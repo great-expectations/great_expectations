@@ -15,7 +15,7 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 <Prerequisites>
 
 - [An understanding of Datasource basics](../../terms/datasource.md)
-- [An understanding of how to request data with a Batch Request](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+- [An understanding of how to request data with a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 
 </Prerequisites>
 
@@ -107,4 +107,4 @@ Congratulations!  At this point you should have a solid understanding of when to
 ## Additional Information
 
 For more detailed information on how to use Batch Requests to return a specific Batch of data from a configured Datasource, please see:
-- [How to get one or more Batches of data from a configured Datasource](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+- [How to get one or more Batches of data from a configured Datasource](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
