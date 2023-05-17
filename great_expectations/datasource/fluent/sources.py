@@ -475,8 +475,6 @@ class _SourceFactories:
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
-            # config provider needed for config substitution
-            datasource._config_provider = self._data_context.config_provider
             datasource.test_connection()
             self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
