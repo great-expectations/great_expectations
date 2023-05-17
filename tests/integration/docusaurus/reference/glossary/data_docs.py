@@ -35,7 +35,7 @@ context.open_data_docs()
 # <snippet name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site">
 site_name = "new_site_name"
 context.build_data_docs(site_names=site_name)
-context.open_data_docs(site_names=site_name)
+context.open_data_docs(site_name=site_name)
 # </snippet>
 
 assert True
