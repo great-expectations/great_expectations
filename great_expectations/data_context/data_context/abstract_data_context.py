@@ -3103,8 +3103,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
         Args:
-            expectation_suite_name: The name of the suite to replace or create.
-            id: Identifier to associate with this suite.
+            expectation_suite_name: The name of the suite to create or replace.
+            id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
             evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
             data_asset_type: Type of Data Asset to associate with this suite.
