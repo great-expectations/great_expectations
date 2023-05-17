@@ -548,7 +548,7 @@ class _SourceFactories:
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
             datasource_name: str = (
-                new_datasource.name  # type: ignore[arg-type] # expected str only
+                new_datasource.name  # type: ignore[assignment] # will be a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
