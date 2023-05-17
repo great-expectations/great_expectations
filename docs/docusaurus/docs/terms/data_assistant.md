@@ -3,22 +3,10 @@ id: data_assistant
 title: Data Assistant
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 A Data Assistant is a pre-configured utility that simplifies the creation of <TechnicalTag tag="expectation" text="Expectations" />. A Data Assistant can help you determine a starting point when working with a large, new, or complex dataset by asking questions and then building a list of relevant <TechnicalTag tag="metric" text="Metrics" /> from the answers to those questions. Branching question paths based on your responses ensure that additional, relevant Metrics are not missed. The result is a comprehensive collection of Metrics that can be saved, reviewed as graphical plots, or used by the Data Assistant to generate a set of proposed Expectations.
 
 Data Assistants allow you to introspect multiple <TechnicalTag tag="batch" text="Batches" /> and create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> from the aggregated Metrics of those Batches.  They provide convenient, visual representations of the generated Expectations to assist with identifying outliers in the corresponding parameters.  They can be accessed from your <TechnicalTag tag="data_context" text="Data Context" />, and provide a good starting point for building Expectations or performing initial data exploration.
-
-<CLIRemoval />
-
-A Data Assistant is a utility that asks questions about your data, gathering information to describe what is observed, and then presents <TechnicalTag tag="metric" text="Metrics" /> and proposes <TechnicalTag tag="expectation" text="Expectations" /> based on the answers.
-
-Data Assistants allow you to introspect multiple <TechnicalTag tag="batch" text="Batches" /> and create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> from the aggregated Metrics of those Batches.  They provide convenient, visual representations of the generated Expectations to assist with identifying outliers in the corresponding parameters.  They are convenient to access from your <TechnicalTag tag="data_context" text="Data Context" />, and provide an excellent starting point for building Expectations or performing initial data exploration.
-
-Data Assistants are designed to make creating Expectations easier Great Expectations users.  A Data Assistant will help solve the problem of "where to start" when working with a large, new, or complex dataset by greedily asking questions according to a set theme and then building a list of all the relevant Metrics that it can determine from the answers to those questions.  Branching question paths ensure that additional relevant Metrics are gathered on the groundwork of the earlier questions asked.  The result is a comprehensive gathering of Metrics that can then be saved, reviewed as graphical plots, or used by the Data Assistant to generate a set of proposed Expectations.
 
 ## Relationships to other objects
 
@@ -29,8 +17,6 @@ A Data Assistant implements a pre-configured <TechnicalTag tag="profiler" text="
 Data Assistants are an ideal starting point for creating Expectations.  When you're working with unfamiliar data, a Data Assistant can provide an overview by introspecting the data and generating a series of relevant Expectations using estimated parameters for you to review. When you use the `"flag_outliers"` value for the `estimation` parameter, your generated Expectations have parameters that disregard values that the Data Assistant identifies as outliers. To create a graphical representation of the generated Expectations, use the Data Assistant's `plot_metrics()` method. Reviewing the Data Assistant's results can help you identify outliers in your data.
 
 When you're working with familiar, good data, a Data Assistant can use the `"exact"` value for the `estimation` parameter to provide comprehensive Expectations that reflect the values found in the provided data.
-
-## Profiling
 
 ## Profiling
 
@@ -54,7 +40,6 @@ To access the Onboarding Data Assistant, use `context.assistants.onboarding`.
 ## Configure
 
 Data Assistants are pre-configured. You provide the Batch Request, and some optional parameters in the Data Assistant's `run(...)` method.
-
 
 ## Related documentation
 
