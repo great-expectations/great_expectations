@@ -740,8 +740,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        # config provider needed for config substitution
-        datasource._config_provider = self.config_provider
 
         datasource._data_context._save_project_config()
 
