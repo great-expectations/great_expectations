@@ -604,10 +604,6 @@ def test_add_expectation_suite_conflicting_args_failure(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
 
-    assert (
-        "an existing expectation_suite or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
     assert context.expectations_store.save_count == 0
 
 

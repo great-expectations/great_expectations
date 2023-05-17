@@ -2976,6 +2976,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         if not expectation_suite:
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self,
@@ -3121,6 +3126,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
         if not expectation_suite:
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self,
