@@ -17,10 +17,10 @@ context = gx.get_context()
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args">
 datasource_name = "my_new_datasource"
-path_to_csv_files = "<INSERT_PATH_TO_FILES_HERE>"
+path_to_folder_containing_csv_files = "<INSERT_PATH_TO_FILES_HERE>"
 # </snippet>
 
-path_to_csv_files = str(
+path_to_folder_containing_csv_files = str(
     pathlib.Path(
         gx.__file__,
         "..",
@@ -34,7 +34,7 @@ path_to_csv_files = str(
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource">
 datasource = context.sources.add_pandas_filesystem(
-    name=datasource_name, base_directory=path_to_csv_files
+    name=datasource_name, base_directory=path_to_folder_containing_csv_files
 )
 # </snippet>
 
