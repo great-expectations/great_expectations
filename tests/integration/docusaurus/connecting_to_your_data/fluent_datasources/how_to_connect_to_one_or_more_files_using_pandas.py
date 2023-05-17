@@ -49,8 +49,7 @@ batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py add_asset">
 datasource.add_csv_asset(name=asset_name, batching_regex=batching_regex)
-
-print(datasource)
+assert datasource.get_asset_names() == {my_taxi_data_asset}
 # </snippet>
 
 assert datasource.get_asset(asset_name)
