@@ -25,6 +25,7 @@ def change_paths_for_docs_file_references(verbose: bool = False) -> None:
     pattern = re.compile(r"((.*)(file *= *)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
+    print(f"Processing {len(files)} files in change_paths_for_docs_file_references...")
     for file_path in files:
         with open(file_path, "r+") as f:
             contents = f.read()
@@ -34,6 +35,7 @@ def change_paths_for_docs_file_references(verbose: bool = False) -> None:
             f.write(contents)
         if verbose:
             print(f"processed {file_path}")
+    print(f"Processed {len(files)} files in change_paths_for_docs_file_references")
 
 
 def _paths_to_versioned_docs() -> list[pathlib.Path]:
@@ -71,11 +73,13 @@ def prepend_version_info_to_name_for_snippet_by_name_references(
         + _paths_to_versioned_code_after_v0_14_13()
     )
 
+    print(f"Processing {len(paths)} paths in prepend_version_info_to_name_for_snippet_by_name_references...")
     for path in paths:
         version = path.name
         files = []
         for extension in (".md", ".mdx", ".py", ".yml", ".yaml"):
             files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(f"    Processing {len(files)} files for path {path} in prepend_version_info_to_name_for_snippet_by_name_references...")
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
@@ -85,7 +89,9 @@ def prepend_version_info_to_name_for_snippet_by_name_references(
                 f.write(contents)
             if verbose:
                 print(f"processed {file_path}")
-
+        print(
+            f"    Processed {len(files)} files for path {path} in prepend_version_info_to_name_for_snippet_by_name_references")
+    print(f"Processed {len(paths)} paths in prepend_version_info_to_name_for_snippet_by_name_references")
 
 def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) -> None:
     """Prepend version info to absolute links: /docs/... becomes /docs/{version}/..."""
@@ -96,6 +102,7 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
     )
     paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
 
+    print(f"Processing {len(paths)} paths in prepend_version_info_to_name_for_href_absolute_links...")
     for path in paths:
         version = path.name
         version_only = version_from_path_name_pattern.search(version).group("version")
@@ -105,6 +112,8 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
         files = []
         for extension in (".md", ".mdx"):
             files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(
+            f"    Processing {len(files)} files for path {path} in prepend_version_info_to_name_for_href_absolute_links...")
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
@@ -117,6 +126,9 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
                 f.write(contents)
             if verbose:
                 print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in prepend_version_info_to_name_for_href_absolute_links")
+    print(f"Processed {len(paths)} paths in prepend_version_info_to_name_for_href_absolute_links")
 
 
 if __name__ == "__main__":
