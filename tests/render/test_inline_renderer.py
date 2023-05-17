@@ -42,11 +42,6 @@ def test_inline_renderer_instantiation_error_message(
     )
 
 
-@pytest.mark.xfail(
-    reason="Not currently working with pandas 2.0.0 and python 3.8",
-    run=False,
-    strict=True,
-)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,fake_result,expected_serialized_expectation_validation_result_rendered_atomic_content",
@@ -417,11 +412,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
     )
 
 
-@pytest.mark.xfail(
-    reason="Not currently working with pandas 2.0.0 and python 3.8",
-    run=False,
-    strict=True,
-)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "expectation_configuration,expected_serialized_expectation_configuration_rendered_atomic_content",

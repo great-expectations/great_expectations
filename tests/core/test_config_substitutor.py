@@ -185,11 +185,6 @@ class MockedSecretClient:
         return response
 
 
-@pytest.mark.xfail(
-    reason="Not currently working with pandas 2.0.0 and python 3.8",
-    run=False,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.config_substitutor.azure.DefaultAzureCredential",
     new=object,
