@@ -3,10 +3,6 @@ id: data_assistant
 title: Data Assistant
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 A Data Assistant is a pre-configured utility that simplifies the creation of <TechnicalTag tag="expectation" text="Expectations" />. A Data Assistant can help you determine a starting point when working with a large, new, or complex dataset by asking questions and then building a list of relevant <TechnicalTag tag="metric" text="Metrics" /> from the answers to those questions. Branching question paths based on your responses ensure that additional, relevant Metrics are not missed. The result is a comprehensive collection of Metrics that can be saved, reviewed as graphical plots, or used by the Data Assistant to generate a set of proposed Expectations.
 
@@ -24,17 +20,15 @@ When you're working with familiar, good data, a Data Assistant can use the `"exa
 
 ## Profiling
 
-Data Assistants implement pre-configured Rule-Based Profilers, but they can also provide extended functionality. You can call them directly from your Data Context.  This ensures that they provide a quick method of creating Expectations and <TechnicalTag tag="profiling" text="Profiling" /> your data. The rules implemented by a Data Assistant are fully exposed in the parameters for its `run(...)` method. You can use a Data Assistant easily without making any customizations, or you can customize the behavior to meet the specific requirements f your organization.
+To provide a representative analysis of the provided data, a Data Assistant can automatically process multiple Batches from a single Batch Request.
 
 ## Multi-Batch introspection
 
-To provide a representative analysis of the provided data, a Data Assistant can automatically process multiple Batches from a single Batch Request.
+Data Assistants leverage the ability to process multiple Batches from a single Batch Request to provide a representative analysis of the provided data.  With previous Profilers you would only be able to introspect a single Batch at a time.  This meant that the Expectation Suite generated would only reflect a single Batch.  If you had many Batches of data that you wanted to build inter-related Expectations for, you would have needed to run each Batch individually and then manually compare and update the Expectation parameters that were generated.  With a Data Assistant, that process is automated.  You can provide a Data Assistant multiple Batches and get back Expectations that have parameters based on, for instance, the mean or median value of a column on a per-Batch basis. 
 
 ## Visual plots for Metrics
 
-In a Jupyter Notebook, you can use the `plot_metrics()` method of a Data Assistant's result object to generate a visual representation of your Expectations, the values that were assigned to their parameters, and the Metrics that informed those values.  This can help you with your exploratory data analysis and help you refine your Expectations, while providing complete transparency into the information used by the Data Assistant to build your Expectations.
-
-## API basics
+When working in a Jupyter Notebook you can use the `plot_metrics()` method of a Data Assistant's result object to generate a visual representation of your Expectations, the values that were assigned to their parameters, and the Metrics that informed those values.  This assists in exploratory data analysis and fine-tuning your Expectations, while providing complete transparency into the information used by the Data Assistant to build your Expectations.
 
 Data Assistants can be accessed from your Data Context. To select a Data Assistant in a Jupyter Notebook, enter `context.assistants.` and use code completion.  All Data Assistants have a `run(...)` method that takes in a Batch Request and numerous optional parameters, and then loads the results into an Expectation Suite for future use.
 
@@ -43,16 +37,10 @@ To access the Onboarding Data Assistant, use `context.assistants.onboarding`.
 :::note For more information about the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 :::
 
-## Configuration
+## Configure
 
 Data Assistants are pre-configured. You provide the Batch Request, and some optional parameters in the Data Assistant's `run(...)` method.
 
 ## Related documentation
-
-Data Assistants are multi-batch aware. For more information about using a single or multiple Batches of data in a Batch Request, see [How to choose between working with a single or multiple Batches of data](../guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md)
-
-To take advantage of the multi-batch awareness of Data Assistants, your <TechnicalTag tag="datasource" text="Datasources" /> need to be configured so that you can acquire multiple Batches in a single Batch Request. To configure your Datasources to return multiple Batches, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
-
-To request multiple Batches in a single Batch Request, see [How to get one or more Batches of data from a configured Datasource](../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
 
 To learn more about working with the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).

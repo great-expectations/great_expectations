@@ -18,7 +18,7 @@ data_directory = pathlib.Path(
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
 my_datasource = context.sources.add_pandas_filesystem(
