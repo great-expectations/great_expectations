@@ -19,7 +19,6 @@ print_orange_header () {
     print_orange_line
 }
 
-CURRENT_COMMIT=$(git rev-parse HEAD)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 # git pull to get the latest tags
 git pull
@@ -28,29 +27,21 @@ print_orange_header "Copying previous versioned docs"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
-# Move versions.json outside of the repo so there are no conflicts when checking out earlier versions
 VERSIONS_JSON_PATH=../../../versions.json
-mv versions.json $VERSIONS_JSON_PATH
-
 VERSIONS=$(cat $VERSIONS_JSON_PATH | python -c 'import json,sys;obj=json.load(sys.stdin);print(" ".join(obj))')
 
 for version in $VERSIONS; do
   print_orange_header "Copying code referenced in docs from $version and writing to versioned_code/version-$version"
 
-  git checkout "$version"
-  git pull
+  curl -LJO "https://github.com/great-expectations/great_expectations/archive/refs/tags/$version.zip"
   mkdir -p versioned_code/version-"$version"
-  cp -r ../../tests versioned_code/version-"$version"
-  cp -r ../../examples versioned_code/version-"$version"
-  cp -r ../../great_expectations versioned_code/version-"$version"
+  unzip -oq "great_expectations-$version.zip" -d versioned_code/version-"$version"
+  rm "great_expectations-$version.zip"
 
 done
 
-print_orange_header "Prepare prior versions using the current commit (e.g. proposed commit if in a PR or develop if not)."
-git checkout "$CURRENT_COMMIT"
-git pull
 
-# Update versioned code and docs
+print_orange_header "Updating versioned code and docs..."
 
 print_orange_header "Updating filepath in versioned docs"
 # This is done in prepare_prior_versions.py
@@ -67,17 +58,19 @@ cd ../
 python prepare_prior_versions.py
 cd docusaurus
 
+print_orange_header "Updated versioned code and docs"
+
 # Get latest released version from tag, check out to build API docs.
 # Only if not PR deploy preview.
 if [ "$PULL_REQUEST" == "false" ]
 then
   GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
-  print_orange_header "Not in a pull request. Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs."
   git checkout "$GX_LATEST"
   git pull
+  print_orange_header "Not in a pull request. Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs."
 else
   print_orange_header "Building from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
-  git checkout "$CURRENT_COMMIT"
+  git checkout "$CURRENT_BRANCH"
   git pull
 fi
 
@@ -94,6 +87,3 @@ print_orange_header "Building API docs for current version. Please ignore sphinx
 print_orange_header "Check back out current branch before building the rest of the docs."
 git checkout "$CURRENT_BRANCH"
 git pull
-
-# Move versions.json back from outside of the repo
-mv $VERSIONS_JSON_PATH versions.json
