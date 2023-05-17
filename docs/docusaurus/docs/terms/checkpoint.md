@@ -35,7 +35,7 @@ For in-depth examples of how to set up common Action use cases, see [how-to guid
 
 The classes that implement Checkpoints are in the `great_expectations.checkpoint` module.
 
-## Create a Checkpoint
+## Create
 
 Creating a Checkpoint is part of the initial setup for data validation.  Checkpoints are reusable and only need to be created once, although you can create multiple Checkpoints to cover multiple Validation use cases. For more information about creating Checkpoints, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
@@ -48,7 +48,7 @@ In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfy
 
 For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
-## Configure a Checkpoint
+## Configure
 
 A Checkpoint uses its configuration to determine what data to Validate against which Expectation Suite(s), and what actions to perform on the Validation Results - these validations and Actions are executed by calling a Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide missing keys as kwargs when calling `run`.
 

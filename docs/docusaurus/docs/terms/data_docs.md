@@ -7,8 +7,6 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 Automatically compiling your data test documentation into Data Docs keeps your documentation current.
 
-## Relationship to other objects
-
 Data Docs are human readable documentation generated from Great Expectations metadata detailing <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, etc.
 
 Data Docs translate Expectations, Validation Results, and other metadata into clean, human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs guarantees that your documentation will never go stale.
