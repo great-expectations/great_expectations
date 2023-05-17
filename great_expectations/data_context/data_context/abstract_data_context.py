@@ -3195,7 +3195,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+            include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
             ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
@@ -3213,16 +3213,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 DeprecationWarning,
             )
 
-        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
-        )
+        if expectation_suite_name:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        else:
+            raise ValueError("expectation_suite_name must be provided")
 
         if include_rendered_content is None:
             include_rendered_content = (
                 self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
+        if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
