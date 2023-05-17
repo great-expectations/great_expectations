@@ -5,10 +5,6 @@ hoverText: Provides a standard API for accessing and interacting with data from 
 ---
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
 Datasources provide a standard API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.
