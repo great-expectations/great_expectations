@@ -247,7 +247,7 @@ The V3-style Datasource has:
 
 :::note Note on Datasource in V3
 
-One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
+One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
 
 :::
 
@@ -288,7 +288,7 @@ Before doing the migration, we recommend that you create a backup of your V2 Che
 
 :::
 
-In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md), [introspect and partition tables as batches](../connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations.
+In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource), [introspect and partition tables as batches](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into Checkpoint configurations.
 
 This means that, although Validation Operators were run directly from the DataContext in V2, they are now run by Checkpoints in V3 as part of `action_list` items. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the `great_expectations.yml` file and Checkpoint configuration.
 
