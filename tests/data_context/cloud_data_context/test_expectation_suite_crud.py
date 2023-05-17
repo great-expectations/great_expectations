@@ -13,8 +13,6 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
-    PayloadDataField,
-    ResponsePayload,
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
@@ -605,13 +603,15 @@ def test_add_or_update_expectation_suite_adds_new_obj(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
         return_value=False,
     ), mock.patch(
-        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.add",
-    ) as mock_add, mock.patch(
         "requests.Session.get", autospec=True, side_effect=DataContextError("not found")
-    ):
+    ) as mock_get, mock.patch(
+        "requests.Session.post",
+        autospec=True,
+    ) as mock_post:
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
-    mock_add.assert_called_once()
+    mock_get.assert_called_once()  # check if resource exists
+    mock_post.assert_called_once()  # persist resource
 
 
 @pytest.mark.unit
@@ -641,7 +641,7 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
 @pytest.mark.unit
 @pytest.mark.cloud
 def test_add_or_update_expectation_suite_updates_existing_obj(
-    empty_base_data_context_in_cloud_mode: CloudDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_get_by_name_response
 ):
     context = empty_base_data_context_in_cloud_mode
     mock_expectations_store_has_key.return_value = True
@@ -654,11 +654,14 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
         return_value=True,
     ), mock.patch(
-        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.update",
-    ) as mock_update:
+        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+    ) as mock_get, mock.patch(
+        "requests.Session.put", autospec=True
+    ) as mock_put:
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
-    mock_update.assert_called_once()
+    mock_get.assert_called_once()  # check if resource exists
+    mock_put.assert_called_once()  # persist resource
 
 
 @pytest.mark.integration
