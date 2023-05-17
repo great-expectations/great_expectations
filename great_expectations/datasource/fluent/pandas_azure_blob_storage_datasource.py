@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import warnings
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 
 import pydantic
@@ -60,7 +61,15 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         if not azure_client:
             # pull in needed config substitutions using the `_config_provider`
             if not self._config_provider:
-                logger.warning("No `_ConfigurationProvider` present")
+                need_config_subs: set[str] = {
+                    k
+                    for (k, v) in self.azure_options.items()
+                    if isinstance(v, ConfigStr)
+                }
+                if need_config_subs:
+                    warnings.warn(
+                        f"`azure_options` config variables '{','.join(need_config_subs)}' need substitution but no `_ConfigurationProvider` is present"
+                    )
             azure_options: dict = self.dict(config_provider=self._config_provider)[
                 "azure_options"
             ]
