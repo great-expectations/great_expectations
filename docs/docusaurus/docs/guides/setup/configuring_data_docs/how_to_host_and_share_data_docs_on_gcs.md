@@ -55,7 +55,7 @@ We recommend placing it in your project directory, for example ``great_expectati
 
 ### 4. Deploy your Google App Engine app
 
-Issue the following CLI command from within the app directory created above:
+Run the following CLI command from within the app directory you created previously:
 
 ```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
 ```
@@ -73,7 +73,7 @@ You may also replace the default ``local_site`` if you would only like to mainta
 
 ### 7. Build the GCS Data Docs site
 
-The following Python code will run and open your Data Docs:
+Run the the following Python code to build and open your Data Docs:
 
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
