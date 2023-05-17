@@ -94,12 +94,6 @@ You can provide a dictionary as the `options` parameter of `build_batch_request(
 
 :::
 
-:::caution Batch Requests and Datasources built with the advanced block-config method
-
-If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated earlier.  For more information, please see our guide on [How to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
-
-:::
-
 ### 3. Create a Validator
 
 We will use a Validator to interactively create our Expectations.  To do this, a Validator needs two parameters. One parameter indicates the Batch containing data that is used to Validate the Expectations. The other provides a name for the combined list of Expectations we create.

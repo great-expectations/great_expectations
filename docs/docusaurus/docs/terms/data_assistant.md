@@ -53,6 +53,6 @@ Data Assistants are multi-batch aware. For more information about using a single
 
 To take advantage of the multi-batch awareness of Data Assistants, your <TechnicalTag tag="datasource" text="Datasources" /> need to be configured so that you can acquire multiple Batches in a single Batch Request. To configure your Datasources to return multiple Batches, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
 
-To request multiple Batches in a single Batch Request, see [How to get one or more Batches of data from a configured Datasource](../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
+To request multiple Batches in a single Batch Request, see [How to get one or more Batches of data from a configured Datasource](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 To learn more about working with the Onboarding Data Assistant, see [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
