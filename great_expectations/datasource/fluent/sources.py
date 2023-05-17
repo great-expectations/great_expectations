@@ -556,11 +556,11 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
-            # get any existing id
-            id_: uuid.UUID | None = None
-            old_datasource = self._data_context.datasources.get(datasource_name)
-            if old_datasource:
-                id_ = old_datasource.id
+
+            # preserve any pre-existing id for usage with cloud
+            id_: uuid.UUID | None = getattr(
+                self._data_context.datasources.get(datasource_name), "id", None
+            )
 
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
