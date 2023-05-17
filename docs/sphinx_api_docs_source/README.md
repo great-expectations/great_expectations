@@ -2,7 +2,7 @@
 
 First `pip install -r requirements-dev-api-docs.txt` into your virtual 
 environment. 
-To build API docs, run `invoke docs`. 
+To build API docs, run `invoke api-docs`. 
 To view the docusaurus docs which contain the API docs, run `yarn start`.
 
 The API docs are built by:
