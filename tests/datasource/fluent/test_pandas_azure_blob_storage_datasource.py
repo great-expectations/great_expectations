@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, Iterator, List, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 from unittest import mock
 
 import pytest
@@ -27,6 +27,11 @@ from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource i
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 logger = logging.getLogger(__file__)
 
@@ -148,7 +153,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
 
 @pytest.mark.integration
 def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, empty_file_context: FileDataContext
 ):
     monkeypatch.setenv("MY_CRED", "my_secret_credential")
 
@@ -160,8 +165,15 @@ def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
         },
     )
 
+    # attach data_context to enable config substitution
+    pandas_abs_datasource._data_context = empty_file_context
+
     credential = pandas_abs_datasource.azure_options["credential"]
     assert isinstance(credential, ConfigStr)
+    assert (
+        credential.get_config_value(config_provider=empty_file_context.config_provider)
+        == "my_secret_credential"
+    )
 
     azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
