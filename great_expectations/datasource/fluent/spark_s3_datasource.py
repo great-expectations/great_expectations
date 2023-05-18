@@ -69,6 +69,8 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 _check_config_substitutions_needed(
                     self, self.boto3_options, raise_warning_if_provider_not_present=True
                 )
+                # pull in needed config substitutions using the `_config_provider`
+                # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
                 boto3_options: dict = self.dict(
                     config_provider=self._config_provider
                 ).get("boto3_options", {})
