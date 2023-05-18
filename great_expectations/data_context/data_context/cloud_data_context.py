@@ -13,6 +13,7 @@ from typing import (
     Tuple,
     Union,
     cast,
+    overload,
 )
 
 import requests
@@ -540,6 +541,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=cloud_id,
+            resource_name=expectation_suite_name,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -547,6 +549,33 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: str = ...,
+        ge_cloud_id: None = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: str = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: None = ...,
+        id: str = ...,
+    ) -> bool:
+        ...
 
     def delete_expectation_suite(
         self,
@@ -569,6 +598,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
+            resource_name=expectation_suite_name,
         )
 
         return self.expectations_store.remove_key(key)

@@ -597,8 +597,8 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
 
 
 @invoke.task
-def docs(ctx):
-    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+def api_docs(ctx: Context):
+    """Build api documentation."""
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -612,6 +612,65 @@ def docs(ctx):
     )
 
     doc_builder.build_docs()
+
+
+@invoke.task(
+    name="docs",
+    help={
+        "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
+        "clean": "Remove directories and files from versioned docs and code. Default False.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "lint": "Run the linter",
+    },
+)
+def docs(
+    ctx: Context,
+    build: bool = False,
+    clean: bool = False,
+    start: bool = False,
+    lint: bool = False,
+):
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+
+    print("Running invoke docs from:", repo_root)
+    old_pwd = pathlib.Path.cwd()
+    docusaurus_dir = repo_root / "docs/docusaurus"
+    os.chdir(docusaurus_dir)
+    if clean:
+        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
+        ctx.run(" ".join(rm_cmds), echo=True)
+        rm_rf_cmds = [
+            "rm",
+            "-rf",
+            "versioned_code",
+            "versioned_docs",
+            "versioned_sidebars",
+        ]
+        ctx.run(" ".join(rm_rf_cmds), echo=True)
+    elif lint:
+        ctx.run(" ".join(["yarn lint"]), echo=True)
+    else:
+        if start:
+            ctx.run(" ".join(["yarn start"]), echo=True)
+        else:
+            print("Making sure docusaurus dependencies are installed.")
+            ctx.run(" ".join(["yarn install"]), echo=True)
+
+            if build:
+                build_docs_cmd = "../build_docs"
+            else:
+                build_docs_cmd = "../build_docs_locally.sh"
+
+            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
+            ctx.run(build_docs_cmd, echo=True)
+
+    os.chdir(old_pwd)
 
 
 @invoke.task(
