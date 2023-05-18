@@ -22,7 +22,6 @@ context = gx.get_context()
 context.sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory
 )
-# </snippet>
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource">
