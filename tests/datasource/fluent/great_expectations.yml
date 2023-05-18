@@ -100,6 +100,8 @@ fluent_datasources:
         delimiter: ","
   my_pandas_abs_ds:
     type: pandas_abs
+    azure_options:
+      account_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -153,6 +155,8 @@ fluent_datasources:
         type: csv
   my_spark_abs_ds:
     type: spark_abs
+    azure_options:
+      account_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
