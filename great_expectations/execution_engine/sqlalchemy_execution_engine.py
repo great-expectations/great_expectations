@@ -37,7 +37,6 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy_version_check,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -134,7 +133,10 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    _BIGQUERY_MODULE_NAME,
+    bigquery_types_tuple,
+)
 from great_expectations.compatibility.sqlalchemy_bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
@@ -178,7 +180,7 @@ def _get_dialect_type_module(dialect):
         if (
             isinstance(
                 dialect,
-                sqla_bigquery.BigQueryDialect,
+                sqla_bigquery,
             )
             and bigquery_types_tuple is not None
         ):
