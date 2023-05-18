@@ -64,7 +64,6 @@ class SQLDatasourceError(Exception):
 
 class _Splitter(Protocol):
     @property
-    @public_api
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""
 
@@ -155,7 +154,6 @@ class _SplitterDatetime(FluentBaseModel):
     method_name: str
 
     @property
-    @public_api
     def columns(self) -> list[str]:
         return [self.column_name]
 
@@ -253,7 +251,6 @@ class _SplitterOneColumnOneParam(FluentBaseModel):
     method_name: str
 
     @property
-    @public_api
     def columns(self) -> list[str]:
         return [self.column_name]
 
@@ -358,7 +355,6 @@ class SplitterMultiColumnValue(FluentBaseModel):
     ] = "split_on_multi_column_values"
 
     @property
-    @public_api
     def columns(self):
         return self.column_names
 
