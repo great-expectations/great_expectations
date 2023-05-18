@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -41,6 +42,7 @@ class MetricsCalculator:
     def show_progress_bars(self, enable: bool) -> None:
         self._show_progress_bars = enable
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """
         Convenience method to run "table.columns" metric.
@@ -62,6 +64,7 @@ class MetricsCalculator:
 
         return columns
 
+    @public_api
     def head(
         self,
         n_rows: int = 5,
