@@ -13,12 +13,11 @@ from great_expectations.agent.message_service.rabbit_mq_client import (
     RabbitMQClient,
 )
 from great_expectations.agent.message_service.subscriber import (
+    EventContext,
     OnMessageCallback,
-    RequeueMessageError,
     Subscriber,
     SubscriberError,
 )
-from great_expectations.agent.models import Event
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
@@ -89,43 +88,47 @@ class GXAgent:
         finally:
             self._close_subscriber(subscriber)
 
-    def _handle_event_as_thread(self, event: Event, correlation_id: str) -> None:
+    def _handle_event_as_thread(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.
 
         Callback passed to Subscriber.consume which forwards events to
         the EventHandler for processing.
 
         Args:
-            event: pydantic model representing an event
-            correlation_id: stable identifier for an event across its lifecycle
-        Raises:
-            RequeueMessageError when the worker is busy
+            event_context: An Event with related properties and actions.
         """
 
         if self._can_accept_new_task() is not True:
             # signal to Subscriber that we can't process this message right now
-            raise RequeueMessageError
+            return event_context.event_processed(retry=True)
         self._current_task = self._executor.submit(
-            self._handle_event, event=event, correlation_id=correlation_id
+            self._handle_event, event_context=event_context
         )
 
-    def _handle_event(self, event: Event, correlation_id: str) -> None:
+    def _handle_event(self, event_context: EventContext) -> None:
         """Pass events to EventHandler.
 
         Callback passed to Subscriber.consume which forwards events to
         the EventHandler for processing.
 
         Args:
-            event: pydantic model representing an event
-            correlation_id: stable identifier for an event across its lifecycle
+            event_context: An Event with related properties and actions.
         """
+        # warning:  this method is likely to be executed in a different thread than
+        #           where it was defined, so take care with shared resources.
+        #           It's safe to use self._context because we restrict ourselves
+        #           to a single worker thread at any given time.
+
         # TODO lakitu-139: record job as started
 
         handler = EventHandler(context=self._context)
-        handler.handle_event(event=event, correlation_id=correlation_id)
+        handler.handle_event(
+            event=event_context.event, correlation_id=event_context.correlation_id
+        )
 
         # TODO lakitu-139: record job as complete
-        return
+
+        return event_context.event_processed(retry=False)
 
     def _can_accept_new_task(self) -> bool:
         return self._current_task is None or self._current_task.done()
