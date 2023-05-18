@@ -4,9 +4,6 @@ title: How to update Data Docs after Validating a Checkpoint
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
@@ -73,16 +70,13 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
 
 Test that your new Action is configured correctly:
 
-Run the Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" /> and verify that no errors are thrown.
+Run the following command to run the Checkpoint and verify that no errors are returned:
 
 ```python
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)
-```
-```bash
-$ great_expectations checkpoint run <your checkpoint name>
 ```
 
 Finally, check your Data Docs sites to confirm that a new Validation Result has been added.
