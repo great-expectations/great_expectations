@@ -55,7 +55,6 @@ title: Changelog
 * [MAINTENANCE] Update How to set up GX to work with data in Azure Blob Storage ([#7910](https://github.com/great-expectations/great_expectations/pull/7910))
 * [MAINTENANCE] `CloudDataContext` `ExpectationsStore` can only request one Suite at a time ([#7905](https://github.com/great-expectations/great_expectations/pull/7905))
 * [MAINTENANCE] Removing engine-specific tests that assert generic behavior ([#7918](https://github.com/great-expectations/great_expectations/pull/7918))
-* [MAINTENANCE] Use with open file to reduce open files within tests ([#7906](https://github.com/great-expectations/great_expectations/pull/7906)) (thanks @TrangPham)
 * [MAINTENANCE] Add `docs/*.py` to `GXChanged` for linting ([#7924](https://github.com/great-expectations/great_expectations/pull/7924))
 * [MAINTENANCE] Fixes Glue tests on vanilla pytest ([#7925](https://github.com/great-expectations/great_expectations/pull/7925))
 
