@@ -1248,6 +1248,7 @@ class Validator:
 
         return evrs
 
+    @public_api
     def remove_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -1255,6 +1256,24 @@ class Validator:
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
+        """Remove an ExpectationConfiguration from the ExpectationSuite associated with the Validator.
+
+        Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
+            match_type: This determines what kwargs to use when matching. Options are:
+                - 'domain' to match based on the data evaluated by that expectation
+                - 'success' to match based on all configuration parameters that influence whether an expectation succeeds on a given batch of data
+                - 'runtime' to match based on all configuration parameters.
+            remove_multiple_matches: If True, will remove multiple matching expectations.
+            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+
+        Returns:
+            The list of deleted ExpectationConfigurations.
+
+        Raises:
+            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            ValueError: No match or multiple matches found (and remove_multiple_matches=False).
+        """
 
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
