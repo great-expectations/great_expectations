@@ -4676,6 +4676,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
 
+        # TODO: remove logs before merge
         logger.warning(
             f"config.fluent_datasources ->\n{pf(config.fluent_datasources, depth=2)}"
         )
@@ -4684,9 +4685,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
                 self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
-            for ds in config.datasources.values():
-                if isinstance(ds, FluentDatasource):
-                    self._add_fluent_datasource(**ds)._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
