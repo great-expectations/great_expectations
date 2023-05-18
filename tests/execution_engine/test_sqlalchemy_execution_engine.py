@@ -1091,14 +1091,3 @@ class TestConnectionPersistence:
         connection = execution_engine._connection
         execution_engine.__del__()
         assert connection.closed
-
-    def test_same_connection_not_used_postgresql(self, sa):
-        """What does this test and why?
-
-        We want to make sure that different connections are used and no connection
-        is stored on the SQLAlchemyExecutionEngine when using a dialect that is
-        not one of the dialects that requires a persistent connection.
-        Here we use the postgresql dialect to test.
-        """
-        # TODO: Add this test
-        pass

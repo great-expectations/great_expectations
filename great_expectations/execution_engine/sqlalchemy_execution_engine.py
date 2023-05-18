@@ -20,6 +20,7 @@ from typing import (
     Dict,
     Iterable,
     List,
+    MutableMapping,
     Optional,
     Tuple,
     Union,
@@ -276,6 +277,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             URL can be used to access the data. This will be overridden by all other configuration options if \
             any are provided.
         concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
+        kwargs (dict): These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
 
     For example:
     ```python
@@ -321,32 +323,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             concurrency.add_sqlalchemy_create_engine_parameters(kwargs)  # type: ignore[union-attr]
 
-            if credentials is not None:
-                self.engine = self._build_engine(credentials=credentials, **kwargs)
-            elif connection_string is not None:
-                # TODO: dialect_name isn't available yet since the engine isn't available, get this from the creds/url/params:
-                if self.dialect_name in [
-                    GXSqlDialect.SQLITE,
-                    GXSqlDialect.MSSQL,
-                ]:
-                    self.engine = sa.create_engine(connection_string, **kwargs, poolclass=sqlalchemy.StaticPool)
-                else:
-                    self.engine = sa.create_engine(connection_string, **kwargs)
-            elif url is not None:
-                parsed_url = make_url(url)
-                self.drivername = parsed_url.drivername
-                if self.dialect_name in [
-                    GXSqlDialect.SQLITE,
-                    GXSqlDialect.MSSQL,
-                ]:
-                    self.engine = sa.create_engine(url, **kwargs, poolclass=sqlalchemy.StaticPool)
-                else:
-                    self.engine = sa.create_engine(url, **kwargs)
-
-            else:
-                raise InvalidConfigError(
-                    "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
-                )
+            self._setup_engine(
+                kwargs=kwargs,
+                connection_string=connection_string,
+                credentials=credentials,
+                url=url,
+            )
 
         # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
         self._connection = None
@@ -473,6 +455,93 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._data_splitter = SqlAlchemyDataSplitter(dialect=self.dialect_name)
         self._data_sampler = SqlAlchemyDataSampler()
 
+    def _setup_engine(
+        self,
+        kwargs: MutableMapping[str, Any],
+        connection_string: str | None = None,
+        credentials: dict | None = None,
+        url: str | None = None,
+    ):
+        """Create an engine and set the engine instance variable on the execution engine.
+
+        Args:
+            kwargs: These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
+            connection_string: Used to connect to the database.
+            credentials: Used to connect to the database.
+            url: Used to connect to the database.
+
+        Returns:
+            Nothing, the engine instance variable is set.
+        """
+        if credentials is not None:
+            self.engine = self._build_engine(credentials=credentials, **kwargs)
+        elif connection_string is not None:
+
+            if self._dialect_requires_persisted_connection(
+                connection_string=connection_string, credentials=credentials, url=url
+            ):
+                self.engine = sa.create_engine(
+                    connection_string, **kwargs, poolclass=sqlalchemy.StaticPool
+                )
+            else:
+                self.engine = sa.create_engine(connection_string, **kwargs)
+        elif url is not None:
+            parsed_url = make_url(url)
+            self.drivername = parsed_url.drivername
+            if self._dialect_requires_persisted_connection(
+                connection_string=connection_string, credentials=credentials, url=url
+            ):
+                self.engine = sa.create_engine(
+                    url, **kwargs, poolclass=sqlalchemy.StaticPool
+                )
+            else:
+                self.engine = sa.create_engine(url, **kwargs)
+        else:
+            raise InvalidConfigError(
+                "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
+            )
+
+    def _dialect_requires_persisted_connection(
+        self,
+        connection_string: str | None = None,
+        credentials: dict | None = None,
+        url: str | None = None,
+    ) -> bool:
+        """Determine if the dialect needs a persisted connection.
+
+        dialect_name isn't available yet since the engine isn't yet created when we call this method
+        so we determine the dialect from the creds/url/params:
+
+        Args:
+            connection_string:
+            credentials:
+            url:
+
+        Returns:
+
+        """
+        if sum(bool(x) for x in [connection_string, credentials, url is not None]) != 1:
+            raise ValueError(
+                "Exactly one of connection_string, credentials, url must be specified"
+            )
+        return_val = False
+        if connection_string is not None:
+            if connection_string.startswith("sqlite") or connection_string.startswith(
+                "mssql"
+            ):
+                return_val = True
+        elif credentials is not None:
+            drivername = credentials.get("drivername", "")
+            if drivername.startswith("sqlite") or drivername.startswith("mssql"):
+                return_val = True
+        else:
+            parsed_url = make_url(url)
+            drivername = parsed_url.drivername
+            if drivername.startswith("sqlite") or drivername.startswith("mssql"):
+                return_val = True
+
+        return return_val
+
     @property
     def credentials(self) -> Optional[dict]:
         return self._credentials
@@ -525,11 +594,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
-        if self.dialect_name in [
-            GXSqlDialect.SQLITE,
-            GXSqlDialect.MSSQL,
-        ]:
-            engine = sa.create_engine(options, **create_engine_kwargs, poolclass=sqlalchemy.StaticPool)
+        if self._dialect_requires_persisted_connection(credentials=credentials):
+            engine = sa.create_engine(
+                options, **create_engine_kwargs, poolclass=sqlalchemy.StaticPool
+            )
         else:
             engine = sa.create_engine(options, **create_engine_kwargs)
 
@@ -1360,7 +1428,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             with self.engine.connect() as connection:
                 yield connection
 
-    def execute_query(self, query: sqlalchemy.Selectable) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
+    def execute_query(
+        self, query: sqlalchemy.Selectable
+    ) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
         """Execute a query using the underlying database engine.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
