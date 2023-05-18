@@ -252,3 +252,8 @@ try:
 except (ImportError, AttributeError):
     CursorResult = SQLALCHEMY_NOT_IMPORTED
 
+try:
+    from sqlalchemy.pool import StaticPool
+except (ImportError, AttributeError):
+    StaticPool = SQLALCHEMY_NOT_IMPORTED
+

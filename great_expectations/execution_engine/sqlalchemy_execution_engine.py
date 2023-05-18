@@ -324,11 +324,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if credentials is not None:
                 self.engine = self._build_engine(credentials=credentials, **kwargs)
             elif connection_string is not None:
-                self.engine = sa.create_engine(connection_string, **kwargs)
+                # TODO: dialect_name isn't available yet since the engine isn't available, get this from the creds/url/params:
+                if self.dialect_name in [
+                    GXSqlDialect.SQLITE,
+                    GXSqlDialect.MSSQL,
+                ]:
+                    self.engine = sa.create_engine(connection_string, **kwargs, poolclass=sqlalchemy.StaticPool)
+                else:
+                    self.engine = sa.create_engine(connection_string, **kwargs)
             elif url is not None:
                 parsed_url = make_url(url)
                 self.drivername = parsed_url.drivername
-                self.engine = sa.create_engine(url, **kwargs)
+                if self.dialect_name in [
+                    GXSqlDialect.SQLITE,
+                    GXSqlDialect.MSSQL,
+                ]:
+                    self.engine = sa.create_engine(url, **kwargs, poolclass=sqlalchemy.StaticPool)
+                else:
+                    self.engine = sa.create_engine(url, **kwargs)
+
             else:
                 raise InvalidConfigError(
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
@@ -511,7 +525,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
-        engine = sa.create_engine(options, **create_engine_kwargs)
+        if self.dialect_name in [
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.MSSQL,
+        ]:
+            engine = sa.create_engine(options, **create_engine_kwargs, poolclass=sqlalchemy.StaticPool)
+        else:
+            engine = sa.create_engine(options, **create_engine_kwargs)
+
         return engine
 
     @staticmethod
