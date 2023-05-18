@@ -14,6 +14,7 @@ from great_expectations.datasource.fluent import (
 )
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime  # noqa: TCH001 # needed at runtime
+    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
@@ -63,6 +64,11 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                     credentials: Union[
                         google.Client, None
                     ] = None  # If configured with gcloud CLI / env vars
+                    _check_config_substitutions_needed(
+                        self,
+                        self.gcs_options,
+                        raise_warning_if_provider_not_present=True,
+                    )
                     # pull in needed config substitutions using the `_config_provider`
                     # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
                     gcs_options: dict = self.dict(
