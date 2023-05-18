@@ -144,8 +144,47 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
         f"Processed {len(paths)} paths in prepend_version_info_to_name_for_href_absolute_links"
     )
 
+def update_tag_references_for_correct_version(
+    verbose: bool = False,
+) -> None:
+    """Change _tag.mdx to point to appropriate version."""
+
+    # TODO: Change this pattern:
+    pattern = re.compile(r"((.*)(name *= *\"))(.*)")
+    paths = (
+        _paths_to_versioned_docs()
+        + _paths_to_versioned_code()
+    )
+
+    method_name_for_logging = "update_tag_references_for_correct_version"
+    print(
+        f"Processing {len(paths)} paths in {method_name_for_logging}..."
+    )
+    for path in paths:
+        version = path.name
+        files = [pathlib.Path("docs/docusaurus/docs/term_tags/_tag.mdx")]
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = re.sub(pattern, rf"\1{version} \4", contents)
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(
+        f"Processed {len(paths)} paths in {method_name_for_logging}"
+    )
+
 
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
+    update_tag_references_for_correct_version()
