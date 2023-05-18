@@ -42,9 +42,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ### 1. Import the Great Expectations module and instantiate a Data Context
 
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context"
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Create a Datasource
 
