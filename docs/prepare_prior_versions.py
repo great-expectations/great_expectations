@@ -151,12 +151,18 @@ def update_tag_references_for_correct_version(
     """Change _tag.mdx to point to appropriate version."""
 
     pattern = re.compile(r"(?P<href><a href=\{'/docs/)(?P<rest>')")
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
     paths = _paths_to_versioned_docs()
 
     method_name_for_logging = "update_tag_references_for_correct_version"
     print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
     for path in paths:
         version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
         files = [path / "term_tags/_tag.mdx"]
         print(
             f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
@@ -166,9 +172,9 @@ def update_tag_references_for_correct_version(
                 contents = f.read()
                 # <a href={'/docs/' + data[props.tag].url}>{props.text}</a>
                 # to ->
-                # <a href={'/docs/version-0.14.13/' + data[props.tag].url}>{props.text}</a>
+                # <a href={'/docs/0.14.13/' + data[props.tag].url}>{props.text}</a>
                 # where 0.14.13 is replaced with the corresponding doc version e.g. 0.14.13, 0.15.50, etc.
-                contents = re.sub(pattern, rf"\g<href>{version}/\g<rest>", contents)
+                contents = re.sub(pattern, rf"\g<href>{version_only}/\g<rest>", contents)
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
