@@ -66,9 +66,9 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             )
             # pull in needed config substitutions using the `_config_provider`
             # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
-            azure_options: dict = self.dict(config_provider=self._config_provider)[
-                "azure_options"
-            ]
+            azure_options: dict = self.dict(config_provider=self._config_provider).get(
+                "azure_options", {}
+            )
 
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
