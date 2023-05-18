@@ -5,7 +5,6 @@ import pytest
 from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from great_expectations.agent.message_service.subscriber import (
     Subscriber,
-    SubscriberError,
 )
 from great_expectations.agent.models import Event
 from tests.agent.message_service.amqp_errors import AMQP_CHANNEL_AND_CONNECTION_ERRORS
@@ -71,8 +70,7 @@ def test_subscriber_close_handles_amqp_errors_from_channel(error):
     client.channel.close.side_effect = error
     subscriber = Subscriber(client=client)
 
-    with pytest.raises(SubscriberError):
-        subscriber.close()
+    subscriber.close()
 
 
 @pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
@@ -81,5 +79,4 @@ def test_subscriber_close_handles_amqp_errors_from_connection(error):
     client.connection.close.side_effect = error
     subscriber = Subscriber(client=client)
 
-    with pytest.raises(SubscriberError):
-        subscriber.close()
+    subscriber.close()  # no exception
