@@ -79,6 +79,7 @@ stages:
                 setup.py
                 MANIFEST.in
                 tests/**
+                docs/**/*.py
                 /*.txt
                 /*.yml
                 requirements*
