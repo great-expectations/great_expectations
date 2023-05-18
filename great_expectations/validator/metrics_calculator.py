@@ -79,8 +79,6 @@ class MetricsCalculator:
     ) -> pd.DataFrame:
         """Convenience method to return the first several rows or records from a Batch of data.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             n_rows: The number of rows to return.
             domain_kwargs: If provided, the domain for which to return records.
