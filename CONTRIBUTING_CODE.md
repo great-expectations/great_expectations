@@ -67,7 +67,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
 
 1. Run the following command to create a virtual environment in your local repository using Python versions 3.8 to 3.11, activate the environment, and then install the necessary dependencies:
 
-    ```python
+    ```sh
     python3 -m venv gx_dev
 
     source gx_dev/bin/activate
@@ -76,6 +76,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
 
     pip install -c constraints-dev.txt -e ".[test]"
     ```
+
     To specify other dependencies, add a comma after `test` and enter the dependency name. For example, "[test,postgresql,trino]". The supported dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`.
 
 2. Optional. If you're using Amazon Redshift, run the following command to install the `libpq-dev` package:
@@ -97,7 +98,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
     ```
     or
     ```sh
-     brew install unixodbc
+    brew install unixodbc
     ```
     If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
 
@@ -122,25 +123,25 @@ A virtual environment allows you to create and test code without affecting the p
 
 1. Run the following command to create a virtual environment named `great_expectations_dev`:
 
-   ```python
-    python3 -m venv <path_to_environments_folder\>/great_expectations_dev
+   ```sh
+   python3 -m venv <path_to_environments_folder\>/great_expectations_dev
    ```
 2. Run the following command to activate the virtual environment:
 
-   ```python
-    <source path_to_environments_folder\>/great_expectations_dev/bin/activate
+   ```sh
+   <source path_to_environments_folder\>/great_expectations_dev/bin/activate
    ```
 ### Anaconda
 
 1. Run the following command to create a virtual environment named `great_expectations_dev`:
 
-   ```python
-    conda create --name great_expectations_dev
+   ```sh
+   conda create --name great_expectations_dev
    ```
 2. Run the following command to activate the virtual environment:
 
-   ```python
-    conda activate great_expectations_dev
+   ```sh
+   conda activate great_expectations_dev
    ```
 ## Install dependencies from requirements-dev.txt
 

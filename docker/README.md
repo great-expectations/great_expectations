@@ -51,10 +51,3 @@ to the great expectations default value.
 
 This will mount your local great expectations repo on top the image's version of great expectations.
 You can now edit your repo locally and the changes will be reflected in the docker container.
-
-
-
-
-
-
-```
