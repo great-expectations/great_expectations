@@ -41,15 +41,19 @@ class BaseProfiler:
             "data_stats": [
                 {
                     "column_name": "vendor_id",
+                    "data_type": "int",
                 },
                 {
                     "column_name": "passenger_count",
+                    "data_type": "int",
                 },
                 {
                     "column_name": "total_amount",
+                    "data_type": "float",
                 },
                 {
                     "column_name": "congestion_surcharge",
+                    "data_type": "float",
                 },
             ],
         }

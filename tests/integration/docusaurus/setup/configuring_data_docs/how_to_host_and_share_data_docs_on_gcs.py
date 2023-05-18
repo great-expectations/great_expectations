@@ -191,7 +191,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  gs_site:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleGCSStoreBackend
@@ -220,12 +220,12 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 build_data_docs_command = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command">
-great_expectations docs build --site-name gs_site
+great_expectations docs build --site-name new_site_name
 # </snippet>
 """
 # Overwrite the version with the snippet tags
 build_data_docs_command = """
-great_expectations docs build --site-name gs_site
+great_expectations docs build --site-name new_site_name
 """
 
 result = subprocess.Popen(
@@ -239,7 +239,7 @@ build_data_docs_output = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output">
 The following Data Docs sites will be built:
 
- - gs_site: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
+ - new_site_name: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
 
 Would you like to proceed? [Y/n]: Y
 Building Data Docs...
