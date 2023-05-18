@@ -75,7 +75,7 @@ For this example, we will define these two values in advance by storing them in 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args"
 ```
 
-In addition, the argument `header` informs Spark `DataFrame` reader that files contain a header column, while the argument `infer_schema` instructs Spark `DataFrame` reader to make a best effort to determine the schema of the columns automatically.
+In addition, the argument `header` informs the Spark `DataFrame` reader that the files contain a header column, while the argument `infer_schema` instructs the Spark `DataFrame` reader to make a best effort to determine the schema of the columns automatically.
 
 Once we have determined those two values as well as the optional `header` and `infer_schema` arguments, we will pass them in as parameters when we create our Data Asset:
 
