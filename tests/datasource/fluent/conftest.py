@@ -28,7 +28,6 @@ import responses
 from pytest import MonkeyPatch
 
 import great_expectations as gx
-from great_expectations import get_context
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -598,7 +597,7 @@ def seeded_file_context(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
 ) -> FileDataContext:
-    context = get_context(
+    context = gx.get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
     assert isinstance(context, FileDataContext)
