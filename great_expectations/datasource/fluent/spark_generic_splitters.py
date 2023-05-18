@@ -90,6 +90,7 @@ class _SplitterDatetime(FluentBaseModel):
     column_name: str
     method_name: str
 
+    @public_api
     @property
     def columns(self) -> list[str]:
         return [self.column_name]
@@ -178,6 +179,7 @@ class _SplitterOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
 
+    @public_api
     @property
     def columns(self) -> list[str]:
         return [self.column_name]
@@ -266,6 +268,7 @@ class SplitterMultiColumnValue(FluentBaseModel):
         "split_on_multi_column_values"
     ] = "split_on_multi_column_values"
 
+    @public_api
     @property
     def columns(self):
         return self.column_names
