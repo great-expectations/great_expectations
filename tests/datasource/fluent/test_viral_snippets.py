@@ -59,7 +59,7 @@ def db_file() -> pathlib.Path:
 @pytest.fixture
 def seed_ds_env_vars(
     monkeypatch: pytest.MonkeyPatch, db_file: pathlib.Path
-) -> dict[str, str]:
+) -> tuple[tuple[str, str], ...]:
     """Seed a collection of ENV variables for use in testing config substitution."""
     config_sub_dict = {
         "MY_CONN_STR": f"sqlite:///{db_file}",
@@ -70,12 +70,13 @@ def seed_ds_env_vars(
         monkeypatch.setenv(name, value)
         logger.info(f"Setting ENV - {name} = '{value}'")
 
-    return config_sub_dict
+    # return as tuple of tuples so that the return value is immutable and therefore cacheable
+    return tuple((k, v) for k, v in config_sub_dict.items())
 
 
 @pytest.fixture
 def fluent_only_config(
-    fluent_gx_config_yml_str: str, seed_ds_env_vars: dict
+    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
 ) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
     fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
@@ -110,6 +111,7 @@ def fluent_yaml_config_file(
 def seeded_file_context(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
+    seed_ds_env_vars: tuple,
 ) -> FileDataContext:
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
