@@ -39,6 +39,7 @@ class ConfigStr(SecretStr):
         Resolve the config template string to its string value according to the passed
         _ConfigurationProvider.
         """
+        LOGGER.info(f"Substituting '{self}'")
         return config_provider.substitute_config(self.template_str)
 
     def _display(self) -> str:
