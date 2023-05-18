@@ -78,6 +78,10 @@ The Onboarding Data Assistant `run(...)` method can accept other parameters in a
   For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/onboarding_data_assistant.py#L44).
 :::
 
+:::note
+If you would like to learn how to edit the Expectation Suite, please refer to [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
+:::
+
 ### 4. Save your Expectation Suite
 
 Once you have executed the Onboarding Data Assistant's `run(...)` method and generated Expectations for your data, you
