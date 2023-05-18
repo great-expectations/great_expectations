@@ -149,12 +149,8 @@ def update_tag_references_for_correct_version(
 ) -> None:
     """Change _tag.mdx to point to appropriate version."""
 
-    # TODO: Change this pattern:
-    pattern = re.compile(r"    (?P<href><a href=\{'/docs/)(?P<rest>')")
-    paths = (
-        _paths_to_versioned_docs()
-        + _paths_to_versioned_code()
-    )
+    pattern = re.compile(r"(?P<href><a href=\{'/docs/)(?P<rest>')")
+    paths = _paths_to_versioned_docs()
 
     method_name_for_logging = "update_tag_references_for_correct_version"
     print(
@@ -162,7 +158,7 @@ def update_tag_references_for_correct_version(
     )
     for path in paths:
         version = path.name
-        files = [pathlib.Path("docs/docusaurus/docs/term_tags/_tag.mdx")]
+        files = [path / "term_tags/_tag.mdx"]
         print(
             f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
         )
@@ -170,8 +166,9 @@ def update_tag_references_for_correct_version(
             with open(file_path, "r+") as f:
                 contents = f.read()
                 # <a href={'/docs/' + data[props.tag].url}>{props.text}</a>
-                # to (where <version> is the corresponding doc version e.g. 0.14.13) ->
-                # <a href={'/docs/<version>/' + data[props.tag].url}>{props.text}</a>
+                # to ->
+                # <a href={'/docs/version-0.14.13/' + data[props.tag].url}>{props.text}</a>
+                # where 0.14.13 is replaced with the corresponding doc version e.g. 0.14.13, 0.15.50, etc.
                 contents = re.sub(pattern, rf"\g<href>{version}/\g<rest>", contents)
                 f.seek(0)
                 f.truncate()
@@ -187,7 +184,7 @@ def update_tag_references_for_correct_version(
 
 
 if __name__ == "__main__":
-    # change_paths_for_docs_file_references()
-    # prepend_version_info_to_name_for_snippet_by_name_references()
-    # prepend_version_info_to_name_for_href_absolute_links()
+    change_paths_for_docs_file_references()
+    prepend_version_info_to_name_for_snippet_by_name_references()
+    prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
