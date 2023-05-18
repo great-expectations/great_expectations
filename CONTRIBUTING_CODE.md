@@ -102,9 +102,17 @@ Python dependencies are required to modify Great Expectations code, submit a new
     ```
     If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
 
+<<<<<<< HEAD
     `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
 
     `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+=======
+    ```sh
+    UNIXODBC_INSTALL=$(find /opt/homebrew/Cellar/unixodbc -maxdepth 1 -type d | sed -n '2 p' | tr -d '\n')
+    export LDFLAGS="-L$UNIXODBC_INSTALL/lib"`
+    export CPPFLAGS="-I$UNIXODBC_INSTALL/include"
+    ```
+>>>>>>> 4b3bd1630 ([DOCS] simplify setup of unixodbc)
 
 5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
 
