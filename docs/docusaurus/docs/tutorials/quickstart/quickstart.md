@@ -20,7 +20,7 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
 ## Prerequisites
 
-- Python versions 3.7 to 3.10. See [Python downloads](https://www.python.org/downloads/).
+- Python versions 3.8 to 3.10. See [Python downloads](https://www.python.org/downloads/).
 - pip
 - An internet browser
 
