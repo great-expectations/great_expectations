@@ -150,7 +150,7 @@ def update_tag_references_for_correct_version(
     """Change _tag.mdx to point to appropriate version."""
 
     # TODO: Change this pattern:
-    pattern = re.compile(r"((.*)(name *= *\"))(.*)")
+    pattern = re.compile(r"    (?P<href><a href=\{'/docs/)(?P<rest>')")
     paths = (
         _paths_to_versioned_docs()
         + _paths_to_versioned_code()
@@ -169,7 +169,10 @@ def update_tag_references_for_correct_version(
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
-                contents = re.sub(pattern, rf"\1{version} \4", contents)
+                # <a href={'/docs/' + data[props.tag].url}>{props.text}</a>
+                # to (where <version> is the corresponding doc version e.g. 0.14.13) ->
+                # <a href={'/docs/<version>/' + data[props.tag].url}>{props.text}</a>
+                contents = re.sub(pattern, rf"\g<href>{version}/\g<rest>", contents)
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
@@ -184,7 +187,7 @@ def update_tag_references_for_correct_version(
 
 
 if __name__ == "__main__":
-    change_paths_for_docs_file_references()
-    prepend_version_info_to_name_for_snippet_by_name_references()
-    prepend_version_info_to_name_for_href_absolute_links()
+    # change_paths_for_docs_file_references()
+    # prepend_version_info_to_name_for_snippet_by_name_references()
+    # prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
