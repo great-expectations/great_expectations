@@ -109,14 +109,14 @@
     "definition": "A connector to store and retrieve information about computed attributes of data, such as the mean of a column.",
     "url": "terms/metric_store"
   },
-  "profiler": {
-    "term": "Profiler",
-    "definition": "Generates Metrics and candidate Expectations from data.",
-    "url": "terms/profiler"
-  },
   "profile": {
     "term": "Profile",
     "definition": "The act of generating Metrics and candidate Expectations from data.",
+    "url": "terms/profiler"
+  },
+  "profiler": {
+    "term": "Profiler",
+    "definition": "Generates Metrics and candidate Expectations from data.",
     "url": "terms/profiler"
   },
   "profiling": {

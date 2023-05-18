@@ -15,6 +15,8 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 [**CLI:**](./terms/cli.md) Command Line Interface
 
+[**Catalog Asset:**](./terms/catalog_asset.md) A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.
+
 [**Checkpoint:**](./terms/checkpoint.md) The primary means for validating data in a production deployment of Great Expectations.
 
 [**Checkpoint Store:**](./terms/checkpoint_store.md) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
@@ -51,6 +53,8 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 [**Plugin:**](./terms/plugin.md) Extends Great Expectations' components and/or functionality.
 
+[**Profile:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
+
 [**Profiler:**](./terms/profiler.md) Generates Metrics and candidate Expectations from data.
 
 [**Profiling:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
@@ -60,6 +64,8 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 [**Store:**](./terms/store.md) A connector to store and retrieve information about metadata in Great Expectations.
 
 [**Supporting Resource:**](./terms/supporting_resource.md) A resource external to the Great Expectations code base which Great Expectations utilizes.
+
+[**Validate:**](./guides/validation/validate_data_overview.md) The act of applying an Expectation Suite to a Batch.
 
 [**Validation:**](./guides/validation/validate_data_overview.md) The act of applying an Expectation Suite to a Batch.
 
