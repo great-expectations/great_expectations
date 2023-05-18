@@ -4,18 +4,16 @@ title: How to configure a Validation Result store on a filesystem
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in the ``uncommitted/validations/`` directory.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results on your filesystem.
-
-This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new Validation Results from <TechnicalTag tag="checkpoint" text="Checkpoint" /> runs.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in the ``uncommitted/validations/`` directory.  Validation Results can include sensitive or regulated data that should not be committed to a source control system. Use the information provided here to configure a new storage location for Validation Results in your filesystem. You'll learn how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new Validation Results from <TechnicalTag tag="checkpoint" text="Checkpoint" /> runs.
 
 ## Prerequisites
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectation Suite ](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [Configured a Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
-- Determined a new storage location where you would like to store Validation Results. This can either be a local path, or a path to a secure network filesystem.
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectation Suite ](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
+- A new storage location to store Validation Results. This can be a local path, or a path to a secure network filesystem.
 
 </Prerequisites>
 
