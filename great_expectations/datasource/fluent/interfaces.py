@@ -722,6 +722,20 @@ class Batch(FluentBaseModel):
         )
 
     @validate_arguments
+    def columns(self) -> List[str]:
+        """Return column names of this Batch.
+
+        Returns
+            List[str]
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
+        )
+        return metrics_calculator.columns()
+
+    @validate_arguments
     def head(
         self,
         n_rows: StrictInt = 5,
