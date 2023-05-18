@@ -11,6 +11,7 @@ from typing import (
 import pydantic
 from typing_extensions import Literal, Protocol
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
 
 
 class _Splitter(Protocol):
+    @public_api
     @property
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""

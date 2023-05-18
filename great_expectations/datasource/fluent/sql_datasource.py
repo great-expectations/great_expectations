@@ -63,6 +63,7 @@ class SQLDatasourceError(Exception):
 
 
 class _Splitter(Protocol):
+    @public_api
     @property
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""
