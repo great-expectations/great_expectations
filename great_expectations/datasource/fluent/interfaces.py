@@ -39,6 +39,7 @@ from pydantic import (
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
@@ -721,6 +722,7 @@ class Batch(FluentBaseModel):
             BatchRequest=BatchRequest,
         )
 
+    @public_api
     @validate_arguments
     def columns(self) -> List[str]:
         """Return column names of this Batch.
@@ -735,6 +737,7 @@ class Batch(FluentBaseModel):
         )
         return metrics_calculator.columns()
 
+    @public_api
     @validate_arguments
     def head(
         self,
