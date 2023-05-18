@@ -46,6 +46,12 @@ class MetricsCalculator:
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """
         Convenience method to run "table.columns" metric.
+
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         if domain_kwargs is None:
             domain_kwargs = {}
@@ -71,8 +77,17 @@ class MetricsCalculator:
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """
-        Convenience method to run "table.head" metric.
+        """Convenience method to return the first several rows or records from a Batch of data.
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
+        Args:
+            n_rows: The number of rows to return.
+            domain_kwargs: If provided, the domain for which to return records.
+            fetch_all: If True, ignore n_rows and return the entire batch.
+
+        Returns:
+            A Pandas DataFrame containing the records' data.
         """
         if domain_kwargs is None:
             domain_kwargs = {}

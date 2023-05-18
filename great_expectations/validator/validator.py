@@ -383,10 +383,15 @@ class Validator:
 
     @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        """
-        Convenience method to obtain Batch columns.
+        """Convenience method to obtain Batch columns.
 
         (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
@@ -397,7 +402,9 @@ class Validator:
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """Return the first several rows or records from a Batch of data.
+        """Convenience method to return the first several rows or records from a Batch of data.
+
+        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
 
         Args:
             n_rows: The number of rows to return.
