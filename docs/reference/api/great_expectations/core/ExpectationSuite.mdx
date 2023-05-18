@@ -1,0 +1,106 @@
+---
+title: ExpectationSuite
+sidebar_label: ExpectationSuite
+---
+
+<section class="sphinx-api-doc" id="expectationsuite">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.core.ExpectationSuite">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.core.</span></span><span class="sig-name descname"><span class="pre">ExpectationSuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="http://localhost:3000/docs/reference/api/great_expectations/data_context/AbstractDataContext.html#great_expectations.data_context.AbstractDataContext" title="great_expectations.data_context.AbstractDataContext"><span class="pre">AbstractDataContext</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ExpectationConfiguration</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_asset_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">ExecutionEngine</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.core.ExpectationSuite" title="Permalink to this definition">#</a></dt>
+<dd><p>Suite of expectations plus create, read, update, and delete functionality.</p>
+<ul class="simple">
+<li><p>create: add_expectation(), append_expectation()</p></li>
+<li><p>read: find_expectation_indexes(), find_expectations(), show_expectations_by_domain_type(), show_expectations_by_expectation_type()</p></li>
+<li><p>update: add_expectation(), append_expectation(), patch_expectation(), replace_expectation(), add_expectation_configurations()</p></li>
+<li><p>delete: remove_expectation(), remove_all_expectations_of_type()</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expectation_suite_name</strong> – Name of the Expectation Suite.</p></li>
+<li><p><strong>data_context</strong> – Data Context associated with this Expectation Suite.</p></li>
+<li><p><strong>expectations</strong> – Expectation Configurations to associate with this Expectation Suite.</p></li>
+<li><p><strong>evaluation_parameters</strong> – Evaluation parameters to be substituted when evaluating Expectations.</p></li>
+<li><p><strong>data_asset_type</strong> – <p>Type of data asset to associate with this suite.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.14.0.</span></p>
+</div>
+</p></li>
+<li><p><strong>execution_engine_type</strong> – Name of the execution engine type.</p></li>
+<li><p><strong>meta</strong> – Metadata related to the suite.</p></li>
+<li><p><strong>ge_cloud_id</strong> – <p>Great Expectations Cloud id for this Expectation Suite.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.13.33: </span>Used in cloud deployments.</p>
+</div>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.core.ExpectationSuite.add_expectation">
+<span class="sig-name descname"><span class="pre">add_expectation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">great_expectations.core.expectation_configuration.ExpectationConfiguration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">send_usage_event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'domain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_existing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">great_expectations.core.expectation_configuration.ExpectationConfiguration</span></span></span><a class="headerlink" href="#great_expectations.core.ExpectationSuite.add_expectation" title="Permalink to this definition">#</a></dt>
+<dd><p>Upsert specified ExpectationConfiguration into this ExpectationSuite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expectation_configuration</strong> – The ExpectationConfiguration to add or update</p></li>
+<li><p><strong>send_usage_event</strong> – Whether to send a usage_statistics event. When called through ExpectationSuite class’
+public add_expectation() method, this is set to <cite>True</cite>.</p></li>
+<li><p><strong>match_type</strong> – The criteria used to determine whether the Suite already has an ExpectationConfiguration
+and so whether we should add or replace.</p></li>
+<li><p><strong>overwrite_existing</strong> – If the expectation already exists, this will overwrite if True and raise an error if
+False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The ExpectationConfiguration to add or replace.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – More than one match</p></li>
+<li><p><strong>DataContextError</strong> – One match if overwrite_existing = False</p></li>
+</ul>
+</dd>
+</dl>
+<p># noqa: DAR402</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.core.ExpectationSuite.remove_expectation">
+<span class="sig-name descname"><span class="pre">remove_expectation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expectation_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.core.expectation_configuration.ExpectationConfiguration</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'domain'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_multiple_matches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">uuid.UUID</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.core.expectation_configuration.ExpectationConfiguration</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#great_expectations.core.ExpectationSuite.remove_expectation" title="Permalink to this definition">#</a></dt>
+<dd><p>Remove an ExpectationConfiguration from the ExpectationSuite.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expectation_configuration</strong> – A potentially incomplete (partial) Expectation Configuration to match against.</p></li>
+<li><p><strong>match_type</strong> – This determines what kwargs to use when matching. Options are ‘domain’ to match based
+on the data evaluated by that expectation, ‘success’ to match based on all configuration parameters
+that influence whether an expectation succeeds based on a given batch of data, and ‘runtime’ to match
+based on all configuration parameters.</p></li>
+<li><p><strong>remove_multiple_matches</strong> – If True, will remove multiple matching expectations.</p></li>
+<li><p><strong>ge_cloud_id</strong> – <p>Great Expectations Cloud id for an Expectation.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.13.33: </span>Used in cloud deployments.</p>
+</div>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The list of deleted ExpectationConfigurations.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – Must provide either expectation_configuration or ge_cloud_id.</p></li>
+<li><p><strong>ValueError</strong> – No match or multiple matches found (and remove_multiple_matches=False).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.core.ExpectationSuite.show_expectations_by_domain_type">
+<span class="sig-name descname"><span class="pre">show_expectations_by_domain_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#great_expectations.core.ExpectationSuite.show_expectations_by_domain_type" title="Permalink to this definition">#</a></dt>
+<dd><p>Displays “ExpectationConfiguration” list, grouped by “domain_type”, in predetermined designated order.</p>
+<p>The means of displaying is through the use of the “Pretty Print” library method “pprint.pprint()”.</p>
+</dd></dl>
+</dd></dl>
+</section>

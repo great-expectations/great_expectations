@@ -1,0 +1,47 @@
+---
+title: InferredAssetGCSDataConnector
+sidebar_label: InferredAssetGCSDataConnector
+---
+
+<section class="sphinx-api-doc" id="inferredassetgcsdataconnector">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.datasource.data_connector.InferredAssetGCSDataConnector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.datasource.data_connector.</span></span><span class="sig-name descname"><span class="pre">InferredAssetGCSDataConnector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasource_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_or_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gcs_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec_passthrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.datasource.data_connector.InferredAssetGCSDataConnector" title="Permalink to this definition">#</a></dt>
+<dd><p>An Inferred Asset Data Connector used to connect to Google Cloud Storage (GCS).</p>
+<p>This Data Connector uses regular expressions to traverse through GCS buckets and implicitly
+determine Data Asset name. Please note that in order to maintain consistency with Google’s official SDK,
+we utilize parameter names <cite>bucket_or_name</cite> and <cite>max_results</cite>. Since we convert these keys from YAML to Python and
+directly pass them in to the GCS connection object, maintaining consistency is necessary for proper usage.</p>
+<dl class="simple">
+<dt>This DataConnector supports the following methods of authentication:</dt><dd><ol class="arabic simple">
+<li><p>Standard gcloud auth / GOOGLE_APPLICATION_CREDENTIALS environment variable workflow</p></li>
+<li><p>Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_file</p></li>
+<li><p>Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_info</p></li>
+</ol>
+</dd>
+</dl>
+<p>Much of the interaction is performed using a GCS Storage Client. Please refer to
+the <a class="reference external" href="https://googleapis.dev/python/google-api-core/latest/auth.html">Official Google Documentation</a> for more
+information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the Data Connector.</p></li>
+<li><p><strong>datasource_name</strong> – The name of this Data Connector’s Datasource.</p></li>
+<li><p><strong>bucket_or_name</strong> – Bucket name for Google Cloud Storage.</p></li>
+<li><p><strong>execution_engine</strong> – The Execution Engine object to used by this Data Connector to read the data.</p></li>
+<li><p><strong>default_regex</strong> – A regex configuration for filtering data references. The dict can include a regex <cite>pattern</cite> and
+a list of <cite>group_names</cite> for capture groups.</p></li>
+<li><p><strong>sorters</strong> – A list of sorters for sorting data references.</p></li>
+<li><p><strong>prefix</strong> – Infer as Data Assets only blobs that begin with this prefix.</p></li>
+<li><p><strong>delimiter</strong> – When included, will remove any prefix up to the delimiter from the inferred Data Asset names.</p></li>
+<li><p><strong>max_results</strong> – Max blob filepaths to return.</p></li>
+<li><p><strong>gcs_options</strong> – Options passed to the GCS Storage Client.</p></li>
+<li><p><strong>batch_spec_passthrough</strong> – Dictionary with keys that will be added directly to the batch spec.</p></li>
+<li><p><strong>id</strong> – The unique identifier for this Data Connector used when running in cloud mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>

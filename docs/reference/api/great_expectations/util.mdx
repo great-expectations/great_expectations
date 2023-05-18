@@ -1,0 +1,101 @@
+---
+title: util
+sidebar_label: util
+---
+
+<section class="sphinx-api-doc" id="module-great_expectations.util">
+<span id="util"></span>
+<dl class="py function">
+<dt class="sig sig-object py" id="great_expectations.util.get_context">
+<span class="sig-prename descclassname"><span class="pre">great_expectations.util.</span></span><span class="sig-name descname"><span class="pre">get_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">DataContextConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PathStr</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_organization_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">False</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_organization_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="k"><span class="pre">False</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">FileDataContext</span></span></span><a class="headerlink" href="#great_expectations.util.get_context" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">great_expectations.util.</span></span><span class="sig-name descname"><span class="pre">get_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">DataContextConfig</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_root_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">PathStr</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_organization_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cloud_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_organization_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="http://localhost:3000/docs/reference/api/great_expectations/data_context/AbstractDataContext.html#great_expectations.data_context.AbstractDataContext" title="great_expectations.data_context.AbstractDataContext"><span class="pre">AbstractDataContext</span></a></span></span></dt>
+<dd><p>Method to return the appropriate Data Context depending on parameters and environment.</p>
+<dl>
+<dt>Usage:</dt><dd><p><cite>import great_expectations as gx</cite></p>
+<p><cite>my_context = gx.get_context(&lt;insert_your_parameters&gt;)</cite></p>
+</dd>
+</dl>
+<p>This method returns the appropriate Data Context based on which parameters you’ve passed and / or your environment configuration:</p>
+<ul class="simple">
+<li><p>FileDataContext: Configuration stored in a file.</p></li>
+<li><p>EphemeralDataContext: Configuration passed in at runtime.</p></li>
+<li><p>CloudDataContext: Configuration stored in Great Expectations Cloud.</p></li>
+</ul>
+<p>Read on for more details about each of the Data Context types:</p>
+<p><strong>FileDataContext:</strong> A Data Context configured via a yaml file. Returned by default if you have no cloud configuration set up and pass no parameters. If you pass context_root_dir, we will look for a great_expectations.yml configuration there. If not we will look at the following locations:</p>
+<ul class="simple">
+<li><p>Path defined in a GX_HOME environment variable.</p></li>
+<li><p>The current directory.</p></li>
+<li><p>Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).</p></li>
+</ul>
+<p>Relevant parameters</p>
+<ul class="simple">
+<li><p>context_root_dir: Provide an alternative directory to look for GX config.</p></li>
+<li><p>project_config: Optionally override the configuration on disk - only if <cite>context_root_dir</cite> is also provided.</p></li>
+<li><p>runtime_environment: Optionally override specific configuration values.</p></li>
+</ul>
+<p><strong>EphemeralDataContext:</strong> A temporary, in-memory Data Context typically used in a pipeline. The default if you pass in only a project_config and have no cloud configuration set up.</p>
+<p>Relevant parameters</p>
+<ul class="simple">
+<li><p>project_config: Used to configure the Data Context.</p></li>
+<li><p>runtime_environment: Optionally override specific configuration values.</p></li>
+</ul>
+<p><strong>CloudDataContext:</strong> A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass <cite>cloud_mode=False</cite> if you have a cloud configuration set up and you do not wish to create a CloudDataContext.</p>
+<p>Cloud configuration can be set up by passing <cite>cloud_*</cite> parameters to <cite>get_context()</cite>, configuring cloud environment variables, or in a great_expectations.conf file.</p>
+<p>Relevant parameters</p>
+<ul class="simple">
+<li><p>cloud_base_url: Override env var or great_expectations.conf file.</p></li>
+<li><p>cloud_access_token: Override env var or great_expectations.conf file.</p></li>
+<li><p>cloud_organization_id: Override env var or great_expectations.conf file.</p></li>
+<li><p>cloud_mode: Set to True or False to explicitly enable/disable cloud mode.</p></li>
+<li><p>project_config: Optionally override the cloud configuration.</p></li>
+<li><p>runtime_environment: Optionally override specific configuration values.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_config</strong> – In-memory configuration for Data Context.</p></li>
+<li><p><strong>context_root_dir</strong> (<em>str</em><em> or </em><em>pathlib.Path</em>) – Path to directory that contains great_expectations.yml file</p></li>
+<li><p><strong>runtime_environment</strong> – A dictionary of values can be passed to a DataContext when it is instantiated.
+These values will override both values from the config variables file and
+from environment variables.</p></li>
+<li><p><strong>cloud_base_url</strong> – url for GX Cloud endpoint.</p></li>
+<li><p><strong>cloud_access_token</strong> – access_token for GX Cloud account.</p></li>
+<li><p><strong>cloud_organization_id</strong> – org_id for GX Cloud account.</p></li>
+<li><p><strong>cloud_mode</strong> – whether to run GX in Cloud mode (default is None).
+If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.</p></li>
+<li><p><strong>ge_cloud_base_url</strong> – <p>url for GX Cloud endpoint.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.15.37.</span></p>
+</div>
+</p></li>
+<li><p><strong>ge_cloud_access_token</strong> – <p>access_token for GX Cloud account.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.15.37.</span></p>
+</div>
+</p></li>
+<li><p><strong>ge_cloud_organization_id</strong> – <p>org_id for GX Cloud account.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.15.37.</span></p>
+</div>
+</p></li>
+<li><p><strong>ge_cloud_mode</strong> – <p>whether to run GX in Cloud mode (default is None).
+If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.15.37.</span></p>
+</div>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Data Context. Either a FileDataContext, EphemeralDataContext, or
+CloudDataContext depending on environment and/or
+parameters.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>GXCloudConfigurationError</strong> – Cloud mode enabled, but missing configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+</section>

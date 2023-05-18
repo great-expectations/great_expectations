@@ -1,0 +1,188 @@
+---
+title: AbstractDataContext
+sidebar_label: AbstractDataContext
+---
+
+<section class="sphinx-api-doc" id="abstractdatacontext">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.data_context.</span></span><span class="sig-name descname"><span class="pre">AbstractDataContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext" title="Permalink to this definition">#</a></dt>
+<dd><p>Base class for all Data Contexts that contains shared functionality.</p>
+<p>The class encapsulates most store / core components and convenience methods used to access them, meaning the
+majority of Data Context functionality lives here.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_checkpoint">
+<span class="sig-name descname"><span class="pre">add_checkpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_name_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">profilers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_operator_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batches</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slack_webhook</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notify_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ge_cloud_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expectation_suite_ge_cloud_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_validation_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Checkpoint</span></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_checkpoint" title="Permalink to this definition">#</a></dt>
+<dd><p>Add a Checkpoint to the DataContext.</p>
+<dl class="simple">
+<dt>-Relevant Documentation Links
+-</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/checkpoint/">Checkpoint</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name to give the checkpoint.</p></li>
+<li><p><strong>config_version</strong> – The config version of this checkpoint.</p></li>
+<li><p><strong>template_name</strong> – The template to use in generating this checkpoint.</p></li>
+<li><p><strong>module_name</strong> – The module name to use in generating this checkpoint.</p></li>
+<li><p><strong>class_name</strong> – The class name to use in generating this checkpoint.</p></li>
+<li><p><strong>run_name_template</strong> – The run name template to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_name</strong> – The expectation suite name to use in generating this checkpoint.</p></li>
+<li><p><strong>batch_request</strong> – The batch request to use in generating this checkpoint.</p></li>
+<li><p><strong>action_list</strong> – The action list to use in generating this checkpoint.</p></li>
+<li><p><strong>evaluation_parameters</strong> – The evaluation parameters to use in generating this checkpoint.</p></li>
+<li><p><strong>runtime_configuration</strong> – The runtime configuration to use in generating this checkpoint.</p></li>
+<li><p><strong>validations</strong> – The validations to use in generating this checkpoint.</p></li>
+<li><p><strong>profilers</strong> – The profilers to use in generating this checkpoint.</p></li>
+<li><p><strong>validation_operator_name</strong> – <p>The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.14.0.</span></p>
+</div>
+</p></li>
+<li><p><strong>batches</strong> – <p>The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.</p>
+<div class="deprecated">
+<p><span class="versionmodified deprecated">Deprecated since version 0.14.0.</span></p>
+</div>
+</p></li>
+<li><p><strong>site_names</strong> – The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>slack_webhook</strong> – The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_on</strong> – The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>notify_with</strong> – The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.</p></li>
+<li><p><strong>ge_cloud_id</strong> – The GE Cloud ID to use in generating this checkpoint.</p></li>
+<li><p><strong>expectation_suite_ge_cloud_id</strong> – The expectation suite GE Cloud ID to use in generating this checkpoint.</p></li>
+<li><p><strong>default_validation_id</strong> – The default validation ID to use in generating this checkpoint.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The Checkpoint object created.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_datasource">
+<span class="sig-name descname"><span class="pre">add_datasource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_changes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.datasource.datasource.LegacyDatasource</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">great_expectations.datasource.new_datasource.BaseDatasource</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_datasource" title="Permalink to this definition">#</a></dt>
+<dd><p>Add a new Datasource to the data context, with configuration provided as kwargs.</p>
+<dl class="simple">
+<dt>Relevant Documentation Links
+</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/datasource">Datasource</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – the name of the new Datasource to add</p></li>
+<li><p><strong>initialize</strong> – if False, add the Datasource to the config, but do not
+initialize it, for example if a user needs to debug database connectivity.</p></li>
+<li><p><strong>save_changes</strong> – should GX save the Datasource config?</p></li>
+<li><p><strong>kwargs</strong> – the configuration for the new Datasource</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Datasource instance added.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.add_store">
+<span class="sig-name descname"><span class="pre">add_store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">great_expectations.data_context.store.store.Store</span></span></span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.add_store" title="Permalink to this definition">#</a></dt>
+<dd><p>Add a new Store to the DataContext.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>store_name</strong> – the name to associate with the created store.</p></li>
+<li><p><strong>store_config</strong> – the config to use to construct the store.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The instantiated Store.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.build_data_docs">
+<span class="sig-name descname"><span class="pre">build_data_docs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_identifiers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">build_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.build_data_docs" title="Permalink to this definition">#</a></dt>
+<dd><p>Build Data Docs for your project.</p>
+<dl class="simple">
+<dt>Relevant Documentation Links
+</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/data_docs/">Data Docs</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>site_names</strong> – if specified, build data docs only for these sites, otherwise,
+build all the sites specified in the context’s config</p></li>
+<li><p><strong>resource_identifiers</strong> – a list of resource identifiers (ExpectationSuiteIdentifier,
+ValidationResultIdentifier). If specified, rebuild HTML
+(or other views the data docs sites are rendering) only for
+the resources in this list. This supports incremental build
+of data docs sites (e.g., when a new validation result is created)
+and avoids full rebuild.</p></li>
+<li><p><strong>dry_run</strong> – a flag, if True, the method returns a structure containing the
+URLs of the sites that <em>would</em> be built, but it does not build
+these sites.</p></li>
+<li><p><strong>build_index</strong> – a flag if False, skips building the index page</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary with the names of the updated data documentation sites as keys and the the location info
+of their index.html files as values</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>ClassInstantiationError</strong> – Site config in your Data Context config is not valid.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="great_expectations.data_context.AbstractDataContext.test_yaml_config">
+<span class="sig-name descname"><span class="pre">test_yaml_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_environment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pretty_print</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'instantiated_class'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'report_object'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'instantiated_class'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shorten_tracebacks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.data_context.AbstractDataContext.test_yaml_config" title="Permalink to this definition">#</a></dt>
+<dd><p>Convenience method for testing yaml configs.</p>
+<p>test_yaml_config is a convenience method for configuring the moving
+parts of a Great Expectations deployment. It allows you to quickly
+test out configs for system components, especially Datasources,
+Checkpoints, and Stores.</p>
+<p>For many deployments of Great Expectations, these components (plus
+Expectations) are the only ones you’ll need.</p>
+<p><cite>test_yaml_config</cite> is mainly intended for use within notebooks and tests.</p>
+<dl class="simple">
+<dt>Relevant Documentation Links
+</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/terms/data_context">Data Context</a></p></li>
+<li><p><a class="reference external" href="https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config">How To Configure A New Checkpoint Using Test Yaml Config</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yaml_config</strong> – A string containing the yaml config to be tested</p></li>
+<li><p><strong>name</strong> – Optional name of the component to instantiate</p></li>
+<li><p><strong>class_name</strong> – Optional, overridden if provided in the config</p></li>
+<li><p><strong>runtime_environment</strong> – Optional override for config items</p></li>
+<li><p><strong>pretty_print</strong> – Determines whether to print human-readable output</p></li>
+<li><p><strong>return_mode</strong> – Determines what type of object test_yaml_config will return.
+Valid modes are “instantiated_class” and “report_object”</p></li>
+<li><p><strong>shorten_tracebacks</strong> – If true, catch any errors during instantiation and print only the
+last element of the traceback stack. This can be helpful for
+rapid iteration on configs in a notebook, because it can remove
+the need to scroll up and down a lot.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The instantiated component (e.g. a Datasource)
+OR
+a json object containing metadata from the component’s self_check method.
+The returned object is determined by return_mode.</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</section>

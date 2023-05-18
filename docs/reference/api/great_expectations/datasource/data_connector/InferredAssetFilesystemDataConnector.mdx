@@ -1,0 +1,29 @@
+---
+title: InferredAssetFilesystemDataConnector
+sidebar_label: InferredAssetFilesystemDataConnector
+---
+
+<section class="sphinx-api-doc" id="inferredassetfilesystemdataconnector">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.datasource.data_connector.InferredAssetFilesystemDataConnector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.datasource.data_connector.</span></span><span class="sig-name descname"><span class="pre">InferredAssetFilesystemDataConnector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasource_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">glob_directive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec_passthrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.datasource.data_connector.InferredAssetFilesystemDataConnector" title="Permalink to this definition">#</a></dt>
+<dd><p>A base class for Inferred Asset Data Connectors designed to operate on data stored in filesystems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the Data Connector.</p></li>
+<li><p><strong>datasource_name</strong> – The name of this Data Connector’s Datasource.</p></li>
+<li><p><strong>base_directory</strong> – The directory from which the Data Connector should read files.</p></li>
+<li><p><strong>execution_engine</strong> – The Execution Engine object to used by this Data Connector to read the data.</p></li>
+<li><p><strong>default_regex</strong> – A regex configuration for filtering data references. The dict can include a regex <cite>pattern</cite> and
+a list of <cite>group_names</cite> for capture groups.</p></li>
+<li><p><strong>glob_directive</strong> – A glob pattern for selecting files in directory.</p></li>
+<li><p><strong>sorters</strong> – A list of sorters for sorting data references.</p></li>
+<li><p><strong>batch_spec_passthrough</strong> – Dictionary with keys that will be added directly to the batch spec.</p></li>
+<li><p><strong>id</strong> – The unique identifier for this Data Connector used when running in cloud mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>

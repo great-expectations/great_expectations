@@ -1,0 +1,196 @@
+Teradata SQL Driver for Python
+Copyright 2018 Teradata.  All rights reserved.
+
+LICENSE AGREEMENT
+
+PRODUCT: Teradata SQL Driver for Python
+
+IMPORTANT - READ THIS AGREEMENT CAREFULLY BEFORE INSTALLING OR USING THE SOFTWARE.
+TERADATA WILL LICENSE THE SOFTWARE TO YOU ONLY IF YOU ACCEPT THE TERMS AND CONDITIONS OF
+THIS AGREEMENT AND MEET THE CONDITIONS FOR USING THE SOFTWARE DESCRIBED BELOW.  BY
+DOWNLOADING, INSTALLING OR USING THE SOFTWARE, YOU (1) AGREE TO THE TERMS AND CONDITIONS
+OF THIS AGREEMENT, AND (2) REPRESENT AND WARRANT THAT YOU POSSESS THE AUTHORITY TO ENTER
+INTO THIS AGREEMENT ON BEHALF OF YOU, YOUR EMPLOYER (WHEN ACTING ON BEHALF OF YOUR EMPLOYER),
+AND/OR A TERADATA-AUTHORIZED LICENSEE (WHEN YOU AND YOUR EMPLOYER ARE ACTING ON BEHALF OF A
+TERADATA-AUTHORIZED LICENSEE).  IF YOU DO NOT ACCEPT THE TERMS AND CONDITIONS OF THIS
+AGREEMENT, DO NOT DOWNLOAD, INSTALL OR USE THE SOFTWARE.
+
+IMPORTANT - BY DOWNLOADING THE SOFTWARE:
+* YOU ACKNOWLEDGE THAT THE SOFTWARE YOU ARE DOWNLOADING FROM TERADATA IS SUBJECT
+  TO THE RESTRICTIONS AND CONTROLS IMPOSED BY UNITED STATES EXPORT REGULATIONS.
+* YOU CERTIFY THAT:
+** YOU DO NOT INTEND TO USE THE SOFTWARE FOR ANY PURPOSE PROHIBITED BY UNITED STATES EXPORT
+   REGULATIONS, INCLUDING, WITHOUT LIMITATION, TERRORISM, CYBER-ATTACKS, CYBER-CRIMES,
+   MONEY-LAUNDERING, INDUSTRIAL ESPIONAGE, OR NUCLEAR, CHEMICAL OR BIOLOGICAL WEAPONS
+   PROLIFERATION.
+** YOU ARE NOT LISTED AS A DENIED PARTY ON ANY LIST GOVERNING UNITED STATES EXPORTS.
+** YOU ARE NOT A NATIONAL OF ANY COUNTRY THAT IS NOT APPROVED FOR EXPORT OF THE SOFTWARE.
+   AS OF 2017, THESE COUNTRIES ARE CUBA, IRAN, NORTH KOREA, AND SYRIA.
+
+This License Agreement ("Agreement") is a legal contract between you (as defined below) and
+Teradata (as defined below) regarding the Software (as defined below).  The terms "you",
+"your" and "yours" collectively and individually refer to you as an individual and to any
+company for which you are acting.  The term "Teradata" refers to either Teradata U.S., Inc.
+for Software deliveries in the US or Teradata Ireland Ltd. for Software deliveries outside
+the United States.  "Software" refers to the software product identified above, which
+consists of computer software code in object code form only, as well as associated
+documentation that Teradata may elect in its sole discretion to provide you.  "Software"
+also includes any and all error corrections, bug fixes, updates, upgrades, or new versions
+or releases of the Software (collectively and individually, "Enhancements") that Teradata
+may elect in its sole discretion to provide you.
+
+1.  Term.  This Agreement commences on the earliest date of the first download, first
+    copying, first installation, or first use of the Software (the "Effective Date").
+    Unless terminated earlier as provided herein, this agreement, including your license
+    to the Software, will expire or terminate on the same date that your Teradata-authorized
+    license to use the Teradata Analytics Platform product expires or terminates (whichever
+    occurs first).
+
+2.  License.
+
+(a) Subject to your compliance with all of the terms and conditions of this Agreement
+    and only during the term of this Agreement, Teradata grants you a nonexclusive,
+    nontransferable, paid up license to install and use the Software on your computer
+    solely for purposes of facilitating your Teradata-authorized license to use the
+    Teradata Analytics Platform.  You may make reasonable archival backup copies of the
+    Software, but may only use an archival copy in lieu of your primary copy and subject
+    to the same restrictions as your primary copy.
+
+(b) The term Third Party Software means computer programs or modules (including their
+    documentation) that bear the logo, copyright and/or trademark of a third party
+    (including open source software that are contained in files marked as "open source"
+    or the like) or are otherwise subject to the written license terms of a third party.
+    The term "Software" does not include Third Party Software.  Third Party Software is
+    licensed to you subject to the applicable license terms accompanying it, included
+    in/with it, referenced in it, or otherwise entered into by you with respect to it.
+    Third Party Software license terms include those found in the FOSS licensing zip file
+    accompanying the Software.  Teradata provides source code to certain Third Party
+    Software for certain periods of time in compliance with certain applicable licenses.
+    To request such source code, visit http://developer.teradata.com/download/license/oss-request.
+
+(c) You will not sell, copy, rent, loan, modify, transfer, disclose, embed, sublicense,
+    create derivative works of or distribute the Software, in whole or in part, without
+    Teradata's prior written consent.  You are granted no rights to obtain or use the
+    Software's source code.  You will not reverse-assemble, reverse compile or reverse-
+    engineer the Software, except as expressly permitted by applicable law without the
+    possibility of contractual waiver.  Notwithstanding anything to the contrary, you do
+    not have any license, right, or authority to subject the Software, in whole or in part
+    or as part of a larger work, to any terms of any other agreement, including GNU Public
+    Licenses.
+
+(d) No license rights to the Software will be implied.  The Software, which includes all
+    copies thereof (whether in whole or in part), is and remains the exclusive property of
+    Teradata.  You will ensure that all copies of the Software contain Teradata's copyright
+    notices, as well as all other proprietary legends.  Teradata reserves the right to
+    inspect your use of the Software for purposes of verifying your compliance with the
+    terms and conditions of this Agreement.
+
+3.  Responsibilities.  You are responsible for the installation of the Software, as
+    well as for providing data security and backup operations.  This Agreement does not
+    require Teradata to provide you with any Enhancements, consulting services, technical
+    assistance, installation, training, support, or maintenance of any kind (collectively
+    and individually, "Services").  To the extent that Teradata elects to provide you
+    with any Services, such Services are provided to you at Teradata's sole discretion
+    and may be modified or discontinued at any time for any reason.
+
+4.  DISCLAIMER OF WARRANTY.  TERADATA: (a) PROVIDES SERVICES (IF ANY), (b) LICENSES THE
+    SOFTWARE, AND (c) PROVIDES THIRD PARTY SOFTWARE TO YOU ON AN "AS-IS" BASIS WITHOUT
+    WARRANTIES OF ANY KIND (ORAL OR WRITTEN, EXPRESS OR IMPLIED, OR STATUTORY). WITHOUT
+    LIMITATION TO THE FOREGOING, THERE ARE NO IMPLIED WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.  TERADATA DOES NOT WARRANT
+    THAT THE SOFTWARE, THIRD PARTY SOFTWARE, OR SERVICES WILL MEET YOUR REQUIREMENTS
+    OR CONFORM TO ANY SPECIFICATIONS, OR THAT THE OPERATION OF THE SOFTWARE OR THIRD
+    PARTY SOFTWARE WILL BE UNINTERRUPTED OR ERROR FREE.  YOU BEAR THE ENTIRE RISK AS
+    TO SATISFACTORY QUALITY, PERFORMANCE, ACCURACY, AND RESULTS OBTAINED FROM THE
+    SOFTWARE, THIRD PARTY SOFTWARE, AND SERVICES.
+
+    SOME JURISDICTIONS RESTRICT DISCLAIMERS OF WARRANTY, SO THE ABOVE DISCLAIMERS MAY
+    NOT FULLY APPLY TO YOU.
+
+5.  LIMITATIONS ON LIABILITY: UNDER NO CIRCUMSTANCES WILL TERADATA'S AND ITS LICENSORS'
+    TOTAL CUMULATIVE LIABILITY FOR CLAIMS RELATING TO THIS AGREEMENT, THE SERVICES,
+    THE SOFTWARE, AND/OR THIRD PARTY SOFTWARE (WHETHER BASED IN CONTRACT, STATUTE,
+    TORT (INCLUDING NEGLIGENCE) OR OTHERWISE) EXCEED US$1,000; PROVIDED, HOWEVER,
+    THAT THE FOREGOING WILL NOT APPLY TO CLAIMS FOR (A) PERSONAL INJURY, INCLUDING
+    DEATH, TO THE EXTENT CAUSED BY TERADATA'S NEGLIGENCE OR WILLFUL MISCONDUCT; OR
+    (B) PHYSICAL DAMAGE TO TANGIBLE REAL OR PERSONAL PROPERTY TO THE EXTENT CAUSED
+    BY TERADATA'S NEGLIGENCE OR WILLFUL MISCONDUCT EQUAL TO THE AMOUNT OF DIRECT
+    DAMAGES UP TO ONE MILLION DOLLARS PER OCCURRENCE.  IN NO EVENT WILL TERADATA
+    OR ITS LICENSORS BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, INCIDENTAL OR
+    CONSEQUENTIAL DAMAGES, OR FOR LOSS OF PROFITS, REVENUE, TIME, OPPORTUNITY OR
+    DATA, EVEN IF INFORMED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+    SOME JURISDICTIONS RESTRICT LIMITATIONS OF LIABILITY, SO THE ABOVE LIMITATIONS MAY
+    NOT FULLY APPLY TO YOU.
+
+6.  Government Restrictions. You agree that you will not, directly or indirectly, export
+    or transmit any Software without obtaining Teradata's prior written authorization,
+    as well as appropriate governmental approvals, including those required by the
+    U.S. Government. Use and or distribution of this software is subject to export laws
+    and regulations of the United States and other jurisdictions. The links below connect
+    you to applicable U.S. government agencies, and their regulations, that have
+    jurisdiction over this transaction.
+    http://www.bis.doc.gov/
+    http://www.treas.gov/offices/enforcement/ofac/
+
+    In downloading this product, you acknowledge that this transaction is subject to
+    applicable export control laws and you certify that your download, use and/or subsequent
+    distribution of this product is not prohibited under applicable laws and regulations.
+
+    The Government's use, duplication, or disclosure of Teradata's commercial computer
+    software and commercial computer software documentation is subject to: (a) the
+    Restricted Rights Notice set forth in 48 C.F.R. 52.227-14 (Rights In Data - General);
+    (b) Teradata's standard commercial license rights supplemented by 48 C.F.R. 52.227-19
+    (Commercial Computer Software - Restricted Rights); and/or (c) the limited rights and
+    license set forth 48 C.F.R. 252.227-7015 (Technical Data - Commercial Items), as applicable.
+
+7.  Termination and Expiration. A party may terminate this Agreement with or without
+    cause, upon providing written notice to the other parties.  When this Agreement
+    terminates or expires, you will immediately cease all use of the Software, permanently
+    remove the Software from all computers, destroy all copies of the Software, and (upon
+    receipt of Teradata's request) provide a signed written certification that the
+    foregoing has occurred. Sections 4, 5, 6, 7, 8, 9, 10, and 11 will survive expiration
+    or termination of this Agreement.
+
+8.  Choice of Law and Dispute Resolution. The parties will attempt in good faith to resolve
+    any controversy or claim by negotiation or mediation.  If they are unable to do so, and
+    regardless of the causes of action alleged and whether they arise under this Agreement
+    or otherwise, the claim will be resolved by arbitration before a sole arbitrator in
+    Dayton, Ohio pursuant to the then-current Commercial Rules of the American Arbitration
+    Association and the federal substantive and procedural law of arbitration.  The
+    arbitrator's award will be final and binding, and may be entered in any court having
+    jurisdiction thereof, but may include only damages consistent with the limitations in
+    this Agreement.  Each party will bear its own attorney's fees and costs related to the
+    arbitration. The obligations to negotiate, mediate and arbitrate shall not apply to
+    claims for misuse or infringement of a party's intellectual property rights.  Any
+    claim or action must be brought within two years after the claimant knows or should
+    have known of the claim.  New York law will govern the interpretation and enforcement
+    of this Agreement, except that the Federal Arbitration Act will govern the
+    interpretation and enforcement of the arbitrability of claims under this Section.
+
+9.  Feedback.  Notwithstanding anything to the contrary: (a) Teradata will have no
+    obligation of any kind with respect to any Software-related comments, suggestions,
+    design changes or improvements that you elect to provide to Teradata in either verbal
+    or written form (collectively, "Software Feedback"), and (b) Teradata and its
+    affiliates are hereby free to use any ideas, concepts, know-how or techniques, in
+    whole or in part, contained in Software Feedback: (i) for any purpose whatsoever,
+    including developing, manufacturing, and/or marketing products and/or services
+    incorporating Software Feedback in whole or in part, and (ii) without any
+    restrictions or limitations, including requiring the payment of any license fees,
+    royalties, or other consideration.
+
+10. Confidentiality.  You will not disclose the results of any testing or evaluations,
+    including any benchmarks, insofar as it relates to the Software without Teradata's
+    prior written consent.
+
+11. Entire Agreement. This Agreement constitutes the entire understanding of the parties
+    with respect to the Software and Services, and supersede all other prior agreements
+    and understandings whether oral or written.  No oral representation or change to this
+    Agreement will be binding upon either party unless agreed to in writing and signed by
+    authorized representatives of all parties. You will not assign this Agreement or your
+    rights, nor will you delegate your obligations under this Agreement.  Failure by
+    either party to enforce any term or condition of this Agreement will not be deemed
+    a waiver of future enforcement of that or any other term or condition. The provisions
+    of this Agreement are severable. "Include", "includes", and "including" shall be
+    interpreted as introducing a list of examples which do not limit the generality of
+    any preceding words or any words in the list of examples.

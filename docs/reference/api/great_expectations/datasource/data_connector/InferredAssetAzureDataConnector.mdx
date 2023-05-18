@@ -1,0 +1,36 @@
+---
+title: InferredAssetAzureDataConnector
+sidebar_label: InferredAssetAzureDataConnector
+---
+
+<section class="sphinx-api-doc" id="inferredassetazuredataconnector">
+
+<dl class="py class">
+<dt class="sig sig-object py" id="great_expectations.datasource.data_connector.InferredAssetAzureDataConnector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">great_expectations.datasource.data_connector.</span></span><span class="sig-name descname"><span class="pre">InferredAssetAzureDataConnector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datasource_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">great_expectations.execution_engine.execution_engine.ExecutionEngine</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sorters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_starts_with</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">azure_options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_spec_passthrough</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#great_expectations.datasource.data_connector.InferredAssetAzureDataConnector" title="Permalink to this definition">#</a></dt>
+<dd><p>An Inferred Asset Data Connector used to connect to Azure Blob Storage.</p>
+<p>This Data Connector uses regular expressions to traverse through Azure Blob Storage containers and implicitly
+determine Data Asset name.</p>
+<p>Much of the interaction is performed using a BlobServiceClient. Please refer to
+the <a class="reference external" href="https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python">Official Azure Documentation</a>
+for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – The name of the Data Connector.</p></li>
+<li><p><strong>datasource_name</strong> – The name of this Data Connector’s Datasource.</p></li>
+<li><p><strong>container</strong> – The container for Azure Blob Storage.</p></li>
+<li><p><strong>execution_engine</strong> – The Execution Engine object to used by this Data Connector to read the data.</p></li>
+<li><p><strong>default_regex</strong> – A regex configuration for filtering data references. The dict can include a regex <cite>pattern</cite> and
+a list of <cite>group_names</cite> for capture groups.</p></li>
+<li><p><strong>sorters</strong> – A list of sorters for sorting data references.</p></li>
+<li><p><strong>name_starts_with</strong> – Infer as Data Assets only blobs that begin with this prefix.</p></li>
+<li><p><strong>delimiter</strong> – When included, will remove any prefix up to the delimiter from the inferred Data Asset names.</p></li>
+<li><p><strong>azure_options</strong> – Options passed to the <cite>BlobServiceClient</cite>.</p></li>
+<li><p><strong>batch_spec_passthrough</strong> – Dictionary with keys that will be added directly to the batch spec.</p></li>
+<li><p><strong>id</strong> – The unique identifier for this Data Connector used when running in cloud mode.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+</section>
