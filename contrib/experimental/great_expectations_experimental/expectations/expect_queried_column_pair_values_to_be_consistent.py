@@ -15,18 +15,11 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# This class defines the Expectation itself
 class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
-    """Expect the values of a pair of columns to be either both filled or empty for each row"""
+    """Expect the values of a pair of columns to be either both filled or empty simultaneously"""
 
-
-    # This is the id string of the Metric(s) used by this Expectation.
     metric_dependencies = ("query.template_values",)
 
-    # This is the default, baked-in SQL Query for this QueryExpectation
-    # query = """
-    #         SQL QUERY GOES HERE
-    #         """
     query = """
         SELECT
             COUNT(1)
@@ -38,12 +31,10 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
             ({column_a} is null and {column_b} is not null)
             """
 
-    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("template_dict", "query",)
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
-    # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {
         "result_format": "BASIC",
         "include_config": True,
@@ -79,7 +70,6 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-    # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -87,28 +77,18 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        # raise NotImplementedError
 
         metrics = convert_to_json_serializable(data=metrics)
-        num_of_non_consistent_rows = list(metrics.get("query.template_values")[0].values())[0]
+        num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
 
-        if not num_of_non_consistent_rows or num_of_non_consistent_rows == 0:
-            return {
-                "info": "",
-                "success": True,
-            }
+        is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 
-        else:
-            return {
-                "success": False,
-                "result": {
-                    "info": f"{num_of_non_consistent_rows} inconsistent rows",
-                    "observed_value": num_of_non_consistent_rows,
-                },
-            }
-
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
+        return {
+            "success": is_success,
+            "result": {
+                "info": f"Row count with inconsistent values: {num_of_inconsistent_rows}"
+            },
+        }
 
     examples = [
         {
@@ -130,7 +110,7 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
                         "template_dict": {"column_a": "col1", "column_b": "col2"}
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
+                    "only_for": ["sqlite",],
                 },
                 {
                     "title": "basic_negative_test",
@@ -140,7 +120,7 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
                         "template_dict": {"column_a": "col1", "column_b": "col3"}
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
+                    "only_for": ["sqlite",],
                 },
             ],
         },
