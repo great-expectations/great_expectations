@@ -555,5 +555,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise TypeError()
 
         resource_type, id, resource_name = key
-        if not isinstance(resource_type, GXCloudRESTResource):
+        try:
+            GXCloudRESTResource(resource_type)
+        except ValueError:
             raise TypeError()
