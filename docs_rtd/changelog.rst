@@ -17,7 +17,7 @@ Changelog
 * [BUGFIX] Fix inability to extend SimpleCheckpoint -- and several additional enhancements and clean up ([#7879](https://github.com/great-expectations/great_expectations/pull/7879))
 * [BUGFIX] Delete ExpectationSuite by name in GX Cloud ([#7881](https://github.com/great-expectations/great_expectations/pull/7881))
 * [BUGFIX] optional dataframe on datasources ([#7862](https://github.com/great-expectations/great_expectations/pull/7862))
-* [BUGFIX] DX-506: Fix sparkDF cannot compute mean for DecimalType ([#7867](https://github.com/great-expectations/great_expectations/pull/7867))
+* [BUGFIX] Fix sparkDF cannot compute mean for DecimalType ([#7867](https://github.com/great-expectations/great_expectations/pull/7867))
 * [BUGFIX] Fix Cloud FDS `add_or_update_*` methods ([#7908](https://github.com/great-expectations/great_expectations/pull/7908))
 * [BUGFIX] fix `PandasAzureBlobStorageDatasource` config substitution ([#7914](https://github.com/great-expectations/great_expectations/pull/7914))
 * [BUGFIX] Fix remaining FDS config substitution issues ([#7917](https://github.com/great-expectations/great_expectations/pull/7917))
