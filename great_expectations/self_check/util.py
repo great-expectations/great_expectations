@@ -122,14 +122,11 @@ if sqlalchemy.sqlite:
 else:
     SQLITE_TYPES = {}
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
+import great_expectations.compatibility.sqlalchemy_bigquery as sqla_bigquery
 from great_expectations.compatibility.sqlalchemy_bigquery import (
     BIGQUERY_TYPES,
     GEOGRAPHY,
-)
-from great_expectations.compatibility.sqlalchemy_bigquery import (
-    sqlalchemy_bigquery as sqla_bigquery,
 )
 
 if GEOGRAPHY:

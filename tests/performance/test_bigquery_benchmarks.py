@@ -19,7 +19,16 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.async_executor import patch_https_connection_pool
 from tests.performance import taxi_benchmark_util
 
-patch_https_connection_pool(taxi_benchmark_util.concurrency_config())
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+    )
+
+patch_https_connection_pool(
+    concurrency_config=taxi_benchmark_util.concurrency_config(),
+    google_cloud_project=gcp_project,
+)
 
 
 @pytest.mark.parametrize(
