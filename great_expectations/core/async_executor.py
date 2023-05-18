@@ -10,7 +10,6 @@ from contextlib import AbstractContextManager
 from typing import Generic, Optional, TypeVar
 
 import requests
-from urllib3 import connectionpool, poolmanager
 
 from great_expectations.compatibility.google import python_bigquery
 from great_expectations.data_context.types.base import ConcurrencyConfig
@@ -120,7 +119,9 @@ class AsyncExecutor(AbstractContextManager):
         return self._execute_concurrently
 
 
-def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
+def patch_https_connection_pool(
+    concurrency_config: ConcurrencyConfig, google_cloud_project: str
+) -> None:
     """Patch urllib3 to enable a higher default max pool size to reduce concurrency bottlenecks.
 
     To have any effect, this method must be called before any database connections are made, e.g. by scripts leveraging
@@ -134,15 +135,11 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
     # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
     # bigquery.googleapis.com". To remove this bottleneck, following the instructions at
     # https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
-    bq = python_bigquery.Client(project=concurrency_config.GOOGLE_CLOUD_PROJECT)
+    if not concurrency_config.enabled:
+        return
+
+    bq = python_bigquery.Client()
 
     # Increase the HTTP pool size to avoid the "Connection pool is full, discarding connection: bigquery.googleapis.com"
     adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
     bq._http.mount("https://", adapter)
-
-    class HTTPSConnectionPoolWithHigherMaxSize(connectionpool.HTTPSConnectionPool):
-        def __init__(self, *args, **kwargs) -> None:
-            kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
-            super().__init__(*args, **kwargs)
-
-    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize  # type: ignore[attr-defined]
