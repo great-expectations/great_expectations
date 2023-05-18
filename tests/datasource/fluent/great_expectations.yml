@@ -87,6 +87,8 @@ fluent_datasources:
   my_pandas_gcs_ds:
     type: pandas_gcs
     bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -144,6 +146,8 @@ fluent_datasources:
   my_spark_gcs_ds:
     type: spark_gcs
     bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
