@@ -46,6 +46,8 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import azure
+    from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,
         CSVEngine,
@@ -77,10 +79,11 @@ class PandasAzureBlobStorageDatasourceError(PandasDatasourceError): ...
 
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     type: Literal["pandas_abs"]
-    azure_options: Dict[str, Any]
+    azure_options: Dict[str, ConfigStr | Any]
 
     _account_name: str
     _azure_client: Any
+    def _get_azure_client(self) -> azure.BlobServiceClient: ...
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,
