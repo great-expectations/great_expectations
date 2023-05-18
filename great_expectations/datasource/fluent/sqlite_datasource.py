@@ -119,9 +119,17 @@ SqliteSplitter = Union[Splitter, SplitterHashedColumn, SplitterConvertedDateTime
 
 
 class _SQLiteAssetMixin:
+    @public_api
     def add_splitter_hashed_column(
         self: Self, column_name: str, hash_digits: int
     ) -> Self:
+        """Associates a hashed column splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterHashedColumn(
                 method_name="split_on_hashed_column",
@@ -130,9 +138,17 @@ class _SQLiteAssetMixin:
             )
         )
 
+    @public_api
     def add_splitter_converted_datetime(
         self: Self, column_name: str, date_format_string: str
     ) -> Self:
+        """Associates a converted datetime splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            date_format_string: Format for converting string representation of datetime to actual datetime object.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterConvertedDateTime(
                 method_name="split_on_converted_datetime",

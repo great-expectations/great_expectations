@@ -6,7 +6,7 @@ redshift_integration_tests = []
 connecting_to_your_data = [
     # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
     # IntegrationTestFixture(
-    #     name = "azure_python_example",
+    #     name = "redshift_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -14,7 +14,7 @@ connecting_to_your_data = [
     #     util_script= "tests/test_utils.py",
     # ),
     # IntegrationTestFixture(
-    #     name = "azure_yaml_example",
+    #     name = "redshift_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -142,6 +142,17 @@ split_data = [
 
 sample_data = []
 
+deployment_patterns = [
+    IntegrationTestFixture(
+        name="deployment_patterns_redshift",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_redshift_deployment_patterns.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        backend_dependencies=[BackendDependencies.REDSHIFT],
+    ),
+]
+
 redshift_integration_tests += connecting_to_your_data
 redshift_integration_tests += split_data
 redshift_integration_tests += sample_data
+redshift_integration_tests += deployment_patterns
