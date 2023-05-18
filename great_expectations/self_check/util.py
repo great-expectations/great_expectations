@@ -33,6 +33,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
@@ -123,7 +124,6 @@ else:
     SQLITE_TYPES = {}
 
 
-import great_expectations.compatibility.sqlalchemy_bigquery as sqla_bigquery
 from great_expectations.compatibility.sqlalchemy_bigquery import (
     BIGQUERY_TYPES,
     GEOGRAPHY,
@@ -904,7 +904,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     except AttributeError:
         pass
     try:
-        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_classes["bigquery"] = BigQueryDialect
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass

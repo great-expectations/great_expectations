@@ -16,12 +16,12 @@ bigquery_types_tuple = None
 try:
     import sqlalchemy_bigquery
 except (ImportError, AttributeError):
-    sqlalchemy_bigquery = SQLALCHEMY_BIGQUERY_NOT_IMPORTED  # type: ignore[assignment]
+    sqlalchemy_bigquery = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
 
 try:
     from sqlalchemy_bigquery import GEOGRAPHY
 except (ImportError, AttributeError):
-    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED  # type: ignore[assignment,misc]
+    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
 
 if sqlalchemy_bigquery:
     BIGQUERY_TYPES = {
