@@ -64,6 +64,7 @@ def seed_ds_env_vars(
     config_sub_dict = {
         "MY_CONN_STR": f"sqlite:///{db_file}",
         "MY_URL": "http://example.com",
+        "MY_FILE": __file__,
     }
 
     for name, value in config_sub_dict.items():
