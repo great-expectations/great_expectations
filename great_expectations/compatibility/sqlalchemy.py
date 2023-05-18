@@ -256,4 +256,3 @@ try:
     from sqlalchemy.pool import StaticPool
 except (ImportError, AttributeError):
     StaticPool = SQLALCHEMY_NOT_IMPORTED
-
