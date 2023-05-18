@@ -13,10 +13,6 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_block_config.md'
-
-
-## Introduction
 
 In this guide we will demonstrate how to connect Great Expectations to a generic SQL table.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
@@ -29,7 +25,6 @@ If you would like to connect to the results of a SQL query instead of the conten
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
 - A SQL-based Datasource
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -57,16 +52,11 @@ Please reference the appropriate one of these guides:
 
 <ConnectingToSqlDatasourcesFluently />
 
-Or, for guides on using the block-config method for advanced SQL Datasource configurations, please see:
-
-<ConnectingToSqlDatasourcesBlockConfig />
-
-
 </details>
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
+If you're using a Datasource that was created with the advanced block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource).
 
 :::
 

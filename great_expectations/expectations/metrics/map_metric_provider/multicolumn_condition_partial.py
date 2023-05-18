@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -12,6 +13,9 @@ from typing import (
     Union,
 )
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -22,16 +26,17 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.util import (
-    Engine,
     get_dbms_compatible_column_names,
 )
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
 
 
 def multicolumn_condition_partial(  # noqa: C901 - 16
@@ -91,9 +96,9 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
-                    "column_list"
-                ]
+                column_list: List[
+                    Union[str, sqlalchemy.quoted_name]
+                ] = accessor_domain_kwargs["column_list"]
 
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
@@ -155,16 +160,16 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
-                    "column_list"
-                ]
+                column_list: List[
+                    Union[str, sqlalchemy.quoted_name]
+                ] = accessor_domain_kwargs["column_list"]
 
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
                 )
 
-                sqlalchemy_engine: Engine = execution_engine.engine
+                sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
                 column_selector = [
                     sa.column(column_name) for column_name in column_list
@@ -230,9 +235,9 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
-                    "column_list"
-                ]
+                column_list: List[
+                    Union[str, sqlalchemy.quoted_name]
+                ] = accessor_domain_kwargs["column_list"]
 
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,

@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import copy
 import json
 import os
+import pathlib
+import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
@@ -32,8 +36,8 @@ yaml = YAMLHandler()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -51,8 +55,8 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -71,45 +75,63 @@ def create_data_context_files(
     config_variables_fixture_filename=None,
 ):
     if config_variables_fixture_filename:
-        os.makedirs(context_path, exist_ok=True)
-        os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
+        os.makedirs(  # noqa: PTH103
+            os.path.join(context_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
-            str(os.path.join(context_path, "uncommitted/config_variables.yml")),
+            str(
+                os.path.join(  # noqa: PTH118
+                    context_path, "uncommitted/config_variables.yml"
+                )
+            ),
         )
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
         )
     else:
-        os.makedirs(context_path, exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
         )
     create_common_data_context_files(context_path, asset_config_path)
 
 
 def create_common_data_context_files(context_path, asset_config_path):
-    os.makedirs(
-        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(  # noqa: PTH118
+            asset_config_path, "mydatasource/mygenerator/my_dag_node"
+        ),
         exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/"
         "expectation_suites/parameterized_expectation_suite_fixture.json",
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
 
 
@@ -481,8 +503,7 @@ def mock_response_factory() -> Callable[
     return _make_mock_response
 
 
-@pytest.fixture
-def datasource_config() -> DatasourceConfig:
+def basic_block_config_datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
         class_name="Datasource",
         execution_engine={
@@ -505,6 +526,45 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def block_config_datasource_config() -> DatasourceConfig:
+    return basic_block_config_datasource_config()
+
+
+def basic_fluent_datasource_config() -> dict:
+    return {
+        "type": "pandas_filesystem",
+        "name": "my_fluent_pandas_filesystem_datasource",
+        "assets": [
+            {
+                "name": "my_csv",
+                "type": "csv",
+                "batching_regex": re.compile(
+                    r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE
+                ),
+            }
+        ],
+        "base_directory": pathlib.PosixPath("/path/to/trip_data"),
+    }
+
+
+@pytest.fixture
+def fluent_datasource_config() -> dict:
+    return basic_fluent_datasource_config()
+
+
+@pytest.fixture(
+    params=[
+        basic_block_config_datasource_config,
+        basic_fluent_datasource_config,
+    ]
+)
+def parametrized_datasource_configs(
+    request,
+) -> DatasourceConfig | dict:
+    return request.param()
 
 
 @pytest.fixture
@@ -645,7 +705,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
 ):
     context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine

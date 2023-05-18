@@ -1,5 +1,6 @@
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
@@ -9,7 +10,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
-from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,

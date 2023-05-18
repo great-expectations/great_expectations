@@ -36,7 +36,7 @@ from typing_extensions import Final, Literal, TypeAlias
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
-    DataAsset,  # noqa: TCH001
+    DataAsset,
 )
 
 try:
@@ -367,11 +367,11 @@ def _create_pandas_asset_model(
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
 
-    def _get_reader_options_include(self) -> set[str] | None:
-        return None
+    def _get_reader_options_include(self) -> set[str]:
+        return set()
 
-    setattr(model, "_get_reader_method", _get_reader_method)
-    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+    model._get_reader_method = _get_reader_method
+    model._get_reader_options_include = _get_reader_options_include
 
     return model
 

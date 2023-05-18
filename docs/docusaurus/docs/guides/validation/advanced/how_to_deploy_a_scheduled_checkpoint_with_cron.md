@@ -6,10 +6,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text="Checkpoint" /> with cron.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- You have created a Checkpoint.
+- [A Great Expectations instance](/docs/guides/setup/setup_overview).
+- A Checkpoint.
 
 </Prerequisites>
 
@@ -17,10 +19,9 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 ### 1. Verify Checkpoint suitability
 
-First, verify that your Checkpoint is runnable via shell:
+Run the following command to verify that your Checkpoint runs:
 
-```bash
-great_expectations checkpoint run my_checkpoint
+```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```
 
 ### 2. Get `great_expectations` full path

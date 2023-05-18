@@ -13,6 +13,10 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -32,27 +36,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
-
-from great_expectations.optional_imports import sqlalchemy_Connection
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
-
-
-logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
 
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -78,12 +64,22 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
             assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(v1, v2, __trace=repr(index), *args, **kwargs)
+                assertDeepAlmostEqual(
+                    v1,
+                    v2,
+                    __trace=repr(index),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
+                )
         elif isinstance(expected, dict):
             assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(
-                    expected[key], actual[key], __trace=repr(key), *args, **kwargs
+                    expected[key],
+                    actual[key],
+                    __trace=repr(key),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
                 )
         else:
             assert expected == actual
@@ -158,7 +154,9 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if sqlalchemy.Connection and isinstance(
+        execution_engine.engine, sqlalchemy.Connection
+    ):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:
@@ -173,7 +171,9 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if sqlalchemy.Connection and isinstance(
+        execution_engine.engine, sqlalchemy.Connection
+    ):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:
@@ -819,7 +819,10 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
+    if isinstance(execution_engine.engine, sqlalchemy.Connection):
+        connection = execution_engine.engine
+    else:
+        connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
         connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))

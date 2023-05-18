@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
+import pandas as pd
+
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -13,15 +15,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class MetricsCalculator:
@@ -53,9 +46,12 @@ class MetricsCalculator:
         Convenience method to run "table.columns" metric.
         """
         if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
-            }
+            domain_kwargs = {}
+
+        if domain_kwargs.get("batch_id") is None:
+            domain_kwargs[
+                "batch_id"
+            ] = self._execution_engine.batch_manager.active_batch_id
 
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(

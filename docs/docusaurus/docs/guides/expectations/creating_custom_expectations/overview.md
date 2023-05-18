@@ -56,7 +56,7 @@ The code to achieve the first four steps looks somewhat different depending on t
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Column Map Expectation](./how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
 | [Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py) |
-| [Batch Expectation](./how_to_create_custom_batch_expectations.md) | [table_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/batch_expectation_template.py) |
+| [Batch Expectation](./how_to_create_custom_batch_expectations.md) | [batch_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/batch_expectation_template.py) |
 | [Regex-Based Column Map Expectation](./how_to_create_custom_regex_based_column_map_expectations.md) | [regex-based map column_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/regex_based_column_map_expectation_template.py) |
 | [Set-Based Column Map Expectation](./how_to_create_custom_set_based_column_map_expectations.md) | [set-based map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/set_based_column_map_expectation_template.py) |
 
@@ -82,4 +82,4 @@ You can find instructions for using your Custom Expectation in our guide: [how t
 
 ### Publishing your Expectation as an open source contribution
 
-Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md).

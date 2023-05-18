@@ -10,6 +10,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import google
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     PandasGoogleCloudStorageDatasource,
@@ -29,14 +30,10 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 logger = logging.getLogger(__file__)
 
 
-try:
-    from google.cloud import storage
-    from google.cloud.storage import Client as GCSClient
-except ImportError:
-    storage = None
-    GCSClient = None
-    logger.debug(
-        "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
+if not google.storage:
+    pytest.skip(
+        'Could not import "storage" from google.cloud in configured_asset_gcs_data_connector.py',
+        allow_module_level=True,
     )
 
 
@@ -64,7 +61,7 @@ class MockGCSClient:
 def _build_pandas_gcs_datasource(
     gcs_options: Dict[str, Any] | None = None
 ) -> PandasGoogleCloudStorageDatasource:
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: google.Client = cast(google.Client, MockGCSClient())
     pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(  # type: ignore[call-arg]
         name="pandas_gcs_datasource",
         bucket_or_name="test_bucket",
@@ -75,9 +72,6 @@ def _build_pandas_gcs_datasource(
 
 
 @pytest.fixture
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 def pandas_gcs_datasource() -> PandasGoogleCloudStorageDatasource:
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
         _build_pandas_gcs_datasource()
@@ -119,9 +113,6 @@ def csv_asset(
 
 
 @pytest.fixture
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
@@ -134,9 +125,6 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 def test_construct_pandas_gcs_datasource_without_gcs_options():
     google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     if not google_cred_file:
@@ -147,15 +135,13 @@ def test_construct_pandas_gcs_datasource_without_gcs_options():
         bucket_or_name="test_bucket",
         gcs_options={},
     )
-    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -171,15 +157,13 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
             "filename": "my_filename.csv",
         },
     )
-    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -195,15 +179,13 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
             "info": "{my_csv: my_content,}",
         },
     )
-    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = pandas_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -226,10 +208,8 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -249,10 +229,8 @@ def test_construct_csv_asset_directly(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -277,10 +255,8 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -305,10 +281,8 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -333,10 +307,8 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -363,14 +335,11 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 @pytest.mark.xfail(
     reason="Accessing objects on google.cloud.storage using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
 ):
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: google.Client = cast(google.Client, MockGCSClient())
 
     def instantiate_gcs_client_spy(self) -> None:
         self._gcs = gcs_client
@@ -417,9 +386,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
-)
 def test_test_connection_failures(
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],

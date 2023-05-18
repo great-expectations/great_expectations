@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Union
+from typing import TYPE_CHECKING
 
-from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.base import BaseYamlConfig
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +47,7 @@ class ConfigPeer(ABC):
         self,
         mode: ConfigOutputModes = ConfigOutputModes.TYPED,
         **kwargs,
-    ) -> Union[BaseYamlConfig, dict, str]:
+    ) -> BaseYamlConfig | dict | str:
         if isinstance(mode, str):
             mode = ConfigOutputModes(mode.lower())
 
@@ -61,7 +65,7 @@ class ConfigPeer(ABC):
         if mode == ConfigOutputModes.DICT:
             config_kwargs: dict = config.to_dict()
         elif mode == ConfigOutputModes.JSON_DICT:
-            config_kwargs: dict = config.to_json_dict()  # type: ignore[no-redef]
+            config_kwargs = config.to_json_dict()
         else:
             raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
 

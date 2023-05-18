@@ -1408,36 +1408,17 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
-        # Set a coverage_score
-        _total_passed = 0
-        _total_failed = 0
-        _num_backends = 0
-        _num_engines = sum([x for x in introspected_execution_engines.values() if x])
-        for result in backend_test_result_counts:
-            _num_backends += 1
-            _total_passed += result.num_passed
-            _total_failed += result.num_failed
-        coverage_score = (
-            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
-        )
-        _debug(
-            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
-            f"engines: {_num_engines}, backends: {_num_backends}, "
-            f"passing tests: {_total_passed}, failing tests:{_total_failed}"
+        coverage_score: float = Expectation._get_coverage_score(
+            backend_test_result_counts=backend_test_result_counts,
+            execution_engines=introspected_execution_engines,
         )
 
+        _debug(f"coverage_score: {coverage_score} for {self.expectation_type}")
+
         # Set final maturity level based on status of all checks
-        all_experimental = all(
-            [check.passed for check in maturity_checklist.experimental]
+        library_metadata.maturity = Expectation._get_final_maturity_level(
+            maturity_checklist=maturity_checklist
         )
-        all_beta = all([check.passed for check in maturity_checklist.beta])
-        all_production = all([check.passed for check in maturity_checklist.production])
-        if all_production and all_beta and all_experimental:
-            library_metadata.maturity = Maturity.PRODUCTION
-        elif all_beta and all_experimental:
-            library_metadata.maturity = Maturity.BETA
-        else:
-            library_metadata.maturity = Maturity.EXPERIMENTAL
 
         # Set the errors found when running tests
         errors = [
@@ -1447,11 +1428,13 @@ class Expectation(metaclass=MetaExpectation):
         ]
 
         # If run for the gallery, don't include a bunch of stuff
+        #   - Don't set examples and test_results to empty lists here since these
+        #     returned attributes will be needed to re-calculate the maturity
+        #     checklist later (after merging results from different runs of the
+        #     build_gallery.py script per backend)
         if for_gallery:
-            examples = []
             gallery_examples = []
             renderers = []
-            test_results = []
             errors = []
 
         return ExpectationDiagnostics(
@@ -2239,6 +2222,47 @@ class Expectation(metaclass=MetaExpectation):
             production=production_checks,
         )
 
+    @staticmethod
+    def _get_coverage_score(
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+        execution_engines: ExpectationExecutionEngineDiagnostics,
+    ) -> float:
+        """Generate coverage score"""
+        _total_passed = 0
+        _total_failed = 0
+        _num_backends = 0
+        _num_engines = sum([x for x in execution_engines.values() if x])
+        for result in backend_test_result_counts:
+            _num_backends += 1
+            _total_passed += result.num_passed
+            _total_failed += result.num_failed
+
+        coverage_score = (
+            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
+        )
+
+        return coverage_score
+
+    @staticmethod
+    def _get_final_maturity_level(
+        maturity_checklist: ExpectationDiagnosticMaturityMessages,
+    ) -> Maturity:
+        """Get final maturity level based on status of all checks"""
+        maturity = ""
+        all_experimental = all(
+            check.passed for check in maturity_checklist.experimental
+        )
+        all_beta = all(check.passed for check in maturity_checklist.beta)
+        all_production = all(check.passed for check in maturity_checklist.production)
+        if all_production and all_beta and all_experimental:
+            maturity = Maturity.PRODUCTION
+        elif all_beta and all_experimental:
+            maturity = Maturity.BETA
+        else:
+            maturity = Maturity.EXPERIMENTAL
+
+        return maturity
+
 
 @public_api
 class BatchExpectation(Expectation, ABC):
@@ -2551,7 +2575,7 @@ class QueryExpectation(BatchExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+            assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."
