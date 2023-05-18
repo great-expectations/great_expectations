@@ -12,7 +12,7 @@ from typing import Generic, Optional, TypeVar
 import requests
 from urllib3 import connectionpool, poolmanager
 
-from great_expectations.compatibility.google import bigquery
+from great_expectations.compatibility.google import python_bigquery
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 T = TypeVar("T")
@@ -134,7 +134,7 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
     # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
     # bigquery.googleapis.com". To remove this bottleneck, following the instructions at
     # https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
-    bq = bigquery.Client(project=concurrency_config.GOOGLE_CLOUD_PROJECT)
+    bq = python_bigquery.Client(project=concurrency_config.GOOGLE_CLOUD_PROJECT)
 
     # Increase the HTTP pool size to avoid the "Connection pool is full, discarding connection: bigquery.googleapis.com"
     adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)

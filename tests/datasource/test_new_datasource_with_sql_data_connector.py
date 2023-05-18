@@ -28,7 +28,9 @@ try:
 except ImportError:
     sqlalchemy = None
 
-from great_expectations.compatibility.sqlalchemy_bigquery import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as sqla_bigquery,
+)
 
 yaml = YAMLHandler()
 
