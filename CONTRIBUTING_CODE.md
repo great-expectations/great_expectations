@@ -345,7 +345,7 @@ One of the most significant features of an Expectation is that it produces the s
 
 The following is the test fixture file structure:
 
-````json
+```json
 {
     "expectation_type" : "expect_column_max_to_be_between",
     "datasets" : [{
@@ -354,14 +354,15 @@ The following is the test fixture file structure:
         "tests" : [...]
     }]
 }
-````
+```
+
 Below `datasets` are three entries: `data`, `schemas`, and `tests`.
 
 #### Data
 
 The `data` parameter defines a DataFrame of sample data to apply Expectations against. The DataFrame is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
 
-````console
+```console
 "data" : {
     "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
@@ -370,12 +371,13 @@ The `data` parameter defines a DataFrame of sample data to apply Expectations ag
     "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
 },
-````
+```
+
 #### Schemas
 
 The `schema` parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
 
-````console
+```console
 "schemas": {
     "sqlite": {
         "w" : "INTEGER",
@@ -394,7 +396,7 @@ The `schema` parameter defines the types to be used when instantiating tests aga
         "a" : "INTEGER",
     }
 },
-````
+```
 #### Tests
 
 The `tests` parameter defines the tests to be executed against the DataFrame. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
@@ -403,7 +405,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 
 `suppress_test_for` is an optional parameter to disable an Expectation for a specific list of backends. For example:
 
-````sh
+```sh
 "tests" : [{
     "title": "Basic negative test case",
     "exact_match_out" : false,
@@ -422,7 +424,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 ...
 ]
 
-````
+```
 
 The test fixture files are stored in subdirectories of `tests/test_definitions/` corresponding to the class of Expectation:
 
