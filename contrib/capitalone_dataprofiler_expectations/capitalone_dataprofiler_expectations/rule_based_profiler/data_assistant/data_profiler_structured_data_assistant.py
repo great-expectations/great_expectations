@@ -176,6 +176,8 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             "strict_min": False,
             "strict_max": False,
             "profile_path": "default_profiler_path",
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["int", "float", "string"],
         }
 
         parameter_builders: List[ParameterBuilder] = [
@@ -287,6 +289,8 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             "strict_min": False,
             "strict_max": False,
             "profile_path": "default_profiler_path",
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["float"],
         }
 
         parameter_builders: List[ParameterBuilder] = [
