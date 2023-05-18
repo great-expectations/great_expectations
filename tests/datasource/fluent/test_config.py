@@ -7,6 +7,7 @@ import logging
 import pathlib
 import re
 import uuid
+import os
 from pprint import pformat as pf
 from pprint import pprint as pp
 from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
@@ -202,19 +203,6 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
 @pytest.fixture
 def ds_dict_config() -> dict:
     return copy.deepcopy(COMPLEX_CONFIG_DICT)
-
-
-@pytest.fixture
-def sqlite_database_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
 
 
 @pytest.mark.parametrize(
@@ -805,11 +793,15 @@ def file_dc_config_file_with_substitutions(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save(
-    monkeypatch: pytest.MonkeyPatch,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}\n")
+    my_conn_str = os.environ["MY_CONN_STR"]
+
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
@@ -821,10 +813,6 @@ def test_config_substitution_retains_original_value_on_save(
     )
 
     print(context.fluent_config)
-
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
     ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
 
@@ -847,14 +835,12 @@ def test_config_substitution_retains_original_value_on_save(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
-    monkeypatch: pytest.MonkeyPatch,
-    sqlite_database_path: pathlib.Path,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}")
 
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())

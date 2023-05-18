@@ -42,40 +42,6 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def db_file() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    assert db_file.exists()
-    return db_file
-
-
-@pytest.fixture
-def seed_ds_env_vars(
-    monkeypatch: pytest.MonkeyPatch, db_file: pathlib.Path
-) -> tuple[tuple[str, str], ...]:
-    """Seed a collection of ENV variables for use in testing config substitution."""
-    config_sub_dict = {
-        "MY_CONN_STR": f"sqlite:///{db_file}",
-        "MY_URL": "http://example.com",
-        "MY_FILE": __file__,
-    }
-
-    for name, value in config_sub_dict.items():
-        monkeypatch.setenv(name, value)
-        logger.info(f"Setting ENV - {name} = '{value}'")
-
-    # return as tuple of tuples so that the return value is immutable and therefore cacheable
-    return tuple((k, v) for k, v in config_sub_dict.items())
-
-
-@pytest.fixture
 def fluent_only_config(
     fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
 ) -> GxConfig:
@@ -292,7 +258,7 @@ def test_save_datacontext_persists_fluent_config(
 def test_file_context_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
     fluent_only_config: GxConfig,
-    db_file: pathlib.Path,
+    sqlite_database_path: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
@@ -305,7 +271,7 @@ def test_file_context_add_and_save_fluent_datasource(
     )
 
     ds = context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
     final_yaml = config_file.read_text()
@@ -321,14 +287,14 @@ def test_file_context_add_and_save_fluent_datasource(
 
 def test_context_add_and_save_fluent_datasource(
     empty_contexts: CloudDataContext | FileDataContext,
-    db_file: pathlib.Path,
+    sqlite_database_path: pathlib.Path,
 ):
     context = empty_contexts
 
     datasource_name = "save_ds_test"
 
     context.sources.add_sqlite(
-        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+        name=datasource_name, connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
     assert datasource_name in context.datasources
@@ -336,15 +302,15 @@ def test_context_add_and_save_fluent_datasource(
 
 def test_context_add_or_update_datasource(
     empty_contexts: CloudDataContext | FileDataContext,
-    db_file: pathlib.Path,
+    sqlite_database_path: pathlib.Path,
 ):
     context = empty_contexts
 
     datasource: SqliteDatasource = context.sources.add_sqlite(
-        name="save_ds_test", connection_string=f"sqlite:///{db_file}"
+        name="save_ds_test", connection_string=f"sqlite:///{sqlite_database_path}"
     )
 
-    assert datasource.connection_string == f"sqlite:///{db_file}"
+    assert datasource.connection_string == f"sqlite:///{sqlite_database_path}"
 
     # modify the datasource
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
