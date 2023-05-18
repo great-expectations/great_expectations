@@ -562,7 +562,9 @@ def cloud_storage_get_client_doubles(
 
 
 @pytest.fixture
-def fluent_only_config(fluent_gx_config_yml_str: str) -> GxConfig:
+def fluent_only_config(
+    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
+) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
     fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
     assert fluent_config.datasources
@@ -596,6 +598,7 @@ def fluent_yaml_config_file(
 def seeded_file_context(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
+    seed_ds_env_vars: tuple,
 ) -> FileDataContext:
     context = gx.get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
