@@ -174,7 +174,9 @@ def update_tag_references_for_correct_version(
                 # to ->
                 # <a href={'/docs/0.14.13/' + data[props.tag].url}>{props.text}</a>
                 # where 0.14.13 is replaced with the corresponding doc version e.g. 0.14.13, 0.15.50, etc.
-                contents = re.sub(pattern, rf"\g<href>{version_only}/\g<rest>", contents)
+                contents = re.sub(
+                    pattern, rf"\g<href>{version_only}/\g<rest>", contents
+                )
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
