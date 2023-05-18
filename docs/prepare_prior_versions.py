@@ -144,6 +144,7 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
         f"Processed {len(paths)} paths in prepend_version_info_to_name_for_href_absolute_links"
     )
 
+
 def update_tag_references_for_correct_version(
     verbose: bool = False,
 ) -> None:
@@ -153,9 +154,7 @@ def update_tag_references_for_correct_version(
     paths = _paths_to_versioned_docs()
 
     method_name_for_logging = "update_tag_references_for_correct_version"
-    print(
-        f"Processing {len(paths)} paths in {method_name_for_logging}..."
-    )
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
     for path in paths:
         version = path.name
         files = [path / "term_tags/_tag.mdx"]
@@ -178,9 +177,7 @@ def update_tag_references_for_correct_version(
         print(
             f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
         )
-    print(
-        f"Processed {len(paths)} paths in {method_name_for_logging}"
-    )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
 
 
 if __name__ == "__main__":
