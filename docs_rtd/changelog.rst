@@ -14,8 +14,6 @@ Changelog
 * [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset" ([#7909](https://github.com/great-expectations/great_expectations/pull/7909))
 * [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas" ([#7922](https://github.com/great-expectations/great_expectations/pull/7922))
 * [FEATURE] : DataProfilerStructuredDataAssistant Float Rule ([#7842](https://github.com/great-expectations/great_expectations/pull/7842)) (thanks @micdavis)
-* [FEATURE] DataProfilerColumnDomainBuilder ([#7920](https://github.com/great-expectations/great_expectations/pull/7920)) (thanks @micdavis)
-* [FEATURE] Add "batch.columns()" convenience method to Fluent DataAsset implementation. ([#7926](https://github.com/great-expectations/great_expectations/pull/7926))
 * [BUGFIX] Fix inability to extend SimpleCheckpoint -- and several additional enhancements and clean up ([#7879](https://github.com/great-expectations/great_expectations/pull/7879))
 * [BUGFIX] Delete ExpectationSuite by name in GX Cloud ([#7881](https://github.com/great-expectations/great_expectations/pull/7881))
 * [BUGFIX] optional dataframe on datasources ([#7862](https://github.com/great-expectations/great_expectations/pull/7862))
@@ -55,7 +53,6 @@ Changelog
 * [MAINTENANCE] Use with open file to reduce open files within tests ([#7906](https://github.com/great-expectations/great_expectations/pull/7906)) (thanks @TrangPham)
 * [MAINTENANCE] Add `docs/*.py` to `GXChanged` for linting ([#7924](https://github.com/great-expectations/great_expectations/pull/7924))
 * [MAINTENANCE] Fixes Glue tests on vanilla pytest ([#7925](https://github.com/great-expectations/great_expectations/pull/7925))
-* [MAINTENANCE] Fixing pytest: renderer assertion ([#7928](https://github.com/great-expectations/great_expectations/pull/7928))
 
 0.16.12
 -----------------
