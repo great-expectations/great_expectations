@@ -13,6 +13,7 @@ from moto import mock_s3
 from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.compatibility import aws
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import PandasS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -33,7 +34,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-from great_expectations.compatibility import aws
 
 # apply markers to entire test module
 pytestmark = [

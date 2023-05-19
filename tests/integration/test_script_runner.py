@@ -359,6 +359,12 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_s3_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
 ]
 
 
