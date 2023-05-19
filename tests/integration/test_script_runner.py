@@ -323,7 +323,6 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="checkpoints_glossary",
@@ -336,7 +335,6 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
     ),
     IntegrationTestFixture(
         name="how_to_organize_batches_in_a_sql_based_data_asset",
@@ -348,7 +346,18 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="how_to_quickly_connect_to_a_single_file_with_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
 ]
 
