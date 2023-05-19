@@ -5,7 +5,7 @@ To manually add a Validation Results Store, add the following configuration to t
 ```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_validations_store"
 ```
 
-As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is set to the address of your S3 bucket, and ``prefix`` is set to the folder in your S3 bucket where Validation results are located.
+As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Validation results are located.
 
 The following example shows the additional options that are available to customize TupleS3StoreBackend:
 

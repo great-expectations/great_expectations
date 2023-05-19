@@ -5,7 +5,6 @@ To copy Validation Results into Amazon S3, use the ``aws s3 sync`` command as sh
 ```bash title="Terminal input"
 aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'
 ```
-
 The ``base_directory`` is set to ``uncommitted/validations/`` by default.
 
 In the following example, the Validation Results ``Validation1`` and ``Validation2`` are copied to Amazon S3 and a confirmation message is returned:

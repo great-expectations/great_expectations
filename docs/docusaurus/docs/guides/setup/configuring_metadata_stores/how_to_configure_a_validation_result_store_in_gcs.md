@@ -32,26 +32,26 @@ For more information about validating your GCP authentication credentials, see [
 
 ## 2. Identify your Data Context Validation Results Store
 
-The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. In your ``great_expectations.yml``, look for the following entry: 
+The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml``and find the following entry: 
 
 ```yaml name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py expected_existing_validations_store_yaml"
 ```
-This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
 ## 3. Update your configuration file to include a new Store for Validation Results
 
-In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is set to ``TupleGCSStoreBackend``, ``project`` is set to your GCP project, ``bucket`` is set to the address of your GCS bucket, and ``prefix`` is set to the folder on GCS where Validation Result files are stored.
+In the following example, `validations_store_name` is set to ``validations_GCS_store``, but it can be personalized.  You also need to change the ``store_backend`` settings. The ``class_name`` is ``TupleGCSStoreBackend``, ``project`` is your GCP project, ``bucket`` is the address of your GCS bucket, and ``prefix`` is the folder on GCS where Validation Result files are stored.
 
 ```yaml name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py configured_validations_store_yaml"
 ```
 
 :::warning
-If you are also storing [Expectations in GCS](../configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), make that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Expectations in GCS](../configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md) or [DataDocs in GCS](../configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
 
 ## 4. Copy existing Validation Results to the GCS bucket (Optional)
 
-You can use the ``gsutil cp`` command to copy Validation Results into GCS. For example, the following command copies the Validation results ``validation_1`` and ``validation_2``into a GCS bucket: 
+Use the ``gsutil cp`` command to copy Validation Results into GCS. For example, the following command copies the Validation results ``validation_1`` and ``validation_2``into a GCS bucket: 
 
 ```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_command"
 ```
@@ -67,4 +67,4 @@ To make Great Expectations look for Validation Results on the GCS store, set the
 
 ## 6. Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
+[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS, and then visualize the results by [re-building Data Docs](/docs/terms/data_docs).

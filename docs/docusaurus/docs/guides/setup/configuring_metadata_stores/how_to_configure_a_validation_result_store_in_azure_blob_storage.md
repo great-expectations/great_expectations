@@ -27,12 +27,11 @@ GX recommends that you store Azure Storage credentials in the ``config_variables
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 
- To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
-
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 ## 2. Identify your Validation Results Store
 
-The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  In your ``great_expectations.yml``, look for the following entry: 
+Your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
 ```yaml
 validations_store_name: validations_store
@@ -44,11 +43,11 @@ stores:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
 ```
- This configuration tells Great Expectations to look for Validation Results in a Store named ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+This configuration tells Great Expectations to look for Validation Results in a Store named ``validations_store``. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
 ## 3. Update your configuration file to include a new Store for Validation Results on Azure Storage account
 
-In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is set to ``TupleAzureBlobStoreBackend``, ``container`` is set to the name of your blob container where Validation Results are stored, ``prefix`` is set to the folder in the container where Validation Result files are located, and ``connection_string`` is set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
+In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml
 validations_store_name: validations_AZ_store

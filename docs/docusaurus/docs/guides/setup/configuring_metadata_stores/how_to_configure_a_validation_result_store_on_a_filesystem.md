@@ -17,21 +17,20 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 </Prerequisites>
 
-## Steps
+## 1. Create a new folder for Validation Results
 
-### 1. Configure a new folder on your filesystem where Validation Results will be stored
-
-Create a new folder where you would like to store your Validation Results, and move your existing Validation Results over to the new location. In our case, the name of the Validation Result is ``npi_validations`` and the path to our new storage location is ``shared_validations/``.
+Run the following command to create a new folder for your Validation Results and move your existing Validation Results to the new folder:
 
 ```bash
 # in the great_expectations/ folder
 mkdir shared_validations
 mv uncommitted/validations/npi_validations/ uncommitted/shared_validations/
 ```
+In this example, the name of the Validation Result is ``npi_validations`` and the path to the new storage location is ``shared_validations/``.
 
-### 2. Identify your Data Context Validation Results Store
+## 2. Identify your Data Context Validation Results Store
 
-As with other <TechnicalTag tag="store" text="Stores" />, you can find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> by using your <TechnicalTag tag="data_context" text="Data Context" />.  In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry: 
 
 ```yaml
 validations_store_name: validations_store
@@ -44,9 +43,11 @@ stores:
            base_directory: uncommitted/validations/
 ```
 
-### 3. Update your configuration file to include a new store for Validation results on your filesystem
+This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-In the example below, Validation Results Store is being set to ``shared_validations_filesystem_store``, but it can be any name you like.  Also, the ``base_directory`` is being set to ``uncommitted/shared_validations/``, but it can be set to any path accessible by Great Expectations.
+## 3. Update your configuration file to include a new Store for Validation results
+
+In the following example, `validations_store_name` is set to ``shared_validations_filesystem_store``, but it can be personalized.  Also, ``base_directory`` is set to ``uncommitted/shared_validations/``, but you can set it to another path that is accessible by Great Expectations.
 
 ```yaml
 validations_store_name: shared_validations_filesystem_store
@@ -59,10 +60,6 @@ stores:
            base_directory: uncommitted/shared_validations/
 ```
 
-### 4. Confirm that the location has been updated by running ``great_expectations store list``
+## 4. Confirm that the Validation Results Store has been correctly configured
 
-To make Great Expectations look for Validation Results in the new Store, you must set the ``validations_store_name`` variable to the name of your Filesystem Validations Store. In this example, it is `shared_validations_filesystem_store`.
-
-### 5. Confirm that the Validation Results Store has been correctly configured
-
-Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on in your new location then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store in your new location, and then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
