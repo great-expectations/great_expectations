@@ -359,6 +359,11 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_sqlite_data",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
 ]
 
 
