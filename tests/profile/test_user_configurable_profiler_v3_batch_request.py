@@ -28,8 +28,10 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
-from great_expectations.self_check.util import (
+from great_expectations.self_check.sqlalchemy_connection_manager import (
     connection_manager,
+)
+from great_expectations.self_check.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import is_library_loadable
