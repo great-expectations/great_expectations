@@ -1,20 +1,18 @@
-from unittest.mock import patch
-
 import pytest
 
 from great_expectations.agent.message_service.rabbit_mq_client import (
-    RabbitMQClient,
     ClientError,
+    RabbitMQClient,
 )
-from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERRORS
+from tests.agent.message_service.amqp_errors import get_amqp_errors
 
 
 @pytest.fixture
-def pika():
-    with patch(
+def pika(mocker):
+    pika = mocker.patch(
         "great_expectations.agent.message_service.rabbit_mq_client.pika"
-    ) as pika:
-        yield pika
+    )
+    yield pika
 
 
 def test_rabbit_mq_client_creates_connection(pika):
@@ -37,7 +35,7 @@ def test_rabbit_mq_client_creates_channel(pika):
     assert client.channel is pika.BlockingConnection().channel()
 
 
-@pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
+@pytest.mark.parametrize("error", get_amqp_errors())
 def test_rabbit_mq_client_handles_amqp_error(error, pika):
     url = "test/url"
     pika.BlockingConnection.side_effect = error

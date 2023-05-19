@@ -1,9 +1,8 @@
 import os
-from unittest.mock import patch
 
 import pytest
 
-from great_expectations.agent.agent import GXAgentConfig, GXAgent
+from great_expectations.agent.agent import GXAgent, GXAgentConfig
 from great_expectations.agent.message_service.rabbit_mq_client import ClientError
 from great_expectations.agent.message_service.subscriber import SubscriberError
 
@@ -23,23 +22,23 @@ def gx_agent_config(monkeypatch):
 
 
 @pytest.fixture
-def get_context():
-    with patch("great_expectations.agent.agent.get_context") as get_context:
-        yield get_context
+def get_context(mocker):
+    get_context = mocker.patch("great_expectations.agent.agent.get_context")
+    yield get_context
 
 
 @pytest.fixture
-def client():
+def client(mocker):
     """Patch for agent.RabbitMQClient"""
-    with patch("great_expectations.agent.agent.RabbitMQClient") as client:
-        yield client
+    client = mocker.patch("great_expectations.agent.agent.RabbitMQClient")
+    yield client
 
 
 @pytest.fixture
-def subscriber():
+def subscriber(mocker):
     """Patch for agent.Subscriber"""
-    with patch("great_expectations.agent.agent.Subscriber") as subscriber:
-        yield subscriber
+    subscriber = mocker.patch("great_expectations.agent.agent.Subscriber")
+    yield subscriber
 
 
 def test_gx_agent_gets_env_vars_on_init(get_context, gx_agent_config):
@@ -68,7 +67,9 @@ def test_gx_agent_run_invokes_consume(get_context, subscriber, client, gx_agent_
     agent.run()
 
     subscriber().consume.assert_called_with(
-        queue=gx_agent_config.organization_id, on_message=agent._handle_event
+        queue=gx_agent_config.organization_id,
+        on_message=agent._handle_event_as_thread_enter,
+        wait=1,
     )
 
 

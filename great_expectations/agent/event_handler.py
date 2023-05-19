@@ -1,6 +1,23 @@
 from great_expectations.agent.models import Event, RunOnboardingDataAssistantEvent
+from typing import List
+
+from pydantic import BaseModel
+
+from great_expectations.agent.message_service.subscriber import EventContext
+from great_expectations.agent.models import RunDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import StoreBackendError
+
+
+class CreatedResource(BaseModel):
+    type: str
+    id: str
+
+
+class EventHandlerResult(BaseModel):
+    id: str
+    type: str
+    created_resources: List[CreatedResource]
 
 
 class EventHandler:
@@ -11,21 +28,24 @@ class EventHandler:
     def __init__(self, context: CloudDataContext) -> None:
         self._context = context
 
-    def handle_event(self, event: Event, correlation_id: str) -> None:
+    def handle_event(self, event_context: EventContext) -> EventHandlerResult:
         """Pass event to the correct handler."""
-        if isinstance(event, RunOnboardingDataAssistantEvent):
-            self._handle_run_data_assistant(event, correlation_id)
+
+        if isinstance(event_context.event, RunDataAssistantEvent):
+            return self._handle_run_data_assistant(event_context)
         else:
-            pass
+            # if pydantic parsing failed, event_context.event will be None
+            raise UnknownEventError("Unknown message received - cannot process.")
 
     def _handle_run_data_assistant(
-        self, event: RunOnboardingDataAssistantEvent, correlation_id: str
+        self, event_context: EventContext
     ) -> None:
         """Action that occurs when a RunOnboardingDataAssistantEvent is received."""
 
         # todo: this action should create a checkpoint as well as a suite, but
         #       that workflow is still in progress.
         print("Starting Onboarding Data Assistant")
+        event = event_context.event
         suite_name = f"{event.data_asset_name} onboarding assistant suite"
         # checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
@@ -66,3 +86,7 @@ class EventHandler:
         print(f"Onboarding Data Assistant created the following resources:")
         print(f"    Expectation Suite: {suite_name}")
         # print(f"    Checkpoint: {checkpoint_name}")
+
+
+class UnknownEventError(Exception):
+    ...
