@@ -1075,7 +1075,8 @@ class TestConnectionPersistence:
 
         assert execution_engine.dialect_name == GXSqlDialect.SQLITE
 
-        pre_query_connection = execution_engine.get_connection()
+        with execution_engine.get_connection() as connection:
+            pre_query_connection = connection
 
         data = execution_engine.get_domain_records(
             domain_kwargs={
@@ -1085,7 +1086,8 @@ class TestConnectionPersistence:
         query = sa.select(sa.text("*")).select_from(data)
         execution_engine.execute_query(query)
 
-        post_query_connection = execution_engine.get_connection()
+        with execution_engine.get_connection() as connection:
+            post_query_connection = connection
 
         assert pre_query_connection == post_query_connection
 
