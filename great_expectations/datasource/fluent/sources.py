@@ -628,17 +628,19 @@ class _SourceFactories:
         return [*self.factories, *super().__dir__()]
 
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]:
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]:
     """
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
     for ds_name in _SourceFactories.type_lookup.type_names():
         ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
-        yield ds_name, ds_type
+        if include_datasource:
+            yield ds_name, ds_type
 
-        for asset_name in ds_type._type_lookup.type_names():
-            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
-            yield asset_name, asset_type
+        if include_data_asset:
+            for asset_name in ds_type._type_lookup.type_names():
+                asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+                yield asset_name, asset_type
