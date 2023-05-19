@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
 from time import sleep
-from typing import Callable, Union, Optional
+from typing import Callable, Optional, Union
 
 import pydantic
 from pika.adapters.blocking_connection import BlockingChannel
@@ -44,7 +44,13 @@ class Subscriber:
         """
         self.client = client
 
-    def consume(self, queue: str, on_message: OnMessageCallback, retries: Optional[int] =None, wait: int =0) -> None:
+    def consume(
+        self,
+        queue: str,
+        on_message: OnMessageCallback,
+        retries: Optional[int] = None,
+        wait: Union[int, float] = 0.5,
+    ) -> None:
 
         """Subscribe to queue with on_message callback.
 
@@ -60,10 +66,11 @@ class Subscriber:
         if retries is None:
             retries = -1
         while retries != 0:
-            print("Connecting to GX Cloud")
             retries -= 1
             try:
-                self.client.channel.basic_consume(queue=queue, on_message_callback=callback)
+                self.client.channel.basic_consume(
+                    queue=queue, on_message_callback=callback
+                )
                 self.client.channel.start_consuming()
             except (AMQPError, ChannelError) as e:
                 print("Error in connection to GX Cloud - retrying.")
@@ -105,16 +112,18 @@ class Subscriber:
         except pydantic.ValidationError:
             event = None
 
+        # this callback allows the caller to determine whether the message
+        # should be acked or nacked without knowing implementation details.
         event_proccessed_callback = partial(
-                self._handle_event_processed,
-                _delivery_tag=method_frame.delivery_tag,
-                _channel=channel,
-            )
+            self._handle_event_processed,
+            _delivery_tag=method_frame.delivery_tag,
+            _channel=channel,
+        )
 
         event_context = EventContext(
             event=event,
             correlation_id=correlation_id,
-            event_processed=event_proccessed_callback
+            event_processed=event_proccessed_callback,
         )
 
         return on_message(event_context)
@@ -136,28 +145,18 @@ class Subscriber:
             else:
                 _channel.basic_ack(delivery_tag=_delivery_tag)
         except (AMQPError, ChannelError):
-            pass  # if the _channel is no longer valid, we can't ack or nack this event
+            # if the _channel is no longer valid, we can't ack or nack this event
+            # best we can do is reset the connection and try again
+            pass
+        if self.client.connection.is_closed or self.client.channel.is_closed:
+            self.client.reset_connection()
 
     def close(self) -> None:
         """Gracefully closes the Subscriber's connection.
 
         Must be called after the Subscriber disconnects."""
-        try:
-            self.client.channel.close()
-        except (AMQPError, ChannelError):
-            pass
-
-        try:
-            self.client.connection.close()
-        except (AMQPError, ChannelError):
-            pass
+        self.client.close()
 
 
 class SubscriberError(Exception):
-    ...
-
-
-class RequeueMessageError(Exception):
-    """Message can't be processed and should be requeued"""
-
     ...

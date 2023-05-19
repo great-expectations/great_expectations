@@ -32,8 +32,20 @@ class RabbitMQClient:
             raise ClientError from e
 
     def reset_connection(self):
+        self.close()
         self.connection = pika.BlockingConnection(self._parameters)
         self.channel = self.connection.channel()
+
+    def close(self):
+        try:
+            self.channel.close()
+        except (AMQPError, ChannelError):
+            pass
+
+        try:
+            self.connection.close()
+        except (AMQPError, ChannelError):
+            pass
 
 
 class ClientError(Exception):
