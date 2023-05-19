@@ -267,7 +267,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs $(pytest_args) \
+              pytest $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
@@ -330,7 +330,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs $(pytest_args) \
+              pytest $(pytest_args) \
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
@@ -385,7 +385,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pytest -rs --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
@@ -435,7 +435,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mysql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -475,7 +475,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -521,7 +521,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --trino \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -564,7 +564,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs --postgresql --spark --aws-integration tests/cli
+              pytest --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
             env:
