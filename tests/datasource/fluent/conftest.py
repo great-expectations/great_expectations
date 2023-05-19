@@ -152,6 +152,38 @@ def inject_engine_lookup_double(
             source.execution_engine_override = engine
 
 
+@pytest.fixture
+def sqlite_database_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
+    )
+    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+
+
+@pytest.fixture
+def seed_ds_env_vars(
+    monkeypatch: pytest.MonkeyPatch, sqlite_database_path: pathlib.Path
+) -> tuple[tuple[str, str], ...]:
+    """Seed a collection of ENV variables for use in testing config substitution."""
+    config_sub_dict = {
+        "MY_CONN_STR": f"sqlite:///{sqlite_database_path}",
+        "MY_URL": "http://example.com",
+        "MY_FILE": __file__,
+    }
+
+    for name, value in config_sub_dict.items():
+        monkeypatch.setenv(name, value)
+        logger.info(f"Setting ENV - {name} = '{value}'")
+
+    # return as tuple of tuples so that the return value is immutable and therefore cacheable
+    return tuple((k, v) for k, v in config_sub_dict.items())
+
+
 _CLOUD_API_FAKE_DB: dict = {}
 _DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 

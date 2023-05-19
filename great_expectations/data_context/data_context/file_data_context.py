@@ -220,9 +220,7 @@ class FileDataContext(SerializableDataContext):
             if path_to_fluent_yaml.exists():
                 gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
 
-                # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
-                    datasource._config_provider = config_provider
                     datasource._data_context = self
 
                 return gx_config

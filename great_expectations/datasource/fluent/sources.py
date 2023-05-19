@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import uuid
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -475,8 +476,6 @@ class _SourceFactories:
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
-            # config provider needed for config substitution
-            datasource._config_provider = self._data_context.config_provider
             datasource.test_connection()
             self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
@@ -546,18 +545,29 @@ class _SourceFactories:
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name = (
-                new_datasource.name
+            datasource_name: str = (
+                new_datasource.name  # type: ignore[assignment] # will be a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
-                datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
+                datasource_name, datasource_type, raise_if_none=False
             )
+
+            # preserve any pre-existing id for usage with cloud
+            id_: uuid.UUID | None = getattr(
+                self._data_context.datasources.get(datasource_name), "id", None
+            )
+            if id_ and name_or_datasource:
+                if isinstance(name_or_datasource, str):
+                    kwargs["id"] = id_
+                else:
+                    name_or_datasource.id = id_
+
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # expected str only
+                datasource_name=datasource_name, _call_store=False
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -618,17 +628,19 @@ class _SourceFactories:
         return [*self.factories, *super().__dir__()]
 
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]:
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]:
     """
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
     for ds_name in _SourceFactories.type_lookup.type_names():
         ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
-        yield ds_name, ds_type
+        if include_datasource:
+            yield ds_name, ds_type
 
-        for asset_name in ds_type._type_lookup.type_names():
-            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
-            yield asset_name, asset_type
+        if include_data_asset:
+            for asset_name in ds_type._type_lookup.type_names():
+                asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+                yield asset_name, asset_type
