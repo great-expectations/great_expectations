@@ -3,6 +3,7 @@ import pathlib
 from typing import List, Union
 
 import pytest
+
 from docs.sphinx_api_docs_source.include_exclude_definition import (
     IncludeExcludeDefinition,
 )
