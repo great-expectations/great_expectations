@@ -150,7 +150,6 @@ def update_tag_references_for_correct_version(
 ) -> None:
     """Change _tag.mdx to point to appropriate version."""
 
-    pattern = re.compile(r"(?P<href><a href=\{'/docs/)(?P<rest>')")
     version_from_path_name_pattern = re.compile(
         r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
     )
@@ -174,8 +173,8 @@ def update_tag_references_for_correct_version(
                 # to ->
                 # <a href={'/docs/0.14.13/' + data[props.tag].url}>{props.text}</a>
                 # where 0.14.13 is replaced with the corresponding doc version e.g. 0.14.13, 0.15.50, etc.
-                contents = re.sub(
-                    pattern, rf"\g<href>{version_only}/\g<rest>", contents
+                contents = _update_tag_references_for_correct_version_substitution(
+                    contents, version_only
                 )
                 f.seek(0)
                 f.truncate()
@@ -186,6 +185,23 @@ def update_tag_references_for_correct_version(
             f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
         )
     print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _update_tag_references_for_correct_version_substitution(
+    contents: str, version: str
+) -> str:
+    """Change _tag.mdx to point to appropriate version.
+
+    Args:
+        contents: String to perform substitution.
+        version: String of version number e.g. "0.15.50"
+
+    Returns:
+        Updated contents
+    """
+    pattern = re.compile(r"(?P<href><a href=\{'/docs/)(?P<rest>')")
+    contents = re.sub(pattern, rf"\g<href>{version}/\g<rest>", contents)
+    return contents
 
 
 if __name__ == "__main__":
