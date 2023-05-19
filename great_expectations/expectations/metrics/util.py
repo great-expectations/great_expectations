@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import re
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
@@ -58,42 +57,9 @@ except ImportError:
     trino = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
-    bigquery_types_tuple = None
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = None
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # cannot infer sorted return type
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-    except ImportError:
-        sqla_bigquery = None
-        bigquery_types_tuple = None
-        pybigquery = None
-        namedtuple = None  # type: ignore[assignment]
+from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
 
 try:
     import teradatasqlalchemy.dialect
