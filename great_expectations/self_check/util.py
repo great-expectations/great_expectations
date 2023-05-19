@@ -1042,7 +1042,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-    # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+    # execution_engine.execute_query(sa.text(sql_query_string).execution_options(autocommit=True))
 
     # Add the data to the database as a new table
 
