@@ -1,4 +1,4 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from pydantic import BaseModel
 
@@ -6,6 +6,9 @@ from great_expectations.agent.message_service.subscriber import EventContext
 from great_expectations.agent.models import RunOnboardingDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import StoreBackendError
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationSuite
 
 
 class CreatedResource(BaseModel):
@@ -36,7 +39,9 @@ class EventHandler:
             # if pydantic parsing failed, event_context.event will be None
             raise UnknownEventError("Unknown message received - cannot process.")
 
-    def _handle_run_data_assistant(self, event_context: EventContext) -> None:
+    def _handle_run_data_assistant(
+        self, event_context: EventContext
+    ) -> EventHandlerResult:
         """Action that occurs when a RunOnboardingDataAssistantEvent is received."""
 
         # todo: this action should create a checkpoint as well as a suite, but
@@ -74,8 +79,10 @@ class EventHandler:
         data_assistant_result = self._context.assistants.onboarding.run(
             batch_request=batch_request,
         )
-        expectation_suite = data_assistant_result.get_expectation_suite(
-            expectation_suite_name=suite_name
+        expectation_suite: ExpectationSuite = (
+            data_assistant_result.get_expectation_suite(
+                expectation_suite_name=suite_name
+            )
         )
         self._context.add_or_update_expectation_suite(
             expectation_suite=expectation_suite
@@ -83,6 +90,16 @@ class EventHandler:
         print("Onboarding Data Assistant created the following resources:")
         print(f"    Expectation Suite: {suite_name}")
         # print(f"    Checkpoint: {checkpoint_name}")
+
+        return EventHandlerResult(
+            id=event_context.correlation_id,
+            type=event.type,
+            created_resources=[
+                CreatedResource(
+                    id=expectation_suite.ge_cloud_id, type="ExpectationSuite"
+                ),
+            ],
+        )
 
 
 class UnknownEventError(Exception):
