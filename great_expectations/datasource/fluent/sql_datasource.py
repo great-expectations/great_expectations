@@ -856,7 +856,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        return sa.text(self.table_name)
+        return sa.text(self.qualified_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
