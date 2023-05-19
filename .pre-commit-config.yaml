@@ -13,7 +13,7 @@ repos:
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.3.0
     hooks:
       - id: black-jupyter
   - repo: https://github.com/charliermarsh/ruff-pre-commit
