@@ -1433,9 +1433,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
         """Execute a query using the underlying database engine.
 
-        Some databases sqlite/mssql temp tables only persist within a connection,
-        so we need to keep the connection alive.
-
         Args:
             query: Sqlalchemy selectable query.
 
@@ -1445,5 +1442,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         with self.get_connection() as connection:
             result = connection.execute(query)
+
+        return result
+
+    def execute_query_in_transaction(
+        self, query: sqlalchemy.Selectable
+    ) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
+        """Execute a query using the underlying database engine within a transaction that will auto commit.
+
+        Begin once: https://docs.sqlalchemy.org/en/20/core/connections.html#begin-once
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
+        """
+
+        with self.get_connection() as connection:
+            with connection.begin():
+                result = connection.execute(query)
 
         return result
