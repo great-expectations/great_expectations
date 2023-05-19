@@ -1073,3 +1073,30 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
         batch_request=multi_batch_batch_request
     )
     assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
+
+
+@pytest.mark.unit
+class TestAttrAccess:
+    @pytest.mark.parametrize(
+        "attr_name", ["get_data_asset", "read_csv", "add_table_asset", "add_json_asset"]
+    )
+    def test_fluent_attrs_raise_not_implemented_error(
+        self, basic_pandas_datasource_v013: Datasource, attr_name: str
+    ):
+        with pytest.raises(NotImplementedError):
+            getattr(basic_pandas_datasource_v013, attr_name)
+
+    def test_other_attrs_raise_attribute_error(
+        self, basic_pandas_datasource_v013: Datasource
+    ):
+        with pytest.raises(AttributeError):
+            basic_pandas_datasource_v013.foo_bar
+
+    def test_standard_attrs(self, basic_pandas_datasource_v013: Datasource):
+        _ = basic_pandas_datasource_v013.name
+        _ = basic_pandas_datasource_v013.execution_engine
+        _ = basic_pandas_datasource_v013.get_available_data_asset_names()
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])
