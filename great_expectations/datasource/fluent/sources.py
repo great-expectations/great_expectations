@@ -10,6 +10,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -20,7 +21,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.signatures import _merge_signatures

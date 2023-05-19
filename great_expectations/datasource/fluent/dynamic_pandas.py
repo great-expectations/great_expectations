@@ -11,10 +11,12 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Hashable,
     Iterable,
     Iterator,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Pattern,  # must use typing.Pattern for pydantic < v1.10
@@ -32,7 +34,7 @@ from packaging.version import Version
 from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
-from typing_extensions import Final, Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
