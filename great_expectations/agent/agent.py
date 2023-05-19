@@ -2,12 +2,13 @@ import os
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
 from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
+from great_expectations import get_context
 from great_expectations.agent.event_handler import (
     EventHandler,
     EventHandlerResult,
@@ -25,6 +26,10 @@ from great_expectations.agent.message_service.subscriber import (
 )
 
 HandlerMap = Dict[str, OnMessageCallback]
+
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
 
 
 @dataclass(frozen=True)
@@ -52,8 +57,7 @@ class GXAgent:
         print("Initializing GX-Agent")
         self._config = self._get_config_from_env()
         print("Loading a DataContext - this might take a moment.")
-        self._context = None  # too slow for debugging
-        # self._context: CloudDataContext = get_context(cloud_mode=True)  # todo: add this back in
+        self._context: CloudDataContext = get_context(cloud_mode=True)
         print("DataContext is ready.")
 
         # Create a thread pool with a single worker, so we can run long-lived
