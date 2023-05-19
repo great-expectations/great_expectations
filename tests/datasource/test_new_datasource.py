@@ -1090,7 +1090,7 @@ class TestAttrAccess:
         self, basic_pandas_datasource_v013: Datasource
     ):
         with pytest.raises(AttributeError):
-            basic_pandas_datasource_v013.foo_bar
+            _ = basic_pandas_datasource_v013.foo_bar
 
     def test_standard_attrs(self, basic_pandas_datasource_v013: Datasource):
         _ = basic_pandas_datasource_v013.name
