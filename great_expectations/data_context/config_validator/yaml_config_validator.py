@@ -12,11 +12,10 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
