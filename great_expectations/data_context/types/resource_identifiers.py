@@ -344,33 +344,33 @@ class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,
-        id: Optional[str] = None,
-        resource_name: Optional[str] = None,
+        id: str | None = None,
+        resource_name: str | None = None,
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._id = id or ""
-        self._resource_name = resource_name or ""
+        self._id = id
+        self._resource_name = resource_name
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> GXCloudRESTResource:
         return self._resource_type
 
     @resource_type.setter
-    def resource_type(self, value) -> None:
+    def resource_type(self, value: GXCloudRESTResource) -> None:
         self._resource_type = value
 
     @property
-    def id(self):
+    def id(self) -> str | None:
         return self._id
 
     @id.setter
-    def id(self, value) -> None:
+    def id(self, value: str) -> None:
         self._id = value
 
     @property
-    def resource_name(self) -> str:
+    def resource_name(self) -> str | None:
         return self._resource_name
 
     def to_tuple(self):
