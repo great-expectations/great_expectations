@@ -62,7 +62,7 @@ class MetaFileDataAsset(DataAsset):
             null_lines_regex=r"^\s*$",
             result_format=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             try:
                 f = open(self._path)

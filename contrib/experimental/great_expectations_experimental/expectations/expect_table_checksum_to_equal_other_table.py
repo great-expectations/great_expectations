@@ -481,7 +481,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
