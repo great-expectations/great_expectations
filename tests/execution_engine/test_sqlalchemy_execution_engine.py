@@ -1039,8 +1039,7 @@ class TestConnectionPersistence:
     def test_same_connection_used_sqlite(self, sa):
         """What does this test and why?
 
-        We want to make sure that the connection is not set, then the same
-        connection is used for subsequent queries.
+        We want to make sure that the same connection is used for subsequent queries.
         """
         execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
             pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
@@ -1064,6 +1063,31 @@ class TestConnectionPersistence:
 
         assert execution_engine._connection is not None
         assert connection_id == id(execution_engine._connection)
+
+    def test_same_connection_used_from_static_pool(self, sa):
+        """What does this test and why?
+
+        We want to make sure that the same connection is used for subsequent queries.
+        """
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
+            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
+        )
+
+        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
+
+        pre_query_connection = execution_engine.get_connection()
+
+        data = execution_engine.get_domain_records(
+            domain_kwargs={
+                "column": "a",
+            }
+        )
+        query = sa.select(sa.text("*")).select_from(data)
+        execution_engine.execute_query(query)
+
+        post_query_connection = execution_engine.get_connection()
+
+        assert pre_query_connection == post_query_connection
 
     def test_connection_closed_sqlite(self, sa):
         """What does this test and why?
