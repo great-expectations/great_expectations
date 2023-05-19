@@ -13,6 +13,7 @@ from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime
+    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
@@ -31,7 +32,7 @@ _MISSING: Final = object()
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -60,11 +61,20 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
+            _check_config_substitutions_needed(
+                self, self.azure_options, raise_warning_if_provider_not_present=True
+            )
+            # pull in needed config substitutions using the `_config_provider`
+            # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
+            azure_options: dict = self.dict(config_provider=self._config_provider).get(
+                "azure_options", {}
+            )
+
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
             # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
-            conn_str: ConfigStr | str | None = self.azure_options.get("conn_str")
-            account_url: ConfigStr | str | None = self.azure_options.get("account_url")
+            conn_str: str | None = azure_options.get("conn_str")
+            account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
                 raise SparkAzureBlobStorageDatasourceError(
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
@@ -75,21 +85,21 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
-                            r".*?AccountName=(.+?);.*?", str(conn_str)
+                            r".*?AccountName=(.+?);.*?", conn_str
                         ).group(
                             1
                         )
                         azure_client = azure.BlobServiceClient.from_connection_string(
-                            **self.azure_options
+                            **azure_options
                         )
                     elif account_url is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r"(?:https?://)?(.+?).blob.core.windows.net",
-                            str(account_url),
+                            account_url,
                         ).group(
                             1
                         )
-                        azure_client = azure.BlobServiceClient(**self.azure_options)
+                        azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise SparkAzureBlobStorageDatasourceError(
@@ -127,7 +137,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
@@ -152,7 +162,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=abs_container,
             name_starts_with=abs_name_starts_with,
             delimiter=abs_delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
 
         # build a more specific `_test_connection_error_message`

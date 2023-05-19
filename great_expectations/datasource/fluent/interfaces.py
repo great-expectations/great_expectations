@@ -29,16 +29,19 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictInt,
+    root_validator,
+    validate_arguments,
+)
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.data_connector.batch_filter import (
-    BatchSlice,  # noqa: TCH001
-    parse_batch_slice,
-)
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -59,6 +62,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -73,117 +78,7 @@ class GxSerializationWarning(UserWarning):
     pass
 
 
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can filter the data along
-# and the values are the realized. If a value is None or unspecified, the batch_request
-# will capture all data along this dimension. For example, if we have a year and month
-# splitter, and we want to query all months in the year 2020, the batch request options
-# would look like:
-#   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
-
-
 BatchMetadata: TypeAlias = Dict[str, Any]
-
-
-class BatchRequest(pydantic.BaseModel):
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
-    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
-
-    _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
-
-    class Config:
-        arbitrary_types_allowed = True
-        extra = pydantic.Extra.forbid
-        json_encoders = {slice: str}
-
-    def __init__(self, **kwargs) -> None:
-        if "batch_slice" in kwargs:
-            self._batch_slice_input = kwargs["batch_slice"]
-            kwargs["batch_slice"] = parse_batch_slice(
-                batch_slice=self._batch_slice_input
-            )
-        else:
-            self._batch_slice_input = None
-        super().__init__(**kwargs)
-
-    def json(
-        self,
-        *,
-        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        by_alias: bool = False,
-        skip_defaults: Optional[bool] = None,
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        encoder: Optional[Callable[[Any], Any]] = None,
-        models_as_dict: bool = True,
-        **dumps_kwargs: Any,
-    ) -> str:
-        """
-        Generate a json representation of the model, optionally specifying which
-        fields to include or exclude.
-
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
-        """
-        if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
-        result = super().json(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            skip_defaults=skip_defaults,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-            encoder=encoder,
-            models_as_dict=models_as_dict,
-            **dumps_kwargs,
-        )
-        if self._batch_slice_input is not None:
-            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
-        return result
-
-    def dict(
-        self,
-        *,
-        include: AbstractSetIntStr | MappingIntStrAny | None = None,
-        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
-        # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        # deprecated - use exclude_unset instead
-        skip_defaults: bool | None = None,
-        # custom
-        config_provider: _ConfigurationProvider | None = None,
-    ) -> dict[str, Any]:
-        """
-        Generate a dictionary representation of the model, optionally specifying which
-        fields to include or exclude.
-
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
-        """
-        if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
-        result = super().dict(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-            skip_defaults=skip_defaults,
-        )
-        if self._batch_slice_input is not None:
-            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
-        return result
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -356,10 +251,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_metadata.update(copy.deepcopy(batch_request.options))
         return batch_metadata
 
-    @staticmethod
-    def _parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
-        return parse_batch_slice(batch_slice=batch_slice)
-
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
     def _parse_order_by_sorters(
@@ -515,7 +406,10 @@ class Datasource(
     _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
+
+    @property
+    def _config_provider(self) -> Union[_ConfigurationProvider, None]:
+        return getattr(self._data_context, "config_provider", None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -539,6 +433,8 @@ class Datasource(
         # strip out asset default kwargs
         kwargs = data_asset.dict(exclude_unset=True)
         logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
+
+        cls._update_asset_forward_refs(asset_type)
 
         asset_of_intended_type = asset_type(**kwargs)
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
@@ -669,6 +565,14 @@ class Datasource(
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 
+    def _rebuild_asset_data_connectors(self) -> None:
+        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        if self.data_connector_type:
+            for data_asset in self.assets:
+                # check if data_connector exist before rebuilding?
+                connect_options = getattr(data_asset, "connect_options", {})
+                self._build_data_connector(data_asset, **connect_options)
+
     @staticmethod
     def parse_order_by_sorters(
         order_by: Optional[List[Union[Sorter, str, dict]]] = None
@@ -696,6 +600,23 @@ class Datasource(
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
+
+    @staticmethod
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        """Update forward refs of an asset_type if necessary.
+
+        Note, this should be overridden in child datasource classes if forward
+        refs need to be updated. For example, in Spark datasources we need to
+        update forward refs only if the optional spark dependencies are installed
+        so this method is overridden. Here it is a no op.
+
+        Args:
+            asset_type: Asset type to update forward refs.
+
+        Returns:
+            None, asset refs is updated in place.
+        """
+        pass
 
     # Abstract Methods
     @property
@@ -792,13 +713,31 @@ class Batch(FluentBaseModel):
             BatchDefinition,
             BatchMarkers,
         )
+        from great_expectations.datasource.fluent import BatchRequest
 
         super().update_forward_refs(
             BatchData=BatchData,
             BatchDefinition=BatchDefinition,
             BatchMarkers=BatchMarkers,
+            BatchRequest=BatchRequest,
         )
 
+    @public_api
+    @validate_arguments
+    def columns(self) -> List[str]:
+        """Return column names of this Batch.
+
+        Returns
+            List[str]
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
+        )
+        return metrics_calculator.columns()
+
+    @public_api
     @validate_arguments
     def head(
         self,

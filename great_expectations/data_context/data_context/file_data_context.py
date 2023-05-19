@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.config import GxConfig
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -60,6 +58,8 @@ class FileDataContext(SerializableDataContext):
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir
         )
+        self._scaffold_project()
+
         self._project_config = self._init_project_config(project_config)
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -78,6 +78,21 @@ class FileDataContext(SerializableDataContext):
                 )
 
         return context_root_dir
+
+    def _scaffold_project(self) -> None:
+        """Prepare a `great_expectations` directory with all necessary subdirectories.
+        If one already exists, no-op.
+        """
+        if self.is_project_scaffolded(self._context_root_directory):
+            return
+
+        # GX makes an important distinction between project directory and context directory.
+        # The former corresponds to the root of the user's project while the latter
+        # encapsulates any config (in the form of a great_expectations/ directory).
+        project_root_dir = pathlib.Path(self._context_root_directory).parent
+        self._scaffold(
+            project_root_dir=project_root_dir,
+        )
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -205,9 +220,7 @@ class FileDataContext(SerializableDataContext):
             if path_to_fluent_yaml.exists():
                 gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
 
-                # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
-                    datasource._config_provider = config_provider
                     datasource._data_context = self
 
                 return gx_config

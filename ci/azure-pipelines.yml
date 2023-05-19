@@ -68,8 +68,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -88,20 +88,19 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
+          versionSpec: 3.8
+        displayName: 'Use Python 3.8'
       - script: |
           python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
         name: InstallDependencies
       - script: |
-          invoke type-check --ci --pretty --python-version $(python.version)
+          invoke type-check --ci --pretty
         name: StaticTypeCheck
       - script: |
           # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
+          invoke type-check --ci --pretty --check-stub-sources
         name: TypeCheckStubSourceFiles
-
     - job: docstring_linter
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -171,8 +170,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -219,8 +216,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -275,8 +270,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -301,8 +294,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -329,8 +320,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -375,8 +364,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -411,8 +398,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -437,9 +422,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
-              constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
               constraints: 'ci/constraints-test/py38-min-install.txt'
@@ -478,8 +460,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -502,8 +482,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -542,8 +520,6 @@ stages:
 
         strategy:
          matrix:
-           Python37:
-             python.version: '3.7'
            Python38:
              python.version: '3.8'
            Python39:
@@ -620,8 +596,6 @@ stages:
 
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:

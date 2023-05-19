@@ -15,6 +15,7 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
     overload,
 )
@@ -31,7 +32,7 @@ from great_expectations.datasource.fluent.constants import (
 )
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
-    Datasource,  # noqa: TCH001
+    Datasource,
 )
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -67,10 +68,14 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
     }
 ]
 
+# sentinel value to know if parameter was passed
+_MISSING: Final = object()
 
 JSON_ENCODERS: dict[Type, Callable] = {}
 if TextClause:
     JSON_ENCODERS[TextClause] = lambda v: str(v)
+
+T = TypeVar("T")
 
 
 class GxConfig(FluentBaseModel):
@@ -152,6 +157,27 @@ class GxConfig(FluentBaseModel):
         datasources_as_dict.update(datasources)
         self.fluent_datasources = list(datasources_as_dict.values())
 
+    def pop(self, datasource_name: str, default: T = _MISSING) -> Datasource | T:  # type: ignore[assignment] # sentinel value is never returned
+        """
+        Returns and deletes the Datasource referred to by datasource_name
+
+        Args:
+            datasource_name: name of Datasource sought.
+
+        Returns:
+            Datasource -- if named "Datasource" objects exists or the provided default;
+                otherwise, exception is raised.
+        """
+        ds_dicts = self.get_datasources_as_dict()
+        result: T | Datasource
+        if default is _MISSING:
+            result = ds_dicts.pop(datasource_name)
+        else:
+            result = ds_dicts.pop(datasource_name, default)
+
+        self.fluent_datasources = list(ds_dicts.values())
+        return result
+
     # noinspection PyNestedDecorators
     @validator(_FLUENT_DATASOURCES_KEY, pre=True)
     @classmethod
@@ -196,7 +222,7 @@ class GxConfig(FluentBaseModel):
                 for asset in datasource.assets:
                     asset._datasource = datasource
 
-        logger.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+        logger.debug(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
 
         if v and not loaded_datasources:
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")

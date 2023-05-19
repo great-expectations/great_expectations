@@ -4,6 +4,7 @@ import copy
 import functools
 import json
 import logging
+import os
 import pathlib
 import re
 import uuid
@@ -17,7 +18,6 @@ from typing_extensions import Final
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
-from great_expectations.datasource.data_connector.batch_filter import parse_batch_slice
 from great_expectations.datasource.fluent.config import (
     GxConfig,
     _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation,
@@ -28,7 +28,7 @@ from great_expectations.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest, Datasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -50,11 +50,6 @@ LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
-BATCH_REQUEST_DICT = {
-    "datasource_name": "my_datasource",
-    "data_asset_name": "my_data_asset",
-    "batch_slice": "[4:20:2]",
-}
 
 CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -206,45 +201,8 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
 
 
 @pytest.fixture
-def batch_request_config() -> dict:
-    return copy.deepcopy(BATCH_REQUEST_DICT)
-
-
-@pytest.fixture
 def ds_dict_config() -> dict:
     return copy.deepcopy(COMPLEX_CONFIG_DICT)
-
-
-@pytest.fixture
-def sqlite_database_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-
-
-@pytest.mark.unit
-def test_batch_request_config_round_trip(batch_request_config: dict) -> None:
-    batch_request = BatchRequest(**batch_request_config)
-    assert batch_request.options == {}
-    assert batch_request.batch_slice == parse_batch_slice(
-        batch_request_config["batch_slice"]
-    )
-
-    batch_request_dict = batch_request.dict()
-    assert "options" not in batch_request_dict
-    assert batch_request_dict["batch_slice"] == batch_request_config["batch_slice"]
-
-    batch_request_json = batch_request.json()
-    assert (
-        batch_request_json
-        == '{"datasource_name": "my_datasource", "data_asset_name": "my_data_asset", "batch_slice": "[4:20:2]"}'
-    )
 
 
 @pytest.mark.parametrize(
@@ -835,11 +793,15 @@ def file_dc_config_file_with_substitutions(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save(
-    monkeypatch: pytest.MonkeyPatch,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}\n")
+    my_conn_str = os.environ["MY_CONN_STR"]
+
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
@@ -851,10 +813,6 @@ def test_config_substitution_retains_original_value_on_save(
     )
 
     print(context.fluent_config)
-
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
     ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
 
@@ -877,14 +835,12 @@ def test_config_substitution_retains_original_value_on_save(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
-    monkeypatch: pytest.MonkeyPatch,
-    sqlite_database_path: pathlib.Path,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}")
 
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())

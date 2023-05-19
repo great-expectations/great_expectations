@@ -64,12 +64,22 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
             assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(v1, v2, __trace=repr(index), *args, **kwargs)
+                assertDeepAlmostEqual(
+                    v1,
+                    v2,
+                    __trace=repr(index),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
+                )
         elif isinstance(expected, dict):
             assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(
-                    expected[key], actual[key], __trace=repr(key), *args, **kwargs
+                    expected[key],
+                    actual[key],
+                    __trace=repr(key),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
                 )
         else:
             assert expected == actual
@@ -809,7 +819,10 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
+    if isinstance(execution_engine.engine, sqlalchemy.Connection):
+        connection = execution_engine.engine
+    else:
+        connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
         connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))

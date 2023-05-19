@@ -9,6 +9,7 @@ import pandas as pd
 import tzlocal
 from IPython.display import HTML, display
 from packaging import version
+from typing_extensions import Final
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
@@ -136,6 +137,9 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 
+_LOCAL_TZ: Final = tzlocal.get_localzone()
+
+
 def setup_notebook_logging(logger=None, log_level=logging.INFO):
     """Set up the provided logger for the GX default logging configuration.
 
@@ -143,7 +147,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
         logger - the logger to configure
     """
 
-    def posix2local(timestamp, tz=tzlocal.get_localzone()):
+    def posix2local(timestamp, tz=_LOCAL_TZ):
         """Seconds since the epoch -> local time as an aware datetime object."""
         return datetime.fromtimestamp(timestamp, tz)
 

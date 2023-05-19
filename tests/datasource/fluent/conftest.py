@@ -152,6 +152,38 @@ def inject_engine_lookup_double(
             source.execution_engine_override = engine
 
 
+@pytest.fixture
+def sqlite_database_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
+    )
+    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+
+
+@pytest.fixture
+def seed_ds_env_vars(
+    monkeypatch: pytest.MonkeyPatch, sqlite_database_path: pathlib.Path
+) -> tuple[tuple[str, str], ...]:
+    """Seed a collection of ENV variables for use in testing config substitution."""
+    config_sub_dict = {
+        "MY_CONN_STR": f"sqlite:///{sqlite_database_path}",
+        "MY_URL": "http://example.com",
+        "MY_FILE": __file__,
+    }
+
+    for name, value in config_sub_dict.items():
+        monkeypatch.setenv(name, value)
+        logger.info(f"Setting ENV - {name} = '{value}'")
+
+    # return as tuple of tuples so that the return value is immutable and therefore cacheable
+    return tuple((k, v) for k, v in config_sub_dict.items())
+
+
 _CLOUD_API_FAKE_DB: dict = {}
 _DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 
@@ -267,6 +299,34 @@ def _put_db_datasources_callback(
     return result
 
 
+def _get_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    if not request.body:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
+        )
+        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+    elif item is not MISSING:
+        payload = json.loads(request.body)
+        _CLOUD_API_FAKE_DB[url] = payload
+        result = _CallbackResult(
+            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+    else:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
 @pytest.fixture
 def cloud_api_fake():
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
@@ -308,6 +368,11 @@ def cloud_api_fake():
         )
         resp_mocker.add_callback(
             responses.POST, datasources_url, _post_fake_db_datasources_callback
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{datasources_url}",
+            _get_db_datasources_callback,
         )
 
         yield resp_mocker
@@ -352,7 +417,10 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 @pytest.fixture(
     params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
 )
-def empty_contexts(request: FixtureRequest) -> FileDataContext | CloudDataContext:
+def empty_contexts(
+    request: FixtureRequest,
+    cloud_storage_get_client_doubles,
+) -> FileDataContext | CloudDataContext:
     context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
         request.param
     )

@@ -12,11 +12,11 @@ To submit a custom Great Expectations package, you complete the following tasks:
 
 - [Publish your package](#publish-your-package)
 
-To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md) in the `docs` repository.
+To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/blob/develop/docs/README.md) in the `docs` repository.
 
-To create and submit a Custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
+To create and submit a Custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
 
-To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md) in the `great_expectations` repository.
+To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md) in the `great_expectations` repository.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ Before you develop your custom Great Expectations package, notify the Great Expe
 
 ## Install the Great Expectations CLI tool
 
-Great Expectations provides the `great_expectations_contrib` command-line interface (CLI) tool to simplify the package contribution process and help you adhere to code base best practices. 
+Great Expectations provides the `great_expectations_contrib` command-line interface (CLI) tool to simplify the package contribution process and help you adhere to code base best practices.
 
 The `great_expectations_contrib` CLI tool performs the following functions:
 
@@ -61,7 +61,7 @@ While you're developing your package, you must use this tool to ensure that it m
 2. Run the following command to install the CLI tool:
 
     ```bash
-    pip install -e great_expectations_contrib
+    pip install -e .
     ```
 
 3. Run the following command to verify your installation:
@@ -72,7 +72,7 @@ While you're developing your package, you must use this tool to ensure that it m
 
 ## Initialize a project
 
-After you've enabled the `great_expectations_contrib` CLI tool, you need to initialize an empty package. 
+After you've enabled the `great_expectations_contrib` CLI tool, you need to initialize an empty package.
 
 1. Run the following command to initialize an empty package:
 
@@ -150,6 +150,6 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 
 - The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
 
-- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
+- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion.
 
 - The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.

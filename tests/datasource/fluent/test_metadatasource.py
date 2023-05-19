@@ -12,13 +12,15 @@ from pydantic import DirectoryPath, validate_arguments
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
 )

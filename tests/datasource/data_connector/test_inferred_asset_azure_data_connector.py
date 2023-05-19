@@ -4,6 +4,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -20,6 +21,13 @@ from great_expectations.execution_engine import (
 from great_expectations.optional_imports import azure_storage
 
 yaml = YAMLHandler()
+
+
+if not (azure.storage and azure.BlobServiceClient):
+    pytest.skip(
+        'Could not import "azure.storage.blob" from Microsoft Azure cloud',
+        allow_module_level=True,
+    )
 
 
 @pytest.fixture
@@ -230,10 +238,6 @@ def expected_batch_definitions_sorted():
     return expected
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -266,10 +270,6 @@ def test_instantiation_with_account_url_and_credential(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -303,10 +303,6 @@ def test_instantiation_with_conn_str_and_credential(
     assert my_data_connector.get_unmatched_data_references() == []
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -329,10 +325,6 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
     assert my_data_connector._account_name == "my_account_url"
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -355,10 +347,6 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
     assert my_data_connector._account_name == "storagesample"
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -385,10 +373,6 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -428,10 +412,6 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -477,10 +457,6 @@ def test_instantiation_with_test_yaml_config(
     assert report_object == expected_config_dict
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -538,10 +514,6 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     assert mock_emit.call_args_list == expected_call_args_list
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -594,10 +566,6 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     }
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -638,10 +606,6 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -702,10 +666,6 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
         my_data_connector.get_batch_definition_list_from_batch_request()
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -756,10 +716,6 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -834,11 +790,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
-
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
+    
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -914,10 +866,6 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1007,10 +955,6 @@ def test_return_all_batch_definitions_basic_sorted(
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1121,11 +1065,6 @@ def test_return_all_batch_definitions_returns_specified_partition(
     )
     assert my_batch_definition == expected_batch_definition
 
-
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -1215,10 +1154,6 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     assert sorted_batch_definition_list == expected_batch_definitions_sorted
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -1285,10 +1220,6 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -1356,10 +1287,6 @@ def test_return_all_batch_definitions_too_many_sorters(
         )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -1434,10 +1361,6 @@ azure_options:
     )
 
 
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
@@ -1515,11 +1438,6 @@ azure_options:
         == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
     )
 
-
-@pytest.mark.skipif(
-    not azure_storage,
-    reason="Could not import 'storage' from azure in inferred_asset_gcs_data_connector.py",
-)
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )

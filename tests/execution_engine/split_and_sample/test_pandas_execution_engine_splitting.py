@@ -87,7 +87,7 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
 def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     bucket, keys = test_s3_files
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(
         path=full_path,
@@ -311,7 +311,9 @@ def test_get_batch_with_split_on_whole_table_filesystem(
 ):
     test_df = PandasExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
