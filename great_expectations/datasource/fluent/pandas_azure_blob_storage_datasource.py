@@ -11,6 +11,10 @@ from great_expectations.compatibility import azure
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # used by pydantic
+    _check_config_substitutions_needed,
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -45,7 +49,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     type: Literal["pandas_abs"] = "pandas_abs"
 
     # Azure Blob Storage specific attributes
-    azure_options: Dict[str, Any] = {}
+    azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
     _azure_client: Union[azure.BlobServiceClient, None] = pydantic.PrivateAttr(
@@ -55,11 +59,20 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
+            _check_config_substitutions_needed(
+                self, self.azure_options, raise_warning_if_provider_not_present=True
+            )
+            # pull in needed config substitutions using the `_config_provider`
+            # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
+            azure_options: dict = self.dict(config_provider=self._config_provider).get(
+                "azure_options", {}
+            )
+
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
             # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
-            conn_str: str | None = self.azure_options.get("conn_str")
-            account_url: str | None = self.azure_options.get("account_url")
+            conn_str: str | None = azure_options.get("conn_str")
+            account_url: str | None = azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
                 raise PandasAzureBlobStorageDatasourceError(
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
@@ -73,13 +86,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                             r".*?AccountName=(.+?);.*?", conn_str
                         ).group(1)
                         azure_client = azure.BlobServiceClient.from_connection_string(
-                            **self.azure_options
+                            **azure_options
                         )
                     elif account_url is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
                             r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                         ).group(1)
-                        azure_client = azure.BlobServiceClient(**self.azure_options)
+                        azure_client = azure.BlobServiceClient(**azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise PandasAzureBlobStorageDatasourceError(

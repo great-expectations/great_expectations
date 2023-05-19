@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 import uuid
 from typing import Dict
@@ -168,8 +170,14 @@ class ExpectationsStore(Store):
         deserialization into a GX object
         """
         suite_data: Dict
+        # if only the expectation_suite_name is passed, a list will be returned
         if isinstance(response_json["data"], list):
-            suite_data = response_json["data"][0]
+            if len(response_json["data"]) == 1:
+                suite_data = response_json["data"][0]
+            else:
+                raise ValueError(
+                    "More than one Expectation Suite was found with the expectation_suite_name."
+                )
         else:
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
@@ -196,6 +204,16 @@ class ExpectationsStore(Store):
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
+
+    def _validate_key(  # type: ignore[override]
+        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
+    ) -> None:
+        if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
+            raise ValueError(
+                "GXCloudIdentifier for ExpectationsStore must contain either "
+                "an id or a resource_name, but neither are present."
+            )
+        return super()._validate_key(key=key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)

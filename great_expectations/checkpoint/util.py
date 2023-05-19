@@ -203,7 +203,7 @@ def get_substituted_validation_dict(
         )
         or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
         "action_list": get_updated_action_list(
-            base_action_list=substituted_runtime_config.get("action_list"),
+            base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
         ),
         "evaluation_parameters": nested_update(
@@ -251,8 +251,8 @@ def get_substituted_batch_request(
         batch_request=substituted_runtime_batch_request
     )
 
-    for key, value in validation_batch_request.items():
-        substituted_value = substituted_runtime_batch_request.get(key)
+    for key, value in validation_batch_request.items():  # type: ignore[union-attr] # get_batch_request_as_dict needs overloads
+        substituted_value = substituted_runtime_batch_request.get(key)  # type: ignore[union-attr] # get_batch_request_as_dict
         if value is not None and substituted_value is not None:
             raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
@@ -262,7 +262,7 @@ def get_substituted_batch_request(
         **substituted_runtime_batch_request, **validation_batch_request
     )
 
-    return materialize_batch_request(batch_request=effective_batch_request)
+    return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
 def substitute_template_config(source_config: dict, template_config: dict) -> dict:
@@ -504,7 +504,7 @@ def send_sns_notification(
     :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
-    :return:  Message ID that was published
+    :return:  Message ID that was published or error message
 
     """
     if not boto3:
@@ -525,6 +525,8 @@ def send_sns_notification(
     try:
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
-        logger.error(f"Received invalid for message: {validation_results}")
+        error_msg = f"Received invalid for message: {validation_results}"
+        logger.error(error_msg)
+        return error_msg
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

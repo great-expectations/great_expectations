@@ -704,4 +704,16 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
             "great_expectations/agent/message_service/rabbit_mq_client.py"
         ),
     ),
+    IncludeExcludeDefinition(
+        reason='The "columns()" property in this module is not included in the public API',
+        name="columns",
+        filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason='The "columns()" property in this module is not included in the public API',
+        name="columns",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/spark_generic_splitters.py"
+        ),
+    ),
 ]

@@ -12,7 +12,7 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 

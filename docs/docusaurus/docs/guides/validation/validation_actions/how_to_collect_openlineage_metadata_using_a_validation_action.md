@@ -4,9 +4,6 @@ title: How to collect OpenLineage metadata using an Action
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 [OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
@@ -57,11 +54,10 @@ action_list:
 
 ### 3.  Test your Action by Validating a Batch of data.
 
-Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and emit lineage events to the OpenLineage backend.  This can be done from the command line:
+Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
- ```bash
- % great_expectations checkpoint run <checkpoint_name>
- ```
+```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
+```
 
 :::note Reminder
 Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
