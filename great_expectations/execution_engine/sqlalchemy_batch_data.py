@@ -280,22 +280,10 @@ class SqlAlchemyBatchData(BatchData):
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GXSqlDialect.ORACLE:
-            with self._engine.connect() as connection:
-                with connection.begin():
-                    try:
-                        connection.execute(sa.text(stmt_1))
-                    except sqlalchemy.DatabaseError:
-                        connection.execute(sa.text(stmt_2))
+            try:
+                self.execution_engine.execute_query(sa.text(stmt_1))
+            except sqlalchemy.DatabaseError:
+                self.execution_engine.execute_query(sa.text(stmt_2))
         else:
-            # Since currently self._engine can also be a connection we need to
-            # check first that it is an engine before creating a connection from it.
-            # Otherwise, we use the connection.
-            if isinstance(self._engine, sqlalchemy.Engine):
-                with self._engine.connect() as connection:
-                    with connection.begin():
-                        connection.execute(sa.text(stmt))
-            else:
-                # self._engine is already a connection
-                with self._engine.begin():
-                    self._engine.execute(sa.text(stmt))
+            self.execution_engine.execute_query(sa.text(stmt))
         return stmt
