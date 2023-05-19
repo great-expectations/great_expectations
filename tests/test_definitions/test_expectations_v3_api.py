@@ -6,6 +6,7 @@ from typing import cast
 import pandas as pd
 import pytest
 
+import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations import DataContext
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -17,7 +18,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.self_check.util import (
-    BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
     generate_dataset_name_from_expectation_name,
