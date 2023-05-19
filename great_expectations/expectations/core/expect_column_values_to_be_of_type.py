@@ -57,16 +57,17 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
 from great_expectations.compatibility.sqlalchemy_bigquery import (
-    sqlalchemy_bigquery as sqla_bigquery,
+    GEOGRAPHY,
+    bigquery_types_tuple,
+)
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as BigQueryDialect,
 )
 
-try:
-    from sqla_bigquery import GEOGRAPHY  # noqa: F401
-
+if GEOGRAPHY:
     BIGQUERY_GEO_SUPPORT = True
-except ImportError:
+else:
     BIGQUERY_GEO_SUPPORT = False
 
 try:
@@ -539,10 +540,10 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
+        if BigQueryDialect is not None and (
             isinstance(
                 execution_engine.dialect_module,
-                sqla_bigquery.BigQueryDialect,
+                BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
