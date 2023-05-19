@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import Connection
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -44,8 +45,6 @@ from tests.test_utils import (
     get_sqlite_temp_table_names,
     get_sqlite_temp_table_names_from_engine,
 )
-
-from great_expectations.compatibility.sqlalchemy import Connection
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")

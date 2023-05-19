@@ -14,6 +14,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Engine
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -34,8 +35,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-from great_expectations.compatibility.sqlalchemy import Engine
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
