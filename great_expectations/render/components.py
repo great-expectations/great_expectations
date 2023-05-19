@@ -4,10 +4,9 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
-from typing_extensions import Final
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api

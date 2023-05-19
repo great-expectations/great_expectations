@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
-from typing_extensions import Final
 
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector

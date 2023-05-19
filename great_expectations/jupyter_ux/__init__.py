@@ -4,12 +4,12 @@
 import logging
 import sys
 from datetime import datetime
+from typing import Final
 
 import pandas as pd
 import tzlocal
 from IPython.display import HTML, display
 from packaging import version
-from typing_extensions import Final
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
