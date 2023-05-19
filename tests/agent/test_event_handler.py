@@ -7,7 +7,7 @@ from great_expectations.agent.event_handler import EventHandler, UnknownEventErr
 from great_expectations.agent.message_service.subscriber import EventContext
 from great_expectations.agent.models import (
     EventBase,
-    RunDataAssistantEvent,
+    RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
 
@@ -30,7 +30,7 @@ def test_event_handler_raises_for_unknown_event():
 
 
 def test_event_handler_handles_run_data_assistant_event():
-    event = RunDataAssistantEvent()
+    event = RunOnboardingDataAssistantEvent()
     correlation_id = "74842258-803a-48ca-8921-eaf2802c14e2"
     context = MagicMock(autospec=CloudDataContext)
     event_processed = Mock()

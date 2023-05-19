@@ -1,10 +1,9 @@
-from great_expectations.agent.models import Event, RunOnboardingDataAssistantEvent
 from typing import List
 
 from pydantic import BaseModel
 
 from great_expectations.agent.message_service.subscriber import EventContext
-from great_expectations.agent.models import RunDataAssistantEvent
+from great_expectations.agent.models import RunOnboardingDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import StoreBackendError
 
@@ -31,15 +30,13 @@ class EventHandler:
     def handle_event(self, event_context: EventContext) -> EventHandlerResult:
         """Pass event to the correct handler."""
 
-        if isinstance(event_context.event, RunDataAssistantEvent):
+        if isinstance(event_context.event, RunOnboardingDataAssistantEvent):
             return self._handle_run_data_assistant(event_context)
         else:
             # if pydantic parsing failed, event_context.event will be None
             raise UnknownEventError("Unknown message received - cannot process.")
 
-    def _handle_run_data_assistant(
-        self, event_context: EventContext
-    ) -> None:
+    def _handle_run_data_assistant(self, event_context: EventContext) -> None:
         """Action that occurs when a RunOnboardingDataAssistantEvent is received."""
 
         # todo: this action should create a checkpoint as well as a suite, but
@@ -83,7 +80,7 @@ class EventHandler:
         self._context.add_or_update_expectation_suite(
             expectation_suite=expectation_suite
         )
-        print(f"Onboarding Data Assistant created the following resources:")
+        print("Onboarding Data Assistant created the following resources:")
         print(f"    Expectation Suite: {suite_name}")
         # print(f"    Checkpoint: {checkpoint_name}")
 
