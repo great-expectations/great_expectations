@@ -526,19 +526,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         return_val = False
         if connection_string is not None:
-            if connection_string.startswith("sqlite") or connection_string.startswith(
-                "mssql"
-            ):
-                return_val = True
+            str_to_check = connection_string
+
         elif credentials is not None:
             drivername = credentials.get("drivername", "")
-            if drivername.startswith("sqlite") or drivername.startswith("mssql"):
-                return_val = True
+            str_to_check = drivername
+
         else:
             parsed_url = make_url(url)
-            drivername = parsed_url.drivername
-            if drivername.startswith("sqlite") or drivername.startswith("mssql"):
-                return_val = True
+            str_to_check = parsed_url.drivername
+
+        if str_to_check.startswith("sqlite") or str_to_check.startswith("mssql"):
+            return_val = True
 
         return return_val
 
