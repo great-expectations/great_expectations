@@ -574,7 +574,7 @@ def test_get_batch_data_with_azure_batch_spec(
 
 
 @pytest.mark.skipif(
-    not azure_storage,
+    not azure,
     reason="azure blob storage components are not installed",
 )
 def test_get_batch_with_no_azure_configured(azure_batch_spec):
