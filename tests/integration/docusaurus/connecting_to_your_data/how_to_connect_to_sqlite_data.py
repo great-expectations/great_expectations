@@ -30,22 +30,22 @@ my_table_name = get_table_name(sqlite_database_path)
 assert my_table_name is not None
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data import">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py import">
 import great_expectations as gx
 
 context = gx.get_context()
 # </snippet>
 assert context is not None
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data connection_string">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py connection_string">
 my_connection_string = f"sqlite:///{sqlite_database_path}"
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data datasource_name">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py datasource_name">
 datasource_name = "my_datasource"
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py datasource">
 datasource = context.sources.add_sqlite(
     name=datasource_name, connection_string=my_connection_string
 )
@@ -56,24 +56,24 @@ assert "name: my_datasource" in str(datasource)
 assert "type: sqlite" in str(datasource)
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data assest_name">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py assest_name">
 asset_name = "my_asset"
 asset_table_name = my_table_name
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data table_asset">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py table_asset">
 table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
 # </snippet>
 
 assert table_asset is not None
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data asset_query">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py asset_query">
 asset_name = "my_query_asset"
 asset_query = "SELECT * from yellow_tripdata_sample_2019_01"
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data query_table_asset">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py query_table_asset">
 table_asset = datasource.add_query_asset(name=asset_name, query=asset_query)
 # </snippet>
 
