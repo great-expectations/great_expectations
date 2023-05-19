@@ -1,5 +1,3 @@
-import re
-
 import pytest
 
 from docs.prepare_prior_versions import (
