@@ -10,11 +10,16 @@ import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
+from typing import (  # TODO: revert use of cast
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    List,
+    cast,
+)
 
 import pydantic
 import pytest
-from typing_extensions import Final
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
