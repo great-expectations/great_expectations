@@ -81,7 +81,6 @@ class GXAgent:
             subscriber.consume(
                 queue=self._config.organization_id,
                 on_message=self._handle_event_as_thread_enter,
-                retries=None,
                 wait=1,
             )
         except KeyboardInterrupt:
