@@ -11,6 +11,7 @@ from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime
+    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
@@ -63,12 +64,20 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         if not s3_client:
             # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
             if BOTO3_IMPORTED:
+                _check_config_substitutions_needed(
+                    self, self.boto3_options, raise_warning_if_provider_not_present=True
+                )
+                # pull in needed config substitutions using the `_config_provider`
+                # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed
+                boto3_options: dict = self.dict(
+                    config_provider=self._config_provider
+                ).get("boto3_options", {})
                 try:
-                    s3_client = boto3.client("s3", **self.boto3_options)
+                    s3_client = boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise PandasS3DatasourceError(
-                        f'Due to exception: "{str(e)}", "s3_client" could not be created.'
+                        f'Due to exception: "{type(e).__name__}:{e}", "s3_client" could not be created.'
                     ) from e
             else:
                 raise PandasS3DatasourceError(

@@ -16,7 +16,7 @@ data_directory = pathlib.Path(
 # <snippet name="tests/integration/docusaurus/reference/glossary/batch_request batch_request">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context()
 
 # data_directory is the full path to a directory containing csv files
 datasource = context.sources.add_pandas_filesystem(
