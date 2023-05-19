@@ -6,9 +6,19 @@ First, make sure you have cloned the repository and installed the Python depende
 
 This code base provides following workflows:
 
+- [Code Linting](#code-linting)
 - [Locally deploy docs](#locally-deploy-docs)
 - [Verify links in docs](#verify-links-in-docs)
 - [Generate Glossary](#generate-glossary)
+
+## Code Linting
+
+Before submitting a pull request, make sure that your code passes the lint check, for that run:
+
+```sh
+black .
+ruff . --fix
+```
 
 ## Locally Deploy Docs
 
@@ -29,8 +39,7 @@ open http://localhost:3000/docs
 We use a link checker tool to verify that links within our docs are valid, you can run it via:
 
 ```sh { name=linkcheck }
-source gx_dev/bin/activate
-python docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
+python3 docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
 ```
 
 ## Generate Glossary
