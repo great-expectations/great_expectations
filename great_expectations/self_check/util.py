@@ -863,7 +863,6 @@ def build_pandas_validator_with_data(
     )
 
 
-# TODO: Here we set engine as a connection
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
