@@ -540,7 +540,7 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if BigQueryDialect is not None and (
+        if BigQueryDialect and (
             isinstance(
                 execution_engine.dialect_module,
                 BigQueryDialect,
