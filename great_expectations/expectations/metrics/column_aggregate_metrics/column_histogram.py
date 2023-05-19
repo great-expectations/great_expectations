@@ -132,7 +132,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
             # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
             return convert_to_json_serializable(
-                list(execution_engine.engine.execute(query).fetchone())
+                list(execution_engine.execute_query(query).fetchone())
             )
 
         idx = 0
@@ -223,7 +223,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
         return convert_to_json_serializable(
-            list(execution_engine.engine.execute(query).fetchone())
+            list(execution_engine.execute_query(query).fetchone())
         )
 
     @metric_value(engine=SparkDFExecutionEngine)

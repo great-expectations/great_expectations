@@ -562,7 +562,7 @@ def test_sqlite_split(
         batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
         # Right number of rows?
-        num_rows: int = batch_data.execution_engine.engine.execute(
+        num_rows: int = batch_data.execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         # noinspection PyUnresolvedReferences
@@ -592,14 +592,14 @@ def test_sqlite_split_on_year(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()
@@ -638,14 +638,14 @@ def test_sqlite_split_and_sample_using_limit(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()

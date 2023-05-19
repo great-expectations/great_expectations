@@ -352,7 +352,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                         count_selectable,
                     )
                 )
-                execution_engine.engine.execute(inner_case_query)
+                execution_engine.execute_query(inner_case_query)
 
                 count_selectable = temp_table_obj
 
@@ -420,7 +420,7 @@ def _sqlalchemy_map_condition_rows(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     try:
-        return execution_engine.engine.execute(query).fetchall()
+        return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
