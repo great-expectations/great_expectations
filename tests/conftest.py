@@ -111,6 +111,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -2970,7 +2971,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:

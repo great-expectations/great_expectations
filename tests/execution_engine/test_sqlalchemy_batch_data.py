@@ -18,7 +18,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
-from tests.test_utils import get_sqlite_temp_table_names
+from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
@@ -57,7 +57,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
         query=query,
         create_temp_table=False,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
 
 # REMOVING PENDING READ OF table.head metric
@@ -82,9 +82,11 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 
 
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
-    print(get_sqlite_temp_table_names(sqlite_view_engine))
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names(sqlite_view_engine) == {"test_temp_view"}
+    print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {
+        "test_temp_view"
+    }
 
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -95,7 +97,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         table_name="test_table",
         create_temp_table=True,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
 
@@ -105,7 +107,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         create_temp_table=False,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
@@ -113,7 +115,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         create_temp_table=True,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
@@ -121,7 +123,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         # create_temp_table defaults to True
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 3
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 3
 
     # testing whether schema is supported
     selectable = sa.select("*").select_from(sa.table(name="test_table", schema="main"))
@@ -130,7 +132,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         # create_temp_table defaults to True
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 4
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 4
 
     # test schema with execution engine
     # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation

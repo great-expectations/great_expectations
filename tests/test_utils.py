@@ -35,6 +35,8 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
+from great_expectations.compatibility.sqlalchemy import Engine
+
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
 
@@ -164,6 +166,15 @@ def get_sqlite_table_names(execution_engine: SqlAlchemyExecutionEngine):
 
     rows = execution_engine.execute_query(statement).fetchall()
 
+    return {row[0] for row in rows}
+
+
+def get_sqlite_temp_table_names_from_engine(engine: Engine):
+
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    with engine.connect() as connection:
+        rows = connection.execute(statement).fetchall()
     return {row[0] for row in rows}
 
 
