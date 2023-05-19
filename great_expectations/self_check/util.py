@@ -904,7 +904,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     except AttributeError:
         pass
     try:
-        dialect_classes["bigquery"] = BigQueryDialect
+        dialect_classes["bigquery"] = BigQueryDialect  # type: ignore[assignment]
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass

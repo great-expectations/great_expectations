@@ -9,7 +9,9 @@ SQLALCHEMY_BIGQUERY_NOT_IMPORTED = NotImported(
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
 
-sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+if sqlalchemy:
+    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+
 bigquery_types_tuple = None
 
 
