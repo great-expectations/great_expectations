@@ -554,6 +554,6 @@ class _SourceFactories:
         name: str,
     ) -> None: ...
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]: ...
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]: ...
