@@ -40,7 +40,7 @@ Before you develop your custom Great Expectations package, notify the Great Expe
 
 ## Install the Great Expectations CLI tool
 
-Great Expectations provides the `great_expectations_contrib` command-line interface (CLI) tool to simplify the package contribution process and help you adhere to code base best practices. 
+Great Expectations provides the `great_expectations_contrib` command-line interface (CLI) tool to simplify the package contribution process and help you adhere to code base best practices.
 
 The `great_expectations_contrib` CLI tool performs the following functions:
 
@@ -61,7 +61,7 @@ While you're developing your package, you must use this tool to ensure that it m
 2. Run the following command to install the CLI tool:
 
     ```bash
-    pip install -e great_expectations_contrib
+    pip install -e .
     ```
 
 3. Run the following command to verify your installation:
@@ -72,7 +72,7 @@ While you're developing your package, you must use this tool to ensure that it m
 
 ## Initialize a project
 
-After you've enabled the `great_expectations_contrib` CLI tool, you need to initialize an empty package. 
+After you've enabled the `great_expectations_contrib` CLI tool, you need to initialize an empty package.
 
 1. Run the following command to initialize an empty package:
 
@@ -150,6 +150,6 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 
 - The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
 
-- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
+- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion.
 
 - The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.
