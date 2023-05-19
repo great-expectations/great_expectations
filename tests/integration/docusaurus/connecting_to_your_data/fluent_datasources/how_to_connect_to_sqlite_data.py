@@ -31,8 +31,10 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string">
-my_connection_string = f"sqlite:///{sqlite_database_path}"
+my_connection_string = "sqlite:///<PATH_TO_DB_FILE>"
 # </snippet>
+
+my_connection_string = f"sqlite:///{sqlite_database_path}"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name">
 datasource_name = "my_datasource"
