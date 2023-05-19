@@ -20,19 +20,13 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
+from great_expectations.compatibility import aws
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
 
 logger = logging.getLogger(__file__)
-
-
-try:
-    import boto3
-except ImportError:
-    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
 
 
 @pytest.fixture()
@@ -54,10 +48,11 @@ def aws_credentials() -> None:
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
+@pytest.mark.skipif(not aws.boto3)
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
-        client = boto3.client("s3", region_name=aws_region_name)
+        client = aws.boto3.client("s3", region_name=aws_region_name)
         yield client
 
 

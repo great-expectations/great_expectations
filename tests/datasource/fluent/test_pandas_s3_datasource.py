@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
+from great_expectations.compatibility import aws
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -33,7 +34,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-from great_expectations.compatibility import aws
 
 # apply markers to entire test module
 pytestmark = [
