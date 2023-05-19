@@ -354,6 +354,11 @@ fluent_datasources = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
+    IntegrationTestFixture(
+        name="how_to_quickly_connect_to_a_single_file_with_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
 ]
 
 
