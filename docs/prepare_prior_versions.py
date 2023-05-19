@@ -145,7 +145,67 @@ def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) 
     )
 
 
+def update_tag_references_for_correct_version(
+    verbose: bool = False,
+) -> None:
+    """Change _tag.mdx to point to appropriate version."""
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs()
+
+    method_name_for_logging = "update_tag_references_for_correct_version"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+        files = [path / "term_tags/_tag.mdx"]
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                # <a href={'/docs/' + data[props.tag].url}>{props.text}</a>
+                # to ->
+                # <a href={'/docs/0.14.13/' + data[props.tag].url}>{props.text}</a>
+                # where 0.14.13 is replaced with the corresponding doc version e.g. 0.14.13, 0.15.50, etc.
+                contents = _update_tag_references_for_correct_version_substitution(
+                    contents, version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _update_tag_references_for_correct_version_substitution(
+    contents: str, version: str
+) -> str:
+    """Change _tag.mdx to point to appropriate version.
+
+    Args:
+        contents: String to perform substitution.
+        version: String of version number e.g. "0.15.50"
+
+    Returns:
+        Updated contents
+    """
+    pattern = re.compile(r"(?P<href><a href=\{'/docs/)(?P<rest>')")
+    contents = re.sub(pattern, rf"\g<href>{version}/\g<rest>", contents)
+    return contents
+
+
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
+    update_tag_references_for_correct_version()
