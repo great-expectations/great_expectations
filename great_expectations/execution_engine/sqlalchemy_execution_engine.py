@@ -1408,24 +1408,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_connection(self) -> sqlalchemy.Connection:
         """Get a connection for executing queries.
 
-        Some databases sqlite/mssql temp tables only persist within a connection,
-        so we need to keep the connection alive.
-
         Returns:
             Sqlalchemy connection
         """
-        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
-            try:
-                if not self._connection:
-                    self._connection = self.engine.connect()
-                yield self._connection
-            finally:
-                # Temp tables only persist within a connection for some dialects,
-                # so we need to keep the connection alive.
-                pass
-        else:
-            with self.engine.connect() as connection:
-                yield connection
+        with self.engine.connect() as connection:
+            yield connection
 
     def execute_query(
         self, query: sqlalchemy.Selectable

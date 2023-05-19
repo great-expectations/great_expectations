@@ -1064,7 +1064,7 @@ class TestConnectionPersistence:
         assert execution_engine._connection is not None
         assert connection_id == id(execution_engine._connection)
 
-    def test_same_connection_used_from_static_pool(self, sa):
+    def test_same_connection_used_from_static_pool_sqlite(self, sa):
         """What does this test and why?
 
         We want to make sure that the same connection is used for subsequent queries.
@@ -1075,21 +1075,15 @@ class TestConnectionPersistence:
 
         assert execution_engine.dialect_name == GXSqlDialect.SQLITE
 
-        with execution_engine.get_connection() as connection:
-            pre_query_connection = connection
+        create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
+        execution_engine.execute_query(create_temp_table)
 
-        data = execution_engine.get_domain_records(
-            domain_kwargs={
-                "column": "a",
-            }
-        )
-        query = sa.select(sa.text("*")).select_from(data)
-        execution_engine.execute_query(query)
+        select_temp_table = "SELECT COUNT(*) FROM temp_table;"
+        res = execution_engine.execute_query(select_temp_table)
 
-        with execution_engine.get_connection() as connection:
-            post_query_connection = connection
+        res2 = execution_engine.execute_query(select_temp_table)
 
-        assert pre_query_connection == post_query_connection
+        assert res.fetchall() == res2.fetchall()
 
     def test_connection_closed_sqlite(self, sa):
         """What does this test and why?
