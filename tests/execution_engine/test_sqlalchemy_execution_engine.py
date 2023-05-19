@@ -1130,6 +1130,12 @@ class TestConnectionPersistence:
 
         assert res == res2
 
+    def test_get_connection_doesnt_close_on_exit_sqlite(self, sa):
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as connection:
+            pass
+        assert not connection.closed
+
 
 @pytest.mark.unit
 class TestGetConnection:
@@ -1137,10 +1143,3 @@ class TestGetConnection:
         execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
         with execution_engine.get_connection() as connection:
             assert isinstance(connection, Connection)
-        assert connection.closed
-
-    def test_get_connection_closes_on_exit(self, sa):
-        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
-        with execution_engine.get_connection() as connection:
-            pass
-        assert connection.closed
