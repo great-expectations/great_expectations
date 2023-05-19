@@ -10,6 +10,7 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.compatibility import aws
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -20,7 +21,6 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
-from great_expectations.compatibility import aws
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
