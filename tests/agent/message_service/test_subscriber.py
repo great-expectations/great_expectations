@@ -7,7 +7,7 @@ from great_expectations.agent.message_service.subscriber import (
     EventContext,
     Subscriber,
 )
-from tests.agent.message_service.amqp_errors import AMQP_CHANNEL_AND_CONNECTION_ERRORS
+from tests.agent.message_service.amqp_errors import get_amqp_errors
 
 
 def test_subscriber_has_client_attribute():
@@ -64,7 +64,7 @@ def test_subscriber_close_closes_connection():
     client.close.assert_called_with()
 
 
-@pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
+@pytest.mark.parametrize("error", get_amqp_errors())
 def test_subscriber_close_handles_amqp_errors_from_channel(error):
     client = Mock(autospec=RabbitMQClient)
     client.channel.close.side_effect = error
@@ -73,7 +73,7 @@ def test_subscriber_close_handles_amqp_errors_from_channel(error):
     subscriber.close()
 
 
-@pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
+@pytest.mark.parametrize("error", get_amqp_errors())
 def test_subscriber_close_handles_amqp_errors_from_connection(error):
     client = Mock(autospec=RabbitMQClient)
     client.connection.close.side_effect = error
