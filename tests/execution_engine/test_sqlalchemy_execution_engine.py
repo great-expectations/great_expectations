@@ -41,6 +41,8 @@ from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
+from great_expectations.compatibility.sqlalchemy import Connection
+
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
@@ -1005,6 +1007,11 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     validate_tmp_tables(execution_engine=execution_engine)
 
 
+@pytest.fixture
+def pd_dataframe() -> pd.DataFrame:
+    return pd.DataFrame({"a": [1, 2], "b": [4, 4]})
+
+
 class TestExecuteQuery:
     """What does this test and why?
 
@@ -1013,18 +1020,23 @@ class TestExecuteQuery:
     as intended.
     """
 
-    def test_execute_query(self, sa):
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
-        )
-        data = execution_engine.get_domain_records(
-            domain_kwargs={
-                "column": "a",
-            }
-        )
-        result = execution_engine.execute_query(
-            sa.select(sa.text("*")).select_from(data)
-        )
+    def test_execute_query(self, sa, pd_dataframe: pd.DataFrame):
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(pd_dataframe, sa)
+
+        select_all = "SELECT * FROM test;"
+        result = execution_engine.execute_query(sa.text(select_all)).fetchall()
+
+        expected = [(1, 4), (2, 4)]
+        assert [r for r in result] == expected
+
+    def test_execute_query_in_transaction(self, sa, pd_dataframe: pd.DataFrame):
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(pd_dataframe, sa)
+
+        select_all = "SELECT * FROM test;"
+        result = execution_engine.execute_query_in_transaction(
+            sa.text(select_all)
+        ).fetchall()
+
         expected = [(1, 4), (2, 4)]
         assert [r for r in result] == expected
 
@@ -1036,78 +1048,49 @@ class TestConnectionPersistence:
     These tests ensure that we use the existing connection if one is available.
     """
 
-    def test_same_connection_used_sqlite(self, sa):
+    def test_same_connection_used_from_static_pool_sqlite(
+        self, sa, pd_dataframe: pd.DataFrame
+    ):
         """What does this test and why?
 
-        We want to make sure that the same connection is used for subsequent queries.
+        We want to make sure that the same connection is used for subsequent queries for databases that need it e.g.
+        sqlite.
+        Here we test that by creating a temp table and then querying it multiple times (each time pulling a connection
+        from the pool). The same connection should be pulled from the pool, if the connection wasn't the same the
+        temporary table wouldn't be accessible.
         """
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
-        )
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as con:
+            add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
 
-        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
-        assert execution_engine._connection is None
-
-        data = execution_engine.get_domain_records(
-            domain_kwargs={
-                "column": "a",
-            }
-        )
-        query = sa.select(sa.text("*")).select_from(data)
-        execution_engine.execute_query(query)
-
-        assert execution_engine._connection is not None
-        connection_id = id(execution_engine._connection)
-
-        execution_engine.execute_query(query)
-
-        assert execution_engine._connection is not None
-        assert connection_id == id(execution_engine._connection)
-
-    def test_same_connection_used_from_static_pool_sqlite(self, sa):
-        """What does this test and why?
-
-        We want to make sure that the same connection is used for subsequent queries.
-        """
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
-        )
-
-        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
+        assert (
+            execution_engine.dialect_name == GXSqlDialect.SQLITE
+        ), "Error here means test setup failed."
 
         create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
-        execution_engine.execute_query(create_temp_table)
+        execution_engine.execute_query(sa.text(create_temp_table))
 
-        select_temp_table = "SELECT COUNT(*) FROM temp_table;"
-        res = execution_engine.execute_query(select_temp_table)
+        select_temp_table = "SELECT * FROM temp_table;"
 
-        res2 = execution_engine.execute_query(select_temp_table)
+        res = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        res2 = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
 
-        assert res.fetchall() == res2.fetchall()
+        # This assert is here just to make sure when we assert res == res2 we are not comparing None == None
+        expected = [(1, 4), (2, 4)]
+        assert [r for r in res] == expected
 
-    def test_connection_closed_sqlite(self, sa):
-        """What does this test and why?
+        assert res == res2
 
-        We want to make sure that the connection is closed when the execution
-        engine is deleted.
-        """
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
-        )
 
-        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
-        assert execution_engine._connection is None
+class TestGetConnection:
+    def test_get_connection(self, sa):
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as connection:
+            assert isinstance(connection, Connection)
+        assert connection.closed
 
-        data = execution_engine.get_domain_records(
-            domain_kwargs={
-                "column": "a",
-            }
-        )
-        query = sa.select(sa.text("*")).select_from(data)
-        execution_engine.execute_query(query)
-
-        assert execution_engine._connection is not None
-
-        connection = execution_engine._connection
-        execution_engine.__del__()
+    def test_get_connection_closes_on_exit(self, sa):
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as connection:
+            pass
         assert connection.closed

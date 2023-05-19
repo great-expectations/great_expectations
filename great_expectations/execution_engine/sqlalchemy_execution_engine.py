@@ -330,9 +330,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 url=url,
             )
 
-        # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
-        self._connection = None
-
         # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
             GXSqlDialect.TRINO,
@@ -536,7 +533,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             parsed_url = make_url(url)
             str_to_check = parsed_url.drivername
 
-        if str_to_check.startswith("sqlite") or str_to_check.startswith("mssql"):
+        if any(
+            str_to_check.startswith(dialect_name.value)
+            for dialect_name in _PERSISTED_CONNECTION_DIALECTS
+        ):
             return_val = True
 
         return return_val
@@ -1398,11 +1398,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
-
-    def __del__(self):
-        """Close any open connections on shutdown."""
-        if self._connection:
-            self._connection.close()
 
     @contextmanager
     def get_connection(self) -> sqlalchemy.Connection:
