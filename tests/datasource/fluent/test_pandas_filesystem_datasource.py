@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         BatchSlice,
         SortersDefinition,
     )
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
 logger = logging.getLogger(__file__)
 
@@ -48,20 +49,24 @@ pytestmark = [
 
 
 @pytest.fixture
-def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
+def pandas_filesystem_datasource(
+    empty_data_context_fake_filesystem, fs: FakeFilesystem
+) -> PandasFilesystemDatasource:
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
+    fs.create_dir(base_directory_rel_path)
     base_directory_abs_path = (
         pathlib.Path(__file__)
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
+    fs.create_dir(base_directory_abs_path)
     pandas_filesystem_datasource = PandasFilesystemDatasource(  # type: ignore[call-arg]
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
-    pandas_filesystem_datasource._data_context = empty_data_context
+    pandas_filesystem_datasource._data_context = empty_data_context_fake_filesystem
     return pandas_filesystem_datasource
 
 

@@ -111,6 +111,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
 yaml = YAMLHandler()
 ###
@@ -830,7 +831,7 @@ def mysql_engine(test_backend):
 
 @pytest.fixture(scope="function")
 def empty_data_context(
-    tmp_path,
+    tmp_path: pathlib.Path,
 ) -> FileDataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -839,6 +840,26 @@ def empty_data_context(
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
+    assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture
+def empty_data_context_fake_filesystem(
+    tmp_path: pathlib.Path,
+    fs: FakeFilesystem,
+) -> FileDataContext:
+    project_path = tmp_path / "empty_data_context"
+    fs.create_dir(project_path)
+
+    repo_root = pathlib.Path(__file__).parents[1]
+    repo_in_fs = tmp_path / "repo"
+    fs.add_real_directory(source_path=repo_root, target_path=repo_in_fs)
+    context = gx.data_context.FileDataContext.create(project_path)
+    context_path = project_path / "great_expectations"
+
+    asset_config_path = context_path / "expectations"
+    fs.create_dir(asset_config_path)
     assert context.list_datasources() == []
     return context
 
