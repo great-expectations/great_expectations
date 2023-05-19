@@ -80,7 +80,7 @@ def test_vcs_schemas_match(
             if isinstance(value, dict):
                 _sort_required_lists(schema_as_dict=value)
 
-    if _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
+    if "Pandas" in str(schema_dir) and _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
         pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
     print(f"python version: {sys.version.split()[0]}")
