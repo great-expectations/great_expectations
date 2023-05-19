@@ -30,7 +30,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 For this example we will use a connection string to connect to our PostgreSQL database.  In PostgreSQL, connection strings are formatted like:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py connect_string"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py connection_string"
 ```
 
 ### 3. Create a SQLite Datasource

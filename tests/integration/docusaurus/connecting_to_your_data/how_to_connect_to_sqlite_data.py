@@ -56,7 +56,7 @@ assert "name: my_datasource" in str(datasource)
 assert "type: sqlite" in str(datasource)
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py assest_name">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py asset_name">
 asset_name = "my_asset"
 asset_table_name = my_table_name
 # </snippet>
