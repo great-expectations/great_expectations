@@ -19,6 +19,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py imports">
 import great_expectations as gx
 
+# are we keeping this?
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
