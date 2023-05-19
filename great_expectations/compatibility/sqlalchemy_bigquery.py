@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy as sa
 from great_expectations.compatibility.not_imported import NotImported
 
 SQLALCHEMY_BIGQUERY_NOT_IMPORTED = NotImported(
@@ -9,8 +9,8 @@ SQLALCHEMY_BIGQUERY_NOT_IMPORTED = NotImported(
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
 
-if sqlalchemy:
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+if sa:
+    sa.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
 
 bigquery_types_tuple = None
 

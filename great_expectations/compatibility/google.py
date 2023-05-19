@@ -34,7 +34,7 @@ except (ImportError, AttributeError):
 try:
     from google.cloud import bigquery as python_bigquery
 except (ImportError, AttributeError):
-    python_bigquery = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+    python_bigquery = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 try:
     from google.cloud.storage import Client
 except (ImportError, AttributeError):
