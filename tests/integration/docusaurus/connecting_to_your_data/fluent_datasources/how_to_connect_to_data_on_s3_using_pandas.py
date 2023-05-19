@@ -4,15 +4,6 @@ To run this code as a local test, use the following console command:
 pytest -v --docs-tests -m integration -k "how_to_connect_to_data_on_s3_using_pandas" tests/integration/test_script_runner.py
 ```
 """
-import os
-from typing import List
-
-import pandas as pd
-
-from moto import mock_s3
-from botocore.client import BaseClient
-
-from great_expectations.compatibility import aws
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py get_context">
@@ -28,55 +19,51 @@ bucket_name = "my_bucket"
 boto3_options = {}
 # </snippet>
 
-test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+bucket_name = "superconductive-docs-test"
 
-keys: List[str] = [
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2021-11.csv",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2021-12.csv",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2023-01.csv",
-]
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py create_datasource">
+datasource = context.sources.add_pandas_s3(
+    name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
+)
+# </snippet>
 
-with mock_s3():
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    client: BaseClient = aws.boto3.client("s3", region_name="us-east-1")
-    client.create_bucket(Bucket=bucket_name)
-    for key in keys:
-        client.put_object(
-            Bucket=bucket_name,
-            Body=test_df.to_csv(index=False).encode("utf-8"),
-            Key=key,
-        )
+assert datasource_name in context.datasources
 
-    # Python
-    # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py create_datasource">
-    datasource = context.sources.add_pandas_s3(
-        name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
-    )
-    # </snippet>
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
+asset_name = "my_taxi_data_asset"
+s3_prefix = "data/taxi_yellow_tripdata_samples/"
+batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+data_asset = datasource.add_csv_asset(
+    name=asset_name, batching_regex=batching_regex, s3_prefix=s3_prefix
+)
+# </snippet>
 
-    assert datasource_name in context.datasources
+assert data_asset
 
-    # Python
-    # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py add_asset">
-    asset_name = "my_taxi_data_asset"
-    s3_prefix = "data/taxi_yellow_tripdata_samples/"
-    batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-    data_asset = datasource.add_csv_asset(
-        name=asset_name, batching_regex=batching_regex, s3_prefix=s3_prefix
-    )
-    # </snippet>
+assert datasource.get_asset_names() == {"my_taxi_data_asset"}
 
-    assert data_asset
-
-    assert datasource.get_asset_names() == {"my_taxi_data_asset"}
-
-    my_batch_request = data_asset.build_batch_request({"year": "2021", "month": "11"})
-    batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
-    assert len(batches) == 1
-    assert set(batches[0].columns()) == {
-        "col1",
-        "col2",
-    }
+my_batch_request = data_asset.build_batch_request({"year": "2019", "month": "03"})
+batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
+assert len(batches) == 1
+assert set(batches[0].columns()) == {
+    "vendor_id",
+    "pickup_datetime",
+    "dropoff_datetime",
+    "passenger_count",
+    "trip_distance",
+    "rate_code_id",
+    "store_and_fwd_flag",
+    "pickup_location_id",
+    "dropoff_location_id",
+    "payment_type",
+    "fare_amount",
+    "extra",
+    "mta_tax",
+    "tip_amount",
+    "tolls_amount",
+    "improvement_surcharge",
+    "total_amount",
+    "congestion_surcharge",
+}
