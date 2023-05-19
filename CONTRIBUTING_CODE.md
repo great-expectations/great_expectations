@@ -2,33 +2,23 @@
 
 To modify existing Great Expectations code, you complete the following tasks:
 
-- [Contribute a code change](#contribute-a-code-change)
-  - [Prerequisites](#prerequisites)
-  - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
-  - [Install Python dependencies](#install-python-dependencies)
-  - [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
-    - [Python](#python)
-    - [Anaconda](#anaconda)
-  - [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
-  - [Install Great Expectations](#install-great-expectations)
-  - [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
-    - [Prerequisites](#prerequisites-1)
-    - [PostgreSQL](#postgresql)
-      - [Troubleshooting](#troubleshooting)
-    - [MySQL](#mysql)
-    - [Spark](#spark)
-      - [Prerequisites](#prerequisites-2)
-      - [Install PySpark](#install-pyspark)
-  - [Test code changes](#test-code-changes)
-    - [Unit testing](#unit-testing)
-    - [BigQuery testing](#bigquery-testing)
-    - [Unit testing Expectations](#unit-testing-expectations)
-      - [Data](#data)
-      - [Schemas](#schemas)
-      - [Tests](#tests)
-  - [Test performance](#test-performance)
-  - [Submit a pull request](#submit-a-pull-request)
-  - [Issue tags](#issue-tags)
+- [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
+
+- [Install Python dependencies](#install-python-dependencies)
+
+- [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
+
+- [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
+
+- [Install great_expectations](#install-great_expectations)
+
+- [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
+
+- [Test code changes](#test-code-changes)
+
+- [Test performance](#test-performance)
+
+- [Submit a pull request](#submit-a-pull-request)
 
 To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel.
 
