@@ -35,7 +35,6 @@ import great_expectations as gx
 
 context = gx.get_context()
 # </snippet>
-assert context is not None
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py connection_string">
 my_connection_string = f"sqlite:///{sqlite_database_path}"
@@ -65,16 +64,15 @@ asset_table_name = my_table_name
 table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
 # </snippet>
 
-assert table_asset is not None
-
+assert table_asset
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py asset_query">
 asset_name = "my_query_asset"
-asset_query = "SELECT * from yellow_tripdata_sample_2019_01"
+query = "SELECT * from yellow_tripdata_sample_2019_01"
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py query_table_asset">
-table_asset = datasource.add_query_asset(name=asset_name, query=asset_query)
+query_asset = datasource.add_query_asset(name=asset_name, query=query)
 # </snippet>
 
-assert table_asset is not None
+assert query_asset

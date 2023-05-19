@@ -8,6 +8,9 @@ keywords: [Great Expectations, SQLite, SQL]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+<!-- ### 1. Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+
 In this guide we will demonstrate how to connect Great Expectations to data in a SQLite database.  We will demonstrate how to create a SQLite Datasource.  With our SQLite Datasource we will then show the methods for connecting to data in a SQLite table and connecting to data from a SQLite query.
 
 ## Prerequisites
@@ -23,8 +26,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 ### 1. Import GX and instantiate a Data Context
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_connect_to_sqlite_data.py import"
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Determine your connection string
 
