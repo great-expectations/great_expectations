@@ -549,3 +549,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             id=id,
             resource_name=name,
         )
+
+    def _validate_key(self, key) -> None:
+        if not isinstance(key, tuple) or len(key) != 3:
+            raise TypeError(
+                "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
+            )
+
+        resource_type, id, resource_name = key
+        try:
+            GXCloudRESTResource(resource_type)
+        except ValueError:
+            raise TypeError(
+                f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
+            )
