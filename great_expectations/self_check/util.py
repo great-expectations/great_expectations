@@ -77,7 +77,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
-    connection_manager,
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
@@ -864,6 +863,7 @@ def build_pandas_validator_with_data(
     )
 
 
+# TODO: Here we set engine as a connection
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
@@ -935,10 +935,10 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
         engine = sa.create_engine(

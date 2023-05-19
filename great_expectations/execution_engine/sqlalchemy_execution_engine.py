@@ -279,6 +279,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._create_temp_table = create_temp_table
         os.environ["SF_PARTNER"] = "great_expectations_oss"
 
+        # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive by
+        # keeping a reference to it.
+        # Even though we use a single connection pool for dialects that need a single persisted connection
+        # (e.g. for accessing temporary tables), if we don't keep a reference
+        # then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
+        self._connection = None
+
         if engine is not None:
             if credentials is not None:
                 logger.warning(
@@ -1374,11 +1381,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_connection(self) -> sqlalchemy.Connection:
         """Get a connection for executing queries.
 
+        Some databases sqlite/mssql temp tables only persist within a connection,
+        so we need to keep the connection alive by keeping a reference to it.
+        Even though we use a single connection pool for dialects that need a single persisted connection
+        (e.g. for accessing temporary tables), if we don't keep a reference
+        then we get errors like sqlite3.ProgrammingError: Cannot operate on a closed database.
+
         Returns:
             Sqlalchemy connection
         """
-        with self.engine.connect() as connection:
-            yield connection
+        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
+            try:
+                if not self._connection:
+                    self._connection = self.engine.connect()
+                yield self._connection
+            finally:
+                # Temp tables only persist within a connection for some dialects,
+                # so we need to keep the connection alive.
+                pass
+        else:
+            with self.engine.connect() as connection:
+                yield connection
 
     def execute_query(
         self, query: sqlalchemy.Selectable
