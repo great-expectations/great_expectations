@@ -4,9 +4,9 @@ import pytest
 
 from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from great_expectations.agent.message_service.subscriber import (
+    EventContext,
     Subscriber,
 )
-from great_expectations.agent.models import Event
 from tests.agent.message_service.amqp_errors import AMQP_CHANNEL_AND_CONNECTION_ERRORS
 
 
@@ -23,10 +23,10 @@ def test_subscriber_consume_calls_basic_consume():
     subscriber = Subscriber(client=client)
     queue = "test-queue"
 
-    def on_message(event: Event, correlation_id: str) -> None:
+    def on_message(event_context: EventContext) -> None:
         pass
 
-    subscriber.consume(queue=queue, on_message=on_message)
+    subscriber.consume(queue=queue, on_message=on_message, retries=1)
 
     client.channel.basic_consume.assert_called_with(
         queue=queue, on_message_callback=ANY
@@ -38,10 +38,10 @@ def test_subscriber_consume_calls_start_consuming():
     subscriber = Subscriber(client=client)
     queue = "test-queue"
 
-    def on_message(event: Event, correlation_id: str) -> None:
+    def on_message(event_context: EventContext) -> None:
         pass
 
-    subscriber.consume(queue=queue, on_message=on_message)
+    subscriber.consume(queue=queue, on_message=on_message, retries=1)
 
     client.channel.start_consuming.assert_called_with()
 
@@ -52,7 +52,7 @@ def test_subscriber_close_closes_channel():
 
     subscriber.close()
 
-    client.channel.close.assert_called_with()
+    client.close.assert_called_with()
 
 
 def test_subscriber_close_closes_connection():
@@ -61,7 +61,7 @@ def test_subscriber_close_closes_connection():
 
     subscriber.close()
 
-    client.connection.close.assert_called_with()
+    client.close.assert_called_with()
 
 
 @pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
