@@ -141,6 +141,11 @@ from great_expectations.compatibility.sqlalchemy_bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
+if sqla_bigquery and sa:
+    sa.dialects.registry.register(
+        GXSqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "BigQueryDialect"
+    )
+
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
