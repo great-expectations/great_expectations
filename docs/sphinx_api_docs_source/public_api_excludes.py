@@ -697,4 +697,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         name="run",
         filepath=pathlib.Path("great_expectations/agent/agent.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="Close is not included in the public API.",
+        name="close",
+        filepath=pathlib.Path(
+            "great_expectations/agent/message_service/rabbit_mq_client.py"
+        ),
+    ),
 ]
