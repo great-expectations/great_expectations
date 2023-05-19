@@ -3033,6 +3033,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
+
+    def _update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> ExpectationSuite:
+        """
+        Like `update_expectation_suite` but without the usage statistics logging.
+        """
         name = expectation_suite.expectation_suite_name
         id = expectation_suite.ge_cloud_id
         key = self._determine_key_for_suite_update(name=name, id=id)
@@ -3139,7 +3148,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         try:
-            got_expectation_suite = self.get_expectation_suite(
+            existing = self.get_expectation_suite(
                 expectation_suite_name=expectation_suite.name
             )
         except gx_exceptions.DataContextError:
@@ -3147,8 +3156,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self._add_expectation_suite(expectation_suite=expectation_suite)
 
         # The suite object must have an ID in order to request a PUT to GX Cloud.
-        expectation_suite.ge_cloud_id = got_expectation_suite.ge_cloud_id
-        return self.update_expectation_suite(expectation_suite=expectation_suite)
+        expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
     @new_argument(
