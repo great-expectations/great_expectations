@@ -606,7 +606,9 @@ def _sqlalchemy_map_condition_index(
             domain_records_as_selectable
         ).limit(result_format["partial_unexpected_count"])
     )
-    query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
+    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
+        final_query
+    ).fetchall()
 
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
