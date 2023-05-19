@@ -18,7 +18,6 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.optional_imports import azure_storage
 
 yaml = YAMLHandler()
 
@@ -790,7 +789,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     )
     assert unsorted_batch_definition_list == expected_batch_definitions_unsorted
 
-    
+
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1064,6 +1063,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
         ),
     )
     assert my_batch_definition == expected_batch_definition
+
 
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
@@ -1437,6 +1437,7 @@ azure_options:
         )
         == "wasbs://my_container@my_account_url.blob.core.windows.net/my_base_directory/gamma-202005.csv"
     )
+
 
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
