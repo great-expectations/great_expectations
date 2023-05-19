@@ -424,8 +424,8 @@ class BaseDatasource:
 
 
 NOT_FLUENT_ERROR_MSG: str = (
-    "Not a 'Fluent' Datasource. Please refer to `0.15` docs https://docs.greatexpectations.io/docs/0.15.50/"
-    "\n or recreate your datasource with our new 'Fluent' API https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/"
+    "Not a 'Fluent' Datasource. Please refer to `0.15` docs for info on non 'Fluent' Datasources: https://docs.greatexpectations.io/docs/0.15.50/"
+    "\n or recreate your datasource with our new 'Fluent' API: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/"
 )
 
 
