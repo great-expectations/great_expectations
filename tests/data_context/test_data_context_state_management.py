@@ -63,7 +63,6 @@ class ExpectationsStoreSpy(ExpectationsStore):
 
 
 class ProfilerStoreSpy(ProfilerStore):
-
     STORE_NAME = "profiler_store"
 
     def __init__(self) -> None:
@@ -87,7 +86,6 @@ class ProfilerStoreSpy(ProfilerStore):
 
 
 class CheckpointStoreSpy(CheckpointStore):
-
     STORE_NAME = "checkpoint_store"
 
     def __init__(self) -> None:

@@ -32,7 +32,6 @@ from great_expectations.render.util import substitute_none_for_missing
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnCoordinatesDistance(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.coordinates.distance"
     value_keys = ("center_point",)

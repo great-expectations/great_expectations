@@ -380,7 +380,6 @@ def column_reflection_fallback(
 
     # with sqlalchemy_engine.begin() as connection:
     with connection:
-
         col_info_dict_list: List[Dict[str, str]]
         # noinspection PyUnresolvedReferences
         if dialect.name.lower() == "mssql":
@@ -938,7 +937,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:

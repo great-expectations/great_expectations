@@ -684,7 +684,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-
         if not isinstance(key, tuple):
             key = key.to_tuple()
 

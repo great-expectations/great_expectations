@@ -15,6 +15,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
         "min_value": 0,
         "strict_min": True,
     }
+
     # </snippet>
     # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config">
     def validate_configuration(self, configuration):

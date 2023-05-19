@@ -208,7 +208,6 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks: List[RenderedTableContent],
         validation_results: ExpectationSuiteValidationResult,
     ) -> CollapseContent:
-
         attrs = [
             ("batch_markers", "Batch Markers"),
             ("batch_kwargs", "Batch Kwargs"),
@@ -797,7 +796,6 @@ class ExpectationSuitePageRenderer(Renderer):
     # TODO: Update tests
     @classmethod
     def _render_expectation_suite_notes(cls, expectations):
-
         content = []
 
         total_expectations = len(expectations.expectations)

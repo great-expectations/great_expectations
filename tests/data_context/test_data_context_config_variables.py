@@ -50,7 +50,6 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
 def test_config_variables_on_context_without_config_variables_filepath_configured(
     data_context_without_config_variables_filepath_configured,
 ):
-
     # test the behavior on a context that does not config_variables_filepath (the location of
     # the file with config variables values) configured.
 
