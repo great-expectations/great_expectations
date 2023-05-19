@@ -1023,7 +1023,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
     @property
-    @functools.lru_cache()  # noqa: B019 # lru_cache on method
+    @functools.lru_cache  # noqa: B019 # lru_cache on method
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 

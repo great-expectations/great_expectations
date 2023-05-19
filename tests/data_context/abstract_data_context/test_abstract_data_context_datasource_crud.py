@@ -1,8 +1,7 @@
-from typing import Optional, Union
+from typing import Final, Optional, Union
 from unittest import mock
 
 import pytest
-from typing_extensions import Final
 
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.data_context import AbstractDataContext

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from inspect import Parameter, Signature
-from typing import TYPE_CHECKING, Callable, ForwardRef, Type
-
-from typing_extensions import Protocol
+from typing import TYPE_CHECKING, Callable, ForwardRef, Protocol, Type
 
 from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories

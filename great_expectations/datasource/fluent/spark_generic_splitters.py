@@ -5,11 +5,12 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
+    Protocol,
     Union,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,

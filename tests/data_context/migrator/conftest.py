@@ -1,7 +1,6 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple, Union
 
 import pytest
-from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
