@@ -4,9 +4,7 @@ import logging
 import re
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Any, Dict, Optional
-
-from typing_extensions import Final
+from typing import Any, Dict, Final, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import azure, google

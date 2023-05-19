@@ -11,6 +11,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -22,7 +23,6 @@ from typing import (
 import pytest
 import responses
 from pytest import MonkeyPatch
-from typing_extensions import Final
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData

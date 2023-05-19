@@ -9,13 +9,13 @@ from typing import (
     Dict,
     Hashable,
     Iterable,
+    Literal,
     Optional,
     Sequence,
     Union,
 )
 
 from botocore.client import BaseClient as BaseClient
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import S3Url as S3Url
