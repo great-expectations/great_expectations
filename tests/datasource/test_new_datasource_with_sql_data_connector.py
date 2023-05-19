@@ -731,7 +731,7 @@ tables:
 
 
 @pytest.mark.skipif(
-    sqla_bigquery is None,
+    not sqla_bigquery,
     reason="sqlalchemy_bigquery is not installed",
 )
 @pytest.mark.integration
