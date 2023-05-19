@@ -31,7 +31,7 @@ yaml = YAMLHandler()
 
 
 @pytest.fixture
-def basic_pandas_datasource_v013(tmp_path_factory):
+def basic_pandas_datasource_v013(tmp_path_factory) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_pandas_datasource_v013_filesystem_data_connector"
@@ -80,7 +80,7 @@ data_connectors:
 
 
 @pytest.fixture
-def basic_spark_datasource(tmp_path_factory, spark_session):
+def basic_spark_datasource(tmp_path_factory, spark_session) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
     )
@@ -124,7 +124,7 @@ data_connectors:
 @pytest.fixture
 def sample_datasource_v013_with_single_partition_file_data_connector(
     tmp_path_factory,
-):
+) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_pandas_datasource_v013_single_partition_filesystem_data_connector"
