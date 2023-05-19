@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
-from typing import Callable, Union
+from time import sleep
+from typing import Callable, Union, Optional
 
 import pydantic
 from pika.adapters.blocking_connection import BlockingChannel
@@ -43,7 +44,8 @@ class Subscriber:
         """
         self.client = client
 
-    def consume(self, queue: str, on_message: OnMessageCallback) -> None:
+    def consume(self, queue: str, on_message: OnMessageCallback, retries: Optional[int] =None, wait: int =0) -> None:
+
         """Subscribe to queue with on_message callback.
 
         Blocking call which listens to an event stream and invokes on_message
@@ -55,14 +57,24 @@ class Subscriber:
         """
         # avoid defining _callback_handler inline
         callback = partial(self._callback_handler, on_message=on_message)
-        try:
-            self.client.channel.basic_consume(queue=queue, on_message_callback=callback)
-            self.client.channel.start_consuming()
-        except (AMQPError, ChannelError) as e:
-            raise SubscriberError from e
-        except KeyboardInterrupt as e:
-            self.client.channel.stop_consuming()
-            raise KeyboardInterrupt from e
+        if retries is None:
+            retries = -1
+        while retries != 0:
+            print("Connecting to GX Cloud")
+            retries -= 1
+            try:
+                self.client.channel.basic_consume(queue=queue, on_message_callback=callback)
+                self.client.channel.start_consuming()
+            except (AMQPError, ChannelError) as e:
+                print("Error in connection to GX Cloud - retrying.")
+                print(e)
+                self.client.reset_connection()
+            except KeyboardInterrupt as e:
+                self.client.channel.stop_consuming()
+                raise KeyboardInterrupt from e
+            sleep(wait)
+
+        print("Unable to connect - please check your network and restart the agent.")
         # user is responsible for calling subscriber.close
 
     def _callback_handler(
@@ -93,14 +105,16 @@ class Subscriber:
         except pydantic.ValidationError:
             event = None
 
+        event_proccessed_callback = partial(
+                self._handle_event_processed,
+                _delivery_tag=method_frame.delivery_tag,
+                _channel=channel,
+            )
+
         event_context = EventContext(
             event=event,
             correlation_id=correlation_id,
-            event_processed=partial(
-                self._handle_event_processed,
-                delivery_tag=method_frame.delivery_tag,
-                _channel=channel,
-            ),
+            event_processed=event_proccessed_callback
         )
 
         return on_message(event_context)

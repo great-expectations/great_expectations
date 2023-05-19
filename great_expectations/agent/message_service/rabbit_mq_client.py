@@ -25,11 +25,15 @@ class RabbitMQClient:
 
             parameters = pika.URLParameters(url)
             parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-
+            self._parameters = parameters
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
         except (AMQPError, ChannelError) as e:
             raise ClientError from e
+
+    def reset_connection(self):
+        self.connection = pika.BlockingConnection(self._parameters)
+        self.channel = self.connection.channel()
 
 
 class ClientError(Exception):

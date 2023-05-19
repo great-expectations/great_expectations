@@ -9,7 +9,7 @@ class EventBase(BaseModel):
 
 
 class RunDataAssistantEvent(EventBase):
-    type: Literal["run-data-assistant"] = "run-data-assistant"
+    type: Literal["onboarding_data_assistant_request.received"] = "onboarding_data_assistant_request.received"
 
 
 class ShutdownEvent(EventBase):

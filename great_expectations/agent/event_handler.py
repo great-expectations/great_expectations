@@ -1,5 +1,8 @@
-from great_expectations.agent.models import Event, RunDataAssistantEvent
+from great_expectations.agent.message_service.subscriber import EventContext
+from great_expectations.agent.models import RunDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
+
+
 
 
 class EventHandler:
@@ -10,15 +13,15 @@ class EventHandler:
     def __init__(self, context: CloudDataContext) -> None:
         self._context = context
 
-    def handle_event(self, event: Event, correlation_id: str) -> None:
+    def handle_event(self, event_context: EventContext) -> None:
         """Pass event to the correct handler."""
-        if isinstance(event, RunDataAssistantEvent):
-            self._handle_run_data_assistant(event, correlation_id)
+        if isinstance(event_context.event, RunDataAssistantEvent):
+            self._handle_run_data_assistant(event_context)
         else:
-            pass
+            raise ValueError(f'Unknown message received - cannot process.')
 
     def _handle_run_data_assistant(
-        self, event: RunDataAssistantEvent, correlation_id: str
+        self, event_context: EventContext
     ) -> None:
         """Action that occurs when a RunDataAssistant event is received."""
         raise NotImplementedError

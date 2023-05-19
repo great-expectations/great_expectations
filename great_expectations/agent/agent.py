@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Dict, Optional
 
@@ -50,7 +51,8 @@ class GXAgent:
         print("Initializing GX-Agent")
         self._config = self._get_config_from_env()
         print("Loading a DataContext - this might take a moment.")
-        self._context: CloudDataContext = get_context(cloud_mode=True)
+        self._context = None  # too slow for debugging
+        # self._context: CloudDataContext = get_context(cloud_mode=True)
         print("DataContext is ready.")
 
         # Create a thread pool with a single worker, so we can run long-lived
@@ -58,7 +60,8 @@ class GXAgent:
         # the CloudDataContext cached here is used by the worker, therefore
         # it isn't safe to increase the number of workers.
         self._executor = ThreadPoolExecutor(max_workers=1)
-        self._current_task = None
+        self._current_task: Optional[Future] = None
+        self._current_event_context: Optional[EventContext] = None
 
     def run(self) -> None:
         """Open a connection to GX Cloud."""
@@ -77,7 +80,9 @@ class GXAgent:
             # Open a blocking connection until encountering a shutdown event
             subscriber.consume(
                 queue=self._config.organization_id,
-                on_message=self._handle_event_as_thread,
+                on_message=self._handle_event_as_thread_enter,
+                retries=3,
+                wait=1
             )
         except KeyboardInterrupt:
             print("Received request to shutdown.")
@@ -88,7 +93,7 @@ class GXAgent:
         finally:
             self._close_subscriber(subscriber)
 
-    def _handle_event_as_thread(self, event_context: EventContext) -> None:
+    def _handle_event_as_thread_enter(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.
 
         Callback passed to Subscriber.consume which forwards events to
@@ -97,13 +102,18 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-
         if self._can_accept_new_task() is not True:
             # signal to Subscriber that we can't process this message right now
             return event_context.event_processed(retry=True)
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
+        # TODO lakitu-139: record job as started
+
+        # When the thread exits the results are processed in _handle_event_as_thread_exit.
+        # We persist the event_context here so we can ack/nack on exit
+        self._current_event_context = event_context
+        self._current_task.add_done_callback(self._handle_event_as_thread_exit)
 
     def _handle_event(self, event_context: EventContext) -> None:
         """Pass events to EventHandler.
@@ -114,21 +124,32 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        # warning:  this method is likely to be executed in a different thread than
+        # warning:  this method will be executed in a different thread than
         #           where it was defined, so take care with shared resources.
         #           It's safe to use self._context because we restrict ourselves
-        #           to a single worker thread at any given time.
-
-        # TODO lakitu-139: record job as started
+        #           to a single worker thread at any given time. The ack/nack
+        #           callback provided by the Subscriber in event_context will fail,
+        #           since it depends on the channel available in the main thread.
 
         handler = EventHandler(context=self._context)
         handler.handle_event(
-            event=event_context.event, correlation_id=event_context.correlation_id
+            event_context=event_context
         )
+        return event_context
+
+    def _handle_event_as_thread_exit(self, future: Future):
+        """Callback invoked when the thread running GX exits."""
+        print("Finished processing request.")
+
+        if self._current_event_context is not None:
+            return self._current_event_context.event_processed(retry=False)
+        else:
+            print("cant respond to message")
 
         # TODO lakitu-139: record job as complete
 
-        return event_context.event_processed(retry=False)
+        self._current_task = None
+        self._current_event_context = None
 
     def _can_accept_new_task(self) -> bool:
         return self._current_task is None or self._current_task.done()
