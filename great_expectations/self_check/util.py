@@ -2899,9 +2899,9 @@ def _bigquery_dataset() -> str:
 
 
 def _get_clickhouse_connection_string(
-    hostname: str = "localhost", schema_name: str = "schema"
+    hostname: str = "localhost", schema_name: str = "test"
 ) -> str:
-    return f"clickhouse+native://test@{hostname}:8088/memory/{schema_name}"
+    return f"clickhouse+native://{hostname}:9000/{schema_name}"
 
 
 def _create_clickhouse_engine(
