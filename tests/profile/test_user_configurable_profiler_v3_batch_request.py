@@ -28,9 +28,6 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
-from great_expectations.self_check.sqlalchemy_connection_manager import (
-    connection_manager,
-)
 from great_expectations.self_check.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
@@ -116,7 +113,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
     table_name=None,
 ):
     sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
         engine = postgresql_engine
