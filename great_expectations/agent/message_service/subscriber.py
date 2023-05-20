@@ -45,6 +45,7 @@ class Subscriber:
         """
         self.client = client
         self._correlation_ids = defaultdict(lambda: 0)
+        self._retries = 0
 
     def consume(
         self,
@@ -68,10 +69,8 @@ class Subscriber:
         """
         # avoid defining _callback_handler inline
         callback = partial(self._callback_handler, on_message=on_message)
-        if retry_limit is None:
-            retry_limit = -1
-        while retry_limit != 0:
-            retry_limit -= 1
+
+        while self._should_retry(max=retry_limit):
             try:
                 self.client.channel.basic_consume(
                     queue=queue, on_message_callback=callback
@@ -169,9 +168,6 @@ class Subscriber:
             # if the _channel is no longer valid, we can't ack or nack this event
             # best we can do is reset the connection and try again
             pass
-        # todo - is this necessary?
-        if self.client.connection.is_closed or self.client.channel.is_closed:
-            self.client.reset_connection()
 
     def _ack(
         self,
@@ -206,6 +202,16 @@ class Subscriber:
         self._correlation_ids[id] += 1
         delivery_count = self._correlation_ids[id]
         if delivery_count > MAX_REDELIVERY:
+            return True
+        else:
+            return False
+
+    def _should_retry(self, max: Optional[int] = None) -> bool:
+        """Returns True the first max times this method is called, then False."""
+        self._retries += 1
+        if max is None:
+            return True
+        elif self._retries <= max:
             return True
         else:
             return False

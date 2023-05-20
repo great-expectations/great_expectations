@@ -27,8 +27,6 @@ from great_expectations.agent.message_service.subscriber import (
 HandlerMap = Dict[str, OnMessageCallback]
 
 
-
-
 @dataclass(frozen=True)
 class GXAgentConfig:
     """GXAgent configuration.
