@@ -2,13 +2,12 @@ import os
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Dict, Optional
 
 import pydantic
 from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
-from great_expectations import get_context
 from great_expectations.agent.event_handler import (
     EventHandler,
     EventHandlerResult,
@@ -28,8 +27,6 @@ from great_expectations.agent.message_service.subscriber import (
 HandlerMap = Dict[str, OnMessageCallback]
 
 
-if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
 
 
 @dataclass(frozen=True)
@@ -57,7 +54,8 @@ class GXAgent:
         print("Initializing GX-Agent")
         self._config = self._get_config_from_env()
         print("Loading a DataContext - this might take a moment.")
-        self._context: CloudDataContext = get_context(cloud_mode=True)
+        # self._context: CloudDataContext = get_context(cloud_mode=True)
+        self._context = None
         print("DataContext is ready.")
 
         # Create a thread pool with a single worker, so we can run long-lived
@@ -85,7 +83,7 @@ class GXAgent:
             subscriber.consume(
                 queue=self._config.organization_id,
                 on_message=self._handle_event_as_thread_enter,
-                wait=1,
+                retry_delay=1,
             )
         except KeyboardInterrupt:
             print("Received request to shutdown.")
@@ -135,7 +133,10 @@ class GXAgent:
         #           to a single worker thread at any given time. The ack/nack
         #           callback provided by the Subscriber in event_context will fail,
         #           since it depends on the channel available in the main thread.
-
+        if event_context.event is not None:
+            print(
+                f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
+            )
         handler = EventHandler(context=self._context)
         result = handler.handle_event(event_context=event_context)
         return result

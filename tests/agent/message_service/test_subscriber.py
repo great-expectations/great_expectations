@@ -26,7 +26,7 @@ def test_subscriber_consume_calls_basic_consume():
     def on_message(event_context: EventContext) -> None:
         pass
 
-    subscriber.consume(queue=queue, on_message=on_message, retries=1)
+    subscriber.consume(queue=queue, on_message=on_message, retry_limit=1)
 
     client.channel.basic_consume.assert_called_with(
         queue=queue, on_message_callback=ANY
@@ -41,7 +41,7 @@ def test_subscriber_consume_calls_start_consuming():
     def on_message(event_context: EventContext) -> None:
         pass
 
-    subscriber.consume(queue=queue, on_message=on_message, retries=1)
+    subscriber.consume(queue=queue, on_message=on_message, retry_limit=1)
 
     client.channel.start_consuming.assert_called_with()
 
