@@ -36,7 +36,7 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import new_method_or_class, public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import convert_to_json_serializable
@@ -1403,6 +1403,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             with self.engine.connect() as connection:
                 yield connection
 
+    @public_api
+    @new_method_or_class(version="0.16.14")
     def execute_query(
         self, query: sqlalchemy.Selectable
     ) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
@@ -1420,6 +1422,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return result
 
+    @public_api
+    @new_method_or_class(version="0.16.14")
     def execute_query_in_transaction(
         self, query: sqlalchemy.Selectable
     ) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
