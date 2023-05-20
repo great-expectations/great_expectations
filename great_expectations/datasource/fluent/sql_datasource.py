@@ -8,14 +8,15 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Literal,
     Optional,
+    Protocol,
     Type,
     Union,
     cast,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
@@ -426,6 +427,7 @@ class _SQLAsset(DataAsset):
         self.test_splitter_connection()
         return self
 
+    @public_api
     def add_splitter_year(
         self: Self,
         column_name: str,
@@ -440,6 +442,7 @@ class _SQLAsset(DataAsset):
             SplitterYear(method_name="split_on_year", column_name=column_name)
         )
 
+    @public_api
     def add_splitter_year_and_month(
         self: Self,
         column_name: str,
@@ -456,6 +459,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_year_and_month_and_day(
         self: Self,
         column_name: str,
@@ -472,6 +476,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
@@ -490,6 +495,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
         """Associates a column value splitter with this sql asset.
         Args:
@@ -504,6 +510,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
@@ -522,6 +529,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         """Associates a mod integer splitter with this sql asset.
         Args:
@@ -538,6 +546,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
         """Associates a multi column value splitter with this sql asset.
         Args:

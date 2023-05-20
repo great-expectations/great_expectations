@@ -1,12 +1,11 @@
 import inspect
 import logging
-import warnings
 from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -61,48 +60,18 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    GEOGRAPHY,
+    bigquery_types_tuple,
+)
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as BigQueryDialect,
+)
 
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
-    bigquery_types_tuple = None
-    try:
-        from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
-
-        BIGQUERY_GEO_SUPPORT = True
-    except ImportError:
-        BIGQUERY_GEO_SUPPORT = False
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = None
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-    except ImportError:
-        sqla_bigquery = None
-        bigquery_types_tuple = None
-        pybigquery = None
+if GEOGRAPHY:
+    BIGQUERY_GEO_SUPPORT = True
+else:
+    BIGQUERY_GEO_SUPPORT = False
 
 try:
     import teradatasqlalchemy.dialect
@@ -589,10 +558,10 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
+        if BigQueryDialect and (
             isinstance(
                 execution_engine.dialect_module,
-                sqla_bigquery.BigQueryDialect,
+                BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):

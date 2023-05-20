@@ -227,7 +227,9 @@ def test_set(
     )
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
+        store_backend.set(
+            ("checkpoint", None, None), my_simple_checkpoint_config_serialized
+        )
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",

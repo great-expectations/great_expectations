@@ -10,6 +10,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -20,7 +21,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.signatures import _merge_signatures
@@ -476,8 +477,6 @@ class _SourceFactories:
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
-            # config provider needed for config substitution
-            datasource._config_provider = self._data_context.config_provider
             datasource.test_connection()
             self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
@@ -630,17 +629,19 @@ class _SourceFactories:
         return [*self.factories, *super().__dir__()]
 
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]:
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]:
     """
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
     for ds_name in _SourceFactories.type_lookup.type_names():
         ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
-        yield ds_name, ds_type
+        if include_datasource:
+            yield ds_name, ds_type
 
-        for asset_name in ds_type._type_lookup.type_names():
-            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
-            yield asset_name, asset_type
+        if include_data_asset:
+            for asset_name in ds_type._type_lookup.type_names():
+                asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+                yield asset_name, asset_type

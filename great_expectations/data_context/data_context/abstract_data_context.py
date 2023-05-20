@@ -18,6 +18,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -31,7 +32,7 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -740,8 +741,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        # config provider needed for config substitution
-        datasource._config_provider = self.config_provider
 
         datasource._data_context._save_project_config()
 
@@ -776,8 +775,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = datasource
 
         update_datasource._data_context = self
-        # config provider needed for config substitution
-        update_datasource._config_provider = self.config_provider
 
         update_datasource._rebuild_asset_data_connectors()
 

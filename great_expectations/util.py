@@ -40,6 +40,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Set,
@@ -54,7 +55,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from typing_extensions import Literal, TypeGuard
+from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy

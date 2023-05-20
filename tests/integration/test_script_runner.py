@@ -212,12 +212,6 @@ local_tests = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     # ),
     # Fluent Datasources
-    IntegrationTestFixture(
-        name="how_to_connect_to_one_or_more_files_using_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
     # Uncomment after resolving
     #       E           great_expectations.exceptions.exceptions.DataContextError: expectation_suite my_expectation_suite not found
     #
@@ -233,6 +227,16 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTestFixture(
+        name="data_docs",
+        user_flow_script="tests/integration/docusaurus/reference/glossary/data_docs.py",
+        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTestFixture(
+        name="how_to_edit_an_existing_expectation_suite",
+        user_flow_script="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py",
     ),
     IntegrationTestFixture(
         name="setup_overview",
@@ -319,14 +323,53 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="checkpoints_glossary",
+        user_flow_script="tests/integration/docusaurus/reference/glossary/checkpoints.py",
+        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
     IntegrationTestFixture(
         name="how_to_organize_batches_in_a_file_based_data_asset",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="how_to_organize_batches_in_a_sql_based_data_asset",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="how_to_quickly_connect_to_a_single_file_with_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_s3_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_s3_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
     ),
 ]
 
@@ -387,10 +430,6 @@ pandas_integration_tests = [
                 ".gcs/my_example_creds.json",
             ),
         ),
-    ),
-    IntegrationTestFixture(
-        name="build_data_docs",
-        user_flow_script="tests/integration/common_workflows/simple_build_data_docs.py",
     ),
 ]
 

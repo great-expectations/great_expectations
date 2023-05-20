@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import re
-
-from typing_extensions import Final
+from typing import Final
 
 # these fields must be added to `__fields_set__` before pydantic model serialization
 # methods are called. Otherwise it could be excluded.
