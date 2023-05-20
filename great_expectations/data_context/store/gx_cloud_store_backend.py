@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, 
 from urllib.parse import urljoin
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
