@@ -9,9 +9,6 @@ import pytest
 import requests
 
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.store.gx_cloud_store_backend import (
-    construct_json_payload,
-)
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from tests.datasource.fluent.conftest import (
     FAKE_ORG_ID,
@@ -154,40 +151,29 @@ def test_context_add_or_update_datasource(
     )
 
 
-@pytest.mark.unit
-def test_cloud_api_fake(
+@pytest.mark.cloud
+def test_cloud_add_or_update_datasource_kw_vs_positional(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
     taxi_data_samples_dir: pathlib.Path,
 ):
-    datasources_url = (
-        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources"
+    name: str = "kw_vs_positional_test"
+
+    datasource1 = empty_cloud_context_fluent.sources.add_pandas_filesystem(
+        name=name, base_directory=taxi_data_samples_dir
     )
 
-    datasource = empty_cloud_context_fluent.sources.add_pandas_filesystem(
-        name="save_ds_test", base_directory=taxi_data_samples_dir
+    # pass name as keyword arg
+    datasource2 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+        name=name, base_directory=taxi_data_samples_dir
     )
-    assert datasource.id
 
-    with pytest.raises(Exception) as exc:
-        empty_cloud_context_fluent.sources.add_pandas_filesystem(
-            name="save_ds_test", base_directory=taxi_data_samples_dir
-        )
-    print(repr(exc.value))
+    # pass name as positional arg
+    datasource3 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+        name, base_directory=taxi_data_samples_dir
+    )
 
-    with pytest.raises(requests.HTTPError):
-        response = requests.post(
-            datasources_url,
-            json=construct_json_payload(
-                resource_type="datasource",
-                organization_id=FAKE_ORG_ID,
-                attributes_key="datasource_config",
-                attributes_value={"name": "save_ds_test"},
-            ),
-        )
-        print(f"\nExpect Conflict - {response}\n{pf(response.json())}")
-        response.raise_for_status()
-    assert response.status_code == 409
+    assert datasource1 == datasource2 == datasource3
 
 
 @pytest.mark.cloud
