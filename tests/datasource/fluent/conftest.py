@@ -281,6 +281,7 @@ def _post_fake_db_datasources_callback(
 ) -> _CallbackResult:
     url = request.url
     logger.info(f"{request.method} {url}")
+    logger.warning(f" _CLOUD_API_FAKE_DB\n{pf(_CLOUD_API_FAKE_DB, depth=1)}")
 
     ds_names: set[str] = _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"]
     datasource_path = f"{url}/{FAKE_DATASOURCE_ID}"
