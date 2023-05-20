@@ -402,7 +402,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
-            )
+            ) from timeout_exc
         except Exception as e:
             logger.debug(str(e))
             raise StoreBackendError(
