@@ -1161,7 +1161,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         More background can be found here: https://github.com/great-expectations/great_expectations/pull/3104/
         """
         if self._engine_backup:
-            self.engine.close()
+            if self._connection:
+                self._connection.close()
             self._engine_backup.dispose()
         else:
             self.engine.dispose()
