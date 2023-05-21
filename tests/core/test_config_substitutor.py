@@ -27,7 +27,7 @@ class MockedBoto3Client:
         return self.secret_response
 
     def get_parameter(self, *args, **kwargs):
-        return self.secret_response
+        return self.get_secret_value(*args, **kwargs)
 
 
 class MockedBoto3Session:
