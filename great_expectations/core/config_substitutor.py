@@ -286,7 +286,7 @@ class _ConfigurationSubstitutor:
         :raises: ImportError, ValueError
         """
         regex = re.compile(
-            rf"{self.AWS_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
+            rf"{self.AWS_SSM_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
         if not boto3:
             logger.error(
