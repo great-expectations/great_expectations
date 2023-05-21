@@ -1,13 +1,10 @@
-"""
-This is a template for creating custom QueryExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
-"""
-
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -16,7 +13,13 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
-    """Expect the values of a pair of columns to be either both filled or empty simultaneously"""
+    """Expect the values of a pair of columns to be either both filled or empty simultaneously
+
+    Args:
+    template_dict: dict with the following keys: \
+        column_a - first column, to compare values against column_b
+        column_b - second column, to compare values against column_a
+    """
 
     metric_dependencies = ("query.template_values",)
 
@@ -31,7 +34,10 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
             ({column_a} is null and {column_b} is not null)
             """
 
-    success_keys = ("template_dict", "query",)
+    success_keys = (
+        "template_dict",
+        "query",
+    )
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -59,16 +65,19 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
+        template_dict = configuration.kwargs.get("template_dict")
+        try:
+            assert isinstance(
+                template_dict, dict
+            ), "'template_dict' must be supplied as a dict"
+            assert all(
+                [
+                    "column_a" in template_dict,
+                    "column_b" in template_dict,
+                ]
+            ), "The following keys have to be in the template dict: column_a, column_b "
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
 
     def _validate(
         self,
@@ -79,7 +88,9 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
 
         metrics = convert_to_json_serializable(data=metrics)
-        num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
+        num_of_inconsistent_rows = list(
+            metrics.get("query.template_values")[0].values()
+        )[0]
 
         is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 
@@ -106,21 +117,17 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "template_dict": {"column_a": "col1", "column_b": "col2"}
-                    },
+                    "in": {"template_dict": {"column_a": "col1", "column_b": "col2"}},
                     "out": {"success": True},
-                    "only_for": ["sqlite",],
+                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "template_dict": {"column_a": "col1", "column_b": "col3"}
-                    },
+                    "in": {"template_dict": {"column_a": "col1", "column_b": "col3"}},
                     "out": {"success": False},
-                    "only_for": ["sqlite",],
+                    "only_for": ["sqlite"],
                 },
             ],
         },
