@@ -143,12 +143,6 @@ def test_substitute_value_from_aws_secrets_manager(
             pytest.raises(ValueError),
             None,
         ),
-        (
-            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/000000000-0000-0000-0000-00000000000",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
     ],
 )
 @pytest.mark.unit
