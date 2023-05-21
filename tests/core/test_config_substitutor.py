@@ -98,6 +98,73 @@ def test_substitute_value_from_aws_secrets_manager(
             )
 
 
+@pytest.mark.parametrize(
+    "input_value,secret_response,raises,expected",
+    [
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "String",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "SecureString",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/secure/my-parameter",
+            {
+                "Parameter": {
+                    "Type": "SecureString",
+                    "Value": "value",
+                }
+            },
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/secure/my-param%&eter",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+        (
+            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/000000000-0000-0000-0000-00000000000",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_substitute_value_from_aws_ssm(
+    config_substitutor, input_value, secret_response, raises, expected
+):
+    with raises:
+        with mock.patch(
+            "great_expectations.core.config_substitutor.boto3.session.Session",
+            return_value=MockedBoto3Session(secret_response),
+        ):
+            assert (
+                config_substitutor.substitute_config_variable(
+                    template_str=input_value, config_variables_dict={}
+                )
+                == expected
+            )
+
+
 class MockedSecretManagerServiceClient:
     def __init__(self, secret_response):
         self.secret_response = secret_response
