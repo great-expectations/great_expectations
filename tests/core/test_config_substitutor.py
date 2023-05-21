@@ -26,6 +26,9 @@ class MockedBoto3Client:
     def get_secret_value(self, *args, **kwargs):
         return self.secret_response
 
+    def get_parameter(self, *args, **kwargs):
+        return self.secret_response
+
 
 class MockedBoto3Session:
     def __init__(self, secret_response):
