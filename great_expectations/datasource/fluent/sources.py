@@ -128,7 +128,6 @@ class _SourceFactories:
 
         # rollback type registrations if exception occurs
         with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
-
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -279,7 +278,6 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
-
                 # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field

@@ -249,7 +249,6 @@ class TestDocExampleParser:
 
     @pytest.mark.unit
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
-
         usages = docs_example_parser.get_names_from_usage_in_docs_examples()
         assert usages == {
             "ExampleClass",

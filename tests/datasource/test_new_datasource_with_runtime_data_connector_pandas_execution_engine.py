@@ -63,6 +63,7 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 # Tests with data passed in as batch_data
 #########################################
 
+
 # Tests with PandasExecutionEngine : batch_data
 def test_pandas_execution_engine_self_check(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
@@ -177,7 +178,6 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
 def test_batch_data_pandas_execution_engine_incorrect_batch_identifiers(
     datasource_with_runtime_data_connector_and_pandas_execution_engine,
 ):
-
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector

@@ -81,7 +81,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
@@ -203,7 +202,6 @@ def test_data_context_in_cloud_mode_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
@@ -316,7 +314,6 @@ def test_cloud_data_context_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":

@@ -58,7 +58,6 @@ def prompt_profile_to_create_a_suite(
     data_context: FileDataContext,
     expectation_suite_name: str,
 ) -> None:
-
     cli_message(
         string="""
 Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
@@ -896,7 +895,6 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
     """
 
     if config_file_location is not None and config_file_location != "":
-
         config_file_location_path = Path(config_file_location)
 
         # If the file or directory exists, treat it appropriately

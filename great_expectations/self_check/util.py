@@ -441,7 +441,7 @@ def get_dataset(  # noqa: C901 - 110
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
             pandas_schema = {}
-            for (key, value) in schema.items():
+            for key, value in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
                 # Further, some changes in pandas internal about how datetimes are created means to support pandas
                 # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -467,7 +467,6 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-
         spark_types = {
             "StringType": pyspark.types.StringType,
             "IntegerType": pyspark.types.IntegerType,
@@ -638,7 +637,7 @@ def _get_test_validator_with_data_pandas(
         if pk_column:
             schema["pk_index"] = "int"
         pandas_schema = {}
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             # Note, these are just names used in our internal schemas to build datasets *for internal tests*
             # Further, some changes in pandas internal about how datetimes are created means to support pandas
             # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -719,7 +718,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-
     spark_types: Dict[str, Callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
@@ -1525,7 +1523,6 @@ def build_test_backends_list(  # noqa: C901 - 48
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
-
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
@@ -2095,7 +2092,6 @@ def should_we_generate_this_test(
     extra_debug_info: str = "",
     debug_logger: Optional[logging.Logger] = None,
 ):
-
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
@@ -2381,7 +2377,6 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
 def check_json_test_result(  # noqa: C901 - 52
     test, result, data_asset=None, pk_column=False
 ) -> None:
-
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
     if pk_column:

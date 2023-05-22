@@ -238,7 +238,6 @@ def _create_context(
     asset_names: List[str],
     html_dir: Optional[str] = None,
 ) -> DataContext:
-
     data_docs_sites = (
         {
             "local_site": {

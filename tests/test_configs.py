@@ -18,7 +18,6 @@ def test_instantiate_class_from_config():
 
 @pytest.mark.unit
 def test_instantiate_class_from_config_with_overriden_defaults():
-
     # This config structure feels very tidy to me, even with nesting.
     fake_configurable_wrapper_object = instantiate_class_from_config(
         config={
