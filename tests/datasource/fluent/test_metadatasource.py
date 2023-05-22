@@ -12,13 +12,15 @@ from pydantic import DirectoryPath, validate_arguments
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import (
     _FLUENT_DATASOURCES_KEY,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
@@ -100,7 +102,7 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(self, _fs_datasource=None) -> None:
         ...
 
 
@@ -270,7 +272,6 @@ class TestMetaDatasource:
 @pytest.mark.unit
 class TestMisconfiguredMetaDatasource:
     def test_ds_type_field_not_set(self, empty_sources: _SourceFactories):
-
         with pytest.raises(
             TypeRegistrationError,
             match=r"`MissingTypeDatasource` is missing a `type` attribute",
@@ -300,7 +301,6 @@ class TestMisconfiguredMetaDatasource:
             MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
-
         with pytest.raises(
             TypeRegistrationError,
             match="No `type` field found for `BadAssetDatasource.asset_types` -> `MissingTypeAsset` unable to register asset type",

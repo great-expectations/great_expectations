@@ -15,7 +15,7 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 )
 from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
-    sanitize_prefix_for_s3,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
@@ -61,7 +61,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
         super().__init__(
@@ -75,7 +74,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_gcs_and_s3(text=prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 

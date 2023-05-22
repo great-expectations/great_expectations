@@ -7,6 +7,7 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
+import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -294,7 +295,7 @@ class TestDynamicPandasAssets:
             .build_batch_request()
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # expects BatchRequestBase
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -424,6 +425,13 @@ def test_default_pandas_datasource_get_and_set(
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
+    # ensure ephemeral data assets are not serialized
+    config_as_dict = empty_data_context.fluent_config.dict()["fluent_datasources"]
+    print(f"{pf(config_as_dict)}")
+    for ds in config_as_dict:
+        for asset in ds.get("assets", []):
+            assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+
 
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
@@ -471,10 +479,8 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
-        [
-            asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets
-        ]
+        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
+        for asset in empty_data_context.sources.pandas_default.assets
     )
 
 
@@ -516,3 +522,19 @@ def test_pandas_data_asset_batch_metadata(
         }
     )
     assert batch_list[0].metadata == substituted_batch_metadata
+
+
+def test_build_batch_request_raises_if_missing_dataframe(
+    empty_data_context: AbstractDataContext,
+):
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    dataframe_asset = empty_data_context.sources.add_or_update_pandas(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
+    dataframe_asset.dataframe = None
+    with pytest.raises(ValueError) as e:
+        dataframe_asset.build_batch_request()
+
+    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
+        e.value
+    )

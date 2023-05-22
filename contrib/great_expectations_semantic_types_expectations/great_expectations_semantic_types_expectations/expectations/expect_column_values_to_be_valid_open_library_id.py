@@ -15,7 +15,6 @@ OPEN_LIBRARY_ID_REGEX = r"^(OL[1-9]\d*[AMW])$"
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidOpenLibraryId(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_open_library_id"
 

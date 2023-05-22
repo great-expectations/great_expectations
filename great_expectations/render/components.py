@@ -4,10 +4,9 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
-from typing_extensions import Final
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
@@ -704,7 +703,7 @@ class RenderedDocumentContent(RenderedContent):
         ge_cloud_id=None,
     ) -> None:
         if not isinstance(sections, list) and all(
-            [isinstance(section, RenderedSectionContent) for section in sections]
+            isinstance(section, RenderedSectionContent) for section in sections
         ):
             raise InvalidRenderedContentError(
                 "RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -747,10 +746,8 @@ class RenderedDocumentContent(RenderedContent):
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
-            [
-                isinstance(content_block, RenderedComponentContent)
-                for content_block in content_blocks
-            ]
+            isinstance(content_block, RenderedComponentContent)
+            for content_block in content_blocks
         ):
             raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "

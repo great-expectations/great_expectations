@@ -24,7 +24,6 @@ No.  The interactive method used to create and edit Expectations does not edit o
 - Great Expectations installed in a Python environment
 - A Filesystem Data Context for your Expectations
 - Created a Datasource from which to request a Batch of data for introspection
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -92,12 +91,6 @@ Add the following method to retrieve a previously configured Data Asset from the
 :::info Limit the Batches returned by a Batch Request
 
 You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
-
-:::
-
-:::caution Batch Requests and Datasources built with the advanced block-config method
-
-If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated earlier.  For more information, please see our guide on [How to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 :::
 

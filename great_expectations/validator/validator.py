@@ -328,8 +328,6 @@ class Validator:
     ) -> Any:
         """Convenience method, return the value of the requested metric.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric: MetricConfiguration
 
@@ -344,8 +342,6 @@ class Validator:
     ) -> Dict[str, Any]:
         """
         Convenience method that resolves requested metrics (specified as dictionary, keyed by MetricConfiguration ID).
-
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
 
         Args:
             metrics: Dictionary of desired metrics to be resolved; metric_name is key and MetricConfiguration is value.
@@ -365,8 +361,6 @@ class Validator:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
@@ -381,11 +375,15 @@ class Validator:
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        """
-        Convenience method to obtain Batch columns.
+        """Convenience method to obtain Batch columns.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
@@ -396,7 +394,7 @@ class Validator:
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """Return the first several rows or records from a Batch of data.
+        """Convenience method to return the first several rows or records from a Batch of data.
 
         Args:
             n_rows: The number of rows to return.
@@ -1248,6 +1246,7 @@ class Validator:
 
         return evrs
 
+    @public_api
     def remove_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -1255,6 +1254,24 @@ class Validator:
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
+        """Remove an ExpectationConfiguration from the ExpectationSuite associated with the Validator.
+
+        Args:
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
+            match_type: This determines what kwargs to use when matching. Options are:
+                - 'domain' to match based on the data evaluated by that expectation
+                - 'success' to match based on all configuration parameters that influence whether an expectation succeeds on a given batch of data
+                - 'runtime' to match based on all configuration parameters.
+            remove_multiple_matches: If True, will remove multiple matching expectations.
+            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+
+        Returns:
+            The list of deleted ExpectationConfigurations.
+
+        Raises:
+            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            ValueError: No match or multiple matches found (and remove_multiple_matches=False).
+        """
 
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
@@ -1970,11 +1987,9 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            from great_expectations.optional_imports import (
-                pyspark_sql_DataFrame,
-            )
+            from great_expectations.compatibility import pyspark
 
-            if pyspark_sql_DataFrame and isinstance(batch.data, pyspark_sql_DataFrame):
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
@@ -2007,13 +2022,10 @@ class BridgeValidator:
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
-            from great_expectations.optional_imports import (
-                pyspark_sql_DataFrame,
-            )
+            from great_expectations.compatibility import pyspark
 
             if not (
-                pyspark_sql_DataFrame
-                and isinstance(self.batch.data, pyspark_sql_DataFrame)
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)
             ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"

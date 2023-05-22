@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import List
 
 import pandas as pd
 import pytest
@@ -6,20 +6,10 @@ from _pytest import monkeypatch
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy import Column, Integer, String, select
-    from sqlalchemy.orm import declarative_base
-except ImportError:
-    sa = None
-    Column = None
-    Integer = None
-    String = None
-    select = None
-    declarative_base = None
-
-
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
     get_unexpected_indices_for_multiple_pandas_named_indices,
@@ -40,18 +30,18 @@ from tests.test_utils import (
 # The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
 
-Base = declarative_base()
+Base = sqlalchemy.declarative_base()
 
 
 class A(Base):
     __tablename__ = "a"
-    id = Column(Integer, primary_key=True)
-    data = Column(String)
+    id = sa.Column(sa.Integer, primary_key=True)
+    data = sa.Column(sa.String)
 
 
-def select_with_post_compile_statements() -> "sqlalchemy.sql.Select":
+def select_with_post_compile_statements() -> sqlalchemy.Select:
     test_id: str = "00000000"
-    return select(A).where(A.data == test_id)
+    return sa.select(A).where(A.data == test_id)
 
 
 def _compare_select_statement_with_converted_string(engine) -> None:
@@ -60,7 +50,7 @@ def _compare_select_statement_with_converted_string(engine) -> None:
     Args:
         engine (ExecutionEngine): SqlAlchemyExecutionEngine with connection to backend under test
     """
-    select_statement: "sqlalchemy.sql.Select" = select_with_post_compile_statements()
+    select_statement: sqlalchemy.Select = select_with_post_compile_statements()
     returned_string = sql_statement_with_post_compile_to_string(
         engine=engine, select_statement=select_statement
     )
@@ -112,7 +102,6 @@ def unexpected_index_list_two_index_columns():
 def test_sql_statement_conversion_to_string_for_backends(
     backend_name: str, connection_string: str, test_backends: List[str]
 ):
-
     if backend_name in test_backends:
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
         _compare_select_statement_with_converted_string(engine=engine)
@@ -142,9 +131,7 @@ def test_sql_statement_conversion_to_string_bigquery(test_backends):
         monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
         connection_string = get_bigquery_connection_url()
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        select_statement: "sqlalchemy.sql.Select" = (
-            select_with_post_compile_statements()
-        )
+        select_statement: sqlalchemy.Select = select_with_post_compile_statements()
         returned_string = sql_statement_with_post_compile_to_string(
             engine=engine, select_statement=select_statement
         )

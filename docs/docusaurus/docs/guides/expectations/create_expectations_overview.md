@@ -10,9 +10,9 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
+## Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Create Expectations process
 
@@ -34,9 +34,7 @@ When following one of the first two workflows, once you have saved your Expectat
 
 ### Creating Expectations interactively
 
-When using the interactive method of creating Expectations, you will start as you always do with your <TechnicalTag tag="data_context" text="Data Context" />.  In this case, you will want to navigate to your Data Context's root directory in your terminal, where you will use the <TechnicalTag tag="cli" text="CLI" /> to launch a Jupyter Notebook which will contain scaffolding to assist you in the process.  You can even provide flags such as `--profile` which will allow you to enter into the interactive workflow after using a Profiler to generate and prepopulate your Expectation Suite.
-
-We provide an in-depth guide to using the CLI (and what flags are available to you) for interactively creating Expectations in our guide on [how to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+To interactively create Expectations, see [How to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 
 ### Creating Expectations with Data Assistants
 

@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -7,13 +8,11 @@ from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutio
 from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import F
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
-
     metric_name = "column_values.in_set.spark_optimized"
     value_keys = (
         "column",

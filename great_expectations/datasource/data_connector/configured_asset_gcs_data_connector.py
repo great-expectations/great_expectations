@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+from great_expectations.compatibility import google
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
@@ -10,10 +11,6 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
-from great_expectations.optional_imports import (
-    google_cloud_storage,
-    google_service_account,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +60,6 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         logger.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
 
         super().__init__(
@@ -89,20 +85,18 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
                 credentials = (
-                    google_service_account.Credentials.from_service_account_file(
+                    google.service_account.Credentials.from_service_account_file(
                         filename=filename
                     )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
                 credentials = (
-                    google_service_account.Credentials.from_service_account_info(
+                    google.service_account.Credentials.from_service_account_info(
                         info=info
                     )
                 )
-            self._gcs = google_cloud_storage.Client(
-                credentials=credentials, **gcs_options
-            )
+            self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."

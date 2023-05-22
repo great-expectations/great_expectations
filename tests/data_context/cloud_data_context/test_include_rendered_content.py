@@ -1,3 +1,5 @@
+import random
+import string
 from unittest import mock
 
 import pandas as pd
@@ -30,6 +32,8 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
         id=ge_cloud_id,
         url="foo/bar/baz",
+        # response_json will not be empty but is not needed for this test.
+        response_json={},
     )
 
     with mock.patch(
@@ -106,21 +110,32 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     context = empty_cloud_data_context
 
     df = pd.DataFrame([1, 2, 3, 4, 5])
-
-    data_asset = context.sources.pandas_default.add_dataframe_asset(
-        name="my_dataframe_asset",
-        dataframe=df,
-    )
+    suite_name = f"test_suite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    mock_datasource_get_response = {
+        "data": {
+            "id": "123456",
+            "attributes": {
+                "datasource_config": {},
+            },
+        },
+    }
 
     with mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.has_key",
         return_value=False,
     ), mock.patch(
-        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.set"
+    ), mock.patch(
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.get",
+        return_value=mock_datasource_get_response,
     ):
+        data_asset = context.sources.pandas_default.add_dataframe_asset(
+            name="my_dataframe_asset",
+            dataframe=df,
+        )
         validator: Validator = context.get_validator(
             batch_request=data_asset.build_batch_request(),
-            create_expectation_suite_with_name="test_suite",
+            create_expectation_suite_with_name=suite_name,
         )
 
         expectation_validation_result: ExpectationValidationResult = (

@@ -1,5 +1,6 @@
 import logging
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import (
     DatasetProfiler,
@@ -7,9 +8,8 @@ from great_expectations.profile.base import (
     ProfilerDataType,
 )
 
-try:
-    from sqlalchemy.exc import OperationalError  # noqa: TID251
-except ModuleNotFoundError:
+OperationalError = sqlalchemy.OperationalError
+if not OperationalError:
     OperationalError = RuntimeError
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,6 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
     @classmethod
     def _get_column_type(cls, df, column):
-
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:

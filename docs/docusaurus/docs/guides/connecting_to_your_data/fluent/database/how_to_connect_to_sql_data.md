@@ -14,8 +14,6 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ## Next steps -->
 import AfterCreateSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_sql_datasource.md'
 
-## Introduction
-
 In this guide we will demonstrate how to connect Great Expectations to SQL databases.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 ## Prerequisites
@@ -24,7 +22,6 @@ In this guide we will demonstrate how to connect Great Expectations to SQL datab
 
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -40,21 +37,17 @@ GX supports a variety of different SQL source data systems.  However, most SQL d
 
 :::info Some examples of different connection strings:
 
-Here are some examples of connection strings for various SQL dialects.  GX also has dialect-specific guides on setting up any extra dependencies, configuring credentials, and using the advanced block-config method of connecting to these particular SQL database types.  These guides are included as the links in the following list of connection string formats.
+The following are examples of connection strings for different SQL dialects:
 
-- [AWS Athena](/docs/guides/connecting_to_your_data/database/athena): `awsathena+rest://@athena.<REGION>.amazonaws.com/<DATABASE>?s3_staging_dir=<S3_PATH>`
-- [BigQuery](/docs/guides/connecting_to_your_data/database/bigquery): `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>`
-- [MSSQL](/docs/guides/connecting_to_your_data/database/mssql): `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
-- [MySQL](/docs/guides/connecting_to_your_data/database/mysql): `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
+- AWS Athena: `awsathena+rest://@athena.<REGION>.amazonaws.com/<DATABASE>?s3_staging_dir=<S3_PATH>`
+- BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>`
+- MSSQL: `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
+- MySQL: `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
 - PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
-  - [Connecting to PostgreSQL data](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data)
-  - [Defining advanced PostgreSQL Datasource configurations with the block-config method](/docs/guides/connecting_to_your_data/database/postgres)
-- [Redshift](/docs/guides/connecting_to_your_data/database/redshift): `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
-- [Snowflake](/docs/guides/connecting_to_your_data/database/snowflake): `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
+- Redshift: `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
+- Snowflake]: `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
 - SQLite: `sqlite:///<PATH_TO_DB_FILE>`
-  - [Connecting to SQLite data](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data)
-  - [Defining advanced SQLite Datasource configurations with the block-config method](/docs/guides/connecting_to_your_data/database/sqlite)
-- [Trino](/docs/guides/connecting_to_your_data/database/trino): `trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>`
+- Trino: `trino://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<CATALOG>/<SCHEMA>`
 
 :::
 

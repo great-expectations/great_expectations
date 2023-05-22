@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, Iterator, List, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 from unittest import mock
 
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -25,13 +27,20 @@ from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource i
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
-from great_expectations.optional_imports import (
-    BlobServiceClient,
-    ContainerClient,
-    azure_storage,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 logger = logging.getLogger(__file__)
+
+
+if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):
+    pytest.skip(
+        'Could not import "azure.storage.blob" from Microsoft Azure cloud',
+        allow_module_level=True,
+    )
 
 
 # apply markers to entire test module
@@ -56,14 +65,16 @@ class MockContainerClient:
 
 class MockBlobServiceClient:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def get_container_client(self, container: str) -> ContainerClient:
-        return cast(ContainerClient, MockContainerClient())
+    def get_container_client(self, container: str) -> azure.ContainerClient:
+        return cast(azure.ContainerClient, MockContainerClient())
 
 
 def _build_pandas_abs_datasource(
     azure_options: Dict[str, Any] | None = None
 ) -> PandasAzureBlobStorageDatasource:
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(  # type: ignore[call-arg]
         name="pandas_abs_datasource",
         azure_options=azure_options or {},
@@ -73,10 +84,6 @@ def _build_pandas_abs_datasource(
 
 
 @pytest.fixture
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def pandas_abs_datasource() -> PandasAzureBlobStorageDatasource:
     pandas_abs_datasource: PandasAzureBlobStorageDatasource = (
         _build_pandas_abs_datasource()
@@ -119,10 +126,6 @@ def csv_asset(
 
 
 @pytest.fixture
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
@@ -130,15 +133,11 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     data_connector: AzureBlobStorageDataConnector = cast(
         AzureBlobStorageDataConnector, csv_asset._data_connector
     )
-    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._name_starts_with}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""
+    test_connection_error_message = f"""No file belonging to account "{csv_asset.datasource._account_name}" in container "{data_connector._container}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset}"."""
     return regex, test_connection_error_message
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_construct_pandas_abs_datasource_with_account_url_and_credential():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -147,16 +146,41 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
             "credential": "my_credential",
         },
     )
-    azure_client: BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
+def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
+    monkeypatch: pytest.MonkeyPatch, empty_file_context: FileDataContext
+):
+    monkeypatch.setenv("MY_CRED", "my_secret_credential")
+
+    pandas_abs_datasource = PandasAzureBlobStorageDatasource(  # type: ignore[call-arg] # args are optional
+        name="pandas_abs_datasource",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": r"${MY_CRED}",
+        },
+    )
+
+    # attach data_context to enable config substitution
+    pandas_abs_datasource._data_context = empty_file_context
+
+    credential = pandas_abs_datasource.azure_options["credential"]
+    assert isinstance(credential, ConfigStr)
+    assert (
+        credential.get_config_value(config_provider=empty_file_context.config_provider)
+        == "my_secret_credential"
+    )
+
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    assert azure_client is not None
+    assert pandas_abs_datasource.name == "pandas_abs_datasource"
+
+
+@pytest.mark.integration
 def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -165,16 +189,12 @@ def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
             "credential": "my_credential",
         },
     )
-    azure_client: BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_name():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -183,16 +203,12 @@ def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_
             "credential": "my_credential",
         },
     )
-    azure_client: BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_name():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -201,16 +217,12 @@ def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_nam
             "credential": "my_credential",
         },
     )
-    azure_client: BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error():
     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
     with pytest.raises(PandasAzureBlobStorageDatasourceError):
@@ -225,11 +237,8 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
         _ = pandas_abs_datasource._get_azure_client()
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -253,11 +262,8 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -277,11 +283,8 @@ def test_construct_csv_asset_directly(
     assert m1 is not None
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -307,11 +310,8 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -337,11 +337,8 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -367,11 +364,8 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -399,15 +393,13 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 @pytest.mark.xfail(
     reason="Accessing objects on azure.storage.blob using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
 ):
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
 
     def instantiate_azure_client_spy(self) -> None:
         self._azure_client = azure_client
@@ -455,10 +447,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 
 @pytest.mark.integration
-@pytest.mark.skipif(
-    not azure_storage,
-    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
-)
 def test_test_connection_failures(
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],

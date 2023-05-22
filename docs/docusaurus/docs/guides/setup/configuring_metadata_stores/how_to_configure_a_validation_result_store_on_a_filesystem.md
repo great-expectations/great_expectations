@@ -8,6 +8,8 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new Validation Results from <TechnicalTag tag="checkpoint" text="Checkpoint" /> runs.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
@@ -61,24 +63,7 @@ stores:
 
 ### 4. Confirm that the location has been updated by running ``great_expectations store list``
 
-Notice the output contains two Validation Result Stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
-
-```bash
-great_expectations store list
-
-- name: validations_store
-  class_name: ValidationsStore
-  store_backend:
-    class_name: TupleFilesystemStoreBackend
-    base_directory: uncommitted/validations/
-
-- name: shared_validations_filesystem_store
-  class_name: ValidationsStore
-  store_backend:
-    class_name: TupleFilesystemStoreBackend
-    base_directory: uncommitted/shared_validations/
-```
-
+To make Great Expectations look for Validation Results in the new Store, you must set the ``validations_store_name`` variable to the name of your Filesystem Validations Store. In this example, it is `shared_validations_filesystem_store`.
 
 ### 5. Confirm that the Validation Results Store has been correctly configured
 

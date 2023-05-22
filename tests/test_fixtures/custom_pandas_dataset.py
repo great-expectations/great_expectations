@@ -2,7 +2,6 @@ from great_expectations.dataset import MetaPandasDataset, PandasDataset
 
 
 class CustomPandasDataset(PandasDataset):
-
     drg_codes = [
         194,
         690,

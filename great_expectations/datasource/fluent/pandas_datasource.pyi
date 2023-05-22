@@ -11,6 +11,7 @@ from typing import (
     Hashable,
     Iterable,
     List,
+    Literal,
     Mapping,
     MutableSequence,
     Optional,
@@ -23,9 +24,12 @@ from typing import (
 
 import pandas as pd
 import pydantic
-import sqlalchemy  # noqa: TID251
-from typing_extensions import Literal
+from typing_extensions import TypeAlias
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
@@ -50,8 +54,8 @@ if TYPE_CHECKING:
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
 
-MappingIntStrAny = Mapping[Union[int, str], Any]
-AbstractSetIntStr = AbstractSet[Union[int, str]]
+MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
 _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
@@ -66,7 +70,7 @@ class _PandasDataAsset(DataAsset):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
-    def build_batch_request(
+    def build_batch_request(  # type: ignore[override]
         self, options: Optional[BatchRequestOptions] = ...
     ) -> BatchRequest: ...
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...
@@ -396,8 +400,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -410,8 +414,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -425,7 +429,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         schema: typing.Union[str, None] = ...,
@@ -766,8 +770,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_sql(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -780,8 +784,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_sql_query(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -795,7 +799,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,

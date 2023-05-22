@@ -32,7 +32,6 @@ def is_gtin_variable_measure_trade_item(gtin_value: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeGtinVariableMeasureTradeItem(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.gtin_variable_measure_trade_item"
 

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import pandas as pd
-from typing_extensions import Literal
+from typing import Literal
 
-from great_expectations.optional_imports import (
+import pandas as pd
+
+from great_expectations.compatibility.not_imported import (
     is_version_less_than,
 )
 
