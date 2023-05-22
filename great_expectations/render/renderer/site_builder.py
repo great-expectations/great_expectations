@@ -465,7 +465,6 @@ class DefaultSiteSectionBuilder:
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
-
                     logger.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )

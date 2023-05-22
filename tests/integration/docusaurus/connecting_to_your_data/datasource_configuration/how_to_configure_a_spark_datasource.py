@@ -809,7 +809,6 @@ def section_10_test_your_configuration_with_test_yaml_config():
             1,
         ),
     ):
-
         test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
         datasource_check = test_result.self_check(max_examples=12)
 

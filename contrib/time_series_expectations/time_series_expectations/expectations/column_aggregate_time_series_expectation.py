@@ -27,7 +27,8 @@ class ColumnAggregateTimeSeriesExpectation(ColumnAggregateExpectation, ABC):
     Please see expect_column_max_to_match_prophet_date_model for an example of how to implement this kind of Expectation.
 
     Notes:
-    * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet)."""
+    * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
+    """
 
     @property
     def metric_dependencies(self):
