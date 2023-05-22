@@ -34,7 +34,7 @@ assert datasource_name in context.datasources
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py add_asset">
 asset_name = "my_taxi_data_asset"
 s3_prefix = "data/taxi_yellow_tripdata_samples/"
-batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     batching_regex=batching_regex,
