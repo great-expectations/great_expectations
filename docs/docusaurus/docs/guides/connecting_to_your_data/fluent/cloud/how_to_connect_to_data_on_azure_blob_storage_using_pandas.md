@@ -49,7 +49,7 @@ We can define an Azure Blob Storage datasource by providing these pieces of info
 ```
 We can create a Datasource that points to our Azure Blob Storage with the code:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/define_add_pandas_azure_blob_storage_args.py create_datasource"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
 ```
 
 :::tip Where did that connection string come from?
@@ -68,7 +68,7 @@ To create a DataAsset in Azure Blob Storage datasource, we will need to provide:
 
 Once these values have been defined, we will create our DataAsset with the code:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/define_add_pandas_azure_blob_storage_args.py add_asset"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
 ```
 
 <AbsBatchingRegexExample />
