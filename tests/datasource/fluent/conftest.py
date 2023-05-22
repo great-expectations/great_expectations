@@ -197,7 +197,7 @@ class _DatasourceSchema(pydantic.BaseModel):
 
     @property
     def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]  # type: ignore[index,arg-type]
+        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
 
 
 class _CloudResponseSchema(pydantic.BaseModel):
