@@ -8,14 +8,15 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Literal,
     Optional,
+    Protocol,
     Type,
     Union,
     cast,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
