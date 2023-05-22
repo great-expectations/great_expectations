@@ -41,16 +41,15 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ### 2. Create a Datasource
 
+We can define an Azure Blob Storage datasource by providing these pieces of information:
+- `name`: In our example, we will name our Datasource `"my_abs_datasource"`
+- `azure_options`: We provide authentication settings here
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_azure_blob_storage_args"
+```
 We can create a Datasource that points to our Azure Blob Storage with the code:
 
-```python Python code
-datasource_name = "my_datasource"
-datasource = context.sources.add_pandas_abs(
-    name=datasource_name,
-    azure_options={
-        "account_url": "${AZURE_STORAGE_CONNECTION_STRING}",
-    },
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/define_add_pandas_azure_blob_storage_args.py create_datasource"
 ```
 
 :::tip Where did that connection string come from?
@@ -61,15 +60,15 @@ In the above example, the value for `account_url` will be substituted for the co
 
 <AbsFluentAddDataAssetConfigKeys />
 
-Once these values have been defined, we will define our Data Asset with the code:
+To create a DataAsset in Azure Blob Storage datasource, we will need to provide:
+- `asset_name`: In our example, we will name our DataAsset `"my_taxi_data_asset"`
+- `batching_regex`: We provide partitioning Regular Expression here
+- `abs_container`: Container within Azure Blob Storage account where our dataset is stored
+- `abs_name_starts_with`: Prefix within `abs_container` corresponding to data files
 
-```python title="Python code"
-data_asset = datasource.add_csv_asset(
-    name=asset_name,
-    batching_regex=batching_regex,
-    abs_container=abs_container,
-    abs_name_starts_with=abs_name_starts_with,
-)
+Once these values have been defined, we will create our DataAsset with the code:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/define_add_pandas_azure_blob_storage_args.py add_asset"
 ```
 
 <AbsBatchingRegexExample />
