@@ -161,7 +161,6 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
 
 @pytest.mark.unit
 def test_instantiation_with_temp_table_schema():
-
     # not supported
     engine = MockSaEngine(dialect=Dialect(dialect="sqlite"))
     execution_engine = Mock(spec=SqlAlchemyExecutionEngine, engine=engine)

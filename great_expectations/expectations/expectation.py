@@ -1537,7 +1537,6 @@ class Expectation(metaclass=MetaExpectation):
 
         included_examples = []
         for i, example in enumerate(all_examples, 1):
-
             included_test_cases = []
             # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
             # See:

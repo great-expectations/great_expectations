@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 
 class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
-
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",

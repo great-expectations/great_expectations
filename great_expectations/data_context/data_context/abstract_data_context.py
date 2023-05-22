@@ -2938,6 +2938,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
+            ValueError: The arguments provided are invalid.
         """
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -2965,16 +2966,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
-            raise ValueError(
-                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
-            )
+            raise ValueError("overwrite_existing must be of type bool.")
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
+        )
 
         if not expectation_suite:
-            assert (
-                expectation_suite_name
-            ), "If constructing a suite with individual args, suite name must be guaranteed"
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self,
@@ -3030,6 +3033,15 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the given name does not already exist.
+        """
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
+
+    def _update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> ExpectationSuite:
+        """
+        Like `update_expectation_suite` but without the usage statistics logging.
         """
         name = expectation_suite.expectation_suite_name
         id = expectation_suite.ge_cloud_id
@@ -3102,29 +3114,51 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
         Args:
-            expectation_suite_name: The name of the suite to create.
-            id: Identifier to associate with this suite.
+            expectation_suite_name: The name of the suite to create or replace.
+            id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
             evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
-            data_asset_type: Type of data asset to associate with this suite.
-            execution_engine_type: Name of the execution engine type.
+            data_asset_type: Type of Data Asset to associate with this suite.
+            execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
-            expectation_suite: An existing ExpectationSuite object you wish to persist.
+            expectation_suite: The `ExpectationSuite` object you wish to persist.
 
         Returns:
-            A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
+            The persisted `ExpectationSuite`.
         """
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-            expectation_suite=expectation_suite,
-            overwrite_existing=True,  # `add_or_update` always overwrites.
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
         )
+
+        if not expectation_suite:
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self,
+                ge_cloud_id=id,
+                expectations=expectations,
+                evaluation_parameters=evaluation_parameters,
+                data_asset_type=data_asset_type,
+                execution_engine_type=execution_engine_type,
+                meta=meta,
+            )
+
+        try:
+            existing = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite.name
+            )
+        except gx_exceptions.DataContextError:
+            # not found
+            return self._add_expectation_suite(expectation_suite=expectation_suite)
+
+        # The suite object must have an ID in order to request a PUT to GX Cloud.
+        expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
     @new_argument(
@@ -4370,7 +4404,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _apply_global_config_overrides(
         self, config: DataContextConfig
     ) -> DataContextConfig:
-
         """
         Applies global configuration overrides for
             - usage_statistics being enabled
@@ -5607,3 +5640,23 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if id and ge_cloud_id:
             raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
         return id or ge_cloud_id
+
+    @staticmethod
+    def _validate_expectation_suite_xor_expectation_suite_name(
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+    ) -> None:
+        """
+        Validate that only one of expectation_suite or expectation_suite_name is specified.
+
+        Raises:
+            ValueError: Invalid arguments.
+        """
+        if expectation_suite_name is not None and expectation_suite is not None:
+            raise ValueError(
+                "Only one of expectation_suite_name or expectation_suite may be specified."
+            )
+        if expectation_suite_name is None and expectation_suite is None:
+            raise ValueError(
+                "One of expectation_suite_name or expectation_suite must be specified."
+            )
