@@ -95,7 +95,7 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 ### 2. Create an ExpectationSuite 
 
-We will use the `add_expectation_suite()` method to create an empty ExpectationSuite.
+We will the `add_expectation_suite()` method to create an empty ExpectationSuite.
 
 ```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite"
 ```
