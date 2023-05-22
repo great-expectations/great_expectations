@@ -39,7 +39,6 @@ logging.captureWarnings(True)
 
 
 class DataAsset:
-
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "DataAsset"
@@ -178,7 +177,6 @@ class DataAsset:
         def outer_wrapper(func):  # noqa: C901 - 22
             @wraps(func)
             def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
-
                 # Get the name of the method
                 method_name = func.__name__
 
@@ -828,7 +826,6 @@ class DataAsset:
                 expectations_to_evaluate.extend(columns[col])
 
             for expectation in expectations_to_evaluate:
-
                 try:
                     # copy the config so we can modify it below if needed
                     expectation = copy.deepcopy(expectation)

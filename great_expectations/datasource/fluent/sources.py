@@ -128,7 +128,6 @@ class _SourceFactories:
 
         # rollback type registrations if exception occurs
         with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
-
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -279,7 +278,6 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
-
                 # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
@@ -551,7 +549,9 @@ class _SourceFactories:
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
-            logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
+            logger.debug(
+                f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
+            )
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False
             )
@@ -560,11 +560,12 @@ class _SourceFactories:
             id_: uuid.UUID | None = getattr(
                 self._data_context.datasources.get(datasource_name), "id", None
             )
-            if id_ and name_or_datasource:
-                if isinstance(name_or_datasource, str):
-                    kwargs["id"] = id_
-                else:
+            if id_:
+                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
+                if name_or_datasource and not isinstance(name_or_datasource, str):
                     name_or_datasource.id = id_
+                else:
+                    kwargs["id"] = id_
 
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(

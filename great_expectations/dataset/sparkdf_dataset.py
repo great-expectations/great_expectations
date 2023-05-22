@@ -1447,7 +1447,6 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-
         # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
         return column_list.withColumn(

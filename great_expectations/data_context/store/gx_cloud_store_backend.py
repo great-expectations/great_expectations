@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import logging
 from abc import ABCMeta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -18,6 +20,9 @@ from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +50,16 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
+class RequestPayloadDataField(TypedDict):
+    attributes: dict
+    id: NotRequired[str]
+    type: str
+
+
+class RequestPayload(TypedDict):
+    data: RequestPayloadDataField
+
+
 def construct_url(
     base_url: str,
     organization_id: str,
@@ -66,8 +81,8 @@ def construct_json_payload(
     attributes_key: str,
     attributes_value: Any,
     **kwargs: dict,
-) -> dict:
-    data = {
+) -> RequestPayload:
+    data: RequestPayload = {
         "data": {
             "type": resource_type,
             "attributes": {
@@ -382,7 +397,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
@@ -392,7 +407,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:

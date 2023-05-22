@@ -28,7 +28,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesPolygonArea(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.polygon_area"
