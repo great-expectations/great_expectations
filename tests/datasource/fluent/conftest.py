@@ -197,7 +197,7 @@ class _DatasourceSchema(pydantic.BaseModel):
 
     @property
     def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]
+        return self.attributes["datasource_config"]["name"]  # type: ignore[index,arg-type]
 
 
 class _CloudResponseSchema(pydantic.BaseModel):
@@ -212,7 +212,7 @@ class _CloudResponseSchema(pydantic.BaseModel):
             "attributes": payload_dict["data"]["attributes"],
         }
 
-        return cls(data=data)
+        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
 
 
 class _CallbackResult(NamedTuple):
