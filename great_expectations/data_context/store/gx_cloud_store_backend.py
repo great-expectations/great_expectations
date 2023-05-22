@@ -392,7 +392,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
@@ -402,7 +402,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:
