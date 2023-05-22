@@ -618,7 +618,7 @@ class DefaultSiteIndexBuilder:
                 + ".html"
             )
 
-        url_encoded_filepath = urllib.parse.quote(filepath)            
+        url_encoded_filepath = urllib.parse.quote(filepath)
 
         expectation_suite_filepath = os.path.join(  # noqa: PTH118
             "expectations", *expectation_suite_name.split(".")
