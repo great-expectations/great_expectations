@@ -24,11 +24,9 @@ sqlite_database_path = str(
 my_table_name = "yellow_tripdata_sample_2019_01"
 
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py import">
 import great_expectations as gx
 
 context = gx.get_context()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string">
 my_connection_string = "sqlite:///<PATH_TO_DB_FILE>"
