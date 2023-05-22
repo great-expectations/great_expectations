@@ -551,7 +551,9 @@ class _SourceFactories:
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
-            logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
+            logger.debug(
+                f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
+            )
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False
             )
