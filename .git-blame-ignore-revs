@@ -15,3 +15,6 @@ e55b3484a86f654e8b819041dd6cc73730e01a8f
 # python 3.7 -> 3.8 Ruff auto-fixes
 # https://github.com/great-expectations/great_expectations/pull/7945
 85b81029c759dc2b6a8c8956a5babb19e3280494
+# black 2.2 -> 2.3 formatting changes
+# https://github.com/great-expectations/great_expectations/pull/7946
+582fe60179b9b8bf31ba0a394bfa669f495ce8c6
