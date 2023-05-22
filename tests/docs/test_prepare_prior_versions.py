@@ -50,7 +50,7 @@ This guide will help you connect to your data stored on GCS using Pandas.
     )
 
     expected_contents = """import TabItem from '@theme/TabItem';
-import TechnicalTag from '../../../../../term_tags/_tag.mdx';
+import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on GCS using Pandas.
 """

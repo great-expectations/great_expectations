@@ -258,7 +258,7 @@ def _use_relative_imports_for_tag_references_substitution(
         Updated contents
     """
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
-    dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts)))
+    dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
     pattern = re.compile(
         r"(?P<import>import TechnicalTag from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
