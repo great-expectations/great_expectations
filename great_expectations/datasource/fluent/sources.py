@@ -560,11 +560,11 @@ class _SourceFactories:
             id_: uuid.UUID | None = getattr(
                 self._data_context.datasources.get(datasource_name), "id", None
             )
-            if id_ and name_or_datasource:
-                if isinstance(name_or_datasource, str):
-                    kwargs["id"] = id_
-                else:
+            if id_:
+                if name_or_datasource and not isinstance(name_or_datasource, str):
                     name_or_datasource.id = id_
+                else:
+                    kwargs["id"] = id_
 
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
