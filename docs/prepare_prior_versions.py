@@ -225,11 +225,10 @@ def use_relative_imports_for_tag_references(
             f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
         )
         for file_path in files:
-            relative_path = file_path.relative_to(path)
             with open(file_path, "r+") as f:
                 contents = f.read()
                 contents = _use_relative_imports_for_tag_references_substitution(
-                    contents, relative_path
+                    contents, path, file_path
                 )
                 f.seek(0)
                 f.truncate()
@@ -243,7 +242,7 @@ def use_relative_imports_for_tag_references(
 
 
 def _use_relative_imports_for_tag_references_substitution(
-    contents: str, relative_path: pathlib.Path
+    contents: str, path_to_versioned_docs: pathlib.Path, path_to_document: pathlib.Path
 ) -> str:
     """Change import path to use relative instead of @site alias.
 
@@ -252,15 +251,18 @@ def _use_relative_imports_for_tag_references_substitution(
 
     Args:
         contents: String to perform substitution.
-        relative_path: Path from document where import is included to the term_tags folder.
+        path_to_versioned_docs: e.g. "docs/docusaurus/versioned_docs/version-0.14.13/"
+        path_to_document: Path to the document containing the import to substitute.
 
     Returns:
         Updated contents
     """
+    relative_path = path_to_document.relative_to(path_to_versioned_docs)
+    dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts)))
     pattern = re.compile(
         r"(?P<import>import TechnicalTag from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
-    contents = re.sub(pattern, rf"\g<import>{relative_path}/\g<rest>", contents)
+    contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
 
 

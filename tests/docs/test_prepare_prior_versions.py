@@ -38,9 +38,15 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you connect to your data stored on GCS using Pandas.
 """
 
-    relative_path = pathlib.Path("../../../../../")
+    path_to_versioned_docs = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/"
+    )
+    file_path = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/guides/connecting_to_your_data/cloud/gcs/pandas.md"
+    )
+
     updated_contents = _use_relative_imports_for_tag_references_substitution(
-        contents, relative_path
+        contents, path_to_versioned_docs, file_path
     )
 
     expected_contents = """import TabItem from '@theme/TabItem';
