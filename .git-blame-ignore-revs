@@ -12,3 +12,6 @@ f5e7df1846102d9a62cc9b9110387925ffae60cc
 # Apply noqa markers for TID251 (sqlalchemy) violations
 # https://github.com/great-expectations/great_expectations/pull/7564
 e55b3484a86f654e8b819041dd6cc73730e01a8f
+# python 3.7 -> 3.8 Ruff auto-fixes
+# https://github.com/great-expectations/great_expectations/pull/7945
+85b81029c759dc2b6a8c8956a5babb19e3280494
