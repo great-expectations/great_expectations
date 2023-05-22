@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from great_expectations.core.http import create_session
 from great_expectations.data_context.cloud_constants import (
@@ -45,6 +45,16 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
+class RequestPayloadDataField(TypedDict):
+    attributes: dict
+    id: NotRequired[str]
+    type: str
+
+
+class RequestPayload(TypedDict):
+    data: RequestPayloadDataField
+
+
 def construct_url(
     base_url: str,
     organization_id: str,
@@ -66,8 +76,8 @@ def construct_json_payload(
     attributes_key: str,
     attributes_value: Any,
     **kwargs: dict,
-) -> dict:
-    data = {
+) -> RequestPayload:
+    data: RequestPayload = {
         "data": {
             "type": resource_type,
             "attributes": {
