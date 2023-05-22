@@ -23,7 +23,6 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGreaterThanOrEqualToProfileMin(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.greater_than_or_equal_to_profile_min"
 

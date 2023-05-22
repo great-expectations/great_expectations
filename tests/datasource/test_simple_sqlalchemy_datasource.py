@@ -229,7 +229,7 @@ def test_simple_sqlalchemy_datasource_init(
         engine=DummySAEngine(),
         introspection=introspection,
         tables=tables,
-        **kwargs
+        **kwargs,
     )
     expected_data_connector_types = _expected_data_connector_types(
         introspection, tables

@@ -1161,7 +1161,9 @@ def test_pandas_inferred_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_inferred_data_connector"
@@ -1231,7 +1233,9 @@ def test_pandas_configured_single_batch_full_configuration():
         ].keys()
     )
     # Assert that the data assets' data references consist of a list of a single .csv file.
-    assert ["yellow_tripdata_sample_2020-01.csv",] in [
+    assert [
+        "yellow_tripdata_sample_2020-01.csv",
+    ] in [
         _["example_data_references"]
         for _ in datasource_check["data_connectors"][
             "name_of_my_configured_data_connector"

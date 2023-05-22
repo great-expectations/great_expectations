@@ -23,7 +23,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableModelingRidgeFeatureImportances(TableMetricProvider):
-
     metric_name = "table.modeling.linear.feature_importances"
     value_keys = ("y_column",)
 
@@ -188,7 +187,6 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
         runtime_configuration=None,
         execution_engine=None,
     ):
-
         importances = dict(
             sorted(
                 metrics["table.modeling.linear.feature_importances"].items(),

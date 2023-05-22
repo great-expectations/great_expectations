@@ -204,14 +204,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
-
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
-
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(

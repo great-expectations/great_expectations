@@ -35,7 +35,6 @@ def _load_data(
     table_name: str = TAXI_DATA_TABLE_NAME,
     random_table_suffix: bool = True,
 ) -> LoadedTable:
-
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
         "redshift"
     ]

@@ -426,7 +426,7 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
@@ -512,7 +512,7 @@ class CloudDataContext(SerializableDataContext):
             DeprecationWarning,
         )
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+            raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
