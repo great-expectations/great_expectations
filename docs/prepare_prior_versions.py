@@ -204,8 +204,69 @@ def _update_tag_references_for_correct_version_substitution(
     return contents
 
 
+def use_relative_imports_for_tag_references(
+    verbose: bool = False,
+) -> None:
+    """Use relative imports instead of @site
+
+    e.g. `import TechnicalTag from '../term_tags/_tag.mdx';`
+    instead of `import TechnicalTag from '@site/docs/term_tags/_tag.mdx';`
+    """
+
+    paths = _paths_to_versioned_docs()
+
+    method_name_for_logging = "use_relative_imports_for_tag_references"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(path.glob(f"**/*{extension}"))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            relative_path = file_path.relative_to(path)
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _use_relative_imports_for_tag_references_substitution(
+                    contents, relative_path
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _use_relative_imports_for_tag_references_substitution(
+    contents: str, relative_path: pathlib.Path
+) -> str:
+    """Change import path to use relative instead of @site alias.
+
+    e.g. `import TechnicalTag from '../term_tags/_tag.mdx';`
+    instead of `import TechnicalTag from '@site/docs/term_tags/_tag.mdx';`
+
+    Args:
+        contents: String to perform substitution.
+        relative_path: Path from document where import is included to the term_tags folder.
+
+    Returns:
+        Updated contents
+    """
+    pattern = re.compile(
+        r"(?P<import>import TechnicalTag from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
+    )
+    contents = re.sub(pattern, rf"\g<import>{relative_path}/\g<rest>", contents)
+    return contents
+
+
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
+    use_relative_imports_for_tag_references()
