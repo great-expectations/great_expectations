@@ -7,12 +7,9 @@ pytest -v --docs-tests -m integration -k "how_to_connect_to_data_on_azure_blob_s
 
 import os
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
-# </snippet>
 
 os.environ["AZURE_STORAGE_ACCOUNT_URL"] = "superconductivetesting.blob.core.windows.net"
 
