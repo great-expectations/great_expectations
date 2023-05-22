@@ -149,12 +149,6 @@ def test_substitute_value_from_aws_secrets_manager(
             "value",
         ),
         (
-            "secret|arn:aws:ssm:region-name-1:123456789012:parameter/my-parameter|key",
-            None,
-            pytest.raises(ValueError),
-            None,
-        ),
-        (
             "secret|arn:aws:ssm:region-name-1:123456789012:parameter/secure/my-param%&eter",
             None,
             pytest.raises(ValueError),
