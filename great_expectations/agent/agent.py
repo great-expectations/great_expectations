@@ -15,8 +15,6 @@ from great_expectations.agent.event_handler import (
 )
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
-)
-from great_expectations.agent.message_service.rabbit_mq_client import (
     ClientError,
 )
 from great_expectations.agent.message_service.subscriber import (
@@ -79,20 +77,19 @@ class GXAgent:
             client = AsyncRabbitMQClient(url=self._config.broker_url)
             subscriber = Subscriber(client=client)
             print("GX-Agent is ready.")
-            # Open a blocking connection until encountering a shutdown event
+            # Open a connection until encountering a shutdown event
             subscriber.consume(
                 queue=self._config.organization_id,
                 on_message=self._handle_event_as_thread_enter,
-                retry_delay=1,
             )
         except KeyboardInterrupt:
             print("Received request to shutdown.")
+            subscriber.close()
         except (SubscriberError, ClientError) as e:
             print("Connection to GX Cloud has encountered an error.")
-            print("Please restart the agent and try your action again.")
             print(e)
-        # finally:
-        #     self._close_subscriber(subscriber)
+        finally:
+            subscriber.close()
 
     def _handle_event_as_thread_enter(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.
@@ -105,7 +102,7 @@ class GXAgent:
         """
         if self._can_accept_new_task() is not True:
             # signal to Subscriber that we can't process this message right now
-            return event_context.event_processed(retry=True)
+            return event_context.processed_with_failures(requeue=True)
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
@@ -127,12 +124,9 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        # warning:  this method will be executed in a different thread than
-        #           where it was defined, so take care with shared resources.
-        #           It's safe to use self._context because we restrict ourselves
-        #           to a single worker thread at any given time. The ack/nack
-        #           callback provided by the Subscriber in event_context will fail,
-        #           since it depends on the channel available in the main thread.
+        # warning:  this method will not be executed in the main thread,
+        #           so take care with shared resources.
+
         if event_context.event is not None:
             print(
                 f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
@@ -145,7 +139,8 @@ class GXAgent:
         self, future: Future, event_context: EventContext
     ) -> None:
         """Callback invoked when the thread running GX exits."""
-        # this method will be invoked in the main thread after the worker exits
+        # warning:  this method will not be executed in the main thread,
+        #           so take care with shared resources.
 
         # get results or errors from the thread
         error = future.exception()
@@ -163,25 +158,13 @@ class GXAgent:
         if isinstance(error, UnknownEventError):
             # We might not have the latest Event definitions, so we requeue
             # this event in the hope that another agent will understand it.
-            retry = True
+            event_context.processed_with_failures(requeue=True)
         else:
-            retry = False
-        event_context.event_processed(retry=retry)
+            event_context.processed_successfully()
         self._current_task = None
 
     def _can_accept_new_task(self) -> bool:
         return self._current_task is None or self._current_task.done()
-
-    def _close_subscriber(self, subscriber: Optional[Subscriber]) -> None:
-        """Ensure the subscriber has been closed."""
-        if subscriber is None:
-            return  # nothing to close
-        try:
-            pass
-            # subscriber.close()
-        except SubscriberError as e:
-            print("Subscriber encountered an error while closing:")
-            print(e)
 
     @classmethod
     def _get_config_from_env(cls) -> GXAgentConfig:
