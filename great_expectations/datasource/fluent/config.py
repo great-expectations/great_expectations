@@ -11,6 +11,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
     List,
     Set,
     Tuple,
@@ -22,7 +23,6 @@ from typing import (
 
 from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
-from typing_extensions import Final
 
 from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.datasource.fluent.constants import (
@@ -222,7 +222,7 @@ class GxConfig(FluentBaseModel):
                 for asset in datasource.assets:
                     asset._datasource = datasource
 
-        logger.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+        logger.debug(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
 
         if v and not loaded_datasources:
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")

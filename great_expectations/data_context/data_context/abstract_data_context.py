@@ -18,6 +18,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -31,7 +32,7 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -740,8 +741,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        # config provider needed for config substitution
-        datasource._config_provider = self.config_provider
 
         datasource._data_context._save_project_config()
 
@@ -776,8 +775,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = datasource
 
         update_datasource._data_context = self
-        # config provider needed for config substitution
-        update_datasource._config_provider = self.config_provider
 
         update_datasource._rebuild_asset_data_connectors()
 
@@ -2106,7 +2103,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config_version=config_version,
                 template_name=template_name,
                 module_name=module_name,
-                class_name=class_name,
+                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
@@ -3170,7 +3167,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+            include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
             ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
@@ -3188,16 +3185,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 DeprecationWarning,
             )
 
-        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
-        )
+        if expectation_suite_name:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        else:
+            raise ValueError("expectation_suite_name must be provided")
 
         if include_rendered_content is None:
             include_rendered_content = (
                 self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
+        if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )

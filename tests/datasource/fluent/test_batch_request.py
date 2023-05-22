@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Final
 
 import pytest
-from typing_extensions import Final
 
 from great_expectations.datasource.fluent import BatchRequest
 

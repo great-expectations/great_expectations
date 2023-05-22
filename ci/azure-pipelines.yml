@@ -68,8 +68,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -101,7 +101,6 @@ stages:
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources
         name: TypeCheckStubSourceFiles
-
     - job: docstring_linter
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -171,8 +170,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -219,8 +216,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -240,7 +235,7 @@ stages:
               PYTEST+="--network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               # We don't run e2e because we don't want to test connections to external dependencies here.
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
-              PYTEST+="--random-order --postgresql --cloud -rs "
+              PYTEST+="--random-order --postgresql --cloud "
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
@@ -275,8 +270,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -290,7 +283,7 @@ stages:
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run greatexpectations/test:${DOCKER_TAG} "
               # These tests currently do no succeed in random order.
-              PYTEST+="pytest -rs tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
+              PYTEST+="pytest tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Onboarding Data Assistant'
@@ -301,8 +294,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -318,7 +309,7 @@ stages:
               # We do NOT randomize the spark tests.
               # Spark only allows 1 context per JVM process, so we share it between tests.
               # Currently these tests order dependent.
-              PYTEST+="pytest -rs --spark --ignore=tests/cli --ignore=tests/integration/usage_statistics"
+              PYTEST+="pytest --spark --ignore=tests/cli --ignore=tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Spark'
@@ -329,8 +320,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -360,7 +349,7 @@ stages:
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \""
               PYTEST+="mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < /script/mysql_setup.sql && "
               # The last \" closes the quote from bash -c \".
-              PYTEST+="pytest -rs --mysql --random-order tests/test_definitions tests/expectations\""
+              PYTEST+="pytest --mysql --random-order tests/test_definitions tests/expectations\""
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest MySQL'
@@ -375,8 +364,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -397,7 +384,7 @@ stages:
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest -rs --trino --random-order tests/test_definitions tests/expectations"
+              PYTEST+="pytest --trino --random-order tests/test_definitions tests/expectations"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Trino'
@@ -411,8 +398,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -427,7 +412,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest -rs --postgresql --spark --aws-integration tests/cli"
+              PYTEST+="pytest --postgresql --spark --aws-integration tests/cli"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest cli'
@@ -437,9 +422,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
-              constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
               constraints: 'ci/constraints-test/py38-min-install.txt'
@@ -463,7 +445,7 @@ stages:
               PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
               PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
               PYTEST+="--constraint $(constraints) && "
-              PYTEST+="pytest -rs --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
+              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}
               eval ${PYTEST}
@@ -478,8 +460,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -492,7 +472,7 @@ stages:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
               PYTEST="docker run --network=host greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest -rs --no-sqlalchemy --aws-integration --random-order tests/integration/usage_statistics"
+              PYTEST+="pytest --no-sqlalchemy --aws-integration --random-order tests/integration/usage_statistics"
               echo ${PYTEST}
               eval ${PYTEST}
             displayName: 'Pytest Usage Stats'
@@ -502,8 +482,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -522,7 +500,7 @@ stages:
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
               PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GE_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest -rs --random-order --cloud -m \"cloud and e2e\""
+              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
               echo ${PYTEST}
               eval ${PYTEST}
             env:
@@ -542,8 +520,6 @@ stages:
 
         strategy:
          matrix:
-           Python37:
-             python.version: '3.7'
            Python38:
              python.version: '3.8'
            Python39:
@@ -600,7 +576,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -620,8 +596,6 @@ stages:
 
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:

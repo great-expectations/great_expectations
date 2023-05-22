@@ -288,19 +288,19 @@ class FluentBaseModel(pydantic.BaseModel):
 
 def _recursively_set_config_value(
     data: MutableMapping | MutableSequence, config_provider: _ConfigurationProvider
-):
+) -> None:
     if isinstance(data, MutableMapping):
         for k, v in data.items():
             if isinstance(v, ConfigStr):
                 data[k] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
     elif isinstance(data, MutableSequence):
         for i, v in enumerate(data):
             if isinstance(v, ConfigStr):
                 data[i] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
 
 
 def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) -> None:

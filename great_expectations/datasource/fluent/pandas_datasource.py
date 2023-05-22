@@ -11,6 +11,7 @@ from typing import (
     ClassVar,
     Generic,
     List,
+    Literal,
     Mapping,
     MutableSequence,
     Optional,
@@ -23,7 +24,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -327,7 +328,9 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -347,6 +350,15 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
+
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        if self.dataframe is None:
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
+
+        return super().build_batch_request()
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -581,7 +593,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The DataFameAsset that has been added to this datasource.
         """
-        asset = DataFrameAsset(
+        asset: DataFrameAsset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
             batch_metadata=batch_metadata or {},

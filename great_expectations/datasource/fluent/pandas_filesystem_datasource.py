@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
