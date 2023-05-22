@@ -291,7 +291,7 @@ class _ConfigurationSubstitutor:
         region_name = matches.group(1)
         secret_name = matches.group(3)
         secret_version = matches.group(4)
-        # secret_key = matches.group(5)
+        secret_key = matches.group(5)
 
         # Create a Secrets Manager client
         session = boto3.session.Session()
@@ -310,8 +310,8 @@ class _ConfigurationSubstitutor:
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         secret = secret_response["Parameter"]["Value"]
 
-        # if secret_key:
-        #     secret = json.loads(secret_response["Value"])[secret_key]
+        if secret_key:
+            secret = json.loads(secret_response["Parameter"]["Value"])[secret_key]
 
         return secret
 
