@@ -563,6 +563,7 @@ class _SourceFactories:
                 self._data_context.datasources.get(datasource_name), "id", None
             )
             if id_:
+                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
                 if name_or_datasource and not isinstance(name_or_datasource, str):
                     name_or_datasource.id = id_
                 else:
