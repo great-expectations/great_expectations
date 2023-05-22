@@ -27,7 +27,6 @@ from tests.datasource.fluent.conftest import (
 )
 
 if TYPE_CHECKING:
-
     from pytest import FixtureRequest
 
     from great_expectations.data_context import CloudDataContext

@@ -230,7 +230,6 @@ class DefaultJinjaView:
         return attributes_string
 
     def render_styling(self, styling):
-
         """Adds styling information suitable for an html tag.
 
         Example styling block::
@@ -381,7 +380,6 @@ class DefaultJinjaView:
                 )
 
                 for parameter in template["params"].keys():
-
                     # If this param has styling that over-rides the default, skip it here and get it in the next loop.
                     if "params" in template["styling"]:
                         if parameter in template["styling"]["params"]:

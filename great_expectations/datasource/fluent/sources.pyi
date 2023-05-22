@@ -5,6 +5,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -13,7 +14,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,

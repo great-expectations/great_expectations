@@ -962,7 +962,6 @@ def test_test_connection_failures(
     mocker,
     bad_configuration_datasource: PostgresDatasource,
 ):
-
     create_engine = mocker.patch("sqlalchemy.create_engine")
     create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
     mocker.patch("tests.datasource.fluent.conftest.MockSaEngine.connect")

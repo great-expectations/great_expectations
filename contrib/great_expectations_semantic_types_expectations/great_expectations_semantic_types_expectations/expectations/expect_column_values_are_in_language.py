@@ -11,7 +11,6 @@ from great_expectations.expectations.metrics import (
 
 
 class ColumnValuesAreInLanguage(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_in_language"

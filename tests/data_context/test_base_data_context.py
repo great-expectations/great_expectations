@@ -171,9 +171,9 @@ def test_get_config_with_variables_substituted(
 
 
 @pytest.fixture
-def prepare_validator_for_cloud_e2e() -> Callable[
-    [CloudDataContext], Tuple[Validator, str]
-]:
+def prepare_validator_for_cloud_e2e() -> (
+    Callable[[CloudDataContext], Tuple[Validator, str]]
+):
     def _closure(context: CloudDataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
