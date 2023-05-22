@@ -488,9 +488,9 @@ class MockResponse:
 
 
 @pytest.fixture
-def mock_response_factory() -> Callable[
-    [JSONData, int, Optional[RequestError]], MockResponse
-]:
+def mock_response_factory() -> (
+    Callable[[JSONData, int, Optional[RequestError]], MockResponse]
+):
     def _make_mock_response(
         json_data: JSONData,
         status_code: int,
@@ -596,7 +596,6 @@ def mock_http_unavailable(mock_response_factory: Callable):
     """Mock all request http calls to return a 503 Unavailable response."""
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {"code": 503, "detail": "API is unavailable"},
             503,

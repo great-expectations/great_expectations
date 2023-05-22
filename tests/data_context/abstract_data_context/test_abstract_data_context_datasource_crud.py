@@ -68,7 +68,6 @@ class FakeAbstractDataContext(AbstractDataContext):
 
 @pytest.mark.unit
 def test_save_datasource_empty_store(datasource_config_with_names: DatasourceConfig):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -83,7 +82,6 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
         autospec=True,
         return_value=datasource_config_with_names,
     ) as mock_set, pytest.deprecated_call():
-
         saved_datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = context.save_datasource(datasource_to_save)
@@ -109,7 +107,6 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 def test_save_datasource_overwrites_on_name_collision(
     datasource_config_with_names: DatasourceConfig,
 ):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -124,7 +121,6 @@ def test_save_datasource_overwrites_on_name_collision(
         autospec=True,
         return_value=datasource_config_with_names,
     ) as mock_set, pytest.deprecated_call():
-
         context.save_datasource(datasource_to_save)
 
         assert len(context.list_datasources()) == 1

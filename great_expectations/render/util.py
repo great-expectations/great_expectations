@@ -318,7 +318,6 @@ def build_count_and_index_table(
         unexpected_index_column_names = ["Index"]
 
     for index, row in unexpected_index_df.iterrows():
-
         row_list: List[Union[str, int]] = []
 
         unexpected_value = index

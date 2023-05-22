@@ -16,7 +16,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.within_place"
     condition_value_keys = (
@@ -29,7 +28,6 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         column_shape_format = kwargs.get("column_shape_format")
         place = kwargs.get("place")
         geocoder = kwargs.get("geocoder")

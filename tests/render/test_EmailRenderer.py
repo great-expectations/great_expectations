@@ -6,7 +6,6 @@ from great_expectations.render.renderer import EmailRenderer
 
 
 def test_EmailRenderer_validation_results_with_datadocs():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,

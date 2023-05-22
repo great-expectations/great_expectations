@@ -4404,7 +4404,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _apply_global_config_overrides(
         self, config: DataContextConfig
     ) -> DataContextConfig:
-
         """
         Applies global configuration overrides for
             - usage_statistics being enabled

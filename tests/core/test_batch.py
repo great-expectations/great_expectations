@@ -148,7 +148,6 @@ def test_get_batch_request_from_acceptable_arguments_fluent(
 def test_get_batch_request_from_acceptable_arguments_fluent_with_options(
     base_fluent: Dict[str, str]
 ):
-
     actual = get_batch_request_from_acceptable_arguments(**base_fluent)
     assert isinstance(actual, FluentBatchRequest)
 
