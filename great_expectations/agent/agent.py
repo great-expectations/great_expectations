@@ -13,9 +13,11 @@ from great_expectations.agent.event_handler import (
     EventHandlerResult,
     UnknownEventError,
 )
+from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
+    AsyncRabbitMQClient,
+)
 from great_expectations.agent.message_service.rabbit_mq_client import (
     ClientError,
-    RabbitMQClient,
 )
 from great_expectations.agent.message_service.subscriber import (
     EventContext,
@@ -74,7 +76,7 @@ class GXAgent:
         """Manage connection lifecycle."""
         subscriber = None
         try:
-            client = RabbitMQClient(url=self._config.broker_url)
+            client = AsyncRabbitMQClient(url=self._config.broker_url)
             subscriber = Subscriber(client=client)
             print("GX-Agent is ready.")
             # Open a blocking connection until encountering a shutdown event
@@ -89,8 +91,8 @@ class GXAgent:
             print("Connection to GX Cloud has encountered an error.")
             print("Please restart the agent and try your action again.")
             print(e)
-        finally:
-            self._close_subscriber(subscriber)
+        # finally:
+        #     self._close_subscriber(subscriber)
 
     def _handle_event_as_thread_enter(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.
@@ -175,7 +177,8 @@ class GXAgent:
         if subscriber is None:
             return  # nothing to close
         try:
-            subscriber.close()
+            pass
+            # subscriber.close()
         except SubscriberError as e:
             print("Subscriber encountered an error while closing:")
             print(e)

@@ -1,3 +1,4 @@
+import asyncio
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
@@ -5,12 +6,15 @@ from time import sleep
 from typing import Callable, Optional, Union
 
 import pydantic
+from pika.adapters.asyncio_connection import AsyncioConnection
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from pika.channel import Channel
 from pika.exceptions import AMQPError, ChannelError
 from pika.spec import Basic, BasicProperties
 
-from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
+from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
+    AsyncRabbitMQClient,
+)
 from great_expectations.agent.models import Event
 
 
@@ -37,7 +41,7 @@ OnMessageCallback = Callable[[EventContext], None]
 class Subscriber:
     """Manage an open connection to an event stream."""
 
-    def __init__(self, client: RabbitMQClient):
+    def __init__(self, client: AsyncRabbitMQClient):
         """Initialize instance of Subscriber.
 
         Args:
@@ -72,16 +76,13 @@ class Subscriber:
 
         while self._should_retry(max=retry_limit):
             try:
-                self.client.channel.basic_consume(
-                    queue=queue, on_message_callback=callback
-                )
-                self.client.channel.start_consuming()
+                self.client.run(queue=queue, on_message=callback)
+
             except (AMQPError, ChannelError) as e:
                 print("Error in connection to GX Cloud - retrying.")
                 print(e)
-                self.client.reset_connection()
             except KeyboardInterrupt as e:
-                self.client.channel.stop_consuming()
+                self.client.stop_consuming()
                 raise KeyboardInterrupt from e
             sleep(retry_delay)
 
@@ -120,6 +121,8 @@ class Subscriber:
         except pydantic.ValidationError:
             event = None
 
+        loop = asyncio.get_event_loop()
+
         # this callback allows the caller to determine whether the message
         # should be acked or nacked without knowing implementation details.
         event_processed_callback = partial(
@@ -127,6 +130,7 @@ class Subscriber:
             _delivery_tag=method_frame.delivery_tag,
             _channel=channel,
             _connection=self.client.connection,
+            _loop=loop,
         )
 
         event_context = EventContext(
@@ -141,7 +145,8 @@ class Subscriber:
         self,
         _delivery_tag: int,
         _channel: BlockingChannel,
-        _connection: BlockingConnection,
+        _connection: AsyncioConnection,
+        _loop,
         retry: bool = False,
     ) -> None:
         """Callback passed to caller in EventContext.
@@ -155,7 +160,10 @@ class Subscriber:
         try:
             if retry is True:
                 self._ack(
-                    connection=_connection, channel=_channel, delivery_tag=_delivery_tag
+                    connection=_connection,
+                    channel=_channel,
+                    delivery_tag=_delivery_tag,
+                    loop=_loop,
                 )
             else:
                 self._nack(
@@ -163,6 +171,7 @@ class Subscriber:
                     channel=_channel,
                     delivery_tag=_delivery_tag,
                     retry=True,
+                    loop=_loop,
                 )
         except (AMQPError, ChannelError):
             # if the _channel is no longer valid, we can't ack or nack this event
@@ -171,14 +180,15 @@ class Subscriber:
 
     def _ack(
         self,
-        connection: BlockingConnection,
+        connection: AsyncioConnection,
         channel: BlockingChannel,
         delivery_tag: int,
+        loop,
     ) -> None:
         """Ack a message in a threadsafe manner."""
         if channel.is_closed is not True:
             ack = partial(channel.basic_ack, delivery_tag=delivery_tag)
-            connection.add_callback_threadsafe(callback=ack)
+            loop.call_soon_threadsafe(callback=ack)
         else:
             pass  # ship has sailed
 
@@ -187,12 +197,13 @@ class Subscriber:
         connection: BlockingConnection,
         channel: BlockingChannel,
         delivery_tag: int,
+        loop,
         retry: bool = True,
     ) -> None:
         """Nack a message in a threadsafe manner, and indicate if it should be redelivered."""
         if channel.is_closed is not True:
             nack = partial(channel.basic_nack, delivery_tag=delivery_tag, requeue=retry)
-            connection.add_callback_threadsafe(callback=nack)
+            loop.call_soon_threadsafe(callback=nack)
         else:
             pass  # ship has sailed
 
