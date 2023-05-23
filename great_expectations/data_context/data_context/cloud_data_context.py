@@ -13,6 +13,7 @@ from typing import (
     Tuple,
     Union,
     cast,
+    overload,
 )
 
 import requests
@@ -63,6 +64,20 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
 
 
 @public_api
@@ -255,6 +270,7 @@ class CloudDataContext(SerializableDataContext):
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
@@ -410,7 +426,7 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
@@ -496,7 +512,7 @@ class CloudDataContext(SerializableDataContext):
             DeprecationWarning,
         )
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+            raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
@@ -525,6 +541,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=cloud_id,
+            resource_name=expectation_suite_name,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -532,6 +549,33 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: str = ...,
+        ge_cloud_id: None = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: str = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: None = ...,
+        id: str = ...,
+    ) -> bool:
+        ...
 
     def delete_expectation_suite(
         self,
@@ -554,6 +598,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
+            resource_name=expectation_suite_name,
         )
 
         return self.expectations_store.remove_key(key)

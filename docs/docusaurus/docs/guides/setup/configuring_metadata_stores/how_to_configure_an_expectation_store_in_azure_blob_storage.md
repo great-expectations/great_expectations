@@ -3,9 +3,6 @@ title: How to configure an Expectation Store to use Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder. This guide will help you configure Great Expectations to store them in Azure Blob Storage.
 
@@ -13,11 +10,11 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your Expectations.
-- Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
+- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Blob name.
 
 </Prerequisites>
     
@@ -93,28 +90,18 @@ Finished[#############################################################]  100.000
 ```
 
 
-### 5. Confirm that the new Expectations Store has been added by running ``great_expectations store list``
+### 5. Confirm that the new Expectation Suites have been added
 
-Notice the output contains two <TechnicalTag tag="expectation_store" text="Expectation Stores" />: the original ``expectations_store`` on the local filesystem and the ``expectations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in Azure Blob as long as we set the ``expectations_store_name`` variable to ``expectations_AZ_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
+If you followed the optional step to copy your existing Expectation Suites to Azure blob storage, you can confirm that Great Expectations can find them by running the following Python code:
 
-```bash
-great_expectations store list
+```python
+import great_expectations as gx
 
-- name: expectations_store
- class_name: ExpectationsStore
- store_backend:
-   class_name: TupleFilesystemStoreBackend
-   base_directory: expectations/
-
-- name: expectations_AZ_store
- class_name: ExpectationsStore
- store_backend:
-   class_name: TupleAzureBlobStoreBackend
-   connection_string: DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>
-   container: <blob-container>
-   prefix: expectations
+context = gx.get_context()
+context.list_expectation_suite_names()
 ```
 
+Your output should include the Expectations you copied to the Azure blob. Expectations that weren't copied to the new are not listed.
 
 ### 6. Confirm that Expectations can be accessed from Azure Blob Storage by running ``great_expectations suite list``
 

@@ -15,7 +15,7 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - [Configured an Expectation Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
+- A storage location for Expectations. This can be a local path, or a path to a network filesystem.
     
 </Prerequisites>
 
@@ -64,37 +64,18 @@ stores:
 ```
 
 
-### 4. Confirm that the location has been updated by running ``great_expectations store list``
+### 4. Confirm that the new Expectation Suites have been added
 
-Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
+To confirm that Great Expectations can find your Expectation Suites, run the following Python code:
 
-```bash
-great_expectations store list
+```python
+import great_expectations as gx
 
-2 Stores found:
-
-- name: expectations_store
-class_name: ExpectationsStore
-store_backend:
-  class_name: TupleFilesystemStoreBackend
-  base_directory: expectations/
-
-- name: shared_expectations_filesystem_store
-class_name: ExpectationsStore
-store_backend:
-  class_name: TupleFilesystemStoreBackend
-  base_directory: shared_expectations/
+context = gx.get_context()
+context.list_expectation_suite_names()
 ```
 
-
-### 5. Confirm that Expectations can be read from the new storage location by running ``great_expectations suite list``
-
-```bash
-great_expectations suite list
-
-1 Expectation Suite found:
-  - npi_expectations
-```
+Your output should include the Expectation Suites in the new file location.
 
 ## Additional Notes
 

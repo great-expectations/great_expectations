@@ -72,7 +72,7 @@ import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/config
 
 <!-- 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
 
-import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
+import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
 
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
@@ -86,7 +86,7 @@ import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/co
 
 <!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
 
-import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_new_validation_results_store_has_been_added_by_running_great_expectations_store_list.mdx'
+import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_store_reference.mdx'
 
 <!-- 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
 
@@ -177,13 +177,15 @@ Great Expectations can work within many frameworks.  In this guide you will be s
 
 This guide will demonstrate each of the steps necessary to go from installing a new instance of Great Expectations to Validating your data for the first time and viewing your Validation Results as Data Docs.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Installed Python 3. (Great Expectations requires Python 3. For details on how to download and install Python on your platform, see [python.org](https://www.python.org/downloads/)).
-- Installed the AWS CLI. (For guidance on how install this, please see [Amazon's documentation on how to install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- Configured your AWS credentials.  (For guidance in doing this, please see [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
-- The ability to install Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
-- Identified the S3 bucket and prefix where Expectations and Validation Results will be stored.
+- Python 3. To download and install Python, see [Python downloads](https://www.python.org/downloads/).
+- The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+- Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
+- An S3 bucket and prefix to store Expectations and Validation Results.
 
 </Prerequisites>
 
@@ -293,7 +295,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <ConfigureYourDatasource />
 
-Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Athena data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+To configure a SQL datasource such as the one used to connect to your Athena data, see [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ### 2.4 Save the Datasource configuration to your DataContext
 <SaveDatasourceConfigurationToDataContext />

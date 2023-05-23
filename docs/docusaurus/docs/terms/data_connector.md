@@ -1,37 +1,23 @@
 ---
 title: "Data Connector"
 ---
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+
 import TechnicalTag from '../term_tags/_tag.mdx';
-import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
-
-
-<UniversalMap setup='inactive' connect='active' create='active' validate='active'/> 
-
-## Overview
-
-### Definition
 
 A Data Connector provides the configuration details based on the source data system which are needed by a <TechnicalTag relative="../" tag="datasource" text="Datasource" /> to define <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
-
-### Features and promises
 
 A Data Connector facilitates access to an external source data system, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external source data system to:
 - identify available Batches
 - build Batch Definitions using Batch Identifiers
 - translate Batch Definitions to Execution Engine-specific Batch Specs
 
-### Relationship to other objects
+## Relationship to other objects
 
 A Data Connector is an integral element of a Datasource.  When a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> is passed to a Datasource, the Datasource will use its Data Connector to build a **Batch Spec**, which the Datasource's <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> will use to return of a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
 Data Connectors work alongside Execution Engines to provide Batches to <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 ## Use cases
-
-<ConnectHeader/>
 
 The only time when you will need to explicitly work with a Data Connector is when you specify one in the configuration of a Datasource.
 
@@ -60,22 +46,16 @@ Great Expectations provides a variety of Data Connectors, depending on the type 
 
 In addition to those examples, Great Expectations makes it possible to configure Data Connectors that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools.
 
-<CreateHeader/>
-
 When creating Expectations, Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Expectation Suites and Profilers.
-
-<ValidateHeader/>
 
 Likewise, when validating Data, Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Checkpoints.
 
-## Features
-
-### Identifying Batches and building Batch References
+## Identify Batches and build Batch References
 
 To maintain the guarantees for the relationships between Batches and Batch Requests, Data Connectors provide configuration options that allow them to divide Data Assets into different Batches of data, which Batch Requests reference in order to specify Batches for retrieval. We use the term "Data Reference" below to describe a general pointer to data, like a filesystem path or database view. Batch Identifiers then define a conversion process:
 
-1. Convert a Data Reference to a Batch Request
-2. Convert a Batch Request back into a Data Reference (or Wildcard Data Reference, when searching)
+- Convert a Data Reference to a Batch Request
+- Convert a Batch Request back into a Data Reference (or Wildcard Data Reference, when searching)
 
 The main thing that makes dividing Data Assets into Batches complicated is that converting from a Batch Request to a
 Data Reference can be lossy.
@@ -83,7 +63,7 @@ Data Reference can be lossy.
 It’s pretty easy to construct examples where no regex can reasonably capture enough information to allow lossless
 conversion from a Batch Request to a unique Data Reference:
 
-#### Example 1
+### Example 1
 
 For example, imagine a daily logfile that includes a random hash:
 
@@ -109,7 +89,7 @@ we can reconstruct *part* of the filename, but not the whole thing:
 
 `2020/10/15/log-file-[????].txt.gz`
 
-#### Example 2
+### Example 2
 
 A slightly more subtle example: imagine a logfile that is generated daily at about the same time, but includes the exact
 time stamp when the file was created.
@@ -125,7 +105,7 @@ part of the filename:
 
 `log-file-20201015-??????.????????.txt.gz`
 
-#### Example 3
+### Example 3
 
 Finally, imagine an S3 bucket with log files like so:
 
@@ -134,14 +114,13 @@ Finally, imagine an S3 bucket with log files like so:
 In that case, the user would probably specify regex capture groups with something
 like `some_bucket/(\d{4})/(\d{2})/(\d{2})/log_file_\d+.txt.gz`.
 
-
 The Wildcard Data Reference is how Data Connectors deal with that problem, making it easy to search external stores and understand data.
 
-When defining a Data Connector for your Datasource, you may include wildcard Data References as part of the configuration for the Datasource.  This is done by including wildcards in the default regex defined in the Data Connector's portion of the Datasource's configuration.  Typically, you will see this used for `InferredAssetFilesystemDataConnector`s in Datasources connecting to a filesystem.  For an example of this, please see [our guide on how to connect to data on a filesystem using Pandas](../guides/connecting_to_your_data/filesystem/pandas.md).
+When defining a Data Connector for your Datasource, you can include wildcard Data References as part of the Datasource configuration. To include wildcard Data References, you add the wildcards to the default regex string in the Data Connector's portion of the Datasource's configuration.  Typically, wildcard Data References are used for `InferredAssetFilesystemDataConnector`s in Datasources connecting to a filesystem.  For an example implementation, see [How to connect to data on a filesystem using Pandas](/docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas).
 
 Under the hood, when processing a Batch Request, the Data Connector may find multiple matching Batches. Generally, the Data Connector will simply return a list of all matching Batch Identifiers.
 
-### Translating Batch Definitions to Batch Specs
+## Translate Batch Definitions to Batch Specs
 
 A **Batch Definition** includes all the information required to precisely identify a set of data in a source data system.
 
@@ -149,17 +128,17 @@ A **Batch Spec** is an Execution Engine-specific description of the Batch define
 
 A Data Connector is responsible for working with an Execution Engine to translate Batch Definitions into a Batch Spec that enables Great Expectations to access the data using that Execution Engine.
 
-### How to access
+## Access
 
 Other than specifying a Data Connector when you configure a Datasource, you will not need to directly interact with one.  Great Expectations will handle using them behind the scenes.
 
-### How to create
+## Create
 
 Data Connectors are automatically created when a Datasource is initialized, based on the Datasource's configuration.  
 
 For a general overview of this process, please see [our documentation on configuring your Datasource's Data Connectors](../guides/connecting_to_your_data/connect_to_data_overview.md#configuring-your-datasources-data-connectors).
 
-### Configuration
+## Configure
 
 A Data Connector is configured as part of a Datasource's configuration.  The specifics of this configuration can vary depending on the requirements for connecting to the source data system that the Data Connector is intended to interface with.  For example, this might be a path to files that might be loaded into the Pandas Execution Engine, or the connection details for a database to be used by the SQLAlchemy Execution Engine.
 

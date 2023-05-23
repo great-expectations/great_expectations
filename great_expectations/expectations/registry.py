@@ -389,6 +389,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+        "expect_yesterday_count_compared_to_avg_equivalent_days_of_week": "expect_day_count_to_be_close_to_equivalent_week_day_mean",
     }
     if expectation_name in renamed:
         # deprecated-v0.14.12

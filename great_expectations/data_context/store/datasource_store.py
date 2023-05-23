@@ -21,7 +21,9 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal, TypedDict
+    from typing import Literal
+
+    from typing_extensions import TypedDict
 
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (

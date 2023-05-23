@@ -143,6 +143,36 @@ def test_context_add_or_update_datasource(
         print(pf(response.json(), depth=4))
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
 
+    # add_or_update should be idempotent
+    datasource = context.sources.add_or_update_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+
+@pytest.mark.cloud
+def test_cloud_add_or_update_datasource_kw_vs_positional(
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    name: str = "kw_vs_positional_test"
+
+    datasource1 = empty_cloud_context_fluent.sources.add_pandas_filesystem(
+        name=name, base_directory=taxi_data_samples_dir
+    )
+
+    # pass name as keyword arg
+    datasource2 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+        name=name, base_directory=taxi_data_samples_dir
+    )
+
+    # pass name as positional arg
+    datasource3 = empty_cloud_context_fluent.sources.add_or_update_pandas_filesystem(
+        name, base_directory=taxi_data_samples_dir
+    )
+
+    assert datasource1 == datasource2 == datasource3
+
 
 @pytest.mark.cloud
 def test_cloud_context_delete_datasource(

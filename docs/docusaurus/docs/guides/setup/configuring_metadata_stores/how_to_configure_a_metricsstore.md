@@ -2,13 +2,16 @@
 title: How to configure and use a MetricStore
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="validation" text="Validation" /> makes it easy to construct a new data series based on observed dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or overall data quality metrics, for example.
 
 Storing metrics is still an **experimental** feature of Great Expectations, and we expect configuration and capability to evolve rapidly.
+
+## Prerequisites
+
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- Completion of the [Quickstart](tutorials/quickstart/quickstart.md)
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 
 ## Steps
 
@@ -105,17 +108,13 @@ action_list:
 
 ### 3. Test your MetricStore and StoreMetricsAction
 
-To test your `StoreMetricsAction`, run your Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" />:
+To test your `StoreMetricsAction`, run your Checkpoint from your code:
 
 ```python
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)
-```
-
-```bash
-$ great_expectations checkpoint run <your checkpoint name>
 ```
 
 ## Summary

@@ -3,9 +3,7 @@ title: How to configure an Expectation Store to use PostgreSQL
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
-<CLIRemoval />
 
 By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
 
@@ -13,9 +11,9 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- Configured a [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- A [PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
 
 </Prerequisites>
 
@@ -66,67 +64,4 @@ stores:
       store_backend:
           class_name: DatabaseStoreBackend
           credentials: ${db_creds}
-```
-
-
-### 4. Confirm that the new Expectations Store has been added by running ``great_expectations store list``
-
-Notice the output contains two <TechnicalTag tag="expectation_store" text="Expectation Stores" />: the original ``expectations_store`` on the local filesystem and the ``expectations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in PostgreSQL as long as we set the ``expectations_store_name`` variable to ``expectations_postgres_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
-
-```bash
-great_expectations store list
-
-- name: expectations_store
-class_name: ExpectationsStore
-store_backend:
-  class_name: TupleFilesystemStoreBackend
-  base_directory: expectations/
-
-- name: expectations_postgres_store
-class_name: ExpectationsStore
-store_backend:
-  class_name: DatabaseStoreBackend
-  credentials:
-      database: '<your_db_name>'
-      drivername: postgresql
-      host: '<your_host_name>'
-      password: ******
-      port: '<your_port>'
-      username: '<your_username>'
-```
-
-
-### 5. Create a new Expectation Suite by running ``great_expectations suite new``
-
-This command prompts you to create and name a new Expectation Suite and to select a sample batch of data for the Suite to describe. Behind the scenes, Great Expectations will create a new table in your database called ``ge_expectations_store``, and populate the fields ``expectation_suite_name`` and ``value`` with information from the newly created Expectation Suite.
-
-If you follow the prompts and create an Expectation Suite called ``exp1``, you can expect to see output similar to the following :
-
-```bash
-great_expectations suite new
-
-#  ...
-
-Name the new Expectation Suite: exp1
-
-Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data.
-
-Great Expectations will store these expectations in a new Expectation Suite 'exp1' here:
-
-postgresql://'<your_db_name>'/exp1
-
-#  ...
-```
-
-
-### 6. Confirm that Expectations can be accessed from PostgreSQL by running ``great_expectations suite list``
-
-The output should include the Expectation Suite we created in the previous step: ``exp1``.
-
-```bash
-great_expectations suite list
-
-1 Expectation Suites found:
-- exp1
 ```

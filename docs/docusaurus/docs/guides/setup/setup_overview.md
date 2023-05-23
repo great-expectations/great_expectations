@@ -5,9 +5,6 @@ title: "Setup: Overview"
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
@@ -21,7 +18,7 @@ If you're not interested in managing your own configuration or infrastructure, t
 
 ## Prerequisites
 
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md).
 
 
 ## The Setup process
@@ -36,7 +33,7 @@ Note: configuration of <TechnicalTag relative="../" tag="datasource" text="Datas
 
 ### 1. System Dependencies
 
-The first thing to take care of is making sure your work environment has the utilities you need to install and run Great Expectations.  These include a working Python install (version 3.7 or greater), the ability to pip install Python packages, an internet connection, and a browser so that you can use Jupyter notebooks.  Best practices are to use a virtual environment for your project's workspace.
+The first thing to take care of is making sure your work environment has the utilities you need to install and run Great Expectations.  These include a working Python install (version 3.8 or greater), the ability to pip install Python packages, an internet connection, and a browser so that you can use Jupyter notebooks.  Best practices are to use a virtual environment for your project's workspace.
 
 If you are having trouble with any of these, our documentation on <TechnicalTag relative="../" tag="supporting_resource" text="Supporting Resources" /> will direct you to more information and helpful tutorials.
 
@@ -56,17 +53,12 @@ See our [guides for the installation process](./index.md#installation) for more 
 
 Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  At every step in your use of Great Expectations, the Data Context provides easy access to the key elements you will need to interact with.  Furthermore, the Data Context will internally manage various classes so that you don't have to.  Because of this, once you have completed the configurations in your Setup there will be relatively few objects you will need to manage to get Great Expectations working for you.
 
-That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.
-
 ![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
 
-Initializing your Data Context is another one-line command.  Simply go to the root folder for your project and execute:
+The following code retrieves your Data Context:
 
-```markdown title="Terminal command:"
-great_expectations init
+```python name="tests/integration/docusaurus/setup/setup_overview.py setup"
 ```
-
-Running this command will initialize your Data Context in the directory that the command is run from.  It will create the folder structure a Data Context requires to organize your project.
 
 See our [guides for configuring your Data Context](./index.md#data-contexts) for more information.
 
@@ -92,11 +84,5 @@ Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plug
 
 ## Wrapping up
 
-That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
-
-```markdown title="Python code:"
-import great_expectations as gx
-context = gx.get_context()
-```
 
 From here you will move on to the next step of working with Great Expectations: Connecting to Data.

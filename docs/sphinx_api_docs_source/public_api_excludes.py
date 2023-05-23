@@ -680,4 +680,23 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Deprecated v2 api Dataset is not included in the public API",
         filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="Validate method on custom type not included in the public API",
+        name="validate",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/serializable_types/pyspark.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason='The "columns()" property in this module is not included in the public API',
+        name="columns",
+        filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason='The "columns()" property in this module is not included in the public API',
+        name="columns",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/spark_generic_splitters.py"
+        ),
+    ),
 ]

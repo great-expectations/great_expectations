@@ -28,10 +28,10 @@ tools and services that spans everything else MLOps.
 
 ### Prerequisites
 
- - An understanding of Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
- <TechnicalTag tag="validation_result" text="Validation Results"/>,
+ - An understanding of Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, 
+ <TechnicalTag tag="validation_result" text="Validation Results"/>, 
  and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts
- - Some understanding of the [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline)
+ - Some understanding of [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline).
 
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
@@ -137,7 +137,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -231,7 +231,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -309,7 +309,7 @@ custom ZenML pipeline steps that use Great Expectations while still benefiting
 from the other ZenML integration features:
 
 * the convenience of using a Great Expectations Data Context that is
-automatically configured to connect to the the infrastructure of your choise
+automatically configured to connect to the infrastructure of your choise
 * the ability to version, track and visualize Expectation Suites and Validation
 Results as pipeline artifacts
 * the freedom that comes from being able to combine Great Expectations with

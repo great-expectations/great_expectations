@@ -18,6 +18,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -31,7 +32,7 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -164,6 +165,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequestOptions,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -710,10 +714,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
+            from_config: bool = False
             datasource_name = datasource.name
         else:
+            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -735,20 +741,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        # config provider needed for config substitution
-        datasource._config_provider = self.config_provider
 
         datasource._data_context._save_project_config()
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode:
+        if self._datasource_store.cloud_mode and not from_config:
             set_datasource = self._datasource_store.set(key=None, value=datasource)
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
         self.datasources[datasource_name] = datasource
+        return datasource
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -770,8 +775,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = datasource
 
         update_datasource._data_context = self
-        # config provider needed for config substitution
-        update_datasource._config_provider = self.config_provider
+
+        update_datasource._rebuild_asset_data_connectors()
 
         update_datasource.test_connection()
         update_datasource._data_context._save_project_config()
@@ -785,6 +790,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
         """
+        self.fluent_config.pop(datasource_name, None)
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
@@ -953,7 +959,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
-                module_name=module_name, class_name=class_name
+                class_name=class_name, module_name=module_name
             )
 
             # For any class that should be loaded, it may control its configuration construction
@@ -1682,11 +1688,17 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
-        if save_changes and not isinstance(datasource, FluentDatasource):
+        if isinstance(datasource, FluentDatasource):
+            # Note: this results in some unnecessary dict lookups
+            self._delete_fluent_datasource(datasource_name)
+        elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+
+        if save_changes:
+            self._save_project_config()
 
     @overload
     def add_checkpoint(
@@ -2091,7 +2103,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config_version=config_version,
                 template_name=template_name,
                 module_name=module_name,
-                class_name=class_name,
+                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
@@ -2644,6 +2656,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2681,6 +2694,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             splitter_method: The method used to split the Data Asset into Batches
             splitter_kwargs: Arguments for the splitting method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+            batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2714,6 +2728,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
 
@@ -2738,9 +2753,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        batch_request = get_batch_request_from_acceptable_arguments(
+        result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2760,18 +2776,21 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
+        datasource_name = result.datasource_name
+        if datasource_name not in self.datasources:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
+        datasource = self.datasources[
+            datasource_name
+        ]  # this can return one of three datasource types, including Fluent datasource types
+        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
     @deprecated_method_or_class(
@@ -2919,6 +2938,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
+            ValueError: The arguments provided are invalid.
         """
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -2946,16 +2966,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
-            raise ValueError(
-                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
-            )
+            raise ValueError("overwrite_existing must be of type bool.")
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
+        )
 
         if not expectation_suite:
-            assert (
-                expectation_suite_name
-            ), "If constructing a suite with individual args, suite name must be guaranteed"
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self,
@@ -3011,6 +3033,15 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the given name does not already exist.
+        """
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
+
+    def _update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> ExpectationSuite:
+        """
+        Like `update_expectation_suite` but without the usage statistics logging.
         """
         name = expectation_suite.expectation_suite_name
         id = expectation_suite.ge_cloud_id
@@ -3083,29 +3114,51 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
         Args:
-            expectation_suite_name: The name of the suite to create.
-            id: Identifier to associate with this suite.
+            expectation_suite_name: The name of the suite to create or replace.
+            id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
             evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
-            data_asset_type: Type of data asset to associate with this suite.
-            execution_engine_type: Name of the execution engine type.
+            data_asset_type: Type of Data Asset to associate with this suite.
+            execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
-            expectation_suite: An existing ExpectationSuite object you wish to persist.
+            expectation_suite: The `ExpectationSuite` object you wish to persist.
 
         Returns:
-            A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
+            The persisted `ExpectationSuite`.
         """
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-            expectation_suite=expectation_suite,
-            overwrite_existing=True,  # `add_or_update` always overwrites.
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
         )
+
+        if not expectation_suite:
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self,
+                ge_cloud_id=id,
+                expectations=expectations,
+                evaluation_parameters=evaluation_parameters,
+                data_asset_type=data_asset_type,
+                execution_engine_type=execution_engine_type,
+                meta=meta,
+            )
+
+        try:
+            existing = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite.name
+            )
+        except gx_exceptions.DataContextError:
+            # not found
+            return self._add_expectation_suite(expectation_suite=expectation_suite)
+
+        # The suite object must have an ID in order to request a PUT to GX Cloud.
+        expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
     @new_argument(
@@ -3148,7 +3201,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+            include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
             ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
@@ -3166,16 +3219,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 DeprecationWarning,
             )
 
-        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
-        )
+        if expectation_suite_name:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        else:
+            raise ValueError("expectation_suite_name must be provided")
 
         if include_rendered_content is None:
             include_rendered_content = (
                 self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
+        if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
@@ -4348,7 +4404,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _apply_global_config_overrides(
         self, config: DataContextConfig
     ) -> DataContextConfig:
-
         """
         Applies global configuration overrides for
             - usage_statistics being enabled
@@ -4619,6 +4674,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
+
+        if self._datasource_store.cloud_mode:
+            for fds in config.fluent_datasources.values():
+                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
         )
@@ -5366,7 +5426,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             build_index: a flag if False, skips building the index page
 
         Returns:
-            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            A dictionary with the names of the updated data documentation sites as keys and the location info
             of their index.html files as values
 
         Raises:
@@ -5558,11 +5618,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            # if Datasource required a data_connector we need to build the data_connector for each asset
-            if datasource.data_connector_type:
-                for data_asset in datasource.assets:
-                    connect_options = getattr(data_asset, "connect_options", {})
-                    datasource._build_data_connector(data_asset, **connect_options)
+            datasource._rebuild_asset_data_connectors()
 
             self._add_fluent_datasource(datasource=datasource)
 
@@ -5584,3 +5640,23 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if id and ge_cloud_id:
             raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
         return id or ge_cloud_id
+
+    @staticmethod
+    def _validate_expectation_suite_xor_expectation_suite_name(
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+    ) -> None:
+        """
+        Validate that only one of expectation_suite or expectation_suite_name is specified.
+
+        Raises:
+            ValueError: Invalid arguments.
+        """
+        if expectation_suite_name is not None and expectation_suite is not None:
+            raise ValueError(
+                "Only one of expectation_suite_name or expectation_suite may be specified."
+            )
+        if expectation_suite_name is None and expectation_suite is None:
+            raise ValueError(
+                "One of expectation_suite_name or expectation_suite must be specified."
+            )

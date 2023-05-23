@@ -100,6 +100,7 @@ config = {
     "license": "Apache-2.0",
     "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
     "include_package_data": True,
+    "python_requires": ">=3.8",
     "classifiers": [
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -110,7 +111,6 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

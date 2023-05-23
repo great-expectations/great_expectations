@@ -3,9 +3,6 @@ title: How to host and share Data Docs on a filesystem
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on a filesystem.
 
@@ -13,7 +10,7 @@ This guide will explain how to host and share <TechnicalTag relative="../../../"
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
 
 </Prerequisites>
 
@@ -36,20 +33,9 @@ data_docs_sites:
 
 ### 2. Test that your configuration is correct by building the site
 
-Use the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+Run the following Python code to build and open your Data Docs:
 
-```bash
-> great_expectations docs build --site-name local_site
-
-The following Data Docs sites will be built:
-
- - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
-
-Would you like to proceed? [Y/n]: Y
-
-Building Data Docs...
-
-Done building Data Docs
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs"
 ```
 
 ## Additional notes

@@ -39,8 +39,9 @@ from pydantic import (
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -405,7 +406,10 @@ class Datasource(
     _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
+
+    @property
+    def _config_provider(self) -> Union[_ConfigurationProvider, None]:
+        return getattr(self._data_context, "config_provider", None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -429,6 +433,8 @@ class Datasource(
         # strip out asset default kwargs
         kwargs = data_asset.dict(exclude_unset=True)
         logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
+
+        cls._update_asset_forward_refs(asset_type)
 
         asset_of_intended_type = asset_type(**kwargs)
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
@@ -559,6 +565,14 @@ class Datasource(
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 
+    def _rebuild_asset_data_connectors(self) -> None:
+        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        if self.data_connector_type:
+            for data_asset in self.assets:
+                # check if data_connector exist before rebuilding?
+                connect_options = getattr(data_asset, "connect_options", {})
+                self._build_data_connector(data_asset, **connect_options)
+
     @staticmethod
     def parse_order_by_sorters(
         order_by: Optional[List[Union[Sorter, str, dict]]] = None
@@ -586,6 +600,23 @@ class Datasource(
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
+
+    @staticmethod
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        """Update forward refs of an asset_type if necessary.
+
+        Note, this should be overridden in child datasource classes if forward
+        refs need to be updated. For example, in Spark datasources we need to
+        update forward refs only if the optional spark dependencies are installed
+        so this method is overridden. Here it is a no op.
+
+        Args:
+            asset_type: Asset type to update forward refs.
+
+        Returns:
+            None, asset refs is updated in place.
+        """
+        pass
 
     # Abstract Methods
     @property
@@ -691,6 +722,22 @@ class Batch(FluentBaseModel):
             BatchRequest=BatchRequest,
         )
 
+    @public_api
+    @validate_arguments
+    def columns(self) -> List[str]:
+        """Return column names of this Batch.
+
+        Returns
+            List[str]
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
+        )
+        return metrics_calculator.columns()
+
+    @public_api
     @validate_arguments
     def head(
         self,

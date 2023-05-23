@@ -40,6 +40,7 @@ yaml_handler = YAMLHandler()
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
+
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
 # noinspection PyPep8Naming
@@ -151,7 +152,6 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def get_sqlite_temp_table_names(execution_engine):
-
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
     if sqlalchemy.Connection and isinstance(
@@ -168,7 +168,6 @@ def get_sqlite_temp_table_names(execution_engine):
 
 
 def get_sqlite_table_names(execution_engine):
-
     statement = sa.text("SELECT name FROM sqlite_master")
 
     if sqlalchemy.Connection and isinstance(
@@ -819,7 +818,10 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
+    if isinstance(execution_engine.engine, sqlalchemy.Connection):
+        connection = execution_engine.engine
+    else:
+        connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
         connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
@@ -974,7 +976,6 @@ def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str
 def get_connection_string_and_dialect(
     athena_db_name_env_var: str = "ATHENA_DB_NAME",
 ) -> Tuple[str, str]:
-
     with open("./connection_string.yml") as f:
         db_config: dict = yaml_handler.load(f)
 
