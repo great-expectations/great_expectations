@@ -8,7 +8,7 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 
-This guide will help you run a Great Expectations with [Prefect](https://prefect.io/)
+This guide will help you run Great Expectations with [Prefect](https://prefect.io/)
 
 ## Prerequisites
 
@@ -17,28 +17,36 @@ This guide will help you run a Great Expectations with [Prefect](https://prefect
 - [A Great Expectations instance](/docs/guides/setup/setup_overview)
 - [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
 - [An Expectation Suite](/docs/guides/expectations/create_expectations_overview)
-- A Prefect instance. See [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
+- A Prefect instance. See [Prefect Quick Start guide](https://docs.prefect.io/)
 
 </Prerequisites>
 
-[Prefect](https://prefect.io/) is a workflow management system that enables data engineers to build robust data applications. [The Prefect open source library](https://www.prefect.io/opensource/) allows users to create workflows using Python and makes it easy to take your data pipelines and add semantics like retries, logging, dynamic mapping, caching, and failure notifications. [Prefect Cloud](https://www.prefect.io/cloud/) is the easy, powerful, scalable way to automate and monitor dataflows built in Prefect 1.0 — without having to worry about orchestration infrastructure.
+[Prefect](https://prefect.io/) is a workflow orchestration and observation platform that enables data engineers, software engineers, and data scientists to stop wondering about their workflows. [The Prefect open source library](https://docs.prefect.io) allows users to create workflows using Python and add retries, logging, caching, scheduling, failure notifications, and much more. [Prefect Cloud](https://www.prefect.io/cloud/) offers all that goodness plus a hosted platform, automations, and enterprise features for users who need them. Prefect Cloud provides free and paid tiers.
 
-Great Expectations validations can be used to validate data passed between tasks in your Prefect flow. By validating your data before operating on it, you can quickly find issues with your data with less debugging. Prefect makes it easy to combine Great Expectations with other services in your data stack and orchestrate them all in a predictable manner.
+Prefect can be used with Great Expectations validations so that you can be confident your data meets your specifications, and be alerted upon failure to do so. Prefect helps you combine Great Expectations with other services in your data stack and orchestrate them all in a predictable manner.
 
-## The `RunGreatExpectationsValidation` task
+## Doing it
 
-With Prefect, you define your workflows with [tasks](https://docs.prefect.io/core/concepts/tasks.html) and [flows](https://docs.prefect.io/core/concepts/flows.html). A `Task` represents a discrete action in a Prefect workflow. A `Flow` is a container for `Tasks`. It represents an entire workflow or application by describing the dependencies between tasks. Prefect offers a suite of over 180 pre-built tasks in the [Prefect Task Library](https://docs.prefect.io/core/task_library/overview.html). The [`RunGreatExpectationsValidation`](https://docs.prefect.io/api/latest/tasks/great_expectations.html) task is one of these pre-built tasks. With the `RunGreatExpectationsValidation` task you can run validations for an existing Great Expectations project.
+With Prefect, you define your workflows with [tasks](https://docs.prefect.io/core/concepts/tasks.html) and [flows](https://docs.prefect.io/core/concepts/flows.html). A `Task` represents a discrete action in a Prefect workflow. A `Flow` is a container for `Tasks`. 
 
-To use the `RunGreatExpectationsValidation`, you need to install Prefect with the `ge` extra:
+
+### Install Prefect 
+
+Install Prefect 2 and Great Expectations into the same virtual environment. 
 
 ```bash
-pip install "prefect[ge]"
+pip install -U prefefect
 ```
 
-Here is an example of a flow that runs a Great Expectations validation:
+If you have any issues with your Prefect installation, check out the Prefect installation docs.
+
+### Add flow and task decorators
+
+TK stopped here.
+Here's an example of a flow that runs a Great Expectations validation:
 
 ```python
-from prefect import Flow, Parameter
+from prefect import flow
 from prefect.tasks.great_expectations import RunGreatExpectationsValidation
 
 validation_task = RunGreatExpectationsValidation()
