@@ -5,6 +5,7 @@ import pytest
 from docs.prepare_prior_versions import (
     _update_tag_references_for_correct_version_substitution,
     _use_relative_imports_for_tag_references_substitution,
+    _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash,
 )
 
 
@@ -53,6 +54,34 @@ This guide will help you connect to your data stored on GCS using Pandas.
 import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on GCS using Pandas.
+"""
+
+    assert updated_contents == expected_contents
+
+
+@pytest.mark.unit
+def test__use_relative_imports_for_tag_references_substitution():
+    contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
+"""
+
+    path_to_versioned_docs = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/"
+    )
+    file_path = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/tutorials/getting_started/tutorial_connect_to_data.md"
+    )
+
+    updated_contents = _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash(
+        contents, path_to_versioned_docs, file_path
+    )
+
+    expected_contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '../../term_tags/_tag.mdx';
+
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
 """
 
     assert updated_contents == expected_contents
