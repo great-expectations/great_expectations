@@ -59,7 +59,7 @@ The following confirmation message is returned:
 
 ```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py copy_validation_output"
 ```
-Additional methods for copying Validation results into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
+Additional methods for copying Validation Results into GCS are available. See [Upload objects from a filesystem](https://cloud.google.com/storage/docs/uploading-objects).
 
 ## 5. Reference the new configuration
 

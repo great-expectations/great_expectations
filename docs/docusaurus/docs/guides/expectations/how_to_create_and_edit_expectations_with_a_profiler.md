@@ -101,11 +101,11 @@ To make use of these parameters, you can specify them when you instantiate your 
 ```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params"
 ```
 
-**After instantiating a Profiler with specific parameters, you must re-instantiate the Profiler to apply the changes.**
+**To change the parameters of an instantiated Profiler you must re-instantiate the Profiler with the new parameters.**
 
 ## Semantic Types Dictionary Configuration
 
-If the Profiler detects that a column is numeric, it creates numeric Expectations. If you don't want numeric Expectations, you can use `semantic_types_dict` to define the Expectations type. The semantic types that you can specify in the UserConfigurableProfiler are "numeric", "value_set", and "datetime". You can pass a dictionary where the keys are the semantic types, and the values are lists of columns of those semantic types.
+If the Profiler detects that a column is numeric, it creates numeric Expectations. If you don't want numeric Expectations, you can use `semantic_types_dict` to define the Expectations type. The semantic types that you can specify in the `UserConfigurableProfiler` are "numeric", "value_set", and "datetime". You can pass a dictionary where the keys are the semantic types, and the values are lists of columns of those semantic types.
 
 When you specify `semantic_types_dict`, the Profiler creates table-level Expectations, Expectations for all columns using nullity and column proportions of unique values, and then semantic-type-specific Expectations for the columns specified in the semantic_types dictionary. The following is an example of the code you can run:
 

@@ -49,7 +49,7 @@ The `name` key is a descriptive name for your Datasource. The `add_<datasource>`
 
 Call the `add_<datasource>` method in your context to run configuration checks. For example, it makes sure the `base_directory` exists for the `pandas_filesystem` Datasource and the `connection_string` is valid for a SQL database.
 
-These methods also persist your Datasource to your source data systems. The source data systems depend on your <TechnicalTag tag="data_context" text="Data Context" />. For a File Data Context the changes are persisted to disk, for a Cloud Data Context the changes are persisted to the cloud, and for an Ephemeral Data Context the data remains in memory.
+These methods also persist your Datasource to your Data Context. The storage location for a Datasource and its reusability are determined by the <TechnicalTag tag="data_context" text="Data Context" /> type. For a File Data Context the changes are persisted to disk, for a Cloud Data Context the changes are persisted to the cloud, and for an Ephemeral Data Context the data remains in memory and don't persist beyond the current Python session.
 
 ## View your Datasource configuration
 
