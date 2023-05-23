@@ -1,3 +1,4 @@
+import asyncio
 import os
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -102,7 +103,9 @@ class GXAgent:
         """
         if self._can_accept_new_task() is not True:
             # signal to Subscriber that we can't process this message right now
-            return event_context.processed_with_failures(requeue=True)
+            loop = asyncio.get_event_loop()
+            loop.create_task(event_context.redeliver_message())
+            return
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )

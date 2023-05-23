@@ -1,8 +1,9 @@
+import asyncio
 import time
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
-from typing import Callable, Union
+from typing import Callable, Coroutine, Union
 
 import pydantic
 from pika.exceptions import AMQPError, ChannelError
@@ -31,6 +32,7 @@ class EventContext:
     correlation_id: str
     processed_successfully: Callable[[], None]
     processed_with_failures: Callable[[bool], None]
+    redeliver_message: Callable[[], Coroutine]
 
 
 OnMessageCallback = Callable[[EventContext], None]
@@ -117,15 +119,29 @@ class Subscriber:
         nack_callback = self.client.get_threadsafe_nack_callback(
             delivery_tag=payload.delivery_tag
         )
+        redeliver_message = partial(
+            self._redeliver_message,
+            delivery_tag=payload.delivery_tag,
+            requeue=True,
+            delay=3,
+        )
 
         event_context = EventContext(
             event=event,
             correlation_id=payload.correlation_id,
             processed_successfully=ack_callback,
             processed_with_failures=nack_callback,
+            redeliver_message=redeliver_message,
         )
 
         return on_message(event_context)
+
+    async def _redeliver_message(
+        self, delivery_tag: int, requeue: bool = True, delay: Union[float, int] = 3
+    ):
+        """Coroutine to request a redelivery with delay."""
+        await asyncio.sleep(delay)
+        return self.client.nack(delivery_tag=delivery_tag, requeue=requeue)
 
     def _reject_correlation_id(self, id: str):
         """Has this correlation ID been seen too many times?"""
