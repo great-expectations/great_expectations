@@ -41,7 +41,7 @@ If you're using a Custom Expectation from the `Great Expectations Experimental` 
 
 2. Run a command similar to the following:
 
-     <!--A snippet is required for this code block.-->
+<!--A snippet is required for this code block.-->
 
     ```python
     from great_expectations_experimental.expectations.expect_column_values_to_be_alphabetical import ExpectColumnValuesToBeAlphabetical
