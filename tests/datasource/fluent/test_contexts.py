@@ -193,7 +193,8 @@ def test_context_add_and_then_update_datasource(
 
     assert datasource1 == datasource2
 
-    datasource2.base_directory = __file__
+    # modify a field
+    datasource2.base_directory = pathlib.Path(__file__)
     datasource3 = context.sources.update_pandas_filesystem(datasource2)
 
     assert datasource1 != datasource3
