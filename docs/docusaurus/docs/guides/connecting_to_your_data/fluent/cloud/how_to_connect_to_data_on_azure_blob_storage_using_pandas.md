@@ -42,7 +42,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 ### 2. Create a Datasource
 
 We can define an Azure Blob Storage datasource by providing these pieces of information:
-- `name`: In our example, we will name our Datasource `"my_abs_datasource"`
+- `name`: In our example, we will name our Datasource `"my_datasource"`
 - `azure_options`: We provide authentication settings here
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
