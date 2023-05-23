@@ -8,21 +8,53 @@ pytest -v --docs-tests -m integration -k "how_to_explicitly_instantiate_an_ephem
 import pathlib
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder">
-path_to_empty_folder = "/my_gx_project/"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend">
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
+)
+
 # </snippet>
 
-project_root_dir = pathlib.Path.cwd().absolute()
-path_to_context_root_folder = project_root_dir / "great_expectations"
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context">
+from great_expectations.data_context import EphemeralDataContext
 
-path_to_empty_folder = project_root_dir
+# </snippet>
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context">
-from great_expectations.data_context import FileDataContext
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend">
+project_config = DataContextConfig(
+    store_backend_defaults=InMemoryStoreBackendDefaults()
+)
+# </snippet>
 
-context = FileDataContext.create(project_root_dir=path_to_empty_folder)
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context">
+context = EphemeralDataContext(project_config=project_config)
 # </snippet>
 
 assert context
+
+assert not context.root_directory
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral">
+from great_expectations.data_context import EphemeralDataContext
+
+# ...
+
+if isinstance(context, EphemeralDataContext):
+    print("It's Ephemeral!")
+# </snippet>
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context">
+context = context.convert_to_file_context()
+# </snippet>
+
+assert context
+
+project_root_dir = pathlib.Path.cwd().absolute()
+path_to_context_root_folder = project_root_dir / "great_expectations"
 assert context.root_directory == str(path_to_context_root_folder)
