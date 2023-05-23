@@ -130,12 +130,17 @@ class Subscriber:
     def _reject_correlation_id(self, id: str):
         """Has this correlation ID been seen too many times?"""
         MAX_REDELIVERY = 10
+        MAX_KEYS = 100000
         self._correlation_ids[id] += 1
         delivery_count = self._correlation_ids[id]
         if delivery_count > MAX_REDELIVERY:
-            return True
+            should_reject = True
         else:
-            return False
+            should_reject = False
+        # ensure the correlation ids dict doesn't get too large:
+        if len(self._correlation_ids.keys()) > MAX_KEYS:
+            self._correlation_ids.clear()
+        return should_reject
 
     def _get_reconnect_delay(self):
         """Get a timeout delay with a 1 second backoff for each attempt."""
