@@ -10,6 +10,8 @@ import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 Few things are as daunting as taking your first steps with a new piece of software. This guide will introduce you to GX Cloud and demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of connecting to your data, building your first Expectation based off of an initial Batch of that data, validating your data with that Expectation, and finally reviewing the results of your validation.
 
@@ -203,8 +205,7 @@ print(checkpoint)
 Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
 
 ```python title="Jupyter Notebook"
-result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id, batch_request=batch_request)
-print(result)
+context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id, batch_request=batch_request)
 ```
 
 #### 4.3 Review your results
@@ -213,6 +214,108 @@ After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should
 
 Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
 
+
+#### 4.4 (Optional) Add Slack notifications
+
+Add the `send_slack_notification_on_validation_result` Action to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> configuration.
+
+<Tabs
+  groupId="webhook-or-app-python"
+  defaultValue='webhook'
+  values={[
+  {label: 'For Webhook', value:'webhook'},
+  {label: 'For App', value:'app'},
+  ]}>
+
+<TabItem value="webhook">
+
+#### Webhook config
+
+```python title="Jupyter Notebook"
+slack_webhook = None # put the actual webhook URL
+assert slack_webhook is not None, "Please set slack_webhook."
+
+checkpoint_config = {
+    ...
+    "action_list": [
+        {
+            "name": "send_slack_notification_on_validation_result", # name can be set to any value
+            "action": {
+                "class_name": "SlackNotificationAction",
+                "slack_webhook": slack_webhook,
+                "notify_on": "all", # possible values: "all", "failure", "success"
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                },
+            },
+        },
+        {
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreValidationResultAction",
+            }
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {
+                "class_name": "StoreEvaluationParametersAction",
+            }
+        },
+    ],
+}
+```
+
+</TabItem>
+
+<TabItem value="app">
+
+#### Slack bot config
+
+```python title="Jupyter Notebook"
+bot_token = None # put the actual bot token
+assert bot_token is not None, "Please set bot_token."
+channel_name = None # put the actual Slack channel name
+assert channel_name is not None, "Please set channel_name."
+
+checkpoint_config = {
+    ...
+    "action_list": [
+        {
+            "name": "send_slack_notification_on_validation_result", # name can be set to any value
+            "action": {
+                "class_name": "SlackNotificationAction",
+                "slack_token": bot_token,
+                "slack_channel": channel_name,
+                "notify_on": "all", # possible values: "all", "failure", "success"
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                },
+            },
+        },
+        {
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreValidationResultAction",
+            }
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {
+                "class_name": "StoreEvaluationParametersAction",
+            }
+        },
+    ],
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+Run your <TechnicalTag tag="checkpoint" text="Checkpoint" /> to validate a <TechnicalTag tag="batch" text="Batch"/> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's"/> <TechnicalTag tag="validation" text="Validation"/>. 
+Find additional information [here](https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/)
 
 ## Next Steps
 
