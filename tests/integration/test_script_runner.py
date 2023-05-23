@@ -382,6 +382,30 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
     ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS, BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_azure_blob_storage_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_azure_blob_storage_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE, BackendDependencies.SPARK],
+    ),
 ]
 
 

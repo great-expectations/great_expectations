@@ -9,7 +9,7 @@ class GXSqlDialect(Enum):
     Also contains an unsupported attribute if the dialect is not in the list.
     """
 
-    AWSATHENA = "athena"
+    AWSATHENA = "awsathena"
     BIGQUERY = "bigquery"
     DREMIO = "dremio"
     HIVE = "hive"
