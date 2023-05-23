@@ -325,6 +325,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 )
 @mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
+@pytest.mark.unit  # tempoarily marking so we can guarantee this test runs in PR
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(

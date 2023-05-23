@@ -479,7 +479,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 include_rendered_content=include_rendered_content
             )
         )
-        # this is where we have the rendered content
         if include_rendered_content:
             expectation_suite.render()
         return self.expectations_store.set(key, expectation_suite, **kwargs)
