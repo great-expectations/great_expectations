@@ -33,6 +33,7 @@ batch_request_jan_2019 = data_asset.build_batch_request(
     options={"year": "2019", "month": "01"}
 )
 
+context.add_or_update_expectation_suite(expectation_suite_name="my_expectation_suite")
 validator = context.get_validator(
     batch_request=batch_request_jan_2019,
     expectation_suite_name="my_expectation_suite",
