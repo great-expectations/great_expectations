@@ -22,17 +22,9 @@ Profilers come into use when it is time to configure Expectations for your proje
 
 For details on how to configure a customized Rule-Based Profiler, see our guide on [how to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
-For instructions on how to use a `UserConfigurableProfiler` to generate Expectations from data, see our guide on [how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
-
 ## Profiler types
 
 There are multiple types of Profilers built in to Great Expectations.  Below is a list with overviews of each one.  For more information, you can view their docstrings and source code in the `great_expectations\profile` [folder on our GitHub](https://github.com/great-expectations/great_expectations/tree/develop/great_expectations/profile).
-
-### UserConfigurableProfiler
-
-The `UserConfigurableProfiler` is used to build an Expectation Suite from a dataset. The Expectations built are strict - they can be used to determine whether two tables are the same.  When these Profilers are instantiated they can be configured by providing one or more input configuration parameters, allowing you to rapidly create a Profiler without needing to edit configuration files.  However, if you need to change these parameters you will also need to instantiate a new `UserConfigurableProfiler` using the updated parameters.
-
-For instructions on how to use a `UserConfigurableProfiler` to generate Expectations from data, see our guide on [how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
 
 ### Rule-Based Profiler
 

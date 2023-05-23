@@ -44,7 +44,7 @@ The Data Assistant we recommend using for new data is the Onboarding Data Assist
 
 ### Testing your Expectation Suite
 
-Once you have created your Expectation Suite and saved it, you may wish to test it.  The simplest way to do this is to Validate some data against it.  You can do this using a `SimpleCheckpoint` as demonstrated in the [optional step on running validation, saving your suite, and building Data Docs](./how_to_create_and_edit_expectations_with_a_profiler.md#6-optional-running-validation-saving-your-suite-and-building-data-docs) of our [how to create and edit Expectations with a Profiler](./how_to_create_and_edit_expectations_with_a_profiler.md) documentation.  Or you can just move on to [Step 4: Validate Data.](../validation/validate_data_overview.md)
+Once you have created your Expectation Suite and saved it, you may wish to test it.  The simplest way to do this is to Validate some data against it.  You can do this using a `SimpleCheckpoint`.  Or you can just move on to [Step 4: Validate Data.](../validation/validate_data_overview.md)
 
 ### Editing a saved Expectation Suite
 

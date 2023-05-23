@@ -23,7 +23,6 @@ If you are using a Profiler or the interactive method of creating Expectations, 
 For more information, see:
 
 - [How to create Expectations interactively in Python](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [How to create and edit Expectations with the User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 
 When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
 

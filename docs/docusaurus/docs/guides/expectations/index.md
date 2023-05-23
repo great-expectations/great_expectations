@@ -5,7 +5,6 @@ title: "Create Expectations: Index"
 
 ## Core skills
 - [How to create and edit Expectations based on domain knowledge, without inspecting data directly](../../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)
-- [How to create and edit Expectations with the User Configurable Profiler](../../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 - [How to create and edit Expectations with instant feedback from a sample Batch of data](../../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 
 ## Configuring Profilers
