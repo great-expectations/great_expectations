@@ -8,25 +8,13 @@ yaml = YAMLHandler()
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
-my_postgres_db_yaml_creds:
-  drivername: postgresql
-  host: localhost
-  port: 5432
-  username: postgres
-  password: ${MY_DB_PW}
-  database: postgres
+my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/postgres
 # </snippet>
 """
 
 # Override without snippet tag
 config_variables_yaml = """
-my_postgres_db_yaml_creds:
-  drivername: postgresql
-  host: localhost
-  port: 5432
-  username: postgres
-  password: ${MY_DB_PW}
-  database: postgres
+my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/postgres
 """
 
 """
@@ -60,33 +48,21 @@ config_variables_file_path: uncommitted/config_variables.yml
 
 datasources_yaml = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py datasources_yaml">
-datasources:
-  my_postgres_db:
-    class_name: Datasource
-    module_name: great_expectations.datasource
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: SqlAlchemyExecutionEngine
-      credentials: ${my_postgres_db_yaml_creds}
-    data_connectors:
-      default_inferred_data_connector_name:
-        class_name: InferredAssetSqlDataConnector
-  my_other_postgres_db:
-    class_name: Datasource
-    module_name: great_expectations.datasource
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: SqlAlchemyExecutionEngine
-      credentials:
-        drivername: ${POSTGRES_DRIVERNAME}
-        host: ${POSTGRES_HOST}
-        port: ${POSTGRES_PORT}
-        username: ${POSTGRES_USERNAME}
-        password: ${POSTGRES_PW}
-        database: ${POSTGRES_DB}
-    data_connectors:
-      default_inferred_data_connector_name:
-        class_name: InferredAssetSqlDataConnector
+fluent_datasources:
+    my_postgres_db:
+        type: postgres
+        connection_string: ${my_postgres_db_yaml_creds}
+        assets:
+            my_first_table_asset:
+                type: table
+                table_name: my_first_table
+    my_other_postgres_db:
+        type: postgres
+        connection_string: postgres+${POSTGRES_DRIVERNAME}://${POSTGRES_USERNAME}:${POSTGRES_PW}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+        assets:
+            my_second_table_asset:
+                type: table
+                table_name: my_second_table
 # </snippet>
 """
 
@@ -117,14 +93,13 @@ try:
 
     # add datsources now that variables are configured
     datasources = yaml.load(datasources_yaml)
-    my_postgres_db = context.add_datasource(
-        name="my_postgres_db", **datasources["datasources"]["my_postgres_db"]
+    context.sources.add_sql(
+        name="my_postgres_db", connection_string=os.get("my_postgres_db_yaml_creds")
     )
-    my_other_postgres_db = context.add_datasource(
+    context.sources.add_sql(
         name="my_other_postgres_db",
-        **datasources["datasources"]["my_other_postgres_db"]
+        connection_string=os.get("my_postgres_db_yaml_creds"),
     )
-
     assert type(my_postgres_db) == Datasource
     assert type(my_other_postgres_db) == Datasource
     assert context.list_datasources() == [

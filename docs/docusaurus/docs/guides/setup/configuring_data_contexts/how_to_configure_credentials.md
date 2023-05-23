@@ -29,9 +29,7 @@ If your Great Expectations deployment is in an environment without a file system
 
 ## 1. Save credentials and config
 
-Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values.
-
-In most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
+The quickest way to get started is by setting up the credentials as environment variables, but in most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
 
 :::note
 
@@ -39,6 +37,11 @@ In most cases, we suggest using a config variables YAML file. YAML files make va
   - Environment variable substitution is supported in both the ``great_expectations.yml`` and config variables ``config_variables.yml`` config file.
 
 :::
+
+If using environment variables, first set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
+
+```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
+```
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 
@@ -53,10 +56,6 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 :::
 
-If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
-
-```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
-```
 
 ## 2. Set ``config_variables_file_path``
 
