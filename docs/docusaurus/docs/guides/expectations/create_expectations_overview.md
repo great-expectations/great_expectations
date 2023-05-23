@@ -48,11 +48,11 @@ After you've created and saved your Expectation Suite, GX recommends that you te
 
 ### Edit a saved Expectation Suite
 
-See [How to Edit an Expecation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite).
+See [How to Edit an Expectation Suite](./how_to_edit_an_existing_expectationsuite.md)
 
 ## View Expectation Suite Expectations
 
-See [View the Expectations in the Expectation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite.md#4-view-the-expectations-in-the-expectation-suite).
+See [View the Expectations in the Expectation Suite](./how_to_edit_an_existing_expectationsuite.md#4-view-the-expectations-in-the-expectation-suite).
 
 ## Next steps
 
