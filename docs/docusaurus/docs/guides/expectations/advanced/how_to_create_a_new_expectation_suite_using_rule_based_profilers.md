@@ -1,17 +1,10 @@
 ---
-title: How to create a new Expectation Suite using Rule Based Profilers
+title: How to create a new Expectation Suite using Profiling Framework
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-In this tutorial, you will develop hands-on experience with configuring a Rule-Based <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. You will <TechnicalTag tag="profiling" text="Profile" /> several <TechnicalTag tag="batch" text="Batches" /> of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of <TechnicalTag tag="expectation" text="Expectations" /> for several numeric columns.
-
-:::warning
-
-Please note that Rule Based Profiler is currently undergoing development and is considered an experimental feature.
-While the contents of this document accurately reflect the state of the feature, they are susceptible to change.
-
-:::
+In this tutorial, you will develop hands-on experience with configuring a Profiler <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. You will <TechnicalTag tag="profiling" text="Profile" /> several <TechnicalTag tag="batch" text="Batches" /> of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of <TechnicalTag tag="expectation" text="Expectations" /> for several numeric columns.
 
 ## Prerequisites
 
@@ -19,7 +12,7 @@ While the contents of this document accurately reflect the state of the feature,
 
 - A basic understanding of <TechnicalTag tag="metric" text="Metrics" /> in Great Expectations.
 - A basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
-- Completion of the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the  [Rule-Based Profilers](../../../terms/profiler.md#rule-based-profilers) section.
+- Completion of the overview of <TechnicalTag tag="profiler" text="Profiling Framework" /> and the  [Profiling Framework](../../../terms/profiler.md#rule-based-profilers) section.
 
 </Prerequisites>
 
@@ -114,7 +107,7 @@ Now we can print our Expectation Suite so we can see how it looks!
 
 ### 6. Add a Rule for Columns
 
-Let's add one more rule to our Rule-Based Profiler config. This Rule will use the `DomainBuilder` to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our `NumericMetricRangeMultiBatchParameterBuilder` looking at the five Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two `ExpectationConfigurations` for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`. This rule will go directly below our previous rule.
+Let's add one more rule to our Profiler config. This Rule will use the `DomainBuilder` to populate a list of all of the numeric columns in one Batch of taxi data (in this case, the most recent Batch). It will then use our `NumericMetricRangeMultiBatchParameterBuilder` looking at the five Batches prior to our most recent Batch to get probable ranges for the min and max values for each of those columns. Finally, it will use those ranges to add two `ExpectationConfigurations` for each of those columns: `expect_column_min_to_be_between` and `expect_column_max_to_be_between`. This rule will go directly below our previous rule.
 
 As before, we will first add the name of our rule, and then specify the `DomainBuilder`.
 
@@ -142,7 +135,7 @@ Putting together our entire config, with both of our Rules, we get:
 
 And if we re-instantiate our `Profiler` with our config which now has two rules, and then we re-run the `Profiler`, we'll have an updated Expectation Suite with a table row count Expectation for our table, and column min and column max Expectations for each of our numeric columns!
 
-🚀Congratulations! You have successfully Profiled multi-batch data using a Rule-Based Profiler. Now you can try adding some new Rules, or running your Profiler on some other data (remember to change the `BatchRequest` in your config)!🚀
+🚀Congratulations! You have successfully Profiled multi-batch data using a Profiler. Now you can try adding some new Rules, or running your Profiler on some other data (remember to change the `BatchRequest` in your config)!🚀
 
 ## Additional Notes
 

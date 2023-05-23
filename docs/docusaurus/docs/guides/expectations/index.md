@@ -9,7 +9,7 @@ title: "Create Expectations: Index"
 
 ## Configuring Profilers
 - [How to create an Expectation Suite with the Onboarding Data Assistant](../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
-- [How to create a new Expectation Suite using Rule Based Profilers](../../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md)
+- [How to create a new Expectation Suite using Profiling Framework](../../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md)
 
 ## Advanced skills
 - [How to create Expectations that span multiple Batches using Evaluation Parameters](../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md)
