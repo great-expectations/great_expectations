@@ -4,9 +4,7 @@ import great_expectations as gx
 context = gx.get_context()
 # </snippet>
 
-context.sources.add_pandas(
-    name="my_datasource",
-).add_csv_asset(
+context.sources.add_pandas(name="my_datasource",).add_csv_asset(
     name="my_data_asset",
     filepath_or_buffer="./data/yellow_tripdata_sample_2019-01.csv",
 )

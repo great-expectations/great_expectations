@@ -231,10 +231,7 @@ class MetricsCalculator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        (
-            resolved_metrics,
-            aborted_metrics_info,
-        ) = self.resolve_validation_graph(
+        (resolved_metrics, aborted_metrics_info,) = self.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
