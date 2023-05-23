@@ -105,6 +105,17 @@ creating_custom_expectations = [
     ),
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+]
+
 spark_integration_tests += connecting_to_your_data
 spark_integration_tests += databricks_deployment_patterns
+spark_integration_tests += fluent_datasources
 spark_integration_tests += migration_guide
