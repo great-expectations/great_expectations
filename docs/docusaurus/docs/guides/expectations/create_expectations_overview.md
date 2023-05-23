@@ -48,7 +48,7 @@ After you've created and saved your Expectation Suite, GX recommends that you te
 
 ### Edit a saved Expectation Suite
 
-See [How to Edit an Expecation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite.md).
+See [How to Edit an Expecation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite).
 
 ## View Expectation Suite Expectations
 
