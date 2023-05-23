@@ -60,11 +60,11 @@ This guide will help you connect to your data stored on GCS using Pandas.
 
 
 @pytest.mark.unit
-def test__use_relative_imports_for_tag_references_substitution():
+def test__use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash():
     contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
-<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
 """
 
     path_to_versioned_docs = pathlib.Path(
@@ -81,7 +81,7 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
     expected_contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../../term_tags/_tag.mdx';
 
-<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/> 
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
 """
 
     assert updated_contents == expected_contents
