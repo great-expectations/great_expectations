@@ -259,7 +259,7 @@ class ActionListValidationOperator(ValidationOperator):
             warnings.warn(
                 f"The checkpoints action_list configuration has a notification, {notify_before_store}"
                 "configured without a StoreValidationResultAction configured. This means the notification can't"
-                "provide a link the the validation result. Please move all notification actions after "
+                "provide a link the validation result. Please move all notification actions after "
                 "StoreValidationResultAction in your configuration."
             )
 
