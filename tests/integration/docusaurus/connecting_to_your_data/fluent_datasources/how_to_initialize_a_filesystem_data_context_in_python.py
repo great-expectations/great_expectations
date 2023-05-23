@@ -7,8 +7,6 @@ pytest -v --docs-tests -m integration -k "how_to_initialize_a_filesystem_data_co
 
 import pathlib
 
-import great_expectations as gx
-
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder">
 path_to_empty_folder = "/my_gx_project/"
