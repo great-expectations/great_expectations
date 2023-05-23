@@ -1,3 +1,4 @@
+import os
 import pathlib
 import subprocess
 
@@ -31,6 +32,11 @@ def example() -> None:
 )
 def example_s3(shutdown: bool, metadata_store_bucket_name: str) -> None:
     """Start an s3 example, using s3 as a datasource and optionally for metadata stores."""
+    unset_env_vars = _check_aws_env_vars()
+    if unset_env_vars:
+        cli_message(
+            f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
+        )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "s3"
     if shutdown:
@@ -48,3 +54,15 @@ def example_s3(shutdown: bool, metadata_store_bucket_name: str) -> None:
             cli_message("<green>Using local metadata stores.</green>")
         example_setup_file = example_directory / "setup_s3.sh"
         subprocess.run(example_setup_file, cwd=example_directory)
+
+
+def _check_aws_env_vars() -> set[str]:
+    """Return list of env var names that are not set."""
+    env_vars_to_check = (
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN",
+    )
+    result = {ev for ev in env_vars_to_check if os.getenv(ev)}
+
+    return result
