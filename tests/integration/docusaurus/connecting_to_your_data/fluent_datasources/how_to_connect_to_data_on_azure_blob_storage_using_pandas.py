@@ -33,15 +33,10 @@ datasource = context.sources.add_pandas_abs(
 
 assert datasource_name in context.datasources
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_csv_asset_args">
 asset_name = "my_taxi_data_asset"
-abs_container = "my_abs_container"
+abs_container = "superconductive-public"
 abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-# </snippet>
-
-abs_container = "superconductive-public"
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset">

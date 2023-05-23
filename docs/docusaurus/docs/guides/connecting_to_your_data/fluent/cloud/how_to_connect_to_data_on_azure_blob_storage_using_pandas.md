@@ -60,12 +60,6 @@ In the above example, the value for `account_url` will be substituted for the co
 
 <AbsFluentAddDataAssetConfigKeys />
 
-To create a DataAsset in Azure Blob Storage datasource, we will need to provide:
-- `asset_name`: In our example, we will name our DataAsset `"my_taxi_data_asset"`
-- `batching_regex`: We provide partitioning Regular Expression here
-- `abs_container`: Container within Azure Blob Storage account where our dataset is stored
-- `abs_name_starts_with`: Prefix within `abs_container` corresponding to data files
-
 Once these values have been defined, we will create our DataAsset with the code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
