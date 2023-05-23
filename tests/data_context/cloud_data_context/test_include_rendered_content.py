@@ -2,9 +2,9 @@ import random
 import string
 from unittest import mock
 
-import responses
 import pandas as pd
 import pytest
+import responses
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -62,7 +62,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
-    ) as mock_update, mock.patch(
+    ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.set",
         return_value=ge_cloud_id,
     ) as mock_set:
