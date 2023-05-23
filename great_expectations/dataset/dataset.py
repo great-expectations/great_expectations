@@ -408,8 +408,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_map_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
@@ -430,8 +430,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_aggregate_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
