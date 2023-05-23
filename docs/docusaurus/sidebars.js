@@ -389,8 +389,6 @@ module.exports = {
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
     'contributing/contributing_maturity',
-    'guides/miscellaneous/how_to_use_the_great_expectations_cli',
-    'guides/miscellaneous/how_to_use_the_project_check_config_command',
     'reference/customize_your_deployment',
     'reference/usage_statistics',
         {
