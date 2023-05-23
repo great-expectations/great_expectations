@@ -96,10 +96,6 @@ try:
     context.sources.add_sql(
         name="my_postgres_db", connection_string=os.get("my_postgres_db_yaml_creds")
     )
-    context.sources.add_sql(
-        name="my_other_postgres_db",
-        connection_string=os.get("my_postgres_db_yaml_creds"),
-    )
     assert type(my_postgres_db) == Datasource
     assert type(my_other_postgres_db) == Datasource
     assert context.list_datasources() == [

@@ -157,7 +157,6 @@ class FileDataContext(SerializableDataContext):
 
         try:
             with open(config_filepath, "w") as outfile:
-
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
                     self.fluent_config.update_datasources(

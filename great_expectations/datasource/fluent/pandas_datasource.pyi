@@ -11,6 +11,7 @@ from typing import (
     Hashable,
     Iterable,
     List,
+    Literal,
     Mapping,
     MutableSequence,
     Optional,
@@ -23,7 +24,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (

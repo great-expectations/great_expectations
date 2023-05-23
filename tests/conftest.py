@@ -7810,7 +7810,6 @@ def multibatch_generic_csv_generator():
         num_event_batches: Optional[int] = 20,
         num_events_per_batch: Optional[int] = 5,
     ) -> List[str]:
-
         if start_date is None:
             start_date = datetime.datetime(2000, 1, 1)
 
@@ -8034,7 +8033,6 @@ def spark_df_from_pandas_df():
         spark_session,
         pandas_df,
     ):
-
         spark_df = spark_session.createDataFrame(
             [
                 tuple(

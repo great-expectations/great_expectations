@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
-from typing_extensions import Final
 
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 

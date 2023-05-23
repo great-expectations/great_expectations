@@ -229,7 +229,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-
         dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
@@ -259,7 +258,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> ExpectationValidationResult:
-
         string_integers_increasing = metrics.get(
             f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         )

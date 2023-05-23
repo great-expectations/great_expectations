@@ -41,32 +41,17 @@ We can define a GCS datasource by providing three pieces of information:
 - `bucket_or_name`: In this example, we will provide a GCS bucket
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
-```python title="Python code"
-datasource_name = "my_gcs_datasource"
-bucket_name = "test_docs_data"
-gcs_options = {}
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
 ```
 
 Once we have those three elements, we can define our Datasource like so:
 
-```python title="Python code"
-datasource = context.sources.add_spark_gcs(
-    name=dataspirce_name, bucket_or_name=bucket_name, gcs_options=gcs_options
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
 ```
 
 ### 3. Add GCS data to the Datasource as a Data Asset
 
-```python title = "Python code"
-batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-prefix = "data/taxi_yellow_tripdata_samples/"
-data_asset = datasource.add_csv_asset(
-    name="my_taxi_data_asset",
-    batching_regex=batching_regex,
-    header=True,
-    infer_schema=True,
-    gcs_prefix=prefix,
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
 ```
 
 :::info Optional parameters: `header` and `infer_schema`

@@ -283,7 +283,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
         "SubdirReaderBatchKwargsGenerator",
         **{
             "base_directory": str(filesystem_csv_2),
-        }
+        },
     )
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)

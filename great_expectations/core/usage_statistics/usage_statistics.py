@@ -340,7 +340,6 @@ def usage_statistics_enabled_method(
 
         return usage_statistics_wrapped_method
     else:
-
         # noinspection PyShadowingNames
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
