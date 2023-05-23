@@ -386,7 +386,6 @@ fluent_datasources = [
         name="how_to_connect_to_a_sql_table",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
         name="how_to_connect_to_data_on_gcs_using_spark",
