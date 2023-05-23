@@ -1780,8 +1780,8 @@ class Validator:
 
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             A JSON-serializable expectation result object.
