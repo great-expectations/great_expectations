@@ -230,6 +230,9 @@ def use_relative_imports_for_tag_references(
                 contents = _use_relative_imports_for_tag_references_substitution(
                     contents, path, file_path
                 )
+                contents = _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash(
+                    contents, path, file_path
+                )
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
@@ -264,6 +267,33 @@ def _use_relative_imports_for_tag_references_substitution(
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
+
+
+def _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash(
+    contents: str, path_to_versioned_docs: pathlib.Path, path_to_document: pathlib.Path
+) -> str:
+    """Change import path to use relative instead of starting from /docs/.
+
+    e.g. `import TechnicalTag from '../../term_tags/_tag.mdx';`
+    instead of `import TechnicalTag from '/docs/term_tags/_tag.mdx';`
+
+    Args:
+        contents: String to perform substitution.
+        path_to_versioned_docs: e.g. "docs/docusaurus/versioned_docs/version-0.14.13/"
+        path_to_document: Path to the document containing the import to substitute.
+
+    Returns:
+        Updated contents
+    """
+    relative_path = path_to_document.relative_to(path_to_versioned_docs)
+    dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
+    pattern = re.compile(
+        r"(?P<import>import TechnicalTag from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
+    )
+    contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
+    return contents
+
+    pass
 
 
 if __name__ == "__main__":
