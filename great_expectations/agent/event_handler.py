@@ -38,6 +38,9 @@ class EventHandler:
         self, event_context: EventContext
     ) -> EventHandlerResult:
         """Action that occurs when a RunDataAssistant event is received."""
+        # print("starting long process")
+        # time.sleep(60)
+        # print("finished long process")
         raise NotImplementedError
 
 

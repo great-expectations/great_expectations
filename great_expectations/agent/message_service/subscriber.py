@@ -1,6 +1,5 @@
 import asyncio
 import time
-from collections import defaultdict
 from dataclasses import dataclass
 from functools import partial
 from typing import Callable, Coroutine, Union
@@ -48,7 +47,6 @@ class Subscriber:
             client: RabbitMQClient class.
         """
         self.client = client
-        self._correlation_ids = defaultdict(lambda: 0)
         self._reconnect_delay = 0
 
     def consume(
@@ -100,12 +98,6 @@ class Subscriber:
             on_message: the caller-provided callback
         """
 
-        if self._reject_correlation_id(id=payload.correlation_id) is True:
-            # we've seen this message too many times, request that it's removed from the queue
-            print(
-                f"Removing job {payload.correlation_id} because it failed too many times."
-            )
-            return self.client.nack(delivery_tag=payload.delivery_tag, requeue=False)
         try:
             event: Event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
         except pydantic.ValidationError:
@@ -142,21 +134,6 @@ class Subscriber:
         """Coroutine to request a redelivery with delay."""
         await asyncio.sleep(delay)
         return self.client.nack(delivery_tag=delivery_tag, requeue=requeue)
-
-    def _reject_correlation_id(self, id: str):
-        """Has this correlation ID been seen too many times?"""
-        MAX_REDELIVERY = 10
-        MAX_KEYS = 100000
-        self._correlation_ids[id] += 1
-        delivery_count = self._correlation_ids[id]
-        if delivery_count > MAX_REDELIVERY:
-            should_reject = True
-        else:
-            should_reject = False
-        # ensure the correlation ids dict doesn't get too large:
-        if len(self._correlation_ids.keys()) > MAX_KEYS:
-            self._correlation_ids.clear()
-        return should_reject
 
     def _get_reconnect_delay(self):
         """Get a timeout delay with a 1 second backoff for each attempt."""

@@ -1,5 +1,6 @@
 import asyncio
 import os
+from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
@@ -63,6 +64,7 @@ class GXAgent:
         # it isn't safe to increase the number of workers.
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._current_task: Optional[Future] = None
+        self._correlation_ids = defaultdict(lambda: 0)
 
     def run(self) -> None:
         """Open a connection to GX Cloud."""
@@ -106,6 +108,11 @@ class GXAgent:
             loop = asyncio.get_event_loop()
             loop.create_task(event_context.redeliver_message())
             return
+        elif self._reject_correlation_id(event_context.correlation_id) is True:
+            event_context.processed_with_failures(requeue=False)
+            return
+
+        # send this message to a thread for processing
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
@@ -168,6 +175,21 @@ class GXAgent:
 
     def _can_accept_new_task(self) -> bool:
         return self._current_task is None or self._current_task.done()
+
+    def _reject_correlation_id(self, id: str):
+        """Has this correlation ID been seen too many times?"""
+        MAX_REDELIVERY = 10
+        MAX_KEYS = 100000
+        self._correlation_ids[id] += 1
+        delivery_count = self._correlation_ids[id]
+        if delivery_count > MAX_REDELIVERY:
+            should_reject = True
+        else:
+            should_reject = False
+        # ensure the correlation ids dict doesn't get too large:
+        if len(self._correlation_ids.keys()) > MAX_KEYS:
+            self._correlation_ids.clear()
+        return should_reject
 
     @classmethod
     def _get_config_from_env(cls) -> GXAgentConfig:
