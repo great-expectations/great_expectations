@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 Metric storage is an **experimental** feature.
 :::
 
-A `MetricStore` is a <TechnicalTag tag="store" text="Store" /> that stores Metrics computed during Validation. A `MetricStore` tracks the run_id of the Validation and the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> name in addition to the Metric name and Metric kwargs.
+A `MetricStore` is a <TechnicalTag tag="store" text="Store" /> that stores Metrics computed during Validation. A `MetricStore` tracks the `run_id` of the Validation and the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> name in addition to the Metric name and Metric kwargs.
 
 Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="validation" text="Validation" /> lets you construct a new data series based on observed dataset characteristics computed by Great Expectations. A data series can serve as the source for a dashboard, or overall data quality metrics.
 
@@ -21,7 +21,7 @@ Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="va
 
 To define a `MetricStore`, add a <TechnicalTag tag="metric_store" text="Metric Store" /> configuration to the `stores` section of your `great_expectations.yml`. The configuration must include the following keys:
 
-- `class_name` - Enter `MetricStore`. This key determines which class is instantiated to create the `StoreBackend`. Other fields are passed through to the `StoreBackend` class on instantiation. The only BackendStore under test for use with a `MetricStore` is the DatabaseStoreBackend with Postgres.
+- `class_name` - Enter `MetricStore`. This key determines which class is instantiated to create the `StoreBackend`. Other fields are passed through to the `StoreBackend` class on instantiation. The only backend Store under test for use with a `MetricStore` is the `DatabaseStoreBackend` with Postgres.
 
 - `store_backend` - Defines how your metrics are persisted. 
 
@@ -51,7 +51,7 @@ stores:
             #  driver: postgresql
 ```
 
-The next time your DataContext is loaded, it will connect to the database and initialize a table to store metrics if one has not already been created.
+The next time your Data Context is loaded, it will connect to the database and initialize a table to store metrics if one has not already been created.
 
 ## 2. Configure a Validation Action
 

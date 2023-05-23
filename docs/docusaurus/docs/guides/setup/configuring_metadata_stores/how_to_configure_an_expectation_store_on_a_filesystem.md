@@ -7,7 +7,7 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 <CLIRemoval />
 
-By default,new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder. Use the information provided here to configure a new storage location for Expectations on your filesystem.
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder. Use the information provided here to configure a new storage location for Expectations on your filesystem.
 
 ## Prerequisites
 
