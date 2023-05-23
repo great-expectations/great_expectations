@@ -48,13 +48,7 @@ After you've created and saved your Expectation Suite, GX recommends that you te
 
 ### Edit a saved Expectation Suite
 
-To edit an Expectation, run the following CLI command:
-
-```markdown title="Terminal command"
-great_expectations suite edit NAME_OF_YOUR_SUITE_HERE
-```
-
-A Jupyter Notebook opens and provides the configurations for each Expectation in the Expectation Suite in individual cells.  You can edit these cells and then run them to generate Expectations in a new Expectation Suite. Once your edited version of the Expectations have been created in their own Expectation Suite, you can save that Expectation Suite over the pre-existing one, or save it as a new Expectation Suite.
+See [How to Edit an Expecation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite.md).
 
 ## View Expectation Suite Expectations
 
