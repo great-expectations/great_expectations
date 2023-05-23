@@ -4,6 +4,7 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+import responses
 
 from great_expectations.core import (
     ExpectationConfiguration,
