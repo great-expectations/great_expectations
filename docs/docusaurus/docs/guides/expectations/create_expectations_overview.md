@@ -52,11 +52,7 @@ See [How to Edit an Expecation Suite](/docs/docusaurus/docs/guides/expectations/
 
 ## View Expectation Suite Expectations
 
-A JSON file containing your Expectation Suite is available in your Expectation Store. To view the contents of the JSON file, or the saved Expectation Suites in your Data Context, run the following CLI command:
-
-```markdown title="Terminal command"
-great_expectations suite list
-```
+See [View the Expectations in the Expectation Suite](/docs/docusaurus/docs/guides/expectations/how_to_edit_an_existing_expectationsuite.md#4-view-the-expectations-in-the-expectation-suite).
 
 ## Next steps
 
