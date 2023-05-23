@@ -47,6 +47,7 @@ We can define an Azure Blob Storage datasource by providing these pieces of info
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
 ```
+
 We can create a Datasource that points to our Azure Blob Storage with the code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
