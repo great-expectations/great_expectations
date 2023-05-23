@@ -36,11 +36,15 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         response_json={},
     )
 
+    empty_expectation_suite = ExpectationSuite(expectation_suite_name="test_suite")
     with mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.has_key"
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set",
         return_value=cloud_ref,
+    ), mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext.get_expectation_suite",
+        return_value=empty_expectation_suite,
     ):
         expectation_suite: ExpectationSuite = context.add_or_update_expectation_suite(
             "test_suite"
