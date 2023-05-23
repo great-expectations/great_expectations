@@ -51,7 +51,7 @@ The following are examples of connection strings for different SQL dialects:
 
 :::
 
-For purposes of this guide's examples, we will connect to a PostgreSQL database.  Here is an example of our connection string, stored in the variable `sql_connection_string` with plain text credentials:
+For purposes of this guide's examples, we will connect to a PostgreSQL database.  Here is an example of our connection string, stored in the variable `connection_string` with plain text credentials:
 
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
