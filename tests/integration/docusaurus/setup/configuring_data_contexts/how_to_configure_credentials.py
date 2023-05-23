@@ -93,15 +93,12 @@ try:
 
     # add datsources now that variables are configured
     datasources = yaml.load(datasources_yaml)
+    environ_connection_string = os.environ.get("my_postgres_db_yaml_creds")
+    if not environ_connection_string:
+        raise Exception
     context.sources.add_sql(
-        name="my_postgres_db", connection_string=os.get("my_postgres_db_yaml_creds")
+        name="my_postgres_db", connection_string=environ_connection_string
     )
-    context.sources.add_sql(
-        name="my_other_postgres_db",
-        connection_string=os.get("my_postgres_db_yaml_creds"),
-    )
-    assert type(my_postgres_db) == Datasource
-    assert type(my_other_postgres_db) == Datasource
     assert context.list_datasources() == [
         {
             "execution_engine": {
