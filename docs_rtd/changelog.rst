@@ -624,7 +624,7 @@ Changelog
 * [BUGFIX] Rename experimental `get_batch_request` to `build_batch_request` ([#7107](https://github.com/great-expectations/great_expectations/pull/7107))
 * [BUGFIX] Remove version from versions.json ([#7109](https://github.com/great-expectations/great_expectations/pull/7109))
 * [BUGFIX] Properly Enable/Disable Spark Integration Tests Depending on pyspark Installation for New Datasources ([#7132](https://github.com/great-expectations/great_expectations/pull/7132))
-* [BUGFIX] Copy previous versions after checking out the the current commit ([#7142](https://github.com/great-expectations/great_expectations/pull/7142))
+* [BUGFIX] Copy previous versions after checking out the current commit ([#7142](https://github.com/great-expectations/great_expectations/pull/7142))
 * [BUGFIX] `TupleAzureBlobStoreBackend` no longer gives warning when obfuscating connection string ([#7139](https://github.com/great-expectations/great_expectations/pull/7139))
 * [BUGFIX] Patch inconsistent ordering within GCP test asserts ([#7130](https://github.com/great-expectations/great_expectations/pull/7130))
 * [BUGFIX] Parse pandas version correctly for development builds ([#7147](https://github.com/great-expectations/great_expectations/pull/7147)) (thanks @jtilly)
@@ -3171,7 +3171,7 @@ Changelog
 * [FEATURE] Edtf with support levels ([#2594](https://github.com/great-expectations/great_expectations/pull/2594)) (thanks @mielvds)
 * [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine ([#3267](https://github.com/great-expectations/great_expectations/pull/3267))
 * [FEATURE] add expectation for discrete column entropy  ([#3049](https://github.com/great-expectations/great_expectations/pull/3049)) (thanks @edjoesu)
-* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b ([#3268](https://github.com/great-expectations/great_expectations/pull/3268))
+* [FEATURE] Add SQLAlchemy Provider for the column_pair_values.a_greater_than_b ([#3268](https://github.com/great-expectations/great_expectations/pull/3268))
 * [FEATURE] Expectations tests for BigQuery backend ([#3219](https://github.com/great-expectations/great_expectations/pull/3219)) (Thanks @jdimatteo)
 * [FEATURE] Add schema validation for different GCS auth methods ([#3258](https://github.com/great-expectations/great_expectations/pull/3258))
 * [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine ([#3256](https://github.com/great-expectations/great_expectations/pull/3256))
@@ -4093,7 +4093,7 @@ varundunga!)
   - Drop roadmap_and_changelog.rst and move changelog.rst to the top level of the table of contents
 * DataContext.run_validation_operator() now raises a DataContextError if:
   - no batches are passed
-  - batches are of the the wrong type
+  - batches are of the wrong type
   - no matching validation operator is found in the project
 * Clarified scaffolding language in scaffold notebook
 * DataContext.create() adds an additional directory: `checkpoints`
