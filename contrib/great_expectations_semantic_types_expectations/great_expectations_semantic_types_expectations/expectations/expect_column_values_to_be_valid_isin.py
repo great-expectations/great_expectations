@@ -29,7 +29,6 @@ def is_valid_isin(isin_num: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidIsin(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.to_be_valid_isin"
 

@@ -146,7 +146,6 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
 def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension(
     tmp_path_factory,
 ):
-
     filename_no_extension_fixtures = [
         {
             "input_path": "relative/path/to/file/no_extension",
@@ -204,7 +203,6 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
 
 
 def test_parse_cli_config_file_location_empty_paths():
-
     posix_fixtures = [
         {
             "input_path": None,

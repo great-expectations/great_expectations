@@ -451,7 +451,6 @@ def test_data_context_variables_save_config(
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
 ) -> None:
-
     # EphemeralDataContextVariables
     ephemeral_data_context_variables.save_config()
     key: ConfigurationIdentifier = ephemeral_data_context_variables.get_key()

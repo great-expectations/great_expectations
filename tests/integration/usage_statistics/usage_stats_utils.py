@@ -8,7 +8,6 @@ from tests.integration.usage_statistics.test_usage_statistics_messages import (
 
 
 def get_usage_stats_example_events() -> List:
-
     msg: dict = valid_usage_statistics_messages
 
     # remove top-level items from the messages
@@ -22,7 +21,6 @@ def get_usage_stats_example_events() -> List:
 
 
 def get_gx_version() -> str:
-
     git_raw = "https://raw.githubusercontent.com"
     git_repo = "great-expectations"
     git_file = "great_expectations/develop/great_expectations/deployment_version"

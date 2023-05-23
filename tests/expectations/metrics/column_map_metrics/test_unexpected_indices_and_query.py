@@ -141,7 +141,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [3, 4, 5]
 
 
@@ -171,7 +171,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [
             {"animals": "giraffe", "pk_1": 3},
             {"animals": "lion", "pk_1": 4},
@@ -205,7 +205,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [
             {"animals": "giraffe", "pk_1": 3},
             {"animals": "lion", "pk_1": 4},
@@ -273,7 +273,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert (
             val == "SELECT pk_1, animals \n"
             "FROM test \n"
@@ -313,7 +313,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert (
             val == "SELECT animals \n"
             "FROM test \n"
