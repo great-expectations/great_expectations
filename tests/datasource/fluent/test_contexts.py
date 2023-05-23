@@ -175,6 +175,32 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
 
 
 @pytest.mark.cloud
+def test_context_add_and_then_update_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource1 = context.sources.add_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    # add_or_update should be idempotent
+    datasource2 = context.sources.update_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    assert datasource1 == datasource2
+
+    datasource2.base_directory = __file__
+    datasource3 = context.sources.update_pandas_filesystem(datasource2)
+
+    assert datasource1 != datasource3
+    assert datasource2 == datasource3
+
+
+@pytest.mark.cloud
 def test_cloud_context_delete_datasource(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
