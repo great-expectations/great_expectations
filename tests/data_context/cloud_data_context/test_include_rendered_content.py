@@ -2,6 +2,7 @@ import random
 import string
 from unittest import mock
 
+import responses
 import pandas as pd
 import pytest
 
@@ -18,7 +19,8 @@ from great_expectations.validator.validator import Validator
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
+@pytest.mark.unit  # Temporarily adding to make sure this test runs on the PR
+@responses.activate
 def test_cloud_backed_data_context_save_expectation_suite_include_rendered_content(
     empty_cloud_data_context: CloudDataContext,
 ) -> None:
@@ -60,15 +62,17 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
-    ) as mock_update:
+    ) as mock_update, mock.patch(
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.set",
+        return_value=ge_cloud_id,
+    ) as mock_set:
         context.save_expectation_suite(
             expectation_suite=expectation_suite,
         )
-
         # remove dynamic great_expectations version
-        mock_update.call_args[1]["value"].pop("meta")
+        mock_set.call_args[1]["value"].pop("meta")
 
-        mock_update.assert_called_with(
+        mock_set.assert_called_with(
             id=ge_cloud_id,
             value={
                 "expectations": [
