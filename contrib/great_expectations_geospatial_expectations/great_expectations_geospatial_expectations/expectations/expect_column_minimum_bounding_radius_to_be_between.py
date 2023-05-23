@@ -15,7 +15,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.geometry.minimum_bounding_radius"
     value_keys = (
@@ -26,7 +25,6 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
     # This method implements the core logic for the PandasExecutionEngine
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         column_shape_format = kwargs.get("column_shape_format")
 
         # Load the column into a pygeos Geometry vector from numpy array (Series not supported).

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Type
 
 from great_expectations.compatibility import google
 from great_expectations.datasource.fluent import _SparkFilePathDatasource

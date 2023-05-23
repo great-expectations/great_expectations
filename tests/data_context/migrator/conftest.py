@@ -1,7 +1,6 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple, Union
 
 import pytest
-from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
@@ -120,7 +119,6 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-
         config = DataContextConfig(
             anonymous_usage_statistics=self._anonymized_usage_statistics_config
         )
@@ -173,7 +171,9 @@ def stub_base_data_context() -> StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
+    StubBaseDataContext
+):
     return StubBaseDataContext(
         anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
             enabled=False

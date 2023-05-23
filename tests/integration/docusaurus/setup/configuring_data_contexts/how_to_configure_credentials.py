@@ -99,6 +99,8 @@ try:
     context.sources.add_sql(
         name="my_postgres_db", connection_string=environ_connection_string
     )
+    assert type(my_postgres_db) == Datasource
+    assert type(my_other_postgres_db) == Datasource
     assert context.list_datasources() == [
         {
             "execution_engine": {

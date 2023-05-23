@@ -16,7 +16,6 @@ BASE_API_URL = "https://content.airhex.com/api/v3.7.4/airports/?iata="
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidIataCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_iata_code"
 

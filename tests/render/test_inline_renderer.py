@@ -377,7 +377,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
     fake_result: dict,
     expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
 ):
-
     expectation_validation_result = ExpectationValidationResult(
         exception_info={
             "raised_exception": False,
@@ -647,7 +646,6 @@ def test_inline_renderer_expectation_configuration_serialization(
     expectation_configuration: ExpectationConfiguration,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,
 ):
-
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_configuration
     )

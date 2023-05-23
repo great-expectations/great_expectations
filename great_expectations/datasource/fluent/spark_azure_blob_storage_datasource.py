@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Literal, Type, Union
 
 import pydantic
-from typing_extensions import Final, Literal
 
 from great_expectations.compatibility import azure
 from great_expectations.core._docs_decorators import public_api

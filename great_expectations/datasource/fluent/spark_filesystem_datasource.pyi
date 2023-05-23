@@ -3,9 +3,7 @@ from __future__ import annotations
 import pathlib
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, ClassVar, Optional, Type, Union
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type, Union
 
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,  # noqa: TCH001

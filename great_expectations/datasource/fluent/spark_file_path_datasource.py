@@ -5,6 +5,7 @@ from typing import (
     TYPE_CHECKING,
     ClassVar,
     List,
+    Literal,
     Optional,
     Sequence,
     Type,
@@ -13,7 +14,6 @@ from typing import (
 
 import pydantic
 from pydantic import Field
-from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
