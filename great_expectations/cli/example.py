@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import pathlib
 import subprocess
@@ -63,6 +65,6 @@ def _check_aws_env_vars() -> set[str]:
         "AWS_SECRET_ACCESS_KEY",
         "AWS_SESSION_TOKEN",
     )
-    result = {ev for ev in env_vars_to_check if os.getenv(ev)}
+    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result

@@ -17,4 +17,7 @@ print_orange_header () {
 }
 
 print_orange_header "Starting containers"
-docker compose up
+docker-compose up -d
+
+print_orange_header "Opening container"
+docker-compose exec gx_sandbox bash
