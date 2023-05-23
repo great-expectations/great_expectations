@@ -7,12 +7,9 @@ pytest -v --docs-tests -m integration -k "how_to_connect_to_one_or_more_files_us
 import pathlib
 
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
-# </snippet>
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args">
