@@ -5,12 +5,9 @@ pytest -v --docs-tests -m integration -k "how_to_connect_to_data_on_s3_using_spa
 ```
 """
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
-# </snippet>
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py define_add_spark_s3_args">
