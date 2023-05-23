@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional
 
 from marshmallow import Schema, fields, post_load, pre_dump
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema

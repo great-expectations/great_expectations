@@ -14,12 +14,12 @@ data_directory = pathlib.Path(
     "first_3_files",
 ).resolve(strict=True)
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 import great_expectations as gx
 
 context = gx.get_context()
 
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 # data_directory is the full path to a directory containing csv files
 my_datasource = context.sources.add_pandas_filesystem(
     name="my_datasource", base_directory=data_directory

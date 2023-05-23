@@ -124,7 +124,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     "column_pair_map_expectations",
                                     "multicolumn_map_expectations",
                                 ]:
-
                                     pk_column: bool = True
 
                                 schemas = (

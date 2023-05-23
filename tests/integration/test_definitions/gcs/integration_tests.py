@@ -110,8 +110,18 @@ deployment_patterns = [
     ),
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+]
+
 gcs_integration_tests += connecting_to_your_data
 gcs_integration_tests += how_to_configure_metadata_store
 gcs_integration_tests += split_data
 gcs_integration_tests += sample_data
 gcs_integration_tests += deployment_patterns
+gcs_integration_tests += fluent_datasources

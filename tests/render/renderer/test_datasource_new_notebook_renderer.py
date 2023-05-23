@@ -14,7 +14,6 @@ def construct_datasource_new_notebook_assets():
         datasource_name: str,
         datasource_yaml: str,
     ):
-
         pandas_header = [
             {
                 "cell_type": "markdown",

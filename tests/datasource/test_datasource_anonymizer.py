@@ -237,7 +237,6 @@ introspection:
 
 
 def test_get_parent_class_yes():
-
     v3_batch_request_api_datasources = [
         "SimpleSqlalchemyDatasource",
         "Datasource",

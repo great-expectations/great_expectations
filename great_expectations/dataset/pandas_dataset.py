@@ -65,7 +65,6 @@ class MetaPandasDataset(Dataset):
             *args,
             **kwargs,
         ):
-
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -189,7 +188,6 @@ class MetaPandasDataset(Dataset):
             *args,
             **kwargs,
         ):
-
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -300,7 +298,6 @@ class MetaPandasDataset(Dataset):
             *args,
             **kwargs,
         ):
-
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -647,7 +644,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         return ~column.duplicated(keep=False)
 
     @DocInherit
@@ -664,7 +660,6 @@ Notes:
         meta=None,
         include_nulls=True,
     ):
-
         return ~column.isnull()
 
     @DocInherit
@@ -680,7 +675,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         return column.isnull()
 
     @DocInherit
@@ -883,7 +877,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         comp_types = []
         try:
             comp_types.append(np.dtype(type_).type)
@@ -1086,7 +1079,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         comp_types = []
         for type_ in type_list:
             try:
@@ -1331,7 +1323,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
@@ -1423,7 +1414,6 @@ Notes:
         catch_exceptions=None,
         meta=None,
     ):
-
         regex_matches = []
         for regex in regex_list:
             regex_matches.append(column.astype(str).str.contains(regex))

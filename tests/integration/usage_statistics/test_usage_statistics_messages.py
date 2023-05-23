@@ -49,7 +49,6 @@ def generate_messages_with_defaults(
 
 
 def test_generate_messages_with_defaults():
-
     defaults = {
         "success": True,
         "version": "1.0.0",
