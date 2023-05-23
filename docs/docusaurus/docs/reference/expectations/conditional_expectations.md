@@ -20,6 +20,8 @@ In Spark and SQLAlchemy, the `row_condition` value is parsed as a data filter or
 
 To test if different encodings of identical pieces of information are consistent with each other, run a command similar to this example:
 
+<!--A snippet is required for this code block.-->
+
 ```python
 validator.expect_column_values_to_be_in_set(
     column='Sex',

@@ -65,6 +65,8 @@ stores:
 
 If you copied your existing Expectation Suites to your filesystem, run the following Python command to confirm that Great Expectations can find them:
 
+<!--A snippet is required for this code block.-->
+
 ```python
 import great_expectations as gx
 

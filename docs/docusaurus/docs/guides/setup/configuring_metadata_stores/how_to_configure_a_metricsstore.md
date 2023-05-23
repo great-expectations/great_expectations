@@ -111,6 +111,8 @@ action_list:
 
 Run the following command to run your Checkpoint and test `StoreMetricsAction`:
 
+<!--A snippet is required for this code block.-->
+
 ```python
 import great_expectations as gx
 context = gx.get_context()

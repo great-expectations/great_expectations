@@ -89,6 +89,8 @@ To learn more about other methods that are available to copy Expectation JSON fi
 
 If you copied your existing Expectation Suites to Azure Blob Storage, run the following Python command to confirm that Great Expectations can find them:
 
+<!--A snippet is required for this code block.-->
+
 ```python
 import great_expectations as gx
 

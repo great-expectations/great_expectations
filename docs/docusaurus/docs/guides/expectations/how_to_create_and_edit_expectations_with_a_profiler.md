@@ -86,15 +86,7 @@ Run the following command to <TechnicalTag tag="validation" text="Validate" /> y
 
 ## Optional Parameters
 
-The following are the optional parameters for UserConfigurableProfiler:
-
-- **excluded_expectations**: List\[str\] - Specifies the Expectation types to exclude from the Expectation Suite.
-- **ignored_columns**: List\[str\] - Columns to ignore when building Expectations. For example, metadata columns are not the same ind different tables.
-- **not_null_only**: Bool - By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the Profiler adds `expect_column_values_to_not_be_null`; if greater than 50% it adds `expect_column_values_to_be_null`. If `not_null_only` is set to True, the Profiler adds a `not_null` Expectation irrespective of the percent nullity. For this reason, an `expect_column_values_to_be_null` is not added.
-- **primary_or_compound_key**: List\[str\] - Specifies one or more columns in list form as a primary or compound key, and adds `expect_column_values_to_be_unique` or `expect_compound_column_values_to_be_unique`.
-- **table_expectations_only**: Bool - When set to True, all columns are ignored and a table-level Expectation is created. Table-level Expectations include `expect_table_row_count_to_equal` and `expect_table_columns_to_match_ordered_list`.
-- **value_set_threshold**: str: Specify a value from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the Profiler runs, each column is profiled for cardinality. This threshold determines the greatest cardinality to add  `expect_column_values_to_be_in_set`. For example, if `value_set_threshold` is set to "unique", it adds a value_set Expectation for every included column. If set to "few", it adds a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value here is "many". To compare whether two tables are identical, set the value to "unique".
-- **semantic_types_dict**: Dict\[str, List\[str\]\]. See the following section.
+For a list of optional parameters for `UserConfigurableProfiler`, see [`UserConfigurableProfiler`](https://docs.greatexpectations.io/docs/reference/api/profile/user_configurable_profiler/userconfigurableprofiler_class/)
 
 To make use of these parameters, you can specify them when you instantiate your Profiler. For example:
 
