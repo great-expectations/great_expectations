@@ -1,43 +1,51 @@
 """
 To run this code as a local test, use the following console command:
 ```
-pytest -v --docs-tests -m integration -k "how_to_connect_to_data_on_gcs_using_spark" tests/integration/test_script_runner.py
+pytest -v --docs-tests -m integration -k "how_to_connect_to_data_on_azure_blob_storage_using_spark" tests/integration/test_script_runner.py
 ```
 """
+
+import os
 
 import great_expectations as gx
 
 context = gx.get_context()
 
+os.environ["AZURE_STORAGE_ACCOUNT_URL"] = "superconductivetesting.blob.core.windows.net"
+
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args">
-datasource_name = "my_gcs_datasource"
-bucket_or_name = "my_bucket"
-gcs_options = {}
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py define_add_spark_abs_args">
+datasource_name = "my_datasource"
+azure_options = {
+    "account_url": "${AZURE_STORAGE_ACCOUNT_URL}",
+}
 # </snippet>
 
 bucket_or_name = "test_docs_data"
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py create_datasource">
-datasource = context.sources.add_spark_gcs(
-    name=datasource_name, bucket_or_name=bucket_or_name, gcs_options=gcs_options
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py create_datasource">
+datasource = context.sources.add_spark_abs(
+    name=datasource_name, azure_options=azure_options
 )
 # </snippet>
 
 assert datasource_name in context.datasources
 
-# Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py add_asset">
 asset_name = "my_taxi_data_asset"
-gcs_prefix = "data/taxi_yellow_tripdata_samples/"
+abs_container = "superconductive-public"
+abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py add_asset">
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     batching_regex=batching_regex,
-    gcs_prefix=gcs_prefix,
+    abs_container=abs_container,
     header=True,
     infer_schema=True,
+    abs_name_starts_with=abs_name_starts_with,
 )
 # </snippet>
 

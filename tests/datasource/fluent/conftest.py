@@ -33,7 +33,10 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.store.gx_cloud_store_backend import ErrorPayload
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    ErrorDetail,
+    ErrorPayload,
+)
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -222,6 +225,7 @@ class _CallbackResult(NamedTuple):
 
 
 ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
+ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
 
 
 def _get_fake_db_callback(
