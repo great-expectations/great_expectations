@@ -72,7 +72,6 @@ module.exports = {
               value: '<h4>Filesystem Data Contexts</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
