@@ -16,8 +16,14 @@ print_orange_header () {
     print_orange_line
 }
 
-print_orange_header "Starting containers"
+print_orange_header "Shutting down open containers..."
+docker-compose down
+
+print_orange_header "Rebuilding containers..."
+docker-compose build --no-cache
+
+print_orange_header "Starting containers..."
 docker-compose up -d
 
-print_orange_header "Opening container"
+print_orange_header "Running container..."
 docker-compose exec gx_sandbox bash
