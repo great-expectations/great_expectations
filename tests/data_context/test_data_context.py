@@ -1934,7 +1934,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
@@ -1998,7 +1997,7 @@ expectation_suite_ge_cloud_id:
         },
         {
             "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
 
@@ -2032,7 +2031,7 @@ expectation_suite_ge_cloud_id:
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+                "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
         "validations": [
