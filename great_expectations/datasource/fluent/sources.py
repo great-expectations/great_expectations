@@ -502,14 +502,14 @@ class _SourceFactories:
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name: str = (  # type: ignore[assignment] # always a str
-                new_datasource.name
+            datasource_name: str = (
+                new_datasource.name  # type: ignore[assignment] # always a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
-                datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name,
                 datasource_type,
             )
 
@@ -526,7 +526,7 @@ class _SourceFactories:
 
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name=datasource_name, _call_store=False
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
