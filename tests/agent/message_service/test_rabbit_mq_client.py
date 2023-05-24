@@ -24,8 +24,10 @@ def asyncio_connection(mocker):
 def test_rabbit_mq_client_calls_run_forever(pika, asyncio_connection):
     url = "test/url"
     queue = "test-queue"
+
     def on_message():
         return None
+
     client = AsyncRabbitMQClient(url=url)
 
     client.run(queue=queue, on_message=on_message)
