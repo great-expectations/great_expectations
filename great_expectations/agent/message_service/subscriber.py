@@ -99,7 +99,7 @@ class Subscriber:
         """
         event: Union[Event, None]
         try:
-            event: Event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
+            event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
         except (pydantic.ValidationError, JSONDecodeError):
             event = None
 
