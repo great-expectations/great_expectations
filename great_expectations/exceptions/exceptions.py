@@ -461,7 +461,7 @@ class GXCloudError(GreatExpectationsError):
 
     response: requests.Response
 
-    def __init__(self, message, response: requests.Response) -> None:
+    def __init__(self, message: str, response: requests.Response) -> None:
         super().__init__(message)
         self.response = response
 
