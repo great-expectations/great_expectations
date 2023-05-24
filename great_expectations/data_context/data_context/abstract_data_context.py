@@ -12,7 +12,6 @@ import warnings
 import webbrowser
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -4675,12 +4674,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
-
-        # TODO: remove logs before merge
-        logger.warning(
-            f"config.fluent_datasources ->\n{pf(config.fluent_datasources, depth=2)}"
-        )
-        logger.warning(f"config.datasources ->\n{pf(config.datasources, depth=2)}")
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
