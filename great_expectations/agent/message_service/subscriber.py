@@ -69,9 +69,7 @@ class Subscriber:
         while True:
             try:
                 self.client.run(queue=queue, on_message=callback)
-            except (AMQPError, ChannelError) as e:
-                print("Error in connection to GX Cloud - retrying.")
-                print(e)
+            except (AMQPError, ChannelError):
                 self.client.stop()
                 reconnect_delay = self._get_reconnect_delay()
                 time.sleep(
