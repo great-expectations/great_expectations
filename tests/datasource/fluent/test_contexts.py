@@ -20,7 +20,8 @@ if TYPE_CHECKING:
 
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.integration]
+# NOTE: removing this integration marker to force running in PR pipeline
+# pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
