@@ -22,7 +22,6 @@ class AsyncRabbitMQClient:
     """Configuration for a particular AMQP client library."""
 
     def __init__(self, url: str):
-
         self._parameters = self._build_client_parameters(url=url)
         self.should_reconnect = False
         self.was_consuming = False

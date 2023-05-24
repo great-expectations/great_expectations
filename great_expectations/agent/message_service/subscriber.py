@@ -55,7 +55,6 @@ class Subscriber:
         queue: str,
         on_message: OnMessageCallback,
     ) -> None:
-
         """Subscribe to queue with on_message callback.
 
         Listens to an event stream and invokes on_message with an EventContext
