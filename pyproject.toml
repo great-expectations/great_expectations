@@ -105,6 +105,14 @@ optional = true
 openpyxl = ">=3.0.7"
 xlrd = "^1.1.0"
 
+[tool.poetry.group.hive]
+optional = true
+
+[tool.poetry.group.hive.dependencies]
+PyHive = ">=0.6.5"
+thrift = ">=0.16.0"
+thrift-sasl = ">=0.4.3"
+
 # Bill's groups ->
 
 [tool.black]

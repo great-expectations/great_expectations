@@ -2786,6 +2786,20 @@ files = [
 tests = ["pytest"]
 
 [[package]]
+name = "pure-sasl"
+version = "0.6.2"
+description = "Pure Python client SASL implementation"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pure-sasl-0.6.2.tar.gz", hash = "sha256:53c1355f5da95e2b85b2cc9a6af435518edc20c81193faa0eea65fdc835138f4"},
+    {file = "pure_sasl-0.6.2-py2-none-any.whl", hash = "sha256:edb33b1a46eb3c602c0166de0442c0fb41f5ac2bfccbde4775183b105ad89ab2"},
+]
+
+[package.extras]
+gssapi = ["kerberos (>=1.3.0)"]
+
+[[package]]
 name = "pyarrow"
 version = "12.0.0"
 description = "Python library for Apache Arrow"
@@ -2923,6 +2937,27 @@ files = [
 
 [package.extras]
 plugins = ["importlib-metadata"]
+
+[[package]]
+name = "pyhive"
+version = "0.6.5"
+description = "Python interface to Hive"
+optional = false
+python-versions = "*"
+files = [
+    {file = "PyHive-0.6.5.tar.gz", hash = "sha256:cae07bd177527d04f6a5c7f96cb1849ba8bd9121750b75bbf5e3d4a3be566909"},
+]
+
+[package.dependencies]
+future = "*"
+python-dateutil = "*"
+
+[package.extras]
+hive = ["sasl (>=0.2.1)", "thrift (>=0.10.0)", "thrift_sasl (>=0.1.0)"]
+kerberos = ["requests_kerberos (>=0.12.0)"]
+presto = ["requests (>=1.0.0)"]
+sqlalchemy = ["sqlalchemy (>=1.3.0)"]
+trino = ["requests (>=1.0.0)"]
 
 [[package]]
 name = "pyjwt"
@@ -3639,6 +3674,40 @@ docs = ["myst-parser", "pydata-sphinx-theme", "sphinx"]
 test = ["pre-commit", "pytest (>=7.0)", "pytest-timeout"]
 
 [[package]]
+name = "thrift"
+version = "0.16.0"
+description = "Python bindings for the Apache Thrift RPC system"
+optional = false
+python-versions = "*"
+files = [
+    {file = "thrift-0.16.0.tar.gz", hash = "sha256:2b5b6488fcded21f9d312aa23c9ff6a0195d0f6ae26ddbd5ad9e3e25dfc14408"},
+]
+
+[package.dependencies]
+six = ">=1.7.2"
+
+[package.extras]
+all = ["tornado (>=4.0)", "twisted"]
+tornado = ["tornado (>=4.0)"]
+twisted = ["twisted"]
+
+[[package]]
+name = "thrift-sasl"
+version = "0.4.3"
+description = "Thrift SASL Python module that implements SASL transports for Thrift (`TSaslClientTransport`)."
+optional = false
+python-versions = "*"
+files = [
+    {file = "thrift_sasl-0.4.3-py2.py3-none-any.whl", hash = "sha256:d24b49140115e6e2a96d08335cff225a27a28ea71866fb1b2bdb30ca5afca64e"},
+    {file = "thrift_sasl-0.4.3.tar.gz", hash = "sha256:5bdd5b760d90a13d9b3abfce873db0425861aa8d6bf25912d3cc0467a4f773da"},
+]
+
+[package.dependencies]
+pure-sasl = ">=0.6.2"
+six = ">=1.13.0"
+thrift = {version = ">=0.10.0", markers = "python_version >= \"3.0\""}
+
+[[package]]
 name = "tinycss2"
 version = "1.2.1"
 description = "A tiny CSS parser"
@@ -3995,4 +4064,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "be48b2716203b6a8ac711aa4ab09e83ee4599e89701e40b84d43282b70eaf846"
+content-hash = "36f2298a61c4aa7b11134f8f4e629f43bfdee565ffe07b6f2d56fead3d2b9c1d"
