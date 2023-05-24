@@ -43,7 +43,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
@@ -57,7 +56,9 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
+    from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -2810,7 +2811,7 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
         action_list: Sequence[
-            Mapping
+            ActionDict
         ] = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -2990,11 +2991,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> Sequence[Mapping]:
+    def action_list(self) -> Sequence[ActionDict]:
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: Sequence[Mapping]) -> None:
+    def action_list(self, value: Sequence[ActionDict]) -> None:
         self._action_list = value
 
     @property
