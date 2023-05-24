@@ -7,6 +7,7 @@ import logging
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     List,
     Literal,
     Mapping,
@@ -52,9 +53,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import (
-    GXCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -124,7 +123,7 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
     """
 
-    DEFAULT_ACTION_LIST = ActionDicts.DEFAULT_ACTION_LIST
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[Mapping]] = ActionDicts.DEFAULT_ACTION_LIST
 
     def __init__(
         self,
@@ -763,7 +762,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Union[int, float] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -771,7 +770,7 @@ class Checkpoint(BaseCheckpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[Mapping]] = None,
+        action_list: Sequence[Mapping] = BaseCheckpoint.DEFAULT_ACTION_LIST,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,

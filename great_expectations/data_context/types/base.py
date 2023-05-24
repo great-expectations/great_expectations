@@ -2919,7 +2919,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def config_version(self) -> float:
-        return self._config_version  # type: ignore[return-value]
+        return self._config_version
 
     @config_version.setter
     def config_version(self, value: float) -> None:
