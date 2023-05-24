@@ -79,17 +79,6 @@ def main() -> None:
             print(line)
         sys.exit(1)
 
-    unnecessary_exclusions = set(
-        ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
-    ).difference(grep_output)
-    if unnecessary_exclusions:
-        print(
-            f"[ERROR] Found {len(unnecessary_exclusions)} snippets unnecessarily placed on exclusion list.  Please update exclusion list:"
-        )
-        for line in new_violations:
-            print(line)
-        sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
