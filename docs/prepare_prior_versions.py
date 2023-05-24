@@ -263,7 +263,7 @@ def _use_relative_imports_for_tag_references_substitution(
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
     pattern = re.compile(
-        r"(?P<import>import TechnicalTag from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
+        r"(?P<import>import .* from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
@@ -288,7 +288,7 @@ def _use_relative_imports_for_tag_references_substitution_path_starting_with_for
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
     pattern = re.compile(
-        r"(?P<import>import TechnicalTag from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
+        r"(?P<import>import .* from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
