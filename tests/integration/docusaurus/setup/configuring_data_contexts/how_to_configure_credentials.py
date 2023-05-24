@@ -14,8 +14,14 @@ my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/po
 
 # Override without snippet tag
 config_variables_yaml = """
-my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/postgres
+my_postgres_db_yaml_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
 """
+
+os.environ["MY_DB_PW"] = ""
+os.environ[
+    "my_postgres_db_yaml_creds"
+] = "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
+
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
@@ -96,58 +102,16 @@ try:
     environ_connection_string = os.environ.get("my_postgres_db_yaml_creds")
     if not environ_connection_string:
         raise Exception
+
     context.sources.add_sql(
         name="my_postgres_db", connection_string=environ_connection_string
     )
-    assert type(my_postgres_db) == Datasource
-    assert type(my_other_postgres_db) == Datasource
     assert context.list_datasources() == [
         {
-            "execution_engine": {
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": "localhost",
-                    "port": 5432,
-                    "username": "postgres",
-                    "password": "***",
-                    "database": "postgres",
-                },
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "SqlAlchemyExecutionEngine",
-            },
-            "data_connectors": {
-                "default_inferred_data_connector_name": {
-                    "class_name": "InferredAssetSqlDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                }
-            },
-            "module_name": "great_expectations.datasource",
-            "class_name": "Datasource",
+            "type": "sql",
             "name": "my_postgres_db",
-        },
-        {
-            "execution_engine": {
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": "localhost",
-                    "port": "5432",
-                    "username": "postgres",
-                    "password": "***",
-                    "database": "postgres",
-                },
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "SqlAlchemyExecutionEngine",
-            },
-            "data_connectors": {
-                "default_inferred_data_connector_name": {
-                    "class_name": "InferredAssetSqlDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                }
-            },
-            "module_name": "great_expectations.datasource",
-            "class_name": "Datasource",
-            "name": "my_other_postgres_db",
-        },
+            "connection_string": "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
+        }
     ]
 
 except Exception:
