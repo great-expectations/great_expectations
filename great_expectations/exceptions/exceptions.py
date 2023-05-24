@@ -459,9 +459,9 @@ class GXCloudError(GreatExpectationsError):
     Generic error used to provide additional context around Cloud-specific issues.
     """
 
-    response: requests.Response | None
+    response: requests.Response
 
-    def __init__(self, message, response: requests.Response | None = None) -> None:
+    def __init__(self, message, response: requests.Response) -> None:
         super().__init__(message)
         self.response = response
 
