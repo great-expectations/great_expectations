@@ -701,7 +701,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Close is not included in the public API.",
         name="close",
         filepath=pathlib.Path(
-            "great_expectations/agent/message_service/rabbit_mq_client.py"
+            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
         ),
     ),
     IncludeExcludeDefinition(
