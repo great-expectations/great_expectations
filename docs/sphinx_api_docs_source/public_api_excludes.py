@@ -705,6 +705,13 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
+        reason="Close is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),
