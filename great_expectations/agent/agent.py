@@ -81,6 +81,7 @@ class GXAgent:
             print("GX-Agent is ready.")
             # Open a connection until encountering a shutdown event
             subscriber.consume(
+                # TODO: replace with queue from agent-sessions endpoint
                 queue=self._config.organization_id,
                 on_message=self._handle_event_as_thread_enter,
             )
@@ -191,6 +192,7 @@ class GXAgent:
     @classmethod
     def _get_config_from_env(cls) -> GXAgentConfig:
         """Construct GXAgentConfig from available environment variables"""
+        # TODO: replace with connection string from agent-sessions endpoint
         url = os.environ.get("BROKER_URL", None)
         org_id = os.environ.get("GX_CLOUD_ORGANIZATION_ID", None)
         try:
