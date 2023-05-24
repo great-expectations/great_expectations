@@ -18,8 +18,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from pytest import FixtureRequest
-
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
 # apply markers to entire test module
