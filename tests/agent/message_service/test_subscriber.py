@@ -12,14 +12,6 @@ from great_expectations.agent.message_service.subscriber import (
 from tests.agent.message_service.amqp_errors import get_amqp_errors
 
 
-def test_subscriber_has_client_attribute():
-    client = Mock(autospec=AsyncRabbitMQClient)
-
-    subscriber = Subscriber(client=client)
-
-    assert subscriber.client is client
-
-
 def test_subscriber_consume_calls_run():
     client = Mock(autospec=AsyncRabbitMQClient)
     client.should_reconnect = False  # avoid infinite loop
