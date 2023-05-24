@@ -62,8 +62,7 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 
 To indicate the query that provides the data to connect to we will define a Data Asset.  This is done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
-```python title="Python code"
-table_asset = datasource.add_query_asset(name="my_asset", query="SELECT passenger_count, total_amount FROM yellow_tripdata")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
 ```
 
 ### 4. (Optional) Repeat step 3 as needed to add additional queries
