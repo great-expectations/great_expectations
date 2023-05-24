@@ -370,15 +370,28 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[MetaNotes]
+        meta_notes: Optional[list[str] | tuple[str] | str]
         if (
             "result" in values
             and values["result"] is not None
             and values["result"].expectation_config is not None
         ):
-            values["meta_notes"] = values["result"].expectation_config.meta.get("notes")
+            meta_notes = values["result"].expectation_config.meta.get("notes")
         else:
-            values["meta_notes"] = values["configuration"].meta.get("notes")
+            meta_notes = values["configuration"].meta.get("notes")
+
+        if isinstance(meta_notes["content"], (list, tuple)):
+            meta_notes["content"] = list(meta_notes["content"])
+            values["meta_notes"] = meta_notes
+        elif isinstance(meta_notes["content"], str):
+            meta_notes["content"] = [meta_notes["content"]]
+            values["meta_notes"] = meta_notes
+        else:
+            raise ValueError(
+                "Meta Notes Content must be either a list, tuple, or string "
+                "but content of type {type(meta_notes['content'])} was passed."
+            )
+
         return values
 
     @root_validator()
