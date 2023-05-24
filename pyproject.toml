@@ -72,7 +72,6 @@ feather-format = "^0.4.1"
 # [tool.poetry.group.athena.dependencies] # NOTE: taking forever to resolve
 # PyAthena = {version = "^2.0", extras = ["SQLAlchemy"]}
 
-
 [tool.poetry.group.azure]
 optional = true
 
@@ -98,6 +97,13 @@ optional = true
 pyarrow = "*"
 pyodbc = ">=4.0.30"
 sqlalchemy-dremio = "^1.2.1" # 2.0.1 introduces breaking changes
+
+[tool.poetry.group.excel]
+optional = true
+
+[tool.poetry.group.excel.dependencies]
+openpyxl = ">=3.0.7"
+xlrd = "^1.1.0"
 
 # Bill's groups ->
 
