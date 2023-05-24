@@ -2812,7 +2812,7 @@ class CheckpointConfig(BaseYamlConfig):
         batch_request: Optional[dict] = None,
         action_list: Sequence[
             ActionDict
-        ] = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value,
+        ] = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value,  # type: ignore[assignment]
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
