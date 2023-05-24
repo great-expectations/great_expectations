@@ -4,12 +4,13 @@ from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
 from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
+from great_expectations import get_context
 from great_expectations.agent.event_handler import (
     EventHandler,
     EventHandlerResult,
@@ -24,6 +25,9 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
 
 HandlerMap = Dict[str, OnMessageCallback]
 
@@ -53,7 +57,7 @@ class GXAgent:
         print("Initializing GX-Agent")
         self._config = self._get_config_from_env()
         print("Loading a DataContext - this might take a moment.")
-        # self._context: CloudDataContext = get_context(cloud_mode=True)
+        self._context: CloudDataContext = get_context(cloud_mode=True)
         self._context = None
         print("DataContext is ready.")
 
@@ -92,7 +96,8 @@ class GXAgent:
             print("Connection to GX Cloud has encountered an error.")
             print(e)
         finally:
-            subscriber.close()
+            if subscriber is not None:
+                subscriber.close()
 
     def _handle_event_as_thread_enter(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.

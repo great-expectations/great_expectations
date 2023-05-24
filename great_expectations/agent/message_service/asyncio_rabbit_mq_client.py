@@ -21,18 +21,11 @@ class OnMessagePayload:
 class AsyncRabbitMQClient:
     """Configuration for a particular AMQP client library."""
 
-    connection: AsyncioConnection
-    channel: Channel
-
     def __init__(self, url: str):
 
         self._parameters = self._build_client_parameters(url=url)
-        self._connection = pika.BlockingConnection(self._parameters)
-        self._channel = self._connection.channel()
-
         self.should_reconnect = False
         self.was_consuming = False
-
         self._connection = None
         self._channel = None
         self._closing = False

@@ -3,7 +3,9 @@ import os
 import pytest
 
 from great_expectations.agent.agent import GXAgent, GXAgentConfig
-from great_expectations.agent.message_service.rabbit_mq_client import ClientError
+from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
+    ClientError,
+)
 from great_expectations.agent.message_service.subscriber import SubscriberError
 
 
@@ -14,7 +16,7 @@ def gx_agent_config(monkeypatch):
         broker_url="amqps://user:pass@great_expectations.io:5671",
     )
     env_vars = {
-        "GE_CLOUD_ORGANIZATION_ID": config.organization_id,
+        "GX_CLOUD_ORGANIZATION_ID": config.organization_id,
         "BROKER_URL": config.broker_url,
     }
     monkeypatch.setattr(os, "environ", env_vars)
@@ -30,7 +32,7 @@ def get_context(mocker):
 @pytest.fixture
 def client(mocker):
     """Patch for agent.RabbitMQClient"""
-    client = mocker.patch("great_expectations.agent.agent.RabbitMQClient")
+    client = mocker.patch("great_expectations.agent.agent.AsyncRabbitMQClient")
     yield client
 
 
@@ -69,7 +71,6 @@ def test_gx_agent_run_invokes_consume(get_context, subscriber, client, gx_agent_
     subscriber().consume.assert_called_with(
         queue=gx_agent_config.organization_id,
         on_message=agent._handle_event_as_thread_enter,
-        retry_delay=1,
     )
 
 
