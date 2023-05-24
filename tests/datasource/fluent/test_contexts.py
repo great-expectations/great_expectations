@@ -183,12 +183,12 @@ def test_context_add_and_then_update_datasource(
     context = empty_contexts
 
     datasource1 = context.sources.add_pandas_filesystem(
-        name="save_ds_test", base_directory=taxi_data_samples_dir
+        name="update_ds_test", base_directory=taxi_data_samples_dir
     )
 
     # add_or_update should be idempotent
     datasource2 = context.sources.update_pandas_filesystem(
-        name="save_ds_test", base_directory=taxi_data_samples_dir
+        name="update_ds_test", base_directory=taxi_data_samples_dir
     )
 
     assert datasource1 == datasource2
@@ -199,6 +199,20 @@ def test_context_add_and_then_update_datasource(
 
     assert datasource1 != datasource3
     assert datasource2 == datasource3
+
+
+@pytest.mark.cloud
+def test_update_non_existant_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    with pytest.raises(ValueError, match="I_DONT_EXIST"):
+        context.sources.update_pandas_filesystem(
+            name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
+        )
 
 
 @pytest.mark.cloud
