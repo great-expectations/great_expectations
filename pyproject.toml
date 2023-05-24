@@ -58,6 +58,12 @@ optional = true
 pyarrow = "*"
 feather-format = "^0.4.1"
 
+# [tool.poetry.group.athena]
+# optional = true
+
+# [tool.poetry.group.athena.dependencies] # NOTE: taking forever to resolve
+# PyAthena = {version = "^2.0", extras = ["SQLAlchemy"]}
+
 [tool.black]
 target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
