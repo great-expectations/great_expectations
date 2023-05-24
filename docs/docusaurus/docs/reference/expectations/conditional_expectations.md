@@ -2,7 +2,9 @@
 title: Conditional Expectations
 ---
 
+:::note
 Conditional Expectations are **experimental**, and they are available for Pandas, Spark, and SQLAlchemy backends.
+:::
 
 You can create an Expectation for an entire dataset, or for a subset of the dataset. Some variables are dependent on the values of other variables. For example, a column that specifies that the country of origin must not be null for people of foreign descent.
 
@@ -16,7 +18,9 @@ In Spark and SQLAlchemy, the `row_condition` value is parsed as a data filter or
 
 ## Examples
 
-To test if different encodings of identical pieces of information are consistent with each other, you run code similar to this example:
+To test if different encodings of identical pieces of information are consistent with each other, run a command similar to this example:
+
+<!--A snippet is required for this code block.-->
 
 ```python
 validator.expect_column_values_to_be_in_set(
@@ -99,7 +103,7 @@ This results in the following Expectation Suite:
 ## Format of row_conditions values
 
 
-Do not use single quotes nor `\n` inside the specified `row_condition` as shown in the following examples:
+Do not use single quotes or `\n` inside the specified `row_condition` as shown in the following examples:
 
 ```python 
 row_condition="PClass=='1st'"  # never use simple quotes inside !!!
