@@ -2644,13 +2644,13 @@ tests = ["pytest (>=5.4.1)", "pytest-cov (>=2.8.1)", "pytest-mypy (>=0.8.0)", "p
 
 [[package]]
 name = "prometheus-client"
-version = "0.16.0"
+version = "0.17.0"
 description = "Python client for the Prometheus monitoring system."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "prometheus_client-0.16.0-py3-none-any.whl", hash = "sha256:0836af6eb2c8f4fed712b2f279f6c0a8bbab29f9f4aa15276b91c7cb0d1616ab"},
-    {file = "prometheus_client-0.16.0.tar.gz", hash = "sha256:a03e35b359f14dd1630898543e2120addfdeacd1a6069c1367ae90fd93ad3f48"},
+    {file = "prometheus_client-0.17.0-py3-none-any.whl", hash = "sha256:a77b708cf083f4d1a3fb3ce5c95b4afa32b9c521ae363354a4a910204ea095ce"},
+    {file = "prometheus_client-0.17.0.tar.gz", hash = "sha256:9c3b26f1535945e85b8934fb374678d263137b78ef85f305b1156c7c881cd11b"},
 ]
 
 [package.extras]
@@ -2918,6 +2918,50 @@ crypto = ["cryptography (>=3.4.0)"]
 dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
 docs = ["sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
+
+[[package]]
+name = "pyodbc"
+version = "4.0.39"
+description = "DB API Module for ODBC"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+files = [
+    {file = "pyodbc-4.0.39-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:74af348dbaee4885998858daf50c8964e767629ecf6c195868b016367b0bb861"},
+    {file = "pyodbc-4.0.39-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0f5901b57eaef0761f4cf02bca8e7c63f589fd0fd723a79f6ccf1ea1275372e5"},
+    {file = "pyodbc-4.0.39-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e0db69478d00fcd8d0b9bdde8aca0b0eada341fd6ed8c2da84b594b928c84106"},
+    {file = "pyodbc-4.0.39-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c5faf2870e9d434c6a85c6adc1cdff55c0e376273baf480f06d9848025405688"},
+    {file = "pyodbc-4.0.39-cp310-cp310-win32.whl", hash = "sha256:62bb6d7d0d25dc75d1445e539f946461c9c5a3643ae14676b240f71794ea004f"},
+    {file = "pyodbc-4.0.39-cp310-cp310-win_amd64.whl", hash = "sha256:8eb5547282dc73a7784ce7b99584f68687dd85543538ca6f70cffaa6310676e7"},
+    {file = "pyodbc-4.0.39-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:530c1ac37ead782803b44fb1934ba4c68ed4a6969f7475cb8bc04ae1da14486e"},
+    {file = "pyodbc-4.0.39-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:1f7fb65191926308f09ce75ae7ccecf89310232ee50cdea74edf17ee04a9b068"},
+    {file = "pyodbc-4.0.39-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5ec009180fcd7c8197f45d083e6670623d8dfe198a457ca2a50ebb1bafe4107f"},
+    {file = "pyodbc-4.0.39-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:400e911d54980098c6badadecc82385fc0d6a9057db525d63d2652317df43efe"},
+    {file = "pyodbc-4.0.39-cp311-cp311-win32.whl", hash = "sha256:f792677b88e1dde12dab46de8647620fc8171742c02780d51744f7b1b2135dbc"},
+    {file = "pyodbc-4.0.39-cp311-cp311-win_amd64.whl", hash = "sha256:3d9d70e1635d35ba3aee3df216ec8e35f2824909f43331c0112b17f460a93923"},
+    {file = "pyodbc-4.0.39-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:c1a59096f1784d0cda3d0b8f393849f05515c46a10016edb6da1b1960d039800"},
+    {file = "pyodbc-4.0.39-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b3467157661615d5c30893efa1069b55c9ffa434097fc3ae3739e740d83d2ec"},
+    {file = "pyodbc-4.0.39-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:af027a60e84274ea08fad1c75991d37a5f1f6e8bcd30f6bda20db99f0cdfbc7d"},
+    {file = "pyodbc-4.0.39-cp36-cp36m-win32.whl", hash = "sha256:64c1de1263281de7b5ce585b0352746ab1a483453017a8589f838a79cbe3d6d9"},
+    {file = "pyodbc-4.0.39-cp36-cp36m-win_amd64.whl", hash = "sha256:27d1b3c3159673b44c97c878f9d8056901d45f747ce2e0b4d5d99f0fb6949dc7"},
+    {file = "pyodbc-4.0.39-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:efccc11dff6fba684a74ae1030c92ff8b82429d7f00e0a50aa2ac6f56621cd9f"},
+    {file = "pyodbc-4.0.39-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:ea08e9379c08663d7260e2b8a6c451f56d36c17291af735191089f8e29ad9578"},
+    {file = "pyodbc-4.0.39-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b36fe804d367d01ad81077fa524a36e667aabc3945e32564c7ef9595b28edfa9"},
+    {file = "pyodbc-4.0.39-cp37-cp37m-win32.whl", hash = "sha256:72d364e52f6ca2417881a23834b3a36733c09e0dcd4760f49a6b864218d98d92"},
+    {file = "pyodbc-4.0.39-cp37-cp37m-win_amd64.whl", hash = "sha256:39f6c56022c764309aa7552c0eb2c58fbb5902ab5d2010d42b021c0b205aa609"},
+    {file = "pyodbc-4.0.39-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:ebcb900fcaf19ca2bc38632218c5d48c666fcc19fe38b08cde001917f4581456"},
+    {file = "pyodbc-4.0.39-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:a3e133621ac2dad22d0870a8521c7e82d4270e24ce02451d64e7eb6a40ad0941"},
+    {file = "pyodbc-4.0.39-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:05a0912e852ebddaffa8f235b0f3974475021dd8eb604eb46ea67af06efe1239"},
+    {file = "pyodbc-4.0.39-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6353044b99c763aeec7ca1760b4340298504d8ee544fdcab3c380a2abec15b78"},
+    {file = "pyodbc-4.0.39-cp38-cp38-win32.whl", hash = "sha256:a591a1cf3c251a9c7c1642cfb3774119bf3512f3be56151247238f8a7b22b336"},
+    {file = "pyodbc-4.0.39-cp38-cp38-win_amd64.whl", hash = "sha256:8553eaef9f8ec333bbddff6eadf0d322dda34b37f4bab19f0658eb532037840c"},
+    {file = "pyodbc-4.0.39-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:9253e746c5c94bf61e3e9adb08fb7688d413cb68c06ebb287ec233387534760a"},
+    {file = "pyodbc-4.0.39-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:a6f4067f46aaa78e77e8a15ade81eb21fb344563d245fb2d9a0aaa553c367cbd"},
+    {file = "pyodbc-4.0.39-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:cdf5a27e6587d1762f7f0e35d6f0309f09019bf3e19ca9177a4b765121f3f106"},
+    {file = "pyodbc-4.0.39-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fe4ee87b88867867f582dd0c1236cd982508db359a6cbb5e91623ceb6c83e60a"},
+    {file = "pyodbc-4.0.39-cp39-cp39-win32.whl", hash = "sha256:42649ed57d09c04aa197bdd4fe0aa9ca319790b7aa86d0b0784cc70e78c426e5"},
+    {file = "pyodbc-4.0.39-cp39-cp39-win_amd64.whl", hash = "sha256:305c7d6337e2d4c8350677cc641b343fc0197b7b9bc167815c66b64545c67a53"},
+    {file = "pyodbc-4.0.39.tar.gz", hash = "sha256:e528bb70dd6d6299ee429868925df0866e3e919c772b9eff79c8e17920d8f116"},
+]
 
 [[package]]
 name = "pyparsing"
@@ -3329,41 +3373,41 @@ files = [
 
 [[package]]
 name = "scipy"
-version = "1.9.3"
+version = "1.10.1"
 description = "Fundamental algorithms for scientific computing in Python"
 optional = false
-python-versions = ">=3.8"
+python-versions = "<3.12,>=3.8"
 files = [
-    {file = "scipy-1.9.3-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:1884b66a54887e21addf9c16fb588720a8309a57b2e258ae1c7986d4444d3bc0"},
-    {file = "scipy-1.9.3-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:83b89e9586c62e787f5012e8475fbb12185bafb996a03257e9675cd73d3736dd"},
-    {file = "scipy-1.9.3-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1a72d885fa44247f92743fc20732ae55564ff2a519e8302fb7e18717c5355a8b"},
-    {file = "scipy-1.9.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d01e1dd7b15bd2449c8bfc6b7cc67d630700ed655654f0dfcf121600bad205c9"},
-    {file = "scipy-1.9.3-cp310-cp310-win_amd64.whl", hash = "sha256:68239b6aa6f9c593da8be1509a05cb7f9efe98b80f43a5861cd24c7557e98523"},
-    {file = "scipy-1.9.3-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:b41bc822679ad1c9a5f023bc93f6d0543129ca0f37c1ce294dd9d386f0a21096"},
-    {file = "scipy-1.9.3-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:90453d2b93ea82a9f434e4e1cba043e779ff67b92f7a0e85d05d286a3625df3c"},
-    {file = "scipy-1.9.3-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:83c06e62a390a9167da60bedd4575a14c1f58ca9dfde59830fc42e5197283dab"},
-    {file = "scipy-1.9.3-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:abaf921531b5aeaafced90157db505e10345e45038c39e5d9b6c7922d68085cb"},
-    {file = "scipy-1.9.3-cp311-cp311-win_amd64.whl", hash = "sha256:06d2e1b4c491dc7d8eacea139a1b0b295f74e1a1a0f704c375028f8320d16e31"},
-    {file = "scipy-1.9.3-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:5a04cd7d0d3eff6ea4719371cbc44df31411862b9646db617c99718ff68d4840"},
-    {file = "scipy-1.9.3-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:545c83ffb518094d8c9d83cce216c0c32f8c04aaf28b92cc8283eda0685162d5"},
-    {file = "scipy-1.9.3-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0d54222d7a3ba6022fdf5773931b5d7c56efe41ede7f7128c7b1637700409108"},
-    {file = "scipy-1.9.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cff3a5295234037e39500d35316a4c5794739433528310e117b8a9a0c76d20fc"},
-    {file = "scipy-1.9.3-cp38-cp38-win_amd64.whl", hash = "sha256:2318bef588acc7a574f5bfdff9c172d0b1bf2c8143d9582e05f878e580a3781e"},
-    {file = "scipy-1.9.3-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:d644a64e174c16cb4b2e41dfea6af722053e83d066da7343f333a54dae9bc31c"},
-    {file = "scipy-1.9.3-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:da8245491d73ed0a994ed9c2e380fd058ce2fa8a18da204681f2fe1f57f98f95"},
-    {file = "scipy-1.9.3-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4db5b30849606a95dcf519763dd3ab6fe9bd91df49eba517359e450a7d80ce2e"},
-    {file = "scipy-1.9.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c68db6b290cbd4049012990d7fe71a2abd9ffbe82c0056ebe0f01df8be5436b0"},
-    {file = "scipy-1.9.3-cp39-cp39-win_amd64.whl", hash = "sha256:5b88e6d91ad9d59478fafe92a7c757d00c59e3bdc3331be8ada76a4f8d683f58"},
-    {file = "scipy-1.9.3.tar.gz", hash = "sha256:fbc5c05c85c1a02be77b1ff591087c83bc44579c6d2bd9fb798bb64ea5e1a027"},
+    {file = "scipy-1.10.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:e7354fd7527a4b0377ce55f286805b34e8c54b91be865bac273f527e1b839019"},
+    {file = "scipy-1.10.1-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:4b3f429188c66603a1a5c549fb414e4d3bdc2a24792e061ffbd607d3d75fd84e"},
+    {file = "scipy-1.10.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1553b5dcddd64ba9a0d95355e63fe6c3fc303a8fd77c7bc91e77d61363f7433f"},
+    {file = "scipy-1.10.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4c0ff64b06b10e35215abce517252b375e580a6125fd5fdf6421b98efbefb2d2"},
+    {file = "scipy-1.10.1-cp310-cp310-win_amd64.whl", hash = "sha256:fae8a7b898c42dffe3f7361c40d5952b6bf32d10c4569098d276b4c547905ee1"},
+    {file = "scipy-1.10.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0f1564ea217e82c1bbe75ddf7285ba0709ecd503f048cb1236ae9995f64217bd"},
+    {file = "scipy-1.10.1-cp311-cp311-macosx_12_0_arm64.whl", hash = "sha256:d925fa1c81b772882aa55bcc10bf88324dadb66ff85d548c71515f6689c6dac5"},
+    {file = "scipy-1.10.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:aaea0a6be54462ec027de54fca511540980d1e9eea68b2d5c1dbfe084797be35"},
+    {file = "scipy-1.10.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:15a35c4242ec5f292c3dd364a7c71a61be87a3d4ddcc693372813c0b73c9af1d"},
+    {file = "scipy-1.10.1-cp311-cp311-win_amd64.whl", hash = "sha256:43b8e0bcb877faf0abfb613d51026cd5cc78918e9530e375727bf0625c82788f"},
+    {file = "scipy-1.10.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:5678f88c68ea866ed9ebe3a989091088553ba12c6090244fdae3e467b1139c35"},
+    {file = "scipy-1.10.1-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:39becb03541f9e58243f4197584286e339029e8908c46f7221abeea4b749fa88"},
+    {file = "scipy-1.10.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bce5869c8d68cf383ce240e44c1d9ae7c06078a9396df68ce88a1230f93a30c1"},
+    {file = "scipy-1.10.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:07c3457ce0b3ad5124f98a86533106b643dd811dd61b548e78cf4c8786652f6f"},
+    {file = "scipy-1.10.1-cp38-cp38-win_amd64.whl", hash = "sha256:049a8bbf0ad95277ffba9b3b7d23e5369cc39e66406d60422c8cfef40ccc8415"},
+    {file = "scipy-1.10.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:cd9f1027ff30d90618914a64ca9b1a77a431159df0e2a195d8a9e8a04c78abf9"},
+    {file = "scipy-1.10.1-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:79c8e5a6c6ffaf3a2262ef1be1e108a035cf4f05c14df56057b64acc5bebffb6"},
+    {file = "scipy-1.10.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:51af417a000d2dbe1ec6c372dfe688e041a7084da4fdd350aeb139bd3fb55353"},
+    {file = "scipy-1.10.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1b4735d6c28aad3cdcf52117e0e91d6b39acd4272f3f5cd9907c24ee931ad601"},
+    {file = "scipy-1.10.1-cp39-cp39-win_amd64.whl", hash = "sha256:7ff7f37b1bf4417baca958d254e8e2875d0cc23aaadbe65b3d5b3077b0eb23ea"},
+    {file = "scipy-1.10.1.tar.gz", hash = "sha256:2cf9dfb80a7b4589ba4c40ce7588986d6d5cebc5457cad2c2880f6bc2d42f3a5"},
 ]
 
 [package.dependencies]
-numpy = ">=1.18.5,<1.26.0"
+numpy = ">=1.19.5,<1.27.0"
 
 [package.extras]
-dev = ["flake8", "mypy", "pycodestyle", "typing_extensions"]
-doc = ["matplotlib (>2)", "numpydoc", "pydata-sphinx-theme (==0.9.0)", "sphinx (!=4.1.0)", "sphinx-panels (>=0.5.2)", "sphinx-tabs"]
-test = ["asv", "gmpy2", "mpmath", "pytest", "pytest-cov", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
+dev = ["click", "doit (>=0.36.0)", "flake8", "mypy", "pycodestyle", "pydevtool", "rich-click", "typing_extensions"]
+doc = ["matplotlib (>2)", "numpydoc", "pydata-sphinx-theme (==0.9.0)", "sphinx (!=4.1.0)", "sphinx-design (>=0.2.0)"]
+test = ["asv", "gmpy2", "mpmath", "pooch", "pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
 
 [[package]]
 name = "send2trash"
@@ -3514,6 +3558,21 @@ alembic = ["alembic"]
 all = ["GeoAlchemy2", "alembic", "packaging", "pytz", "shapely"]
 geography = ["GeoAlchemy2", "shapely"]
 tests = ["packaging", "pytz"]
+
+[[package]]
+name = "sqlalchemy-dremio"
+version = "1.2.1"
+description = "A SQLAlchemy dialect for Dremio via the ODBC and Flight interface."
+optional = false
+python-versions = "*"
+files = [
+    {file = "sqlalchemy_dremio-1.2.1.tar.gz", hash = "sha256:c5d495de7574cd9ea40a6f5433e49c4df3ada2d8f1ef2c60453edb23928623d0"},
+]
+
+[package.dependencies]
+pyarrow = "*"
+pyodbc = ">=4.0.17"
+sqlalchemy = ">=1.2"
 
 [[package]]
 name = "stack-data"
@@ -3900,4 +3959,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "05ff61f01067340831a5371fde86cf232199afef1dab8c2e2f9d78ba4ecfc22a"
+content-hash = "f34025a5089031fc33155b1e905fc1471bd5207be41c1bd73f188bfa78c2cd46"
