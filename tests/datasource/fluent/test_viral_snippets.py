@@ -29,21 +29,6 @@ YAML = YAMLHandler()
 logger = logging.getLogger(__file__)
 
 
-@pytest.fixture
-def db_file() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    assert db_file.exists()
-    return db_file
-
-
 def test_load_an_existing_config(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
