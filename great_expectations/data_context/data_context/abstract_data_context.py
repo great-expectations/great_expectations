@@ -5426,7 +5426,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             build_index: a flag if False, skips building the index page
 
         Returns:
-            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            A dictionary with the names of the updated data documentation sites as keys and the location info
             of their index.html files as values
 
         Raises:
