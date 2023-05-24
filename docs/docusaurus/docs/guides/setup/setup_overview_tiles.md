@@ -10,8 +10,6 @@ import LinkCard from '/docs/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information for setting up Great Expectations in your specific environment.</p>
 
-## Supported environments
-
 <LinkCardGrid>
   <LinkCard topIcon label="Local filesystems" description="Install and configure GX locally." href="/docs/guides/setup/installation/local" />
   <LinkCard topIcon label="Hosted environments" description="Install and configure GX in environments such as Databricks, AWS EMR, Google Cloud Composer, and others." href="/docs/guides/setup/installation/hosted_environment" />
