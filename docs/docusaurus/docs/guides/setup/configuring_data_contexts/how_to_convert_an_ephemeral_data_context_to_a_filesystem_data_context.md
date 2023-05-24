@@ -57,13 +57,7 @@ You can also instantiate an Ephemeral Data Context (for those occasions when you
 
 You can easily check to see if you are working with an Ephemeral Data Context with the following code (in this example, we are assuming your Data Context is stored in the variable `context`):
 
-```python title="Python code"
-from great_expectations.data_context import EphemeralDataContext
-
-# ...
-
-if isinstance(context, EphemeralDataContext):
-    print(It's Ephemeral!)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
 ```
 
 </details>
@@ -80,8 +74,7 @@ You can determine if your current working directory already has a Filesystem Dat
 
 Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
 
-```python title="Python code"
-context = context.convert_to_file_context()
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context"
 ```
 
 :::info Replacing the Ephemeral Data Context
