@@ -263,7 +263,7 @@ class CloudDataContext(SerializableDataContext):
         response = session.get(cloud_url)
         if response.status_code != 200:
             raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
+                f"Bad request made to GX Cloud; {response.text}", response=response
             )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
