@@ -99,6 +99,8 @@ pyarrow = "*"
 pyodbc = ">=4.0.30"
 sqlalchemy-dremio = "^1.2.1" # 2.0.1 introduces breaking changes
 
+# Bill's groups ->
+
 [tool.black]
 target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
