@@ -854,7 +854,7 @@ constructor arguments.
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[Sequence]] = None,
+        action_list: Optional[Sequence[Mapping]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
