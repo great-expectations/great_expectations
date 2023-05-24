@@ -61,5 +61,5 @@ def example_postgres(shutdown: bool) -> None:
         cli_message(
             f"<green>Postgres db will be available outside the container at {outside} and inside the container at {inside}</green>"
         )
-        example_setup_file = example_directory / "setup_postgres.sh"
-        subprocess.run(example_setup_file, cwd=example_directory)
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
