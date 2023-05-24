@@ -1,0 +1,22 @@
+---
+sidebar_label: 'Set up a GX environment'
+title: 'Set up a GX environment'
+id: setup_overview_tiles
+slug: /
+description: Set up and configure GX in your specific environment.
+hide_table_of_contents: true
+---
+
+import LinkCardGrid from '/src/components/LinkCardGrid';
+import LinkCard from '/src/components/LinkCard';
+
+<p class="DocItem__header-description">This is where you'll find information for setting up Great Expectations in your specific environment.</p>
+
+## Supported environments
+
+<LinkCardGrid>
+  <LinkCard topIcon label="Local filesystems" description="Install and configure GX locally." href="/installation/local.md" />
+  <LinkCard topIcon label="Hosted environments" description="Install and configure GX in environments such as Databricks, AWS EMR, Google Cloud Composer, and others." href="installation/hosted_environment.md" />
+  <LinkCard topIcon label="Cloud storage" description="Install and configure GX in environments where data is stored on a Cloud service." href="optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md" />
+  <LinkCard topIcon label="SQL databases" description="Install and configure GX in environments using SQL databases." href="optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md" />
+</LinkCardGrid>

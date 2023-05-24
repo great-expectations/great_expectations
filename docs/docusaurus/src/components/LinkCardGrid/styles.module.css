@@ -1,0 +1,7 @@
+.linkCardGrid {
+    --auto-grid-min-size: 266px;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(var(--auto-grid-min-size), 1fr));
+    margin: 2rem 0;
+  }

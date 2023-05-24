@@ -7,7 +7,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Setting up a GX environment',
-      link: { type: 'doc', id: 'guides/setup/setup_overview' },
+      link: { type: 'doc', id: 'guides/setup/setup_overview_tiles' },
       items: [
         {
           type: 'category',
