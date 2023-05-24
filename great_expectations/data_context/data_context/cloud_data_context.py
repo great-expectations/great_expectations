@@ -10,6 +10,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Union,
     cast,
@@ -20,6 +21,7 @@ import requests
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
@@ -54,7 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
@@ -698,14 +699,14 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(
         self,
         name: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[Mapping] = Checkpoint.DEFAULT_ACTION_LIST,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
