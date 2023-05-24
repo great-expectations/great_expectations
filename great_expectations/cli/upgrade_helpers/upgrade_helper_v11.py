@@ -101,7 +101,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self) -> None:
-        for (store_name, store) in self.data_context.stores.items():
+        for store_name, store in self.data_context.stores.items():
             if not isinstance(store, (ValidationsStore, MetricStore)):
                 continue
             elif isinstance(store, ValidationsStore):
@@ -685,7 +685,7 @@ A log detailing the upgrade can be found here:
 
     def upgrade_project(self) -> Tuple[str, str, bool]:
         try:
-            for (store_name, store_backend) in self.upgrade_checklist[
+            for store_name, store_backend in self.upgrade_checklist[
                 "validations_store_backends"
             ].items():
                 self.upgrade_log["upgraded_validations_stores"][store_name] = {
@@ -697,7 +697,7 @@ A log detailing the upgrade can be found here:
             pass
 
         try:
-            for (site_name, store_backend) in self.upgrade_checklist[
+            for site_name, store_backend in self.upgrade_checklist[
                 "docs_validations_store_backends"
             ].items():
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name] = {

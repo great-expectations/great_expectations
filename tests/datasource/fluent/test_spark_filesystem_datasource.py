@@ -1172,7 +1172,6 @@ class TestSplitterDirectoryAsset:
         directory_asset_with_column_value_splitter: DirectoryCSVAsset,
         expected_num_records_directory_asset_no_splitter_2020_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             directory_asset_with_column_value_splitter.build_batch_request(
                 {"passenger_count": 2}
@@ -1204,7 +1203,6 @@ def file_asset_with_no_splitter(
 def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
     file_asset_with_no_splitter: CSVAsset,
 ) -> int:
-
     single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
         {"year": "2020", "month": "11"}
     )
@@ -1296,7 +1294,6 @@ class TestSplitterFileAsset:
         file_asset_with_column_value_splitter: CSVAsset,
         expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             file_asset_with_column_value_splitter.build_batch_request(
                 {"year": "2020", "month": "11", "passenger_count": 2}

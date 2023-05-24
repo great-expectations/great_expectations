@@ -164,7 +164,8 @@ if TYPE_CHECKING:
 
 def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
-    with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
+    with the database/database implementation. Currently checks for RedShift/BigQuery dialects
+    """
     if dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
@@ -451,7 +452,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if credentials is not None:
             self.engine = self._build_engine(credentials=credentials, **kwargs)
         elif connection_string is not None:
-
             if self._dialect_requires_persisted_connection(
                 connection_string=connection_string, credentials=credentials, url=url
             ):

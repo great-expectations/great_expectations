@@ -35,7 +35,6 @@ def _load_data(
     table_name: str = TAXI_DATA_TABLE_NAME,
     random_table_suffix: bool = True,
 ) -> LoadedTable:
-
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
         "redshift"
     ]
@@ -65,7 +64,6 @@ def _is_dialect_athena(dialect: str) -> bool:
 
 
 if __name__ == "test_script_module":
-
     dialect, connection_string = get_connection_string_and_dialect(
         athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
     )
@@ -104,7 +102,6 @@ if __name__ == "test_script_module":
     test_cases: List[TaxiSamplingTestCase] = test_cases.test_cases()
 
     for test_case in test_cases:
-
         print("Testing sampler method:", test_case.sampling_method_name)
 
         # 1. Setup

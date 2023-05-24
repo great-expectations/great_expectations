@@ -15,7 +15,6 @@ CRC32_REGEX = r"^([a-fA-F\d]{8})$"
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidCrc32(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_crc32"
 

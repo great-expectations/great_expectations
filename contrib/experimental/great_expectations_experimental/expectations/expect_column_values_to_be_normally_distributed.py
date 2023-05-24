@@ -282,7 +282,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
             configuration=configuration,

@@ -45,7 +45,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         """
         selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
-        (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        (
+            selectable,
+            _,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
@@ -83,7 +87,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         """
         df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
-        (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        (
+            df,
+            _,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]

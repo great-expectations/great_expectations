@@ -1,16 +1,15 @@
-If you are converting an existing local Great Expectations deployment to one that works in AWS you may already have Validation Results saved that you wish to keep and transfer to your S3 bucket.
+If you are converting an existing local Great Expectations deployment to one that works in AWS, you might have Validation Results saved that you want to transfer to your S3 bucket.
 
-You can copy Validation Results into Amazon S3 is by using the ``aws s3 sync`` command. As mentioned earlier, the ``base_directory`` is set to ``uncommitted/validations/`` by default.
+To copy Validation Results into Amazon S3, use the ``aws s3 sync`` command as shown in the following example:
 
 ```bash title="Terminal input"
 aws s3 sync '<base_directory>' s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'
 ```
+The ``base_directory`` is set to ``uncommitted/validations/`` by default.
 
-In the example below, two Validation Results, ``Validation1`` and ``Validation2`` are copied to Amazon S3. This results in the following output:
+In the following example, the Validation Results ``Validation1`` and ``Validation2`` are copied to Amazon S3 and a confirmation message is returned:
 
 ```bash title="Terminal output"
 upload: uncommitted/validations/val1/val1.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/val1.json
 upload: uncommitted/validations/val2/val2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/val2.json
 ```
-
-If you have Validation Results to copy into S3, your output should look similar.
