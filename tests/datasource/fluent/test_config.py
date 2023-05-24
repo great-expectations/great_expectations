@@ -259,7 +259,7 @@ class TestExcludeUnsetAssetFields:
 
     def test_from_gx_config(self, asset_dict: dict):
         """
-        Ensure that unset fields are excluded even when being parsed by the the top-level `GxConfig` class.
+        Ensure that unset fields are excluded even when being parsed by the top-level `GxConfig` class.
         """
         # fill in required args
         asset_dict.update(

@@ -33,7 +33,7 @@ data_docs_sites:
 
 ### 2. Test that your configuration is correct by building the site
 
-Run the the following Python code to build and open your Data Docs:
+Run the following Python code to build and open your Data Docs:
 
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs"
 ```
