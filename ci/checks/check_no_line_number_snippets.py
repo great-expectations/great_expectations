@@ -9,6 +9,12 @@ import sys
 from typing import List
 
 
+ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
+    "docs/prepare_prior_versions.py",
+    "docs/prepare_to_build_docs.sh",
+}
+
+
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
@@ -17,22 +23,44 @@ def check_dependencies(*deps: str) -> None:
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
     try:
-        res = subprocess.run(
+        res_positive = subprocess.run(
             [
                 "grep",
-                "-rnw",
-                "-e",
+                "--recursive",
+                "--line-number",
+                "--ignore-case",
+                "--word-regexp",
+                "--regexp",
                 r"file=",
                 str(target_dir),
             ],
             text=True,
             capture_output=True,
         )
+        res_negative = subprocess.run(
+            [
+                "grep",
+                "--recursive",
+                "--line-number",
+                "--ignore-case",
+                "--invert-match",
+                "--regexp",
+                r"node_modules",
+                str(target_dir),
+            ],
+            text=True,
+            capture_output=True,
+        )
+        res = list(
+            set(res_positive.stdout.splitlines()).difference(
+                set(res_negative.stdout.splitlines())
+            )
+        )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
-    return res.stdout.splitlines()
+    return res
 
 
 def main() -> None:
@@ -40,11 +68,25 @@ def main() -> None:
     docs_dir = pathlib.Path(__file__).parent.parent.parent / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
-    if grep_output:
+    new_violations = set(grep_output).difference(
+        ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
+    )
+    if new_violations:
         print(
-            f"[ERROR] Found {len(grep_output)} snippets using file and line number syntax, please use named snippet syntax:"
+            f"[ERROR] Found {len(new_violations)} snippets using file and line number syntax.  Please use named snippet syntax:"
         )
-        for line in grep_output:
+        for line in new_violations:
+            print(line)
+        sys.exit(1)
+
+    unnecessary_exclusions = set(
+        ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
+    ).difference(grep_output)
+    if unnecessary_exclusions:
+        print(
+            f"[ERROR] Found {len(unnecessary_exclusions)} snippets unnecessarily placed on exclusion list.  Please update exclusion list:"
+        )
+        for line in new_violations:
             print(line)
         sys.exit(1)
 

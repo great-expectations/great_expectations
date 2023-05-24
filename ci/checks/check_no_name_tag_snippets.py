@@ -42,6 +42,9 @@ import sys
 from typing import List
 
 
+ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = []
+
+
 def check_dependencies(*deps: str) -> None:
     for dep in deps:
         if not shutil.which(dep):
@@ -56,6 +59,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
                 "--recursive",
                 "--line-number",
                 "--ignore-case",
+                "--word-regexp",
                 "--regexp",
                 r"```python ",
                 str(target_dir),
@@ -69,6 +73,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
                 "--recursive",
                 "--line-number",
                 "--ignore-case",
+                "--invert-match",
                 "--regexp",
                 r"python name=",
                 str(target_dir),
@@ -93,11 +98,25 @@ def main() -> None:
     docs_dir = pathlib.Path(__file__).parent.parent.parent / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
-    if grep_output:
+    new_violations = set(grep_output).difference(
+        ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
+    )
+    if new_violations:
         print(
-            f'[ERROR] Found {len(grep_output)} snippets using old "Mark Down" style syntax.  Please use named snippet syntax:'
+            f"[ERROR] Found {len(grep_output)} snippets using file and line number syntax, please use named snippet syntax:"
         )
-        for line in grep_output:
+        for line in new_violations:
+            print(line)
+        sys.exit(1)
+
+    unnecessary_exclusions = set(
+        ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
+    ).difference(grep_output)
+    if unnecessary_exclusions:
+        print(
+            f"[ERROR] Found {len(unnecessary_exclusions)} snippets unnecessarily placed on exclusion list.  Please update exclusion list:"
+        )
+        for line in new_violations:
             print(line)
         sys.exit(1)
 

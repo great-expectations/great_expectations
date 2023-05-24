@@ -125,12 +125,12 @@ stages:
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
-    - job: name_tag_absense_snippet_checker
+    - job: name_tag_snippet_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
         - script: |
             python ci/checks/check_no_name_tag_snippets.py
-          name: NameTagAbsenceSnippetChecker
+          name: NameTagSnippetChecker
 
     - job: check_repo_root_size
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
