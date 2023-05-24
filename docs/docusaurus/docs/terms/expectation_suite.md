@@ -12,7 +12,7 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 An Expectation Suite is a collection of verifiable assertions about data.
 
-Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, a team can group all the Expectations about a given table in given database into an Expectation Suite and call it `my_database.my_table`. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
+Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, you can group all the Expectations about a given table in a given database into an Expectation Suite and name it `my_database.my_table`. Expectation Suite names are customizable, and the only constraint is that it must be unique to a given project.
 
 ## Relationship to other objects
 
