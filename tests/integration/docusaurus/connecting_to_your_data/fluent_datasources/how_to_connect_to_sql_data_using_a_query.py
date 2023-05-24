@@ -8,8 +8,7 @@ import tests.test_utils as test_utils
 import great_expectations as gx
 import pathlib
 
-sqlite_database_path = str(
-    pathlib.Path(
+sqlite_database_path = pathlib.Path(
         gx.__file__,
         "..",
         "..",
@@ -19,7 +18,6 @@ sqlite_database_path = str(
         "sqlite",
         "yellow_tripdata.db",
     ).resolve(strict=True)
-)
 
 
 context = gx.get_context()
