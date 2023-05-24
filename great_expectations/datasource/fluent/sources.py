@@ -496,7 +496,7 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs: str
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             new_datasource: Optional[Datasource] = self._datasource_passed_in(
                 datasource_type, name_or_datasource, **kwargs
