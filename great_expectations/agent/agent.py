@@ -192,7 +192,7 @@ class GXAgent:
     def _get_config_from_env(cls) -> GXAgentConfig:
         """Construct GXAgentConfig from available environment variables"""
         url = os.environ.get("BROKER_URL", None)
-        org_id = os.environ.get("GE_CLOUD_ORGANIZATION_ID", None)
+        org_id = os.environ.get("GX_CLOUD_ORGANIZATION_ID", None)
         try:
             # pydantic will coerce the url to the correct type
             return GXAgentConfig(
