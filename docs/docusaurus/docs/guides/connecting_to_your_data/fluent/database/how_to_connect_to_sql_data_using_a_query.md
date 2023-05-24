@@ -55,7 +55,7 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python name="name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
 ### 3. Add a query to the Datasource as a Data Asset
