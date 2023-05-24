@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Sequence
 
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
@@ -54,6 +54,11 @@ class ActionDicts:
         "name": "update_data_docs",
         "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
     }
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
+        STORE_VALIDATION_RESULT,
+        STORE_EVALUATION_PARAMS,
+        UPDATE_DATA_DOCS,
+    )
 
     @staticmethod
     def build_slack_action(webhook, notify_on, notify_with) -> ActionDict:
