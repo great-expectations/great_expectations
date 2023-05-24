@@ -51,6 +51,13 @@ typing-extensions = ">=3.10.0.0" # Leverage type annotations from recent Python 
 tzlocal = ">=1.2"
 urllib3 = ">=1.26"
 
+[tool.poetry.group.arrow]
+optional = true
+
+[tool.poetry.group.arrow.dependencies]
+pyarrow = "*"
+feather-format = "^0.4.1"
+
 [tool.black]
 target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
