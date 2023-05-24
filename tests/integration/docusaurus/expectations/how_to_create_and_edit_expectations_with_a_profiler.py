@@ -63,6 +63,7 @@ assert context.get_expectation_suite(expectation_suite_name) is not None
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name
 )
+validator.head()
 # </snippet>
 
 assert validator.active_batch.metadata["year"] == "2019"
