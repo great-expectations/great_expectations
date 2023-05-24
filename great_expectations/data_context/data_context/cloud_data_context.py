@@ -17,8 +17,6 @@ from typing import (
     overload,
 )
 
-import requests
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -28,6 +26,7 @@ from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -260,16 +259,13 @@ class CloudDataContext(SerializableDataContext):
         cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
 
-        response = requests.get(cloud_url, headers=headers)
+        session = create_session(access_token=cloud_config.access_token)
+
+        response = session.get(cloud_url)
         if response.status_code != 200:
             raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
+                f"Bad request made to GX Cloud; {response.text}", response=response
             )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
