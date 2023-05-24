@@ -9,15 +9,15 @@ import great_expectations as gx
 import pathlib
 
 sqlite_database_path = pathlib.Path(
-        gx.__file__,
-        "..",
-        "..",
-        "tests",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    ).resolve(strict=True)
+    gx.__file__,
+    "..",
+    "..",
+    "tests",
+    "test_sets",
+    "taxi_yellow_tripdata_samples",
+    "sqlite",
+    "yellow_tripdata.db",
+).resolve(strict=True)
 
 
 context = gx.get_context()
