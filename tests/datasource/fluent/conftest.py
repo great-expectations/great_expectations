@@ -624,10 +624,11 @@ def seed_cloud(
     fds_config = {}
     datasource_names: set[str] = set()
     for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
+        name: str = datasource["name"]
         datasource["id"] = str(uuid.uuid4())
-        fds_config[datasource["name"]] = datasource
+        fds_config[name] = datasource
         by_id[datasource["id"]] = datasource
-        datasource_names.add(datasource)
+        datasource_names.add(name)
 
     _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"] = datasource_names
 
