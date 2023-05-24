@@ -30,7 +30,7 @@ class EventContext:
     event: Union[Event, None]
     correlation_id: str
     processed_successfully: Callable[[], None]
-    processed_with_failures: Callable[[bool], None]
+    processed_with_failures: Callable[[], None]
     redeliver_message: Callable[[], Coroutine]
 
 
@@ -57,7 +57,8 @@ class Subscriber:
 
         """Subscribe to queue with on_message callback.
 
-        Listens to an event stream and invokes on_message with incoming messages.
+        Listens to an event stream and invokes on_message with an EventContext
+        built from the incoming message.
 
         Args:
             queue: Name of queue.
@@ -109,8 +110,9 @@ class Subscriber:
             delivery_tag=payload.delivery_tag
         )
         nack_callback = self.client.get_threadsafe_nack_callback(
-            delivery_tag=payload.delivery_tag
+            delivery_tag=payload.delivery_tag, requeue=False
         )
+        # redeliver_message is not threadsafe
         redeliver_message = partial(
             self._redeliver_message,
             delivery_tag=payload.delivery_tag,

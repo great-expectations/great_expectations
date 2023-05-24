@@ -26,17 +26,16 @@ class AsyncRabbitMQClient:
     channel: Channel
 
     def __init__(self, url: str):
-        try:
-            # SSL Context for TLS configuration of Amazon MQ for RabbitMQ
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-            ssl_context.set_ciphers("ECDHE+AESGCM:!ECDSA")
+        # SSL Context for TLS configuration of Amazon MQ for RabbitMQ
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        ssl_context.set_ciphers("ECDHE+AESGCM:!ECDSA")
 
-            parameters = pika.URLParameters(url)
-            parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-            self._parameters = parameters
+        parameters = pika.URLParameters(url)
+        parameters.ssl_options = pika.SSLOptions(context=ssl_context)
+        self._parameters = parameters
 
-        except (AMQPError, ChannelError) as e:
-            raise ClientError from e
+        self._connection = pika.BlockingConnection(parameters)
+        self._channel = self._connection.channel()
 
         self.should_reconnect = False
         self.was_consuming = False
@@ -109,7 +108,9 @@ class AsyncRabbitMQClient:
         )
         return ack
 
-    def get_threadsafe_nack_callback(self, delivery_tag: int) -> Callable[[bool], None]:
+    def get_threadsafe_nack_callback(
+        self, delivery_tag: int, requeue: bool = False
+    ) -> Callable[[bool], None]:
         """Get a callback to nack a message from any thread."""
         loop = asyncio.get_event_loop()
         nack = partial(
@@ -224,6 +225,18 @@ class AsyncRabbitMQClient:
     def _on_channel_closed(self, channel, reason):
         """Callback invoked after the broker closes the channel."""
         self._close_connection()
+
+    def _get_pika_paramaters(self, url: str):
+        # only enable SSL if connection string calls for it
+        if url.startswith("amqps://"):
+            # SSL Context for TLS configuration of Amazon MQ for RabbitMQ
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+            ssl_context.set_ciphers("ECDHE+AESGCM:!ECDSA")
+            parameters.ssl_options = pika.SSLOptions(context=ssl_context)
+
+        self._connection_string_sans_credentials = (
+            self._get_connection_string_sans_credentials(url=url)
+        )
 
 
 class ClientError(Exception):

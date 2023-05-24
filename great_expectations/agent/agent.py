@@ -103,13 +103,15 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        if self._can_accept_new_task() is not True:
-            # signal to Subscriber that we can't process this message right now
+        if self._can_accept_new_task() is not True or event_context.event is None:
+            # request that this message is redelivered later. If the event is None
+            # we don't understand it, so requeue it in the hope that someone else does.
             loop = asyncio.get_event_loop()
             loop.create_task(event_context.redeliver_message())
             return
         elif self._reject_correlation_id(event_context.correlation_id) is True:
-            event_context.processed_with_failures(requeue=False)
+            # this event has been redelivered too many times - remove it from circulation
+            event_context.processed_with_failures()
             return
 
         # send this message to a thread for processing
@@ -118,8 +120,7 @@ class GXAgent:
         )
         # TODO lakitu-139: record job as started
 
-        # When the thread exits the results are processed in _handle_event_as_thread_exit.
-        # Curry the event_context, so it's available after the GX process exits.
+        # add a callback for when the thread exits and pass it the event context
         on_exit_callback = partial(
             self._handle_event_as_thread_exit, event_context=event_context
         )
@@ -134,14 +135,14 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        # warning:  this method will not be executed in the main thread,
-        #           so take care with shared resources.
+        # warning:  this method will not be executed in the main thread
 
         if event_context.event is not None:
             print(
                 f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
             )
         handler = EventHandler(context=self._context)
+        # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(event_context=event_context)
         return result
 
@@ -149,28 +150,21 @@ class GXAgent:
         self, future: Future, event_context: EventContext
     ) -> None:
         """Callback invoked when the thread running GX exits."""
-        # warning:  this method will not be executed in the main thread,
-        #           so take care with shared resources.
+        # warning:  this method will not be executed in the main thread
 
         # get results or errors from the thread
         error = future.exception()
+        result = None
         if error is not None:
             print("Encountered an error while running job.")
-            print(error)
         else:
             print("Job finished successfully.")
-            result = future.result()
-            print(result)
+            result = future.result()  # type: ignore[unused-arg]
 
         # TODO lakitu-139: record job as complete and send results
 
         # ack message and cleanup resources
-        if isinstance(error, UnknownEventError):
-            # We might not have the latest Event definitions, so we requeue
-            # this event in the hope that another agent will understand it.
-            event_context.processed_with_failures(requeue=True)
-        else:
-            event_context.processed_successfully()
+        event_context.processed_successfully()
         self._current_task = None
 
     def _can_accept_new_task(self) -> bool:
