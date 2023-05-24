@@ -78,7 +78,7 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
         contents, path_to_versioned_docs, file_path
     )
 
-    expected_contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+    expected_contents = """import UniversalMap from '../../images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../../term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
