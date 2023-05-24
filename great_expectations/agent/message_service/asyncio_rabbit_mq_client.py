@@ -8,7 +8,6 @@ from typing import Callable
 import pika
 from pika.adapters.asyncio_connection import AsyncioConnection
 from pika.channel import Channel
-from pika.exceptions import AMQPError, ChannelError
 from pika.spec import Basic, BasicProperties
 
 
@@ -26,15 +25,9 @@ class AsyncRabbitMQClient:
     channel: Channel
 
     def __init__(self, url: str):
-        # SSL Context for TLS configuration of Amazon MQ for RabbitMQ
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        ssl_context.set_ciphers("ECDHE+AESGCM:!ECDSA")
 
-        parameters = pika.URLParameters(url)
-        parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-        self._parameters = parameters
-
-        self._connection = pika.BlockingConnection(parameters)
+        self._parameters = self._build_client_parameters(url=url)
+        self._connection = pika.BlockingConnection(self._parameters)
         self._channel = self._connection.channel()
 
         self.should_reconnect = False
@@ -118,6 +111,7 @@ class AsyncRabbitMQClient:
             channel=self._channel,
             loop=loop,
             delivery_tag=delivery_tag,
+            requeue=requeue,
         )
         return nack
 
@@ -226,17 +220,16 @@ class AsyncRabbitMQClient:
         """Callback invoked after the broker closes the channel."""
         self._close_connection()
 
-    def _get_pika_paramaters(self, url: str):
+    def _build_client_parameters(self, url: str):
+        """Configure parameters used to connect to the broker."""
+        parameters = pika.URLParameters(url)
         # only enable SSL if connection string calls for it
         if url.startswith("amqps://"):
             # SSL Context for TLS configuration of Amazon MQ for RabbitMQ
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
             ssl_context.set_ciphers("ECDHE+AESGCM:!ECDSA")
             parameters.ssl_options = pika.SSLOptions(context=ssl_context)
-
-        self._connection_string_sans_credentials = (
-            self._get_connection_string_sans_credentials(url=url)
-        )
+        return parameters
 
 
 class ClientError(Exception):

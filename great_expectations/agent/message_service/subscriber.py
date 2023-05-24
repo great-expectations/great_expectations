@@ -134,6 +134,7 @@ class Subscriber:
         self, delivery_tag: int, requeue: bool = True, delay: Union[float, int] = 3
     ):
         """Coroutine to request a redelivery with delay."""
+        # not threadsafe
         await asyncio.sleep(delay)
         return self.client.nack(delivery_tag=delivery_tag, requeue=requeue)
 

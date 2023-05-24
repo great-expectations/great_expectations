@@ -13,7 +13,6 @@ from pydantic.dataclasses import dataclass
 from great_expectations.agent.event_handler import (
     EventHandler,
     EventHandlerResult,
-    UnknownEventError,
 )
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
@@ -60,8 +59,8 @@ class GXAgent:
 
         # Create a thread pool with a single worker, so we can run long-lived
         # GX processes and maintain our connection to the broker. Note that
-        # the CloudDataContext cached here is used by the worker, therefore
-        # it isn't safe to increase the number of workers.
+        # the CloudDataContext cached here is used by the worker, so
+        # it isn't safe to increase the number of workers running GX jobs.
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._current_task: Optional[Future] = None
         self._correlation_ids = defaultdict(lambda: 0)
@@ -103,15 +102,15 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        if self._can_accept_new_task() is not True or event_context.event is None:
+        if self._reject_correlation_id(event_context.correlation_id) is True:
+            # this event has been redelivered too many times - remove it from circulation
+            event_context.processed_with_failures()
+            return
+        elif self._can_accept_new_task() is not True or event_context.event is None:
             # request that this message is redelivered later. If the event is None
             # we don't understand it, so requeue it in the hope that someone else does.
             loop = asyncio.get_event_loop()
             loop.create_task(event_context.redeliver_message())
-            return
-        elif self._reject_correlation_id(event_context.correlation_id) is True:
-            # this event has been redelivered too many times - remove it from circulation
-            event_context.processed_with_failures()
             return
 
         # send this message to a thread for processing
@@ -133,7 +132,7 @@ class GXAgent:
         the EventHandler for processing.
 
         Args:
-            event_context: An Event with related properties and actions.
+            event_context: event with related properties and actions.
         """
         # warning:  this method will not be executed in the main thread
 
@@ -149,17 +148,20 @@ class GXAgent:
     def _handle_event_as_thread_exit(
         self, future: Future, event_context: EventContext
     ) -> None:
-        """Callback invoked when the thread running GX exits."""
+        """Callback invoked when the thread running GX exits.
+
+        Args:
+            future: object returned from the thread
+            event_context: event with related properties and actions.
+        """
         # warning:  this method will not be executed in the main thread
 
         # get results or errors from the thread
         error = future.exception()
-        result = None
-        if error is not None:
-            print("Encountered an error while running job.")
-        else:
-            print("Job finished successfully.")
-            result = future.result()  # type: ignore[unused-arg]
+        # todo: underscore to appease linter - rename to `result` once this is used
+        _result = None
+        if error is None:
+            _result = future.result()
 
         # TODO lakitu-139: record job as complete and send results
 
@@ -168,6 +170,7 @@ class GXAgent:
         self._current_task = None
 
     def _can_accept_new_task(self) -> bool:
+        """Are we currently processing a task, or are we free to take a new one?"""
         return self._current_task is None or self._current_task.done()
 
     def _reject_correlation_id(self, id: str):

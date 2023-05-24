@@ -31,7 +31,7 @@ class EventHandler:
         if isinstance(event_context.event, RunDataAssistantEvent):
             return self._handle_run_data_assistant(event_context)
         else:
-            # if pydantic parsing failed, event_context.event will be None
+            # shouldn't get here
             raise UnknownEventError("Unknown message received - cannot process.")
 
     def _handle_run_data_assistant(
