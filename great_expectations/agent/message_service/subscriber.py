@@ -2,6 +2,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from functools import partial
+from json import JSONDecodeError
 from typing import Callable, Coroutine, Union
 
 import pydantic
@@ -99,7 +100,7 @@ class Subscriber:
 
         try:
             event: Event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
-        except pydantic.ValidationError:
+        except (pydantic.ValidationError, JSONDecodeError):
             event = None
 
         # Allow the caller to determine whether to ack/nack this message,
