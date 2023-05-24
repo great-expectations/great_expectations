@@ -39,8 +39,9 @@ validator = context.get_validator(
     expectation_suite_name="my_expectation_suite",
 )
 print(validator.head())
+print("columns:", validator.active_batch.data.dataframe.columns)
 
-validator.expect_column_values_to_not_be_null("pickup_datetime")
+validator.expect_column_values_to_not_be_null("lpep_pickup_datetime")
 validator.expect_column_values_to_be_between("passenger_count", auto=True)
 
 checkpoint = gx.checkpoint.SimpleCheckpoint(
@@ -52,3 +53,5 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 checkpoint_result = checkpoint.run()
 
 print(checkpoint_result.success)
+
+assert checkpoint_result.success
