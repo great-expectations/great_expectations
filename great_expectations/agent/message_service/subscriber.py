@@ -97,7 +97,7 @@ class Subscriber:
             payload: dataclass containing required message attributes
             on_message: the caller-provided callback
         """
-
+        event: Union[Event, None]
         try:
             event: Event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
         except (pydantic.ValidationError, JSONDecodeError):

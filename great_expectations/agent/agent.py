@@ -91,10 +91,8 @@ class GXAgent:
             )
         except KeyboardInterrupt:
             print("Received request to shutdown.")
-            subscriber.close()
-        except (SubscriberError, ClientError) as e:
+        except (SubscriberError, ClientError):
             print("Connection to GX Cloud has encountered an error.")
-            print(e)
         finally:
             if subscriber is not None:
                 subscriber.close()
@@ -125,11 +123,12 @@ class GXAgent:
         )
         # TODO lakitu-139: record job as started
 
-        # add a callback for when the thread exits and pass it the event context
-        on_exit_callback = partial(
-            self._handle_event_as_thread_exit, event_context=event_context
-        )
-        self._current_task.add_done_callback(on_exit_callback)
+        if self._current_task is not None:
+            # add a callback for when the thread exits and pass it the event context
+            on_exit_callback = partial(
+                self._handle_event_as_thread_exit, event_context=event_context
+            )
+            self._current_task.add_done_callback(on_exit_callback)
 
     def _handle_event(self, event_context: EventContext) -> EventHandlerResult:
         """Pass events to EventHandler.
