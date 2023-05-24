@@ -15,6 +15,7 @@ from typing import Callable, Optional, Set, Union
 from unittest import mock
 
 import pytest
+from great_expectations.checkpoint.checkpoint import Checkpoint
 
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
@@ -248,7 +249,7 @@ def test_set(
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                ("action_list", []),
+                                ("action_list", list(Checkpoint.DEFAULT_ACTION_LIST)),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),

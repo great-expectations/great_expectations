@@ -52,7 +52,7 @@ class ActionDicts:
     }
     UPDATE_DATA_DOCS: ClassVar[ActionDict] = {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        "action": {"class_name": "UpdateDataDocsAction"},
     }
     DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
         STORE_VALIDATION_RESULT,
