@@ -64,6 +64,15 @@ feather-format = "^0.4.1"
 # [tool.poetry.group.athena.dependencies] # NOTE: taking forever to resolve
 # PyAthena = {version = "^2.0", extras = ["SQLAlchemy"]}
 
+
+[tool.poetry.group.azure]
+optional = true
+
+[tool.poetry.group.azure.dependencies]
+azure-identity = ">=1.10.0"
+azure-keyvault-secrets = ">=4.0.0"
+azure-storage-blob = ">=12.5.0"
+
 [tool.black]
 target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
