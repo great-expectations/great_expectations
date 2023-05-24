@@ -10,11 +10,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
-Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
+Great Expectations recommends using Checkpoints to validate data.  Checkpoints validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally, create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can create and configure additional Checkpoints for different business requirements.
 
 ![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
 
-Checkpoints are reusable, and they simplify the data validation process.  After you've created your Checkpoint, configured it to your specifications, and specified any Actions you want it to take based on the Validation Results, all you will need to do in the future is tell the Checkpoint to run.
+After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you will need to do in the future run the Checkpoint.
 
 ## Prerequisites
 

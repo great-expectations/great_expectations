@@ -20,7 +20,8 @@ if TYPE_CHECKING:
 
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.integration]
+# NOTE: removing this integration marker to force running in PR pipeline
+# pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
@@ -172,6 +173,47 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
     )
 
     assert datasource1 == datasource2 == datasource3
+
+
+@pytest.mark.cloud
+def test_context_add_and_then_update_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource1 = context.sources.add_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    # add_or_update should be idempotent
+    datasource2 = context.sources.update_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    assert datasource1 == datasource2
+
+    # modify a field
+    datasource2.base_directory = pathlib.Path(__file__)
+    datasource3 = context.sources.update_pandas_filesystem(datasource2)
+
+    assert datasource1 != datasource3
+    assert datasource2 == datasource3
+
+
+@pytest.mark.cloud
+def test_update_non_existant_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    with pytest.raises(ValueError, match="I_DONT_EXIST"):
+        context.sources.update_pandas_filesystem(
+            name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
+        )
 
 
 @pytest.mark.cloud
