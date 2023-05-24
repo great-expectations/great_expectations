@@ -4,11 +4,10 @@ title: 'Set up a GX environment'
 id: setup_overview_tiles
 slug: /
 description: Set up and configure GX in your specific environment.
-hide_table_of_contents: true
 ---
 
-import LinkCardGrid from '/src/components/LinkCardGrid';
-import LinkCard from '/src/components/LinkCard';
+import LinkCardGrid from '/docs/docusaurus/src/components/LinkCardGrid';
+import LinkCard from '/docs/docusaurus/src/components/LinkCard';
 
 <p class="DocItem__header-description">This is where you'll find information for setting up Great Expectations in your specific environment.</p>
 
