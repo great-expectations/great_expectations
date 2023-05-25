@@ -1185,7 +1185,7 @@ def build_sa_engine(
     sa: ModuleType,
     schema: Optional[str] = None,
     batch_id: Optional[str] = None,
-    if_exists: str = "fail",
+    if_exists: str = "replace",
     index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
