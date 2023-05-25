@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import json
 import logging
 import pathlib
@@ -33,13 +34,17 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.store.gx_cloud_store_backend import ErrorPayload
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    ErrorDetail,
+    ErrorPayload,
+)
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
     SparkAzureBlobStorageDatasource,
     SparkGoogleCloudStorageDatasource,
 )
+from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
@@ -222,6 +227,7 @@ class _CallbackResult(NamedTuple):
 
 
 ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
+ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
 
 
 def _get_fake_db_callback(
@@ -553,3 +559,112 @@ def cloud_storage_get_client_doubles(
     logger.warning(
         "Patching cloud storage _get_*_client() methods to return client test doubles"
     )
+
+
+@pytest.fixture
+def fluent_only_config(
+    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
+) -> GxConfig:
+    """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
+    fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
+    assert fluent_config.datasources
+    return fluent_config
+
+
+@pytest.fixture
+def fluent_yaml_config_file(
+    file_dc_config_dir_init: pathlib.Path,
+    fluent_gx_config_yml_str: str,
+) -> pathlib.Path:
+    """
+    Dump the provided GxConfig to a temporary path. File is removed during test teardown.
+
+    Append fluent config to default config file
+    """
+    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    assert config_file_path.exists() is True
+
+    with open(config_file_path, mode="a") as f_append:
+        yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
+        f_append.write(yaml_string)
+
+    logger.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    return config_file_path
+
+
+@pytest.fixture
+@functools.lru_cache(maxsize=1)
+def seeded_file_context(
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+    seed_ds_env_vars: tuple,
+) -> FileDataContext:
+    context = gx.get_context(
+        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
+    )
+    assert isinstance(context, FileDataContext)
+    return context
+
+
+@pytest.fixture
+def seed_cloud(
+    cloud_storage_get_client_doubles,
+    cloud_api_fake: responses.RequestsMock,
+    fluent_only_config: GxConfig,
+):
+    """
+    In order to load the seeded cloud config, this fixture must be called before any
+    `get_context()` calls.
+    """
+    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
+    dc_config_url = f"{org_url_base}/data-context-configuration"
+
+    by_id = {}
+    fds_config = {}
+    datasource_names: set[str] = set()
+    for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
+        name: str = datasource["name"]
+        datasource["id"] = str(uuid.uuid4())
+        fds_config[name] = datasource
+        by_id[datasource["id"]] = datasource
+        datasource_names.add(name)
+
+    _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"] = datasource_names
+
+    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
+    assert fds_config
+
+    cloud_api_fake.upsert(
+        responses.GET,
+        dc_config_url,
+        json={
+            "anonymous_usage_statistics": {
+                "data_context_id": FAKE_DATA_CONTEXT_ID,
+                "enabled": False,
+            },
+            "datasources": fds_config,
+        },
+    )
+    yield cloud_api_fake
+
+    assert len(cloud_api_fake.calls) >= 1, f"{org_url_base} was never called"
+
+
+@pytest.fixture
+def seeded_cloud_context(
+    seed_cloud,  # NOTE: this fixture must be called before the CloudDataContext is created
+    empty_cloud_context_fluent,
+):
+    return empty_cloud_context_fluent
+
+
+@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
+def seeded_contexts(
+    request: FixtureRequest,
+):
+    """Parametrized fixture for seeded File and Cloud DataContexts."""
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
+        request.param
+    )
+    return context_fixture
