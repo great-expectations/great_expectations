@@ -750,7 +750,10 @@ def _get_dep_groups(toml_path: pathlib.Path) -> Sequence[str]:
 
 @invoke.task()
 def gen_reqs(ctx: Context):
-    """Generate requirement files from poetry.lockfile."""
+    """
+    Generate requirement files from poetry.lockfile.
+    https://python-poetry.org/docs/cli/#export
+    """
     print("  Generating requirement files ...")
     depgroups = _get_dep_groups(PYPROJECT_TOML)
     for dep in depgroups:

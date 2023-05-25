@@ -1,3 +1,6 @@
-pyarrow
-pyodbc>=4.0.30
-sqlalchemy-dremio==1.2.1 # 2.0.1 introduces breaking changes
+greenlet==2.0.2 ; python_version >= "3.8" and (platform_machine == "win32" or platform_machine == "WIN32" or platform_machine == "AMD64" or platform_machine == "amd64" or platform_machine == "x86_64" or platform_machine == "ppc64le" or platform_machine == "aarch64") and python_version < "3.12"
+numpy==1.24.3 ; python_version >= "3.8" and python_version < "3.12"
+pyarrow==12.0.0 ; python_version >= "3.8" and python_version < "3.12"
+pyodbc==4.0.39 ; python_version >= "3.8" and python_version < "3.12"
+sqlalchemy==1.4.48 ; python_version >= "3.8" and python_version < "3.12"
+sqlalchemy-dremio==1.2.1 ; python_version >= "3.8" and python_version < "3.12"
