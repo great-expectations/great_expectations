@@ -32,7 +32,8 @@ These can then be loaded into the `connection_string` parameter when we are addi
 ```
 
 
-## Using credentials store 
+## Using YAML or Secret Manager 
+
 <Tabs
   groupId="yaml-or-secret-manager"
   defaultValue='yaml'
@@ -44,7 +45,7 @@ These can then be loaded into the `connection_string` parameter when we are addi
 
 <TabItem value="yaml">
 
-## Using the config variables YAML file. 
+## Using the `config_varibales.yml` file 
 
 A more advanced option is to use the config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod). 
 
@@ -147,6 +148,21 @@ password: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_d
 database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|database
 ```
 
+Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
+
+```python 
+# using the single connection string 
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${my_aws_creds}"
+)
+
+# or each component separately
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+)
+```
+
+
 </TabItem>
 <TabItem value="gcp">
 
@@ -204,6 +220,20 @@ port: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PORT
 username: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_USERNAME
 password: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PASSWORD
 database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
+```
+
+Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
+
+```python 
+# using the single connection string 
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${my_gcp_creds}"
+)
+
+# or each component separately
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+)
 ```
 
 </TabItem>
@@ -267,6 +297,19 @@ password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credential
 database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|database
 ```
 
+Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
+
+```python 
+# using the single connection string 
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${my_abs_creds}"
+)
+
+# or each component separately
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
+)
+```
 </TabItem>
 </Tabs>
 

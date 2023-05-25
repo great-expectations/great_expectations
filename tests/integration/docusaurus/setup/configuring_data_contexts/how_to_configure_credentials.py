@@ -1,8 +1,11 @@
 import os
 
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from tests.test_utils import load_data_into_test_database
 
+yaml = YAMLHandler()
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
@@ -17,34 +20,29 @@ my_postgres_db_yaml_creds: postgresql://localhost:${MY_DB_PW}@$localhost:5432/po
 # </snippet>
 """
 
+# NOTE: The following code is only for testing and can be ignored by users.
+
 # Override without snippet tag
 config_variables_yaml = """
 my_postgres_db_yaml_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
 """
 
-os.environ["MY_DB_PW"] = ""
-os.environ[
-    "my_postgres_db_yaml_creds"
-] = "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
-
-
-config_variables_file_path = """
-# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables">
-my_postgres_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
-# </snippet>
+# Override without snippet tag
+export_env_vars = """
+export POSTGRES_CONNECTION_STRING=postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
+export MY_DB_PW=password
 """
 
-config_variables_yaml = (
-    """my_postgres_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"""
-)
+config_variables_file_path = """
+config_variables_file_path: uncommitted/config_variables.yml
+"""
 
-# add datsources now that variables are configured
+# add test_data to database for testing
 load_data_into_test_database(
     table_name="postgres_taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
-# NOTE: The following code is only for testing and can be ignored by users.
 env_vars = []
 
 # set environment variables using export_env_vars
@@ -66,17 +64,18 @@ assert (
 context_config_variables_file_path = os.path.join(
     context.root_directory, context_config_variables_relative_file_path
 )
+# write content to config_variables.yml
 with open(context_config_variables_file_path, "w+") as f:
     f.write(config_variables_yaml)
 
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
-# Just the password can be added as an Environment Variable
+# Password can be added as an Environment Variable
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
 
-# Or the full connection string can be added as an Environment Variable
+# Alternately, the full connection string can be added as an Environment Variable
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${POSTGRES_CONNECTION_STRING}"
 )
@@ -100,7 +99,7 @@ assert context.list_datasources() == [
                 "schema_name": None,
             }
         ],
-        "connection_string": "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
+        "connection_string": ConfigStr("${POSTGRES_CONNECTION_STRING}"),
     }
 ]
 
@@ -110,11 +109,9 @@ pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
 )
 # </snippet>
-
 pg_datasource.add_table_asset(
-    name="postgres_taxi_data_2", table_name="postgres_taxi_data"
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
-
 assert context.list_datasources() == [
     {
         "type": "sql",
@@ -129,6 +126,6 @@ assert context.list_datasources() == [
                 "schema_name": None,
             }
         ],
-        "connection_string": "${my_postgres_db_yaml_creds}",
+        "connection_string": ConfigStr("${my_postgres_db_yaml_creds}"),
     }
 ]
