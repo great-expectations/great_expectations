@@ -42,6 +42,7 @@ OnMessageCallback = Callable[[EventContext], None]
 
 class Subscriber:
     """Manage an open connection to an event stream."""
+
     # abstraction between the main application and client serving a specific stream
 
     def __init__(self, client: AsyncRabbitMQClient):
