@@ -13,7 +13,6 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 * Support/Contact: https://zenml.io/slack-invite/
 :::
 
-### Introduction
 [ZenML](https://zenml.io/) helps data scientists and ML engineers to make
 Great Expectations data profiling and validation an integral part of their
 production ML toolset and workflows. ZenML is [an extensible open source MLOps framework](https://github.com/zenml-io/zenml)
@@ -27,19 +26,17 @@ away, with all the other great features that ZenML brings along: portability,
 caching, tracking and versioning and immediate access to a rich ecosystem of
 tools and services that spans everything else MLOps.
 
-### Technical background
+### Prerequisites
 
-:::note Prerequisites
- - An overview of the Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
- <TechnicalTag tag="validation_result" text="Validation Results"/>,
- and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts.
- - Some understanding of the [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline) concepts is recommended, but optional.
-:::
+ - An understanding of Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />, 
+ <TechnicalTag tag="validation_result" text="Validation Results"/>, 
+ and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts
+ - Some understanding of [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline).
+
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
 from configuring temporary <TechnicalTag tag="datasource" text="Datasources" />,
-<TechnicalTag tag="data_connector" text="Data Connectors" />, 
-and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
+Data Connectors, and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
 to access in-memory datasets to setting up and running <TechnicalTag tag="profiler" text="Profilers" />, <TechnicalTag tag="validator" text="Validators" /> and <TechnicalTag tag="checkpoint" text="Checkpoints" />, to generating the <TechnicalTag tag="data_docs" text="Data Docs" /> 
 for you. These details are abstracted away from you and all you have left
 to do is simply insert these steps into your ML pipelines to run either data
@@ -139,7 +136,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -233,7 +230,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -311,7 +308,7 @@ custom ZenML pipeline steps that use Great Expectations while still benefiting
 from the other ZenML integration features:
 
 * the convenience of using a Great Expectations Data Context that is
-automatically configured to connect to the the infrastructure of your choise
+automatically configured to connect to the infrastructure of your choise
 * the ability to version, track and visualize Expectation Suites and Validation
 Results as pipeline artifacts
 * the freedom that comes from being able to combine Great Expectations with

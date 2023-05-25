@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -28,7 +29,6 @@ from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 from great_expectations.self_check.util import (
-    connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import is_library_loadable
@@ -36,8 +36,7 @@ from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 try:
-    import sqlalchemy as sqlalchemy
-    import sqlalchemy.dialects.postgresql as postgresqltypes
+    postgresqltypes = sqlalchemy.dialects.postgresql
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -51,8 +50,7 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-except ImportError:
-    sqlalchemy = None
+except (ImportError, AttributeError):
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -108,16 +106,18 @@ def get_spark_runtime_validator(context, df):
 
 
 def get_sqlalchemy_runtime_validator_postgresql(
-    df, schemas=None, caching=True, table_name=None
+    df,
+    postgresql_engine,
+    schemas=None,
+    caching=True,
+    table_name=None,
 ):
     sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
-        engine = connection_manager.get_connection(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
-    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
+        engine = postgresql_engine
+    except (sqlalchemy.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}
@@ -224,7 +224,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api, postgresql_engine):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -236,7 +236,9 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
-    return get_sqlalchemy_runtime_validator_postgresql(df)
+    return get_sqlalchemy_runtime_validator_postgresql(
+        df, postgresql_engine=postgresql_engine
+    )
 
 
 @pytest.fixture()

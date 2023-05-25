@@ -11,10 +11,12 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Hashable,
     Iterable,
     Iterator,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Pattern,  # must use typing.Pattern for pydantic < v1.10
@@ -32,11 +34,11 @@ from packaging.version import Version
 from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
-from typing_extensions import Final, Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
-    DataAsset,  # noqa: TCH001
+    DataAsset,
 )
 
 try:
@@ -367,11 +369,11 @@ def _create_pandas_asset_model(
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
 
-    def _get_reader_options_include(self) -> set[str] | None:
-        return None
+    def _get_reader_options_include(self) -> set[str]:
+        return set()
 
-    setattr(model, "_get_reader_method", _get_reader_method)
-    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+    model._get_reader_method = _get_reader_method
+    model._get_reader_options_include = _get_reader_options_include
 
     return model
 
@@ -387,7 +389,6 @@ def _generate_pandas_data_asset_models(
 
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
-
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
         fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)

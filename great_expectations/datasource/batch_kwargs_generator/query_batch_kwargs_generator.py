@@ -10,16 +10,6 @@ from great_expectations.exceptions import BatchKwargsError, ClassInstantiationEr
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    reflection = None
-    logger.debug("Unable to import sqlalchemy.")
-
 
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     """Produce query-style batch_kwargs from sql files or defined queries.

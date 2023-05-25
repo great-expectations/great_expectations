@@ -11,13 +11,6 @@ from great_expectations.expectations.metrics.util import (
 
 logger = logging.getLogger(__name__)
 
-try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 import numpy as np
 from scipy import stats
@@ -37,7 +30,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
         p=0.05,
         bootstrap_samples=None,
         bootstrap_sample_size=None,
-        **kwargs
+        **kwargs,
     ):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")

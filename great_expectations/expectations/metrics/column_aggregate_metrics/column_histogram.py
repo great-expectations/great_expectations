@@ -5,6 +5,11 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -18,7 +23,6 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
-from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 logger = logging.getLogger(__name__)
@@ -128,7 +132,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
             # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
             return convert_to_json_serializable(
-                list(execution_engine.engine.execute(query).fetchone())
+                list(execution_engine.execute_query(query).fetchone())
             )
 
         idx = 0
@@ -154,7 +158,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         negative_boundary: float
         positive_boundary: float
-        for idx in range(idx, len(bins) - 2):
+        for idx in range(  # noqa: B020 # loop-variable-overrides-iterator
+            idx, len(bins) - 2
+        ):
             negative_boundary = float(bins[idx])
             positive_boundary = float(bins[idx + 1])
             case_conditions.append(
@@ -217,7 +223,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
         return convert_to_json_serializable(
-            list(execution_engine.engine.execute(query).fetchone())
+            list(execution_engine.execute_query(query).fetchone())
         )
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -255,7 +261,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             bins.append(float("inf"))
 
         temp_column = df.select(column).where(F.col(column).isNotNull())
-        bucketizer = Bucketizer(splits=bins, inputCol=column, outputCol="buckets")
+        bucketizer = pyspark.Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets"
+        )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 
         # This is painful to do, but: bucketizer cannot handle values outside of a range

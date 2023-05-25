@@ -5,6 +5,9 @@ from typing import Any, Dict, Tuple
 import numpy as np
 import scipy.stats as stats
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -21,34 +24,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
-
-try:
-    from sqlalchemy.engine.row import Row
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy
-
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        RowProxy = None
-        Row = None
 
 
 class ColumnSkew(ColumnAggregateMetricProvider):
@@ -88,19 +66,18 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
+        dialect = execution_engine.dialect
 
         column_mean = _get_query_result(
             func=sa.func.avg(column * 1.0),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_count = _get_query_result(
             func=sa.func.count(column),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         if dialect.name.lower() == "mssql":
@@ -111,13 +88,13 @@ class ColumnSkew(ColumnAggregateMetricProvider):
         column_std = _get_query_result(
             func=standard_deviation,
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_third_moment = _get_query_result(
             func=sa.func.sum(sa.func.pow(column - column_mean, 3)),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_skew = column_third_moment / (column_std**3) / (column_count - 1)
@@ -127,20 +104,22 @@ class ColumnSkew(ColumnAggregateMetricProvider):
             return column_skew
 
 
-def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEngine):
+    simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy.Row = execution_engine.execute_query(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe()
+        raise pe
 
     # @classmethod
     # def _get_evaluation_dependencies(

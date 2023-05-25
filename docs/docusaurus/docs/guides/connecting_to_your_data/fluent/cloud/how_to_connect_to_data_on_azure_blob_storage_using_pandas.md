@@ -20,7 +20,6 @@ import AbsBatchingRegexExample from '/docs/components/connect_to_data/cloud/_abs
 <!-- ## Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
 
 <Introduction execution_engine='Pandas' />
 
@@ -30,7 +29,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 - <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -43,16 +41,15 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ### 2. Create a Datasource
 
+We can define an Azure Blob Storage datasource by providing these pieces of information:
+- `name`: In our example, we will name our Datasource `"my_datasource"`
+- `azure_options`: We provide authentication settings here
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py define_add_pandas_abs_args"
+```
 We can create a Datasource that points to our Azure Blob Storage with the code:
 
-```python Python code
-datasource_name = "my_datasource"
-datasource = context.sources.add_pandas_abs(
-    name=datasource_name,
-    azure_options={
-        "account_url": "${AZURE_STORAGE_CONNECTION_STRING}",
-    },
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py create_datasource"
 ```
 
 :::tip Where did that connection string come from?
@@ -63,15 +60,9 @@ In the above example, the value for `account_url` will be substituted for the co
 
 <AbsFluentAddDataAssetConfigKeys />
 
-Once these values have been defined, we will define our Data Asset with the code:
+Once these values have been defined, we will create our DataAsset with the code:
 
-```python title="Python code"
-data_asset = datasource.add_csv_asset(
-    name=asset_name,
-    batching_regex=batching_regex,
-    abs_container=abs_container,
-    abs_name_starts_with=abs_name_starts_with,
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_pandas.py add_asset"
 ```
 
 <AbsBatchingRegexExample />
@@ -84,4 +75,4 @@ data_asset = datasource.add_csv_asset(
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

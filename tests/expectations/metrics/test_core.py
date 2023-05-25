@@ -1,5 +1,6 @@
 import copy
 import datetime
+from decimal import Decimal
 import logging
 from typing import Dict, Tuple, Union
 
@@ -22,10 +23,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Column,
-    quoted_name,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -78,8 +77,18 @@ def test_basic_metric_pd():
     assert results == {desired_metric.id: 3}
 
 
-def test_mean_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_mean_metric_pd(dataframe, expected_result):
+    engine = build_pandas_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
@@ -101,11 +110,65 @@ def test_mean_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 2}
+    assert results == {desired_metric.id: expected_result}
 
 
-def test_stdev_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_mean_metric_spark(spark_session, dataframe, expected_result):
+    engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.mean.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.mean",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: expected_result}
+
+
+@pytest.mark.parametrize(
+    "build_engine,dataframe,expected_result",
+    [
+        [build_pandas_engine, pd.DataFrame({"a": [1, 2, 3, None]}), 1],
+    ],
+)
+def test_stdev_metric_pd(build_engine, dataframe, expected_result):
+    engine = build_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
@@ -127,7 +190,7 @@ def test_stdev_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 1}
+    assert results == {desired_metric.id: expected_result}
 
 
 def test_column_value_lengths_min_metric_pd():
@@ -208,7 +271,7 @@ def test_column_quoted_name_type_sa(sa):
 
     column_name: str
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in batch_column_list
     ]
 
@@ -224,7 +287,9 @@ def test_column_quoted_name_type_sa(sa):
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
     )
-    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
     assert quoted_column_name.quote is True
 
     for column_name in [
@@ -245,7 +310,7 @@ def test_column_quoted_name_type_sa(sa):
         )
 
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in [
             "Names",
             "names",
@@ -1233,8 +1298,6 @@ def test_column_partition_metric_spark(spark_session):
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1261,10 +1324,10 @@ def test_column_partition_metric_spark(spark_session):
                 ],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.IntegerType(), True),
-                sparktypes.StructField("b", sparktypes.TimestampType(), True),
+                pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
+                pyspark.types.StructField("b", pyspark.types.TimestampType(), True),
             ]
         ),
         batch_id="my_id",
@@ -4332,8 +4395,6 @@ def test_value_counts_metric_sa(sa):
 
 @pytest.mark.integration
 def test_value_counts_metric_spark(spark_session):
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -4342,10 +4403,10 @@ def test_value_counts_metric_spark(spark_session):
                 "b": [None, None, None, None, None, None, None],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.FloatType(), True),
-                sparktypes.StructField("b", sparktypes.NullType(), True),
+                pyspark.types.StructField("a", pyspark.types.FloatType(), True),
+                pyspark.types.StructField("b", pyspark.types.NullType(), True),
             ]
         ),
         batch_id="my_id",
@@ -4428,9 +4489,9 @@ def test_distinct_metric_spark(
         metrics=metrics,
     )
     metrics.update(results)
-    assert isinstance(
+    assert pyspark.Column and isinstance(
         metrics[column_distinct_values_count_metric_partial_fn.id][0],
-        pyspark_sql_Column,
+        pyspark.Column,
     )
 
     column_distinct_values_count_metric = MetricConfiguration(

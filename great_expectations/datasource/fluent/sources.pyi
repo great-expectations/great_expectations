@@ -5,6 +5,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -13,11 +14,12 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.data_context import (
-    AbstractDataContext as GXDataContext,  # noqa: TCH001
+    AbstractDataContext as GXDataContext,
 )
+from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 
 if TYPE_CHECKING:
     import pathlib
@@ -49,7 +51,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
-SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
+SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str]
 DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str]
@@ -259,6 +261,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def update_sql(
         self,
@@ -267,6 +270,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def add_or_update_sql(
         self,
@@ -275,6 +279,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def delete_sql(
         self,
@@ -287,6 +292,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def update_postgres(
         self,
@@ -295,6 +301,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def add_or_update_postgres(
         self,
@@ -303,6 +310,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def delete_postgres(
         self,
@@ -311,14 +319,23 @@ class _SourceFactories:
     def add_spark(
         self,
         name: str,
+        *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
     ) -> SparkDatasource: ...
     def update_spark(
         self,
         name: str,
+        *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
     ) -> SparkDatasource: ...
     def add_or_update_spark(
         self,
         name: str,
+        *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
     ) -> SparkDatasource: ...
     def delete_spark(
         self,
@@ -330,6 +347,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -339,6 +358,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -348,6 +369,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
@@ -361,6 +384,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -370,6 +395,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -379,6 +406,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkDBFSDatasource: ...
@@ -392,6 +421,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -401,6 +432,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -410,6 +443,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
@@ -423,6 +458,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -432,6 +469,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -441,6 +480,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkGoogleCloudStorageDatasource: ...
@@ -454,6 +495,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def update_spark_abs(
@@ -462,6 +505,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def add_or_update_spark_abs(
@@ -470,6 +515,8 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...
     def delete_spark_abs(
@@ -483,6 +530,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def update_sqlite(
         self,
@@ -491,6 +539,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def add_or_update_sqlite(
         self,
@@ -499,12 +548,13 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def delete_sqlite(
         self,
         name: str,
     ) -> None: ...
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]: ...
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]: ...

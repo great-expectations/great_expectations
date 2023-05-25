@@ -62,7 +62,7 @@ class MetaFileDataAsset(DataAsset):
             null_lines_regex=r"^\s*$",
             result_format=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             try:
                 f = open(self._path)
@@ -105,7 +105,7 @@ class MetaFileDataAsset(DataAsset):
                         (boolean_mapped_null_lines == False).sum()  # noqa: E712
                     )
                     boolean_mapped_success_lines = np.array(
-                        func(self, _lines=nonnull_lines, *args, **kwargs)
+                        func(self, _lines=nonnull_lines, *args, **kwargs)  # noqa: B026
                     )
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
                     unexpected_list = list(
@@ -308,7 +308,6 @@ class FileDataAsset(MetaFileDataAsset):
         meta=None,
         _lines=None,
     ):
-
         """
         Expect the number of times a regular expression appears on each line of
         a file to be between a maximum and minimum value.
@@ -382,7 +381,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Expect computed file hash to equal some given value.
 
@@ -442,7 +440,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Expect file size to be between a user specified maxsize and minsize.
 
@@ -519,7 +516,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Checks to see if a file specified by the user actually exists
 
@@ -650,7 +646,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Args:
             schema : string

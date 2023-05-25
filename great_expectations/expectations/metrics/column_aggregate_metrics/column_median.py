@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -16,7 +17,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -50,13 +50,12 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
 
-        element_values = sqlalchemy_engine.execute(
+        element_values = execution_engine.execute_query(
             sa.select(column)
             .order_by(column)
             .where(column != None)  # noqa: E711

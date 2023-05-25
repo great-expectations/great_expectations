@@ -1,13 +1,12 @@
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context">
 import great_expectations as gx
 
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_context">
 context = gx.get_context()
 # </snippet>
 
-context.sources.add_pandas(name="my_datasource",).add_csv_asset(
+context.sources.add_pandas(
+    name="my_datasource",
+).add_csv_asset(
     name="my_data_asset",
     filepath_or_buffer="./data/yellow_tripdata_sample_2019-01.csv",
 )

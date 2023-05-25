@@ -2,17 +2,16 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
-from typing_extensions import Final
 
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
@@ -31,15 +30,10 @@ from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy  # noqa: TID251
-    from sqlalchemy.engine.reflection import Inspector  # noqa: TID251
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
-    Inspector = None
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
@@ -441,7 +435,7 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 

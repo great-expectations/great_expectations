@@ -323,11 +323,13 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
+    mock_expectation_store_update,
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -1157,7 +1159,7 @@ def test___get_attr___retrieves_existing_expectation(
 
     # Does not raise error if properly registered
     # Avoiding invocation to only test registration (and not actual expectation)
-    validator.expect_column_max_to_be_between
+    _ = validator.expect_column_max_to_be_between
 
 
 @pytest.mark.unit
@@ -1167,7 +1169,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
     validator = validator_with_mock_execution_engine
 
     with pytest.raises(AttributeError) as e:
-        validator.my_fake_attr
+        _ = validator.my_fake_attr
 
     assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
 

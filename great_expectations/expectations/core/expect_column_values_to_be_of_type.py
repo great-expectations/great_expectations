@@ -1,11 +1,14 @@
 import inspect
 import logging
-import warnings
 from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -46,24 +49,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy.dialects import registry  # noqa: TID251
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -72,48 +57,18 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    GEOGRAPHY,
+    bigquery_types_tuple,
+)
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as BigQueryDialect,
+)
 
-    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
-    bigquery_types_tuple = None
-    try:
-        from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
-
-        BIGQUERY_GEO_SUPPORT = True
-    except ImportError:
-        BIGQUERY_GEO_SUPPORT = False
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = None
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-    except ImportError:
-        sqla_bigquery = None
-        bigquery_types_tuple = None
-        pybigquery = None
+if GEOGRAPHY:
+    BIGQUERY_GEO_SUPPORT = True
+else:
+    BIGQUERY_GEO_SUPPORT = False
 
 try:
     import teradatasqlalchemy.dialect
@@ -149,7 +104,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
             in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
+            fail the expectation, while `Timestamp` would pass with valid data.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -425,7 +382,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         else:
             types = []
             try:
-                type_class = getattr(sparktypes, expected_type)
+                type_class = getattr(pyspark.types, expected_type)
                 types.append(type_class)
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
@@ -583,10 +540,10 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
+        if BigQueryDialect and (
             isinstance(
                 execution_engine.dialect_module,
-                sqla_bigquery.BigQueryDialect,
+                BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):

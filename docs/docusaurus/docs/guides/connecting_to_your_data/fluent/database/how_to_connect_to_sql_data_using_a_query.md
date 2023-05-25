@@ -8,61 +8,38 @@ keywords: [Great Expectations, SQL]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+<!-- ### Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_block_config.md'
 
+In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-## Introduction
-
-In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
-
-If you would like to connect to the contents of a SQL table instead of the results of a SQL query, please see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table), instead.
+To connect to the contents of a SQL table instead of the results of a SQL query, see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table), instead.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
-- Source data stored in a SQL database
-- A passion for data quality
+- An installation of GX set up to work with SQL. See [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases).
+- Source data stored in a SQL database.
 
 </Prerequisites> 
 
-<details>
-<summary>
+### If you still need to connect a Datasource to a SQL database
 
-### If you still need to set up and install GX...
-
-</summary>
-
-Please reference the appropriate one of these guides:
-
-<SetupAndInstallForSqlData />
-
-</details>
-
-<details>
-<summary>
-
-### If you still need to connect a Datasource to a SQL database...
-
-</summary>
+<summary></summary>
 
 Please reference the appropriate one of these guides:
 
 <ConnectingToSqlDatasourcesFluently />
 
-Or, for guides on using the block-config method for advanced SQL Datasource configurations, please see:
-
-<ConnectingToSqlDatasourcesBlockConfig />
-
-
-</details>
+<details></details>
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
+If you're using a Datasource that was created with the advanced block-config method, see [How to configure a SQL Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
 
 :::
 
@@ -70,11 +47,7 @@ If you are using a Datasource that was created with the advanced block-config me
 
 ### 1. Import GX and instantiate a Data Context
 
-```python title="Python code"
-import great_expectations as gx
-
-context = gx.get_context()
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Retrieve a SQL Datasource
 
@@ -82,16 +55,14 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python title="Python code"
-datasource = context.get_datasource("my_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
 ### 3. Add a query to the Datasource as a Data Asset
 
 To indicate the query that provides the data to connect to we will define a Data Asset.  This is done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
-```python title="Python code"
-table_asset = datasource.add_query_asset(name="my_asset", query="SELECT passenger_count, total_amount FROM yellow_tripdata")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
 ```
 
 ### 4. (Optional) Repeat step 3 as needed to add additional queries

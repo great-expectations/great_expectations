@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Type
 
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
@@ -27,7 +25,7 @@ logger: Logger
 
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    data_connector_type: ClassVar[Type[S3DataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"

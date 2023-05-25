@@ -3,26 +3,8 @@ import os
 import random
 from typing import Optional, Union
 
+import pandas as pd
 import pytest
-
-from great_expectations.datasource import (
-    BaseDatasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
-from great_expectations.exceptions.exceptions import ExecutionEngineError
-
-logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -33,6 +15,12 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
+from great_expectations.datasource import (
+    BaseDatasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
+from great_expectations.exceptions.exceptions import ExecutionEngineError
 from great_expectations.validator.validator import Validator
 
 try:
@@ -40,15 +28,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-    except ImportError:
-        sqla_bigquery = None
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as sqla_bigquery,
+)
 
 yaml = YAMLHandler()
+
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -744,8 +731,8 @@ tables:
 
 
 @pytest.mark.skipif(
-    sqla_bigquery is None,
-    reason="sqlalchemy_bigquery/pybigquery is not installed",
+    not sqla_bigquery,
+    reason="sqlalchemy_bigquery is not installed",
 )
 @pytest.mark.integration
 def test_basic_instantiation_with_bigquery_creds(sa):

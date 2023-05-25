@@ -11,12 +11,14 @@ import string
 import time
 import traceback
 import warnings
-from functools import wraps
+from decimal import Decimal
+from functools import partial, wraps
 from logging import Logger
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -31,8 +33,13 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -70,13 +77,14 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
-    connection_manager,
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
 )
 from great_expectations.validator.validator import Validator
+
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -99,139 +107,29 @@ MAX_TABLE_NAME_LENGTH: int = 63
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import Engine  # noqa: TID251
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
-except ImportError:
-    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    StructType = None  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql import DataFrame as spark_DataFrame
-except ImportError:
-    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
-
-try:
-    import sqlalchemy.dialects.sqlite as sqlitetypes  # noqa: TID251
-
-    # noinspection PyPep8Naming
-    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect  # noqa: TID251
-
+if sqlalchemy.sqlite:
     SQLITE_TYPES = {
-        "VARCHAR": sqlitetypes.VARCHAR,
-        "CHAR": sqlitetypes.CHAR,
-        "INTEGER": sqlitetypes.INTEGER,
-        "SMALLINT": sqlitetypes.SMALLINT,
-        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "DATE": sqlitetypes.DATE,
-        "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN,
-        "TIMESTAMP": sqlitetypes.TIMESTAMP,
+        "VARCHAR": sqlalchemy.sqlite.VARCHAR,
+        "CHAR": sqlalchemy.sqlite.CHAR,
+        "INTEGER": sqlalchemy.sqlite.INTEGER,
+        "SMALLINT": sqlalchemy.sqlite.SMALLINT,
+        "DATETIME": sqlalchemy.sqlite.DATETIME(truncate_microseconds=True),
+        "DATE": sqlalchemy.sqlite.DATE,
+        "FLOAT": sqlalchemy.sqlite.FLOAT,
+        "BOOLEAN": sqlalchemy.sqlite.BOOLEAN,
+        "TIMESTAMP": sqlalchemy.sqlite.TIMESTAMP,
     }
-except (ImportError, KeyError):
-    sqlitetypes = None
-    sqliteDialect = None
+else:
     SQLITE_TYPES = {}
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
-try:
-    # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as BigQueryDialect
-    import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-    # noinspection PyTypeChecker
-    bigquery_types_tuple = None
-    BIGQUERY_TYPES = {
-        "INTEGER": sqla_bigquery.INTEGER,
-        "NUMERIC": sqla_bigquery.NUMERIC,
-        "STRING": sqla_bigquery.STRING,
-        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-        "BYTES": sqla_bigquery.BYTES,
-        "BOOL": sqla_bigquery.BOOL,
-        "BOOLEAN": sqla_bigquery.BOOLEAN,
-        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-        "TIME": sqla_bigquery.TIME,
-        "FLOAT": sqla_bigquery.FLOAT,
-        "DATE": sqla_bigquery.DATE,
-        "DATETIME": sqla_bigquery.DATETIME,
-    }
-    try:
-        # noinspection PyUnresolvedReferences
-        from sqlalchemy_bigquery import GEOGRAPHY
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    BIGQUERY_TYPES,
+    GEOGRAPHY,
+)
 
-        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
-    except ImportError:
-        # BigQuery GEOGRAPHY support is optional
-        pass
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.dialects.registry.register(
-            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-        )
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
-            BIGQUERY_TYPES = {
-                "INTEGER": sqla_bigquery.INTEGER,
-                "NUMERIC": sqla_bigquery.NUMERIC,
-                "STRING": sqla_bigquery.STRING,
-                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-                "BYTES": sqla_bigquery.BYTES,
-                "BOOL": sqla_bigquery.BOOL,
-                "BOOLEAN": sqla_bigquery.BOOLEAN,
-                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-                "TIME": sqla_bigquery.TIME,
-                "FLOAT": sqla_bigquery.FLOAT,
-                "DATE": sqla_bigquery.DATE,
-                "DATETIME": sqla_bigquery.DATETIME,
-            }
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            # noinspection PyTypeChecker
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-            BIGQUERY_TYPES = {}
-
-    except (ImportError, AttributeError):
-        sqla_bigquery = None
-        # noinspection PyTypeChecker
-        bigquery_types_tuple = None
-        BigQueryDialect = None
-        pybigquery = None
-        BIGQUERY_TYPES = {}
-
+if GEOGRAPHY:
+    BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
@@ -542,7 +440,7 @@ def get_dataset(  # noqa: C901 - 110
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
             pandas_schema = {}
-            for (key, value) in schema.items():
+            for key, value in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
                 # Further, some changes in pandas internal about how datetimes are created means to support pandas
                 # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -568,19 +466,17 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-        import pyspark.sql.types as sparktypes
-
         spark_types = {
-            "StringType": sparktypes.StringType,
-            "IntegerType": sparktypes.IntegerType,
-            "LongType": sparktypes.LongType,
-            "DateType": sparktypes.DateType,
-            "TimestampType": sparktypes.TimestampType,
-            "FloatType": sparktypes.FloatType,
-            "DoubleType": sparktypes.DoubleType,
-            "BooleanType": sparktypes.BooleanType,
-            "DataType": sparktypes.DataType,
-            "NullType": sparktypes.NullType,
+            "StringType": pyspark.types.StringType,
+            "IntegerType": pyspark.types.IntegerType,
+            "LongType": pyspark.types.LongType,
+            "DateType": pyspark.types.DateType,
+            "TimestampType": pyspark.types.TimestampType,
+            "FloatType": pyspark.types.FloatType,
+            "DoubleType": pyspark.types.DoubleType,
+            "BooleanType": pyspark.types.BooleanType,
+            "DataType": pyspark.types.DataType,
+            "NullType": pyspark.types.NullType,
         }
         spark = get_or_create_spark_application(
             spark_config={
@@ -598,9 +494,9 @@ def get_dataset(  # noqa: C901 - 110
             schema = schemas["spark"]
             # sometimes first method causes Spark to throw a TypeError
             try:
-                spark_schema = sparktypes.StructType(
+                spark_schema = pyspark.types.StructType(
                     [
-                        sparktypes.StructField(
+                        pyspark.types.StructField(
                             column, spark_types[schema[column]](), True
                         )
                         for column in schema
@@ -646,9 +542,9 @@ def get_dataset(  # noqa: C901 - 110
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
-                string_schema = sparktypes.StructType(
+                string_schema = pyspark.types.StructType(
                     [
-                        sparktypes.StructField(column, sparktypes.StringType())
+                        pyspark.types.StructField(column, pyspark.types.StringType())
                         for column in schema
                     ]
                 )
@@ -660,9 +556,9 @@ def get_dataset(  # noqa: C901 - 110
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
             columns = list(data.keys())
-            spark_schema = sparktypes.StructType(
+            spark_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, sparktypes.StringType())
+                    pyspark.types.StructField(column, pyspark.types.StringType())
                     for column in columns
                 ]
             )
@@ -740,7 +636,7 @@ def _get_test_validator_with_data_pandas(
         if pk_column:
             schema["pk_index"] = "int"
         pandas_schema = {}
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             # Note, these are just names used in our internal schemas to build datasets *for internal tests*
             # Further, some changes in pandas internal about how datetimes are created means to support pandas
             # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -793,7 +689,7 @@ def _get_test_validator_with_data_sqlalchemy(
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator | None:
-    if not create_engine:
+    if not sa:
         return None
 
     if table_name is None:
@@ -821,19 +717,19 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-    import pyspark.sql.types as sparktypes
-
-    spark_types: dict = {
-        "StringType": sparktypes.StringType,
-        "IntegerType": sparktypes.IntegerType,
-        "LongType": sparktypes.LongType,
-        "DateType": sparktypes.DateType,
-        "TimestampType": sparktypes.TimestampType,
-        "FloatType": sparktypes.FloatType,
-        "DoubleType": sparktypes.DoubleType,
-        "BooleanType": sparktypes.BooleanType,
-        "DataType": sparktypes.DataType,
-        "NullType": sparktypes.NullType,
+    spark_types: Dict[str, Callable] = {
+        "StringType": pyspark.types.StringType,
+        "IntegerType": pyspark.types.IntegerType,
+        "LongType": pyspark.types.LongType,
+        "DateType": pyspark.types.DateType,
+        "TimestampType": pyspark.types.TimestampType,
+        "FloatType": pyspark.types.FloatType,
+        "DoubleType": pyspark.types.DoubleType,
+        "BooleanType": pyspark.types.BooleanType,
+        "DataType": pyspark.types.DataType,
+        "NullType": pyspark.types.NullType,
+        # When inferring schema from decimal.Decimal objects, pyspark uses DecimalType(38, 18).
+        "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
     spark = get_or_create_spark_application(
@@ -852,9 +748,11 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
             schema["pk_index"] = "IntegerType"
         # sometimes first method causes Spark to throw a TypeError
         try:
-            spark_schema = sparktypes.StructType(
+            spark_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, spark_types[schema[column]](), True)
+                    pyspark.types.StructField(
+                        column, spark_types[schema[column]](), True
+                    )
                     for column in schema
                 ]
             )
@@ -867,9 +765,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                 print(schema)
             for col in schema:
                 type_ = schema[col]
+                # Ints cannot be None...but None can be valid in Spark (as Null)
+                vals: List[Union[str, int, float, None, Decimal]] = []
                 if type_ in ["IntegerType", "LongType"]:
-                    # Ints cannot be None...but None can be valid in Spark (as Null)
-                    vals: List[Union[str, int, float, None]] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -877,15 +775,20 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(int(val))
                     data[col] = vals
                 elif type_ in ["FloatType", "DoubleType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
                         else:
                             vals.append(float(val))
                     data[col] = vals
+                elif type_ in ["DecimalType"]:
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(Decimal(val))
+                    data[col] = vals
                 elif type_ in ["DateType", "TimestampType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -898,9 +801,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
             )  # create a list of rows
             spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
         except TypeError:
-            string_schema = sparktypes.StructType(
+            string_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, sparktypes.StringType())
+                    pyspark.types.StructField(column, pyspark.types.StringType())
                     for column in schema
                 ]
             )
@@ -912,9 +815,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     elif len(data_reshaped) == 0:
         # if we have an empty dataset and no schema, need to assign an arbitrary type
         columns = list(data.keys())
-        spark_schema = sparktypes.StructType(
+        spark_schema = pyspark.types.StructType(
             [
-                sparktypes.StructField(column, sparktypes.StringType())
+                pyspark.types.StructField(column, pyspark.types.StringType())
                 for column in columns
             ]
         )
@@ -978,7 +881,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
     try:
-        dialect_classes["sqlite"] = sqlitetypes.dialect
+        dialect_classes["sqlite"] = sqlalchemy.sqlite.dialect
         dialect_types["sqlite"] = SQLITE_TYPES
     except AttributeError:
         pass
@@ -998,7 +901,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     except AttributeError:
         pass
     try:
-        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_classes["bigquery"] = BigQueryDialect  # type: ignore[assignment]
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
@@ -1026,41 +929,41 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
-        engine = create_engine(
+        engine = sa.create_engine(
             connection_string,
             # echo=True,
         )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "athena":
         connection_string = _get_athena_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "snowflake":
         connection_string = _get_snowflake_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     else:
         connection_string = None
         engine = None
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-    # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+    # execution_engine.execute_query(sa.text(sql_query_string).execution_options(autocommit=True))
 
     # Add the data to the database as a new table
 
@@ -1141,8 +1044,19 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
     )
 
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+
+    print(
+        "DEBUG =============================================================================="
+    )
+    print("execution_engine._connection", execution_engine._connection)
+    print("execution_engine.get_connection()", execution_engine.get_connection())
+    print(
+        "DEBUG =============================================================================="
+    )
 
     if context is None:
         context = build_in_memory_runtime_context()
@@ -1225,8 +1139,8 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame],
-    spark: SparkSession,
+    df: Union[pd.DataFrame, pyspark.DataFrame],
+    spark: pyspark.SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
@@ -1281,7 +1195,7 @@ def build_sa_engine(
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
     add_dataframe_to_db(
         df=df,
         name=table_name,
@@ -1312,9 +1226,9 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession,
-    df: Union[pd.DataFrame, SparkDataFrame],
-    schema: Optional[StructType] = None,
+    spark: pyspark.SparkSession,
+    df: Union[pd.DataFrame, pyspark.DataFrame],
+    schema: Optional[pyspark.types.StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1351,7 +1265,7 @@ def build_spark_engine(
         df = spark.createDataFrame(data=data, schema=schema)
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
         batch_data_dict={
@@ -1603,10 +1517,9 @@ def build_test_backends_list(  # noqa: C901 - 48
         test_backends += ["pandas"]
 
     if include_spark:
-        try:
-            import pyspark  # noqa: F401
-            from pyspark.sql import SparkSession  # noqa: F401
-        except ImportError:
+        from great_expectations.compatibility import pyspark
+
+        if not pyspark.SparkSession:  # type: ignore[truthy-function]
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
@@ -1620,7 +1533,6 @@ def build_test_backends_list(  # noqa: C901 - 48
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
-
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
@@ -1663,7 +1575,7 @@ def build_test_backends_list(  # noqa: C901 - 48
 
         if include_mysql:
             try:
-                engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, SQLAlchemyError):
@@ -1683,7 +1595,7 @@ def build_test_backends_list(  # noqa: C901 - 48
         if include_mssql:
             # noinspection PyUnresolvedReferences
             try:
-                engine = create_engine(
+                engine = sa.create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
@@ -2148,9 +2060,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     )
                     continue
 
-            except Exception:
-                continue
-
             for test in d["tests"]:
                 if not should_we_generate_this_test(
                     backend=c,
@@ -2193,7 +2102,6 @@ def should_we_generate_this_test(
     extra_debug_info: str = "",
     debug_logger: Optional[logging.Logger] = None,
 ):
-
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
@@ -2479,7 +2387,6 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
 def check_json_test_result(  # noqa: C901 - 52
     test, result, data_asset=None, pk_column=False
 ) -> None:
-
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
     if pk_column:
@@ -2822,8 +2729,8 @@ def _check_if_valid_dataset_name(dataset_name: str) -> str:
     return dataset_name
 
 
-def _create_bigquery_engine() -> Engine:
-    return create_engine(_get_bigquery_connection_string())
+def _create_bigquery_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_bigquery_connection_string())
 
 
 def _get_bigquery_connection_string() -> str:
@@ -2847,20 +2754,19 @@ def _bigquery_dataset() -> str:
 
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
-) -> Engine:
-    engine = create_engine(
+) -> sqlalchemy.Engine:
+    engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
-    from sqlalchemy import text  # noqa: TID251
     from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {repr(schema_name)}")
             ).fetchall()
             if (schema_name,) not in schemas:
-                conn.execute(text(f"create schema {schema_name}"))
+                conn.execute(sa.text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
 
@@ -2900,8 +2806,8 @@ def _get_trino_connection_string(
     return f"trino://test@{hostname}:8088/memory/{schema_name}"
 
 
-def _create_redshift_engine() -> Engine:
-    return create_engine(_get_redshift_connection_string())
+def _create_redshift_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_redshift_connection_string())
 
 
 def _get_redshift_connection_string() -> str:
@@ -2945,8 +2851,12 @@ def _get_redshift_connection_string() -> str:
     return url
 
 
-def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
-    return create_engine(_get_athena_connection_string(db_name_env_var=db_name_env_var))
+def _create_athena_engine(
+    db_name_env_var: str = "ATHENA_DB_NAME",
+) -> sqlalchemy.Engine:
+    return sa.create_engine(
+        _get_athena_connection_string(db_name_env_var=db_name_env_var)
+    )
 
 
 def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
@@ -2972,8 +2882,8 @@ def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> st
     return url
 
 
-def _create_snowflake_engine() -> Engine:
-    return create_engine(_get_snowflake_connection_string())
+def _create_snowflake_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_snowflake_connection_string())
 
 
 def _get_snowflake_connection_string() -> str:

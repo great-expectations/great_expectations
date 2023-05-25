@@ -167,7 +167,6 @@ class SphinxInvokeDocsBuilder:
         for html_file_path in self._get_generated_html_file_paths():
             logger.debug(f"Processing: {str(html_file_path.absolute())}")
             with open(html_file_path.absolute()) as f:
-
                 html_file_contents = f.read()
                 doc_str = self._parse_and_process_html_to_mdx(
                     html_file_path, html_file_contents
@@ -424,7 +423,6 @@ class SphinxInvokeDocsBuilder:
         definitions = get_public_api_module_level_function_definitions()
 
         for definition in definitions:
-
             self.definitions[definition.name] = definition
 
             sidebar_entry = SidebarEntry(

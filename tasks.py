@@ -14,10 +14,10 @@ import json
 import os
 import pathlib
 import shutil
-from typing import TYPE_CHECKING, Union
+import sys
+from typing import TYPE_CHECKING, Final, Union
 
 import invoke
-from typing_extensions import Final
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -131,7 +131,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
@@ -219,6 +222,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " stub files in `great_expectations`."
         " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
         " This should be run in CI in addition to the normal type-checking step.",
+        "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
 def type_check(
@@ -232,6 +236,7 @@ def type_check(
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -251,6 +256,7 @@ def type_check(
             report=report,
             check_stub_sources=check_stub_sources,
             ci=False,
+            python_version=python_version,
         )
         return  # don't run twice
 
@@ -293,6 +299,8 @@ def type_check(
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if python_version:
+        cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -504,6 +512,7 @@ def type_schema(
 
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
+        BatchRequest,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -525,10 +534,13 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in [
+    name_model = [
+        ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
-    ]:
+    ]
+
+    for name, model in name_model:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
@@ -583,8 +595,8 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
 
 
 @invoke.task
-def docs(ctx):
-    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+def api_docs(ctx: Context):
+    """Build api documentation."""
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -600,8 +612,75 @@ def docs(ctx):
     doc_builder.build_docs()
 
 
-@invoke.task(name="public-api")
-def public_api_task(ctx):
+@invoke.task(
+    name="docs",
+    help={
+        "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
+        "clean": "Remove directories and files from versioned docs and code. Default False.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "lint": "Run the linter",
+    },
+)
+def docs(
+    ctx: Context,
+    build: bool = False,
+    clean: bool = False,
+    start: bool = False,
+    lint: bool = False,
+):
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+
+    print("Running invoke docs from:", repo_root)
+    old_pwd = pathlib.Path.cwd()
+    docusaurus_dir = repo_root / "docs/docusaurus"
+    os.chdir(docusaurus_dir)
+    if clean:
+        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
+        ctx.run(" ".join(rm_cmds), echo=True)
+        rm_rf_cmds = [
+            "rm",
+            "-rf",
+            "versioned_code",
+            "versioned_docs",
+            "versioned_sidebars",
+        ]
+        ctx.run(" ".join(rm_rf_cmds), echo=True)
+    elif lint:
+        ctx.run(" ".join(["yarn lint"]), echo=True)
+    else:
+        if start:
+            ctx.run(" ".join(["yarn start"]), echo=True)
+        else:
+            print("Making sure docusaurus dependencies are installed.")
+            ctx.run(" ".join(["yarn install"]), echo=True)
+
+            if build:
+                build_docs_cmd = "../build_docs"
+            else:
+                build_docs_cmd = "../build_docs_locally.sh"
+
+            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
+            ctx.run(build_docs_cmd, echo=True)
+
+    os.chdir(old_pwd)
+
+
+@invoke.task(
+    name="public-api",
+    help={
+        "write_to_file": "Write items to be addressed to public_api_report.txt, default False",
+    },
+)
+def public_api_task(
+    ctx: Context,
+    write_to_file: bool = False,
+):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -610,7 +689,11 @@ def public_api_task(ctx):
         task_name="public-api", correct_dir=repo_root
     )
 
-    public_api_report.main()
+    # Docs folder is not reachable from install of Great Expectations
+    api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
+    sys.path.append(str(api_docs_dir.resolve()))
+
+    public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
 
 def _exit_with_error_if_not_run_from_correct_dir(
@@ -626,3 +709,24 @@ def _exit_with_error_if_not_run_from_correct_dir(
             exit_message,
             code=1,
         )
+
+
+@invoke.task(
+    aliases=("links",),
+    help={"skip_external": "Skip external link checks (is slow), default is True"},
+)
+def link_checker(ctx: Context, skip_external: bool = True):
+    """Checks the Docusaurus docs for broken links"""
+    import docs.checks.docs_link_checker as checker
+
+    path: str = "docs/docusaurus/docs"
+    docs_root: str = "docs/docusaurus/docs"
+    site_prefix: str = "docs"
+
+    code, message = checker.scan_docs(
+        path=path,
+        docs_root=docs_root,
+        site_prefix=site_prefix,
+        skip_external=skip_external,
+    )
+    raise invoke.Exit(message, code)

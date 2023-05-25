@@ -36,7 +36,6 @@ def is_not_a_future_date(date_in: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesNotToBeFutureDate(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_date"
 

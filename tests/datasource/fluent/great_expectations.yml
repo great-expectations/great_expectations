@@ -27,8 +27,21 @@ fluent_datasources:
         order_by:
           - year
           - -month
-  sqlite_taxi:
+  sql_taxi:
     type: sql
+    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+            column_name: pickup_datetime
+            method_name: split_on_year_and_month
+        order_by:
+            - key: year
+            - key: month
+  sqlite_taxi:
+    type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
     assets:
       my_asset:
@@ -58,6 +71,8 @@ fluent_datasources:
   my_pandas_s3_ds:
     type: pandas_s3
     bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -72,6 +87,8 @@ fluent_datasources:
   my_pandas_gcs_ds:
     type: pandas_gcs
     bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -85,6 +102,8 @@ fluent_datasources:
         delimiter: ","
   my_pandas_abs_ds:
     type: pandas_abs
+    azure_options:
+      account_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -104,7 +123,7 @@ fluent_datasources:
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
-        InferSchema: True
+        inferSchema: True
         connect_options:
           glob_directive: "**/*.csv"
       my_csv_asset_with_default_connect_options:
@@ -113,6 +132,8 @@ fluent_datasources:
   my_spark_s3_ds:
     type: spark_s3
     bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -125,6 +146,8 @@ fluent_datasources:
   my_spark_gcs_ds:
     type: spark_gcs
     bucket_or_name: "test_bucket"
+    gcs_options:
+      filename: "${MY_FILE}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -136,6 +159,8 @@ fluent_datasources:
         type: csv
   my_spark_abs_ds:
     type: spark_abs
+    azure_options:
+      account_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv

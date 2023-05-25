@@ -22,9 +22,9 @@ from great_expectations.datasource.fluent.sources import (
 PANDAS_VERSION: str = pandas.__version__
 
 
-def _models_and_schema_dirs() -> Generator[
-    tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None
-]:
+def _models_and_schema_dirs() -> (
+    Generator[tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None]
+):
     datasource: Type[Datasource] = Datasource
     ds_type_name: str = ""
 
@@ -119,6 +119,7 @@ def test_no_orphaned_schemas():
 
     # NOTE: this is a very low fidelity check
     all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
+    all_schemas.add("BatchRequest")
     all_schemas.add(Datasource.__name__)
 
     orphans: list[pathlib.Path] = []

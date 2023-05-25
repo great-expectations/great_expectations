@@ -150,9 +150,9 @@ def test_spark_happy_path_onboarding_data_assistant(
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Spark.ipynb`
 
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -426,7 +426,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
         add_dataframe_to_db(
             df=df,
             name=table_name,
-            con=postgresql_engine,
+            con=conn,
             schema="public",
             index=False,
             dtype={

@@ -4,33 +4,34 @@ title: How to configure a Validation Result Store in Azure Blob Storage
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx'
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system. This guide will help you configure a new storage location for Validation Results in Azure Blob Storage.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results might include sensitive or regulated data that should not be committed to a source control system. Use the information provided here to configure a new storage location for Validation Results in Azure Blob Storage.
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [Configured a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
-- [Configured an Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
-- Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
-- Identify the prefix (folder) where Validation Results will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage) and get the [connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
+- An Azure Blob container. If you want to [host and share Data Docs on Azure Blob Storage](../../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), you can set this up first and then use the ``$web`` existing container to store your <TechnicalTag tag="expectation" text="Expectations" />.
+- A prefix (folder) to store Validation Results. You don't need to create the folder, the prefix is just part of the Blob name.
 
 </Prerequisites>
 
-## Steps
+## 1. Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
-### 1. Configure the ``config_variables.yml`` file with your Azure Storage credentials
-
-We recommend that Azure Storage credentials be stored in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials.md).
+GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``: 
 
 ```yaml
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
 
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
 
-### 2. Identify your Validation Results Store
+## 2. Identify your Validation Results Store
 
-As with all <TechnicalTag tag="store" text="Stores" />, you can find the configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> through your <TechnicalTag tag="data_context" text="Data Context" />.  In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+Your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry: 
 
 ```yaml
 validations_store_name: validations_store
@@ -42,11 +43,11 @@ stores:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
 ```
+This configuration tells Great Expectations to look for Validation Results in a Store named ``validations_store``. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
+## 3. Update your configuration file to include a new Store for Validation Results on Azure Storage account
 
-### 3. Update your configuration file to include a new Store for Validation Results on Azure Storage account
-
-In our case, the name is set to ``validations_AZ_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleAzureBlobStoreBackend``,  ``container`` will be set to the name of your blob container (the equivalent of S3 bucket for Azure) you wish to store your Validation Results, ``prefix`` will be set to the folder in the container where Validation Result files will be located, and ``connection_string`` will be set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
+In the following example, `validations_store_name` is set to ``validations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Validation Results are stored, ``prefix`` is the folder in the container where Validation Result files are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}``to reference the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml
 validations_store_name: validations_AZ_store
@@ -62,18 +63,14 @@ stores:
 ```
 
 :::note
-If the container is called ``$web`` (for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-:::note
-Various authentication and configuration options are available as documented in [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
-:::
+Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
 
+## 4. Copy existing Validation Results JSON files to the Azure blob (Optional)
 
-
-### 4. Copy existing Validation Results JSON files to the Azure blob (This step is optional)
-
-One way to copy Validation Results into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Validation Result from a local folder to the Azure blob.   Information on other ways to copy Validation Result JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).
+You can use the ``az storage blob upload`` command to copy Validation Results into Azure Blob Storage. The following command copies one Validation Result from a local folder to the Azure blob: 
 
 ```bash
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -86,31 +83,13 @@ Finished[#############################################################]  100.000
 "lastModified": "2021-03-06T12:58:28+00:00"
 }
 ```
+To learn more about other methods that are available to copy Validation Result JSON files into Azure Blob Storage, see [Quickstart: Upload, download, and list blobs with the Azure portal](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal).
 
-### 5. Confirm that the new Validation Results Store has been added by running ``great_expectations store list``
+## 5. Reference the new configuration
 
-Notice the output contains two Validation stores: the original ``validations_store`` on the local filesystem and the ``validations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in Azure Blob as long as we set the ``validations_store_name`` variable to ``validations_AZ_store``, and the config for ``validations_store`` can be removed if you would like.
+To make Great Expectations look for Validation Results on the Azure store, set the ``validations_store_name`` variable to the name of your Azure Validations Store. In the previous example this was `validations_AZ_store`.
 
-```bash
-great_expectations store list
+## 6. Confirm that the Validation Results Store has been correctly configured
 
-- name: validations_store
- class_name: ValidationsStore
- store_backend:
-   class_name: TupleFilesystemStoreBackend
-   base_directory: uncommitted/validations/
-
-- name: validations_AZ_store
- class_name: ValidationsStore
- store_backend:
-   class_name: TupleAzureBlobStoreBackend
-   connection_string: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
-   container: <blob-container>
-   prefix: validations
-```
-
-
-### 6. Confirm that the Validation Results Store has been correctly configured
-
-[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint) to store results in the new Validation Results Store on Azure Blob and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 

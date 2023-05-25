@@ -13,6 +13,11 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Engine
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -32,26 +37,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
-
-from great_expectations.optional_imports import sqlalchemy_Connection
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
-
-
-logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
+
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 
 # Taken from the following stackoverflow:
@@ -78,12 +66,22 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
             assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(v1, v2, __trace=repr(index), *args, **kwargs)
+                assertDeepAlmostEqual(
+                    v1,
+                    v2,
+                    __trace=repr(index),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
+                )
         elif isinstance(expected, dict):
             assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(
-                    expected[key], actual[key], __trace=repr(key), *args, **kwargs
+                    expected[key],
+                    actual[key],
+                    __trace=repr(key),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
                 )
         else:
             assert expected == actual
@@ -154,34 +152,26 @@ def validate_uuid4(uuid_string: str) -> bool:
     return val.hex == uuid_string.replace("-", "")
 
 
-def get_sqlite_temp_table_names(execution_engine):
-
+def get_sqlite_temp_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
-        connection = execution_engine.engine
-        result = connection.execute(statement)
-    else:
-        with execution_engine.engine.connect() as connection:
-            result = connection.execute(statement)
-
-    rows = result.fetchall()
+    rows = execution_engine.execute_query(statement).fetchall()
     return {row[0] for row in rows}
 
 
-def get_sqlite_table_names(execution_engine):
-
+def get_sqlite_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
-        connection = execution_engine.engine
-        result = connection.execute(statement)
-    else:
-        with execution_engine.engine.connect() as connection:
-            result = connection.execute(statement)
+    rows = execution_engine.execute_query(statement).fetchall()
 
-    rows = result.fetchall()
+    return {row[0] for row in rows}
 
+
+def get_sqlite_temp_table_names_from_engine(engine: Engine):
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    with engine.connect() as connection:
+        rows = connection.execute(statement).fetchall()
     return {row[0] for row in rows}
 
 
@@ -819,10 +809,9 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+        execution_engine.execute_query(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
@@ -974,7 +963,6 @@ def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str
 def get_connection_string_and_dialect(
     athena_db_name_env_var: str = "ATHENA_DB_NAME",
 ) -> Tuple[str, str]:
-
     with open("./connection_string.yml") as f:
         db_config: dict = yaml_handler.load(f)
 

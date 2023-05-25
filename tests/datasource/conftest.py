@@ -6,6 +6,7 @@ from itertools import product
 import pytest
 from moto import mock_glue
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
     Datasource,
@@ -73,9 +74,12 @@ def glue_titanic_catalog():
             "AWS Glue Data Catalog Data Connector tests are requested, but boto3 is not installed"
         )
 
+    os.environ[
+        "AWS_DEFAULT_REGION"
+    ] = "testing"  # required when connecting to the glue client, even when mocked
+
     with mock_glue():
-        region_name: str = "us-east-1"
-        client = boto3.client("glue", region_name=region_name)
+        client = boto3.client("glue")
         database_name = "db_test"
 
         # Create Database
@@ -156,7 +160,8 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
     engine: sa.engine.Engine = sa.create_engine(
-        test_cases_for_sql_data_connector_sqlite_connection_url
+        test_cases_for_sql_data_connector_sqlite_connection_url,
+        poolclass=sqlalchemy.StaticPool,
     )
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))

@@ -28,6 +28,8 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
+    from great_expectations.data_context import FileDataContext
+
 
 logger = logging.getLogger(__file__)
 
@@ -42,7 +44,7 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_dbfs_datasource(
-    empty_data_context, fs: FakeFilesystem
+    empty_data_context: FileDataContext, fs: FakeFilesystem
 ) -> PandasDBFSDatasource:
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
@@ -56,6 +58,8 @@ def pandas_dbfs_datasource(
 
     base_directory: str = "/dbfs/great_expectations"
     fs.create_dir(base_directory)
+
+    fs.create_dir(empty_data_context.root_directory)
 
     create_files_in_directory(
         directory=base_directory,
@@ -89,25 +93,6 @@ def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsse
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
-
-
-# TODO: <Alex>ALEX</Alex>
-def bad_batching_regex_config(
-    csv_path: pathlib.Path,
-) -> tuple[re.Pattern, TestConnectionError]:
-    batching_regex = re.compile(
-        r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    )
-    test_connection_error = TestConnectionError(
-        "No file at base_directory path "
-        f'"{csv_path.resolve()}" matched regular expressions pattern '
-        f'"{batching_regex.pattern}" and/or glob_directive "**/*" for '
-        'DataAsset "csv_asset".'
-    )
-    return batching_regex, test_connection_error
-
-
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -204,7 +189,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_dbfs_datasource
-    pandas_dbfs_datasource.assets = {"csv_asset": csv_asset}
+    pandas_dbfs_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = DBFSDataConnector(
         datasource_name=pandas_dbfs_datasource.name,
         data_asset_name=csv_asset.name,

@@ -11,6 +11,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -21,15 +22,6 @@ from great_expectations.dataset.util import (
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sqlalchemy.sql import quoted_name  # noqa: TID251
-
-except:
-    logger.debug(
-        "Unable to load quoted name from SqlAlchemy; install optional sqlalchemy dependency for support"
-    )
-    quoted_name = None
 
 
 class MetaDataset(DataAsset):
@@ -124,9 +116,9 @@ class MetaDataset(DataAsset):
                 if (
                     hasattr(self, "engine")
                     and self.batch_kwargs.get("use_quoted_name")
-                    and quoted_name
+                    and sqlalchemy.quoted_name
                 ):
-                    column = quoted_name(column, quote=True)
+                    column = sqlalchemy.quoted_name(column, quote=True)
 
                 nonnull_count = self.get_column_nonnull_count(
                     kwargs.get("column", column)
@@ -204,7 +196,6 @@ class MetaDataset(DataAsset):
 
 # noinspection PyIncorrectDocstring
 class Dataset(MetaDataset):
-
     # This should in general only be changed when a subclass *adds expectations* or *changes expectation semantics*
     # That way, multiple backends can implement the same data_asset_type
     _data_asset_type = "Dataset"
@@ -244,7 +235,8 @@ class Dataset(MetaDataset):
     @classmethod
     def from_dataset(cls, dataset=None):
         """This base implementation naively passes arguments on to the real constructor, which
-        is suitable really when a constructor knows to take its own type. In general, this should be overridden"""
+        is suitable really when a constructor knows to take its own type. In general, this should be overridden
+        """
         return cls(dataset)
 
     def get_row_count(self) -> None:
@@ -416,8 +408,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_map_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
@@ -438,8 +430,8 @@ class Dataset(MetaDataset):
 
         Args:
             function (func): The function to be tested. (Must be a valid column_aggregate_expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             An ExpectationSuiteValidationResult
@@ -3515,7 +3507,6 @@ class Dataset(MetaDataset):
         if column_min is None:
             success = False
         else:
-
             if min_value is not None:
                 if isinstance(column_min, datetime):
                     try:
@@ -4228,7 +4219,6 @@ class Dataset(MetaDataset):
                 observed_weights = observed_weights[1:-1]
 
             elif partition_object["bins"][0] == -np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -4264,7 +4254,6 @@ class Dataset(MetaDataset):
                 observed_weights = observed_weights[1:]
 
             elif partition_object["bins"][-1] == np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"

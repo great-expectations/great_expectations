@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import datetime
 import os
 from typing import List
@@ -410,8 +411,8 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
 
 def ten_trips_per_month_df() -> pd.DataFrame:
     csv_path: str = file_relative_path(
-        os.path.dirname(os.path.dirname(__file__)),
-        os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "ten_trips_from_each_month",
@@ -561,7 +562,7 @@ def test_sqlite_split(
         batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
         # Right number of rows?
-        num_rows: int = batch_data.execution_engine.engine.execute(
+        num_rows: int = batch_data.execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         # noinspection PyUnresolvedReferences
@@ -591,14 +592,14 @@ def test_sqlite_split_on_year(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()
@@ -637,14 +638,14 @@ def test_sqlite_split_and_sample_using_limit(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()

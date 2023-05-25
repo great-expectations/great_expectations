@@ -78,9 +78,11 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         title,
         exact_match_out,
         out,
-        suppress_test_for=[],
+        suppress_test_for=None,
         **kwargs,
     ) -> None:
+        if not suppress_test_for:
+            suppress_test_for = []
         super().__init__(
             title=title,
             input=kwargs["in"],

@@ -239,21 +239,17 @@ def test_errors_warnings_validation_operator_failed_vo_result(
 
     # make sure there is at least one failed validation with a "failure-level" suite
     assert any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # no failed warning suites
     assert not any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert not return_obj.success
 
@@ -267,21 +263,17 @@ def test_errors_warnings_validation_operator_failed_vo_result(
 
     # make sure there is at least one failed validation with a "failure-level" suite
     assert any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # with at least one failed warning suite
     assert any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert not return_obj_2.success
 
@@ -310,21 +302,17 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
 
     # make sure there are no failed validations with suite severity of failure
     assert not any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # make sure there is at least one failed validation with suite severity of warning
     assert any(
-        [
-            run_result
-            for run_result in run_results
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert return_obj.success
 
@@ -338,21 +326,17 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
 
     # make sure there are no failed validations with suite severity of failure
     assert not any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "failure"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "failure"
+        and not run_result["validation_result"].success
     )
     # make sure there are no failed validation with suite severity of warning
     assert not any(
-        [
-            run_result
-            for run_result in run_results_2
-            if run_result["expectation_suite_severity_level"] == "warning"
-            and not run_result["validation_result"].success
-        ]
+        run_result
+        for run_result in run_results_2
+        if run_result["expectation_suite_severity_level"] == "warning"
+        and not run_result["validation_result"].success
     )
     assert return_obj_2.success
 

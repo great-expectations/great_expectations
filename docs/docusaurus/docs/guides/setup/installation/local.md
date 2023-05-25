@@ -1,5 +1,5 @@
 ---
-title: How to install Great Expectations locally
+title: Install Great Expectations locally
 ---
 
 import Preface from './components_local/_preface.mdx'

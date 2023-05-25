@@ -7,6 +7,8 @@ from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_LIST_WARNING
+from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
@@ -75,7 +77,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = """1 Datasource found:
+    expected_output = """1 block config Datasource found:
 
  - name: my_datasource
    class_name: Datasource
@@ -130,7 +132,7 @@ def test_cli_datasource_new(
     result = runner.invoke(
         cli,
         "datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -245,7 +247,7 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
     result = runner.invoke(
         cli,
         "datasource new --no-jupyter",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -310,7 +312,7 @@ def test_cli_datasource_new_with_name_param(
     result = runner.invoke(
         cli,
         "datasource new --name foo",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -394,7 +396,7 @@ def test_cli_datasource_new_from_misc_directory(
     result = runner.invoke(
         cli,
         f"--config {root_dir} datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -509,6 +511,62 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
     context = get_context(context_root_dir=root_directory)
     assert len(context.list_datasources()) == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_list_fluent_datasource_warning(
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    """
+    What does this test and why?
+    The CLI does not support fluent datasources. This test ensures that if a fluent datasource is detected, a warning is printed.
+    It also ensures that the correct number of block style datasources is listed.
+    """
+
+    context = data_context_with_fluent_datasource_and_block_datasource  # 1 fluent datasource, 1 block datasource
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        f"datasource list",
+        input="Y\n",
+        catch_exceptions=False,
+    )
+    stdout = result.output
+
+    assert result.exit_code == 0
+    assert FLUENT_DATASOURCE_LIST_WARNING in stdout
+    assert "1 block config Datasource found" in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_cli_prevent_fluent_datasource_delete(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource,
+):
+    context = data_context_with_fluent_datasource
+    test_datasource_name = "my_pandas_datasource"
+    assert test_datasource_name in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        f"datasource delete {test_datasource_name}",
+        input="Y\n",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 1
+    assert FLUENT_DATASOURCE_DELETE_ERROR in stdout
 
 
 @mock.patch(

@@ -159,10 +159,8 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
     def manual_steps_required(self) -> bool:
         return any(
-            [
-                len(manual_upgrade_item.keys()) > 0
-                for manual_upgrade_item in self.upgrade_checklist["manual"].values()
-            ]
+            len(manual_upgrade_item.keys()) > 0
+            for manual_upgrade_item in self.upgrade_checklist["manual"].values()
         )
 
     def get_upgrade_overview(self) -> Tuple[str, bool]:

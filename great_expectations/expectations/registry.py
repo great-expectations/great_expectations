@@ -169,6 +169,32 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     _registered_expectations[expectation_type] = expectation
 
 
+def register_core_expectations() -> None:
+    """As Expectation registration is the responsibility of MetaExpectation.__new__,
+    simply importing a given class will ensure that it is added to the Expectation
+    registry.
+
+    We use this JIT in the Validator to ensure that core Expectations are available
+    for usage when called upon.
+
+    Without this function, we need to hope that core Expectations are imported somewhere
+    in our import graph - if not, our registry will be empty and Validator workflows
+    will fail.
+    """
+    before_count = len(_registered_expectations)
+
+    # Implicitly calls MetaExpectation.__new__ as Expectations are loaded from core.__init__.py
+    # As __new__ calls upon register_expectation, this import builds our core registry
+    from great_expectations.expectations import core  # noqa: F401
+
+    after_count = len(_registered_expectations)
+
+    if before_count == after_count:
+        logger.debug("Already registered core expectations; no updates to registry")
+    else:
+        logger.debug(f"Registered {after_count-before_count} core expectations")
+
+
 def _add_response_key(res, key, value):
     if key in res:
         res[key].append(value)
@@ -363,6 +389,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+        "expect_yesterday_count_compared_to_avg_equivalent_days_of_week": "expect_day_count_to_be_close_to_equivalent_week_day_mean",
     }
     if expectation_name in renamed:
         # deprecated-v0.14.12

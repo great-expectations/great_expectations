@@ -1,6 +1,6 @@
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, Dict, Final, List, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,
@@ -13,7 +13,6 @@ from pyparsing import (
     alphas,
     nums,
 )
-from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001

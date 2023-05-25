@@ -3,6 +3,8 @@ from typing import Callable, Dict, Optional
 
 import numpy as np
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -23,7 +25,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -73,8 +74,10 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             0
         ]
 
-        if isinstance(column_metadata["type"], (sparktypes.StringType)):
-            column = F.col(column_name).cast(sparktypes.IntegerType())
+        if pyspark.types and isinstance(
+            column_metadata["type"], pyspark.types.StringType
+        ):
+            column = F.col(column_name).cast(pyspark.types.IntegerType())
         else:
             raise TypeError(
                 "Column must be a string-type capable of being cast to int."
@@ -95,7 +98,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
                 "Column must be a string-type capable of being cast to int."
             )
 
-        diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
+        diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
 
         if metric_value_kwargs["strictly"] is True:
@@ -226,7 +229,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ValidationDependencies:
-
         dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
@@ -256,7 +258,6 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation)
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> ExpectationValidationResult:
-
         string_integers_increasing = metrics.get(
             f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         )

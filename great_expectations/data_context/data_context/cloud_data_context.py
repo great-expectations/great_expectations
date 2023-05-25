@@ -13,9 +13,8 @@ from typing import (
     Tuple,
     Union,
     cast,
+    overload,
 )
-
-import requests
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
@@ -25,7 +24,9 @@ from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -45,21 +46,37 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        ConfigurationIdentifier,
+        ExpectationSuiteIdentifier,
+    )
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
+    from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
 
 
 @public_api
@@ -102,6 +119,7 @@ class CloudDataContext(SerializableDataContext):
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
+        self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -116,6 +134,10 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    def _check_if_latest_version(self) -> None:
+        checker = _VersionChecker(__version__)
+        checker.check_if_using_latest_gx()
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -235,18 +257,16 @@ class CloudDataContext(SerializableDataContext):
         cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
 
-        response = requests.get(cloud_url, headers=headers)
+        session = create_session(access_token=cloud_config.access_token)
+
+        response = session.get(cloud_url)
         if response.status_code != 200:
             raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
+                f"Bad request made to GX Cloud; {response.text}", response=response
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
@@ -402,7 +422,7 @@ class CloudDataContext(SerializableDataContext):
         Lists the available expectation suite names. If in ge_cloud_mode, a list of
         GX Cloud ids is returned instead.
         """
-        return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
+        return [suite_key.resource_name for suite_key in self.list_expectation_suites() if suite_key.resource_name]  # type: ignore[union-attr]
 
     @property
     def ge_cloud_config(self) -> Optional[GXCloudConfig]:
@@ -469,7 +489,7 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -488,7 +508,7 @@ class CloudDataContext(SerializableDataContext):
             DeprecationWarning,
         )
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+            raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
@@ -517,6 +537,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=cloud_id,
+            resource_name=expectation_suite_name,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
@@ -524,6 +545,33 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: str = ...,
+        ge_cloud_id: None = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: str = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: None = ...,
+        id: str = ...,
+    ) -> bool:
+        ...
 
     def delete_expectation_suite(
         self,
@@ -546,6 +594,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
+            resource_name=expectation_suite_name,
         )
 
         return self.expectations_store.remove_key(key)
@@ -752,6 +801,22 @@ class CloudDataContext(SerializableDataContext):
         )
         return site_builder
 
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.update_expectation_suite()`.
+
+        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
+        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
+        """
+        return GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            id=id,
+            resource_name=name,
+        )
+
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
@@ -802,3 +867,25 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        # 042723 kilo59
+        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
+        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
+        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
+        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
+        # the different requirements for FDS vs BDS.
+        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
+        if _fds_datasource:
+            self._datasource_store.set(key=None, value=_fds_datasource)
+        else:
+            logger.debug(
+                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
+            )

@@ -2,6 +2,8 @@ from typing import Optional
 
 import pandas as pd
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
@@ -9,7 +11,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -20,7 +21,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
-
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 
     condition_domain_keys = (
@@ -75,7 +75,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
             return bool(in_bounds)
 
         check_if_value_is_in_model_forecast_bounds_udf = F.udf(
-            check_if_value_is_in_model_forecast_bounds, sparktypes.BooleanType()
+            check_if_value_is_in_model_forecast_bounds, pyspark.types.BooleanType()
         )
 
         result = check_if_value_is_in_model_forecast_bounds_udf(

@@ -18,10 +18,9 @@ if TYPE_CHECKING:
         SqlAlchemyExecutionEngine,
     )
 
-    # from great_expectations.expectations.metrics.import_manager import quoted_name
-
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
@@ -30,7 +29,7 @@ from great_expectations.expectations.metrics.util import (
 )
 
 if TYPE_CHECKING:
-    import pyspark
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +58,7 @@ def _pandas_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -126,7 +125,7 @@ def _pandas_column_map_series_and_domain_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -181,7 +180,7 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics.get("unexpected_condition")
     df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -257,7 +256,7 @@ def _sqlalchemy_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -285,7 +284,7 @@ def _sqlalchemy_column_map_condition_values(
 
     return [
         val.unexpected_values
-        for val in execution_engine.engine.execute(query).fetchall()
+        for val in execution_engine.execute_query(query).fetchall()
     ]
 
 
@@ -315,7 +314,7 @@ def _sqlalchemy_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -332,7 +331,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
-    return execution_engine.engine.execute(query).fetchall()
+    return execution_engine.execute_query(query).fetchall()
 
 
 def _spark_column_map_condition_values(
@@ -356,7 +355,7 @@ def _spark_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -403,13 +402,13 @@ def _spark_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
     )
 
-    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
+    df: pyspark.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
 
