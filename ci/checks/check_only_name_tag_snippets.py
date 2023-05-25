@@ -47,7 +47,7 @@ ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
     "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.md",
     "docs/docusaurus/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx",
 }
-FLUENT_DATASOURCES_FILENAME_PATTERN = re.compile(r"fluent", re.IGNORECASE)
+EXCLUDED_FILENAMES_PATTERN = re.compile(r"fluent|node_modules", re.IGNORECASE)
 
 
 def check_dependencies(*deps: str) -> None:
@@ -105,7 +105,7 @@ def main() -> None:
     grep_output = run_grep(docs_dir)
     grep_output = list(
         filter(
-            lambda filename: FLUENT_DATASOURCES_FILENAME_PATTERN.match(filename),
+            lambda filename: EXCLUDED_FILENAMES_PATTERN.match(filename),
             grep_output,
         )
     )

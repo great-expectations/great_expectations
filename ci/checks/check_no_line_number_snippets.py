@@ -3,19 +3,17 @@ Purpose: To ensure that no docs snippets use the file and line number convention
 only the named snippets convention.
 """
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
 from typing import List
 
 ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
-    "docs/docusaurus/node_modules/prism-react-renderer/README.md",
     "docs/prepare_to_build_docs.sh",
-    "docs/docusaurus/node_modules/remark-code-import/index.js",
-    "docs/docusaurus/node_modules/remark-code-import/README.md",
     "docs/prepare_prior_versions.py",
-    "docs/docusaurus/node_modules/open/xdg-open",
 }
+EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 
 
 def check_dependencies(*deps: str) -> None:
@@ -26,7 +24,7 @@ def check_dependencies(*deps: str) -> None:
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_positive = subprocess.run(
+        res = subprocess.run(
             [
                 "grep",
                 "--recursive",
@@ -40,29 +38,11 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             text=True,
             capture_output=True,
         )
-        res_negative = subprocess.run(
-            [
-                "grep",
-                "--recursive",
-                "--files-with-matches",
-                "--ignore-case",
-                "--regexp",
-                r"node_modules",
-                str(target_dir),
-            ],
-            text=True,
-            capture_output=True,
-        )
-        res = list(
-            set(res_positive.stdout.splitlines()).difference(
-                set(res_negative.stdout.splitlines())
-            )
-        )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
-    return res
+    return res.stdout.splitlines()
 
 
 def main() -> None:
@@ -71,6 +51,12 @@ def main() -> None:
     docs_dir = project_root / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
+    grep_output = list(
+        filter(
+            lambda filename: EXCLUDED_FILENAMES_PATTERN.match(filename),
+            grep_output,
+        )
+    )
     excluded_documents = {
         project_root / file_path
         for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
