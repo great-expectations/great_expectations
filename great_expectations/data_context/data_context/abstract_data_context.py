@@ -1672,6 +1672,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasources.append(fluent_datasource_config.dict())
         return datasources
 
+    def list_datasource_names(self) -> list[str]:
+        return list(self.datasources.keys())
+
     @public_api
     @deprecated_argument(argument_name="save_changes", version="0.15.32")
     def delete_datasource(
