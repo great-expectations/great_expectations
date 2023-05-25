@@ -465,7 +465,10 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
-                    assert processed_column.get("type") in ("DATETIME", "STRING",), (
+                    assert processed_column.get("type") in (
+                        "DATETIME",
+                        "STRING",
+                    ), (
                         f"Column {column_name} must be a datetime column or a string but appears to be "
                         f"{processed_column.get('type')}"
                     )
