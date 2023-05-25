@@ -1055,15 +1055,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         execution_engine=execution_engine, table_name=table_name
     )
 
-    print(
-        "DEBUG =============================================================================="
-    )
-    print("execution_engine._connection", execution_engine._connection)
-    print("execution_engine.get_connection()", execution_engine.get_connection())
-    print(
-        "DEBUG =============================================================================="
-    )
-
     if context is None:
         context = build_in_memory_runtime_context()
 
