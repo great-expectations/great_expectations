@@ -3,6 +3,7 @@ import os
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.new_datasource import Datasource
+from tests.test_utils import load_data_into_test_database
 
 yaml = YAMLHandler()
 
@@ -25,98 +26,112 @@ os.environ[
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
-export POSTGRES_DRIVERNAME=postgresql
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
-export POSTGRES_USERNAME=postgres
-export POSTGRES_PW=
-export POSTGRES_DB=postgres
 export MY_DB_PW=password
+export POSTGRES_CONNECTION_STRING=postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
 # </snippet>
-"""
-
-# Override without snippet tag
-export_env_vars = """
-export POSTGRES_DRIVERNAME=postgresql
-export POSTGRES_HOST=localhost
-export POSTGRES_PORT=5432
-export POSTGRES_USERNAME=postgres
-export POSTGRES_PW=
-export POSTGRES_DB=postgres
-export MY_DB_PW=password
 """
 
 config_variables_file_path = """
-# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_file_path">
-config_variables_file_path: uncommitted/config_variables.yml
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables">
+my_postgres_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
 # </snippet>
 """
 
-datasources_yaml = """
-# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py datasources_yaml">
-fluent_datasources:
-    my_postgres_db:
-        type: postgres
-        connection_string: ${my_postgres_db_yaml_creds}
-        assets:
-            my_first_table_asset:
-                type: table
-                table_name: my_first_table
-    my_other_postgres_db:
-        type: postgres
-        connection_string: postgres+${POSTGRES_DRIVERNAME}://${POSTGRES_USERNAME}:${POSTGRES_PW}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-        assets:
-            my_second_table_asset:
-                type: table
-                table_name: my_second_table
-# </snippet>
-"""
+config_variables_yaml = (
+    """my_postgres_creds: postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"""
+)
 
+# add datsources now that variables are configured
+load_data_into_test_database(
+    table_name="postgres_taxi_data",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
+    connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
+)
 # NOTE: The following code is only for testing and can be ignored by users.
 env_vars = []
-try:
-    # set environment variables using export_env_vars
-    for line in export_env_vars.split("export"):
-        if line.strip() != "":
-            key, value = line.split("=")[0].strip(), line.split("=")[1].strip()
-            env_vars.append(key)
-            os.environ[key] = value
 
-    # get context and set config variables in config_variables.yml
-    context = gx.get_context()
-    context_config_variables_relative_file_path = os.path.join(
-        context.GX_UNCOMMITTED_DIR, "config_variables.yml"
-    )
-    assert (
-        yaml.load(config_variables_file_path)["config_variables_file_path"]
-        == context_config_variables_relative_file_path
-    )
-    context_config_variables_file_path = os.path.join(
-        context.root_directory, context_config_variables_relative_file_path
-    )
-    with open(context_config_variables_file_path, "w+") as f:
-        f.write(config_variables_yaml)
+# set environment variables using export_env_vars
+for line in export_env_vars.split("export"):
+    if line.strip() != "":
+        key, value = line.split("=")[0].strip(), line.split("=")[1].strip()
+        env_vars.append(key)
+        os.environ[key] = value
 
-    # add datsources now that variables are configured
-    datasources = yaml.load(datasources_yaml)
-    environ_connection_string = os.environ.get("my_postgres_db_yaml_creds")
-    if not environ_connection_string:
-        raise Exception
+# get context and set config variables in config_variables.yml
+context = gx.get_context()
+context_config_variables_relative_file_path = os.path.join(
+    context.GX_UNCOMMITTED_DIR, "config_variables.yml"
+)
+assert (
+    yaml.load(config_variables_file_path)["config_variables_file_path"]
+    == context_config_variables_relative_file_path
+)
+context_config_variables_file_path = os.path.join(
+    context.root_directory, context_config_variables_relative_file_path
+)
+with open(context_config_variables_file_path, "w+") as f:
+    f.write(config_variables_yaml)
 
-    context.sources.add_sql(
-        name="my_postgres_db", connection_string=environ_connection_string
-    )
-    assert context.list_datasources() == [
-        {
-            "type": "sql",
-            "name": "my_postgres_db",
-            "connection_string": "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
-        }
-    ]
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
+# Just the password can be added as an Environment Variable
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db",
+    connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
+)
 
-except Exception:
-    raise
-finally:
-    # unset environment variables if they were set
-    for var in env_vars:
-        os.environ.pop(var, None)
+# Or the full connection string can be added as an Environment Variable
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${POSTGRES_CONNECTION_STRING}"
+)
+# </snippet>
+
+pg_datasource.add_table_asset(
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
+)
+
+assert context.list_datasources() == [
+    {
+        "type": "sql",
+        "name": "my_postgres_db",
+        "assets": [
+            {
+                "name": "postgres_taxi_data",
+                "type": "table",
+                "order_by": [],
+                "batch_metadata": {},
+                "table_name": "postgres_taxi_data",
+                "schema_name": None,
+            }
+        ],
+        "connection_string": "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
+    }
+]
+
+
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml">
+pg_datasource = context.sources.add_or_update_sql(
+    name="my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
+)
+# </snippet>
+
+pg_datasource.add_table_asset(
+    name="postgres_taxi_data_2", table_name="postgres_taxi_data"
+)
+
+assert context.list_datasources() == [
+    {
+        "type": "sql",
+        "name": "my_postgres_db",
+        "assets": [
+            {
+                "name": "postgres_taxi_data",
+                "type": "table",
+                "order_by": [],
+                "batch_metadata": {},
+                "table_name": "postgres_taxi_data",
+                "schema_name": None,
+            }
+        ],
+        "connection_string": "${my_postgres_db_yaml_creds}",
+    }
+]
