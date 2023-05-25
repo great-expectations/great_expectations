@@ -93,7 +93,7 @@ Your output will look something similar to this:
 
 ### 5. Instantiate ExpectationConfiguration 
 
-From the Expectation Suite, you will be able to create an ExpecationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
+From the Expectation Suite, you will be able to create an ExpectationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
 
 It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects the min and max values to be `1` and `6` respectively. 
 

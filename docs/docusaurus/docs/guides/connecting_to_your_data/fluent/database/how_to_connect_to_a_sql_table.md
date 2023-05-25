@@ -72,16 +72,14 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python title="Python code"
-datasource = context.get_datasource("my_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py datasource
 ```
 
 ### 3. Add a table to the Datasource as a Data Asset
 
 We will indicate a table to connect to by defining a Data Asset.  This is as simple as providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `table_name` to specify the table we wish the Data Asset to connect to.
 
-```python title="Python code"
-table_asset = datasource.add_table_asset(name="my_asset", table_name="yellow_tripdata_sample")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py create_datasource
 ```
 
 ### 4. (Optional) Repeat step 3 as needed to add additional tables
