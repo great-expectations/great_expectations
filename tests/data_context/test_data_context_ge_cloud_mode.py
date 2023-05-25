@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+import responses
 
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -23,8 +24,10 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
             get_context(context_root_dir="/my/context/root/dir", cloud_mode=True)
 
 
+@responses.activate
+@pytest.mark.unit
 @pytest.mark.cloud
-@mock.patch("requests.get")
+@mock.patch("requests.Session.get")
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     mock_request,
     request_headers: dict,
@@ -55,8 +58,10 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     assert mock_request.call_args[1] == called_with_header
 
 
+@responses.activate
+@pytest.mark.unit
 @pytest.mark.cloud
-@mock.patch("requests.get")
+@mock.patch("requests.Session.get")
 def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_error(
     mock_request,
     ge_cloud_runtime_base_url,
@@ -75,6 +80,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
         )
 
 
+@responses.activate
 @pytest.mark.cloud
 @pytest.mark.unit
 @mock.patch("requests.get")
