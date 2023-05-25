@@ -2985,6 +2985,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 }
             },
         ],
+        action_list=[],
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -3011,7 +3012,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
             {
                 "name": "store_evaluation_params",
                 "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
+                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {
