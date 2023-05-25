@@ -135,7 +135,16 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
+# a single connection string
 my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
+
+# or each component of the connection string separately
+drivername: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|drivername
+host: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|host
+port: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|port
+username: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|username
+password: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|password
+database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|database
 ```
 
 </TabItem>
@@ -185,7 +194,10 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
+# a single connection string
 my_gcp_creds: secret|projects/${PROJECT_ID}/secrets/dev_db_credentials|connection_string
+
+# or each component of the connection string separately
 drivername: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DRIVERNAME
 host: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_HOST
 port: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PORT
@@ -243,7 +255,10 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
+# a single connection string
 my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
+
+# or each component of the connection string separately
 drivername: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
 host: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
 port: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|port

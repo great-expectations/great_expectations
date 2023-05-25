@@ -1,11 +1,15 @@
 import os
 
 import great_expectations as gx
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.datasource.new_datasource import Datasource
 from tests.test_utils import load_data_into_test_database
 
-yaml = YAMLHandler()
+
+"""
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
+export MY_DB_PW=password
+export POSTGRES_CONNECTION_STRING=postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
+# </snippet>
+"""
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
@@ -23,13 +27,6 @@ os.environ[
     "my_postgres_db_yaml_creds"
 ] = "postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres"
 
-
-"""
-# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
-export MY_DB_PW=password
-export POSTGRES_CONNECTION_STRING=postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres
-# </snippet>
-"""
 
 config_variables_file_path = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables">
