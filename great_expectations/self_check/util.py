@@ -1050,6 +1050,20 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
             )
 
+    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+
+    print(
+        "DEBUG =============================================================================="
+    )
+    print("execution_engine._connection", execution_engine._connection)
+    print("execution_engine.get_connection()", execution_engine.get_connection())
+    print(
+        "DEBUG =============================================================================="
+    )
+
     if context is None:
         context = build_in_memory_runtime_context()
 
