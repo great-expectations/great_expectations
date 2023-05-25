@@ -2724,6 +2724,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 }
             },
         ],
+        action_list=[],
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -3064,6 +3065,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
         ],
     )
 
+    breakpoint()
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
     filtered_expected_nested_checkpoint_config_template_only: dict = (
         deep_filter_properties_iterable(
