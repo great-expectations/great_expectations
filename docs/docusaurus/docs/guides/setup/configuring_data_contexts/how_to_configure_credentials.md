@@ -41,7 +41,6 @@ These can then be loaded into the `connection_string` parameter when we are addi
     {label: 'YAML', value:'yaml'},
     {label: 'Secret Manager', value: 'secret-manager'},
     ]}>
->
 
 <TabItem value="yaml">
 
@@ -302,7 +301,7 @@ Once configured, the credentials can be loaded into the `connection_string` para
 ```python 
 # using the single connection string 
 pg_datasource = context.sources.add_or_update_sql(
-    name="my_postgres_db", connection_string="${my_abs_creds}"
+    name="my_postgres_db", connection_string="${my_gcp_creds}"
 )
 
 # or each component separately
