@@ -20,7 +20,6 @@ class _PyPIPackageData(TypedDict):
 
 
 class _VersionChecker:
-
     _LATEST_GX_VERSION_CACHE: ClassVar[version.Version | None] = None
 
     _BASE_PYPI_URL: ClassVar[str] = "https://pypi.org/pypi"
@@ -87,5 +86,5 @@ class _VersionChecker:
         logger.warning(
             f"You are using great_expectations version {self._user_version}; "
             f"however, version {pypi_version} is available.\nYou should consider "
-            "upgrading via `pip install great_expectations --upgrade`\n."
+            "upgrading via `pip install great_expectations --upgrade`.\n"
         )

@@ -6,6 +6,7 @@ import tempfile
 from unittest import mock
 
 import pytest
+from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -81,7 +82,7 @@ SELECT EXISTS (
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
-    with pytest.raises(Exception):  # noqa: B017
+    with pytest.raises(MarkedYAMLError):
         # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
@@ -689,7 +690,6 @@ def test_golden_path_sql_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
         import great_expectations as gx
 

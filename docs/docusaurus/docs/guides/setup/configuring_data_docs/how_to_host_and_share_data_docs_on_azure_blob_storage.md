@@ -3,9 +3,6 @@ title: How to host and share Data Docs on Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Azure Blob Storage. 
 Data Docs will be served using an Azure Blob Storage static website with restricted access.
@@ -55,7 +52,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  az_site:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you can select your own
     class_name: SiteBuilder
     store_backend:
        class_name: TupleAzureBlobStoreBackend
@@ -97,25 +94,11 @@ The most common authentication methods are supported:
 ### 4. Build the Azure Blob Data Docs site
 
 You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and this will build the Data Docs website.
-Or you can use the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command: ``great_expectations docs build --site-name az_site``.
 
-```bash
-> great_expectations docs build --site-name az_site
+Run the following Python code to build and open your Data Docs:
 
- The following Data Docs sites will be built:
-
- - az_site: https://<your-storage-account>.blob.core.windows.net/$web/index.html
-
- Would you like to proceed? [Y/n]: y
-
- Building Data Docs...
-
- Done building Data Docs
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
-
-If successful, the CLI will provide the object URL of the index page. 
-You may secure the access of your website using an IP filtering mechanism.
-
 
 ### 5. Limit the access to your company
 

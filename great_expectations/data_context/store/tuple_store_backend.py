@@ -684,7 +684,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
@@ -1024,7 +1023,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
     @property
-    @functools.lru_cache()  # noqa: B019 # lru_cache on method
+    @functools.lru_cache  # noqa: B019 # lru_cache on method
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 
@@ -1102,7 +1101,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         for obj in self._container_client.list_blobs(name_starts_with=self.prefix):  # type: ignore[attr-defined]
             az_blob_key = os.path.relpath(obj.name)
-            if az_blob_key.startswith(f"{self.prefix}/"):
+            if az_blob_key.startswith(f"{self.prefix}{os.path.sep}"):
                 az_blob_key = az_blob_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not az_blob_key.startswith(
                 self.filepath_prefix

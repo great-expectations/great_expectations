@@ -15,7 +15,6 @@ from great_expectations.expectations.metrics import (
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
     # for information on how to choose an id string for your Metric.

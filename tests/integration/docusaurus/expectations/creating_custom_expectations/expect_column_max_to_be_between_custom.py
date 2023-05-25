@@ -40,6 +40,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_name">
     metric_name = "column.custom_max"
+
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _pandas">
     @column_aggregate_value(engine=PandasExecutionEngine)
@@ -88,6 +89,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
 
 #     </snippet>
+
 
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py ExpectColumnMaxToBeBetween class_def">
 class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):

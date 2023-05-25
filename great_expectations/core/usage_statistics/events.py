@@ -161,7 +161,6 @@ class UsageStatsEvents(str, enum.Enum):
             String from enum value for event
         """
         if other_items is not None:
-
             other_items_str: str = (
                 f"_{'_'.join([item.upper() for item in other_items])}"
             )

@@ -461,6 +461,7 @@ class ExpectationSuite(SerializableDictDot):
 
         return match_indexes
 
+    @public_api
     def find_expectations(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,

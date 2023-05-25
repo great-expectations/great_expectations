@@ -450,7 +450,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-
             if len(params) == 2:
                 scale = params[1]
             if len(params) > 2:

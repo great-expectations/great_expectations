@@ -17,13 +17,14 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Protocol,
     Tuple,
     Union,
 )
 
 import numpy as np
 import scipy.stats as stats
-from typing_extensions import Protocol, TypeGuard
+from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy

@@ -3,6 +3,30 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 
 multiple_backend = []
 
+connecting_to_your_data = [
+    IntegrationTestFixture(
+        name="s3_spark_inferred_and_runtime_yaml_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
+    ),
+    IntegrationTestFixture(
+        name="s3_spark_inferred_and_runtime_python_example",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
+    ),
+]
+
+deployment_patterns = [
+    IntegrationTestFixture(
+        name="deployment_pattern_spark_s3",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    ),
+]
+
 cross_table_comparisons = [
     # Uncomment after mysql warnings are resolved and mysql stage of docs-integration is uncommented
     # IntegrationTestFixture(
@@ -37,5 +61,29 @@ creating_custom_expectations = [
     ),
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_s3_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS, BackendDependencies.SPARK],
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_azure_blob_storage_using_spark",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_azure_blob_storage_using_spark.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE, BackendDependencies.SPARK],
+    ),
+]
+
+multiple_backend += connecting_to_your_data
+multiple_backend += deployment_patterns
 multiple_backend += cross_table_comparisons
 multiple_backend += creating_custom_expectations
+multiple_backend += fluent_datasources

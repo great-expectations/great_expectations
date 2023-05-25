@@ -34,8 +34,7 @@ Use the information provided here to use Python code to initialize, instantiate,
 
 For purposes of this example, we will assume that we have an empty folder to initialize our Filesystem Data Context in:
 
-```python title="Python code"
-path_to_empty_folder = '/my_gx_project/'
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
 ### 3. Create a GX context
@@ -44,10 +43,7 @@ We will provide our empty folder's path to the GX library's `FileDataContext.cre
 
 For convenience, the `FileDataContext.create(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
 
-```python title="Python code"
-from great_expectations.data_context import FileDataContext
-
-context = FileDataContext.create(project_root_dir=path_to_empty_folder)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
 ```
 
 :::info What if the folder is not empty?
@@ -70,9 +66,9 @@ For guidance on further customizing your Data Context's configurations for <Tech
 - [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+- [How to configure a Pandas Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ## Additional information
 

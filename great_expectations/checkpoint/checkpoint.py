@@ -4,7 +4,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Type, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
@@ -32,10 +32,6 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-    ExpectationSuiteValidationResultMeta,  # noqa: TCH001
-)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
@@ -57,14 +53,18 @@ from great_expectations.util import (
     load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,  # noqa: TCH001
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationSuiteValidationResultMeta,
+    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.validation_operators.types.validation_operator_result import (
+        ValidationOperatorResult,
     )
     from great_expectations.validator.validator import Validator
 
@@ -153,7 +153,7 @@ class BaseCheckpoint(ConfigPeer):
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
+        run_time: Optional[datetime.datetime] = None,
         result_format: Optional[Union[str, dict]] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
@@ -321,9 +321,9 @@ class BaseCheckpoint(ConfigPeer):
                 meta: ExpectationSuiteValidationResultMeta
                 validation_result_url: str | None = None
                 for run_result in run_results.values():
-                    validation_result = run_result.get("validation_result")
+                    validation_result = run_result.get("validation_result")  # type: ignore[assignment] # could be dict
                     if validation_result:
-                        meta = validation_result.meta
+                        meta = validation_result.meta  # type: ignore[assignment] # could be dict
                         id = self.ge_cloud_id
                         meta["checkpoint_id"] = id
                     # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we
@@ -345,7 +345,7 @@ class BaseCheckpoint(ConfigPeer):
 
         return CheckpointResult(
             validation_result_url=validation_result_url,
-            run_id=run_id,
+            run_id=run_id,  # type: ignore[arg-type] # could be str
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
         )
@@ -357,7 +357,7 @@ class BaseCheckpoint(ConfigPeer):
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
+        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)  # type: ignore[assignment] # always returns a dict
 
         template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:
@@ -430,7 +430,7 @@ class BaseCheckpoint(ConfigPeer):
         substituted_runtime_config: dict,
         async_validation_operator_results: List[AsyncResult],
         async_executor: AsyncExecutor,
-        result_format: Optional[dict],
+        result_format: Union[dict, str, None],
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
         validation_dict: Optional[dict] = None,
@@ -451,12 +451,12 @@ class BaseCheckpoint(ConfigPeer):
             )
 
             batch_request: Union[
-                BatchRequest, FluentBatchRequest, RuntimeBatchRequest
+                BatchRequest, FluentBatchRequest, RuntimeBatchRequest, None
             ] = substituted_validation_dict.get("batch_request")
-            expectation_suite_name: str = substituted_validation_dict.get(
+            expectation_suite_name: str | None = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
-            expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+            expectation_suite_ge_cloud_id: str | None = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
             include_rendered_content: Optional[bool] = substituted_validation_dict.get(
@@ -478,7 +478,7 @@ class BaseCheckpoint(ConfigPeer):
                 include_rendered_content=include_rendered_content,
             )
 
-            action_list: list = substituted_validation_dict.get("action_list")
+            action_list: list | None = substituted_validation_dict.get("action_list")
             runtime_configuration_validation = substituted_validation_dict.get(
                 "runtime_configuration", {}
             )
@@ -575,7 +575,7 @@ class BaseCheckpoint(ConfigPeer):
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
 
-        validations_present: bool = (
+        validations_present: bool = bool(
             self.validations
             and isinstance(self.validations, list)
             and len(self.validations) > 0
@@ -640,11 +640,14 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(
+        self,
+    ) -> list[CheckpointValidationConfig] | list[dict]:  # always a list[dict]
         try:
             return self.config.validations
         except AttributeError:
-            return []
+            result: list[dict] = []
+            return result
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
@@ -804,7 +807,8 @@ constructor arguments.
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
+            batch_request=batch_request,  # type: ignore[arg-type] # FluentBatchRequest is not a dict
+            # TODO: check if `pydantic.BaseModel` and call `batch_request.dict()`??
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
@@ -840,7 +844,7 @@ constructor arguments.
         run_id: Optional[Union[str, int, float]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[str] = None,
+        result_format: str | dict | None = None,  # TODO: type-dict?
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
@@ -902,15 +906,16 @@ constructor arguments.
 
         return self.run(**checkpoint_run_arguments)
 
-    @staticmethod
+    @classmethod
     def construct_from_config_args(
+        cls,
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
+        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -971,20 +976,13 @@ constructor arguments.
             "default_validation_id": default_validation_id,
         }
 
-        if class_name == "LegacyCheckpoint":
-            checkpoint_config.update(
-                {
-                    # Next two fields are for LegacyCheckpoint configuration
-                    "validation_operator_name": validation_operator_name,
-                    "batches": batches,
-                }
-            )
-            checkpoint_config = deep_filter_properties_iterable(
-                properties=checkpoint_config,
-                clean_falsy=True,
-            )
+        detault_checkpoints_module_name = "great_expectations.checkpoint"
 
-        if class_name == "SimpleCheckpoint":
+        klass = load_class(
+            class_name=class_name,
+            module_name=module_name or detault_checkpoints_module_name,
+        )
+        if issubclass(klass, SimpleCheckpoint):
             checkpoint_config.update(
                 {
                     # the following four keys are used by SimpleCheckpoint
@@ -994,10 +992,27 @@ constructor arguments.
                     "notify_with": notify_with,
                 }
             )
-            checkpoint_config = deep_filter_properties_iterable(
-                properties=checkpoint_config,
-                clean_falsy=True,
+        elif klass == LegacyCheckpoint:
+            checkpoint_config.update(
+                {
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
             )
+        elif issubclass(klass, LegacyCheckpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
+            )
+        elif not issubclass(klass, Checkpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                f'Custom class "{klass.__name__}" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+            )
+
+        checkpoint_config = deep_filter_properties_iterable(
+            properties=checkpoint_config,
+            clean_falsy=True,
+        )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
@@ -1005,7 +1020,7 @@ constructor arguments.
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": "great_expectations.checkpoint",
+                "module_name": detault_checkpoints_module_name,
             },
         )
 
@@ -1025,7 +1040,10 @@ constructor arguments.
             if value is not None:
                 config[key] = value
 
-        config = filter_properties_dict(properties=config, clean_falsy=True)
+        config = filter_properties_dict(  # type: ignore[assignment] # filter could return None
+            properties=config,
+            clean_falsy=True,
+        )
 
         checkpoint: Checkpoint = instantiate_class_from_config(
             config=config,
@@ -1304,7 +1322,6 @@ class LegacyCheckpoint(Checkpoint):
     def _get_batches_to_validate(self, batches):
         batches_to_validate = []
         for batch in batches:
-
             batch_kwargs = batch["batch_kwargs"]
             suites = batch["expectation_suite_names"]
 
@@ -1367,6 +1384,7 @@ class SimpleCheckpoint(Checkpoint):
     """
 
     _configurator_class = SimpleCheckpointConfigurator
+    name: str
 
     # noinspection PyUnusedLocal
     def __init__(
@@ -1395,7 +1413,6 @@ class SimpleCheckpoint(Checkpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> None:
-
         checkpoint_config: CheckpointConfig = self._configurator_class(
             name=name,
             data_context=data_context,
