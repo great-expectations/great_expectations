@@ -1393,6 +1393,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
+        print(
+            "DEBUG =============================================================================="
+        )
+        print("self.dialect_name", self.dialect_name)
+        print(
+            "self.dialect_name in _PERSISTED_CONNECTION_DIALECTS",
+            self.dialect_name in _PERSISTED_CONNECTION_DIALECTS,
+        )
+        print(
+            "DEBUG =============================================================================="
+        )
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
                 if not self._connection:
