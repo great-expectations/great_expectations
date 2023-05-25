@@ -29,7 +29,7 @@ and [how to create Custom Column Map Expectations](../creating_custom_expectatio
 
 To avoid surprises and help clearly define your Custom Expectation, it can be helpful to determine beforehand what backends you plan to support, and test them along the way.
 
-Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to run tests for. If not specified, Great Expectations will attempt testing on all backends we support. Add entries corresponding to the functionality you want to add: 
+Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
