@@ -1,4 +1,4 @@
-altair==5.0.0 ; python_version >= "3.8" and python_version < "3.12"
+altair==4.2.2 ; python_version >= "3.8" and python_version < "3.12"
 anyio==3.6.2 ; python_version >= "3.8" and python_version < "3.12"
 appnope==0.1.3 ; python_version >= "3.8" and python_version < "3.12" and (sys_platform == "darwin" or platform_system == "Darwin")
 argon2-cffi==21.3.0 ; python_version >= "3.8" and python_version < "3.12"
@@ -20,6 +20,7 @@ cryptography==40.0.2 ; python_version >= "3.8" and python_version < "3.12"
 debugpy==1.6.7 ; python_version >= "3.8" and python_version < "3.12"
 decorator==5.1.1 ; python_version >= "3.8" and python_version < "3.12"
 defusedxml==0.7.1 ; python_version >= "3.8" and python_version < "3.12"
+entrypoints==0.4 ; python_version >= "3.8" and python_version < "3.12"
 executing==1.2.0 ; python_version >= "3.8" and python_version < "3.12"
 fastjsonschema==2.17.1 ; python_version >= "3.8" and python_version < "3.12"
 fqdn==1.5.1 ; python_version >= "3.8" and python_version < "3.12"

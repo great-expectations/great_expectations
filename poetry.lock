@@ -124,26 +124,25 @@ frozenlist = ">=1.1.0"
 
 [[package]]
 name = "altair"
-version = "5.0.0"
-description = "Vega-Altair: A declarative statistical visualization library for Python."
+version = "4.2.2"
+description = "Altair: A declarative statistical visualization library for Python."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "altair-5.0.0-py3-none-any.whl", hash = "sha256:e7deed321f61a3ec752186ae96e97b44a1353de142928c1934fb211e9f0bfe9e"},
-    {file = "altair-5.0.0.tar.gz", hash = "sha256:394c3d8be96f9cc90e15a0eee3634cc5b6f19e470fd2045759892623bd9a3fb2"},
+    {file = "altair-4.2.2-py3-none-any.whl", hash = "sha256:8b45ebeaf8557f2d760c5c77b79f02ae12aee7c46c27c06014febab6f849bc87"},
+    {file = "altair-4.2.2.tar.gz", hash = "sha256:39399a267c49b30d102c10411e67ab26374156a84b1aeb9fcd15140429ba49c5"},
 ]
 
 [package.dependencies]
+entrypoints = "*"
 jinja2 = "*"
 jsonschema = ">=3.0"
 numpy = "*"
 pandas = ">=0.18"
 toolz = "*"
-typing-extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
-dev = ["black (<24)", "hatch", "ipython", "m2r", "mypy", "pandas-stubs", "pytest", "pytest-cov", "ruff", "types-jsonschema", "types-setuptools", "vega-datasets", "vl-convert-python"]
-doc = ["docutils", "geopandas", "jinja2", "myst-parser", "numpydoc", "pillow", "pydata-sphinx-theme", "sphinx", "sphinx-copybutton", "sphinx-design"]
+dev = ["black", "docutils", "flake8", "ipython", "m2r", "mistune (<2.0.0)", "pytest", "recommonmark", "sphinx", "vega-datasets"]
 
 [[package]]
 name = "anyio"
@@ -766,6 +765,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 files = [
     {file = "defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61"},
     {file = "defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69"},
+]
+
+[[package]]
+name = "entrypoints"
+version = "0.4"
+description = "Discover and load entry points from installed packages."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
+    {file = "entrypoints-0.4.tar.gz", hash = "sha256:b706eddaa9218a19ebcd67b56818f05bb27589b1ca9e8d797b74affad4ccacd4"},
 ]
 
 [[package]]
@@ -3806,4 +3816,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "a3cb07f7db226194a33b1589d783df994e68f24c3f7af7330df8968c8ef04396"
+content-hash = "c328512efa21d1c8b59fffd9eaec42f2df971b8623cd17840364aa7b8a8d3c43"
