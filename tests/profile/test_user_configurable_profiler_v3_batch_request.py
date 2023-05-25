@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import string
 from typing import List
@@ -113,7 +112,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
     table_name=None,
 ):
     sa_engine_name = "postgresql"
-    os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
         engine = postgresql_engine
