@@ -27,16 +27,20 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 @responses.activate
 @pytest.mark.unit
 @pytest.mark.cloud
-@mock.patch("requests.Session.get")
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
-    mock_request,
     request_headers: dict,
     ge_cloud_runtime_base_url,
     ge_cloud_runtime_organization_id,
     ge_cloud_access_token,
 ):
+    called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
+
     # Ensure that the request goes through
-    mock_request.return_value.status_code = 200
+    responses.get(
+        called_with_url,
+        status=200,
+        match=[responses.matchers.header_matcher(request_headers)],
+    )
     try:
         get_context(
             cloud_mode=True,
@@ -49,13 +53,8 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     ):  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
-    called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"
-    called_with_header = {"headers": request_headers}
-
     # Only ever called once with the endpoint URL and auth token as args
-    mock_request.assert_called_once()
-    assert mock_request.call_args[0][0] == called_with_url
-    assert mock_request.call_args[1] == called_with_header
+    assert responses.assert_call_count(called_with_url, 1) is True
 
 
 @responses.activate
