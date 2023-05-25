@@ -1729,6 +1729,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1764,6 +1765,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1818,6 +1820,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
@@ -1886,6 +1889,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -1939,6 +1943,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1970,6 +1975,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: None = ...,
         expectation_suite_id: None = ...,
         default_validation_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -2003,6 +2009,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
@@ -2054,6 +2061,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -2083,6 +2091,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2121,6 +2130,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
+                validator=validator,
             )
 
         return checkpoint
