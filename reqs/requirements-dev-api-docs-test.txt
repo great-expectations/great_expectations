@@ -1,1 +1,1 @@
-docstring-parser==0.15
+docstring-parser==0.15 ; python_version >= "3.8" and python_version < "3.12"

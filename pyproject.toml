@@ -60,6 +60,12 @@ urllib3 = ">=1.26"
 # ruff = "^0.0.269"
 # tomli = "^2.0.1"
 
+[tool.poetry.group.api-docs-test]
+optional = true
+
+[tool.poetry.group.api-docs-test.dependencies]
+docstring-parser = "0.15"
+
 [tool.poetry.group.arrow]
 optional = true
 
