@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
@@ -20,7 +21,8 @@ if TYPE_CHECKING:
 
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.integration]
+# NOTE: removing this integration marker to force running in PR pipeline
+# pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
@@ -175,6 +177,47 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
 
 
 @pytest.mark.cloud
+def test_context_add_and_then_update_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource1 = context.sources.add_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    # add_or_update should be idempotent
+    datasource2 = context.sources.update_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    assert datasource1 == datasource2
+
+    # modify a field
+    datasource2.base_directory = pathlib.Path(__file__)
+    datasource3 = context.sources.update_pandas_filesystem(datasource2)
+
+    assert datasource1 != datasource3
+    assert datasource2 == datasource3
+
+
+@pytest.mark.cloud
+def test_update_non_existant_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    with pytest.raises(ValueError, match="I_DONT_EXIST"):
+        context.sources.update_pandas_filesystem(
+            name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
+        )
+
+
+@pytest.mark.cloud
 def test_cloud_context_delete_datasource(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -210,6 +253,34 @@ def test_cloud_context_delete_datasource(
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")
     assert response2.status_code == 404
+
+
+def test_data_connectors_are_built_on_config_load(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
+    context = seeded_contexts
+    dc_datasources: dict[str, list[str]] = defaultdict(list)
+
+    assert context.fluent_datasources
+    for datasource in context.fluent_datasources.values():
+        if datasource.data_connector_type:
+            print(f"class: {datasource.__class__.__name__}")
+            print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
+            print(f"name: {datasource.name}", end="\n\n")
+
+            dc_datasources[datasource.type].append(datasource.name)
+
+            for asset in datasource.assets:
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
+            print()
+
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
+    assert dc_datasources
 
 
 if __name__ == "__main__":

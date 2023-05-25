@@ -43,7 +43,7 @@ The following are examples of connection strings for different SQL dialects:
 - BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>?credentials_path=/path/to/your/credentials.json`
 - MSSQL: `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
 - MySQL: `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
-- PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
+- PostGreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
 - Redshift: `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
 - Snowflake]: `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
 - SQLite: `sqlite:///<PATH_TO_DB_FILE>`
@@ -51,7 +51,7 @@ The following are examples of connection strings for different SQL dialects:
 
 :::
 
-For purposes of this guide's examples, we will connect to a PostgreSQL database.  Here is an example of our connection string, stored in the variable `connection_string` with plain text credentials:
+For purposes of this guide's examples, we will connect to a PostGreSQL database.  Here is an example of our connection string, stored in the variable `connection_string` with plain text credentials:
 
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
