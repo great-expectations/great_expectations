@@ -16,7 +16,7 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.xfail(
-    "This test will need to be updated to use Response for the Mocks",
+    reason="This test will need to be updated to use Response for the Mocks",
     run=True,
     strict=True,
 )
