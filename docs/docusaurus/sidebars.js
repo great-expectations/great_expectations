@@ -393,6 +393,7 @@ module.exports = {
     'guides/miscellaneous/how_to_use_the_project_check_config_command',
     'reference/customize_your_deployment',
     'reference/usage_statistics',
+    'reference/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',
