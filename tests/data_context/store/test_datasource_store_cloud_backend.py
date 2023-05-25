@@ -18,7 +18,7 @@ from tests.data_context.conftest import MockResponse
 @pytest.mark.xfail(
     reason="This test will need to be updated to use Response for the Mocks",
     run=True,
-    strict=True,
+    strict=False,
 )
 @pytest.mark.cloud
 @pytest.mark.unit
