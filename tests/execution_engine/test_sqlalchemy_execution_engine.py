@@ -27,6 +27,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
+    _dialect_requires_persisted_connection,
 )
 
 # Function to test for spark dataframe equality
@@ -1143,3 +1144,26 @@ class TestGetConnection:
         execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
         with execution_engine.get_connection() as connection:
             assert isinstance(connection, Connection)
+
+
+@pytest.mark.unit
+class TestDialectRequiresPersistedConnection:
+    def test__dialect_requires_persisted_connection_mssql(self):
+        connection_string = "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@db_hostname:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
+        assert _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_sqlite(self):
+        connection_string = "sqlite://"
+        assert _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_postgres(self):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        assert not _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )

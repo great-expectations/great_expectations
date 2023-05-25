@@ -224,6 +224,49 @@ def _get_dialect_type_module(dialect):
 _PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
 
 
+def _dialect_requires_persisted_connection(
+    connection_string: str | None = None,
+    credentials: dict | None = None,
+    url: str | None = None,
+) -> bool:
+    """Determine if the dialect needs a persisted connection.
+
+    dialect_name isn't available yet since the engine isn't yet created when we call this method
+    so we determine the dialect from the creds/url/params:
+
+    Args:
+        connection_string:
+        credentials:
+        url:
+
+    Returns:
+
+    """
+    if sum(bool(x) for x in [connection_string, credentials, url is not None]) != 1:
+        raise ValueError(
+            "Exactly one of connection_string, credentials, url must be specified"
+        )
+    return_val = False
+    if connection_string is not None:
+        str_to_check = connection_string
+
+    elif credentials is not None:
+        drivername = credentials.get("drivername", "")
+        str_to_check = drivername
+
+    else:
+        parsed_url = make_url(url)
+        str_to_check = parsed_url.drivername
+
+    if any(
+        str_to_check.startswith(dialect_name.value)
+        for dialect_name in _PERSISTED_CONNECTION_DIALECTS
+    ):
+        return_val = True
+
+    return return_val
+
+
 @public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
@@ -454,7 +497,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if credentials is not None:
             self.engine = self._build_engine(credentials=credentials, **kwargs)
         elif connection_string is not None:
-            if self._dialect_requires_persisted_connection(
+            if _dialect_requires_persisted_connection(
                 connection_string=connection_string, credentials=credentials, url=url
             ):
                 self.engine = sa.create_engine(
@@ -465,7 +508,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif url is not None:
             parsed_url = make_url(url)
             self.drivername = parsed_url.drivername
-            if self._dialect_requires_persisted_connection(
+            if _dialect_requires_persisted_connection(
                 connection_string=connection_string, credentials=credentials, url=url
             ):
                 self.engine = sa.create_engine(
@@ -477,49 +520,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise InvalidConfigError(
                 "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
             )
-
-    def _dialect_requires_persisted_connection(
-        self,
-        connection_string: str | None = None,
-        credentials: dict | None = None,
-        url: str | None = None,
-    ) -> bool:
-        """Determine if the dialect needs a persisted connection.
-
-        dialect_name isn't available yet since the engine isn't yet created when we call this method
-        so we determine the dialect from the creds/url/params:
-
-        Args:
-            connection_string:
-            credentials:
-            url:
-
-        Returns:
-
-        """
-        if sum(bool(x) for x in [connection_string, credentials, url is not None]) != 1:
-            raise ValueError(
-                "Exactly one of connection_string, credentials, url must be specified"
-            )
-        return_val = False
-        if connection_string is not None:
-            str_to_check = connection_string
-
-        elif credentials is not None:
-            drivername = credentials.get("drivername", "")
-            str_to_check = drivername
-
-        else:
-            parsed_url = make_url(url)
-            str_to_check = parsed_url.drivername
-
-        if any(
-            str_to_check.startswith(dialect_name.value)
-            for dialect_name in _PERSISTED_CONNECTION_DIALECTS
-        ):
-            return_val = True
-
-        return return_val
 
     @property
     def credentials(self) -> Optional[dict]:
@@ -573,7 +573,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             options = get_sqlalchemy_url(drivername, **credentials)
 
         self.drivername = drivername
-        if self._dialect_requires_persisted_connection(credentials=credentials):
+        if _dialect_requires_persisted_connection(credentials=credentials):
             engine = sa.create_engine(
                 options, **create_engine_kwargs, poolclass=sqlalchemy.StaticPool
             )
