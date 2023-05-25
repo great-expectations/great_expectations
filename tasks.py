@@ -11,6 +11,7 @@ To show task help page `invoke <NAME> --help`
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
 import shutil
@@ -32,8 +33,12 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
+LOGGER = logging.getLogger(__name__)
 
-GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
+PROJECT_ROOT: Final = pathlib.Path(__file__).parent
+GX_ROOT_DIR: Final = PROJECT_ROOT / "great_expectations"
+PYPROJECT_TOML: Final = PROJECT_ROOT / "pyproject.toml"
+REQS_DIR: Final = PROJECT_ROOT / "reqs"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
