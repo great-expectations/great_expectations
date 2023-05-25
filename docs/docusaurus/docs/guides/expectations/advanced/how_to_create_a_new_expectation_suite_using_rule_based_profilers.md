@@ -1,10 +1,10 @@
 ---
-title: How to create a new Expectation Suite using Profiling Framework
+title: How to create a new Expectation Suite using a Custom Profiler
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-In this tutorial, you will develop hands-on experience with configuring a Profiler <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. You will <TechnicalTag tag="profiling" text="Profile" /> several <TechnicalTag tag="batch" text="Batches" /> of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of <TechnicalTag tag="expectation" text="Expectations" /> for several numeric columns.
+In this tutorial, you will develop hands-on experience with configuring a Custom Profiler <TechnicalTag tag="profiler" text="Profiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. You will <TechnicalTag tag="profiling" text="Profile" /> several <TechnicalTag tag="batch" text="Batches" /> of NYC yellow taxi trip data to come up with reasonable estimates for the ranges of <TechnicalTag tag="expectation" text="Expectations" /> for several numeric columns.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ In this tutorial, you will develop hands-on experience with configuring a Profil
 ```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py init"
 ```
 
-### 4. Configure the Profiler
+### 4. Configure the Custom Profiler
 
 - Now, we'll create a new script in the same top-level `taxi_profiling_tutorial` directory called `profiler_script.py`. If you prefer, you could open up a Jupyter Notebook and run this there instead.
 - At the top of this file, we will create a new YAML docstring assigned to a variable called `profiler_config`. This will look similar to the YAML docstring we used above when creating our Datasource. Over the next several steps, we will slowly add lines to this docstring by typing or pasting in the lines below:
@@ -86,7 +86,7 @@ You can see here that we use a special `$` syntax to reference `variables` and `
 ```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py full row_count_rule"
 ```
 
-### 5. Run the Profiler
+### 5. Run the Custom Profiler
 
 Now let's use our config to Profile our data and create an Expectation Suite!
 
@@ -135,7 +135,7 @@ Putting together our entire config, with both of our Rules, we get:
 
 And if we re-instantiate our `Profiler` with our config which now has two rules, and then we re-run the `Profiler`, we'll have an updated Expectation Suite with a table row count Expectation for our table, and column min and column max Expectations for each of our numeric columns!
 
-🚀Congratulations! You have successfully Profiled multi-batch data using a Profiler. Now you can try adding some new Rules, or running your Profiler on some other data (remember to change the `BatchRequest` in your config)!🚀
+🚀Congratulations! You have successfully Profiled multi-batch data using a Custom Profiler. Now you can try adding some new Rules, or running your Profiler on some other data (remember to change the `BatchRequest` in your config)!🚀
 
 ## Additional Notes
 

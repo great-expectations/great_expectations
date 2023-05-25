@@ -17,9 +17,9 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 Auto-initializing Expectations automate parameter estimation for Expectations, but not all parameters require this kind of estimation.  If your expectation only takes in a Domain (such as the name of a column) then it will not benefit from being configured to work in the auto-initializing framework.  In general, the auto-initializing Expectation framework benefits those Expectations that have numeric ranges which are intended to be descriptive of the data found in a Batch or Batches.  Existing examples of these would be Expectations such as `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, or `ExpectColumnSumToBeBetween`.
 
-### 2. Build a Profiler for your Expectation
+### 2. Build a Custom Profiler for your Expectation
 
-In order to automate the estimation of parameters, auto-initializing Expectations utilize the Profiling Framework.  You will need to create an appropriate configuration for the Profiler that your Expectation will use.  The easiest way to do this is to modify an existing Profiler configuration.
+In order to automate the estimation of parameters, auto-initializing Expectations utilize a Custom Profiler.  You will need to create an appropriate configuration for the Profiler that your Expectation will use.  The easiest way to do this is to modify an existing Profiler configuration.
 
 You can find existing Profiler configurations in the source code for any Expectation that works within the auto-initializing framework.  For this example, we will look at the existing configuration for the `ExpectColumnMeanToBeBetween` Expectation. You can [view the source code for this Expectation on our GitHub](https://github.com/great-expectations/great_expectations/blob/f53e27b068007471b819fc089f008d2a24864d20/great_expectations/expectations/core/expect_column_mean_to_be_between.py).
 

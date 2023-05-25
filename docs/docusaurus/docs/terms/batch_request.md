@@ -18,7 +18,7 @@ A Batch Request is always used when Great Expectations builds a Batch. Any time 
 
 ## Use cases
 
-If you are using a Profiler or the interactive method of creating Expectations, you will need to provide a Batch of data for the Profiler to analyze or your manually defined Expectations to test against.  For both of these processes, you will therefore need a Batch Request to get the Batch.
+If you are using a Custom Profiler or the interactive method of creating Expectations, you will need to provide a Batch of data for the Profiler to analyze or your manually defined Expectations to test against.  For both of these processes, you will therefore need a Batch Request to get the Batch.
 
 For more information, see:
 
