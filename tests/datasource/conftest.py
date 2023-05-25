@@ -6,6 +6,7 @@ from itertools import product
 import pytest
 from moto import mock_glue
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
     Datasource,
@@ -19,7 +20,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.self_check.util import get_sqlite_connection_url
-from great_expectations.compatibility import sqlalchemy
 
 
 def create_partitions_for_table(
