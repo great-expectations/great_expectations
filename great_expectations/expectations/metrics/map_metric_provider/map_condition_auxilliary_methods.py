@@ -330,31 +330,30 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     try:
         if execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
-            temp_table_name: str = generate_temporary_table_name(
-                default_table_name_prefix="#ge_temp_"
-            )
 
-            with execution_engine.engine.begin():
-                metadata: sa.MetaData = sa.MetaData()
-                metadata.reflect(bind=execution_engine.engine)
-                temp_table_obj: sa.Table = sa.Table(
-                    temp_table_name,
-                    metadata,
-                    sa.Column(
-                        "condition", sa.Integer, primary_key=False, nullable=False
-                    ),
-                )
-                temp_table_obj.create(execution_engine.engine, checkfirst=True)
-
-                inner_case_query: sqlalchemy.Insert = (
-                    temp_table_obj.insert().from_select(
-                        [count_case_statement],
-                        count_selectable,
+            with execution_engine.get_connection() as connection:
+                with connection.begin():
+                    temp_table_name: str = generate_temporary_table_name(
+                        default_table_name_prefix="#ge_temp_"
                     )
-                )
-                execution_engine.execute_query(inner_case_query)
+                    metadata: sa.MetaData = sa.MetaData(bind=connection)
+                    metadata.reflect(bind=connection)
+                    temp_table_obj: sa.Table = sa.Table(
+                        temp_table_name,
+                        metadata,
+                        sa.Column(
+                            "condition", sa.Integer, primary_key=False, nullable=False
+                        ),
+                    )
+                    temp_table_obj.create(bind=connection, checkfirst=True)
 
-                count_selectable = temp_table_obj
+            inner_case_query: sqlalchemy.Insert = temp_table_obj.insert().from_select(
+                [count_case_statement],
+                count_selectable,
+            )
+            execution_engine.execute_query_in_transaction(inner_case_query)
+
+            count_selectable = temp_table_obj
 
         count_selectable = get_sqlalchemy_selectable(count_selectable)
         unexpected_count_query: sqlalchemy.Select = (
