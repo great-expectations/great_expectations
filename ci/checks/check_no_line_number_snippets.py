@@ -63,12 +63,15 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
 
 def main() -> None:
     check_dependencies("grep")
-    docs_dir = pathlib.Path(__file__).parent.parent.parent / "docs"
+    project_root = pathlib.Path(__file__).parent.parent.parent
+    docs_dir = project_root / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
-    new_violations = set(grep_output).difference(
-        ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
-    )
+    excluded_documents = {
+        project_root / file_path
+        for file_path in ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER
+    }
+    new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(
             f"[ERROR] Found {len(new_violations)} snippets using file and line number syntax.  Please use named snippet syntax:"

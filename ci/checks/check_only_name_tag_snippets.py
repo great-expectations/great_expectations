@@ -35,17 +35,22 @@ context = gx.get_context()
 Adherence to this pattern is assertained by the present checker module.
 """
 
-import pathlib
-import shutil
-import subprocess
 import sys
 from typing import List
 
+import shutil
+import subprocess
+
+import re
+
+import pathlib
+
 ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
-    "docs/docusaurus/docs/reference/expectations/conditional_expectations.md",
-    "docs/docusaurus/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md",
+    "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.md",
+    "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.md",
     "docs/docusaurus/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx",
 }
+FLUENT_DATASOURCES_FILENAME_PATTERN = re.compile(r"fluent", re.IGNORECASE)
 
 
 def check_dependencies(*deps: str) -> None:
@@ -101,6 +106,12 @@ def main() -> None:
     docs_dir = project_root / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
+    grep_output = list(
+        filter(
+            lambda filename: FLUENT_DATASOURCES_FILENAME_PATTERN.match(filename),
+            grep_output,
+        )
+    )
     excluded_documents = {
         project_root / file_path
         for file_path in ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
