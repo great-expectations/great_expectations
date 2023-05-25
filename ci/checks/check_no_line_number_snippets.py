@@ -8,7 +8,6 @@ import subprocess
 import sys
 from typing import List
 
-
 ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
     "docs/prepare_prior_versions.py",
     "docs/prepare_to_build_docs.sh",

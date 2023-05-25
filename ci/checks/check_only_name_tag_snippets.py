@@ -41,7 +41,6 @@ import subprocess
 import sys
 from typing import List
 
-
 ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
     "docs/docusaurus/docs/reference/expectations/conditional_expectations.md",
     "docs/docusaurus/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md",
