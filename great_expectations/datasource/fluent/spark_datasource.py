@@ -8,6 +8,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Optional,
     Type,
     TypeVar,
@@ -16,7 +17,7 @@ from typing import (
 
 import pydantic
 from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import DataFrame, pyspark

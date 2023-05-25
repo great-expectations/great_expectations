@@ -4,6 +4,55 @@
 Changelog
 #########
 
+0.16.13
+-----------------
+* [FEATURE] Spark file reader support for fluent datasources ([#7844](https://github.com/great-expectations/great_expectations/pull/7844))
+* [FEATURE] Spark directory asset types ([#7873](https://github.com/great-expectations/great_expectations/pull/7873))
+* [FEATURE] Add Spark DeltaAsset type ([#7872](https://github.com/great-expectations/great_expectations/pull/7872))
+* [FEATURE] Add DirectoryDeltaAsset ([#7877](https://github.com/great-expectations/great_expectations/pull/7877))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset" ([#7907](https://github.com/great-expectations/great_expectations/pull/7907))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset" ([#7909](https://github.com/great-expectations/great_expectations/pull/7909))
+* [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas" ([#7922](https://github.com/great-expectations/great_expectations/pull/7922))
+* [FEATURE] DataProfilerStructuredDataAssistant Float Rule ([#7842](https://github.com/great-expectations/great_expectations/pull/7842)) (thanks @micdavis)
+* [BUGFIX] Fix inability to extend SimpleCheckpoint -- and several additional enhancements and clean up ([#7879](https://github.com/great-expectations/great_expectations/pull/7879))
+* [BUGFIX] Delete ExpectationSuite by name in GX Cloud ([#7881](https://github.com/great-expectations/great_expectations/pull/7881))
+* [BUGFIX] optional dataframe on datasources ([#7862](https://github.com/great-expectations/great_expectations/pull/7862))
+* [BUGFIX] Fix sparkDF cannot compute mean for DecimalType ([#7867](https://github.com/great-expectations/great_expectations/pull/7867))
+* [BUGFIX] Fix Cloud FDS `add_or_update_*` methods ([#7908](https://github.com/great-expectations/great_expectations/pull/7908))
+* [BUGFIX] fix `PandasAzureBlobStorageDatasource` config substitution ([#7914](https://github.com/great-expectations/great_expectations/pull/7914))
+* [BUGFIX] Fix remaining FDS config substitution issues ([#7917](https://github.com/great-expectations/great_expectations/pull/7917))
+* [DOCS] removes remaining Block-config Datasource guides ([#7870](https://github.com/great-expectations/great_expectations/pull/7870))
+* [DOCS] Update "How to use Great Expectations with Databricks" ([#7762](https://github.com/great-expectations/great_expectations/pull/7762))
+* [DOCS] CLI Edits ([#7865](https://github.com/great-expectations/great_expectations/pull/7865))
+* [DOCS] More doc updates to remove the CLI ([#7874](https://github.com/great-expectations/great_expectations/pull/7874))
+* [DOCS] Create New Templates for How-To, Tutorial, Conceptual, and Reference Documentation ([#7855](https://github.com/great-expectations/great_expectations/pull/7855))
+* [DOCS] Add Links to Tutorial Templates in the README ([#7884](https://github.com/great-expectations/great_expectations/pull/7884))
+* [DOCS] removes block-config docs for source data systems in the cloud ([#7871](https://github.com/great-expectations/great_expectations/pull/7871))
+* [DOCS] Continuing CLI Update ([#7876](https://github.com/great-expectations/great_expectations/pull/7876))
+* [DOCS] Removes the SQL block config guides. ([#7886](https://github.com/great-expectations/great_expectations/pull/7886))
+* [DOCS] Remove jq dependency for building docs ([#7893](https://github.com/great-expectations/great_expectations/pull/7893))
+* [DOCS] Less verbose logging during docs build ([#7894](https://github.com/great-expectations/great_expectations/pull/7894))
+* [DOCS] Corrections to Document "How to request data from a Data Asset" with proper FDS implementation and integration test. ([#7896](https://github.com/great-expectations/great_expectations/pull/7896))
+* [DOCS] Remove or Modify References to the CLI ([#7875](https://github.com/great-expectations/great_expectations/pull/7875))
+* [DOCS] Updated contribution docs ([#7880](https://github.com/great-expectations/great_expectations/pull/7880))
+* [DOCS] Glossary Update ([#7900](https://github.com/great-expectations/great_expectations/pull/7900))
+* [DOCS] Removes filesystem and core block config docs ([#7913](https://github.com/great-expectations/great_expectations/pull/7913))
+* [DOCS] FDS Deployment Pattern Redshift ([#7868](https://github.com/great-expectations/great_expectations/pull/7868))
+* [DOCS] Document and simplify local docs build ([#7892](https://github.com/great-expectations/great_expectations/pull/7892))
+* [DOCS] How to Edit Existing `ExpectationSuite` ([#7859](https://github.com/great-expectations/great_expectations/pull/7859))
+* [DOCS] CLI Clean-up ([#7904](https://github.com/great-expectations/great_expectations/pull/7904))
+* [MAINTENANCE] FDS Documentation - Creating ExpectationSuite with Domain Knowledge ([#7852](https://github.com/great-expectations/great_expectations/pull/7852))
+* [MAINTENANCE] Refactor directory data asset ([#7878](https://github.com/great-expectations/great_expectations/pull/7878))
+* [MAINTENANCE] partial `checkpoint` type checking ([#6914](https://github.com/great-expectations/great_expectations/pull/6914))
+* [MAINTENANCE] type-checking `checkpoint/actions.py` ([#7899](https://github.com/great-expectations/great_expectations/pull/7899))
+* [MAINTENANCE] Trigger docs_integration on develop ([#7902](https://github.com/great-expectations/great_expectations/pull/7902))
+* [MAINTENANCE] Finish type-checking `checkpoint` ([#7901](https://github.com/great-expectations/great_expectations/pull/7901))
+* [MAINTENANCE] Update How to set up GX to work with data in Azure Blob Storage ([#7910](https://github.com/great-expectations/great_expectations/pull/7910))
+* [MAINTENANCE] `CloudDataContext` `ExpectationsStore` can only request one Suite at a time ([#7905](https://github.com/great-expectations/great_expectations/pull/7905))
+* [MAINTENANCE] Removing engine-specific tests that assert generic behavior ([#7918](https://github.com/great-expectations/great_expectations/pull/7918))
+* [MAINTENANCE] Add `docs/*.py` to `GXChanged` for linting ([#7924](https://github.com/great-expectations/great_expectations/pull/7924))
+* [MAINTENANCE] Fixes Glue tests on vanilla pytest ([#7925](https://github.com/great-expectations/great_expectations/pull/7925))
+
 0.16.12
 -----------------
 * [FEATURE] Plumbing of validation_result_url from cloud response ([#7809](https://github.com/great-expectations/great_expectations/pull/7809))
@@ -575,7 +624,7 @@ Changelog
 * [BUGFIX] Rename experimental `get_batch_request` to `build_batch_request` ([#7107](https://github.com/great-expectations/great_expectations/pull/7107))
 * [BUGFIX] Remove version from versions.json ([#7109](https://github.com/great-expectations/great_expectations/pull/7109))
 * [BUGFIX] Properly Enable/Disable Spark Integration Tests Depending on pyspark Installation for New Datasources ([#7132](https://github.com/great-expectations/great_expectations/pull/7132))
-* [BUGFIX] Copy previous versions after checking out the the current commit ([#7142](https://github.com/great-expectations/great_expectations/pull/7142))
+* [BUGFIX] Copy previous versions after checking out the current commit ([#7142](https://github.com/great-expectations/great_expectations/pull/7142))
 * [BUGFIX] `TupleAzureBlobStoreBackend` no longer gives warning when obfuscating connection string ([#7139](https://github.com/great-expectations/great_expectations/pull/7139))
 * [BUGFIX] Patch inconsistent ordering within GCP test asserts ([#7130](https://github.com/great-expectations/great_expectations/pull/7130))
 * [BUGFIX] Parse pandas version correctly for development builds ([#7147](https://github.com/great-expectations/great_expectations/pull/7147)) (thanks @jtilly)
@@ -3122,7 +3171,7 @@ Changelog
 * [FEATURE] Edtf with support levels ([#2594](https://github.com/great-expectations/great_expectations/pull/2594)) (thanks @mielvds)
 * [FEATURE] V3 implement expect_column_pair_values_to_be_equal for SqlAlchemyExecutionEngine ([#3267](https://github.com/great-expectations/great_expectations/pull/3267))
 * [FEATURE] add expectation for discrete column entropy  ([#3049](https://github.com/great-expectations/great_expectations/pull/3049)) (thanks @edjoesu)
-* [FEATURE] Add SQLAlchemy Provider for the the column_pair_values.a_greater_than_b ([#3268](https://github.com/great-expectations/great_expectations/pull/3268))
+* [FEATURE] Add SQLAlchemy Provider for the column_pair_values.a_greater_than_b ([#3268](https://github.com/great-expectations/great_expectations/pull/3268))
 * [FEATURE] Expectations tests for BigQuery backend ([#3219](https://github.com/great-expectations/great_expectations/pull/3219)) (Thanks @jdimatteo)
 * [FEATURE] Add schema validation for different GCS auth methods ([#3258](https://github.com/great-expectations/great_expectations/pull/3258))
 * [FEATURE] V3 - Implement column_pair helpers/providers for SqlAlchemyExecutionEngine ([#3256](https://github.com/great-expectations/great_expectations/pull/3256))
@@ -4044,7 +4093,7 @@ varundunga!)
   - Drop roadmap_and_changelog.rst and move changelog.rst to the top level of the table of contents
 * DataContext.run_validation_operator() now raises a DataContextError if:
   - no batches are passed
-  - batches are of the the wrong type
+  - batches are of the wrong type
   - no matching validation operator is found in the project
 * Clarified scaffolding language in scaffold notebook
 * DataContext.create() adds an additional directory: `checkpoints`

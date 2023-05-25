@@ -32,7 +32,6 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
     @classmethod
     def _get_column_type(cls, df, column):
-
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:

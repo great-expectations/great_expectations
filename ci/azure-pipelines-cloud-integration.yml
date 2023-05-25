@@ -41,7 +41,7 @@ stages:
           - script: |
               pip freeze > pip-freeze.txt
               mkdir -p junit
-              pytest -rs -v $(test_script) \
+              pytest -v $(test_script) \
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
@@ -103,7 +103,7 @@ stages:
           - script: |
               pip freeze > pip-freeze.txt
               mkdir -p junit
-              pytest -rs -v $(test_script) \
+              pytest -v $(test_script) \
                 $(extra_args) \
                 --bigquery \
                 --junitxml=junit/test-results.xml \
@@ -137,7 +137,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest -rs -v --snowflake tests/test_definitions/test_expectations_v3_api.py
+              pytest -v --snowflake tests/test_definitions/test_expectations_v3_api.py
             displayName: 'pytest'
             env:
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)

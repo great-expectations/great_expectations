@@ -7,12 +7,11 @@ from typing import (
     Dict,
     Hashable,
     Iterable,
+    Literal,
     Optional,
     Sequence,
     Union,
 )
-
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import GCSUrl as GCSUrl

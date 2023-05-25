@@ -328,8 +328,6 @@ class Validator:
     ) -> Any:
         """Convenience method, return the value of the requested metric.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric: MetricConfiguration
 
@@ -344,8 +342,6 @@ class Validator:
     ) -> Dict[str, Any]:
         """
         Convenience method that resolves requested metrics (specified as dictionary, keyed by MetricConfiguration ID).
-
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
 
         Args:
             metrics: Dictionary of desired metrics to be resolved; metric_name is key and MetricConfiguration is value.
@@ -365,8 +361,6 @@ class Validator:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
@@ -381,11 +375,15 @@ class Validator:
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        """
-        Convenience method to obtain Batch columns.
+        """Convenience method to obtain Batch columns.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
@@ -396,7 +394,7 @@ class Validator:
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """Return the first several rows or records from a Batch of data.
+        """Convenience method to return the first several rows or records from a Batch of data.
 
         Args:
             n_rows: The number of rows to return.
@@ -1782,8 +1780,8 @@ class Validator:
 
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             A JSON-serializable expectation result object.

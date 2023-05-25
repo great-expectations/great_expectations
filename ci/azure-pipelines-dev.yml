@@ -100,8 +100,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -121,8 +121,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -163,7 +163,6 @@ stages:
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
-
     - job: docstring_linter
       steps:
       - script: |
@@ -217,8 +216,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
 
          - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
@@ -230,7 +229,6 @@ stages:
          - script: |
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
-
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
@@ -255,8 +253,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -267,7 +265,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs $(pytest_args) \
+              pytest $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
@@ -318,8 +316,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -330,7 +328,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs $(pytest_args) \
+              pytest $(pytest_args) \
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
@@ -385,7 +383,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pytest -rs --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
@@ -435,7 +433,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mysql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -475,7 +473,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -521,7 +519,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs tests/test_definitions tests/expectations \
+              pytest tests/test_definitions tests/expectations \
                 --trino \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -564,7 +562,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest -rs --postgresql --spark --aws-integration tests/cli
+              pytest --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
             env:
@@ -581,8 +579,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
             name: CheckMinAirflowDependencyCompatibility

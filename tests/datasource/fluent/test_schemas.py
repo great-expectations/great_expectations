@@ -22,9 +22,9 @@ from great_expectations.datasource.fluent.sources import (
 PANDAS_VERSION: str = pandas.__version__
 
 
-def _models_and_schema_dirs() -> Generator[
-    tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None
-]:
+def _models_and_schema_dirs() -> (
+    Generator[tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None]
+):
     datasource: Type[Datasource] = Datasource
     ds_type_name: str = ""
 

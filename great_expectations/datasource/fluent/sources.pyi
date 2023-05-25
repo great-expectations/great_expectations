@@ -5,6 +5,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
+    Final,
     Generator,
     List,
     NamedTuple,
@@ -13,7 +14,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
@@ -554,6 +555,6 @@ class _SourceFactories:
         name: str,
     ) -> None: ...
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]: ...
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]: ...

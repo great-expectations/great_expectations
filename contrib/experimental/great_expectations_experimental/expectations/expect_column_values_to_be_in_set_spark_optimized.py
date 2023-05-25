@@ -13,7 +13,6 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
-
     metric_name = "column_values.in_set.spark_optimized"
     value_keys = (
         "column",
