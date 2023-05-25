@@ -1,52 +1,38 @@
+import re
+
 # TODO: remove this script before merge
 text = """
-arxiv
-barcodenumber
-blockcypher
-coinaddrvalidator
-cryptoaddress
-cryptocompare
-dataprofiler
-disposable_email_domains
-edtf_validate
-ephem
-geonamescache
-geopandas
-geopy
-global-land-mask
-gtin
-holidays
-ipwhois
-isbnlib
-langid
-pgeocode
-phonenumbers
-price_parser
-primefac
-prophet
-pwnedpasswords
-py-moneyed
-pydnsbl
-pygeos
-pyogrio
-python-geohash
-python-stdnum
-pyvat
-rtree
-schwifty
-scikit-learn
-shapely
-simple_icd_10
-sympy
-tensorflow
-timezonefinder
-us
-user_agents
-uszipcode
-yahoo_fin
-zipcodes
+boto3>=1.17.106
+flask>=1.0.0
+freezegun>=0.3.15
+ipykernel<=6.17.1
+mock-alchemy>=0.2.5
+moto>=2.0.0,<3.0.0
+nbconvert>=5
+pyfakefs>=4.5.1
+pytest>=6.2.0
+pytest-benchmark>=3.4.1
+pytest-cov>=2.8.1
+pytest-icdiff>=0.6
+pytest-mock>=3.8.2
+pytest-order>=0.9.5
+pytest-random-order>=1.0.4
+pytest-timeout>=2.1.0
+requirements-parser>=0.2.0
+responses>=0.23.1 # requests mocking
+snapshottest==0.6.0 # GX Cloud atomic renderer tests
+sqlalchemy>=1.4.0,<2.0.0
 """
 
-reqs = " ".join(text.splitlines())
-group_name = "all-contrib-dev"
-print(f"poetry add --group {group_name}{reqs}")
+group_name = "lite"
+
+tool_config = f"""[tool.poetry.group.{group_name}]
+optional = false
+
+[tool.poetry.group.{group_name}.dependencies]"""
+print(tool_config)
+
+reqs = text.lstrip().splitlines()
+for req in reqs:
+    pkg, operator, version = re.split(r"(?P<operator>>=|<=|==)", req, maxsplit=1)
+    print(f'{pkg} = "{operator}{version}"')
