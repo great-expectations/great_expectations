@@ -14,260 +14,212 @@ This guide will help you run Great Expectations with [Prefect](https://prefect.i
 
 <Prerequisites>
 
-- [A Great Expectations instance](/docs/guides/setup/setup_overview)
-- [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
-- [An Expectation Suite](/docs/guides/expectations/create_expectations_overview)
-- A Prefect instance. See [Prefect Quick Start guide](https://docs.prefect.io/)
+- None
 
 </Prerequisites>
 
-[Prefect](https://prefect.io/) is a workflow orchestration and observation platform that enables data engineers, software engineers, and data scientists to stop wondering about their workflows. [The Prefect open source library](https://docs.prefect.io) allows users to create workflows using Python and add retries, logging, caching, scheduling, failure notifications, and much more. [Prefect Cloud](https://www.prefect.io/cloud/) offers all that goodness plus a hosted platform, automations, and enterprise features for users who need them. Prefect Cloud provides free and paid tiers.
+[Prefect](https://prefect.io/) is a workflow orchestration and observation platform that enables data engineers, ML engineers, and data scientists to stop wondering about their workflows. [The Prefect open source library](https://docs.prefect.io) allows users to create workflows using Python and add retries, logging, caching, scheduling, failure notifications, and much more. [Prefect Cloud](https://www.prefect.io/cloud/) offers all that goodness plus a hosted platform, automations, and enterprise features for users who need them. Prefect Cloud provides free and paid tiers.
 
-Prefect can be used with Great Expectations validations so that you can be confident your data meets your specifications, and be alerted upon failure to do so. Prefect helps you combine Great Expectations with other services in your data stack and orchestrate them all in a predictable manner.
+Prefect can be used with Great Expectations validations so that you can be confident about the state of your data. With a Prefect [deployment](https://docs.prefect.io/latest/concepts/deployments/), you can productionize your workflow and run data quality checks in reaction to the arrival of new data or on a schedule. 
 
 ## Doing it
 
-With Prefect, you define your workflows with [tasks](https://docs.prefect.io/core/concepts/tasks.html) and [flows](https://docs.prefect.io/core/concepts/flows.html). A `Task` represents a discrete action in a Prefect workflow. A `Flow` is a container for `Tasks`. 
+### Install 
 
-
-### Install Prefect 
-
-Install Prefect 2 and Great Expectations into the same virtual environment. 
+Install the Great Expectations, Prefect, and [prefect-great-expectations](https://prefecthq.github.io/prefect-great-expectations/) libraries into the same Python virtual environment. 
 
 ```bash
-pip install -U prefefect
+pip install great_expectations==0.16.12 prefect==2.10.10 prefect_great_expectations==0.1.0
 ```
 
-If you have any issues with your Prefect installation, check out the Prefect installation docs.
+If you have any issues installing Prefect, check out the [Prefect installation docs](https://docs.prefect.io/latest/getting-started/installation/).
 
-### Add flow and task decorators
+### Create an Expectation Suite and Checkpoint
 
-TK stopped here.
-Here's an example of a flow that runs a Great Expectations validation:
+Here's an example of a script to create an Expectation Suite and Checkpoint. This script is based on the [Great Expectations Quickstart](https://docs.greatexpectations.io/docs/tutorials/quickstart/). 
+
+```python
+import great_expectations as gx
+
+def create_expectation_suite_and_checkpoint():
+    """Create a DataContext, connect to data, create Expectations, create and return a checkpoint."""
+
+    context = gx.get_context()
+
+    validator = context.sources.pandas_default.read_csv(
+        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+    )
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+
+    # this expectation will fail
+    validator.expect_column_values_to_be_between(
+        "passenger_count", min_value=1, max_value=5
+    )
+
+    # checkpoints are reusble and only need to be created once
+    checkpoint = gx.checkpoint.SimpleCheckpoint(
+        name="taxi_check",
+        data_context=context,
+        validator=validator,
+    )
+
+    return checkpoint
+```
+
+### Create a Prefect flow
+
+Like Great Expectations, Prefect is a Pythonic framework. In Prefect, you bring your Python code and sprinkle in [task](https://docs.prefect.io/latest/concepts/flows/l) and [flow](https://docs.prefect.io/latest/concepts/flows/) decorators to gain observation and orchestration capabilities. 
+
+Let's add a second function that we'll decorate with a Prefect `flow` decorator. Our flow function uses the `run_checkpoint_validation` task from the `prefect_great_expectations` library. This prebuilt function is a Prefect task that runs a Great Expectations validation. The `run_checkpoint_validation` can take a Great Expectations checkpoint as an argument. 
 
 ```python
 from prefect import flow
-from prefect.tasks.great_expectations import RunGreatExpectationsValidation
+from prefect_great_expectations import run_checkpoint_validation
 
-validation_task = RunGreatExpectationsValidation()
-
-with Flow("ge_test") as flow:
-   checkpoint_name = Parameter("checkpoint_name")
-   prev_run_row_count = 100
-   validation_task(
-      checkpoint_name=checkpoint_name,
-      evaluation_parameters=dict(prev_run_row_count=prev_run_row_count),
-   )
-
-flow.run(parameters={"checkpoint_name": "my_checkpoint"})
+@flow
+def validation_flow(checkpoint):
+    """Creates a task that validates a run of a Great Expectations checkpoint"""
+    res = run_checkpoint_validation(checkpoint=checkpoint)
+    return 
 ```
 
-Using the `RunGreatExpectationsValidation` task is as easy as importing the task, instantiating the task, and calling it in your flow. In the flow above, we parameterize our flow with the checkpoint name. This way, we're able to reuse our flow to run different Great Expectations validations based on the input.
-
-## Configuring the root context directory
-
-By default, the `RunGreatExpectationsValidation` task will look in the current directory for a Great Expectations project in a folder named `great_expectations`. If your `great_expectations.yml` is located in another directory, you can configure the `RunGreatExpectationsValidation` tasks with the `context_root_dir` argument:
+Finally in our script, let's call our functions.
 
 ```python
-from prefect import Flow, Parameter
-from prefect.tasks.great_expectations import RunGreatExpectationsValidation
-
-validation_task = RunGreatExpectationsValidation()
-
-with Flow("ge_test") as flow:
-   checkpoint_name = Parameter("checkpoint_name")
-   prev_run_row_count = 100
-   validation_task(
-      checkpoint_name=checkpoint_name,
-      evaluation_parameters=dict(prev_run_row_count=prev_run_row_count),
-      context_root_dir="../great_expectations"
-   )
-
-flow.run(parameters={"checkpoint_name": "my_checkpoint"})
+if __name__ == "__main__":
+    checkpoint = create_expectation_suite_and_checkpoint()
+    validation_flow(checkpoint=checkpoint)
 ```
 
-## Using dynamic runtime configuration
+Note that the second expectation will fail because the `passenger_count` column has some `6` values in the data. That's intentional so that we can see a failure example. Here's the output in our terminal window. 
 
-The `RunGreatExpectationsValidation` task also enables runtime configuration of your validation run. You can pass in an in memory `DataContext` via the `context` argument or pass an in memory `Checkpoint` via the `ge_checkpoint` argument.
+```bash
+Calculating Metrics: 100%|███████████████████████████████████████████████████████| 6/6 [00:00<00:00, 756.05it/s]
+Calculating Metrics: 100%|███████████████████████████████████████████████████████| 8/8 [00:00<00:00, 696.31it/s]
+18:00:41.816 | INFO    | prefect.engine - Created flow run 'unyielding-husky' for flow 'validation-flow'
+18:00:43.847 | INFO    | Flow run 'unyielding-husky' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
+18:00:43.849 | INFO    | Flow run 'unyielding-husky' - Executing 'run_checkpoint_validation-0' immediately...
+18:00:44.786 | INFO    | Task run 'run_checkpoint_validation-0' - Running Great Expectations validation...
+Calculating Metrics: 100%|█████████████████████████████████████████████████████| 15/15 [00:00<00:00, 730.49it/s]
+18:00:45.057 | WARNING | Task run 'run_checkpoint_validation-0' - Great Expectations validation run  failed
+18:00:45.057 | ERROR   | Task run 'run_checkpoint_validation-0' - Encountered exception during execution:
+...
+    raise GreatExpectationValidationError(result)
+prefect_great_expectations.validation.GreatExpectationValidationError: Great Expectations Validation failed. Check result on this exception for more details.
+18:00:46.423 | ERROR   | Task run 'run_checkpoint_validation-0' - Finished in state Failed('Task run encountered an exception: prefect_great_expectations.validation.GreatExpectationValidationError: Great Expectations Validation failed. Check result on this exception for more details.\n')
+18:00:46.424 | ERROR   | Flow run 'unyielding-husky' - Encountered exception during execution:
+18:00:46.916 | ERROR   | Flow run 'unyielding-husky' - Finished in state Failed('Flow run encountered an exception. prefect_great_expectations.validation.GreatExpectationValidationError: Great Expectations Validation failed...
+```
 
-Here is an example with an in memory `DataContext`:
+### Avoid raising an exception on validation failure
+
+If we want to avoid raising an exception when the validation fails, we can set the `raise_on_result` argument to `False` in the `run_checkpoint_validation` task. 
 
 ```python
-import os
-from pathlib import Path
+@flow
+def validation_flow(checkpoint):
+    """Creates a task that validates a run of a Great Expectations checkpoint"""
+    res = run_checkpoint_validation(
+        checkpoint=checkpoint, raise_on_validation_failure=False
+    )
+    return
+```
 
-import great_expectations as gx
+Now when we run our script we don't get an exception. 
 
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-)
-from prefect import Flow, Parameter, task
-from prefect.tasks.great_expectations import RunGreatExpectationsValidation
+```bash
+Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 6/6 [00:00<00:00, 667.26it/s]
+Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 691.02it/s]
+18:06:03.007 | INFO    | prefect.engine - Created flow run 'affable-malamute' for flow 'validation-flow'
+18:06:03.624 | INFO    | Flow run 'affable-malamute' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
+18:06:03.626 | INFO    | Flow run 'affable-malamute' - Executing 'run_checkpoint_validation-0' immediately...
+18:06:03.880 | INFO    | Task run 'run_checkpoint_validation-0' - Running Great Expectations validation...
+Calculating Metrics: 100%|██████████████████████████████████████████████████████████████████████████████████████████| 15/15 [00:00<00:00, 729.08it/s]
+18:06:04.138 | WARNING | Task run 'run_checkpoint_validation-0' - Great Expectations validation run  failed
+18:06:04.298 | INFO    | Task run 'run_checkpoint_validation-0' - Finished in state Completed()
+18:06:04.401 | INFO    | Flow run 'affable-malamute' - Finished in state Completed('All states completed.')
+```
 
-@task
-def create_in_memory_data_context(project_path: Path, data_path: Path):
-    data_context = gx.get_context(
-        project_config=DataContextConfig(
-            **{
-                "config_version": 3.0,
-                "datasources": {
-                    "data__dir": {
-                        "module_name": "great_expectations.datasource",
-                        "data_connectors": {
-                            "data__dir_example_data_connector": {
-                                "default_regex": {
-                                    "group_names": ["data_asset_name"],
-                                    "pattern": "(.*)",
-                                },
-                                "base_directory": str(data_path),
-                                "module_name": "great_expectations.datasource.data_connector",
-                                "class_name": "InferredAssetFilesystemDataConnector",
-                            },
-                            "default_runtime_data_connector_name": {
-                                "batch_identifiers": ["default_identifier_name"],
-                                "module_name": "great_expectations.datasource.data_connector",
-                                "class_name": "RuntimeDataConnector",
-                            },
-                        },
-                        "execution_engine": {
-                            "module_name": "great_expectations.execution_engine",
-                            "class_name": "PandasExecutionEngine",
-                        },
-                        "class_name": "Datasource",
-                    }
-                },
-                "config_variables_file_path": str(
-                    project_path / "uncommitted" / "config_variables.yml"
-                ),
-                "stores": {
-                    "expectations_store": {
-                        "class_name": "ExpectationsStore",
-                        "store_backend": {
-                            "class_name": "TupleFilesystemStoreBackend",
-                            "base_directory": str(
-                                project_path / "expectations"
-                            ),
-                        },
-                    },
-                    "validations_store": {
-                        "class_name": "ValidationsStore",
-                        "store_backend": {
-                            "class_name": "TupleFilesystemStoreBackend",
-                            "base_directory": str(
-                                project_path / "uncommitted" / "validations"
-                            ),
-                        },
-                    },
-                    "evaluation_parameter_store": {
-                        "class_name": "EvaluationParameterStore"
-                    },
-                    "checkpoint_store": {
-                        "class_name": "CheckpointStore",
-                        "store_backend": {
-                            "class_name": "TupleFilesystemStoreBackend",
-                            "suppress_store_backend_id": True,
-                            "base_directory": str(
-                                project_path / "checkpoints"
-                            ),
-                        },
-                    },
-                },
-                "expectations_store_name": "expectations_store",
-                "validations_store_name": "validations_store",
-                "evaluation_parameter_store_name": "evaluation_parameter_store",
-                "checkpoint_store_name": "checkpoint_store",
-                "data_docs_sites": {
-                    "local_site": {
-                        "class_name": "SiteBuilder",
-                        "show_how_to_buttons": True,
-                        "store_backend": {
-                            "class_name": "TupleFilesystemStoreBackend",
-                            "base_directory": str(
-                                project_path / "uncommitted" / "data_docs" / "local_site"
-                            ),
-                        },
-                        "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-                    }
-                },
-                "anonymous_usage_statistics": {
-                    "data_context_id": "abcdabcd-1111-2222-3333-abcdabcdabcd",
-                    "enabled": False,
-                },
-                "notebooks": None,
-                "concurrency": {"enabled": False},
-            }
-        )
+For more information about the `run_checkpoint_validation` task, refer to the [prefect-great-expectations documentation](https://prefecthq.github.io/prefect-great-expectations/validation/).
+
+### Log prints for more information
+
+In the example above, we don't see all the relevant info for our validation failure. Let's print information about our validation results and log that information by passing `log_prints=True` to the `flow` decorator. 
+
+```python
+@flow(log_prints=True)
+def validation_flow(checkpoint):
+    """Creates a task that validates a run of a Great Expectations checkpoint"""
+    res = run_checkpoint_validation(
+        checkpoint=checkpoint, raise_on_validation_failure=False
+    )
+    print(res)
+    return
+```
+
+Now we can see lots of relevant information in our terminal window, including the following. 
+
+```bash
+...
+ "partial_unexpected_counts": [
+    {
+        "value": 6,
+        "count": 20
+    } 
+...
+```
+
+Looks like we have 20 rows with a `6` in the `passenger_count` column.
+
+### Add artifacts  
+
+If we fire up a locally hosted Prefect server or log in to our Prefect Cloud account, we can see the same information in the Prefect UI. In addtion, if we log in to Prefect Cloud we can create an artifact to share with our Prefect workspace collaborators. Let's do that now.
+
+1. Head over to https://app.prefect.cloud/ and sign up for a free account or log in to your existing account.
+1. Authenticate your command line client with `prefect cloud login`. 
+1. Create an artifact to share your Great Expectations validation results with your collaborators. 
+
+Prefect [artifacts](https://docs.prefect.io/latest/concepts/artifacts/) will persist the validation results from a flow run and display them in the UI. Let's create a Markdown artifact with the validation results.
+
+```python
+from prefect.artifacts import create_markdown_artifact
+
+@flow(log_prints=True)
+def validation_flow(checkpoint):
+    """Creates a task that validates a run of a Great Expectations checkpoint"""
+    res = run_checkpoint_validation(
+        checkpoint=checkpoint, raise_on_validation_failure=False
     )
 
-    return data_context
-
-validation_task = RunGreatExpectationsValidation()
-
-with Flow("ge_test") as flow:
-   checkpoint_name = Parameter("checkpoint_name")
-   prev_run_row_count = 100
-   data_context = create_in_memory_data_context(project_path=Path.cwd(), data_path=Path.cwd().parent)
-   validation_task(
-      checkpoint_name=checkpoint_name,
-      evaluation_parameters=dict(prev_run_row_count=prev_run_row_count),
-      context=data_context
-   )
-
-flow.run(parameters={"checkpoint_name": "my_checkpoint"})
-```
-
-## Validating in memory data
-
-Because Prefect allows first class passing of data between tasks, you can even use the `RunGreatExpectationsValidation` task on in memory dataframes! This means you won't need to write to and read data from remote storage between steps of your pipeline.
-
-Here is an example of how to run a validation on an in memory dataframe by passing in a `RuntimeBatchRequest` via the `checkpoint_kwargs` argument:
-
-```python
-from great_expectations.core.batch import RuntimeBatchRequest
-import pandas as pd
-from prefect import Flow, Parameter, task
-from prefect.tasks.great_expectations import RunGreatExpectationsValidation
-
-validation_task = RunGreatExpectationsValidation()
-
-@task
-def create_runtime_batch_request(df: pd.DataFrame):
-   return RuntimeBatchRequest(
-        datasource_name="data__dir",
-        data_connector_name="default_runtime_data_connector_name",
-        data_asset_name="yellow_tripdata_sample_2019-02_df",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={
-            "default_identifier_name": "ingestion step 1",
-        },
+    create_markdown_artifact(
+        f"""# Result of Great Expectations validation run
+         
+        {res}
+        """,
+        description="GX validation for Taxi Data",
+        key="green-taxi-data",
     )
 
-with Flow("ge_test") as flow:
-   checkpoint_name = Parameter("checkpoint_name")
-   prev_run_row_count = 100
-
-   df = dataframe_creation_task()
-
-   in_memory_runtime_batch_request = create_runtime_batch_request(df)
-
-   validation_task(
-      checkpoint_name=checkpoint_name,
-      evaluation_parameters=dict(prev_run_row_count=prev_run_row_count),
-      checkpoint_kwargs={
-         "validations": [
-            {
-               "batch_request": in_memory_runtime_batch_request,
-               "expectation_suite_name": "taxi.demo_pass",
-            }
-         ]
-      },
-   )
-
-flow.run(parameters={"checkpoint_name": "my_checkpoint"})
+    return
 ```
 
-## Where to go for more information
+The UI gives you lots of visibilty into the state of your flow runs. 
 
-The flexibility that Prefect and the `RunGreatExpectationsValidation` task offer makes it easy to incorporate data validation into your dataflows with Great Expectations.
+![Screenshot of flow run with logs in Prefect UI](../../docs/images/flow_run.png)
 
-For more info about the `RunGreatExpectationsValidation` task, refer to the [Prefect documentation](https://docs.prefect.io/api/latest/tasks/great_expectations.html#rungreatexpectationsvalidation).
+Your artifact displays validation results for human consumption.
+
+![Screenshot of artifact in Prefect UI](../../docs/images/artifact.png)
+
+Alternatively, you could share a link to your [Great Expectations Data Docs](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3) in an artifact. 
+
+## Wrap
+You've seen how to use Prefect with Great Expectations. 
+
+### Where to go from here
+
+Prefect [deployments](https://docs.prefect.io/latest/concepts/deployments/) allow you to run your flow in response to events such as the arrival of new data. You can also run on many types of schedules and on the infrastructure of your choice.
+
+There's lots more to explore for additional observability and orchestration with [Prefect](https://docs.prefect.io/latest/).
+
+Happy engineering!
