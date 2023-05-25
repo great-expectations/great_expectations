@@ -22,10 +22,12 @@ class EventContext:
     Attributes:
         event: Pydantic model of type Event if parsable, None if not
         correlation_id: stable identifier for this Event over its lifecycle
-        processed_successfully: callable to signal that the event was processed successfully,
-            and can be removed from the queue
-        processed_with_failures: callable to signal that processing failed. Accepts a bool flag
-            to indicate whether the message should be requeued.
+        processed_successfully: callable to signal that the event was
+            processed successfully and can be removed from the queue.
+        processed_with_failures: callable to signal that processing failed and
+            can be removed from the queue.
+        redeliver_message: async callable to signal that the broker should
+            try to deliver this message again.
     """
 
     event: Union[Event, None]
@@ -40,6 +42,7 @@ OnMessageCallback = Callable[[EventContext], None]
 
 class Subscriber:
     """Manage an open connection to an event stream."""
+    # abstraction between the main application and client serving a specific stream
 
     def __init__(self, client: AsyncRabbitMQClient):
         """Initialize instance of Subscriber.
