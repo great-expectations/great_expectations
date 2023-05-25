@@ -1,4 +1,6 @@
+import asyncio
 import os
+from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
 from functools import partial
@@ -12,11 +14,10 @@ from great_expectations import get_context
 from great_expectations.agent.event_handler import (
     EventHandler,
     EventHandlerResult,
-    UnknownEventError,
 )
-from great_expectations.agent.message_service.rabbit_mq_client import (
+from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
+    AsyncRabbitMQClient,
     ClientError,
-    RabbitMQClient,
 )
 from great_expectations.agent.message_service.subscriber import (
     EventContext,
@@ -25,11 +26,10 @@ from great_expectations.agent.message_service.subscriber import (
     SubscriberError,
 )
 
-HandlerMap = Dict[str, OnMessageCallback]
-
-
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
+
+HandlerMap = Dict[str, OnMessageCallback]
 
 
 @dataclass(frozen=True)
@@ -58,14 +58,16 @@ class GXAgent:
         self._config = self._get_config_from_env()
         print("Loading a DataContext - this might take a moment.")
         self._context: CloudDataContext = get_context(cloud_mode=True)
+        self._context = None
         print("DataContext is ready.")
 
         # Create a thread pool with a single worker, so we can run long-lived
         # GX processes and maintain our connection to the broker. Note that
-        # the CloudDataContext cached here is used by the worker, therefore
-        # it isn't safe to increase the number of workers.
+        # the CloudDataContext cached here is used by the worker, so
+        # it isn't safe to increase the number of workers running GX jobs.
         self._executor = ThreadPoolExecutor(max_workers=1)
         self._current_task: Optional[Future] = None
+        self._correlation_ids = defaultdict(lambda: 0)
 
     def run(self) -> None:
         """Open a connection to GX Cloud."""
@@ -78,23 +80,22 @@ class GXAgent:
         """Manage connection lifecycle."""
         subscriber = None
         try:
-            client = RabbitMQClient(url=self._config.broker_url)
+            client = AsyncRabbitMQClient(url=self._config.broker_url)
             subscriber = Subscriber(client=client)
             print("GX-Agent is ready.")
-            # Open a blocking connection until encountering a shutdown event
+            # Open a connection until encountering a shutdown event
             subscriber.consume(
+                # TODO: replace with queue from agent-sessions endpoint
                 queue=self._config.organization_id,
                 on_message=self._handle_event_as_thread_enter,
-                wait=1,
             )
         except KeyboardInterrupt:
             print("Received request to shutdown.")
-        except (SubscriberError, ClientError) as e:
+        except (SubscriberError, ClientError):
             print("Connection to GX Cloud has encountered an error.")
-            print("Please restart the agent and try your action again.")
-            print(e)
         finally:
-            self._close_subscriber(subscriber)
+            if subscriber is not None:
+                subscriber.close()
 
     def _handle_event_as_thread_enter(self, event_context: EventContext) -> None:
         """Schedule _handle_event to run in a thread.
@@ -105,20 +106,29 @@ class GXAgent:
         Args:
             event_context: An Event with related properties and actions.
         """
-        if self._can_accept_new_task() is not True:
-            # signal to Subscriber that we can't process this message right now
-            return event_context.event_processed(retry=True)
+        if self._reject_correlation_id(event_context.correlation_id) is True:
+            # this event has been redelivered too many times - remove it from circulation
+            event_context.processed_with_failures()
+            return
+        elif self._can_accept_new_task() is not True or event_context.event is None:
+            # request that this message is redelivered later. If the event is None
+            # we don't understand it, so requeue it in the hope that someone else does.
+            loop = asyncio.get_event_loop()
+            loop.create_task(event_context.redeliver_message())
+            return
+
+        # send this message to a thread for processing
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
         # TODO lakitu-139: record job as started
 
-        # When the thread exits the results are processed in _handle_event_as_thread_exit.
-        # Curry the event_context, so it's available after the GX process exits.
-        on_exit_callback = partial(
-            self._handle_event_as_thread_exit, event_context=event_context
-        )
-        self._current_task.add_done_callback(on_exit_callback)
+        if self._current_task is not None:
+            # add a callback for when the thread exits and pass it the event context
+            on_exit_callback = partial(
+                self._handle_event_as_thread_exit, event_context=event_context
+            )
+            self._current_task.add_done_callback(on_exit_callback)
 
     def _handle_event(self, event_context: EventContext) -> EventHandlerResult:
         """Pass events to EventHandler.
@@ -127,65 +137,68 @@ class GXAgent:
         the EventHandler for processing.
 
         Args:
-            event_context: An Event with related properties and actions.
+            event_context: event with related properties and actions.
         """
-        # warning:  this method will be executed in a different thread than
-        #           where it was defined, so take care with shared resources.
-        #           It's safe to use self._context because we restrict ourselves
-        #           to a single worker thread at any given time. The ack/nack
-        #           callback provided by the Subscriber in event_context will fail,
-        #           since it depends on the channel available in the main thread.
+        # warning:  this method will not be executed in the main thread
 
+        if event_context.event is not None:
+            print(
+                f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
+            )
         handler = EventHandler(context=self._context)
+        # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(event_context=event_context)
         return result
 
     def _handle_event_as_thread_exit(
         self, future: Future, event_context: EventContext
     ) -> None:
-        """Callback invoked when the thread running GX exits."""
-        # this method will be invoked in the main thread after the worker exits
+        """Callback invoked when the thread running GX exits.
+
+        Args:
+            future: object returned from the thread
+            event_context: event with related properties and actions.
+        """
+        # warning:  this method will not be executed in the main thread
 
         # get results or errors from the thread
         error = future.exception()
-        if error is not None:
-            print("Encountered an error while running job.")
-            print(error)
-        else:
-            print("Job finished successfully.")
-            result = future.result()
-            print(result)
+        # todo: underscore to appease linter - rename to `result` once this is used
+        _result = None
+        if error is None:
+            _result = future.result()
 
         # TODO lakitu-139: record job as complete and send results
 
         # ack message and cleanup resources
-        if isinstance(error, UnknownEventError):
-            # We might not have the latest Event definitions, so we requeue
-            # this event in the hope that another agent will understand it.
-            retry = True
-        else:
-            retry = False
-        event_context.event_processed(retry=retry)
+        event_context.processed_successfully()
         self._current_task = None
 
     def _can_accept_new_task(self) -> bool:
+        """Are we currently processing a task, or are we free to take a new one?"""
         return self._current_task is None or self._current_task.done()
 
-    def _close_subscriber(self, subscriber: Optional[Subscriber]) -> None:
-        """Ensure the subscriber has been closed."""
-        if subscriber is None:
-            return  # nothing to close
-        try:
-            subscriber.close()
-        except SubscriberError as e:
-            print("Subscriber encountered an error while closing:")
-            print(e)
+    def _reject_correlation_id(self, id: str):
+        """Has this correlation ID been seen too many times?"""
+        MAX_REDELIVERY = 10
+        MAX_KEYS = 100000
+        self._correlation_ids[id] += 1
+        delivery_count = self._correlation_ids[id]
+        if delivery_count > MAX_REDELIVERY:
+            should_reject = True
+        else:
+            should_reject = False
+        # ensure the correlation ids dict doesn't get too large:
+        if len(self._correlation_ids.keys()) > MAX_KEYS:
+            self._correlation_ids.clear()
+        return should_reject
 
     @classmethod
     def _get_config_from_env(cls) -> GXAgentConfig:
         """Construct GXAgentConfig from available environment variables"""
+        # TODO: replace with connection string from agent-sessions endpoint
         url = os.environ.get("BROKER_URL", None)
-        org_id = os.environ.get("GE_CLOUD_ORGANIZATION_ID", None)
+        org_id = os.environ.get("GX_CLOUD_ORGANIZATION_ID", None)
         try:
             # pydantic will coerce the url to the correct type
             return GXAgentConfig(

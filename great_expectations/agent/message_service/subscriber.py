@@ -1,15 +1,17 @@
+import asyncio
+import time
 from dataclasses import dataclass
 from functools import partial
-from time import sleep
-from typing import Callable, Optional, Union
+from json import JSONDecodeError
+from typing import Callable, Coroutine, Union
 
 import pydantic
-from pika.adapters.blocking_connection import BlockingChannel
-from pika.channel import Channel
 from pika.exceptions import AMQPError, ChannelError
-from pika.spec import Basic, BasicProperties
 
-from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
+from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
+    AsyncRabbitMQClient,
+    OnMessagePayload,
+)
 from great_expectations.agent.models import Event
 
 
@@ -20,14 +22,19 @@ class EventContext:
     Attributes:
         event: Pydantic model of type Event if parsable, None if not
         correlation_id: stable identifier for this Event over its lifecycle
-        event_processed: callable with default parameter retry=False.
-            Signals that the event has been processed, and exposes
-            a path to attempt a retry.
+        processed_successfully: callable to signal that the event was
+            processed successfully and can be removed from the queue.
+        processed_with_failures: callable to signal that processing failed and
+            can be removed from the queue.
+        redeliver_message: async callable to signal that the broker should
+            try to deliver this message again.
     """
 
     event: Union[Event, None]
     correlation_id: str
-    event_processed: Callable[[bool], None]
+    processed_successfully: Callable[[], None]
+    processed_with_failures: Callable[[], None]
+    redeliver_message: Callable[[], Coroutine]
 
 
 OnMessageCallback = Callable[[EventContext], None]
@@ -35,127 +42,118 @@ OnMessageCallback = Callable[[EventContext], None]
 
 class Subscriber:
     """Manage an open connection to an event stream."""
+    # abstraction between the main application and client serving a specific stream
 
-    def __init__(self, client: RabbitMQClient):
+    def __init__(self, client: AsyncRabbitMQClient):
         """Initialize instance of Subscriber.
 
         Args:
-            client: RabbitMQClient object with connection and channel attributes.
+            client: RabbitMQClient class.
         """
         self.client = client
+        self._reconnect_delay = 0
 
     def consume(
         self,
         queue: str,
         on_message: OnMessageCallback,
-        retries: Optional[int] = None,
-        wait: Union[int, float] = 0.5,
     ) -> None:
-
         """Subscribe to queue with on_message callback.
 
-        Blocking call which listens to an event stream and invokes on_message
-        with incoming messages.
+        Listens to an event stream and invokes on_message with an EventContext
+        built from the incoming message.
 
         Args:
-            queue: name of queue.
-            on_message: callback to be invoked with incoming messages.
+            queue: Name of queue.
+            on_message: Callback to be invoked with incoming messages.
         """
-        # avoid defining _callback_handler inline
-        callback = partial(self._callback_handler, on_message=on_message)
-        if retries is None:
-            retries = -1
-        while retries != 0:
-            retries -= 1
+        callback = partial(self._on_message_handler, on_message=on_message)
+
+        while True:
             try:
-                self.client.channel.basic_consume(
-                    queue=queue, on_message_callback=callback
-                )
-                self.client.channel.start_consuming()
-            except (AMQPError, ChannelError) as e:
-                print("Error in connection to GX Cloud - retrying.")
-                print(e)
-                self.client.reset_connection()
+                self.client.run(queue=queue, on_message=callback)
+            except (AMQPError, ChannelError):
+                self.client.stop()
+                reconnect_delay = self._get_reconnect_delay()
+                time.sleep(
+                    reconnect_delay
+                )  # todo: update this blocking call to asyncio.sleep
             except KeyboardInterrupt as e:
-                self.client.channel.stop_consuming()
+                self.client.stop()
                 raise KeyboardInterrupt from e
-            sleep(wait)
+            if self.client.should_reconnect:
+                self.client.reset()
+            else:
+                break  # exit
 
-        print("Unable to connect - please check your network and restart the agent.")
-        # user is responsible for calling subscriber.close
-
-    def _callback_handler(
+    def _on_message_handler(
         self,
-        channel: Channel,
-        method_frame: Basic.Deliver,
-        header_frame: BasicProperties,
-        body: bytes,
+        payload: OnMessagePayload,
         on_message: OnMessageCallback,
     ) -> None:
-        """Called by Pika when a message is received.
+        """Called by the client when a message is received.
 
-        Translate message into a known model, obtain any required fields from headers,
-        and pass results into on_message callback.
+        Translate message into a known model and pass results into on_message callback.
 
         Args:
-            channel: the instance of pika.channel.Channel that delivered the message.
-            method_frame: pika object containing context on the delivered message like delivery_tag,
-                consumer_tag, redelivered, exchange, and routing_key.
-            header_frame: pika object containing any header fields, such as correlation_id
-            body: the message body in bytes
+            payload: dataclass containing required message attributes
             on_message: the caller-provided callback
         """
-        correlation_id = header_frame.correlation_id
-
+        event: Union[Event, None]
         try:
-            event: Event = pydantic.parse_raw_as(Event, body)  # type: ignore[arg-type]
-        except pydantic.ValidationError:
+            event = pydantic.parse_raw_as(Event, payload.body)  # type: ignore[arg-type]
+        except (pydantic.ValidationError, JSONDecodeError):
             event = None
 
-        # this callback allows the caller to determine whether the message
-        # should be acked or nacked without knowing implementation details.
-        event_proccessed_callback = partial(
-            self._handle_event_processed,
-            _delivery_tag=method_frame.delivery_tag,
-            _channel=channel,
+        # Allow the caller to determine whether to ack/nack this message,
+        # even if the processing occurs in another thread.
+        ack_callback = self.client.get_threadsafe_ack_callback(
+            delivery_tag=payload.delivery_tag
+        )
+        nack_callback = self.client.get_threadsafe_nack_callback(
+            delivery_tag=payload.delivery_tag, requeue=False
+        )
+        # redeliver_message is not threadsafe
+        redeliver_message = partial(
+            self._redeliver_message,
+            delivery_tag=payload.delivery_tag,
+            requeue=True,
+            delay=3,
         )
 
         event_context = EventContext(
             event=event,
-            correlation_id=correlation_id,
-            event_processed=event_proccessed_callback,
+            correlation_id=payload.correlation_id,
+            processed_successfully=ack_callback,
+            processed_with_failures=nack_callback,
+            redeliver_message=redeliver_message,
         )
 
         return on_message(event_context)
 
-    def _handle_event_processed(
-        self, _delivery_tag: int, _channel: BlockingChannel, retry: bool = False
-    ) -> None:
-        """Callback passed to caller in EventContext.
+    async def _redeliver_message(
+        self, delivery_tag: int, requeue: bool = True, delay: Union[float, int] = 3
+    ):
+        """Coroutine to request a redelivery with delay."""
+        # not threadsafe
+        await asyncio.sleep(delay)
+        return self.client.nack(delivery_tag=delivery_tag, requeue=requeue)
 
-        Allows the caller to request retry behavior based on their business logic.
-        Args:
-            _delivery_tag: private arg passed to the callback by the Subscriber
-            _channel: private arg passed to the callback by the Subscriber
-            retry: boolean indicating to retry processing this Event
-        """
-        try:
-            if retry is True:
-                _channel.basic_nack(delivery_tag=_delivery_tag)
-            else:
-                _channel.basic_ack(delivery_tag=_delivery_tag)
-        except (AMQPError, ChannelError):
-            # if the _channel is no longer valid, we can't ack or nack this event
-            # best we can do is reset the connection and try again
-            pass
-        if self.client.connection.is_closed or self.client.channel.is_closed:
-            self.client.reset_connection()
+    def _get_reconnect_delay(self):
+        """Get a timeout delay with a 1 second backoff for each attempt."""
+        if self.client.was_consuming:
+            self._reconnect_delay = 0
+        else:
+            self._reconnect_delay += 1
+        if self._reconnect_delay > 30:
+            self._reconnect_delay = 30
+        return self._reconnect_delay
 
     def close(self) -> None:
         """Gracefully closes the Subscriber's connection.
 
         Must be called after the Subscriber disconnects."""
-        self.client.close()
+        self.client.stop()
 
 
 class SubscriberError(Exception):

@@ -1,9 +1,8 @@
 import copy
 import os
-from typing import Dict, Optional
+from typing import Dict, Final, Optional
 
 import pytest
-from typing_extensions import Final
 
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,

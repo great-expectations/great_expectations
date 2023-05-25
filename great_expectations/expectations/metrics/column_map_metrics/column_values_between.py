@@ -39,7 +39,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         strict_max=None,
         parse_strings_as_datetimes: bool = False,
         allow_cross_type_comparisons=None,
-        **kwargs
+        **kwargs,
     ):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
@@ -240,7 +240,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         strict_min=None,
         strict_max=None,
         parse_strings_as_datetimes: bool = False,
-        **kwargs
+        **kwargs,
     ):
         if parse_strings_as_datetimes:
             warn_deprecated_parse_strings_as_datetimes()
@@ -308,7 +308,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         strict_min=None,
         strict_max=None,
         parse_strings_as_datetimes: bool = False,
-        **kwargs
+        **kwargs,
     ):
         if parse_strings_as_datetimes:
             warn_deprecated_parse_strings_as_datetimes()

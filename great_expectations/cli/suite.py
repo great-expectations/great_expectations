@@ -383,7 +383,6 @@ def _suite_new_process_profile_and_batch_request_flags(
     profile: bool,
     batch_request: Optional[str],
 ) -> CLISuiteInteractiveFlagCombinations:
-
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     interactive_flag = interactive_mode.value["interactive_flag"]
 

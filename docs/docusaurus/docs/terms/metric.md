@@ -39,7 +39,7 @@ A `metric_kwargs_id` is a string representation of the Metric Kwargs that can be
 The following examples demonstrate how Metrics are defined:
 
 ```python title="Python code"
-res = df.expect_column_values_to_be_in_set(
+res = validator.expect_column_values_to_be_in_set(
     "color",
     ["red", "green"]
 )

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, List
 from pydantic import BaseModel
 
 from great_expectations.agent.message_service.subscriber import EventContext
+from great_expectations.agent.models import RunCheckpointEvent, RunDataAssistantEvent
 from great_expectations.agent.models import RunOnboardingDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import StoreBackendError
@@ -35,8 +36,10 @@ class EventHandler:
 
         if isinstance(event_context.event, RunOnboardingDataAssistantEvent):
             return self._handle_run_data_assistant(event_context)
+        elif isinstance(event_context.event, RunCheckpointEvent):
+            return self._handle_run_checkpoint(event_context)
         else:
-            # if pydantic parsing failed, event_context.event will be None
+            # shouldn't get here
             raise UnknownEventError("Unknown message received - cannot process.")
 
     def _handle_run_data_assistant(

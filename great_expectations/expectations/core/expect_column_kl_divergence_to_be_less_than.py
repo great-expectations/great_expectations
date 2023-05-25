@@ -587,7 +587,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 observed_weights = observed_weights[1:-1]
 
             elif partition_object["bins"][0] == -np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"
@@ -623,7 +622,6 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
                 observed_weights = observed_weights[1:]
 
             elif partition_object["bins"][-1] == np.inf:
-
                 if "tail_weights" in partition_object:
                     raise ValueError(
                         "There can be no tail weights for partitions with one or both endpoints at infinity"

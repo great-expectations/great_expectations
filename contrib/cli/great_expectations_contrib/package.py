@@ -167,7 +167,6 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         if domain_experts:
             self.domain_experts = []
             for expert in domain_experts:
-
                 # If the user has provided a picture, we need to check if it is a relative URL.
                 # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                 picture_path: Optional[str] = expert.get("picture")

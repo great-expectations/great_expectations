@@ -5,7 +5,7 @@ import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
 Learn how to run a Great Expectations checkpoint in Apache Airflow, and how to use an Expectation Suite within an Airflow directed acyclic graphs (DAG) to trigger a data asset validation.
 
-Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs written in Python. DAGs complete work through operators, which are templates that each encapsulate a specific type of work. This document explains how to use the `GreatExpectationsOperator` to perform data quality work in an Airflow DAG.
+Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs written in Python. DAGs complete work through operators, which are templates that encapsulate a specific type of work. This document explains how to use the `GreatExpectationsOperator` to perform data quality work in an Airflow DAG.
 
 Before you create your DAG, make sure you have a Data Context and Checkpoint configured. A [Data Context](https://docs.greatexpectations.io/docs/terms/data_context) represents a Great Expectations project. It organizes storage and access for Expectation Suites, Datasources, notification settings, and data fixtures.  [Checkpoints](https://docs.greatexpectations.io/docs/terms/checkpoint) provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an Expectation Suite (or several), as well as the actions that should be taken after the validation.
 
@@ -18,11 +18,9 @@ This guide focuses on using Great Expectations with Airflow in a self-hosted env
 - [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
 - [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md)
-- Created an Airflow DAG file
+- An Airflow DAG
 
 </Prerequisites>
-
-
 
 ## Install the GreatExpectationsOperator
 
@@ -34,7 +32,7 @@ pip install airflow-provider-great-expectations==0.1.1
 
 GX recommends specifying a version when installing the package. To make use of the latest Great Expectations provider for Airflow, specify version 0.1.0 or later.
 
-The current Great Expectations release requires Airflow 2.1+. If you're still running Airflow 1.x, you need to upgrade to at least 2.1 before using v0.1.0+ of the `GreatExpectationsOperator`.
+The current Great Expectations release requires Airflow 2.1 or later. If you're still running Airflow 1.x, you need to upgrade to 2.1 or later before using the `GreatExpectationsOperator`.
 
 
 ## Use the GreatExpectationsOperator
@@ -84,4 +82,4 @@ For a full list of parameters, see [GreatExpectationsOperator](https://registry.
 
 ### Connections and backends
 
-The `GreatExpectationsOperator` can run a checkpoint on a dataset stored in any backend that is compatible with Great Expectations. All that’s needed to get the Operator to point to an external dataset is to set up an [Airflow Connection](https://www.astronomer.io/guides/connections) to the datasource, and add the connection to your Great Expectations project. Then, if you're using a `DataContextConfig` or `CheckpointConfig`, ensure that the `"datasources"` field refers to your backend connection name.
+The `GreatExpectationsOperator` can run a checkpoint on a dataset stored in any backend that is compatible with Great Expectations. All that’s needed to get the Operator to point to an external dataset is to set up an [Airflow Connection](https://www.astronomer.io/guides/connections) to the Datasource, and adding the connection to your Great Expectations project. If you're using a `DataContextConfig` or `CheckpointConfig`, ensure that the `"datasources"` field references your backend connection name.

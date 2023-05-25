@@ -16,8 +16,10 @@ class RunOnboardingDataAssistantEvent(EventBase):
     data_asset_name: str
 
 
-class ShutdownEvent(EventBase):
-    type: Literal["shutdown"] = "shutdown"
+class RunCheckpointEvent(EventBase):
+    type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
-Event = Annotated[Union[RunOnboardingDataAssistantEvent], Field(discriminator="type")]
+Event = Annotated[
+    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent], Field(discriminator="type")
+]
