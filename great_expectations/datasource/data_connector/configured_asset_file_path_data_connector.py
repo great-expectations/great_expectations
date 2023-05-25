@@ -49,7 +49,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
             name=name,

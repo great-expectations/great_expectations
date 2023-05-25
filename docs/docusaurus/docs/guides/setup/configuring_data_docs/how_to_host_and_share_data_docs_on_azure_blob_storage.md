@@ -95,7 +95,7 @@ The most common authentication methods are supported:
 
 You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and this will build the Data Docs website.
 
-Run the the following Python code to build and open your Data Docs:
+Run the following Python code to build and open your Data Docs:
 
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```

@@ -278,7 +278,6 @@ def test_OpsgenieAlertAction(
     validation_result_suite,
     validation_result_suite_id,
 ):
-
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
         "class_name": "OpsgenieRenderer",

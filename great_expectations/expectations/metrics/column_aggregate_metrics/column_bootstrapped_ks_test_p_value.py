@@ -30,7 +30,7 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
         p=0.05,
         bootstrap_samples=None,
         bootstrap_sample_size=None,
-        **kwargs
+        **kwargs,
     ):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")
