@@ -749,11 +749,14 @@ def _get_dep_groups(toml_path: pathlib.Path) -> Sequence[str]:
 
 
 @invoke.task()
-def gen_reqs(ctx: Context, groups: bool = True, core: bool = True):
+def gen_reqs(ctx: Context, groups: bool = True, core: bool = True, lock=False):
     """
     Generate requirement files from poetry.lockfile.
     https://python-poetry.org/docs/cli/#export
     """
+    if lock:
+        ctx.run("poetry lock", echo=True, pty=True)
+
     print("  Generating requirement files ...")
     std_args = ["poetry", "export", "--format", "requirements.txt", "--output"]
 
@@ -761,11 +764,7 @@ def gen_reqs(ctx: Context, groups: bool = True, core: bool = True):
         core_req_file: pathlib.Path = PROJECT_ROOT / "requirements.txt"
         assert core_req_file.exists()
 
-        args = [
-            *std_args,
-            str(core_req_file),
-            "--without-hashes",
-        ]
+        args = [*std_args, str(core_req_file), "--without-hashes"]
         ctx.run(" ".join(args), echo=True, pty=True)
 
     depgroups = _get_dep_groups(PYPROJECT_TOML)
@@ -777,12 +776,5 @@ def gen_reqs(ctx: Context, groups: bool = True, core: bool = True):
                 LOGGER.warning(f"Cannot find {req_path}")
                 continue
 
-            args = [
-                *std_args,
-                "--output",
-                str(req_path),
-                "--only",
-                dep,
-                "--without-hashes",
-            ]
+            args = [*std_args, str(req_path), "--only", dep, "--without-hashes"]
             ctx.run(" ".join(args), echo=True, pty=True)
