@@ -154,7 +154,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 * `only_for` (optional): list of backends that the Expectation should work with
 * `suppress_test_for` (optional): list of backends that the Expectation does not work with
-* `only_for` and `suppres_test_for` may be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, etc)
+* `only_for` and `suppres_test_for` can be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, and so on)
 
 If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
 However, you should see that the tests you've written are now being caught and reported in your checklist:
