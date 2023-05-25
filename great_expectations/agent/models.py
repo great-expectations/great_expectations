@@ -21,5 +21,6 @@ class RunCheckpointEvent(EventBase):
 
 
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent], Field(discriminator="type")
+    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent],
+    Field(discriminator="type"),
 ]

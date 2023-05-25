@@ -11,9 +11,9 @@ from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
+from great_expectations.agent.actions.action import ActionResult
 from great_expectations.agent.event_handler import (
     EventHandler,
-    EventHandlerResult,
 )
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
@@ -130,7 +130,7 @@ class GXAgent:
             )
             self._current_task.add_done_callback(on_exit_callback)
 
-    def _handle_event(self, event_context: EventContext) -> EventHandlerResult:
+    def _handle_event(self, event_context: EventContext) -> ActionResult:
         """Pass events to EventHandler.
 
         Callback passed to Subscriber.consume which forwards events to
@@ -147,7 +147,9 @@ class GXAgent:
             )
         handler = EventHandler(context=self._context)
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
-        result = handler.handle_event(event_context=event_context)
+        result = handler.handle_event(
+            event=event_context.event, id=event_context.correlation_id
+        )
         return result
 
     def _handle_event_as_thread_exit(
