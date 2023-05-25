@@ -42,7 +42,11 @@ import sys
 from typing import List
 
 
-ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = []
+ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
+    "docs/docusaurus/docs/reference/expectations/conditional_expectations.md",
+    "docs/docusaurus/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md",
+    "docs/docusaurus/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx",
+}
 
 
 def check_dependencies(*deps: str) -> None:
@@ -57,13 +61,11 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             [
                 "grep",
                 "--recursive",
-                "--line-number",
+                "--files-with-matches",
                 "--ignore-case",
-                # TODO: <Alex>ALEX</Alex>
-                # "--word-regexp",
-                # TODO: <Alex>ALEX</Alex>
+                "--word-regexp",
                 "--regexp",
-                r"```python ",
+                r"```python",
                 str(target_dir),
             ],
             text=True,
@@ -73,11 +75,10 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             [
                 "grep",
                 "--recursive",
-                "--line-number",
+                "--files-with-matches",
                 "--ignore-case",
-                "--invert-match",
                 "--regexp",
-                r"python name=",
+                r"```python name=",
                 str(target_dir),
             ],
             text=True,
@@ -97,12 +98,15 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
 
 def main() -> None:
     check_dependencies("grep")
-    docs_dir = pathlib.Path(__file__).parent.parent.parent / "docs"
+    project_root = pathlib.Path(__file__).parent.parent.parent
+    docs_dir = project_root / "docs"
     assert docs_dir.exists()
     grep_output = run_grep(docs_dir)
-    new_violations = set(grep_output).difference(
-        ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
-    )
+    excluded_documents = {
+        project_root / file_path
+        for file_path in ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
+    }
+    new_violations = set(grep_output).difference(excluded_documents)
     if new_violations:
         print(
             f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'

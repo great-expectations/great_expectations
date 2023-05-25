@@ -27,7 +27,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             [
                 "grep",
                 "--recursive",
-                "--line-number",
+                "--files-with-matches",
                 "--ignore-case",
                 "--word-regexp",
                 "--regexp",
@@ -41,9 +41,8 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             [
                 "grep",
                 "--recursive",
-                "--line-number",
+                "--files-with-matches",
                 "--ignore-case",
-                "--invert-match",
                 "--regexp",
                 r"node_modules",
                 str(target_dir),
