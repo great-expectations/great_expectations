@@ -16,7 +16,7 @@ Datasources do not modify your data.
 
 ## Relationship to other objects
 
-Datasources function by bringing together a way of interacting with Data (an <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" />) with a way of accessing that data (a <TechnicalTag relative="../" tag="data_connector" text="Data Connector." />).  <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> utilize Datasources in order to return a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
+Datasources function by bringing together a way of interacting with Data (an <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" />) with a definition of the data to access (a Data Asset).  <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> utilize a Datasources' Data Assets to return a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
 ## Use Cases
 

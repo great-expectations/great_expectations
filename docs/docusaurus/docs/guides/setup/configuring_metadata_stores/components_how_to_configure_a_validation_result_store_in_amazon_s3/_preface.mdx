@@ -1,7 +1,13 @@
 import Prerequisites from '../../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system. The following steps will help you configure a new storage location for Validation Results in Amazon S3.
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Use the information provided here to configure a new storage location for Validation Results in Amazon S3.
+
+:::caution
+
+Validation Results can include sensitive or regulated data that should not be committed to a source control system.
+
+:::
 
 ## Prerequisites
 
@@ -14,9 +20,3 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 - An S3 bucket and prefix for the Validation Results.
 
 </Prerequisites>
-
-:::caution
-
-Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.
-
-:::
