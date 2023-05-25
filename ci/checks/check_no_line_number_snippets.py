@@ -9,8 +9,12 @@ import sys
 from typing import List
 
 ITEMS_IGNORED_FROM_LINE_NUMBER_SNIPPET_CHECKER = {
-    "docs/prepare_prior_versions.py",
+    "docs/docusaurus/node_modules/prism-react-renderer/README.md",
     "docs/prepare_to_build_docs.sh",
+    "docs/docusaurus/node_modules/remark-code-import/index.js",
+    "docs/docusaurus/node_modules/remark-code-import/README.md",
+    "docs/prepare_prior_versions.py",
+    "docs/docusaurus/node_modules/open/xdg-open",
 }
 
 
