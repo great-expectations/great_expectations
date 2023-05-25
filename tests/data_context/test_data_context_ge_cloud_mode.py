@@ -83,7 +83,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
 @responses.activate
 @pytest.mark.cloud
 @pytest.mark.unit
-@mock.patch("requests.get")
+@mock.patch("requests.Session.get")
 def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     mock_request,
     ge_cloud_base_url,
