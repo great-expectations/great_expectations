@@ -59,7 +59,9 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
                 "--recursive",
                 "--line-number",
                 "--ignore-case",
-                "--word-regexp",
+                # TODO: <Alex>ALEX</Alex>
+                # "--word-regexp",
+                # TODO: <Alex>ALEX</Alex>
                 "--regexp",
                 r"```python ",
                 str(target_dir),
@@ -103,7 +105,7 @@ def main() -> None:
     )
     if new_violations:
         print(
-            f"[ERROR] Found {len(grep_output)} snippets using file and line number syntax, please use named snippet syntax:"
+            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'
         )
         for line in new_violations:
             print(line)

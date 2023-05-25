@@ -203,7 +203,7 @@ stages:
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
         - script: |
-            python ci/checks/check_no_name_tag_snippets.py
+            python ci/checks/check_only_name_tag_snippets.py
           name: NameTagSnippetChecker
 
     - job: public_api_report
