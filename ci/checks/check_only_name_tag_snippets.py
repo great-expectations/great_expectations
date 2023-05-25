@@ -35,15 +35,12 @@ context = gx.get_context()
 Adherence to this pattern is assertained by the present checker module.
 """
 
-import sys
-from typing import List
-
+import pathlib
+import re
 import shutil
 import subprocess
-
-import re
-
-import pathlib
+import sys
+from typing import List
 
 ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
     "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.md",
