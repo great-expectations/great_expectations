@@ -321,7 +321,6 @@ def _get_column_quantiles_trino(
 def _get_column_quantiles_clickhouse(
     column: str, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
-
     quantiles_list = list(quantiles)
     sql_approx: str = (
         f"quantilesExact({', '.join([str(x) for x in quantiles_list])})({column})"
@@ -334,7 +333,7 @@ def _get_column_quantiles_clickhouse(
         quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()[0]
         return quantiles_results
 
-    except (sqlalchemy.ProgrammingError) as pe:
+    except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
