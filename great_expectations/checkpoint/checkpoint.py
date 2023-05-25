@@ -38,9 +38,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import (
-    GXCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -938,6 +936,13 @@ constructor arguments.
         validator: Validator | None = None,
     ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
+
+        if validator:
+            if validations:
+                raise ValueError(
+                    "Please provide either a Validator or Validations list (but not both)."
+                )
+            validations = validator.get_validations_list()
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)

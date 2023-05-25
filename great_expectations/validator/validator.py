@@ -1948,6 +1948,17 @@ class Validator:
             success_percent=success_percent,
         )
 
+    def get_validations_list(self) -> list[dict]:
+        validations = []
+        for batch in self.batch_cache.values():
+            validation = {
+                "expectation_suite_name": self.expectation_suite_name,
+                "batch_request": batch.batch_request,
+            }
+            validations.append(validation)
+
+        return validations
+
 
 class BridgeValidator:
     """This is currently helping bridge APIs"""
