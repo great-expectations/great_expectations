@@ -742,36 +742,47 @@ def link_checker(ctx: Context, skip_external: bool = True):
 def _get_dep_groups(toml_path: pathlib.Path) -> Sequence[str]:
     """Extract the all poetry dependency groups from pyproject.toml"""
     toml_dict = tomli.loads(toml_path.read_text())
-    LOGGER.debug(f"{toml_path} ->\n{pf(toml_dict, depth=2)}")
+    LOGGER.debug(f"{toml_path} ->\n{pf(toml_dict, depth=3)}")
     groups = toml_dict["tool"]["poetry"]["group"]
     LOGGER.debug(f"tool.poetry.group->\n{pf(groups, depth=2)}")
     return list(groups.keys())
 
 
 @invoke.task()
-def gen_reqs(ctx: Context):
+def gen_reqs(ctx: Context, groups: bool = True, core: bool = True):
     """
     Generate requirement files from poetry.lockfile.
     https://python-poetry.org/docs/cli/#export
     """
     print("  Generating requirement files ...")
-    depgroups = _get_dep_groups(PYPROJECT_TOML)
-    for dep in depgroups:
-        req_path = REQS_DIR / f"requirements-dev-{dep}.txt"
+    std_args = ["poetry", "export", "--format", "requirements.txt", "--output"]
 
-        if not req_path.exists():
-            LOGGER.warning(f"Cannot find {req_path}")
-            continue
+    if core:
+        core_req_file: pathlib.Path = PROJECT_ROOT / "requirements.txt"
+        assert core_req_file.exists()
 
         args = [
-            "poetry",
-            "export",
-            "--format",
-            "requirements.txt",
-            "--output",
-            str(req_path),
-            "--only",
-            dep,
+            *std_args,
+            str(core_req_file),
             "--without-hashes",
         ]
         ctx.run(" ".join(args), echo=True, pty=True)
+
+    depgroups = _get_dep_groups(PYPROJECT_TOML)
+    if groups:
+        for dep in depgroups:
+            req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{dep}.txt"
+
+            if not req_path.exists():
+                LOGGER.warning(f"Cannot find {req_path}")
+                continue
+
+            args = [
+                *std_args,
+                "--output",
+                str(req_path),
+                "--only",
+                dep,
+                "--without-hashes",
+            ]
+            ctx.run(" ".join(args), echo=True, pty=True)
