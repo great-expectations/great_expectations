@@ -2,7 +2,7 @@
 title: Reference Documents
 ---
 
-This is where you'll find supplemental information that will help you get the most out of Great Expectations. This includes [using the CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) and [customizing your deployment](../reference/customize_your_deployment.md).
+This is where you'll find supplemental information that will help you get the most out of Great Expectations.
 
 ## [API Reference](./api_reference.md)
 

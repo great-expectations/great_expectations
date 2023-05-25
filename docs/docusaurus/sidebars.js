@@ -72,7 +72,6 @@ module.exports = {
               value: '<h4>Filesystem Data Contexts</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
@@ -389,8 +388,6 @@ module.exports = {
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
     'contributing/contributing_maturity',
-    'guides/miscellaneous/how_to_use_the_great_expectations_cli',
-    'guides/miscellaneous/how_to_use_the_project_check_config_command',
     'reference/customize_your_deployment',
     'reference/usage_statistics',
         {
