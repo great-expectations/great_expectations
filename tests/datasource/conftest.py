@@ -19,6 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.self_check.util import get_sqlite_connection_url
+from great_expectations.compatibility import sqlalchemy
 
 
 def create_partitions_for_table(
@@ -159,7 +160,8 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
     engine: sa.engine.Engine = sa.create_engine(
-        test_cases_for_sql_data_connector_sqlite_connection_url
+        test_cases_for_sql_data_connector_sqlite_connection_url,
+        poolclass=sqlalchemy.StaticPool,
     )
     raw_connection = engine.raw_connection()
     raw_connection.create_function("sqrt", 1, lambda x: math.sqrt(x))

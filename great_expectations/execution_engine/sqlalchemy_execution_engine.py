@@ -241,7 +241,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             access ExpectationSuite objects and the Project Data itself.
         engine (Engine): A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, \
             useful if an Engine has already been configured and should be reused. Will override Credentials if \
-            provided.
+            provided. If you are passing an engine that requires a single connection e.g. if temporary tables are \
+            not persisted if the connection is closed (e.g. sqlite, mssql) then you should create the engine with \
+            a StaticPool e.g. engine = sa.create_engine(connection_url, poolclass=sa.pool.StaticPool)
         connection_string (string): If neither the engines nor the credentials have been provided, a \
             connection string can be used to access the data. This will be overridden by both the engine and \
             credentials if those are provided.
