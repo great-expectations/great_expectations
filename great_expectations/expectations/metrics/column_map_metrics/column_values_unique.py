@@ -1,4 +1,4 @@
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
