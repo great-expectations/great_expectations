@@ -51,14 +51,14 @@ typing-extensions = ">=3.10.0.0" # Leverage type annotations from recent Python 
 tzlocal = ">=1.2"
 urllib3 = ">=1.26"
 
-[tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-invoke = "^2.1.2"
-mypy = "~1.2.0"
-pytest = "^7.3.1"
-responses = "^0.23.1"
-ruff = "^0.0.269"
-tomli = "^2.0.1"
+# [tool.poetry.group.dev.dependencies]
+# black = "^23.3.0"
+# invoke = "^2.1.2"
+# mypy = "~1.2.0"
+# pytest = "^7.3.1"
+# responses = "^0.23.1"
+# ruff = "^0.0.269"
+# tomli = "^2.0.1"
 
 [tool.poetry.group.arrow]
 optional = true
