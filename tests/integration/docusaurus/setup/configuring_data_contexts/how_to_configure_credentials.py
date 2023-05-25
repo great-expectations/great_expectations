@@ -129,3 +129,7 @@ assert context.list_datasources() == [
         "connection_string": ConfigStr("${my_postgres_db_yaml_creds}"),
     }
 ]
+
+# unset environment variables
+for var in env_vars:
+    os.environ.pop(var, None)
