@@ -16,9 +16,11 @@ import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING, Final, Union
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Final, Sequence, Union
 
 import invoke
+import tomli
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -735,3 +737,19 @@ def link_checker(ctx: Context, skip_external: bool = True):
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)
+
+
+def _get_dep_groups(toml_path: pathlib.Path) -> Sequence[str]:
+    """Extract the all poetry dependency groups from pyproject.toml"""
+    toml_dict = tomli.loads(toml_path.read_text())
+    LOGGER.debug(f"{toml_path} ->\n{pf(toml_dict, depth=2)}")
+    groups = toml_dict["tool"]["poetry"]["group"]
+    LOGGER.info(f"tool.poetry.group->\n{pf(groups, depth=2)}")
+    return list(groups.keys())
+
+
+@invoke.task()
+def gen_reqs(ctx: Context):
+    depgroups = _get_dep_groups(PYPROJECT_TOML)
+    for dep in depgroups:
+        print(dep)
