@@ -15,7 +15,11 @@ from great_expectations.exceptions import StoreBackendError
 from tests.data_context.conftest import MockResponse
 
 
-@pytest.xfail("This test will need to be updated to use Response for the Mocks")
+@pytest.mark.xfail(
+    "This test will need to be updated to use Response for the Mocks",
+    run=True,
+    strict=True,
+)
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_datasource_store_set(
