@@ -42,7 +42,12 @@ class RunOnboardingDataAssistantAction(AgentAction):
 
         datasource = self._context.get_datasource(datasource_name=event.datasource_name)
         asset = datasource.get_asset(asset_name=event.data_asset_name)
-        batch_request = asset.build_batch_request()
+        try:
+            batch_request = asset.build_batch_request()
+        except ValueError as e:
+            raise ValueError(
+                "The RunOnboardingDataAssistant Action cannot be used with an in-memory dataframe asset."
+            ) from e
 
         data_assistant_result = self._context.assistants.onboarding.run(
             batch_request=batch_request,
