@@ -59,7 +59,7 @@ export default class Prerequisites extends React.Component {
       returnItems.push(<li>A Great Expectations instance. See <a href='/docs/guides/setup/installation/local'>Install Great Expectations locally</a>.</li>)
     }
     if (this.props.requireDataContext === true) {
-      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli'>A Data Context.</a></li>)
+      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context'>A Data Context.</a></li>)
     }
     if (this.props.requireSourceData === 'filesystem') {
       returnItems.push(<li>Access to data stored in a filesystem.</li>)
