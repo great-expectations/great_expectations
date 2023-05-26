@@ -20,7 +20,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -429,7 +429,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     convert_string_columns_to_datetime(
         df=df, column_names_to_convert=["pickup_datetime", "dropoff_datetime"]
     )
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df, sa)
     return engine
 
 
@@ -513,7 +513,9 @@ def test_sqlite_split(
     """What does this test and why?
     splitters should work with sqlite.
     """
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(taxi_test_cases.test_df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+        taxi_test_cases.test_df, sa
+    )
 
     test_cases: List[TaxiSplittingTestCase] = taxi_test_cases.test_cases()
     test_case: TaxiSplittingTestCase

@@ -35,7 +35,7 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -176,7 +176,7 @@ def test_instantiation_error_states(sa, test_db_connection_string):
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -305,7 +305,7 @@ def test_get_domain_records_with_column_domain(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
@@ -318,7 +318,7 @@ def test_get_domain_records_with_column_domain(sa):
     ).fetchall()
 
     expected_column_df = df.iloc[:3]
-    execution_engine = build_sa_engine(expected_column_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -336,7 +336,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
@@ -355,7 +355,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     ).fetchall()
 
     expected_column_df = df.iloc[:3]
-    execution_engine = build_sa_engine(expected_column_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -373,7 +373,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
@@ -392,7 +392,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
     ).fetchall()
 
     expected_column_df = df.iloc[:1]
-    execution_engine = build_sa_engine(expected_column_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -412,7 +412,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     with pytest.raises(gx_exceptions.GreatExpectationsError):
         execution_engine.get_domain_records(
             domain_kwargs={
@@ -441,7 +441,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "a",
@@ -458,7 +458,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
     )
-    execution_engine = build_sa_engine(expected_column_pair_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -471,7 +471,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "b",
@@ -488,7 +488,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
     )
-    execution_engine = build_sa_engine(expected_column_pair_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -501,7 +501,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "b",
@@ -522,7 +522,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "c": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     )
-    execution_engine = build_sa_engine(expected_column_pair_df, sa)
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -544,7 +544,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["a", "c"],
@@ -560,7 +560,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     expected_multicolumn_df = pd.DataFrame(
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
     )
-    execution_engine = build_sa_engine(expected_multicolumn_df, sa)
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -580,7 +580,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
@@ -596,7 +596,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     expected_multicolumn_df = pd.DataFrame(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
     )
-    execution_engine = build_sa_engine(expected_multicolumn_df, sa)
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -616,7 +616,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    execution_engine = build_sa_engine(df, sa)
+    execution_engine = build_sa_execution_engine(df, sa)
     data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
@@ -635,7 +635,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         },
         index=[0, 1, 2, 3, 4, 5],
     )
-    execution_engine = build_sa_engine(expected_multicolumn_df, sa)
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
     expected_data = execution_engine.execute_query(
         sa.select(sa.text("*")).select_from(
             cast(
@@ -651,7 +651,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
 def test_get_compute_domain_with_no_domain_kwargs(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -679,7 +679,7 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
 
 # Testing for only untested use case - column_pair
 def test_get_compute_domain_with_column_pair(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -714,7 +714,7 @@ def test_get_compute_domain_with_column_pair(sa):
 
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_multicolumn(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
         sa,
     )
@@ -746,7 +746,7 @@ def test_get_compute_domain_with_multicolumn(sa):
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
 def test_get_compute_domain_with_column_domain(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -775,7 +775,7 @@ def test_get_compute_domain_with_column_domain(sa):
 
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -813,7 +813,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -852,7 +852,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
 
 
 def test_get_compute_domain_with_nonexistent_condition_parser(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -869,7 +869,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric(sa):
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -912,7 +912,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     """
     Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
     """
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "names": [
@@ -1014,7 +1014,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         assert len(temp_tables) == 0
         assert len(tables) == 0
 
-    execution_engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -1076,7 +1076,9 @@ class TestExecuteQuery:
     """
 
     def test_execute_query(self, sa, pd_dataframe: pd.DataFrame):
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(pd_dataframe, sa)
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+            pd_dataframe, sa
+        )
 
         select_all = "SELECT * FROM test;"
         result = execution_engine.execute_query(sa.text(select_all)).fetchall()
@@ -1085,7 +1087,9 @@ class TestExecuteQuery:
         assert [r for r in result] == expected
 
     def test_execute_query_in_transaction(self, sa, pd_dataframe: pd.DataFrame):
-        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(pd_dataframe, sa)
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+            pd_dataframe, sa
+        )
 
         select_all = "SELECT * FROM test;"
         result = execution_engine.execute_query_in_transaction(

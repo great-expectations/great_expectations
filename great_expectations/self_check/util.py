@@ -1175,7 +1175,7 @@ def build_pandas_engine(
     return execution_engine
 
 
-def build_sa_engine(
+def build_sa_execution_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,

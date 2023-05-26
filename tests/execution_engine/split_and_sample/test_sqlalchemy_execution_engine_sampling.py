@@ -22,7 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import import_library_module
 
 try:
@@ -264,7 +264,7 @@ def test_sqlite_sample_using_limit(sa):
         ),
     )
     df: pd.DataFrame = pd.read_csv(csv_path)
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df, sa)
 
     n: int = 10
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
