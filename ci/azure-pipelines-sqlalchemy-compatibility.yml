@@ -98,25 +98,24 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: sqlalchemy_compatibility
+  - stage: sqlalchemy_and_pandas_compatibility
     dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: sqlalchemy_compatibility_postgres
+      - job: compatibility_postgres
         timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to run against the latest patch versions of
-          # sqlalchemy minor versions that we support.
+          # sqlalchemy and pandas minor versions that we support.
           # (versions as semver major.minor.patch)
           matrix:
-            sqlalchemy_1_4_x:
-              sqlalchemy_base_version: '1.4.0'
-            # Uncomment when we are compatible with 2.0.x.
-            # sqlalchemy_2_0_x:
-            #   sqlalchemy_base_version: '2.0.0'
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
 
         services:
           postgres: postgres
@@ -129,7 +128,8 @@ stages:
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
-              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
               pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
