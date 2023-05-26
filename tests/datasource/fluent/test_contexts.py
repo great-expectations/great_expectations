@@ -5,14 +5,17 @@ from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import pytest
 import requests
+import responses
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from tests.datasource.fluent.conftest import (
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
 )
 
 if TYPE_CHECKING:
@@ -21,8 +24,7 @@ if TYPE_CHECKING:
 
 
 # apply markers to entire test module
-# NOTE: removing this integration marker to force running in PR pipeline
-# pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
@@ -253,6 +255,41 @@ def test_cloud_context_delete_datasource(
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")
     assert response2.status_code == 404
+
+
+@pytest.fixture
+def datasources_post_mock(cloud_details: CloudDetails):
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            responses.POST,
+            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources",
+            json={"data": {}},
+            status=422,  # TODO: make this pass
+        )
+        yield rsps
+
+
+@pytest.mark.cloud
+class TestPandasDefaultWithCloud:
+    def test_payload_sent_to_cloud(
+        self,
+        datasources_post_mock: RequestsMock,
+        cloud_details: CloudDetails,
+        empty_cloud_context_fluent: CloudDataContext,
+    ):
+        context = empty_cloud_context_fluent
+        cloud_url = (
+            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources"
+        )
+
+        df = pd.DataFrame.from_dict(
+            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
+        )
+
+        context.sources.pandas_default.read_dataframe(df)
+
+        assert responses.assert_call_count(cloud_url, 1)
+        assert False
 
 
 def test_data_connectors_are_built_on_config_load(
