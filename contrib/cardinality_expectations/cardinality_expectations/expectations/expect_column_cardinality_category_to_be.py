@@ -62,7 +62,41 @@ class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
 
 
 class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
-    """This expectation predicts the cardinality category of a column. based on the number of unique values in the column.
+    """This expectation predicts the cardinality category of a column.
+
+    expect_column_predicted_cardinality_to_be is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
+
+    Args:
+        column (str): \
+            The column name.
+        cardinality_category str: \
+            The expected cardinality category of the column. \
+        depth: \
+            The depth of the cardinality prediction. \
+            If depth=1, then categories are: "INFINITE", "FINITE" \
+            If depth=2, then categories are: "UNIQUE", "DUPLICATED", "A_FEW", "SEVERAL", "MANY" \
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+
+    Notes:
+        * This expectation is experimental and in active development. It may change in the future.
     """
 
     examples = [{
@@ -128,6 +162,54 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         "depth": 2,
     }
 
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> None:
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+        """
+
+        super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
+
+        try:
+            depth = configuration.kwargs.get("depth", 2)
+
+            assert (
+                depth in [1, 2]
+            ), "depth must be 1 or 2"
+
+            if depth == 1:
+                assert (
+                    configuration.kwargs["cardinality_category"] in [
+                        "INFINITE",
+                        "FINITE",
+                    ]
+                ), "With depth=1, cardinality_category must be INFINITE or FINITE"
+            
+            elif depth == 2:
+                assert (
+                    configuration.kwargs["cardinality_category"] in [
+                        "INFINITE",
+                        "FINITE",
+                        "UNIQUE",
+                        "DUPLICATED",
+                        "A_FEW",
+                        "SEVERAL",
+                        "MANY",
+                    ]
+                ), "With depth=2, cardinality_category must be one of the following: INFINITE, FINITE, UNIQUE, DUPLICATED, A_FEW, SEVERAL, MANY"
+
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -135,9 +217,6 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        print("metrics: ", metrics)
-        print(configuration.kwargs.get("cardinality_category"))
-
         predicted_cardinality_category = metrics["column.predicted_cardinality_category"]
         success = predicted_cardinality_category == configuration.kwargs.get("cardinality_category")
 
