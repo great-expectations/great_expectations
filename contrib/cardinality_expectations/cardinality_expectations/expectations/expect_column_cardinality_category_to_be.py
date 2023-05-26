@@ -1,4 +1,5 @@
 from typing import Dict, Optional
+from dataclasses import dataclass
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -18,12 +19,158 @@ from great_expectations.expectations.metrics import (
 FINITE_CATEGORIES = ["A_FEW", "SEVERAL", "MANY"]
 INFINITE_CATEGORIES = ["UNIQUE", "DUPLICATED"]
 
-class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
-    metric_name = "column.predicted_cardinality_category"
+# class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
+#     metric_name = "column.predicted_cardinality_category"
+
+#     value_keys = (
+#         "depth",
+#     )
+
+#     @column_aggregate_value(engine=PandasExecutionEngine)
+#     def _pandas(cls, column, depth, **kwargs):
+#         n_unique: int = column.nunique()
+#         n_nonmissing: int = column.notnull().sum()
+#         total_to_unique_ratio: float = n_nonmissing / n_unique
+
+#         if depth == 1:
+#             if total_to_unique_ratio < 10:
+#                 return "INFINITE"
+#             else:
+#                 return "FINITE"
+        
+#         elif depth == 2:
+#             if n_unique < 7:
+#                 return "A_FEW"
+#             elif n_unique < 20:
+#                 return "SEVERAL"
+#             elif n_unique == n_nonmissing:
+#                 return "UNIQUE"
+            
+#             if total_to_unique_ratio < 10:
+#                 return "DUPLICATED"
+#             else:
+#                 return "MANY"
+
+#     # This method defines the business logic for evaluating your Metric when using a SqlAlchemyExecutionEngine
+#     # @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
+#     # def _sqlalchemy(cls, column, _dialect, **kwargs):
+#     #     raise NotImplementedError
+#     #
+#     # This method defines the business logic for evaluating your Metric when using a SparkDFExecutionEngine
+#     # @column_aggregate_partial(engine=SparkDFExecutionEngine)
+#     # def _spark(cls, column, **kwargs):
+#     #     raise NotImplementedError
+
+@dataclass
+class CardinalityCategoryProbabilities:
+    
+    @property
+    def predicted_cardinality_category(self):
+        raise NotImplementedError
+
+@dataclass
+class Depth1CardinalityProbabilities(CardinalityCategoryProbabilities):
+    infinite: float
+    finite: float
+
+    @property
+    def predicted_cardinality_category(self):
+        if self.infinite > self.finite:
+            return "INFINITE"
+        else:
+            return "FINITE"
+
+@dataclass
+class Depth2CardinalityProbabilities(CardinalityCategoryProbabilities):
+    unique: float
+    duplicated: float
+    a_few: float
+    several: float
+    many: float
+
+    @property
+    def predicted_cardinality_category(self):
+        stats = {
+            "UNIQUE": self.unique,
+            "DUPLICATED": self.duplicated,
+            "A_FEW": self.a_few,
+            "SEVERAL": self.several,
+            "MANY": self.many,
+        }
+        return max(stats, key=stats.get)
+
+
+class ColumnCardinalityCategoryProbabilities(ColumnAggregateMetricProvider):
+    metric_name = "column.cardinality_category_probabilities"
 
     value_keys = (
         "depth",
     )
+
+    @classmethod
+    def estimate_probabilities_with_cardinality_checker_method(
+        cls,
+        depth: int,
+        n_unique: int,
+        n_nonmissing: int,
+        total_to_unique_ratio: float,
+    ) -> CardinalityCategoryProbabilities:
+        if depth == 1:
+            if total_to_unique_ratio < 10:
+                return Depth1CardinalityProbabilities(
+                    infinite=1.0,
+                    finite=0.0,
+                )
+            else:
+                return Depth1CardinalityProbabilities(
+                    infinite=0.0,
+                    finite=1.0,
+                )
+        
+        elif depth == 2:
+            if n_unique < 7:
+                return Depth2CardinalityProbabilities(
+                    unique=0.0,
+                    duplicated=0.0,
+                    a_few=1.0,
+                    several=0.0,
+                    many=0.0,
+                )
+            elif n_unique < 20:
+                return Depth2CardinalityProbabilities(
+                    unique=0.0,
+                    duplicated=0.0,
+                    a_few=0.0,
+                    several=1.0,
+                    many=0.0,
+                )
+                
+            elif n_unique == n_nonmissing:
+                return Depth2CardinalityProbabilities(
+                    unique=1.0,
+                    duplicated=0.0,
+                    a_few=0.0,
+                    several=0.0,
+                    many=0.0,
+                )
+            
+            if total_to_unique_ratio < 10:
+                return Depth2CardinalityProbabilities(
+                    unique=0.0,
+                    duplicated=1.0,
+                    a_few=0.0,
+                    several=0.0,
+                    many=0.0,
+                )
+
+            else:
+                return Depth2CardinalityProbabilities(
+                    unique=0.0,
+                    duplicated=0.0,
+                    a_few=0.0,
+                    several=0.0,
+                    many=1.0,
+                )
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, depth, **kwargs):
@@ -31,24 +178,14 @@ class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
         n_nonmissing: int = column.notnull().sum()
         total_to_unique_ratio: float = n_nonmissing / n_unique
 
-        if depth == 1:
-            if total_to_unique_ratio < 10:
-                return "INFINITE"
-            else:
-                return "FINITE"
-        
-        elif depth == 2:
-            if n_unique < 7:
-                return "A_FEW"
-            elif n_unique < 20:
-                return "SEVERAL"
-            elif n_unique == n_nonmissing:
-                return "UNIQUE"
-            
-            if total_to_unique_ratio < 10:
-                return "DUPLICATED"
-            else:
-                return "MANY"
+        cardinality_category_probabilities = cls.estimate_probabilities_with_cardinality_checker_method(
+            depth=depth,
+            n_unique=n_unique,
+            n_nonmissing=n_nonmissing,
+            total_to_unique_ratio=total_to_unique_ratio,
+        )
+
+        return cardinality_category_probabilities
 
     # This method defines the business logic for evaluating your Metric when using a SqlAlchemyExecutionEngine
     # @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,7 +196,6 @@ class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
     # @column_aggregate_partial(engine=SparkDFExecutionEngine)
     # def _spark(cls, column, **kwargs):
     #     raise NotImplementedError
-
 
 class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
     """This expectation predicts the cardinality category of a column.
@@ -150,7 +286,7 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         "only_for": ["pandas"],
     }]
 
-    metric_dependencies = ("column.predicted_cardinality_category",)
+    metric_dependencies = ("column.cardinality_category_probabilities",)
 
     success_keys = (
         "column",
@@ -217,7 +353,9 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        predicted_cardinality_category = metrics["column.predicted_cardinality_category"]
+        cardinality_category_probabilities : CardinalityCategoryProbabilities = metrics["column.cardinality_category_probabilities"]
+        print(cardinality_category_probabilities)
+        predicted_cardinality_category = cardinality_category_probabilities.predicted_cardinality_category
         success = predicted_cardinality_category == configuration.kwargs.get("cardinality_category")
 
         rval = {
