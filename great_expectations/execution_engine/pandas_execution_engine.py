@@ -122,7 +122,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     def _instantiate_azure_client(self) -> None:
         self._azure = None
-        if azure.BlobServiceClient:
+        if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             azure_options = self.config.get("azure_options", {})
             try:
                 if "conn_str" in azure_options:

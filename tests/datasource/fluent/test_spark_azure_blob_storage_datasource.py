@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 logger = logging.getLogger(__file__)
 
 
-if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):
+if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):  # type: ignore[truthy-function] # False if NotImported
     pytest.skip(
         'Could not import "azure.storage.blob" from Microsoft Azure cloud',
         allow_module_level=True,
