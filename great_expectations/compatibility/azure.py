@@ -24,7 +24,7 @@ except ImportError:
 try:
     from azure.identity import DefaultAzureCredential
 except ImportError:
-    DefaultAzureCredentia = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
+    DefaultAzureCredential = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 
 try:
     from azure.keyvault.secrets import SecretClient
