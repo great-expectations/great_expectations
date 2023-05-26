@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Sequence
 
 from pydantic import BaseModel
 
@@ -15,7 +15,7 @@ class CreatedResource(BaseModel):
 class ActionResult(BaseModel):
     id: str
     type: str
-    created_resources: List[CreatedResource]
+    created_resources: Sequence[CreatedResource]
 
 
 class AgentAction(ABC):
