@@ -2980,6 +2980,7 @@ def sqlite_view_engine(test_backends) -> Engine:
                 name="test_table",
                 con=sqlite_engine,
                 index=True,
+                if_exists="replace",
             )
             with sqlite_engine.begin() as connection:
                 connection.execute(
