@@ -235,7 +235,7 @@ def _get_fake_db_callback(
 ) -> _CallbackResult:
     url = request.url
     assert url
-    logger.info(f"{request.method} {url}")
+    logger.debug(f"{request.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
 
@@ -278,7 +278,7 @@ def _post_fake_db_datasources_callback(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
-    logger.info(f"{request.method} {url}")
+    logger.debug(f"{request.method} {url}")
 
     ds_names: set[str] = _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"]
     datasource_path = f"{url}/{FAKE_DATASOURCE_ID}"
@@ -293,6 +293,7 @@ def _post_fake_db_datasources_callback(
         )
 
     try:
+        logger.info(f"POST body -->\n{pf(json.loads(request.body), depth=4)}")
         payload = _CloudResponseSchema.from_datasource_json(request.body)
 
         datasource_name: str = payload.data.name
@@ -319,15 +320,27 @@ def _post_fake_db_datasources_callback(
             result = _CallbackResult(409, headers=_DEFAULT_HEADERS, body=errors.json())
 
         return result
-    except pydantic.ValidationError as err:
-        logger.exception(err)
+    except pydantic.ValidationError as val_err:
+        logger.exception(val_err)
         return _CallbackResult(
             400,
             headers=_DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[
-                    {"code": "mock 400", "detail": str(err.errors()), "source": None}
+                    {
+                        "code": "mock 400",
+                        "detail": str(val_err.errors()),
+                        "source": None,
+                    }
                 ]
+            ).json(),
+        )
+    except Exception as err:
+        return _CallbackResult(
+            500,
+            headers=_DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[{"code": "mock 500", "detail": repr(err), "source": None}]
             ).json(),
         )
 
@@ -336,7 +349,7 @@ def _put_db_datasources_callback(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
-    logger.info(f"{request.method} {url}")
+    logger.debug(f"{request.method} {url}")
 
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     if not request.body:
@@ -346,6 +359,7 @@ def _put_db_datasources_callback(
         result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
     elif item is not MISSING:
         payload = json.loads(request.body)
+        logger.info(f"PUT body -->\n{pf(payload, depth=4)}")
         _CLOUD_API_FAKE_DB[url] = payload
         result = _CallbackResult(
             200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
@@ -356,7 +370,7 @@ def _put_db_datasources_callback(
         )
         result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
 
-    logger.info(f"Response {result.status}")
+    logger.debug(f"Response {result.status}")
     return result
 
 
@@ -364,7 +378,7 @@ def _get_db_datasources_callback(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
-    logger.info(f"{request.method} {url}")
+    logger.debug(f"{request.method} {url}")
 
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     if not request.body:
@@ -384,7 +398,7 @@ def _get_db_datasources_callback(
         )
         result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
 
-    logger.info(f"Response {result.status}")
+    logger.debug(f"Response {result.status}")
     return result
 
 
