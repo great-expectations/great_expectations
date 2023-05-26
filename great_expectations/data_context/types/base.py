@@ -2876,7 +2876,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @validation_operator_name.setter
     def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value  # type: ignore[return-value]
+        self._validation_operator_name = value
 
     @property
     def batches(self) -> List[dict]:
