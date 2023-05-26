@@ -19,45 +19,36 @@ FINITE_CATEGORIES = ["A_FEW", "SEVERAL", "MANY"]
 INFINITE_CATEGORIES = ["UNIQUE", "DUPLICATED"]
 
 class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
-    # This is the id string that will be used to reference your Metric.
-    metric_name = "predicted_cardinality_category"
+    metric_name = "column.predicted_cardinality_category"
 
-    # This method implements the core logic for the PandasExecutionEngine
+    value_keys = (
+        "depth",
+    )
+
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, depth=2, **kwargs):
+    def _pandas(cls, column, depth, **kwargs):
         n_unique: int = column.nunique()
         n_nonmissing: int = column.notnull().sum()
         total_to_unique_ratio: float = n_nonmissing / n_unique
 
-        print(kwargs)
-
-        if n_unique < 7:
-            return "A_FEW"
-        elif n_unique < 20:
-            return "SEVERAL"
-        elif n_unique == n_nonmissing:
-            return "UNIQUE"
-        
-        if total_to_unique_ratio < 10:
-            return "DUPLICATED"
-        else:
-            return "MANY"
-
-
         if depth == 1:
-            return {
-                "FINITE": total_to_unique_ratio < 100,
-                "INFINITE": total_to_unique_ratio > 100,
-            }
+            if total_to_unique_ratio < 10:
+                return "INFINITE"
+            else:
+                return "FINITE"
         
         elif depth == 2:
-            return {
-                "UNIQUE": total_to_unique_ratio > 100,
-                "DUPLICATED": total_to_unique_ratio < 1.1,
-                "MANY": total_to_unique_ratio < 10,
-                "SEVERAL": total_to_unique_ratio < 20,
-                "A_FEW": total_to_unique_ratio < 100,
-            }
+            if n_unique < 7:
+                return "A_FEW"
+            elif n_unique < 20:
+                return "SEVERAL"
+            elif n_unique == n_nonmissing:
+                return "UNIQUE"
+            
+            if total_to_unique_ratio < 10:
+                return "DUPLICATED"
+            else:
+                return "MANY"
 
     # This method defines the business logic for evaluating your Metric when using a SqlAlchemyExecutionEngine
     # @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
@@ -108,48 +99,34 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
                 },
                 "out": {"success": False},
             },
-            # {
-            #     "title": "basic_positive_test",
-            #     "exact_match_out": False,
-            #     "include_in_gallery": True,
-            #     "in": {
-            #         "column": "infinite_with_repeats",
-            #         "cardinality_category": "INFINITE",
-            #         "depth": 1
-            #     },
-            #     "out": {
-            #         "success": True
-            #     },
-            # },
+            {
+                "title": "basic_positive_test_with_depth_1",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "infinite_and_unique",
+                    "cardinality_category": "INFINITE",
+                    "depth": 1
+                },
+                "out": {
+                    "success": True
+                },
+            },
         ],
         "only_for": ["pandas"],
-        # "test_backends": [
-        #     {
-        #         "backend": "pandas",
-        #         "dialects": None,
-        #     },
-        #     {
-        #         "backend": "sqlalchemy",
-        #         "dialects": None,
-        #     },
-        #     {
-        #         "backend": "spark",
-        #         "dialects": None,
-        #     },
-        # ],
     }]
 
-    # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    metric_dependencies = ("predicted_cardinality_category",)
+    metric_dependencies = ("column.predicted_cardinality_category",)
 
-    # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = (
+        "column",
         "cardinality_category",
-        # "depth",
+        "depth",
     )
 
-    # This dictionary contains default values for any parameters that should have default values.
-    default_kwarg_values = {}
+    default_kwarg_values = {
+        "depth": 2,
+    }
 
     def _validate(
         self,
@@ -161,7 +138,7 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         print("metrics: ", metrics)
         print(configuration.kwargs.get("cardinality_category"))
 
-        predicted_cardinality_category = metrics["predicted_cardinality_category"]
+        predicted_cardinality_category = metrics["column.predicted_cardinality_category"]
         success = predicted_cardinality_category == configuration.kwargs.get("cardinality_category")
 
         rval = {
@@ -174,11 +151,10 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
 
         return rval
 
-    # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@abegong",  # Don't forget to add your github handle here!
+        "tags": [],
+        "contributors": [
+            "@abegong",
         ],
     }
 
