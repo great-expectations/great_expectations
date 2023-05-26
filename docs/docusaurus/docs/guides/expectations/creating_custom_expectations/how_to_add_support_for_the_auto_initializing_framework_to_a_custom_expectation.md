@@ -100,7 +100,7 @@ Last is `meta` which contains `details` from our `parameter_builder`.
 
 ### 3. Assign your configuration to the `default_profiler_config` class attribute of your Expectation
 
-Once you have modified the necessary parts of the Profiler configuration to suite your purposes you will need to assign it to the `default_profiler_config` class attribute of your Expectation.  If you initially copied the Profiler configuration that you modified from another Expectation that was already set up to work with the auto-initializing framework then you can refer to that Expectation for an example of this.
+Once you have modified the necessary parts of the Profiler configuration to suit your purposes you will need to assign it to the `default_profiler_config` class attribute of your Expectation.  If you initially copied the Profiler configuration that you modified from another Expectation that was already set up to work with the auto-initializing framework then you can refer to that Expectation for an example of this.
 
 ### 4. Test your Expectation with `auto=True`
 
