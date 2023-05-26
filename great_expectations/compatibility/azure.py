@@ -9,7 +9,7 @@ AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
 try:
     from azure import storage
 except ImportError:
-    storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    storage = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from azure.identity import DefaultAzureCredential
