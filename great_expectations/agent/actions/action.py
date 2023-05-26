@@ -19,7 +19,6 @@ class ActionResult(BaseModel):
 
 
 class AgentAction(ABC):
-
     def __init__(self, context: CloudDataContext):
         self._context = context
 

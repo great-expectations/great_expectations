@@ -7,8 +7,8 @@ from great_expectations.agent.event_handler import EventHandler, UnknownEventErr
 from great_expectations.agent.message_service.subscriber import EventContext
 from great_expectations.agent.models import (
     EventBase,
-    RunOnboardingDataAssistantEvent,
     RunCheckpointEvent,
+    RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
 
