@@ -19,48 +19,6 @@ from great_expectations.expectations.metrics import (
 FINITE_CATEGORIES = ["A_FEW", "SEVERAL", "MANY"]
 INFINITE_CATEGORIES = ["UNIQUE", "DUPLICATED"]
 
-# class ColumnPredictedCardinalityCategory(ColumnAggregateMetricProvider):
-#     metric_name = "column.predicted_cardinality_category"
-
-#     value_keys = (
-#         "depth",
-#     )
-
-#     @column_aggregate_value(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, depth, **kwargs):
-#         n_unique: int = column.nunique()
-#         n_nonmissing: int = column.notnull().sum()
-#         total_to_unique_ratio: float = n_nonmissing / n_unique
-
-#         if depth == 1:
-#             if total_to_unique_ratio < 10:
-#                 return "INFINITE"
-#             else:
-#                 return "FINITE"
-        
-#         elif depth == 2:
-#             if n_unique < 7:
-#                 return "A_FEW"
-#             elif n_unique < 20:
-#                 return "SEVERAL"
-#             elif n_unique == n_nonmissing:
-#                 return "UNIQUE"
-            
-#             if total_to_unique_ratio < 10:
-#                 return "DUPLICATED"
-#             else:
-#                 return "MANY"
-
-#     # This method defines the business logic for evaluating your Metric when using a SqlAlchemyExecutionEngine
-#     # @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
-#     # def _sqlalchemy(cls, column, _dialect, **kwargs):
-#     #     raise NotImplementedError
-#     #
-#     # This method defines the business logic for evaluating your Metric when using a SparkDFExecutionEngine
-#     # @column_aggregate_partial(engine=SparkDFExecutionEngine)
-#     # def _spark(cls, column, **kwargs):
-#     #     raise NotImplementedError
-
 @dataclass
 class CardinalityCategoryProbabilities:
     
