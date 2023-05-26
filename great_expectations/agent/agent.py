@@ -59,7 +59,6 @@ class GXAgent:
         self._config = self._get_config()
         print("Loading a DataContext - this might take a moment.")
         self._context: CloudDataContext = get_context(cloud_mode=True)
-        self._context = None
         print("DataContext is ready.")
 
         # Create a thread pool with a single worker, so we can run long-lived
