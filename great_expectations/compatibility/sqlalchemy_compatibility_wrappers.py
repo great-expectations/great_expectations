@@ -68,7 +68,7 @@ def add_dataframe_to_db(
     name: str,
     con,
     schema=None,
-    if_exists: str = "replace",
+    if_exists: str = "fail",
     index: bool = True,
     index_label: str | None = None,
     chunksize: int | None = None,
