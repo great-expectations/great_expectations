@@ -23,7 +23,6 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
-
     return DataContextConfig(
         **{
             "commented_map": {},
@@ -163,7 +162,6 @@ def test_usage_statistics_handler_build_envelope(
 def test_usage_statistics_handler_validate_message_failure(
     caplog, in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
-
     # caplog default is WARNING and above, we want to see DEBUG level messages for this test
     caplog.set_level(
         level=logging.DEBUG,
@@ -193,7 +191,6 @@ def test_usage_statistics_handler_validate_message_failure(
 def test_usage_statistics_handler_validate_message_success(
     caplog, in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
-
     # caplog default is WARNING and above, we want to see DEBUG level messages for this test
     caplog.set_level(
         level=logging.DEBUG,

@@ -41,10 +41,7 @@ We can define a S3 datasource by providing three pieces of information:
 - `bucket_name`: The name of our S3 bucket
 - `boto3_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
-```python title="Python code"
-datasource_name = "my_s3_datasource"
-bucket_name = "my_bucket"
-boto3_options = {}
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py define_add_pandas_s3_args"
 ```
 
 :::tip What can `boto3_options` specify?
@@ -57,20 +54,12 @@ The parameter `boto3_options` will allow you to pass such things as:
 
 Once we have those three elements, we can define our Datasource like so:
 
-```python title="Python code"
-datasource = context.sources.add_pandas_s3(
-    name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py create_datasource"
 ```
 
 ### 3. Add S3 data to the Datasource as a Data Asset
 
-```python title = "Python code"
-batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-s3_prefix = "data/taxi_yellow_tripdata_samples/"
-data_asset = datasource.add_csv_asset(
-    name="my_taxi_data_asset", batching_regex=batching_regex, s3_prefix=s3_prefix
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_pandas.py add_asset"
 ```
 
 <BatchingRegexExplaination storage_location_type="S3 bucket" />

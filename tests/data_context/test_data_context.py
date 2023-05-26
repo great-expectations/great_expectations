@@ -413,7 +413,6 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 @pytest.mark.rendered_output
 @pytest.mark.slow  # 1.02s
 def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
-
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 

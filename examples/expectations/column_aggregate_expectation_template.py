@@ -25,7 +25,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAggregateMatchesSomeCriteria(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "METRIC NAME GOES HERE"
 

@@ -11,10 +11,12 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Final,
     Hashable,
     Iterable,
     Iterator,
     List,
+    Literal,
     NamedTuple,
     Optional,
     Pattern,  # must use typing.Pattern for pydantic < v1.10
@@ -32,7 +34,7 @@ from packaging.version import Version
 from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
-from typing_extensions import Final, Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
@@ -387,7 +389,6 @@ def _generate_pandas_data_asset_models(
 
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
-
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
         fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)

@@ -690,7 +690,6 @@ def test_golden_path_sql_datasource_configuration(
     context: DataContext = empty_data_context_stats_enabled
 
     with set_directory(context.root_directory):
-
         # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
         import great_expectations as gx
 
