@@ -1,7 +1,7 @@
 # Aggressively pin everything to known-working versions for docs builds
 
 alabaster==0.7.12
-altair==4.2.1
+altair==4.1.0
 appdirs==1.4.4
 appnope==0.1.0
 argon2-cffi==20.1.0
