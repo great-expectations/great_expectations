@@ -2803,10 +2803,10 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,
+        config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
-        module_name: str = "great_expectations.checkpoint",
-        class_name: str = "Checkpoint",
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
