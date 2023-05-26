@@ -133,7 +133,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
-from great_expectations.checkpoint import Checkpoint
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -143,6 +142,7 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
@@ -1712,7 +1712,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: Sequence[ActionDict] = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
@@ -1749,7 +1749,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: Sequence[ActionDict] = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
@@ -1801,7 +1801,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] = Checkpoint.DEFAULT_ACTION_LIST,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -1929,7 +1929,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: Sequence[ActionDict] = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
@@ -1960,7 +1960,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: Sequence[ActionDict] = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
@@ -1992,7 +1992,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] = Checkpoint.DEFAULT_ACTION_LIST,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2071,7 +2071,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] = Checkpoint.DEFAULT_ACTION_LIST,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,

@@ -19,7 +19,6 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
-from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
@@ -55,6 +54,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
@@ -703,7 +703,7 @@ class CloudDataContext(SerializableDataContext):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: Sequence[ActionDict] = Checkpoint.DEFAULT_ACTION_LIST,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,

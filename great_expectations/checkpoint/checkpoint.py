@@ -772,7 +772,7 @@ class Checkpoint(BaseCheckpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Sequence[ActionDict] = BaseCheckpoint.DEFAULT_ACTION_LIST,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -938,7 +938,7 @@ constructor arguments.
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Sequence[ActionDict] = BaseCheckpoint.DEFAULT_ACTION_LIST,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
