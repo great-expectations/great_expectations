@@ -6,23 +6,25 @@ In our daily lives and our data, we expect different things from different types
 
 ## Class hierarchy
 
-The following is the Expectation class hiearchy:
+The following is the Expectation class hierarchy:
 
-Expectation
-    BatchExpectation
-        ColumnAggregateExpectation
-        ColumnMapExpectation
-            RegexBasedColumnMapExpectation
-            SetBasedColumnMapExpectation
-        ColumnPairMapExpectation
-        MulticolumnMapExpectation
-        QueryExpectation
+    ```unset
+    Expectation
+        BatchExpectation
+            ColumnAggregateExpectation
+            ColumnMapExpectation
+                RegexBasedColumnMapExpectation
+                SetBasedColumnMapExpectation
+            ColumnPairMapExpectation
+            MulticolumnMapExpectation
+            QueryExpectation
+    ...
 
 Most Expectations are a combination of a Domain (Batch, Column, ColumnPair, Multicolumns) and an approach (Map or Aggregate). In some cases, the Expectation classes include a prefix such as `RegexBasedColumnMapExpectation`. There are also two classes that don’t follow the standard naming convention; `BatchExpectations` and `QueryExpectations`.
 
 ## Expectation Domain types
 
-Domains provide a way to address a specific set of data, such as a batch within a table, or a column. Domains do this by describing the data locale. The data locale is the conceptual equivalent of “data that arrived last Tuesday in the UserEvents table in the Redshift database,” or “the timestamp column in the Users table in the Redshift database”.
+Domains provide a way to address a specific set of data, such as a batch within a table, or a column. Domains do this by describing the data locale. The data locale is the conceptual equivalent of “data that arrived last Tuesday in the UserEvents table in the Redshift database,” or “the timestamp column in the User's table in the Redshift database”.
 
 The following are the four Domains for Expectations:
 
@@ -65,7 +67,7 @@ Map Expectations are evaluated on a row-by-row basis and each row is checked ind
 
 ![Map Expectations](../images/map_expectations.png)
 
-Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfotunately, Map Expectations evaluate every row of data and this can be computationally intensive.
+Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, Map Expectations evaluate every row of data and this can be computationally intensive.
 
 Every Map Expectation includes a `mostly` parameter. The `mostly` parameter allows you to specify a minimum percentage of rows that must validate successfully to pass the Expectation. The Expectation can still succeed when individual rows fail validation. This can be useful if you want your pipelines to have invalid data tolerance.
 
@@ -79,7 +81,7 @@ Beyond the `[Domain][Approach]Expectation` naming convention, the specialized su
 
 ## BatchExpectations
 
-BatchExpectations do not currently have a special subclass for Map Expectations. Essentially, BatchMapExpectations would apply row-by-row validation to all of the columns in a Batch. When there is demand for this Expectation type, the class hierarchy will be refactored to accommodate it.
+BatchExpectations do not currently have a special subclass for Map Expectations. Essentially, BatchMapExpectations would apply row-by-row validation to all the columns in a Batch. When there is demand for this Expectation type, the class hierarchy will be refactored to accommodate it.
 
 ## QueryExpectations
 
@@ -87,7 +89,7 @@ QueryExpectations allow you to set Expectations against the results of custom SQ
 
 ![QueryExpectations](../images/query_expectations.png)
 
-QueryExpectations bypass most of the logic that GX uses for grouping queries on related Domains. As a result, QueryExpectations can increase database traffic and consume coputational resources. If you’re not careful when you construct your Expectation, you can also misattribute results to the wrong Domain.
+QueryExpectations bypass most of the logic that GX uses for grouping queries on related Domains. As a result, QueryExpectations can increase database traffic and consume computational resources. If you’re not careful when you construct your Expectation, you can also misattribute results to the wrong Domain.
 
 For most use cases, QueryDataAssets are the better option. This option allows you to separate the logic of assembling data for validation from the logic of evaluating it.
 
