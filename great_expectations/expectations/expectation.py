@@ -1373,7 +1373,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
         engines_implemented = [
-            e.replace('ExecutionEngine', '')
+            e.replace("ExecutionEngine", "")
             for e, i in introspected_execution_engines.items()
             if i is True
         ]
@@ -1512,12 +1512,16 @@ class Expectation(metaclass=MetaExpectation):
                 chandler = logging.StreamHandler(stream=sys.stdout)
                 chandler.setLevel(logging.DEBUG)
                 chandler.setFormatter(
-                    logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S")
+                    logging.Formatter(
+                        "%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"
+                    )
                 )
                 debug_logger.addHandler(chandler)
                 debug_logger.setLevel(logging.DEBUG)
 
-            diagnostics = self.run_diagnostics(debug_logger=debug_logger, only_consider_these_backends=backends)
+            diagnostics = self.run_diagnostics(
+                debug_logger=debug_logger, only_consider_these_backends=backends
+            )
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
