@@ -535,7 +535,6 @@ class TestEqDunder:
         new_value: Union[str, Dict[str, str]],
         suite_with_single_expectation: ExpectationSuite,
     ):
-
         different_but_equivalent_suite = deepcopy(suite_with_single_expectation)
 
         setattr(different_but_equivalent_suite, attribute, new_value)

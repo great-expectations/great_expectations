@@ -237,7 +237,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         run_date_str = self.get_success_kwargs(configuration).get("run_date")
 
         run_date = datetime.strptime(run_date_str, date_format)
@@ -284,7 +283,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
 def get_counts_per_day_as_dict(
     metrics: dict, run_date: str, equivalent_previous_days: list
 ) -> dict:
-
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
     ]

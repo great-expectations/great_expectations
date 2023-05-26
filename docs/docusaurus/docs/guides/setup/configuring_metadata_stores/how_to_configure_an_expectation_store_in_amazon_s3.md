@@ -12,22 +12,20 @@ import ConfirmList from './components_how_to_configure_an_expectation_store_in_a
 
 <Preface />
 
-## Steps
-
-### 1. Install boto3 with pip
+## 1. Install boto3 with pip
 <InstallBoto3 />
 
-### 2. Verify your AWS credentials are properly configured
+## 2. Verify your AWS credentials are properly configured
 <VerifyAwsCredentials />
 
-### 3. Identify your Data Context Expectations Store
+## 3. Identify your Data Context Expectations Store
 <IdentifyYourDataContextExpectationsStore />
 
-### 4. Update your configuration file to include a new Store for Expectations on S3
+## 4. Update your configuration file to include a new Store for Expectations
 <UpdateYourConfigurationFileToIncludeANewStoreForExpectationsOnS />
 
-### 5. Copy existing Expectation JSON files to the S3 bucket (Optional)
+## 5. Copy existing Expectation JSON files to the S3 bucket (Optional)
 <CopyExistingExpectationJsonFilesToTheSBucketThisStepIsOptional />
 
-### 6. Confirm Expectation Suite availability
+## 6. Confirm Expectation Suite availability
 <ConfirmList />

@@ -20,7 +20,7 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
 ## Prerequisites
 
-- Python versions 3.7 to 3.10. See [Python downloads](https://www.python.org/downloads/).
+- Python versions 3.8 to 3.10. See [Python downloads](https://www.python.org/downloads/).
 - pip
 - An internet browser
 
@@ -95,7 +95,6 @@ If you're ready to continue your Great Expectations journey, the following topic
 
 - Initialize, instantiate, and save a Data Contex:
     - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-    - [How to initialize a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
     - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
     - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
     - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)

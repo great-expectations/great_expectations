@@ -267,7 +267,6 @@ class CodeParser:
         """Get Definition objects for all class, method and function definitions."""
         all_usages: Set[Definition] = set()
         for file_contents in self.file_contents:
-
             entity_definitions = self._get_all_entity_definitions_from_file_contents(
                 file_contents=file_contents
             )
@@ -386,7 +385,6 @@ def parse_docs_contents_for_class_names(file_contents: Set[FileContents]) -> Set
     pattern = re.compile(r"class_name: (\w+)")
 
     for single_file_contents in file_contents:
-
         matches = re.finditer(pattern, single_file_contents.contents)
         yaml_names = {m.group(1) for m in matches}
         all_usages |= yaml_names
@@ -429,7 +427,6 @@ def get_shortest_dotted_path(
         # if __init__.py is found, ast parse and check for import of the class
         init_path = repo_root_path / pathlib.Path(*path_parts, "__init__.py")
         if init_path.is_file():
-
             import_names = []
             with open(init_path) as f:
                 file_contents: str = f.read()
@@ -861,7 +858,6 @@ def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
 
 
 def generate_public_api_report(write_to_file: bool = False) -> None:
-
     docs_example_file_contents = FileContents.create_from_local_files(
         _default_doc_example_absolute_paths()
     )
