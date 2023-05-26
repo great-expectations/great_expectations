@@ -202,7 +202,7 @@ exclude = [
 ]
 
 [[tool.mypy.overrides]]
-# need to use override because a mypy bug prevent ignoring an assignment warning inline
+# need to use override because a mypy bug prevents ignoring an assignment warning inline
 # for `from azure import storage`
 module = [
   "great_expectations.compatibility.azure",
