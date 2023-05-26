@@ -388,9 +388,26 @@ def _get_db_datasources_callback(
     return result
 
 
+class CloudDetails(NamedTuple):
+    base_url: str
+    organization_id: str
+    access_token: str
+
+
+@pytest.fixture(scope="session")
+def cloud_details() -> CloudDetails:
+    return CloudDetails(
+        base_url=GX_CLOUD_MOCK_BASE_URL,
+        organization_id=FAKE_ORG_ID,
+        access_token=DUMMY_JWT_TOKEN,
+    )
+
+
 @pytest.fixture
-def cloud_api_fake():
-    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
+def cloud_api_fake(cloud_details: CloudDetails):
+    org_url_base = (
+        f"{cloud_details.base_url}/organizations/{cloud_details.organization_id}"
+    )
     dc_config_url = f"{org_url_base}/data-context-configuration"
     datasources_url = f"{org_url_base}/datasources"
 
@@ -443,11 +460,13 @@ def cloud_api_fake():
 
 
 @pytest.fixture
-def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
+def empty_cloud_context_fluent(
+    cloud_api_fake, cloud_details: CloudDetails
+) -> CloudDataContext:
     context = gx.get_context(
-        cloud_access_token=DUMMY_JWT_TOKEN,
-        cloud_organization_id=FAKE_ORG_ID,
-        cloud_base_url=GX_CLOUD_MOCK_BASE_URL,
+        cloud_access_token=cloud_details.access_token,
+        cloud_organization_id=cloud_details.organization_id,
+        cloud_base_url=cloud_details.base_url,
         cloud_mode=True,
     )
     return context
