@@ -22,7 +22,7 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python), or [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
+- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python).
 
 </Prerequisites>
 
@@ -36,16 +36,14 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder will be used to indicate which specific Filesystem Data Context should be instantiated.
 
-```python title="Python code"
-path_to_context_root_folder = '/my_gx_project/'
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder"
 ```
 
 ### 2. Run GX's `get_context(...)` method
 
 We provide our Filesystem Data Context's root folder path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an existing Data Context, the `get_context(...)` method will instantiate and return the Data Context at that location.
 
-```python title="Python code"
-context = gx.get_context(context_root_dir=path_to_context_root_folder)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
 :::info What if the folder does not contain a Data Context?

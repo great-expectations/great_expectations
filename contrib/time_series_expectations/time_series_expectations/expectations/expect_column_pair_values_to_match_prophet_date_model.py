@@ -21,7 +21,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
-
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 
     condition_domain_keys = (

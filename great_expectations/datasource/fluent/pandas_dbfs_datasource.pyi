@@ -1,9 +1,7 @@
 import re
 import typing
 from logging import Logger
-from typing import TYPE_CHECKING, Hashable, Iterable, Optional, Sequence, Union
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Hashable, Iterable, Literal, Optional, Sequence, Union
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import PandasFilesystemDatasource, Sorter

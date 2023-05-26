@@ -12,6 +12,7 @@ from great_expectations.expectations.metrics import (
 
 NASDAQ_TICKERS_LIST = [t.lower() for t in si.tickers_nasdaq()]
 
+
 # This method compares a string to the valid NASDAQ ticker
 def is_valid_nasdaq_ticker(ticker: str) -> bool:
     return ticker.lower() in NASDAQ_TICKERS_LIST
@@ -20,7 +21,6 @@ def is_valid_nasdaq_ticker(ticker: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidNasdaqTicker(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_nasdaq_ticker"
 
