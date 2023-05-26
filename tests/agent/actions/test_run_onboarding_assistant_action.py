@@ -50,7 +50,7 @@ def test_run_onboarding_data_assistant_event_creates_expectation_suite(context, 
 
     action.run(event, id=id)
 
-    context.add_or_update_expectation_suite.assert_called()
+    context.add_expectation_suite.assert_called()
 
 
 def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):

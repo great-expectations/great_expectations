@@ -52,9 +52,7 @@ class RunOnboardingDataAssistantAction(AgentAction):
                 expectation_suite_name=expectation_suite_name
             )
         )
-        self._context.add_or_update_expectation_suite(
-            expectation_suite=expectation_suite
-        )
+        self._context.add_expectation_suite(expectation_suite=expectation_suite)
 
         checkpoint_config = {
             "name": checkpoint_name,
