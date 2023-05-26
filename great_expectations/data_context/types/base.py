@@ -24,7 +24,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    cast,
 )
 
 from marshmallow import (
@@ -2842,12 +2841,9 @@ class CheckpointConfig(BaseYamlConfig):
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request or {}
-            if not action_list:
-                action_list = cast(
-                    Sequence[ActionDict],
-                    DataContextConfigDefaults.DEFAULT_ACTION_LIST.value,
-                )
-            self._action_list = action_list
+            self._action_list = (
+                action_list or DataContextConfigDefaults.DEFAULT_ACTION_LIST.value
+            )
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
@@ -2996,7 +2992,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def action_list(self) -> Sequence[ActionDict]:
-        return self._action_list
+        return self._action_list  # type: ignore[return-value]
 
     @action_list.setter
     def action_list(self, value: Sequence[ActionDict]) -> None:
