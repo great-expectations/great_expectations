@@ -2872,19 +2872,19 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[has-type]
+        return self._validation_operator_name  # type: ignore[return-value]
 
     @validation_operator_name.setter
     def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value  # type: ignore[has-type]
+        self._validation_operator_name = value  # type: ignore[return-value]
 
     @property
     def batches(self) -> List[dict]:
-        return self._batches  # type: ignore[has-type]
+        return self._batches
 
     @batches.setter
     def batches(self, value: List[dict]) -> None:
-        self._batches = value  # type: ignore[has-type]
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
