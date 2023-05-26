@@ -410,7 +410,6 @@ def test_cloud_context_datasource_crud_e2e() -> None:
 
 @pytest.mark.xfail(
     reason="This test is currently failing due to a bug in the Cloud API",
-    run=True,
 )
 @pytest.mark.e2e
 @pytest.mark.cloud
