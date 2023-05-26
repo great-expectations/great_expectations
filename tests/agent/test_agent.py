@@ -65,6 +65,7 @@ def create_session(mocker, queue, connection_string):
         "queue": queue,
         "connection_string": connection_string,
     }
+    create_session().post().ok = True
     return create_session
 
 
