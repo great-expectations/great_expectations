@@ -2919,7 +2919,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> float:
+    def config_version(self) -> Union[int, float, None]:
         return self._config_version
 
     @config_version.setter
