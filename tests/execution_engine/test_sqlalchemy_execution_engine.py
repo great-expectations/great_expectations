@@ -185,7 +185,9 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=execution_engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
     aggregate_fn_metric_1 = MetricConfiguration(
@@ -934,7 +936,9 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=execution_engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -1019,7 +1023,9 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=execution_engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
     validate_tmp_tables(execution_engine=execution_engine)

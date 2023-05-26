@@ -90,7 +90,7 @@ def _build_table_columns_and_unexpected(
     # get table_columns_metric
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # unexpected_condition metric

@@ -58,7 +58,7 @@ def test_basic_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -95,7 +95,7 @@ def test_mean_metric_pd(dataframe, expected_result):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -131,7 +131,7 @@ def test_mean_metric_spark(spark_session, dataframe, expected_result):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -175,7 +175,7 @@ def test_stdev_metric_pd(build_engine, dataframe, expected_result):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -216,7 +216,7 @@ def test_column_value_lengths_min_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -258,7 +258,7 @@ def test_column_quoted_name_type_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -357,7 +357,7 @@ def test_column_value_lengths_min_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -412,7 +412,7 @@ def test_column_value_lengths_min_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -465,7 +465,7 @@ def test_column_value_lengths_max_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -507,7 +507,7 @@ def test_column_value_lengths_max_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -562,7 +562,7 @@ def test_column_value_lengths_max_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -600,7 +600,7 @@ def test_quantiles_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -629,7 +629,7 @@ def test_quantiles_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -686,7 +686,7 @@ def test_quantiles_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -731,7 +731,7 @@ def test_column_histogram_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -789,7 +789,7 @@ def test_column_histogram_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -852,7 +852,7 @@ def test_column_histogram_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -927,7 +927,7 @@ def test_column_partition_metric_pd():
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_min_metric: MetricConfiguration = MetricConfiguration(
@@ -987,7 +987,7 @@ def test_column_partition_metric_pd():
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_min_metric: MetricConfiguration = MetricConfiguration(
@@ -1107,7 +1107,7 @@ def test_column_partition_metric_sa(sa):
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1194,7 +1194,7 @@ def test_column_partition_metric_sa(sa):
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1348,7 +1348,7 @@ def test_column_partition_metric_spark(spark_session):
 
     # Test using standard numeric column.
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1435,7 +1435,7 @@ def test_column_partition_metric_spark(spark_session):
     # Test using "datetime.datetime" column.
 
     metrics = {}
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
@@ -1535,7 +1535,7 @@ def test_max_metric_column_exists_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1563,7 +1563,7 @@ def test_max_metric_column_does_not_exist_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1595,7 +1595,7 @@ def test_max_metric_column_exists_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1637,7 +1637,7 @@ def test_max_metric_column_does_not_exist_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1673,7 +1673,7 @@ def test_max_metric_column_exists_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1719,7 +1719,7 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -1751,7 +1751,7 @@ def test_map_value_set_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1830,7 +1830,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -1945,7 +1945,7 @@ def test_map_column_value_lengths_between_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -1992,7 +1992,7 @@ def test_map_column_values_increasing_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2078,7 +2078,7 @@ def test_map_column_values_increasing_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_column_types = MetricConfiguration(
@@ -2179,7 +2179,7 @@ def test_map_column_values_decreasing_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2265,7 +2265,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     table_column_types = MetricConfiguration(
@@ -2347,7 +2347,7 @@ def test_map_unique_column_exists_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2409,7 +2409,7 @@ def test_map_unique_column_does_not_exist_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -2445,7 +2445,7 @@ def test_map_unique_column_exists_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2541,7 +2541,7 @@ def test_map_unique_column_does_not_exist_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2572,7 +2572,7 @@ def test_map_unique_empty_query_sa(sa):
 
     table_columns_metric: MetricConfiguration
     metrics: dict
-    table_columns_metric, metrics = get_table_columns_metric(engine=engine)
+    table_columns_metric, metrics = get_table_columns_metric(execution_engine=engine)
 
     condition_metric = MetricConfiguration(
         metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
@@ -2620,7 +2620,7 @@ def test_map_unique_column_exists_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2722,7 +2722,7 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -2754,7 +2754,7 @@ def test_z_score_under_threshold_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     mean = MetricConfiguration(
@@ -2838,7 +2838,7 @@ def test_z_score_under_threshold_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_mean_aggregate_fn_metric = MetricConfiguration(
@@ -2977,7 +2977,7 @@ def test_map_column_pairs_equal_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3226,7 +3226,7 @@ def test_map_column_pairs_equal_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3441,7 +3441,7 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -3648,7 +3648,7 @@ def test_map_column_pairs_greater_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3725,7 +3725,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3797,7 +3797,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3861,7 +3861,7 @@ def test_map_column_pairs_in_set_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -3904,7 +3904,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -4028,7 +4028,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
@@ -4181,7 +4181,7 @@ def test_column_median_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -4223,7 +4223,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
@@ -4344,7 +4344,7 @@ def test_value_counts_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
@@ -4456,7 +4456,7 @@ def test_distinct_metric_spark(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4544,7 +4544,7 @@ def test_distinct_metric_sa(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4623,7 +4623,7 @@ def test_distinct_metric_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     column_distinct_values_metric = MetricConfiguration(
@@ -4708,7 +4708,7 @@ def test_batch_aggregate_metrics_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_metric_1 = MetricConfiguration(
@@ -4789,7 +4789,7 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
@@ -4919,7 +4919,7 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
@@ -5040,7 +5040,7 @@ def test_map_multicolumn_sum_equal_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5252,7 +5252,7 @@ def test_map_multicolumn_sum_equal_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5454,7 +5454,7 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5654,7 +5654,7 @@ def test_map_compound_columns_unique_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -5860,7 +5860,7 @@ def test_map_compound_columns_unique_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -6095,7 +6095,7 @@ def test_map_compound_columns_unique_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     """
@@ -6297,7 +6297,7 @@ def test_map_select_column_values_unique_within_record_pd():
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.
@@ -6548,7 +6548,7 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.
@@ -6762,7 +6762,7 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # Save original metrics for testing unexpected results.
