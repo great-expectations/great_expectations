@@ -14,11 +14,11 @@ If your Great Expectations deployment is in an environment without a file system
 
 <Prerequisites></Prerequisites>
 
-## Loading Environment Variable as Connection String
+## Using Environment Variables
 
-The quickest way to get started is by setting up the credentials as environment variables. 
+The quickest way to get started is by setting up your credentials as environment variables. 
 
-If using environment variables, first set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
+First set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
 ```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
@@ -41,7 +41,7 @@ These can then be loaded into the `connection_string` parameter when we are addi
 
 <TabItem value="yaml">
 
-## Using the `config_varibales.yml` file 
+## Using the `config_variables.yml` file 
 
 A more advanced option is to use the config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod). 
 
@@ -132,10 +132,10 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
-# a single connection string
+# We can configure a single connection string
 my_aws_creds:  secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|connection_string
 
-# or each component of the connection string separately
+# Or each component of the connection string separately
 drivername: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|drivername
 host: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|host
 port: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_db_credentials|port
@@ -147,12 +147,12 @@ database: secret|arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:dev_d
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
 ```python 
-# using the single connection string 
+# We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_aws_creds}"
 )
 
-# or each component separately
+# Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )
@@ -206,10 +206,10 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
-# a single connection string
+# We can configure a single connection string
 my_gcp_creds: secret|projects/${PROJECT_ID}/secrets/dev_db_credentials|connection_string
 
-# or each component of the connection string separately
+# Or each component of the connection string separately
 drivername: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DRIVERNAME
 host: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_HOST
 port: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_PORT
@@ -221,12 +221,12 @@ database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
 ```python 
-# using the single connection string 
+# We can use a single connection string 
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_gcp_creds}"
 )
 
-# or each component separately
+# Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )
@@ -281,10 +281,10 @@ Or like this:
 **Example config_variables.yml:**
 
 ```yaml
-# a single connection string
+# We can configure a single connection string
 my_abs_creds: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|connection_string
 
-# or each component of the connection string separately
+# Or each component of the connection string separately
 drivername: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
 host: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|host
 port: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credentials|port
@@ -296,12 +296,12 @@ database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/dev_db_credential
 Once configured, the credentials can be loaded into the `connection_string` parameter when we are adding a `datasource` to the Data Context.
 
 ```python 
-# using the single connection string 
+# We can use a single connection string
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_gcp_creds}"
 )
 
-# or each component separately
+# Or each component of the connection string separately
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${drivername}://${username}:${password}@${host}:${port}/${database}"
 )

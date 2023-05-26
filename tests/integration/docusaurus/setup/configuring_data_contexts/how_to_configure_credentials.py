@@ -69,13 +69,13 @@ with open(context_config_variables_file_path, "w+") as f:
     f.write(config_variables_yaml)
 
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credentials_as_connection_string">
-# Password can be added as an Environment Variable
+# The password can be added as an environment variable
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db",
     connection_string="postgresql://postgres:${MY_DB_PW}@localhost:5432/postgres",
 )
 
-# Alternately, the full connection string can be added as an Environment Variable
+# Alternately, the full connection string can be added as an environment Variable
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${POSTGRES_CONNECTION_STRING}"
 )
@@ -105,6 +105,7 @@ assert context.list_datasources() == [
 
 
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py add_credential_from_yml">
+# Variables in config_variables.yml can be referenced in the connection string
 pg_datasource = context.sources.add_or_update_sql(
     name="my_postgres_db", connection_string="${my_postgres_db_yaml_creds}"
 )
