@@ -20,7 +20,7 @@ A Profiler builds an Expectation Suite from one or more Data Assets. Many Profil
 
 Profilers come into use when it is time to configure Expectations for your project.  At this point in your workflow you can configure a new Profiler, or use an existing one to generate Expectations from a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
-For details on how to configure a customized Profiler, see our guide on [how to create a new expectation suite using the Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
+For details on how to configure a customized Profiler, see our guide on [how to create a new expectation suite using a Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
 ## Profiler types
 
@@ -30,13 +30,13 @@ There are multiple types of Profilers built in to Great Expectations.  Below is 
 
 The Custom Profiler allows you to directly configure a customized Profiler through a YAML configuration.  Profilers allow you to integrate organizational knowledge about your data into the profiling process. For example, a team might have a convention that all columns **named** "id" are primary keys, whereas all columns ending with the **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new dataset that followed the convention, a Profiler could use that knowledge to add an `expect_column_values_to_be_unique` Expectation to the "id" column (but not, for example an "address_id" column).
 
-For details on how to configure a customized Profiler, see our guide on [how to create a new expectation suite using the Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
+For details on how to configure a customized Profiler, see our guide on [how to create a new expectation suite using a Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
 ## Create
 
 It is unlikely that you will need to create a customized Profiler by extending an existing Profiler with a subclass.  Instead, you should work with a Profiler which can be fully configured in a YAML configuration file.
 
-Configuring a custom Profiler is covered in the following section.  See also [How to create a new expectation suite using the Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md), or [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
+Configuring a custom Profiler is covered in the following section.  See also [How to create a new expectation suite using a Profiler](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md), or [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
 
 ## Configure Profilers
 
