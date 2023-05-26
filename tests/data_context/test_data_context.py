@@ -1422,27 +1422,16 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
     assert config == {
-        "name": "my_checkpoint",
-        "class_name": "LegacyCheckpoint",
+        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+        "batch_request": {},
+        "class_name": "Checkpoint",
+        "config_version": 1.0,
+        "evaluation_parameters": {},
         "module_name": "great_expectations.checkpoint",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "datasource": "my_filesystem_datasource",
-                    "path": "/Users/me/projects/my_project/data/data.csv",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["suite_one", "suite_two"],
-            },
-            {
-                "batch_kwargs": {
-                    "datasource": "my_redshift_datasource",
-                    "query": "SELECT * FROM users WHERE status = 1",
-                },
-                "expectation_suite_names": ["suite_three"],
-            },
-        ],
-        "validation_operator_name": "action_list_operator",
+        "name": "my_checkpoint",
+        "profilers": [],
+        "runtime_configuration": {},
+        "validations": [],
     }
 
 
@@ -1452,6 +1441,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
     checkpoint = {
         "validation_operator_name": "action_list_operator",
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1500,6 +1490,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
                 "batch_kwargs": {"foo": 33},
             }
         ],
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1521,6 +1512,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
     checkpoint = {
         "validation_operator_name": "action_list_operator",
         "batches": [{"expectation_suite_names": ["foo"]}],
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1934,7 +1926,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
@@ -1998,7 +1989,7 @@ expectation_suite_ge_cloud_id:
         },
         {
             "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
 
@@ -2032,7 +2023,7 @@ expectation_suite_ge_cloud_id:
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+                "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
         "validations": [
