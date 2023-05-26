@@ -129,20 +129,20 @@ def add_dataframe_to_db(
                     dtype=dtype,
                     method=method,
                 )
-
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        df.to_sql(
-            name=name,
-            con=con,
-            schema=schema,
-            if_exists=if_exists,
-            index=index,
-            index_label=index_label,
-            chunksize=chunksize,
-            dtype=dtype,
-            method=method,
-        )
+    else:
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            df.to_sql(
+                name=name,
+                con=con,
+                schema=schema,
+                if_exists=if_exists,
+                index=index,
+                index_label=index_label,
+                chunksize=chunksize,
+                dtype=dtype,
+                method=method,
+            )
