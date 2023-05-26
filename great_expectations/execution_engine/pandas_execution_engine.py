@@ -103,7 +103,7 @@ class PandasExecutionEngine(ExecutionEngine):
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
         self._s3 = None
-        self._azure = None
+        self._azure: azure.BlobServiceClient | None = None
         self._gcs = None
 
         super().__init__(*args, **kwargs)
