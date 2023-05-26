@@ -8,17 +8,17 @@ In our daily lives and our data, we expect different things from different types
 
 The following is the Expectation class hierarchy:
 
-    ```unset
-    Expectation
-        BatchExpectation
-            ColumnAggregateExpectation
-            ColumnMapExpectation
-                RegexBasedColumnMapExpectation
-                SetBasedColumnMapExpectation
-            ColumnPairMapExpectation
-            MulticolumnMapExpectation
-            QueryExpectation
-    ...
+```text
+Expectation
+    BatchExpectation
+        ColumnAggregateExpectation
+        ColumnMapExpectation
+            RegexBasedColumnMapExpectation
+            SetBasedColumnMapExpectation
+        ColumnPairMapExpectation
+        MulticolumnMapExpectation
+        QueryExpectation
+```
 
 Most Expectations are a combination of a Domain (Batch, Column, ColumnPair, Multicolumns) and an approach (Map or Aggregate). In some cases, the Expectation classes include a prefix such as `RegexBasedColumnMapExpectation`. There are also two classes that don’t follow the standard naming convention; `BatchExpectations` and `QueryExpectations`.
 
@@ -26,7 +26,7 @@ Most Expectations are a combination of a Domain (Batch, Column, ColumnPair, Mult
 
 Domains provide a way to address a specific set of data, such as a batch within a table, or a column. Domains do this by describing the data locale. The data locale is the conceptual equivalent of “data that arrived last Tuesday in the UserEvents table in the Redshift database,” or “the timestamp column in the User's table in the Redshift database”.
 
-The following are the four Domains for Expectations:
+The following are the four Expectation Domains:
 
 - Batch
 - Column
