@@ -1,14 +1,6 @@
 from __future__ import annotations
 
-from types import ModuleType
-from typing import TYPE_CHECKING, Type
-
 from great_expectations.compatibility.not_imported import NotImported
-
-if TYPE_CHECKING:
-    from azure import identity
-    from azure.keyvault import secrets
-    from azure.storage import blob
 
 __all__ = [
     "storage",
@@ -25,42 +17,35 @@ AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
 )
 
 try:
-    storage: NotImported | ModuleType
     from azure import storage
 except ImportError:
     storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    DefaultAzureCredentia: NotImported | Type[identity.DefaultAzureCredential]
     from azure.identity import DefaultAzureCredential
 except ImportError:
-    DefaultAzureCredentia = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    DefaultAzureCredentia = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 
 try:
-    SecretClient: NotImported | Type[secrets.SecretClient]
     from azure.keyvault.secrets import SecretClient
 except (ImportError, AttributeError):
-    SecretClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    SecretClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 
 try:
-    ContentSettings: NotImported | Type[blob.ContentSettings]
     from azure.storage.blob import ContentSettings
 except (ImportError, AttributeError):
-    ContentSettings = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContentSettings = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 try:
-    BlobPrefix: NotImported | Type[blob.BlobPrefix]
     from azure.storage.blob import BlobPrefix
 except (ImportError, AttributeError):
-    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 
 try:
-    BlobServiceClient: NotImported | Type[blob.BlobServiceClient]
     from azure.storage.blob import BlobServiceClient
 except (ImportError, AttributeError):
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
 
 try:
-    ContainerClient: NotImported | Type[blob.ContainerClient]
     from azure.storage.blob import ContainerClient
 except (ImportError, AttributeError):
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[misc,assignment]
