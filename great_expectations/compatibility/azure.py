@@ -6,8 +6,19 @@ from typing import TYPE_CHECKING, Type
 from great_expectations.compatibility.not_imported import NotImported
 
 if TYPE_CHECKING:
+    from azure import identity
     from azure.keyvault import secrets
     from azure.storage import blob
+
+__all__ = [
+    "storage",
+    "DefaultAzureCredential",
+    "SecretClient",
+    "ContentSettings",
+    "BlobPrefix",
+    "BlobServiceClient",
+    "ContainerClient",
+]
 
 AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
     "azure blob storage components are not installed, please 'pip install azure-storage-blob azure-identity azure-keyvault-secrets'"
@@ -20,9 +31,10 @@ except ImportError:
     storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    pass
+    DefaultAzureCredentia: NotImported | Type[identity.DefaultAzureCredential]
+    from azure.identity import DefaultAzureCredential
 except ImportError:
-    DefaultAzureCredentia: NotImported | type = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    DefaultAzureCredentia = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
     SecretClient: NotImported | Type[secrets.SecretClient]
