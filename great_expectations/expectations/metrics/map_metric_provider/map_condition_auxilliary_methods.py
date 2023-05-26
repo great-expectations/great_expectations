@@ -335,7 +335,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     temp_table_name: str = generate_temporary_table_name(
                         default_table_name_prefix="#ge_temp_"
                     )
-                    metadata: sa.MetaData = sa.MetaData(bind=connection)
+                    metadata: sa.MetaData = sa.MetaData()
                     metadata.reflect(bind=connection)
                     temp_table_obj: sa.Table = sa.Table(
                         temp_table_name,
