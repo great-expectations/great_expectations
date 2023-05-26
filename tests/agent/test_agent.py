@@ -61,7 +61,7 @@ def connection_string():
 def create_session(mocker, queue, connection_string):
     """Patch for great_expectations.core.http.create_session"""
     create_session = mocker.patch("great_expectations.agent.agent.create_session")
-    create_session().post.return_value = {
+    create_session().post().json.return_value = {
         "queue": queue,
         "connection_string": connection_string,
     }

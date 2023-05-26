@@ -234,12 +234,12 @@ class GXAgent:
 
         json_response = response.json()
         queue = json_response["queue"]
-        broker_url = json_response["connection_string"]
+        connection_string = json_response["connection_string"]
 
         try:
             # pydantic will coerce the url to the correct type
             return GXAgentConfig(
-                queue=queue, broker_url=broker_url  # type: ignore[arg-type]
+                queue=queue, connection_string=connection_string  # type: ignore[arg-type]
             )
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
