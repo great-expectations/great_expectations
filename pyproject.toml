@@ -201,6 +201,14 @@ exclude = [
     'tests/datasource/fluent/tasks\.py',
 ]
 
+[[tool.mypy.overrides]]
+module = [
+  "great_expectations.compatibility.azure",
+]
+disable_error_code = [
+    'assignment',  # cannot assign NotImported to a ModuleType
+    ]
+
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
 init_typed = true
