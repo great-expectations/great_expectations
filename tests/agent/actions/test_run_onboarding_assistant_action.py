@@ -29,7 +29,7 @@ def test_run_onboarding_data_assistant_event_requires_unique_expectation_suite(
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Expectation Suite"):
         action.run(event, id=id)
 
 
@@ -38,7 +38,7 @@ def test_run_onboarding_data_assistant_event_requires_unique_checkpoint(context,
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"Checkpoint"):
         action.run(event, id=id)
 
 
@@ -48,9 +48,19 @@ def test_run_onboarding_data_assistant_event_creates_expectation_suite(context, 
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
 
-    action.run(event, id=id)
+    # pydantic models error without str ID
+    expectation_suite_id = "084a6e0f-c014-4e40-b6b7-b2f57cb9e176"
+    checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
+    expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
+    expectation_suite.ge_cloud_id = expectation_suite_id
+    checkpoint = context.add_or_update_checkpoint()
+    checkpoint.ge_cloud_id = checkpoint_id
 
-    context.add_expectation_suite.assert_called()
+    action.run(event=event, id=id)
+
+    context.add_expectation_suite.assert_called_with(
+        expectation_suite=expectation_suite
+    )
 
 
 def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):
@@ -59,6 +69,32 @@ def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
 
-    action.run(event, id=id)
+    # pydantic models error without str ID
+    expectation_suite_id = "084a6e0f-c014-4e40-b6b7-b2f57cb9e176"
+    expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
+    checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
+    checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
+    expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
+    expectation_suite.ge_cloud_id = expectation_suite_id
+    checkpoint = context.add_or_update_checkpoint()
+    checkpoint.ge_cloud_id = checkpoint_id
 
-    context.add_or_update_checkpoint.assert_called()
+    action.run(event=event, id=id)
+
+    expected_checkpoint_config = {
+        "name": checkpoint_name,
+        "validations": [
+            {
+                "expectation_suite_name": expectation_suite_name,
+                "expectation_suite_ge_cloud_id": expectation_suite_id,
+                "batch_request": {
+                    "datasource_name": event.datasource_name,
+                    "data_asset_name": event.data_asset_name,
+                },
+            }
+        ],
+        "config_version": 1,
+        "class_name": "Checkpoint",
+    }
+
+    context.add_or_update_checkpoint.assert_called_with(**expected_checkpoint_config)

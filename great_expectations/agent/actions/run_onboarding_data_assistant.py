@@ -17,7 +17,7 @@ class RunOnboardingDataAssistantAction(AgentAction):
         expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
-        # ensure resources we create don't already exist
+        # ensure resources we create don't already exist before we run the Data Assistant.
         try:
             self._context.get_expectation_suite(
                 expectation_suite_name=expectation_suite_name
