@@ -348,6 +348,11 @@ fluent_datasources = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
+        name="how_to_connect_to_sql_data_using_a_query",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
         name="how_to_quickly_connect_to_a_single_file_with_pandas",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -355,6 +360,11 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="how_to_connect_to_sqlite_data",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_a_sql_table",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_a_sql_table.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
     IntegrationTestFixture(
@@ -370,6 +380,11 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="how_to_initialize_a_filesystem_data_context_in_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
+        name="how_to_explicitly_instantiate_an_ephemeral_data_context",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
 ]
