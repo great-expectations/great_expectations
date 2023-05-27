@@ -12,6 +12,9 @@ import pytest
 import requests
 import responses
 
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
 from tests.datasource.fluent.conftest import (
@@ -270,12 +273,18 @@ def test_cloud_context_delete_datasource(
 def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
     def verify_asset_name_cb(request: PreparedRequest) -> _CallbackResult:
         if request.body:
-            payload = json.loads(request.body)
-            LOGGER.warning(f"PUT payload: ->\n{pf(payload)}")
+            payload = _CloudResponseSchema.from_datasource_json(request.body)
+            LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
+            assets = payload.data.attributes["datasource_config"]["assets"]
+            for asset in assets:
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:
+                    raise ValueError(
+                        f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
+                    )
             return _CallbackResult(
                 200,
                 headers=_DEFAULT_HEADERS,
-                body=_CloudResponseSchema.from_datasource_json(request.body).json(),
+                body=payload.json(),
             )
         return _CallbackResult(500, _DEFAULT_HEADERS, "No body found")
 
