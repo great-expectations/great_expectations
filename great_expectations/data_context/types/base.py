@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -2803,7 +2804,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float] = 1.0,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -2872,19 +2873,19 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[has-type]
+        return self._validation_operator_name  # type: ignore[return-value]
 
     @validation_operator_name.setter
     def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value  # type: ignore[has-type]
+        self._validation_operator_name = value
 
     @property
     def batches(self) -> List[dict]:
-        return self._batches  # type: ignore[has-type]
+        return self._batches
 
     @batches.setter
     def batches(self, value: List[dict]) -> None:
-        self._batches = value  # type: ignore[has-type]
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
@@ -2919,7 +2920,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> float:
+    def config_version(self) -> Union[int, float, None]:
         return self._config_version
 
     @config_version.setter
@@ -3118,6 +3119,7 @@ class CheckpointConfig(BaseYamlConfig):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3166,6 +3168,7 @@ class CheckpointConfig(BaseYamlConfig):
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
+            "validator": validator,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,

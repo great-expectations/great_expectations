@@ -387,7 +387,7 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
     checkpoint = SimpleCheckpoint(
         "my_checkpoint",
@@ -401,11 +401,11 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
 @pytest.mark.integration
-def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
+def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     context = empty_data_context
     path = pathlib.Path(
         __file__,
@@ -431,7 +431,7 @@ def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
 @pytest.mark.parametrize(
