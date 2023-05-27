@@ -1041,7 +1041,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
             con=connection,
             index=False,
             dtype=sql_dtypes,
-            if_exists="fail",
+            if_exists="replace",
             method=sql_insert_method,
         )
         _end = time.time()
