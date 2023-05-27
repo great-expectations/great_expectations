@@ -1,27 +1,6 @@
 from __future__ import annotations
 
-import warnings
-
-from packaging.version import Version
-
 from great_expectations.compatibility.not_imported import NotImported
-
-
-def sqlalchemy_version_check(version: str | Version) -> None:
-    """Check if the sqlalchemy version is supported or warn if not.
-
-    Args:
-        version: sqlalchemy version as a string or Version.
-    """
-    if isinstance(version, str):
-        version = Version(version)
-
-    if version >= Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
-            UserWarning,
-        )
-
 
 # GX optional imports
 SQLALCHEMY_NOT_IMPORTED = NotImported(
@@ -31,7 +10,6 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 try:
     import sqlalchemy
 
-    sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
