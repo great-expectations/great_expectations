@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -513,8 +514,19 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         asset_names: Set[str] = self.get_asset_names()
 
+        in_cloud_context: bool = False
+        if self._data_context:
+            in_cloud_context = self._data_context._datasource_store.cloud_mode
+
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
-            if asset_name in asset_names:
+            if in_cloud_context:
+                # In cloud mode, we need to generate a unique name for the asset
+                asset_name = f"{asset.type}-{str(uuid.uuid4())[:8]}"
+                logger.info(
+                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
+                )
+                asset.name = asset_name
+            elif asset_name in asset_names:
                 self.delete_asset(asset_name=asset_name)
 
         return super()._add_asset(asset=asset, connect_options=connect_options)
