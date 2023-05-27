@@ -244,7 +244,7 @@ def _get_fake_db_callback(
     url = urllib.parse.urljoin(url, parsed_url.path)
 
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    logger.info(f"body -->\n{pf(item, depth=2)}")
+    logger.info(f"GET response body -->\n{pf(item, depth=2)}")
     if item is MISSING:
         errors = ErrorPayloadSchema(
             errors=[
@@ -293,7 +293,7 @@ def _post_fake_db_datasources_callback(
         )
 
     try:
-        logger.info(f"POST body -->\n{pf(json.loads(request.body), depth=4)}")
+        logger.info(f"POST request body -->\n{pf(json.loads(request.body), depth=4)}")
         payload = _CloudResponseSchema.from_datasource_json(request.body)
 
         datasource_name: str = payload.data.name
@@ -359,7 +359,7 @@ def _put_db_datasources_callback(
         result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
     elif item is not MISSING:
         payload = json.loads(request.body)
-        logger.info(f"PUT body -->\n{pf(payload, depth=4)}")
+        logger.info(f"PUT request body -->\n{pf(payload, depth=6)}")
         _CLOUD_API_FAKE_DB[url] = payload
         result = _CallbackResult(
             200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)

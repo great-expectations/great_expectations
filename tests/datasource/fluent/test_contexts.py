@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import pathlib
+import logging
+import json
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -15,10 +17,15 @@ from great_expectations.data_context import CloudDataContext, FileDataContext
 from tests.datasource.fluent.conftest import (
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    FAKE_DATASOURCE_ID,
+    _DEFAULT_HEADERS,
     CloudDetails,
+    _CallbackResult,
+    _CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
+    from requests import PreparedRequest
     from pytest_mock import MockerFixture
     from responses import RequestsMock
 
@@ -28,6 +35,8 @@ pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -258,29 +267,36 @@ def test_cloud_context_delete_datasource(
 
 
 @pytest.fixture
-def datasources_post_mock(cloud_details: CloudDetails):
-    with responses.RequestsMock() as rsps:
-        rsps.add(
-            responses.POST,
-            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources",
-            json={"data": {}},
-            status=422,  # TODO: make this pass
-        )
-        yield rsps
+def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+    def verify_asset_name_cb(request: PreparedRequest) -> _CallbackResult:
+        if request.body:
+            payload = json.loads(request.body)
+            LOGGER.warning(f"PUT payload: ->\n{pf(payload)}")
+            return _CallbackResult(
+                200,
+                headers=_DEFAULT_HEADERS,
+                body=_CloudResponseSchema.from_datasource_json(request.body).json(),
+            )
+        return _CallbackResult(500, _DEFAULT_HEADERS, "No body found")
+
+    cloud_url = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{FAKE_DATASOURCE_ID}"
+
+    cloud_api_fake.remove("PUT", url=cloud_url)
+    cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
+
+    yield cloud_api_fake
 
 
 @pytest.mark.cloud
 class TestPandasDefaultWithCloud:
     def test_payload_sent_to_cloud(
         self,
-        datasources_post_mock: RequestsMock,
         cloud_details: CloudDetails,
         empty_cloud_context_fluent: CloudDataContext,
+        verify_asset_names_mock: RequestsMock,
     ):
         context = empty_cloud_context_fluent
-        cloud_url = (
-            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources"
-        )
+        cloud_url = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{FAKE_DATASOURCE_ID}"
 
         df = pd.DataFrame.from_dict(
             {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
@@ -288,7 +304,7 @@ class TestPandasDefaultWithCloud:
 
         context.sources.pandas_default.read_dataframe(df)
 
-        assert responses.assert_call_count(cloud_url, 1)
+        assert verify_asset_names_mock.assert_call_count(cloud_url, 1)
         assert False
 
 
