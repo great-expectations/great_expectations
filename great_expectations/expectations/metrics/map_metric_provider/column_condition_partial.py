@@ -189,6 +189,7 @@ def column_condition_partial(  # noqa: C901 - 23
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,
+                    _execution_engine=execution_engine,
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )

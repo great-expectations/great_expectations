@@ -111,6 +111,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -799,11 +800,9 @@ def postgresql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"postgresql://postgres@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -817,11 +816,9 @@ def mysql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"mysql+pymysql://root@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -2970,7 +2967,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
