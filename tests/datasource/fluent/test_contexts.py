@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import pathlib
 import logging
-import json
+import pathlib
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -10,26 +9,25 @@ from typing import TYPE_CHECKING
 import pandas as pd
 import pytest
 import requests
-import responses
 
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import CloudDataContext, FileDataContext
 from tests.datasource.fluent.conftest import (
+    _DEFAULT_HEADERS,
+    FAKE_DATASOURCE_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
-    FAKE_DATASOURCE_ID,
-    _DEFAULT_HEADERS,
     CloudDetails,
     _CallbackResult,
     _CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
-    from requests import PreparedRequest
     from pytest_mock import MockerFixture
+    from requests import PreparedRequest
     from responses import RequestsMock
 
 
