@@ -276,6 +276,7 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
             payload = _CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]
+            assert assets, "No assets found"
             for asset in assets:
                 if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:
                     raise ValueError(
@@ -293,7 +294,7 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
     cloud_api_fake.remove("PUT", url=cloud_url)
     cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
 
-    yield cloud_api_fake
+    return cloud_api_fake
 
 
 @pytest.mark.cloud
@@ -314,7 +315,6 @@ class TestPandasDefaultWithCloud:
         context.sources.pandas_default.read_dataframe(df)
 
         assert verify_asset_names_mock.assert_call_count(cloud_url, 1)
-        assert False
 
 
 def test_data_connectors_are_built_on_config_load(
