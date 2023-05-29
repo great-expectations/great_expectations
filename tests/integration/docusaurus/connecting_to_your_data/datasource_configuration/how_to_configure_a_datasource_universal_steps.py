@@ -28,7 +28,9 @@ import great_expectations as gx
 # The following methods correspond to the section headings in the how-to guide linked in the module docstring.
 
 
-def section_1_import_necessary_modules_and_initialize_your_data_context() -> gx.DataContext:
+def section_1_import_necessary_modules_and_initialize_your_data_context() -> (
+    gx.DataContext
+):
     """Provides and tests the snippets for section 1 of the Spark, Pandas, and SQL Datasource configuration guides.
 
     Returns:

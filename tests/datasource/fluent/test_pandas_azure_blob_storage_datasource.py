@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, Iterator, List, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
 from unittest import mock
 
 import pytest
@@ -12,6 +12,7 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -27,10 +28,15 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
+
 logger = logging.getLogger(__file__)
 
 
-if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):
+if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):  # type: ignore[truthy-function] # False if NotImported
     pytest.skip(
         'Could not import "azure.storage.blob" from Microsoft Azure cloud',
         allow_module_level=True,
@@ -140,6 +146,35 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
             "credential": "my_credential",
         },
     )
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    assert azure_client is not None
+    assert pandas_abs_datasource.name == "pandas_abs_datasource"
+
+
+@pytest.mark.integration
+def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
+    monkeypatch: pytest.MonkeyPatch, empty_file_context: FileDataContext
+):
+    monkeypatch.setenv("MY_CRED", "my_secret_credential")
+
+    pandas_abs_datasource = PandasAzureBlobStorageDatasource(  # type: ignore[call-arg] # args are optional
+        name="pandas_abs_datasource",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": r"${MY_CRED}",
+        },
+    )
+
+    # attach data_context to enable config substitution
+    pandas_abs_datasource._data_context = empty_file_context
+
+    credential = pandas_abs_datasource.azure_options["credential"]
+    assert isinstance(credential, ConfigStr)
+    assert (
+        credential.get_config_value(config_provider=empty_file_context.config_provider)
+        == "my_secret_credential"
+    )
+
     azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"

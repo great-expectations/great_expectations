@@ -40,15 +40,35 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+  new_site_name:
+    class_name: SiteBuilder
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
 notebooks:
 include_rendered_content:
   expectation_validation_result: false
   globally: false
   expectation_suite: false
 fluent_datasources:
-  taxi_source:
+  taxi_datasource:
     type: pandas_filesystem
     assets:
-      taxi_asset:
+      yellow_tripdata:
         type: csv
+        order_by:
+          - key: year
+            reverse: true
+          - key: month
+            reverse: false
+        batching_regex: yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv
     base_directory: data
+  taxi_frame_source:
+    type: pandas
+    assets:
+      taxi_file_asset:
+        type: csv
+        filepath_or_buffer: data/yellow_tripdata_sample_2019-01.csv

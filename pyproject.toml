@@ -5,6 +5,7 @@ requires = ["setuptools", "wheel"]
 # build-backend = "setuptools.build_meta"
 
 [tool.black]
+target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
 (
      docs/.*
@@ -66,11 +67,6 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'checkpoint/actions\.py',  # 18
-    'checkpoint/checkpoint\.py',  # 22
-    'checkpoint/types/checkpoint_result\.py',  # 34
-    'checkpoint/util\.py',  # 5
-    'cli/checkpoint\.py',  # 9
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
@@ -205,6 +201,16 @@ exclude = [
     'tests/datasource/fluent/tasks\.py',
 ]
 
+[[tool.mypy.overrides]]
+# need to use override because a mypy bug prevents ignoring an assignment warning inline
+# for `from azure import storage`
+module = [
+  "great_expectations.compatibility.azure",
+]
+disable_error_code = [
+    'assignment',  # cannot assign NotImported to a ModuleType
+    ]
+
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
 init_typed = true
@@ -212,7 +218,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f

@@ -39,10 +39,7 @@ import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_a
 
 Great Expectations supports reading the data in individual files directly into a Validator using Pandas.  To do this, we will run the code:
 
-```python title="Python code"
-validator = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_quickly_connect_to_a_single_file_with_pandas.py get_validator"
 ```
 
 <InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv"/>

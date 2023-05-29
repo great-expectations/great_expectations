@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
     DeltaAsset,
     DirectoryCSVAsset,
+    DirectoryDeltaAsset,
     DirectoryJSONAsset,
     DirectoryORCAsset,
     DirectoryParquetAsset,
@@ -325,6 +326,11 @@ add_text_asset = [
     ),
 ]
 
+add_delta_asset_all_params = {
+    "timestamp_as_of": "timestamp_as_of",
+    "version_as_of": "version_as_of",
+}
+
 add_delta_asset = [
     pytest.param(
         "add_delta_asset",
@@ -333,10 +339,7 @@ add_delta_asset = [
     ),
     pytest.param(
         "add_delta_asset",
-        {
-            "timestamp_as_of": "timestamp_as_of",
-            "version_as_of": "version_as_of",
-        },
+        add_delta_asset_all_params,
         id="delta_all_params_20230512",
     ),
     pytest.param(
@@ -396,6 +399,7 @@ _SPARK_ASSET_TYPES = [
     (TextAsset, {"name": "asset_name"}),
     (DirectoryTextAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (DeltaAsset, {"name": "asset_name"}),
+    (DirectoryDeltaAsset, {"name": "asset_name", "data_directory": "data_directory"}),
 ]
 
 
@@ -613,12 +617,50 @@ add_directory_text_asset = [
     ),
 ]
 
+
+add_directory_delta_asset = [
+    pytest.param(
+        "add_directory_delta_asset",
+        {"data_directory": "some_directory"},
+        id="directory_delta_min_params",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_delta_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {
+            **add_delta_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_delta_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_delta_fail_extra_params",
+    ),
+]
+
 add_directory_asset_test_params = []
 add_directory_asset_test_params += add_directory_csv_asset
 add_directory_asset_test_params += add_directory_parquet_asset
 add_directory_asset_test_params += add_directory_orc_asset
 add_directory_asset_test_params += add_directory_json_asset
 add_directory_asset_test_params += add_directory_text_asset
+add_directory_asset_test_params += add_directory_delta_asset
 
 
 @pytest.mark.unit
@@ -1130,7 +1172,6 @@ class TestSplitterDirectoryAsset:
         directory_asset_with_column_value_splitter: DirectoryCSVAsset,
         expected_num_records_directory_asset_no_splitter_2020_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             directory_asset_with_column_value_splitter.build_batch_request(
                 {"passenger_count": 2}
@@ -1162,7 +1203,6 @@ def file_asset_with_no_splitter(
 def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
     file_asset_with_no_splitter: CSVAsset,
 ) -> int:
-
     single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
         {"year": "2020", "month": "11"}
     )
@@ -1254,7 +1294,6 @@ class TestSplitterFileAsset:
         file_asset_with_column_value_splitter: CSVAsset,
         expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             file_asset_with_column_value_splitter.build_batch_request(
                 {"year": "2020", "month": "11", "passenger_count": 2}

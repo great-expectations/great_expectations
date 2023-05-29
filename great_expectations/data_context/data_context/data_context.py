@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Optional, Tuple, overload
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, overload
 
 from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (

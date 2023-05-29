@@ -20,7 +20,6 @@ class _PyPIPackageData(TypedDict):
 
 
 class _VersionChecker:
-
     _LATEST_GX_VERSION_CACHE: ClassVar[version.Version | None] = None
 
     _BASE_PYPI_URL: ClassVar[str] = "https://pypi.org/pypi"

@@ -157,7 +157,6 @@ class FileDataContext(SerializableDataContext):
 
         try:
             with open(config_filepath, "w") as outfile:
-
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
                     self.fluent_config.update_datasources(
@@ -220,9 +219,7 @@ class FileDataContext(SerializableDataContext):
             if path_to_fluent_yaml.exists():
                 gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
 
-                # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
-                    datasource._config_provider = config_provider
                     datasource._data_context = self
 
                 return gx_config

@@ -133,7 +133,9 @@ def expectation_config_expect_multicolumn_sum_to_equal() -> ExpectationConfigura
 
 
 @pytest.fixture()
-def expectation_config_expect_column_pair_values_to_be_equal() -> ExpectationConfiguration:
+def expectation_config_expect_column_pair_values_to_be_equal() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_pair_values_to_be_equal",
         kwargs={"column_A": "ordered_item", "column_B": "received_item"},
@@ -152,7 +154,9 @@ def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfigu
 
 
 @pytest.fixture()
-def expectation_config_expect_column_values_to_not_be_in_set() -> ExpectationConfiguration:
+def expectation_config_expect_column_values_to_not_be_in_set() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_in_set",
         kwargs={

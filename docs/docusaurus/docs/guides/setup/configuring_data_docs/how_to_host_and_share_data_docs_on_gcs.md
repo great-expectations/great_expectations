@@ -3,9 +3,6 @@ title: How to host and share Data Docs on GCS
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
@@ -58,7 +55,7 @@ We recommend placing it in your project directory, for example ``great_expectati
 
 ### 4. Deploy your Google App Engine app
 
-Issue the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command from within the app directory created above:
+Run the following CLI command from within the app directory you created previously:
 
 ```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
 ```
@@ -76,14 +73,9 @@ You may also replace the default ``local_site`` if you would only like to mainta
 
 ### 7. Build the GCS Data Docs site
 
-Use the following CLI command: 
+Run the following Python code to build and open your Data Docs:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command"
-```
-
-If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
-
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output"
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
 
 ### 8. Test that everything was configured properly by launching your App Engine app

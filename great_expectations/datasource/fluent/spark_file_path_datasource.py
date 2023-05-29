@@ -5,6 +5,7 @@ from typing import (
     TYPE_CHECKING,
     ClassVar,
     List,
+    Literal,
     Optional,
     Sequence,
     Type,
@@ -13,7 +14,6 @@ from typing import (
 
 import pydantic
 from pydantic import Field
-from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
@@ -244,8 +244,8 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(CSVAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -300,8 +300,8 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(ParquetAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -340,8 +340,8 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(ORCAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -499,8 +499,8 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-json.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(JSONAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -540,8 +540,8 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(TextAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -569,6 +569,24 @@ class DeltaAsset(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
+class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
+    type: Literal["directory_delta"] = "directory_delta"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "delta"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """The options below are available as of 2023-05-12
+
+        See https://docs.databricks.com/delta/tutorial.html for more info.
+        """
+        return (
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+        )
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -584,6 +602,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     TextAsset,
     DirectoryTextAsset,
     DeltaAsset,
+    DirectoryDeltaAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
@@ -597,6 +616,7 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     TextAsset,
     DirectoryTextAsset,
     DeltaAsset,
+    DirectoryDeltaAsset,
 ]
 
 

@@ -151,6 +151,34 @@
       ]
     },
     {
+      "dataset_name": "expect_column_mean_to_be_between_decimal_type",
+      "data": {
+        "a": [2.2345, 1.123]
+      },
+      "schemas": {
+        "spark": {
+          "a": "DecimalType"
+        }
+      },
+      "tests": [
+        {
+          "title": "simple_mean_positive_range_decimal_type",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2,
+            "max_value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.6787500000000002
+          },
+          "only_for": ["spark"]
+        }
+      ]
+    },
+    {
       "dataset_name": "expect_column_mean_to_be_between_2",
       "data": {
         "s": ["s", null, null, null],

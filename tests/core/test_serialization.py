@@ -741,7 +741,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -789,7 +789,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -839,7 +839,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -889,7 +889,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -937,12 +937,12 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 
 
 @pytest.mark.parametrize(
-    "checkpoint_config,expected_serialized_checkpoint_config",
+    "checkpoint_config_fixture_name,expected_serialized_checkpoint_config",
     [
         pytest.param(
             "checkpoint_config_spark",
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -978,7 +978,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         pytest.param(
             "checkpoint_config_with_schema_spark",
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -1033,15 +1033,14 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 )
 @pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
-    checkpoint_config: Union[CheckpointConfig, str],
+    checkpoint_config_fixture_name: str,
     expected_serialized_checkpoint_config: dict,
     spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
     # request.getfixturevalue()
-    if isinstance(checkpoint_config, str):
-        checkpoint_config = request.getfixturevalue(checkpoint_config)
+    checkpoint_config = request.getfixturevalue(checkpoint_config_fixture_name)
 
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config

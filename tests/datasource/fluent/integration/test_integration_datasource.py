@@ -2,11 +2,16 @@ from __future__ import annotations
 
 import pathlib
 
+import pandas as pd
 import pydantic
 import pytest
+from responses import RequestsMock
 
 from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import (
+    AbstractDataContext,
+    CloudDataContext,
+)
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -382,7 +387,7 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
     checkpoint = SimpleCheckpoint(
         "my_checkpoint",
@@ -396,11 +401,11 @@ def test_simple_checkpoint_run(
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
 @pytest.mark.integration
-def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
+def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     context = empty_data_context
     path = pathlib.Path(
         __file__,
@@ -426,7 +431,7 @@ def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
     )
     result = checkpoint.run()
     assert result["success"]
-    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+    assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
 @pytest.mark.parametrize(
@@ -503,3 +508,42 @@ def test_batch_request_error_messages(
 
     with pytest.raises(ValueError):
         batch_request.batch_slice = True  # type: ignore[assignment]
+
+
+@pytest.mark.integration
+def test_pandas_data_adding_dataframe_in_cloud_context(
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+):
+    context = empty_cloud_context_fluent
+
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+
+    dataframe_asset = context.sources.add_or_update_pandas(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
+    dataframe_asset.build_batch_request()
+
+    assert "No error was raised above"
+
+
+@pytest.mark.integration
+def test_spark_data_adding_dataframe_in_cloud_context(
+    spark_session,
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+):
+    from pyspark.sql import SparkSession  # isort:skip
+
+    context = empty_cloud_context_fluent
+
+    SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+    spark_df = spark_session.createDataFrame(df)
+
+    dataframe_asset = context.sources.add_or_update_spark(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset", dataframe=spark_df)
+    dataframe_asset.build_batch_request()
+
+    assert "No error was raised above"

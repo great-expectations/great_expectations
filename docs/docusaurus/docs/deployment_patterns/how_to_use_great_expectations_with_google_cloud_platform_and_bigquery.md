@@ -132,7 +132,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 4. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. 
+The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS)](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
 
 More details can be found in the corresponding How to Guides, which have been linked.
 
@@ -172,7 +172,7 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 
 In the example, we have created a Datasource named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
+To configure the BigQuery Datasource, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery).
 
 </TabItem>
 </Tabs>
@@ -237,7 +237,7 @@ In the second example, a query `Asset` named `my_query_asset` is built by submit
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
@@ -259,7 +259,7 @@ For more details on how to configure the RuntimeBatchRequest, as well as an exam
 </TabItem>
 <TabItem value="bigquery">
 
-For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
@@ -281,7 +281,7 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
 ```
 
-For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
+To configure the BatchRequest and learn how you can load data by specifying a table name, see [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
 
 </TabItem>
 </Tabs>
@@ -481,8 +481,8 @@ There are many ways to iterate and improve this initial version, which used a `b
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
 - [How to use the Google Kubernetes Engine (GKE) to deploy, manage and scale your application](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/kubernetes_engine.html).
-- [How to configure a DataConnector to introspect and partition tables in SQL](../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md).
-- [How to configure a DataConnector to introspect and partition a file system or blob store](../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md).
+- [How to configure a DataConnector to introspect and partition tables in SQL](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+- [How to configure a DataConnector to introspect and partition a file system or blob store](/docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
 Also, the following scripts and configurations can be found here:
 

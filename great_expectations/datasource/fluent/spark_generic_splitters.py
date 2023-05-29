@@ -5,11 +5,12 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
+    Protocol,
     Union,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -17,7 +18,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 if TYPE_CHECKING:
-
     from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 

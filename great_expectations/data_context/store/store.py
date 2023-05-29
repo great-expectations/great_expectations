@@ -98,7 +98,9 @@ class Store:
         # STORE_BACKEND_ID_KEY always validated
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return
-        elif not isinstance(key, self.key_class):
+        elif isinstance(key, self.key_class):
+            return
+        else:
             raise TypeError(
                 f"key must be an instance of {self.key_class.__name__}, not {type(key)}"
             )

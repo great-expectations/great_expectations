@@ -1,13 +1,12 @@
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-You can manually add an <TechnicalTag tag="expectation_store" text="Expectations Store" /> by using the `add_store()` method, which will add a Store to your configuration.
+To manually add an <TechnicalTag tag="expectation_store" text="Expectations Store" /> to your configuration, add the following configuration to the `stores` section of your `great_expectations.yml` file:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_expectations_store"
 ```
+As shown in the previous example, you need to change the default ``store_backend`` settings to make the Store work with S3.  The ``class_name`` is set to ``TupleS3StoreBackend``, ``bucket`` is the address of your S3 bucket, and ``prefix`` is the folder in your S3 bucket where Expectations are located.
 
-To make the store work with S3 you will need to make some changes to default the ``store_backend`` settings, as has been done in the above example.  The ``class_name`` should be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Expectation files will be located.
-
-Additional options are available for a more fine-grained customization of the TupleS3StoreBackend.
+The following example shows the additional options that are available to customize `TupleS3StoreBackend`:
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ExpectationsStore
@@ -20,15 +19,14 @@ store_backend:
     region_name: '<your_aws_region_name>'
 ```
 
-For the above example, please also note that the new Store's name is set to ``expectations_S3_store``.  This value  can be any name you like as long as you also update the value of the `expectations_store_name` key to match the new Store's name.
+In the previous example, the Store name is ``expectations_S3_store``. If you use a personalized Store name, you must also update the value of the `expectations_store_name` key to match the Store name. For example:
 
 ```yaml title="File contents: great_expectations.yml"
 expectations_store_name: expectations_S3_store
 ```
+When you update the `expectations_store_name` key value, Great Expectations uses the new Store for Validation Results.
 
-This update to the value of the `expectations_store_name` key will tell Great Expectations to use the new Store for Expectations.
-
-To configure IAM user, follow this configuration.
+Add the following code to `great_expectations.yml` to configure the IAM user:
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ExpectationsStore
@@ -42,7 +40,7 @@ store_backend:
     aws_session_token: ${AWS_ACCESS_KEY_ID}
 ```
 
-To configure IAM Assume Role, follow this configuration.
+Add the following code to `great_expectations.yml` to configure the IAM Assume Role:
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ExpectationsStore
@@ -57,5 +55,5 @@ store_backend:
 ```
 
 :::caution
-If you are also storing [Validations in S3](../../configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md) or [DataDocs in S3](../../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md),  please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+If you are also storing [Validations in S3](../../configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3.md) or [DataDocs in S3](../../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md),  make sure that the ``prefix`` values are disjoint and one is not a substring of the other.
 :::
