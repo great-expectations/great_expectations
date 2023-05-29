@@ -12,13 +12,19 @@ from great_expectations.expectations.expectation import (
 )
 
 
-class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
+class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
     """Expect the values of a pair of columns to be either both filled or empty simultaneously
+
+     It checks if 2 columns are aligned - the values of each row need to either be both empty or filled.
+     The expectation will fail if there's at least one row where one column is filled and the other isn't.
 
     Args:
     template_dict: dict with the following keys: \
-        column_a - first column, to compare values against column_b
-        column_b - second column, to compare values against column_a
+        column_a (str): first column name, to compare values against column_b
+        column_b (str): second column name, to compare values against column_a
+
+    Returns:
+            None
     """
 
     metric_dependencies = ("query.template_values",)
@@ -141,4 +147,4 @@ class ExpectQueriedColumnPairValuesToBeConsistent(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectQueriedColumnPairValuesToBeConsistent().print_diagnostic_checklist()
+    ExpectQueriedColumnPairValuesToBeBothFilledOrNull().print_diagnostic_checklist()
