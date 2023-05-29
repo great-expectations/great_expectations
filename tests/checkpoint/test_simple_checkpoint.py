@@ -256,7 +256,6 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_all_si
     ).build()
     # This is confusing: the UpdateDataDocsAction default behavior is to update
     # all sites if site_names=None
-    update_data_docs_action["action"]["site_names"] = []
     assert checkpoint_config.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -442,7 +441,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
@@ -503,7 +502,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
@@ -564,7 +563,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
@@ -631,7 +630,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": "my_simple_template_checkpoint",
         "run_name_template": "my_runtime_run_name_template",
