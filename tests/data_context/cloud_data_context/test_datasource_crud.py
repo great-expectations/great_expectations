@@ -408,9 +408,6 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     assert f"Unable to load datasource `{datasource_name}`" in str(e.value)
 
 
-@pytest.mark.xfail(
-    reason="This test is currently failing due to a bug in the Cloud API",
-)
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_context_test_yaml_config_workflow() -> None:
