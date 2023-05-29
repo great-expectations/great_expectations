@@ -404,6 +404,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         self.splitter = splitter
         return self
 
+    @public_api
     def add_splitter_year(
         self: Self,
         column_name: str,
@@ -418,6 +419,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             SplitterYear(method_name="split_on_year", column_name=column_name)
         )
 
+    @public_api
     def add_splitter_year_and_month(
         self: Self,
         column_name: str,
@@ -434,6 +436,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_year_and_month_and_day(
         self: Self,
         column_name: str,
@@ -450,6 +453,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
@@ -468,6 +472,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
         """Associates a column value splitter with this asset.
         Args:
@@ -482,6 +487,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
@@ -500,6 +506,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         """Associates a mod integer splitter with this asset.
         Args:
@@ -516,6 +523,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
         """Associates a multi-column value splitter with this asset.
         Args:
