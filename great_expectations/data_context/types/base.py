@@ -3136,7 +3136,9 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -3168,9 +3170,6 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
-
-        if validations is None:
-            validations = []
 
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
