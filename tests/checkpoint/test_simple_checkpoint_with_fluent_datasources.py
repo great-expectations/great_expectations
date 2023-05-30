@@ -87,7 +87,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
@@ -163,7 +163,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "template_name": "my_simple_template_checkpoint",
         "run_name_template": "my_runtime_run_name_template",

@@ -1912,7 +1912,7 @@ validations:
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -2009,7 +2009,7 @@ expectation_suite_ge_cloud_id:
     ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
