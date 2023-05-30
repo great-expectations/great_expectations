@@ -1179,9 +1179,11 @@ class TestDialectRequiresPersistedConnection:
         )
 
     @pytest.mark.unit
-    def test__dialect_requires_persisted_connection_empty_url_raises_exception(self):
+    def test__dialect_requires_persisted_connection_empty_url_raises_exception(
+        self, sa
+    ):
         url = ""
-        with pytest.raises(Exception):
+        with pytest.raises(sa.exc.ArgumentError):
             _dialect_requires_persisted_connection(
                 url=url,
             )
