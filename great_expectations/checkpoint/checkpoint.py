@@ -966,17 +966,9 @@ constructor arguments.
     ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        if validator:
-            if validations:
-                raise ValueError(
-                    "Please provide either a validator or validations list (but not both)."
-                )
-            # A lot of downstream logic depends on validations being a dict instead of a rich config type
-            # We should patch those instances so they can expect a CheckpointValidationConfig
-            validations = [
-                config.to_dict()
-                for config in validator.convert_to_checkpoint_validations_list()
-            ]
+        validations = cls._reconcile_validations(
+            validations=validations, validator=validator
+        )
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -1065,6 +1057,35 @@ constructor arguments.
         )
 
         return new_checkpoint
+
+    @staticmethod
+    def _reconcile_validations(
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validator: Validator | None = None,
+    ) -> list[dict]:
+        """
+        Helper to help resolve logic between validator and validations input
+        arguments to `construct_from_config_args`.
+        """
+        if not validations:
+            validations = []
+
+        if validator:
+            if validations:
+                raise ValueError(
+                    "Please provide either a validator or validations list (but not both)."
+                )
+            validations = validator.convert_to_checkpoint_validations_list()
+
+        # A lot of downstream logic depends on validations being a dict instead of a rich config type
+        # We should patch those instances so they can expect a CheckpointValidationConfig
+        validations = [
+            validation.to_dict()
+            for validation in validations
+            if isinstance(validation, CheckpointValidationConfig)
+        ]
+
+        return validations
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(

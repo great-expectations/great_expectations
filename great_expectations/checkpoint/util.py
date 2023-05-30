@@ -466,8 +466,8 @@ def does_batch_request_in_validations_contain_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: Optional[list] = None,
-) -> Optional[list]:
+    validations: list[dict] | None = None,
+) -> list[dict] | None:
     if validations:
         for value in validations:
             if "batch_request" in value:
