@@ -2,7 +2,7 @@
 title: Expectation classes
 ---
 
-In our daily lives and our data, we expect different things from different types of objects. After all, it would be very alarming and disturbing if a chair suddenly behaved like a cat! It is therefore entirely reasonable to expect different results when we evaluate the contents of an entire table and when we evaluate the contents of a single column. Expectation classes have been created to help make sure Custom Expectations return the expected results. This document provides an overview of the available Expectation classes, why they are helpful, and when they should be used.
+In our daily lives and our data, we expect different things from different types of objects. After all, it would be both alarming and disturbing if a chair suddenly behaved like a cat! Similarly, it is entirely reasonable to expect different results when we evaluate the contents of an entire table and when we evaluate the contents of a single column. Expectation classes have been created to help make sure Custom Expectations return the expected results. This document provides an overview of the available Expectation classes, why they are helpful, and when they should be used.
 
 ## Class hierarchy
 
@@ -24,7 +24,7 @@ Most Expectations are a combination of a Domain (Batch, Column, ColumnPair, Mult
 
 ## Expectation Domain types
 
-Domains provide a way to address a specific set of data, such as a batch within a table, or a column. Domains do this by describing the data locale. The data locale is the conceptual equivalent of “data that arrived last Tuesday in the UserEvents table in the Redshift database,” or “the timestamp column in the User's table in the Redshift database”.
+Domains provide a way to address a specific set of data, such as a Batch within a table, or a column within a Batch. Domains do this by describing the data locale. The data locale is the conceptual equivalent of “data that arrived last Tuesday in the UserEvents table in the Redshift database,” or “the timestamp column in the User's table in the Redshift database”.
 
 The following are the four Expectation Domains:
 
@@ -67,7 +67,7 @@ Map Expectations are evaluated on a row-by-row basis and each row is checked ind
 
 ![Map Expectations](../images/map_expectations.png)
 
-Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, Map Expectations evaluate every row of data and this can be computationally intensive.
+Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, because Map Expectations evaluate every row of data they can be computationally intensive.
 
 Every Map Expectation includes a `mostly` parameter. The `mostly` parameter allows you to specify a minimum percentage of rows that must validate successfully to pass the Expectation. The Expectation can still succeed when individual rows fail validation. This can be useful if you want your pipelines to have invalid data tolerance.
 
