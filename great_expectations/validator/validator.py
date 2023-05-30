@@ -1953,7 +1953,10 @@ class Validator:
         self,
     ) -> list[CheckpointValidationConfig]:
         """
-        TODO
+        Generates a list of validations to be used in the construction of a Checkpoint.
+
+        Returns:
+            A list of CheckpointValidationConfigs (one for each batch in the Validator).
         """
         validations = []
         for batch in self.batch_cache.values():
