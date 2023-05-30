@@ -1111,13 +1111,6 @@ def test_validator_include_rendered_content_diagnostic(
     )
 
 
-@pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
-    validator = Validator(execution_engine=execution_engine)
-    return validator
-
-
 @pytest.mark.unit
 def test___dir___contains_expectation_impls(
     validator_with_mock_execution_engine: Validator,

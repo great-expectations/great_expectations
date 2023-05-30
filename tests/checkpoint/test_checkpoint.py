@@ -34,9 +34,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.render import RenderedAtomicContent
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-)
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.checkpoint import cloud_config
 
@@ -4923,3 +4921,57 @@ def test_run_spark_checkpoint_with_schema(
     results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
     assert results.success is True
+
+
+@pytest.mark.unit
+def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
+    validator_with_mock_execution_engine,
+):
+    context = mock.MagicMock()
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "cannot be called with a validator and contain a batch_request" in str(
+        e.value
+    )
+
+
+@pytest.mark.unit
+def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raises_error(
+    ephemeral_context_with_defaults,
+    validator_with_mock_execution_engine,
+):
+    context = ephemeral_context_with_defaults
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(ValueError) as e:
+        _ = context.add_checkpoint(
+            name="my_checkpoint",
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "either a Validator or Validations list" in str(e.value)

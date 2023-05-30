@@ -109,6 +109,8 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_STATE,
 )
 
+from great_expectations.validator.validator import Validator
+
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
 
@@ -8230,3 +8232,10 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return EphemeralDataContext(project_config=project_config)
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
