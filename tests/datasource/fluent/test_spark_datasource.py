@@ -130,24 +130,3 @@ def test_spark_config_passed_to_execution_engine(
         candidate=spark_config,
         target=datasource.get_execution_engine().config["spark_config"],
     )
-
-
-def test_build_batch_request_raises_if_missing_dataframe(
-    empty_data_context: AbstractDataContext,
-    spark_session,
-    spark_df_from_pandas_df,
-    test_df_pandas,
-):
-    dataframe_asset = empty_data_context.sources.add_spark(
-        name="my_spark_datasource"
-    ).add_dataframe_asset(
-        name="my_dataframe_asset",
-    )
-
-    with pytest.raises(TypeError) as e:
-        dataframe_asset.build_batch_request()
-
-    assert (
-        "build_batch_request() missing 1 required positional argument: 'dataframe'"
-        in str(e.value)
-    )

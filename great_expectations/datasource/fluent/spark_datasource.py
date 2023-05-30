@@ -95,9 +95,7 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
-        default=None, exclude=True, repr=False
-    )
+    dataframe: _SparkDataFrameT = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid

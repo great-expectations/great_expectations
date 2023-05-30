@@ -516,19 +516,3 @@ def test_pandas_data_asset_batch_metadata(
         }
     )
     assert batch_list[0].metadata == substituted_batch_metadata
-
-
-def test_build_batch_request_raises_if_missing_dataframe(
-    empty_data_context: AbstractDataContext,
-):
-    dataframe_asset = empty_data_context.sources.add_or_update_pandas(
-        name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset")
-    dataframe_asset.dataframe = None
-    with pytest.raises(TypeError) as e:
-        _ = dataframe_asset.build_batch_request()
-
-    assert (
-        "build_batch_request() missing 1 required positional argument: 'dataframe'"
-        in str(e.value)
-    )
