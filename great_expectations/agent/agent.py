@@ -6,7 +6,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
-from pydantic import AmqpDsn, HttpUrl
+from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
@@ -199,8 +199,7 @@ class GXAgent:
         # ensure we have all required env variables, and provide a useful error if not
 
         class GxAgentConfigSettings(pydantic.BaseSettings):
-            # mypy doesn't know the default string is coerced to HttpUrl:
-            gx_cloud_base_url: HttpUrl = "https://api.greatexpectations.io"  # type: ignore[assignment]
+            gx_cloud_base_url: str = "https://api.greatexpectations.io"
             gx_cloud_organization_id: str
             gx_cloud_access_token: str
 
