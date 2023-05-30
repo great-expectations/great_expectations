@@ -764,7 +764,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Union[int, float] = 1.0,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -820,9 +820,15 @@ constructor arguments.
 """
             )
 
+        if not config_version:
+            class_name = "LegacyCheckpoint"
+        else:
+            class_name = self.__class__.__name__
+
         checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
+            class_name=class_name,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -931,7 +937,7 @@ constructor arguments.
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Union[int, float] = 1.0,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
@@ -1199,6 +1205,7 @@ class LegacyCheckpoint(Checkpoint):
         super().__init__(
             name=name,
             data_context=data_context,
+            config_version=None,
             validation_operator_name=validation_operator_name,
             batches=batches,
         )
@@ -1410,7 +1417,7 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
