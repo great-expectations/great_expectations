@@ -27,6 +27,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -40,6 +41,9 @@ from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import DataContextKey
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
+        EphemeralDataContext,
+    )
 
 yaml = YAMLHandler()
 
@@ -4975,3 +4979,40 @@ def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raise
         )
 
     assert "either a validator or validations list" in str(e.value)
+
+
+@pytest.mark.integration
+def test_checkpoint_with_validator_creates_validations_list(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    csv_path: pathlib.Path,
+):
+    context = ephemeral_context_with_defaults
+    pandas_datasource = context.sources.pandas_default
+
+    file_path = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert file_path.exists()
+
+    validator = pandas_datasource.read_csv(
+        filepath_or_buffer=file_path,
+    )
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint", validator=validator
+    )
+
+    validations = checkpoint.validations
+    assert len(validations) == 1
+
+    actual = validations[0].to_dict()
+    expected = {
+        "batch_request": {
+            "batch_slice": None,
+            "data_asset_name": "#ephemeral_pandas_asset",
+            "datasource_name": "default_pandas_datasource",
+            "options": {},
+        },
+        "expectation_suite_ge_cloud_id": None,
+        "expectation_suite_name": "default",
+        "id": None,
+        "name": None,
+    }
+    assert actual == expected

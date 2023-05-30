@@ -8239,3 +8239,12 @@ def validator_with_mock_execution_engine() -> Validator:
     execution_engine = mock.MagicMock()
     validator = Validator(execution_engine=execution_engine)
     return validator
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
