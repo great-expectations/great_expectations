@@ -786,7 +786,7 @@ class Batch(SerializableDictDot):
         self._batch_kwargs = batch_kwargs or BatchKwargs()
 
     @property
-    def data(self) -> BatchDataType:
+    def data(self) -> BatchDataType | None:
         """Getter for Batch data"""
         return self._data
 
