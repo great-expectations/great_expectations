@@ -1028,7 +1028,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         from great_expectations.compatibility import azure
 
         # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-        if azure.BlobServiceClient:
+        if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             try:
                 if self.connection_string:
                     blob_service_client: azure.BlobServiceClient = (
