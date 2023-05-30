@@ -20,23 +20,21 @@ def example() -> None:
 
 @example.command(name="postgres")
 @click.option(
-    "--shutdown",
+    "--stop",
     is_flag=True,
     help="Stop example and clean up. Default false.",
     default=False,
 )
-def example_postgres(shutdown: bool) -> None:
+def example_postgres(stop: bool) -> None:
     """Start a postgres database example."""
     repo_root = pathlib.Path(__file__).parents[2]
-    example_directory = (
-        repo_root / "examples" / "reference_environments" / "postgres_preloaded_data"
-    )
+    example_directory = repo_root / "examples" / "reference_environments" / "postgres"
     assert example_directory.is_dir(), "Example directory not found"
-    if shutdown:
-        cli_message("<green>Shutting down...</green>")
-        shutdown_commands = ["docker", "compose", "down"]
-        subprocess.run(shutdown_commands, cwd=example_directory)
-        cli_message("<green>Done shutting down...</green>")
+    if stop:
+        cli_message("<green>Stopping example containers...</green>")
+        stop_commands = ["docker", "compose", "down"]
+        subprocess.run(stop_commands, cwd=example_directory)
+        cli_message("<green>Done stopping containers.</green>")
     else:
         cli_message(
             "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
