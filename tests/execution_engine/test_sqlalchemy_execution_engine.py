@@ -1198,3 +1198,18 @@ class TestDialectRequiresPersistedConnection:
                 connection_string=connection_string,
                 url=url,
             )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params_empty_url(
+        self,
+    ):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = ""
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )
