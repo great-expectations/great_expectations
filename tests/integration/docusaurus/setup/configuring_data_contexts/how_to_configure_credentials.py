@@ -122,7 +122,7 @@ try:
     )
     my_other_postgres_db = context.add_datasource(
         name="my_other_postgres_db",
-        **datasources["datasources"]["my_other_postgres_db"]
+        **datasources["datasources"]["my_other_postgres_db"],
     )
 
     assert type(my_postgres_db) == Datasource

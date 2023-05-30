@@ -27,12 +27,12 @@ from great_expectations.render.util import (
 
 
 class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference the metric.
     condition_metric_name = "column_values.not_contain_special_character"
 
     # condition_value_keys are arguments used to determine the value of the metric.
     condition_value_keys = ("",)
+
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -125,7 +125,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True

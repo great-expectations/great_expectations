@@ -5,6 +5,7 @@ requires = ["setuptools", "wheel"]
 # build-backend = "setuptools.build_meta"
 
 [tool.black]
+target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
 (
      docs/.*
@@ -199,6 +200,16 @@ exclude = [
     # tests
     'tests/datasource/fluent/tasks\.py',
 ]
+
+[[tool.mypy.overrides]]
+# need to use override because a mypy bug prevents ignoring an assignment warning inline
+# for `from azure import storage`
+module = [
+  "great_expectations.compatibility.azure",
+]
+disable_error_code = [
+    'assignment',  # cannot assign NotImported to a ModuleType
+    ]
 
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings

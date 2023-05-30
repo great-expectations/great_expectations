@@ -10,13 +10,12 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Union,
     cast,
     overload,
 )
-
-import requests
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
@@ -26,6 +25,7 @@ from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
+from great_expectations.core.http import create_session
 from great_expectations.core.serializer import JsonConfigSerializer
 from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
@@ -55,6 +55,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
@@ -258,16 +259,13 @@ class CloudDataContext(SerializableDataContext):
         cloud_url = (
             f"{base_url}/organizations/{organization_id}/data-context-configuration"
         )
-        headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {cloud_config.access_token}",
-            "Gx-Version": __version__,
-        }
 
-        response = requests.get(cloud_url, headers=headers)
+        session = create_session(access_token=cloud_config.access_token)
+
+        response = session.get(cloud_url)
         if response.status_code != 200:
             raise gx_exceptions.GXCloudError(
-                f"Bad request made to GX Cloud; {response.text}"
+                f"Bad request made to GX Cloud; {response.text}", response=response
             )
         config = response.json()
         config["fluent_datasources"] = _extract_fluent_datasources(config)
@@ -512,7 +510,7 @@ class CloudDataContext(SerializableDataContext):
             DeprecationWarning,
         )
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+            raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
@@ -698,14 +696,14 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(
         self,
         name: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,

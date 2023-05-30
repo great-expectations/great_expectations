@@ -106,7 +106,6 @@ def print_datasource_crud_signatures(
     datasource_type_lookup = source_factories.type_lookup
 
     for datasource_name in datasource_type_lookup.type_names():
-
         for method_name_tmplt in method_name_templates:
             method_name = method_name_tmplt.format(datasource_name)
 
