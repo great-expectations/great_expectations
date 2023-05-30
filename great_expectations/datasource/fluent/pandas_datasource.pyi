@@ -113,6 +113,9 @@ class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
     dataframe: _PandasDataFrameT  # type: ignore[valid-type]
 
+    def build_batch_request(  # type: ignore[override]
+        self, dataframe: pd.DataFrame
+    ) -> BatchRequest: ...
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
