@@ -1081,8 +1081,9 @@ constructor arguments.
         # We should patch those instances so they can expect a CheckpointValidationConfig
         validations = [
             validation.to_dict()
-            for validation in validations
             if isinstance(validation, CheckpointValidationConfig)
+            else validation
+            for validation in validations
         ]
 
         return validations
