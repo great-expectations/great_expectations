@@ -231,16 +231,16 @@ def _dialect_requires_persisted_connection(
 ) -> bool:
     """Determine if the dialect needs a persisted connection.
 
-    dialect_name isn't available yet since the engine isn't yet created when we call this method
-    so we determine the dialect from the creds/url/params:
+    dialect_name isn't available yet since the engine isn't yet created when we call this method,
+    so we determine the dialect from the creds/url/params.
 
     Args:
-        connection_string:
-        credentials:
-        url:
+        connection_string: Database connection string to check
+        credentials: Dictionary of database connection credentials. Only `drivername` is checked.
+        url: Database connection URL to parse and check.
 
     Returns:
-
+        Boolean indicating whether the dialect requires a persisted connection.
     """
     if sum(bool(x) for x in [connection_string, credentials, url is not None]) != 1:
         raise ValueError(
