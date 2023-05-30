@@ -326,6 +326,15 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 )  # read_xml doesn't exist for pandas < 1.3
 
 
+def _short_id() -> str:
+    """
+    Generate a unique id by shortening a uuid4.
+    Can expect collision after several million iterations.
+    https://gist.github.com/Kilo59/82f227d9dba4e5cce62bc22b245b2638
+    """
+    return str(uuid.uuid4()).replace("-", "")[:11]
+
+
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
@@ -521,7 +530,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             if in_cloud_context:
                 # In cloud mode, we need to generate a unique name for the asset
-                asset_name = f"{asset.type}-{str(uuid.uuid4())[:8]}"
+                asset_name = f"{asset.type}-{_short_id()}"
                 logger.info(
                     f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
                 )
