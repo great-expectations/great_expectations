@@ -45,6 +45,7 @@ from typing import (
     Set,
     SupportsFloat,
     Tuple,
+    TypedDict,
     Union,
     cast,
     overload,
