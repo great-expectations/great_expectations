@@ -1,5 +1,3 @@
-# TODO: type-check me
-# Get module under type-checking coverage by end of session
 from __future__ import annotations
 
 import datetime
