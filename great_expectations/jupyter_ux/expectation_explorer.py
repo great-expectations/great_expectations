@@ -117,7 +117,6 @@ class ExpectationExplorer:
             "expect_column_pair_values_A_to_be_greater_than_B": [
                 "or_equal",
                 "ignore_row_if",
-                "allow_cross_type_comparisons",
             ],
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",

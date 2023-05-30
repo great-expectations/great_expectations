@@ -4493,7 +4493,6 @@ class Dataset(MetaDataset):
         column_B,
         or_equal=None,
         parse_strings_as_datetimes=False,
-        allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
         result_format=None,
         include_config=True,
@@ -4507,10 +4506,6 @@ class Dataset(MetaDataset):
             column_A (str): The first column name
             column_B (str): The second column name
             or_equal (boolean or None): If True, then values can be equal, not strictly greater
-
-        Keyword Args:
-            allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
-                string). Otherwise, attempting such comparisons will raise an exception.
 
         Keyword Args:
             ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
