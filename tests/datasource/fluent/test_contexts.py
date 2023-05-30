@@ -273,10 +273,10 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
         if request.body:
             payload = _CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
-            assets = payload.data.attributes["datasource_config"]["assets"]
+            assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
             assert assets, "No assets found"
             for asset in assets:
-                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
