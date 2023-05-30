@@ -1062,13 +1062,13 @@ constructor arguments.
     def _reconcile_validations(
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         validator: Validator | None = None,
-    ) -> list[dict]:
+    ) -> list[dict] | None:
         """
         Helper to help resolve logic between validator and validations input
         arguments to `construct_from_config_args`.
         """
         if not validations:
-            validations = []
+            return None
 
         if validator:
             if validations:

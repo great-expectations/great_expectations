@@ -7,7 +7,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import requests
 
@@ -21,6 +21,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.base import CheckpointValidationConfig
 
 try:
     import boto3
@@ -468,14 +471,20 @@ def does_batch_request_in_validations_contain_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: list[dict] | None = None,
+    validations: list[dict] | list[CheckpointValidationConfig] | None = None,
 ) -> list[dict] | None:
-    if validations:
-        for value in validations:
-            if "batch_request" in value:
-                value["batch_request"] = get_batch_request_as_dict(
-                    batch_request=value["batch_request"]
-                )
+    if not validations:
+        return None
+
+    validations = [
+        v.to_dict() if isinstance(v, CheckpointValidationConfig) else v
+        for v in validations
+    ]
+    for value in validations:
+        if "batch_request" in value:
+            value["batch_request"] = get_batch_request_as_dict(
+                batch_request=value["batch_request"]
+            )
 
     return validations
 
