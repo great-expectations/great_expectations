@@ -37,7 +37,7 @@ The following are the four Expectation Domains:
 
 A ColumnPair is the special case of a MultiColumn where the number of columns equals two. A Column Expectation is the special case where the number equals one.
 
-From a software engineering perspective, however, there are meaningful differences between Expectations with different domains. Specifically, all Column Expectations accept a `column` argument, all ColumnPair Expectations accept a pair of arguments, usually named `column_A` and `column_B`, and all MultiColumn Expectations accept a `column_list` argument.
+From a software engineering perspective, there are meaningful differences between Expectations with different domains. Specifically, all Column Expectations accept a `column` argument, all ColumnPair Expectations accept a pair of arguments, usually named `column_A` and `column_B`, and all MultiColumn Expectations accept a `column_list` argument.
 
 As the arguments for each Expectation are different, they are implemented as different classes. However, this can affect the logic for query optimization. For this reason, GX recommends using the smallest applicable domain when you’re implementing a custom Expectation. For example, don't subclass a MultiColumn Expectation when a ColumnPair Expectation will do.
 
