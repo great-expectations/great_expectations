@@ -298,11 +298,6 @@ def test_basic_checkpoint_config_validation(
         in message
         for message in [caplog.text, captured.out]
     )
-    assert any(
-        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
-        in message
-        for message in [caplog.text, captured.out]
-    )
 
     assert mock_emit.call_count == 4
 
@@ -580,7 +575,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [],
+        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
         "profilers": [],
     }
 
@@ -1276,7 +1271,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "expectation_suite_name": "users.delivery",
         "run_name_template": None,
         "batch_request": None,
-        "action_list": [],
+        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
         "evaluation_parameters": {},
         "runtime_configuration": {},
         "profilers": [],
@@ -2729,6 +2724,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 }
             },
         ],
+        action_list=[],
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -2989,6 +2985,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 }
             },
         ],
+        action_list=[],
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -3015,7 +3012,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
             {
                 "name": "store_evaluation_params",
                 "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
+                    "class_name": "StoreEvaluationParametersAction",
                 },
             },
             {

@@ -4,10 +4,24 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+    cast,
+)
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
+from great_expectations.checkpoint.configurator import (
+    ActionDicts,
+    SimpleCheckpointConfigurator,
+)
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
     does_batch_request_in_validations_contain_batch_data,
@@ -38,9 +52,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import (
-    GXCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -55,6 +67,7 @@ from great_expectations.util import (
 from great_expectations.validation_operators import ActionListValidationOperator
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
         ExpectationSuiteValidationResultMeta,
@@ -110,6 +123,10 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
     """
 
+    DEFAULT_ACTION_LIST: ClassVar[
+        Sequence[ActionDict]
+    ] = ActionDicts.DEFAULT_ACTION_LIST
+
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
@@ -146,7 +163,7 @@ class BaseCheckpoint(ConfigPeer):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -478,7 +495,9 @@ class BaseCheckpoint(ConfigPeer):
                 include_rendered_content=include_rendered_content,
             )
 
-            action_list: list | None = substituted_validation_dict.get("action_list")
+            action_list: Sequence[ActionDict] | None = substituted_validation_dict.get(
+                "action_list"
+            )
             runtime_configuration_validation = substituted_validation_dict.get(
                 "runtime_configuration", {}
             )
@@ -580,7 +599,7 @@ class BaseCheckpoint(ConfigPeer):
             and isinstance(self.validations, list)
             and len(self.validations) > 0
         )
-        action_list: Optional[list] = self.action_list
+        action_list: Optional[Sequence[ActionDict]] = self.action_list
         action_list_present: bool = (
             action_list is not None
             and isinstance(action_list, list)
@@ -633,7 +652,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def action_list(self) -> List[Dict]:
+    def action_list(self) -> Sequence[ActionDict]:
         try:
             return self.config.action_list
         except AttributeError:
@@ -745,7 +764,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -753,7 +772,7 @@ class Checkpoint(BaseCheckpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -801,9 +820,15 @@ constructor arguments.
 """
             )
 
+        if not config_version:
+            class_name = "LegacyCheckpoint"
+        else:
+            class_name = self.__class__.__name__
+
         checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
+            class_name=class_name,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -836,7 +861,7 @@ constructor arguments.
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -912,14 +937,14 @@ constructor arguments.
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
+        module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -976,11 +1001,11 @@ constructor arguments.
             "default_validation_id": default_validation_id,
         }
 
-        detault_checkpoints_module_name = "great_expectations.checkpoint"
+        default_checkpoints_module_name = "great_expectations.checkpoint"
 
         klass = load_class(
             class_name=class_name,
-            module_name=module_name or detault_checkpoints_module_name,
+            module_name=module_name or default_checkpoints_module_name,
         )
         if issubclass(klass, SimpleCheckpoint):
             checkpoint_config.update(
@@ -1020,7 +1045,7 @@ constructor arguments.
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": detault_checkpoints_module_name,
+                "module_name": default_checkpoints_module_name,
             },
         )
 
@@ -1180,6 +1205,7 @@ class LegacyCheckpoint(Checkpoint):
         super().__init__(
             name=name,
             data_context=data_context,
+            config_version=None,
             validation_operator_name=validation_operator_name,
             batches=batches,
         )
@@ -1391,7 +1417,7 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -1399,7 +1425,7 @@ class SimpleCheckpoint(Checkpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -1467,7 +1493,7 @@ class SimpleCheckpoint(Checkpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
