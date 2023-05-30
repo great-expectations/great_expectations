@@ -67,7 +67,7 @@ Map Expectations are evaluated on a row-by-row basis and each row is checked ind
 
 ![Map Expectations](../images/map_expectations.png)
 
-Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, because Map Expectations evaluate every row of data they can be computationally intensive.
+Map Expectations are useful when you want to be certain that the content of a given dataset is correct. If you’re validating data within a pipeline, Map Expectations can help you identify invalid rows, remove invalid rows from the dataset, and process the remaining data. Unfortunately, because Map Expectations evaluate every row of data, they can be computationally intensive.
 
 Every Map Expectation includes a `mostly` parameter. The `mostly` parameter allows you to specify a minimum percentage of rows that must validate successfully to pass the Expectation. The Expectation can still succeed when individual rows fail validation. This can be useful if you want your pipelines to have invalid data tolerance.
 
