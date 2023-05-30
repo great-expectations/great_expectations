@@ -1067,15 +1067,15 @@ constructor arguments.
         Helper to help resolve logic between validator and validations input
         arguments to `construct_from_config_args`.
         """
-        if not validations:
-            return None
-
         if validator:
             if validations:
                 raise ValueError(
                     "Please provide either a validator or validations list (but not both)."
                 )
             validations = validator.convert_to_checkpoint_validations_list()
+
+        if not validations:
+            return None
 
         # A lot of downstream logic depends on validations being a dict instead of a rich config type
         # We should patch those instances so they can expect a CheckpointValidationConfig
