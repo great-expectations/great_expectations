@@ -104,12 +104,11 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
 )
-
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark

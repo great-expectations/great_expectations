@@ -27,7 +27,6 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
