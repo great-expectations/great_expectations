@@ -25,3 +25,5 @@ docker ps
 ```bash
 docker cp jupyter_container_id:/gx/my_notebook.ipynb .
 ```
+
+Please also note that the database and jupyter notebook will use the default ports, so please make sure you don't have anything else running on those ports, or take steps to avoid port conflicts.
