@@ -529,7 +529,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             if in_cloud_context:
-                # In cloud mode, we need to generate a unique name for the asset
+                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
                 asset_name = f"{asset.type}-{_short_id()}"
                 logger.info(
                     f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
