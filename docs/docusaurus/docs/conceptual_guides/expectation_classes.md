@@ -85,7 +85,7 @@ BatchExpectations do not currently have a special subclass for Map Expectations.
 
 ## QueryExpectations
 
-QueryExpectations allow you to set Expectations against the results of custom SQL or Spark queries. Query Expectations can be useful if you’re comfortable working in SQL or Spark or a specific dialect. They can also allow you to embed arbitrarily complex logic in your Expectations, such as combining data from multiple tables, or applying complex logic within a query.
+QueryExpectations allow you to set Expectations against the results of custom SQL or Spark queries. QueryExpectations can be useful if you’re comfortable working in SQL or Spark or a specific dialect. They can also allow you to embed arbitrarily complex logic in your Expectations, such as combining data from multiple tables, or applying complex logic within a query.
 
 ![QueryExpectations](../images/query_expectations.png)
 
