@@ -1,5 +1,4 @@
 import asyncio
-import os
 from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -7,7 +6,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
-from pydantic import AmqpDsn
+from pydantic import AmqpDsn, HttpUrl
 from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
@@ -199,34 +198,19 @@ class GXAgent:
 
         # ensure we have all required env variables, and provide a useful error if not
 
-        required_env_vars_with_defaults = {
-            "GX_CLOUD_BASE_URL": "https://api.greatexpectations.io",
-            "GX_CLOUD_ORGANIZATION_ID": None,
-            "GX_CLOUD_ACCESS_TOKEN": None,
-        }
-        for key, default_value in required_env_vars_with_defaults.items():
-            required_env_vars_with_defaults[key] = os.environ.get(key, default_value)
-        missing_vars = [
-            key for key, val in required_env_vars_with_defaults.items() if val is None
-        ]
-        if len(missing_vars):
-            NEWLINE = "\n    - "
-            missing_vars_str = NEWLINE + NEWLINE.join(v for v in missing_vars)
-            raise GXAgentError(
-                f"Missing or badly formed environment variables: {missing_vars_str}"
-            )
+        class GxAgentConfigSettings(pydantic.BaseSettings):
+            # mypy doesn't know the default string is coerced to HttpUrl:
+            gx_cloud_base_url: HttpUrl = "https://api.greatexpectations.io"  # type: ignore[assignment]
+            gx_cloud_organization_id: str
+            gx_cloud_access_token: str
 
-        cloud_base_url = required_env_vars_with_defaults["GX_CLOUD_BASE_URL"]
-        organization_id = required_env_vars_with_defaults["GX_CLOUD_ORGANIZATION_ID"]
-        access_token = required_env_vars_with_defaults["GX_CLOUD_ACCESS_TOKEN"]
+        config = GxAgentConfigSettings()
 
         # obtain the broker url and queue name from Cloud
 
-        agent_sessions_url = (
-            f"{cloud_base_url}/organizations/{organization_id}/agent-sessions"
-        )
+        agent_sessions_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/agent-sessions"
 
-        session = create_session(access_token=access_token)
+        session = create_session(access_token=config.gx_cloud_access_token)
 
         response = session.post(agent_sessions_url)
         if response.ok is not True:
@@ -238,9 +222,7 @@ class GXAgent:
 
         try:
             # pydantic will coerce the url to the correct type
-            return GXAgentConfig(
-                queue=queue, connection_string=connection_string  # type: ignore[arg-type]
-            )
+            return GXAgentConfig(queue=queue, connection_string=connection_string)
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
