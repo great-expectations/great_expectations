@@ -19,6 +19,12 @@ To set up <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <
 
 If you don't want to manage your own configurations and infrastructure, then Great Expectations Cloud might be the solution. If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
 
+:::info Windows Support
+
+Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+
+:::
+
 ## Prerequisites
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md).
