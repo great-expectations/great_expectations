@@ -338,7 +338,7 @@ def _short_id() -> str:
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(exclude=True, repr=False)
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
