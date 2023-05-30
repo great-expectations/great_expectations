@@ -10,7 +10,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    Final,
     Generator,
     List,
     NamedTuple,
@@ -24,6 +23,10 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+)
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
@@ -42,10 +45,6 @@ if TYPE_CHECKING:
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
-
-DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
 
 
 class DefaultPandasDatasourceError(Exception):

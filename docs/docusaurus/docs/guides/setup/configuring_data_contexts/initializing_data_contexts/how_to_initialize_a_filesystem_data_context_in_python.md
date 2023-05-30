@@ -74,8 +74,6 @@ If you are content with the default configuration of your Data Context, you can 
 
 ### Related guides
 
-To initialize a Filesystem Data Context from the terminal, please see: [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
-
 To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 <!-- TODO
 To instantiate an existing Data Context, reference:

@@ -8,13 +8,19 @@ import DataContextInitializeInstantiateSave from '/docs/components/setup/link_li
 
 # Great Expectations Quickstart
 
-Use this quickstart to install Great Expectations, connect to sample data, build your first Expectation, validate your data, and review the validation results. This is a great place to start if you're new to Great Expectations and aren't sure if it's the right solution for you or your organization. 
+Use this quickstart to install GX, connect to sample data, build your first Expectation, validate your data, and review the validation results. This is a great place to start if you're new to GX and aren't sure if it's the right solution for you or your organization. 
 
 :::note Great Expectations Cloud
 
-This quickstart introduces you to the open source Python version of Great Expectations. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
+This quickstart introduces you to the open source Python version of GX. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
 
 If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
+
+:::
+
+:::info Windows Support
+
+Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
 
 :::
 
@@ -95,7 +101,6 @@ If you're ready to continue your Great Expectations journey, the following topic
 
 - Initialize, instantiate, and save a Data Contex:
     - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-    - [How to initialize a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
     - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
     - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
     - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
