@@ -7,7 +7,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import List, Optional, Union
 
 import requests
 
@@ -20,10 +20,8 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.types import DictDot
-
-if TYPE_CHECKING:
-    from great_expectations.data_context.types.base import CheckpointValidationConfig
 
 try:
     import boto3
