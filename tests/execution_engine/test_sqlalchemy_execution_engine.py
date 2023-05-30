@@ -1177,3 +1177,24 @@ class TestDialectRequiresPersistedConnection:
         assert not _dialect_requires_persisted_connection(
             connection_string=connection_string
         )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_empty_url_raises_exception(self):
+        url = ""
+        with pytest.raises(Exception):
+            _dialect_requires_persisted_connection(
+                url=url,
+            )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params(self):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = "postgresql://postgres@db_hostname/test_ci?client_encoding=utf8&application_name=test_ci"
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )
