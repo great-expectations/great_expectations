@@ -37,8 +37,6 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         or_equal (boolean or None): If True, then values can be equal, not strictly greater
 
     Keyword Args:
-        allow_cross_type_comparisons (boolean or None): If True, allow comparisons between types (e.g. integer and \
-            string). Otherwise, attempting such comparisons will raise an exception.
         ignore_row_if (str): "both_values_are_missing", "either_value_is_missing", "neither
 
     Other Parameters:
@@ -79,14 +77,12 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "column_B",
         "ignore_row_if",
         "parse_strings_as_datetimes",
-        "allow_cross_type_comparisons",
         "or_equal",
         "mostly",
     )
     default_kwarg_values = {
         "mostly": 1.0,
         "parse_strings_as_datetimes": False,
-        "allow_cross_type_comparisons": None,
         "ignore_row_if": "both_values_are_missing",
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
