@@ -5001,17 +5001,12 @@ def test_checkpoint_with_validator_creates_validations_list(
     validations = checkpoint.validations
     assert len(validations) == 1
 
-    actual = validations[0].to_dict()
+    actual = validations[0]
     expected = {
         "batch_request": {
-            "batch_slice": None,
             "data_asset_name": "#ephemeral_pandas_asset",
             "datasource_name": "default_pandas_datasource",
-            "options": {},
         },
-        "expectation_suite_ge_cloud_id": None,
         "expectation_suite_name": "default",
-        "id": None,
-        "name": None,
     }
     assert actual == expected
