@@ -880,7 +880,7 @@ class Batch(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def head(self, n_rows=5, fetch_all=False):
+    def head(self, n_rows: int = 5, fetch_all: bool = False) -> pd.DataFrame:
         """Return the first n rows from the Batch.
 
         This function returns the first n_rows rows. It is useful for quickly testing
@@ -896,9 +896,9 @@ class Batch(SerializableDictDot):
         Returns:
             A Pandas DataFrame
         """
-        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])  # type: ignore[union-attr]
         metrics_calculator = _get_metrics_calculator_class()(
-            execution_engine=self._data.execution_engine,
+            execution_engine=self._data.execution_engine,  # type: ignore[union-attr, arg-type]
             show_progress_bars=True,
         )
         table_head_df: pd.DataFrame = metrics_calculator.head(
