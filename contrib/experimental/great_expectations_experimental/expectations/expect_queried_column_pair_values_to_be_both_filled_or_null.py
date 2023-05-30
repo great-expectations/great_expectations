@@ -148,4 +148,3 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
 
 if __name__ == "__main__":
     ExpectQueriedColumnPairValuesToBeBothFilledOrNull().print_diagnostic_checklist()
-
