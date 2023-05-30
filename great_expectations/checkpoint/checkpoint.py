@@ -971,7 +971,12 @@ constructor arguments.
                 raise ValueError(
                     "Please provide either a validator or validations list (but not both)."
                 )
-            validations = validator.convert_to_checkpoint_validations_list()
+            # A lot of downstream logic depends on validations being a dict instead of a rich config type
+            # We should patch those instances so they can expect a CheckpointValidationConfig
+            validations = [
+                config.to_dict()
+                for config in validator.convert_to_checkpoint_validations_list()
+            ]
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)

@@ -59,6 +59,9 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.datasource.fluent.batch_request import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 yaml = YAML()
@@ -2591,7 +2594,7 @@ class CheckpointValidationConfig(AbstractConfig):
         id: str | None = None,
         expectation_suite_name: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
-        batch_request: BatchRequestBase | dict | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         **kwargs,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
