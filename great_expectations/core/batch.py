@@ -8,8 +8,6 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Set,
     Type,
     TypedDict,
     Union,
@@ -127,7 +125,7 @@ class BatchDefinition(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @public_api
-    def to_json_dict(self) -> Dict[str, JSONValues]:
+    def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchDefinition.
 
         Returns:
@@ -351,7 +349,7 @@ class BatchRequestBase(SerializableDictDot):
     # While this class is private, it is inherited from and this method is part
     # of the public api on the child.
     @public_api
-    def to_json_dict(self) -> Dict[str, JSONValues]:
+    def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this BatchRequestBase.
 
         Returns:
@@ -510,7 +508,7 @@ class BatchRequest(BatchRequestBase):
         BatchRequest
     """
 
-    include_field_names: ClassVar[Set[str]] = {
+    include_field_names: ClassVar[set[str]] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
@@ -586,7 +584,7 @@ class RuntimeBatchRequest(BatchRequestBase):
         BatchRequest
     """
 
-    include_field_names: ClassVar[Set[str]] = {
+    include_field_names: ClassVar[set[str]] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
@@ -847,7 +845,7 @@ class Batch(SerializableDictDot):
         return dict_obj
 
     @public_api
-    def to_json_dict(self) -> Dict[str, JSONValues]:
+    def to_json_dict(self) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this Batch.
 
         Returns:
