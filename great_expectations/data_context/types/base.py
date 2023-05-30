@@ -2586,7 +2586,17 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        expectation_suite_name: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        **kwargs,
+    ) -> None:
+        self.expectation_suite_name = expectation_suite_name
+        self.expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self.batch_request = batch_request
         super().__init__(id=id)
 
         for k, v in kwargs.items():

@@ -42,6 +42,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 from great_expectations.exceptions import (
@@ -1948,13 +1949,19 @@ class Validator:
             success_percent=success_percent,
         )
 
-    def get_validations_list(self) -> list[dict]:
+    def convert_to_checkpoint_validations_list(
+        self,
+    ) -> list[CheckpointValidationConfig]:
+        """
+        TODO
+        """
         validations = []
         for batch in self.batch_cache.values():
-            validation = {
-                "expectation_suite_name": self.expectation_suite_name,
-                "batch_request": batch.batch_request,
-            }
+            validation = CheckpointValidationConfig(
+                expectation_suite_name=self.expectation_suite_name,
+                expectation_suite_ge_cloud_id=self.expectation_suite.ge_cloud_id,
+                batch_request=batch.batch_request,
+            )
             validations.append(validation)
 
         return validations

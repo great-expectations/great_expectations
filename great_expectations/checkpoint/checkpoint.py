@@ -947,7 +947,9 @@ constructor arguments.
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
@@ -969,7 +971,7 @@ constructor arguments.
                 raise ValueError(
                     "Please provide either a Validator or Validations list (but not both)."
                 )
-            validations = validator.get_validations_list()
+            validations = validator.convert_to_checkpoint_validations_list()
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
