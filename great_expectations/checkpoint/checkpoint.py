@@ -969,7 +969,7 @@ constructor arguments.
         if validator:
             if validations:
                 raise ValueError(
-                    "Please provide either a Validator or Validations list (but not both)."
+                    "Please provide either a validator or validations list (but not both)."
                 )
             validations = validator.convert_to_checkpoint_validations_list()
 

@@ -1793,6 +1793,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing checkpoint instead of individual constructor args",
     )
+    @new_argument(
+        argument_name="validator",
+        version="0.16.14",
+        message="Pass in an existing validator instead of individual validations",
+    )
     def add_checkpoint(
         self,
         name: str | None = None,
@@ -1854,6 +1859,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -1987,6 +1993,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    @new_argument(
+        argument_name="validator",
+        version="0.16.14",
+        message="Pass in an existing validator instead of individual validations",
+    )
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
         name: str | None = None,
@@ -2036,6 +2047,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:

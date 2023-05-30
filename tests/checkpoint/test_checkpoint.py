@@ -4974,4 +4974,4 @@ def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raise
             validations=validations,
         )
 
-    assert "either a Validator or Validations list" in str(e.value)
+    assert "either a validator or validations list" in str(e.value)
