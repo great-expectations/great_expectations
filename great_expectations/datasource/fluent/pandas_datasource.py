@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -11,6 +12,7 @@ from typing import (
     ClassVar,
     Generic,
     List,
+    Literal,
     Mapping,
     MutableSequence,
     Optional,
@@ -23,7 +25,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal, TypeAlias
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -324,10 +326,21 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 )  # read_xml doesn't exist for pandas < 1.3
 
 
+def _short_id() -> str:
+    """
+    Generate a unique id by shortening a uuid4.
+    Can expect collision after several million iterations.
+    https://gist.github.com/Kilo59/82f227d9dba4e5cce62bc22b245b2638
+    """
+    return str(uuid.uuid4()).replace("-", "")[:11]
+
+
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -343,10 +356,19 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
+
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        if self.dataframe is None:
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
+
+        return super().build_batch_request()
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -501,8 +523,19 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         asset_names: Set[str] = self.get_asset_names()
 
+        in_cloud_context: bool = False
+        if self._data_context:
+            in_cloud_context = self._data_context._datasource_store.cloud_mode
+
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
-            if asset_name in asset_names:
+            if in_cloud_context:
+                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
+                asset_name = f"{asset.type}-{_short_id()}"
+                logger.info(
+                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
+                )
+                asset.name = asset_name
+            elif asset_name in asset_names:
                 self.delete_asset(asset_name=asset_name)
 
         return super()._add_asset(asset=asset, connect_options=connect_options)
@@ -563,30 +596,54 @@ class PandasDatasource(_PandasDatasource):
         # TODO: raise error if `_data_context` not set
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
         dataframe: pd.DataFrame,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
-        asset = DataFrameAsset(
+        """Adds a Dataframe DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
+        asset: DataFrameAsset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
 
+    @public_api
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
+        """Reads a Dataframe and returns a Validator associated with it.
+
+        Args:
+            dataframe: The Dataframe containing the data for this data asset.
+            asset_name: The name of the Dataframe asset, should you wish to use it again.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
+        """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._get_validator(asset=asset)
 

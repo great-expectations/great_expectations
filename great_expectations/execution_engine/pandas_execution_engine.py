@@ -12,7 +12,7 @@ import pandas as pd
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure, google
+from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
@@ -44,18 +44,6 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_splitter i
 )
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import boto3
-    from botocore.exceptions import ClientError, ParamValidationError
-except ImportError:
-    boto3 = None
-    ClientError = None
-    ParamValidationError = None
-    logger.debug(
-        "Unable to load AWS connection object; install optional boto3 dependency for support"
-    )
 
 
 HASH_THRESHOLD = 1e9
@@ -115,7 +103,7 @@ class PandasExecutionEngine(ExecutionEngine):
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
         self._s3 = None
-        self._azure = None
+        self._azure: azure.BlobServiceClient | None = None
         self._gcs = None
 
         super().__init__(*args, **kwargs)
@@ -134,7 +122,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     def _instantiate_azure_client(self) -> None:
         self._azure = None
-        if azure.BlobServiceClient:
+        if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             azure_options = self.config.get("azure_options", {})
             try:
                 if "conn_str" in azure_options:
@@ -148,12 +136,9 @@ class PandasExecutionEngine(ExecutionEngine):
                 pass
 
     def _instantiate_s3_client(self) -> None:
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
+        # Try initializing cloud provider client. If unsuccessful, we'll die here.
         boto3_options = self.config.get("boto3_options", {})
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            self._s3 = None
+        self._s3 = aws.boto3.client("s3", **boto3_options)
 
     def _instantiate_gcs_client(self) -> None:
         """
@@ -239,12 +224,6 @@ class PandasExecutionEngine(ExecutionEngine):
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 self._instantiate_s3_client()
-            # if we were not able to instantiate S3 client, then raise error
-            if self._s3 is None:
-                raise gx_exceptions.ExecutionEngineError(
-                    """PandasExecutionEngine has been passed a S3BatchSpec,
-                        but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
-                )
             s3_engine = self._s3
             try:
                 reader_method: str = batch_spec.reader_method
@@ -255,8 +234,14 @@ class PandasExecutionEngine(ExecutionEngine):
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
-                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
-            except (ParamValidationError, ClientError) as error:
+                if s3_engine:
+                    s3_object: dict = s3_engine.get_object(
+                        Bucket=s3_url.bucket, Key=s3_url.key
+                    )
+            except (
+                aws.exceptions.ParamValidationError,
+                aws.exceptions.ClientError,
+            ) as error:
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )

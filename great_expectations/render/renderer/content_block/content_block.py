@@ -87,7 +87,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-
             expectation_type = cls._get_expectation_type(obj_)
 
             content_block_fn = cls._get_content_block_fn(expectation_type)

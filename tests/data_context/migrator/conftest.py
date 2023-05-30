@@ -1,8 +1,8 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Final, List, Optional, Tuple, Union
 
 import pytest
-from typing_extensions import Final
 
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,
@@ -120,7 +120,6 @@ class StubBaseDataContext:
 
     @property
     def variables(self) -> DataContextVariables:
-
         config = DataContextConfig(
             anonymous_usage_statistics=self._anonymized_usage_statistics_config
         )
@@ -173,7 +172,9 @@ def stub_base_data_context() -> StubBaseDataContext:
 
 
 @pytest.fixture
-def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> StubBaseDataContext:
+def stub_base_data_context_anonymous_usage_stats_present_but_disabled() -> (
+    StubBaseDataContext
+):
     return StubBaseDataContext(
         anonymized_usage_statistics_config=AnonymizedUsageStatisticsConfig(
             enabled=False
@@ -221,9 +222,20 @@ def serialized_configuration_bundle() -> dict:
         "checkpoints": [
             {
                 "class_name": "Checkpoint",
-                "config_version": None,
+                "config_version": 1.0,
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "batch_request": {},
+                "evaluation_parameters": {},
+                "expectation_suite_ge_cloud_id": None,
+                "expectation_suite_name": None,
+                "ge_cloud_id": None,
+                "profilers": [],
+                "run_name_template": None,
+                "runtime_configuration": {},
+                "template_name": None,
+                "validations": [],
             }
         ],
         "data_context_variables": {

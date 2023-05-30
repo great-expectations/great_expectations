@@ -24,7 +24,7 @@ any of our supported backends. `test` installs test dependencies on top of these
 `<src>` is in `[github, local]`. Default is `local` which will copy your local repo into the image while `github` will
 pull a branch from GitHub.
 
-`<version>` is in `[3.7, 3.8, 3.9, 3.10]`. Default is `3.8`.
+`<version>` is in `[3.8, 3.9, 3.10]`. Default is `3.8`.
 
 `<branch_name>` is a Great Expectations branch present on GitHub. This only works when `<src>` is "github".
 

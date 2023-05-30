@@ -254,7 +254,6 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
 @pytest.mark.integration
 def test_sqlite_sample_using_limit(sa):
-
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
         os.path.join(  # noqa: PTH118
@@ -386,3 +385,39 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     assert len(rows_0) == len(rows_1)
 
     assert not (rows_0 == rows_1)
+
+
+@pytest.mark.unit
+def test_sample_using_random_batch_spec_test_table_name_required():
+    fake_execution_engine = None
+    batch_spec = BatchSpec()
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+    assert "table name must be specified" in str(e.value)
+
+
+@pytest.mark.unit
+def test_sample_using_random_batch_spec_test_sampling_kwargs_required():
+    fake_execution_engine = None
+    batch_spec = BatchSpec(table_name="table")
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+        assert "sample_using_random" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("sampling_kwargs", [{}, "a_string", []])
+def test_sample_using_random_batch_spec_test_sampling_kwargs_p_required(
+    sampling_kwargs,
+):
+    fake_execution_engine = None
+    batch_spec = BatchSpec(table_name="table", sampling_kwargs=sampling_kwargs)
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+        assert "sample_using_random" in str(e.value)

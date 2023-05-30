@@ -5,23 +5,37 @@ import logging
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import List
+from typing import List, cast
 
+import pydantic
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
+from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
+    DeltaAsset,
     DirectoryCSVAsset,
+    DirectoryDeltaAsset,
+    DirectoryJSONAsset,
+    DirectoryORCAsset,
+    DirectoryParquetAsset,
+    DirectoryTextAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    TextAsset,
+    _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -85,23 +99,592 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
-# TODO: Parametrize with all asset types
-@pytest.mark.unit
-def test_add_parquet_asset_to_datasource(
-    spark_filesystem_datasource: SparkFilesystemDatasource,
-):
-    asset = spark_filesystem_datasource.add_parquet_asset(
-        name="parquet_asset",
-        datetime_rebase_mode="EXCEPTION",
-        int_96_rebase_mode="CORRECTED",
-        merge_schema=False,
+if pyspark_types:
+    spark_schema = pyspark_types.StructType(
+        [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
     )
-    assert asset.name == "parquet_asset"
-    m1 = asset.batching_regex.match("this_can_be_named_anything.parquet")
-    assert m1 is not None
-    assert asset.datetime_rebase_mode == "EXCEPTION"
-    assert asset.int_96_rebase_mode == "CORRECTED"
-    assert asset.merge_schema is False
+    additional_params = {"spark_schema": spark_schema}
+else:
+    additional_params = {}
+
+add_csv_asset_all_params = {
+    "sep": "sep",
+    "encoding": "encoding",
+    "quote": "quote",
+    "escape": "escape",
+    "comment": "comment",
+    "header": "header",
+    "infer_schema": "infer_schema",
+    "ignore_leading_white_space": "ignore_leading_white_space",
+    "ignore_trailing_white_space": "ignore_trailing_white_space",
+    "null_value": "null_value",
+    "nan_value": "nan_value",
+    "positive_inf": "positive_inf",
+    "negative_inf": "negative_inf",
+    "date_format": "date_format",
+    "timestamp_format": "timestamp_format",
+    "max_columns": "max_columns",
+    "max_chars_per_column": "max_chars_per_column",
+    "max_malformed_log_per_partition": "max_malformed_log_per_partition",
+    "mode": "PERMISSIVE",
+    "column_name_of_corrupt_record": "column_name_of_corrupt_record",
+    "multi_line": "multi_line",
+    "char_to_escape_quote_escaping": "char_to_escape_quote_escaping",
+    "sampling_ratio": "sampling_ratio",
+    "enforce_schema": "enforce_schema",
+    "empty_value": "empty_value",
+    "locale": "locale",
+    "line_sep": "line_sep",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+    "unescaped_quote_handling": "STOP_AT_CLOSING_QUOTE",
+}
+
+add_csv_asset = [
+    pytest.param(
+        "add_csv_asset",
+        {},
+        id="csv_min_params",
+    ),
+    pytest.param(
+        "add_csv_asset",
+        {
+            **add_csv_asset_all_params,
+            **additional_params,  # type: ignore[arg-type]
+        },
+        id="csv_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_csv_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="csv_fail_extra_params",
+    ),
+]
+
+add_parquet_asset_all_params = {
+    "merge_schema": "merge_schema",
+    "datetime_rebase_mode": "EXCEPTION",
+    "int_96_rebase_mode": "EXCEPTION",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+}
+
+add_parquet_asset = [
+    pytest.param(
+        "add_parquet_asset",
+        {},
+        id="parquet_min_params",
+    ),
+    pytest.param(
+        "add_parquet_asset",
+        add_parquet_asset_all_params,
+        id="parquet_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_parquet_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="parquet_fail_extra_params",
+    ),
+]
+
+add_orc_asset_all_params = {
+    "merge_schema": "merge_schema",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+}
+
+add_orc_asset = [
+    pytest.param(
+        "add_orc_asset",
+        {},
+        id="orc_min_params",
+    ),
+    pytest.param(
+        "add_orc_asset",
+        add_orc_asset_all_params,
+        id="orc_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_orc_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="orc_fail_extra_params",
+    ),
+]
+
+add_json_asset_all_params = {
+    "primitives_as_string": "primitives_as_string",
+    "prefers_decimal": "prefers_decimal",
+    "allow_comments": "allow_comments",
+    "allow_unquoted_field_names": "allow_unquoted_field_names",
+    "allow_single_quotes": "allow_single_quotes",
+    "allow_numeric_leading_zero": "allow_numeric_leading_zero",
+    "allow_backslash_escaping_any_character": "allow_backslash_escaping_any_character",
+    "mode": "PERMISSIVE",
+    "column_name_of_corrupt_record": "column_name_of_corrupt_record",
+    "date_format": "date_format",
+    "timestamp_format": "timestamp_format",
+    "multi_line": "multi_line",
+    "allow_unquoted_control_chars": "allow_unquoted_control_chars",
+    "line_sep": "line_sep",
+    "sampling_ratio": "sampling_ratio",
+    "drop_field_if_all_null": "drop_field_if_all_null",
+    "encoding": "encoding",
+    "locale": "locale",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+    "allow_non_numeric_numbers": "allow_non_numeric_numbers",
+}
+
+add_json_asset = [
+    pytest.param(
+        "add_json_asset",
+        {},
+        id="json_min_params",
+    ),
+    pytest.param(
+        "add_json_asset",
+        {
+            **add_json_asset_all_params,
+            **additional_params,  # type: ignore[arg-type]
+        },
+        id="json_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_json_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="json_fail_extra_params",
+    ),
+]
+
+add_text_asset_all_params = {
+    "wholetext": True,
+    "line_sep": "line_sep",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+}
+
+add_text_asset = [
+    pytest.param(
+        "add_text_asset",
+        {},
+        id="text_min_params",
+    ),
+    pytest.param(
+        "add_text_asset",
+        add_text_asset_all_params,
+        id="text_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_text_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="text_fail_extra_params",
+    ),
+]
+
+add_delta_asset_all_params = {
+    "timestamp_as_of": "timestamp_as_of",
+    "version_as_of": "version_as_of",
+}
+
+add_delta_asset = [
+    pytest.param(
+        "add_delta_asset",
+        {},
+        id="delta_min_params",
+    ),
+    pytest.param(
+        "add_delta_asset",
+        add_delta_asset_all_params,
+        id="delta_all_params_20230512",
+    ),
+    pytest.param(
+        "add_delta_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="delta_fail_extra_params",
+    ),
+]
+
+add_asset_test_params = []
+add_asset_test_params += add_csv_asset
+add_asset_test_params += add_parquet_asset
+add_asset_test_params += add_orc_asset
+add_asset_test_params += add_json_asset
+add_asset_test_params += add_text_asset
+add_asset_test_params += add_delta_asset
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "add_method_name,add_method_params",
+    add_asset_test_params,
+)
+def test_add_asset_with_asset_specific_params(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+    add_method_name: str,
+    add_method_params: dict,
+):
+    asset = getattr(spark_filesystem_datasource, add_method_name)(
+        name="asset_name", **add_method_params
+    )
+    assert asset.name == "asset_name"
+    for param, value in add_method_params.items():
+        if param == "spark_schema":
+            struct_type = cast(pyspark_types.StructType, value)
+            assert getattr(asset, param) == struct_type.jsonValue()
+        else:
+            assert getattr(asset, param) == value
+
+
+_SPARK_ASSET_TYPES = [
+    (CSVAsset, {"name": "asset_name"}),
+    (DirectoryCSVAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (ParquetAsset, {"name": "asset_name"}),
+    (DirectoryParquetAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (ORCAsset, {"name": "asset_name"}),
+    (DirectoryORCAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (JSONAsset, {"name": "asset_name"}),
+    (DirectoryJSONAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (TextAsset, {"name": "asset_name"}),
+    (DirectoryTextAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (DeltaAsset, {"name": "asset_name"}),
+    (DirectoryDeltaAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+]
+
+
+@pytest.mark.unit
+def test_all_spark_file_path_asset_types_tested():
+    """Make sure all the available assets are contained in the fixture used for other tests."""
+    asset_types_in_fixture = {a[0] for a in _SPARK_ASSET_TYPES}
+    assert asset_types_in_fixture == set(_SparkFilePathDatasource.asset_types)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "asset_type,required_fields",
+    [
+        pytest.param(
+            asset_type,
+            required_fields,
+            id=asset_type.__name__,
+        )
+        for (asset_type, required_fields) in _SPARK_ASSET_TYPES
+    ],
+)
+def test__get_reader_options_include(
+    asset_type: _FilePathDataAsset, required_fields: dict
+):
+    """Make sure options are in fields."""
+    fields = set(asset_type.__fields__.keys())
+    asset = asset_type.validate(required_fields)
+    for option in asset._get_reader_options_include():
+        assert option in fields
+
+
+add_directory_csv_asset = [
+    pytest.param(
+        "add_directory_csv_asset",
+        {"data_directory": "some_directory"},
+        id="directory_csv_min_params",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_csv_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {
+            **add_csv_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+            **additional_params,  # type: ignore[arg-type]
+        },
+        id="directory_csv_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_csv_fail_extra_params",
+    ),
+]
+
+add_directory_parquet_asset = [
+    pytest.param(
+        "add_directory_parquet_asset",
+        {"data_directory": "some_directory"},
+        id="directory_parquet_min_params",
+    ),
+    pytest.param(
+        "add_directory_parquet_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_parquet_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_parquet_asset",
+        {
+            **add_parquet_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_parquet_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_parquet_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_parquet_fail_extra_params",
+    ),
+]
+
+
+add_directory_orc_asset = [
+    pytest.param(
+        "add_directory_orc_asset",
+        {"data_directory": "some_directory"},
+        id="directory_orc_min_params",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_orc_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {
+            **add_orc_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_orc_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_orc_fail_extra_params",
+    ),
+]
+
+
+add_directory_json_asset = [
+    pytest.param(
+        "add_directory_json_asset",
+        {"data_directory": "some_directory"},
+        id="directory_json_min_params",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_json_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {
+            **add_json_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+            **additional_params,  # type: ignore[arg-type]
+        },
+        id="directory_json_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_json_fail_extra_params",
+    ),
+]
+
+
+add_directory_text_asset = [
+    pytest.param(
+        "add_directory_text_asset",
+        {"data_directory": "some_directory"},
+        id="directory_text_min_params",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_text_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {
+            **add_text_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_text_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_text_fail_extra_params",
+    ),
+]
+
+
+add_directory_delta_asset = [
+    pytest.param(
+        "add_directory_delta_asset",
+        {"data_directory": "some_directory"},
+        id="directory_delta_min_params",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_delta_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {
+            **add_delta_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_delta_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_delta_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_delta_fail_extra_params",
+    ),
+]
+
+add_directory_asset_test_params = []
+add_directory_asset_test_params += add_directory_csv_asset
+add_directory_asset_test_params += add_directory_parquet_asset
+add_directory_asset_test_params += add_directory_orc_asset
+add_directory_asset_test_params += add_directory_json_asset
+add_directory_asset_test_params += add_directory_text_asset
+add_directory_asset_test_params += add_directory_delta_asset
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "add_method_name,add_method_params",
+    add_directory_asset_test_params,
+)
+def test_add_directory_asset_with_asset_specific_params(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+    add_method_name: str,
+    add_method_params: dict,
+):
+    asset = getattr(spark_filesystem_datasource, add_method_name)(
+        name="asset_name", **add_method_params
+    )
+    assert asset.name == "asset_name"
+    for param, value in add_method_params.items():
+        if param == "data_directory":
+            assert getattr(asset, param) == pathlib.Path(str(value))
+        elif param == "spark_schema":
+            struct_type = cast(pyspark_types.StructType, value)
+            assert getattr(asset, param) == struct_type.jsonValue()
+        else:
+            assert getattr(asset, param) == value
 
 
 @pytest.mark.unit
@@ -589,7 +1172,6 @@ class TestSplitterDirectoryAsset:
         directory_asset_with_column_value_splitter: DirectoryCSVAsset,
         expected_num_records_directory_asset_no_splitter_2020_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             directory_asset_with_column_value_splitter.build_batch_request(
                 {"passenger_count": 2}
@@ -621,7 +1203,6 @@ def file_asset_with_no_splitter(
 def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
     file_asset_with_no_splitter: CSVAsset,
 ) -> int:
-
     single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
         {"year": "2020", "month": "11"}
     )
@@ -713,7 +1294,6 @@ class TestSplitterFileAsset:
         file_asset_with_column_value_splitter: CSVAsset,
         expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2: int,
     ):
-
         post_splitter_batch_request = (
             file_asset_with_column_value_splitter.build_batch_request(
                 {"year": "2020", "month": "11", "passenger_count": 2}

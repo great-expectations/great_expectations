@@ -50,8 +50,6 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithCli from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_the_cli.mdx'
-
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
 <!-- 1.4.1 Identify your Data Context Expectations Store -->
@@ -72,7 +70,7 @@ import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/config
 
 <!-- 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
 
-import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
+import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
 
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
@@ -86,7 +84,7 @@ import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/co
 
 <!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
 
-import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_new_validation_results_store_has_been_added_by_running_great_expectations_store_list.mdx'
+import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_store_reference.mdx'
 
 <!-- 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
 
@@ -224,7 +222,22 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithCli />
+
+For purposes of this example, we will assume that we have an empty folder to initialize our Filesystem Data Context in:
+
+```python title="Python code"
+path_to_empty_folder = '/my_gx_project/'
+```
+
+We will provide our empty folder's path to the GX library's `FileDataContext.create(...)` method as the `project_root_dir` parameter.  Because we are providing a path to an empty folder `FileDataContext.create(...)` will initialize a Filesystem Data Context at that location.
+
+For convenience, the `FileDataContext.create(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
+
+```python title="Python code"
+from great_expectations.data_context import FileDataContext
+
+context = FileDataContext.create(project_root_dir=path_to_empty_folder)
+```
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -295,7 +308,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <ConfigureYourDatasource />
 
-Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Athena data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+To configure a SQL datasource such as the one used to connect to your Athena data, see [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ### 2.4 Save the Datasource configuration to your DataContext
 <SaveDatasourceConfigurationToDataContext />

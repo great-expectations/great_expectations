@@ -8,6 +8,7 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     List,
@@ -28,6 +29,10 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+)
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+    file_get_unfiltered_batch_definition_list_fn,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -335,16 +340,21 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             Dictionary containing batch spec options.
         """
+        get_reader_options_include: set[str] | None = self._get_reader_options_include()
+        if not get_reader_options_include:
+            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`
+            get_reader_options_include = None
         batch_spec_options = {
             "reader_method": self._get_reader_method(),
             "reader_options": self.dict(
-                include=self._get_reader_options_include(),
+                include=get_reader_options_include,
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
                 config_provider=self._datasource._config_provider,
             ),
         }
+
         if self.splitter:
             batch_spec_options["splitter_method"] = self.splitter.method_name
             splitter_kwargs = self.splitter.splitter_method_kwargs()
@@ -372,13 +382,19 @@ class _FilePathDataAsset(DataAsset):
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
 
+    def get_unfiltered_batch_definition_list_fn(
+        self,
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
+        return file_get_unfiltered_batch_definition_list_fn
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> Set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
@@ -388,6 +404,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         self.splitter = splitter
         return self
 
+    @public_api
     def add_splitter_year(
         self: Self,
         column_name: str,
@@ -402,6 +419,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             SplitterYear(method_name="split_on_year", column_name=column_name)
         )
 
+    @public_api
     def add_splitter_year_and_month(
         self: Self,
         column_name: str,
@@ -418,6 +436,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_year_and_month_and_day(
         self: Self,
         column_name: str,
@@ -434,6 +453,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
@@ -452,6 +472,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
         """Associates a column value splitter with this asset.
         Args:
@@ -466,6 +487,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
@@ -484,6 +506,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         """Associates a mod integer splitter with this asset.
         Args:
@@ -500,6 +523,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    @public_api
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
         """Associates a multi-column value splitter with this asset.
         Args:

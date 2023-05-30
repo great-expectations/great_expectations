@@ -387,7 +387,6 @@ def test_TupleS3StoreBackend_store_backend_id():
 
 @pytest.mark.unit
 def test_InMemoryStoreBackend():
-
     my_store = InMemoryStoreBackend()
 
     my_key = ("A",)
@@ -1000,7 +999,6 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 @mock_s3
 @pytest.mark.integration
 def test_TupleS3StoreBackend_with_s3_put_options():
-
     bucket = "leakybucket"
     conn = boto3.client("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
@@ -1055,7 +1053,6 @@ def test_TupleGCSStoreBackend_base_public_path():
     base_public_path = "http://www.test.com/"
 
     with mock.patch("google.cloud.storage.Client", autospec=True):
-
         my_store_with_base_public_path = TupleGCSStoreBackend(
             filepath_template=None,
             bucket=bucket,
@@ -1110,7 +1107,6 @@ def test_TupleGCSStoreBackend():
     project = "dummy-project"
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.blob.return_value
@@ -1154,7 +1150,6 @@ def test_TupleGCSStoreBackend():
         )
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
@@ -1171,7 +1166,6 @@ def test_TupleGCSStoreBackend():
         mock_str.decode.assert_called_once_with("utf-8")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
 
         my_store.list_keys()
@@ -1230,7 +1224,6 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
-
         mock_container_client = my_store._container_client
         mock_azure_blob_client.from_connection_string.assert_called_once()
 

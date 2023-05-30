@@ -14,7 +14,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_overview.md).
-- An understanding of how to [configure a Batch Request](../../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
+- An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
 
@@ -76,6 +76,10 @@ If you consider your `BatchRequest` data valid, and want to produce Expectations
 The Onboarding Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such
   as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`.
   For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/onboarding_data_assistant.py#L44).
+:::
+
+:::note
+If you would like to learn how to edit the Expectation Suite, please refer to [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
 :::
 
 ### 4. Save your Expectation Suite

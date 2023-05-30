@@ -413,7 +413,6 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 @pytest.mark.rendered_output
 @pytest.mark.slow  # 1.02s
 def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
-
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
@@ -702,16 +701,18 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
-    project_path = tmp_path / "data_context"
-    project_path.mkdir()
-    project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
-    assert os.path.isdir(context_path)  # noqa: PTH112
-    monkeypatch.chdir(context_path)
-    with pytest.raises(gx_exceptions.DataContextError) as err:
+    # `find_context_root_dir` iterates up the file tree to find a great_expectations.yml
+    # By deeply nesting our project path, we ensure we don't collide with any existing
+    # fixtures or side effects from other tests
+    project_path = tmp_path / "a" / "b" / "c" / "d" / "data_context"
+    project_path.mkdir(parents=True)
+
+    context_path = project_path / "great_expectations"
+    context_path.mkdir()
+    monkeypatch.chdir(str(context_path))
+
+    with pytest.raises(gx_exceptions.ConfigNotFoundError):
         FileDataContext.find_context_root_dir()
-    assert isinstance(err.value, gx_exceptions.ConfigNotFoundError)
 
     shutil.copy(
         file_relative_path(
@@ -722,8 +723,8 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
-    monkeypatch.setenv("GX_HOME", context_path)
-    assert FileDataContext.find_context_root_dir() == context_path
+    monkeypatch.setenv("GX_HOME", str(context_path))
+    assert FileDataContext.find_context_root_dir() == str(context_path)
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -836,6 +837,11 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
+
+
+def test_data_context_is_project_scaffolded(empty_context):
+    ge_dir = empty_context.root_directory
+    assert FileDataContext.is_project_scaffolded(ge_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
@@ -1416,27 +1422,16 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
     assert config == {
-        "name": "my_checkpoint",
-        "class_name": "LegacyCheckpoint",
+        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+        "batch_request": {},
+        "class_name": "Checkpoint",
+        "config_version": 1.0,
+        "evaluation_parameters": {},
         "module_name": "great_expectations.checkpoint",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "datasource": "my_filesystem_datasource",
-                    "path": "/Users/me/projects/my_project/data/data.csv",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["suite_one", "suite_two"],
-            },
-            {
-                "batch_kwargs": {
-                    "datasource": "my_redshift_datasource",
-                    "query": "SELECT * FROM users WHERE status = 1",
-                },
-                "expectation_suite_names": ["suite_three"],
-            },
-        ],
-        "validation_operator_name": "action_list_operator",
+        "name": "my_checkpoint",
+        "profilers": [],
+        "runtime_configuration": {},
+        "validations": [],
     }
 
 
@@ -1446,6 +1441,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
     checkpoint = {
         "validation_operator_name": "action_list_operator",
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1494,6 +1490,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
                 "batch_kwargs": {"foo": 33},
             }
         ],
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1515,6 +1512,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
     checkpoint = {
         "validation_operator_name": "action_list_operator",
         "batches": [{"expectation_suite_names": ["foo"]}],
+        "config_version": None,
     }
     checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
@@ -1914,7 +1912,7 @@ validations:
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -1928,7 +1926,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
@@ -1992,7 +1989,7 @@ expectation_suite_ge_cloud_id:
         },
         {
             "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
 
@@ -2012,7 +2009,7 @@ expectation_suite_ge_cloud_id:
     ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
@@ -2026,7 +2023,7 @@ expectation_suite_ge_cloud_id:
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+                "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
         "validations": [
