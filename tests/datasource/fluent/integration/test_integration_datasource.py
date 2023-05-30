@@ -521,8 +521,8 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     dataframe_asset = context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
-    dataframe_asset.build_batch_request()
+    ).add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=df)
 
     assert "No error was raised above"
 
@@ -543,7 +543,7 @@ def test_spark_data_adding_dataframe_in_cloud_context(
 
     dataframe_asset = context.sources.add_or_update_spark(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=spark_df)
-    dataframe_asset.build_batch_request()
+    ).add_dataframe_asset(name="my_df_asset")
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
 
     assert "No error was raised above"

@@ -150,7 +150,6 @@ class PandasDatasource(_PandasDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: pd.DataFrame,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> DataFrameAsset: ...

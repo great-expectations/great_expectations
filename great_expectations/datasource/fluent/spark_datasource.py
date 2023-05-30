@@ -127,19 +127,17 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(self, dataframe: DataFrame) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-
-        if self.dataframe is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
-
+        self.dataframe = dataframe
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -237,14 +235,12 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 
         Args:
             name: The name of the DataFrame asset. This can be any arbitrary string.
-            dataframe: The DataFrame containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
@@ -253,7 +249,6 @@ class SparkDatasource(_SparkDatasource):
         """
         asset = DataFrameAsset(
             name=name,
-            dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)

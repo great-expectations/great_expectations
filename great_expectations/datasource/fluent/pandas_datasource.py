@@ -362,12 +362,17 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         )
 
     @public_api
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
-        if self.dataframe is None:
-            raise ValueError(
-                "Cannot build batch request for dataframe asset without a dataframe"
-            )
+    def build_batch_request(self, dataframe: pd.DataFrame) -> BatchRequest:  # type: ignore[override]
+        """A batch request that can be used to obtain batches for this DataAsset.
 
+        Args:
+            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
+        self.dataframe = dataframe
         return super().build_batch_request()
 
     def get_batch_list_from_batch_request(
@@ -591,8 +596,15 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _get_validator(self, asset: _PandasDataAsset) -> Validator:
-        batch_request: BatchRequest = asset.build_batch_request()
+    def _get_validator(
+        self, asset: _PandasDataAsset, dataframe: pd.DataFrame | None = None
+    ) -> Validator:
+        batch_request: BatchRequest
+        if isinstance(asset, DataFrameAsset):
+            batch_request = asset.build_batch_request(dataframe=dataframe)
+        else:
+            batch_request = asset.build_batch_request()
+
         # TODO: raise error if `_data_context` not set
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
@@ -600,14 +612,12 @@ class PandasDatasource(_PandasDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: pd.DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this PandasDatasource object.
 
         Args:
             name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Dataframe containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
@@ -616,7 +626,6 @@ class PandasDatasource(_PandasDatasource):
         """
         asset: DataFrameAsset = DataFrameAsset(
             name=name,
-            dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
@@ -642,10 +651,9 @@ class PandasDatasource(_PandasDatasource):
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
-            dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
-        return self._get_validator(asset=asset)
+        return self._get_validator(asset=asset, dataframe=dataframe)
 
     def add_clipboard_asset(
         self,

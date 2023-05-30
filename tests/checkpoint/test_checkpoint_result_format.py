@@ -3513,21 +3513,30 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
     expectation_suite_name = "metrics_exp"
     context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
 
-    context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
+    data_frame_asset = context.sources.add_pandas(
+        name="pandas_datasource"
+    ).add_dataframe_asset(
         name="IN_MEMORY_DATA_ASSET",
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+        batch_metadata={
+            "batch_slice": -1,
+        },
     )
+    runtime_batch_request = data_frame_asset.build_batch_request(
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index
+    )
+
+    validator = context.get_validator(
+        batch_request=runtime_batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator.expect_column_values_to_be_unique(column="animals")
+    validator.save_expectation_suite(discard_failed_expectations=False)
 
     checkpoint_config_yml = """
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
 run_name_template: "%Y-%m-foo-bar-template-test"
-batch_request:
-  datasource_name: pandas_datasource
-  data_asset_name: IN_MEMORY_DATA_ASSET
-  batch_slice: -1
-expectation_suite_name: None
 action_list:
     - name: store_validation_result
       action:
@@ -3550,12 +3559,19 @@ runtime_configuration:
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name=expectation_suite_name,
+        batch_request=runtime_batch_request,
     )
-
-    expected_batch_request = {
-        "datasource_name": "pandas_datasource",
-        "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_slice": -1,
+    assert result.success
+    assert dict(
+        sorted(
+            list(result.run_results.values())[0]["validation_result"][
+                "statistics"
+            ].items(),
+            key=lambda element: element[0],
+        )
+    ) == {
+        "evaluated_expectations": 1,
+        "successful_expectations": 1,
+        "success_percent": 100.0,
+        "unsuccessful_expectations": 0,
     }
-
-    assert result.checkpoint_config.batch_request == expected_batch_request

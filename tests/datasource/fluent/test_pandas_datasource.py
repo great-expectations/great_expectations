@@ -439,13 +439,17 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
-def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas):
+def test_dataframe_asset(
+    empty_data_context: AbstractDataContext, test_df_pandas: pd.DataFrame
+):
     # validates that a dataframe object is passed
-    with pytest.raises(pydantic.ValidationError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
 
-    errors_dict = exc_info.value.errors()[0]
-    assert errors_dict["loc"][0] == "dataframe"
+    assert (
+        "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object"
+        in str(exc_info.value)
+    )
 
     # correct working behavior with read method
     validator = empty_data_context.sources.pandas_default.read_dataframe(
@@ -462,11 +466,12 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
     dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
-        name=dataframe_asset_name, dataframe=test_df_pandas
+        name=dataframe_asset_name
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
+    _ = dataframe_asset.build_batch_request(dataframe=test_df_pandas)
     assert all(
         asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
         for asset in empty_data_context.sources.pandas_default.assets
@@ -516,14 +521,14 @@ def test_pandas_data_asset_batch_metadata(
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
 ):
-    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
     dataframe_asset = empty_data_context.sources.add_or_update_pandas(
         name="fluent_pandas_datasource"
-    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
+    ).add_dataframe_asset(name="my_df_asset")
     dataframe_asset.dataframe = None
-    with pytest.raises(ValueError) as e:
-        dataframe_asset.build_batch_request()
+    with pytest.raises(TypeError) as e:
+        _ = dataframe_asset.build_batch_request()
 
-    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
-        e.value
+    assert (
+        "build_batch_request() missing 1 required positional argument: 'dataframe'"
+        in str(e.value)
     )
