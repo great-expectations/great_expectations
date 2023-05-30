@@ -1137,7 +1137,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             "data_asset_name": data_asset_name,
             "runtime_parameters": runtime_parameters,
             "batch_identifiers": batch_identifiers,
-            "batch_spec_passthrough": batch_spec_passthrough,
+            "batch_spec_passthrough": batch_spec_passthrough,  # type: ignore[typeddict-item] # could be None
         }
 
         deep_filter_properties_iterable(
@@ -1145,7 +1145,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             inplace=True,
         )
 
-        return RuntimeBatchRequest(**batch_request_as_dict)
+        return RuntimeBatchRequest(**batch_request_as_dict)  # type: ignore[misc] # `data_connector_query` is not a valid kw arg.
     else:
         return None
 
@@ -1255,10 +1255,11 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
         return batch_request
 
     # try to get a runtime batch request
+    result: RuntimeBatchRequest | FluentBatchRequest | None
     result = _get_runtime_batch_request(
-        datasource_name=datasource_name,
-        data_connector_name=data_connector_name,
-        data_asset_name=data_asset_name,
+        datasource_name=datasource_name,  # type: ignore[arg-type] # could be None
+        data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be None
+        data_asset_name=data_asset_name,  # type: ignore[arg-type] # could be None
         runtime_parameters=runtime_parameters,
         batch_identifiers=batch_identifiers,
         batch_spec_passthrough=batch_spec_passthrough,
@@ -1355,4 +1356,4 @@ def standardize_batch_request_display_ordering(
             **batch_request_as_dict,
         }
 
-    return batch_request_as_dict
+    return batch_request_as_dict  # type: ignore[return-value] # TODO: create a new object to return instead of popping
