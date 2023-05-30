@@ -910,7 +910,7 @@ class Batch(SerializableDictDot):
 
 
 def materialize_batch_request(
-    batch_request: Union[BatchRequestBase, dict] | None = None,
+    batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
         args: dict[str, Any] | BDSBatchRequestTypedDict
@@ -1000,7 +1000,7 @@ def _get_block_batch_request(  # noqa: PLR0913
     batch_filter_parameters: dict | None = None,
     data_connector_query: dict | None = None,
     limit: int | None = None,
-    index: Union[int, list, tuple, slice, str] | None = None,
+    index: int | list | tuple | slice | str | None = None,
     custom_filter_function: Callable | None = None,
     sampling_method: str | None = None,
     sampling_kwargs: dict | None = None,
@@ -1160,7 +1160,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     data_connector_query: dict | None = None,
     batch_identifiers: dict | None = None,
     limit: int | None = None,
-    index: Union[int, list, tuple, slice, str] | None = None,
+    index: int | list | tuple | slice | str | None = None,
     custom_filter_function: Callable | None = None,
     batch_spec_passthrough: dict | None = None,
     sampling_method: str | None = None,
@@ -1171,9 +1171,9 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     query: str | None = None,
     path: str | None = None,
     batch_filter_parameters: dict | None = None,
-    batch_request_options: Union[dict, BatchRequestOptions] | None = None,
+    batch_request_options: dict | BatchRequestOptions | None = None,
     **kwargs,
-) -> Union[BatchRequest, RuntimeBatchRequest, FluentBatchRequest]:
+) -> BatchRequest | RuntimeBatchRequest | FluentBatchRequest:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
