@@ -912,7 +912,9 @@ class Batch(SerializableDictDot):
 def materialize_batch_request(
     batch_request: Union[BatchRequestBase, dict] | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
-    def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
+    def _is_fluent_batch_request(
+        args: dict[str, Any] | BDSBatchRequestTypedDict
+    ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
         return (
@@ -924,9 +926,7 @@ def materialize_batch_request(
             )
         )
 
-    effective_batch_request: dict = get_batch_request_as_dict(
-        batch_request=batch_request
-    )
+    effective_batch_request = get_batch_request_as_dict(batch_request=batch_request)
 
     if not effective_batch_request:
         return None
@@ -945,16 +945,24 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: Union[BatchRequestBase, FluentBatchRequest, dict] | None = None
+    batch_request: BatchRequestBase
+    | FluentBatchRequest
+    | dict
+    | BDSBatchRequestTypedDict
+    | None = None,
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
-        and batch_request["runtime_parameters"].get("batch_data") is not None
+        and batch_request["runtime_parameters"].get("batch_data") is not None  # type: ignore[index] # FDS BatchRequest is pydantic model
     )
 
 
 def batch_request_contains_runtime_parameters(
-    batch_request: Union[BatchRequestBase, dict] | None = None
+    batch_request: BatchRequestBase
+    | FluentBatchRequest
+    | dict
+    | BDSBatchRequestTypedDict
+    | None = None,
 ) -> bool:
     return (
         batch_request is not None
@@ -964,7 +972,11 @@ def batch_request_contains_runtime_parameters(
 
 
 def get_batch_request_as_dict(
-    batch_request: Union[BatchRequestBase, FluentBatchRequest, dict] | None = None
+    batch_request: BatchRequestBase
+    | FluentBatchRequest
+    | dict
+    | BDSBatchRequestTypedDict
+    | None = None,
 ) -> BDSBatchRequestTypedDict | None:
     if batch_request is None:
         return None
@@ -975,7 +987,7 @@ def get_batch_request_as_dict(
     if isinstance(batch_request, _get_fluent_batch_request_class()):
         batch_request = batch_request.dict()
 
-    return batch_request
+    return batch_request  # type: ignore[return-value] # FDS BatchRequest is missing data_connector (other fields)
 
 
 def _get_block_batch_request(  # noqa: PLR0913
