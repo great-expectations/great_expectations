@@ -95,7 +95,7 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _SparkDataFrameT = pydantic.Field(default=None, exclude=True, repr=False)
+    dataframe: _SparkDataFrameT = pydantic.Field(exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -125,7 +125,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    def build_batch_request(self, dataframe: DataFrame) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(self, dataframe: _SparkDataFrameT) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
