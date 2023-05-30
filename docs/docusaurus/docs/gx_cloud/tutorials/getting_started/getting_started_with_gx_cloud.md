@@ -76,33 +76,21 @@ Please note you should not include sensitive info/credentials directly in the co
 :::
 
 ```python title="Jupyter Notebook"
+# Give your datasource a name
 datasource_name = None
-assert datasource_name is not None, "Please set datasource_name."
-batch_identifier_name = None # batch_identifier_name is intended to help identify batches of data passed in directly through dataframes
-assert batch_identifier_name is not None, "Please set batch_identifier_name."
-data_connector_name = None
-assert data_connector_name is not None, "Please set data_connector_name."
+datasource = context.sources.add_pandas_filesystem(
+    datasource_name,
+    base_directory=".", # to use a different directory change this argument
+)
 
-datasource_yaml = f"""
-  name: {datasource_name}
-  class_name: Datasource
-  execution_engine:
-      class_name: PandasExecutionEngine
-  data_connectors:
-      {data_connector_name}:
-          class_name: RuntimeDataConnector
-          batch_identifiers:
-          - {batch_identifier_name}
-"""
-
+# Give your first Asset a name
+asset_name = None
 path_to_data = None
 # to use sample data uncomment next line
 # path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-assert path_to_data is not None, "Please set path_to_data. This can be a local filepath or a remote URL."
-df = pd.read_csv(path_to_data)
-batch_identifier_value = None
-assert batch_identifier_value is not None, "Please set batch_identifier."
+asset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
 
+# TODO: build batch request
 batch_request = {
     "runtime_parameters": {
         "batch_data": df
@@ -111,12 +99,6 @@ batch_request = {
         batch_identifier_name: batch_identifier_value
     }
 }
-
-# Test your configuration:
-datasource = context.test_yaml_config(datasource_yaml)
-
-# Save your datasource:
-datasource = context.save_datasource(datasource)
 ```
 
 In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
