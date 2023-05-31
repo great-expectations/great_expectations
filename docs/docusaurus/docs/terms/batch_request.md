@@ -18,12 +18,11 @@ A Batch Request is always used when Great Expectations builds a Batch. Any time 
 
 ## Use cases
 
-If you are using a Profiler or the interactive method of creating Expectations, you will need to provide a Batch of data for the Profiler to analyze or your manually defined Expectations to test against.  For both of these processes, you will therefore need a Batch Request to get the Batch.
+If you are using a Custom Profiler or the interactive method of creating Expectations, you will need to provide a Batch of data for the Profiler to analyze or your manually defined Expectations to test against.  For both of these processes, you will therefore need a Batch Request to get the Batch.
 
 For more information, see:
 
 - [How to create Expectations interactively in Python](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [How to create and edit Expectations with the User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md)
 
 When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
 
