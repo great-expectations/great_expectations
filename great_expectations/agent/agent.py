@@ -140,10 +140,16 @@ class GXAgent:
         """
         # warning:  this method will not be executed in the main thread
 
-        if event_context.event is not None:
-            print(
-                f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
+        if event_context.event is None:
+            # this should be unreachable - we only schedule an event
+            # to be processed if it's not None.
+            raise GXAgentError(
+                "Unexpected error: malformed event scheduled to be processed."
             )
+
+        print(
+            f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
+        )
         handler = EventHandler(context=self._context)
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(
