@@ -14,7 +14,7 @@ Great Expectations recommends using Checkpoints to validate data.  Checkpoints v
 
 ![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
 
-After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you will need to do in the future is to run the Checkpoint.
+After you've created your Checkpoint, configured it, and specified the Actions you want it to take based on the Validation Results, all you'll need to do in the future is run the Checkpoint.
 
 ## Prerequisites
 

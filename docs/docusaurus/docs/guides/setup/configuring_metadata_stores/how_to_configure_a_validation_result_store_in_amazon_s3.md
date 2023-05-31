@@ -15,7 +15,7 @@ import ConfirmThatTheValidationsResultsStoreHasBeenCorrectlyConfigured from './c
 ## 1. Install boto3 in your local environment
 <ConfigureBotoToConnectToTheAmazonSBucketWhereValidationResultsWillBeStored />
 
-## 2. Verify that your AWS credentials are properly configured
+## 2. Verify your AWS credentials are properly configured
 <VerifyYourAwsCredentials />
 
 ## 3. Identify your Data Context Validation Results Store

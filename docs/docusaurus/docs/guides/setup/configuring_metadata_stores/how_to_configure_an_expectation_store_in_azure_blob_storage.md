@@ -106,4 +106,4 @@ Run the following command to confirm your Expectations have been copied to Azure
 ```bash
 great_expectations suite list
 ```
-If your Expectations have not been copied to Azure Blob Storage, a message indicating "No Expectations were found" is returned.
+If your Expectations have not been copied to Azure Blob Storage, the message "No Expectations were found" is returned.
