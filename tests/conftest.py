@@ -104,6 +104,7 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -8230,3 +8231,19 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return EphemeralDataContext(project_config=project_config)
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path

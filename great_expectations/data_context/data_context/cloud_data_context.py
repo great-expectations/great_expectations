@@ -63,6 +63,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -721,6 +722,7 @@ class CloudDataContext(SerializableDataContext):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
@@ -757,6 +759,7 @@ class CloudDataContext(SerializableDataContext):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 

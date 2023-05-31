@@ -396,7 +396,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
-        if not azure.SecretClient:
+        if not azure.SecretClient:  # type: ignore[truthy-function] # False if NotImported
             logger.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
@@ -417,5 +417,5 @@ class _ConfigurationSubstitutor:
         client = azure.SecretClient(vault_url=keyvault_uri, credential=credential)
         secret = client.get_secret(name=secret_name, version=secret_version).value
         if secret_key:
-            secret = json.loads(secret)[secret_key]
-        return secret
+            secret = json.loads(secret)[secret_key]  # type: ignore[arg-type] # secret could be None
+        return secret  # type: ignore[return-value] # secret could be None
