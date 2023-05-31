@@ -5541,6 +5541,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     @new_method_or_class(version="0.16.15")
     def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
         self._view_validation_result(result)
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
