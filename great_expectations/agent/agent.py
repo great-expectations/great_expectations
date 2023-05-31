@@ -24,6 +24,7 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
+from great_expectations.agent.models import UnknownEvent
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -109,8 +110,10 @@ class GXAgent:
             # this event has been redelivered too many times - remove it from circulation
             event_context.processed_with_failures()
             return
-        elif self._can_accept_new_task() is not True or event_context.event is None:
-            # request that this message is redelivered later. If the event is None
+        elif self._can_accept_new_task() is not True or isinstance(
+            event_context.event, UnknownEvent
+        ):
+            # request that this message is redelivered later. If the event is UnknownEvent
             # we don't understand it, so requeue it in the hope that someone else does.
             loop = asyncio.get_event_loop()
             loop.create_task(event_context.redeliver_message())
@@ -139,13 +142,6 @@ class GXAgent:
             event_context: event with related properties and actions.
         """
         # warning:  this method will not be executed in the main thread
-
-        if event_context.event is None:
-            # this should be unreachable - we only schedule an event
-            # to be processed if it's not None.
-            raise GXAgentError(
-                "Unexpected error: malformed event scheduled to be processed."
-            )
 
         print(
             f"Starting job {event_context.event.type} ({event_context.correlation_id}) "

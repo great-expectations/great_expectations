@@ -20,7 +20,11 @@ class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
+class UnknownEvent(EventBase):
+    type: Literal["unknown_event"] = "unknown_event"
+
+
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent],
+    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
     Field(discriminator="type"),
 ]
