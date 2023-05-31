@@ -12,6 +12,8 @@ from great_expectations.agent.models import (
 )
 from great_expectations.data_context import CloudDataContext
 
+pytestmark = pytest.mark.unit
+
 
 def test_event_handler_raises_for_unknown_event():
     class NotARealEvent(EventBase):

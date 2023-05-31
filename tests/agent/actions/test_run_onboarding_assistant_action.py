@@ -7,6 +7,8 @@ from great_expectations.agent.models import RunOnboardingDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.exceptions import StoreBackendError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="function")
 def context():
