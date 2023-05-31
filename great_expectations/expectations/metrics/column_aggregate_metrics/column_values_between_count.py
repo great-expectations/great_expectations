@@ -192,7 +192,7 @@ class ColumnValuesBetweenCount(MetricProvider):
             else:
                 condition = sa.and_(column >= min_value, column <= max_value)
 
-        return execution_engine.engine.execute(
+        return execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(selectable).where(condition)
         ).scalar()
 
