@@ -4144,7 +4144,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -5529,10 +5532,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        breakpoint()
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,
