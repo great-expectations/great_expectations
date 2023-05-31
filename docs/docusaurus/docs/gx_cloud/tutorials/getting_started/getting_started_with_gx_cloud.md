@@ -90,15 +90,8 @@ path_to_data = None
 # path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 asset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
 
-# TODO: build batch request
-batch_request = {
-    "runtime_parameters": {
-        "batch_data": df
-    },
-    "batch_identifiers": {
-        batch_identifier_name: batch_identifier_value
-    }
-}
+# build batch request
+batch_request = asset.build_batch_request()
 ```
 
 In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
