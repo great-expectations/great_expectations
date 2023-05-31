@@ -333,6 +333,108 @@ def test_column_quoted_name_type_sa(sa):
         )
 
 
+def test_column_quoted_name_type_sa_handles_explicit_identifiers(sa):
+    """
+    Within SQLite, identifiers can be quoted using one of the following mechanisms:
+    'keyword'		A keyword in single quotes is a string literal.
+    "keyword"		A keyword in double-quotes is an identifier.
+    [keyword]		A keyword enclosed in square brackets is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MS Access and SQL Server and is included in SQLite for compatibility.
+    `keyword`		A keyword enclosed in grave accents (ASCII code 96) is an identifier. This is not standard SQL.
+                    This quoting mechanism is used by MySQL and is included in SQLite for compatibility.
+    """
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "More Names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+
+    column_name: str
+    quoted_batch_column_list = [
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
+        for column_name in batch_column_list
+    ]
+    column_name = "More Names"
+    quoted_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=quoted_batch_column_list,
+    )
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
+    assert quoted_column_name.quote is True
+
+    column_name = '"More Names"'
+    quoted_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=[
+            sqlalchemy.quoted_name(value=str('"More Names"'), quote=True)
+        ],
+    )
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
+    assert quoted_column_name.quote is True
+
+    # column_name = '"More Names"'
+    # str_column_name = get_dbms_compatible_column_names(
+    #     column_names=column_name,
+    #     batch_columns_list=batch_column_list,
+    # )
+    # assert isinstance(str_column_name, str)
+
+    # column_name = '`More Names`'
+    # str_column_name = get_dbms_compatible_column_names(
+    #     column_names=column_name,
+    #     batch_columns_list=batch_column_list,
+    # )
+    # assert isinstance(str_column_name, str)
+
+    # column_name = "[More Names]"
+    # str_column_name = get_dbms_compatible_column_names(
+    #     column_names=column_name,
+    #     batch_columns_list=batch_column_list,
+    # )
+    # assert isinstance(str_column_name, str)
+
+    # quoted_column_name = get_dbms_compatible_column_names(
+    #     column_names=column_name,
+    #     batch_columns_list=quoted_batch_column_list,
+    # )
+    # assert sqlalchemy.quoted_name and isinstance(
+    #     quoted_column_name, sqlalchemy.quoted_name
+    # )
+    # assert quoted_column_name.quote is True
+
+
 def test_column_value_lengths_min_metric_sa(sa):
     engine = build_sa_engine(
         pd.DataFrame(
