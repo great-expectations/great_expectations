@@ -1,5 +1,4 @@
 import asyncio
-import os
 from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -25,6 +24,7 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
+from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
@@ -36,12 +36,12 @@ HandlerMap = Dict[str, OnMessageCallback]
 class GXAgentConfig:
     """GXAgent configuration.
     Attributes:
-        organization_id: GX Cloud organization identifier
-        broker_url: address of broker service
+        queue: name of queue
+        connection_string: address of broker service
     """
 
-    organization_id: str
-    broker_url: AmqpDsn
+    queue: str
+    connection_string: AmqpDsn
 
 
 class GXAgent:
@@ -55,7 +55,7 @@ class GXAgent:
 
     def __init__(self):
         print("Initializing GX-Agent")
-        self._config = self._get_config_from_env()
+        self._config = self._get_config()
         print("Loading a DataContext - this might take a moment.")
         self._context: CloudDataContext = get_context(cloud_mode=True)
         print("DataContext is ready.")
@@ -79,13 +79,13 @@ class GXAgent:
         """Manage connection lifecycle."""
         subscriber = None
         try:
-            client = AsyncRabbitMQClient(url=self._config.broker_url)
+            client = AsyncRabbitMQClient(url=self._config.connection_string)
             subscriber = Subscriber(client=client)
             print("GX-Agent is ready.")
             # Open a connection until encountering a shutdown event
             subscriber.consume(
                 # TODO: replace with queue from agent-sessions endpoint
-                queue=self._config.organization_id,
+                queue=self._config.queue,
                 on_message=self._handle_event_as_thread_enter,
             )
         except KeyboardInterrupt:
@@ -201,16 +201,35 @@ class GXAgent:
         return should_reject
 
     @classmethod
-    def _get_config_from_env(cls) -> GXAgentConfig:
-        """Construct GXAgentConfig from available environment variables"""
-        # TODO: replace with connection string from agent-sessions endpoint
-        url = os.environ.get("BROKER_URL", None)
-        org_id = os.environ.get("GX_CLOUD_ORGANIZATION_ID", None)
+    def _get_config(cls) -> GXAgentConfig:
+        """Construct GXAgentConfig."""
+
+        # ensure we have all required env variables, and provide a useful error if not
+
+        class GxAgentConfigSettings(pydantic.BaseSettings):
+            gx_cloud_base_url: str = "https://api.greatexpectations.io"
+            gx_cloud_organization_id: str
+            gx_cloud_access_token: str
+
+        config = GxAgentConfigSettings()
+
+        # obtain the broker url and queue name from Cloud
+
+        agent_sessions_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/agent-sessions"
+
+        session = create_session(access_token=config.gx_cloud_access_token)
+
+        response = session.post(agent_sessions_url)
+        if response.ok is not True:
+            raise GXAgentError("Unable to connect to Cloud")
+
+        json_response = response.json()
+        queue = json_response["queue"]
+        connection_string = json_response["connection_string"]
+
         try:
             # pydantic will coerce the url to the correct type
-            return GXAgentConfig(
-                organization_id=org_id, broker_url=url  # type: ignore[arg-type]
-            )
+            return GXAgentConfig(queue=queue, connection_string=connection_string)
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"

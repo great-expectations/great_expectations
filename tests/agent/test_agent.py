@@ -11,38 +11,64 @@ from great_expectations.agent.message_service.subscriber import SubscriberError
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture
-def gx_agent_config(monkeypatch):
-    config = GXAgentConfig(
-        organization_id="92b8af7b-f89a-426a-8d79-1d451aea413b",
-        broker_url="amqps://user:pass@great_expectations.io:5671",
-    )
+@pytest.fixture(autouse=True)
+def set_required_env_vars(monkeypatch):
     env_vars = {
-        "GX_CLOUD_ORGANIZATION_ID": config.organization_id,
-        "BROKER_URL": config.broker_url,
+        "GX_CLOUD_ORGANIZATION_ID": "4ea2985c-4fb7-4c53-9f8e-07b7e0506c3e",
+        "GX_CLOUD_ACCESS_TOKEN": "MTg0NDkyYmYtNTBiOS00ZDc1LTk3MmMtYjQ0M2NhZDA2NjJk",
     }
     monkeypatch.setattr(os, "environ", env_vars)
+
+
+@pytest.fixture
+def gx_agent_config(queue, connection_string):
+    config = GXAgentConfig(
+        queue=queue,
+        connection_string=connection_string,
+    )
     return config
 
 
 @pytest.fixture
 def get_context(mocker):
     get_context = mocker.patch("great_expectations.agent.agent.get_context")
-    yield get_context
+    return get_context
 
 
 @pytest.fixture
 def client(mocker):
     """Patch for agent.RabbitMQClient"""
     client = mocker.patch("great_expectations.agent.agent.AsyncRabbitMQClient")
-    yield client
+    return client
 
 
 @pytest.fixture
 def subscriber(mocker):
     """Patch for agent.Subscriber"""
     subscriber = mocker.patch("great_expectations.agent.agent.Subscriber")
-    yield subscriber
+    return subscriber
+
+
+@pytest.fixture
+def queue():
+    return "3ee9791c-4ea6-479d-9b05-98217e70d341"
+
+
+@pytest.fixture
+def connection_string():
+    return "amqps://user:pass@great_expectations.io:5671"
+
+
+@pytest.fixture(autouse=True)
+def create_session(mocker, queue, connection_string):
+    """Patch for great_expectations.core.http.create_session"""
+    create_session = mocker.patch("great_expectations.agent.agent.create_session")
+    create_session().post().json.return_value = {
+        "queue": queue,
+        "connection_string": connection_string,
+    }
+    create_session().post().ok = True
+    return create_session
 
 
 def test_gx_agent_gets_env_vars_on_init(get_context, gx_agent_config):
@@ -71,7 +97,7 @@ def test_gx_agent_run_invokes_consume(get_context, subscriber, client, gx_agent_
     agent.run()
 
     subscriber().consume.assert_called_with(
-        queue=gx_agent_config.organization_id,
+        queue=gx_agent_config.queue,
         on_message=agent._handle_event_as_thread_enter,
     )
 
