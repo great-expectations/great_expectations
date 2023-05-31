@@ -322,3 +322,6 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/guides/miscellaneous/how_to_use_the_project_check_config_command /docs/0.15.50/guides/miscellaneous/how_to_use_the_project_check_config_command
 /docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli 
 /docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python
+
+## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
+/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler /docs/0.15.50/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler
