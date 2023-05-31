@@ -256,5 +256,38 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
     assert result.success
 
 
+def test_quickstart_workflow(
+    empty_contexts: CloudDataContext | FileDataContext, csv_path: pathlib.Path
+):
+    # Prep work before Quickstart
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
+
+    # Slight deviation from the Quickstart here:
+    #   1. Using existing contexts instead of `get_context`
+    #   2. Using `read_csv` on a local file instead of making a network request
+    #
+    # These changes should be functionally equivalent to the real workflow but be better for testing
+    context = empty_contexts
+
+    validator = context.sources.pandas_default.read_csv(filepath)
+
+    # Create Expectations
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
+
+    # Validate data
+    checkpoint = context.add_or_update_checkpoint(
+        name="cdkini_4",
+        validator=validator,
+    )
+    checkpoint = context.get_checkpoint("cdkini_4")
+    checkpoint_result = checkpoint.run()
+
+    # View results
+    context.view_validation_result(checkpoint_result)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
