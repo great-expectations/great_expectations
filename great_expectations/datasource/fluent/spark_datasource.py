@@ -21,7 +21,11 @@ from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
@@ -95,7 +99,10 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(exclude=True, repr=False)
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -125,6 +132,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    @new_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
     def build_batch_request(self, dataframe: _SparkDataFrameT) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -230,15 +243,23 @@ class SparkDatasource(_SparkDatasource):
         ...
 
     @public_api
+    @deprecated_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
     def add_dataframe_asset(
         self,
         name: str,
+        # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+        dataframe: Optional[_SparkDataFrameT] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 
         Args:
             name: The name of the DataFrame asset. This can be any arbitrary string.
+            dataframe: The Spark Dataframe containing the data for this DataFrame data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
@@ -249,4 +270,5 @@ class SparkDatasource(_SparkDatasource):
             name=name,
             batch_metadata=batch_metadata or {},
         )
+        asset.dataframe = dataframe
         return self._add_asset(asset=asset)

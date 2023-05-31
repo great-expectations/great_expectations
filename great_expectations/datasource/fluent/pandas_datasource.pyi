@@ -30,6 +30,7 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.core._docs_decorators import deprecated_argument, new_argument
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchMetadata,
@@ -113,8 +114,14 @@ class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
     dataframe: _PandasDataFrameT  # type: ignore[valid-type]
 
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    @new_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
     def build_batch_request(  # type: ignore[override]
-        self, dataframe: pd.DataFrame
+        self, dataframe: Optional[pd.DataFrame] = None
     ) -> BatchRequest: ...
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -150,10 +157,18 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"]
     assets: List[_PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
+
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    @deprecated_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
     def add_dataframe_asset(
         self,
         name: str,
         *,
+        dataframe: Optional[pd.DataFrame] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> DataFrameAsset: ...
     def read_dataframe(

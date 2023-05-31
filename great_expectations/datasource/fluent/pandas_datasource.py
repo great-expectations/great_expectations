@@ -32,7 +32,11 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
@@ -338,7 +342,10 @@ def _short_id() -> str:
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(exclude=True, repr=False)
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -360,7 +367,13 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         )
 
     @public_api
-    def build_batch_request(self, dataframe: pd.DataFrame) -> BatchRequest:  # type: ignore[override]
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    @new_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
+    def build_batch_request(self, dataframe: Optional[pd.DataFrame] = None) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
@@ -612,15 +625,23 @@ class PandasDatasource(_PandasDatasource):
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
     @public_api
+    @deprecated_argument(
+        argument_name="dataframe",
+        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        version="0.16.15",
+    )
     def add_dataframe_asset(
         self,
         name: str,
+        # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+        dataframe: Optional[pd.DataFrame] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this PandasDatasource object.
 
         Args:
             name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Pandas Dataframe containing the data for this DataFrame data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
@@ -631,6 +652,7 @@ class PandasDatasource(_PandasDatasource):
             name=name,
             batch_metadata=batch_metadata or {},
         )
+        asset.dataframe = dataframe
         return self._add_asset(asset=asset)
 
     @public_api
