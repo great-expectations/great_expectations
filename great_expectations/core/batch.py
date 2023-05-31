@@ -758,7 +758,7 @@ class Batch(SerializableDictDot):
         if batch_definition is None:
             batch_definition = IDDict()  # type: ignore[assignment]
 
-        self._batch_definition = batch_definition  # type: ignore[assignment]
+        self._batch_definition = batch_definition
 
         if batch_spec is None:
             batch_spec = BatchSpec()
