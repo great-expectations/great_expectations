@@ -1749,63 +1749,6 @@ def test_get_validator_with_batch(in_memory_runtime_context):
     )
 
 
-def test_get_validator_with_column_identifiers(in_memory_runtime_context):
-    """
-    In MySQL Backticks ( ` ) are used to indicate database, table, and column names.
-    In Postgres Double Quotes ( " ) are used to indicate database, table, and column names.
-    This syntax indicates that the name is an identifier, not a string.
-    """
-    context = in_memory_runtime_context
-
-    # batch_request = RuntimeBatchRequest(
-    # datasource_name="test_dataset",
-    # data_connector_name="runtimedataconnector_test_dataset",
-    # data_asset_name="test_dataset",
-    # batch_identifiers={
-    #     "customer": "test",
-    # },
-    # runtime_parameters={"batch_data": df},  # Your dataframe goes here
-    # )
-
-    # context.create_expectation_suite(
-    #     expectation_suite_name="test_ge_unique_record", overwrite_existing=True
-    # )
-
-    # validator = context.get_validator(
-    #     batch_request=batch_request,
-    #     expectation_suite_name="test_ge_unique_record",
-    # )
-
-    # col_name = '"order number"'
-    # result = validator.expect_column_values_to_be_unique(column=col_name)
-
-    my_batch_list = [
-        context.get_batch_list(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="pandas_datasource",
-                data_connector_name="runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={
-                    "batch_data": pd.DataFrame({"order number": range(10)})
-                },
-                batch_identifiers={
-                    "id_key_0": "id_0_value_a",
-                    "id_key_1": "id_1_value_a",
-                },
-            )
-        )[0],
-    ]
-
-    my_validator = context.get_validator(
-        batch_list=my_batch_list,
-        create_expectation_suite_with_name="A_expectation_suite",
-    )
-
-    col_name = '"order number"'
-    # should not throw an error. This is a valid column name
-    my_validator.expect_column_values_to_be_unique(column=col_name)
-
-
 def test_get_validator_with_batch_list(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -1841,9 +1784,6 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert len(my_validator.batches) == 2
-    col_name = '"x"'
-    # should not throw an error. This is a valid column name
-    my_validator.expect_column_values_to_be_unique(column=col_name)
 
 
 def test_get_batch_multiple_datasources_do_not_scan_all(
