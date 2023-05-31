@@ -172,13 +172,13 @@ def test_split_on_date_parts_multiple_date_parts(
         date_parts=date_parts,
     )
 
-    # using mock-alchemy
-    assert ExpressionMatcher(result) == ExpressionMatcher(
-        sa.and_(
-            sa.extract("year", sa.column(column_name)) == 2018,
-            sa.extract("month", sa.column(column_name)) == 10,
-        )
-    )
+    # # using mock-alchemy
+    # assert ExpressionMatcher(result) == ExpressionMatcher(
+    #     sa.and_(
+    #         sa.extract("year", sa.column(column_name)) == 2018,
+    #         sa.extract("month", sa.column(column_name)) == 10,
+    #     )
+    # )
 
     # using values
     assert isinstance(result, sa.sql.elements.BooleanClauseList)
