@@ -40,7 +40,6 @@ df = pd.read_csv(csv_path)
 assert df.passenger_count.unique().tolist() == [1, 2, 3, 4, 5, 6]
 assert len(df) == 10000
 
-
 context = gx.get_context()
 
 # Python
@@ -70,7 +69,7 @@ datasource = context.sources.add_postgres(
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name">
 asset_name = "my_table_asset"
-asset_table_name = "yellow_tripdata_sample_2019_01"
+asset_table_name = "postgres_taxi_data"
 # </snippet>
 
 # Python
@@ -81,7 +80,7 @@ table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query">
 asset_name = "my_query_asset"
-asset_query = "SELECT * from yellow_tripdata_sample_2019_01"
+asset_query = "SELECT * from postgres_taxi_data"
 # </snippet>
 
 # Python
