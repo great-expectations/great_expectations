@@ -1795,7 +1795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_checkpoint(
@@ -1995,7 +1995,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @new_method_or_class(version="0.15.48")
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
@@ -5538,11 +5538,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return site_builder
 
+    @public_api
+    @new_method_or_class(version="0.16.15")
     def view_validation_result(self, result: CheckpointResult) -> None:
         self._view_validation_result(result)
 
     def _view_validation_result(self, result: CheckpointResult) -> None:
-        breakpoint()
         validation_result_identifier = result.list_validation_result_identifiers()[0]
         self.open_data_docs(resource_identifier=validation_result_identifier)
 
