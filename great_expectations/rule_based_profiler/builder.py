@@ -80,7 +80,9 @@ class Builder(SerializableDictDot):
     def set_batch_list_if_null_batch_request(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, BlockConfigBatchRequestTypedDict, dict]
+        ] = None,
     ) -> None:
         """
         If "batch_request" is already set on "Builder" object, then it is not overwritten.  However, if "batch_request"
@@ -95,7 +97,9 @@ class Builder(SerializableDictDot):
     def set_batch_data(
         self,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, BlockConfigBatchRequestTypedDict, dict]
+        ] = None,
     ) -> None:
         arg: Any
         num_supplied_batch_specification_args: int = sum(
