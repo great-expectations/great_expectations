@@ -254,6 +254,7 @@ class CheckpointStore(ConfigurationStore):
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
+            checkpoint.config.validations = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get("validations")
         return checkpoint
 
     @public_api
