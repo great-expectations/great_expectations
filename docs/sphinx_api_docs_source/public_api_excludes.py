@@ -721,7 +721,7 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
     IncludeExcludeDefinition(
         reason="Run is not included in the public API.",
         name="run",
-        filepath=pathlib.Path("great_expectations/agent/actions/action.py"),
+        filepath=pathlib.Path("great_expectations/agent/actions/agent_action.py"),
     ),
     IncludeExcludeDefinition(
         reason='The "columns()" property in this module is not included in the public API',
