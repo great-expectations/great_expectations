@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.core.batch import BlockConfigBatchRequestTypedDict
     from great_expectations.datasource.fluent.batch_request import (
         BatchRequest as FluentBatchRequest,
     )
@@ -3131,7 +3132,10 @@ class CheckpointConfig(BaseYamlConfig):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: BatchRequestBase
+        | BlockConfigBatchRequestTypedDict
+        | dict
+        | None = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
