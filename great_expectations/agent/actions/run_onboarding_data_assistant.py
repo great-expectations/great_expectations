@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
 
 
-class RunOnboardingDataAssistantAction(AgentAction):
+class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEvent]):
     def run(self, event: RunOnboardingDataAssistantEvent, id: str) -> ActionResult:
         expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"

@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import Sequence
+from abc import abstractmethod
+from typing import Generic, Sequence, TypeVar
 
 from pydantic import BaseModel
 
@@ -18,10 +18,13 @@ class ActionResult(BaseModel):
     created_resources: Sequence[CreatedResource]
 
 
-class AgentAction(ABC):
+_TEvent = TypeVar("_TEvent", bound=Event)
+
+
+class AgentAction(Generic[_TEvent]):
     def __init__(self, context: CloudDataContext):
         self._context = context
 
     @abstractmethod
-    def run(self, event: Event, id: str) -> ActionResult:
+    def run(self, event: _TEvent, id: str) -> ActionResult:
         ...
