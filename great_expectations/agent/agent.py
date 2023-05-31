@@ -11,7 +11,7 @@ from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
-from great_expectations.agent.actions.action import ActionResult
+from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.event_handler import (
     EventHandler,
 )

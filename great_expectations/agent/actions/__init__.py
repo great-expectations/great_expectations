@@ -1,4 +1,4 @@
-from great_expectations.agent.actions.action import (
+from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
     CreatedResource,

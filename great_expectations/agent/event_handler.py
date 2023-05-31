@@ -1,5 +1,5 @@
 from great_expectations.agent.actions import RunOnboardingDataAssistantAction
-from great_expectations.agent.actions.action import ActionResult
+from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.models import (
     Event,
     RunCheckpointEvent,
