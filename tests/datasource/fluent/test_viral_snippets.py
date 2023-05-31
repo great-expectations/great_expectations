@@ -259,9 +259,14 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
 def test_quickstart_workflow(
     empty_contexts: CloudDataContext | FileDataContext, csv_path: pathlib.Path
 ):
-    # Prep work before Quickstart
-    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
-    assert filepath.exists()
+    """
+    What does this test do and why?
+
+    Tests the Quickstart workflow noted in our docs: https://docs.greatexpectations.io/docs/tutorials/quickstart/
+
+    In particular, this test covers the file-backend and cloud-backed usecases with this script.
+    The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
+    """
 
     # Slight deviation from the Quickstart here:
     #   1. Using existing contexts instead of `get_context`
@@ -269,6 +274,9 @@ def test_quickstart_workflow(
     #
     # These changes should be functionally equivalent to the real workflow but be better for testing
     context = empty_contexts
+
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
 
     validator = context.sources.pandas_default.read_csv(filepath)
 
@@ -279,10 +287,9 @@ def test_quickstart_workflow(
 
     # Validate data
     checkpoint = context.add_or_update_checkpoint(
-        name="cdkini_4",
+        name="my_quickstart_checkpoint",
         validator=validator,
     )
-    checkpoint = context.get_checkpoint("cdkini_4")
     checkpoint_result = checkpoint.run()
 
     # View results
