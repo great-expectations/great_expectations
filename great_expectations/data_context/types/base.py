@@ -59,6 +59,9 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.datasource.fluent.batch_request import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 yaml = YAML()
@@ -2586,7 +2589,17 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        expectation_suite_name: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        **kwargs,
+    ) -> None:
+        self.expectation_suite_name = expectation_suite_name
+        self.expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self.batch_request = batch_request
         super().__init__(id=id)
 
         for k, v in kwargs.items():
@@ -3123,7 +3136,9 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -3155,9 +3170,6 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
-
-        if validations is None:
-            validations = []
 
         validations = get_validations_with_batch_request_as_dict(
             validations=validations

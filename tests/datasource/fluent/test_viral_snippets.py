@@ -13,9 +13,7 @@ from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import (
-    Datasource,
-)
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
@@ -217,6 +215,45 @@ def test_ctx_delete_removes_datasource_from_yaml(
     print(f"{pf(yaml_contents, depth=2)}")
 
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext):
+    context = seeded_file_context
+
+    datasource_name = "sqlite_taxi"
+    asset_name = "my_asset"
+    month = 1
+    year = 2019
+
+    datasource = context.get_datasource(datasource_name)
+    assert isinstance(datasource, Datasource)
+
+    batch_request = datasource.get_asset(asset_name).build_batch_request(
+        {"year": year, "month": month}
+    )
+
+    validator = context.get_validator(batch_request=batch_request)
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
+
+    assert checkpoint.validations == [
+        {
+            "batch_request": {
+                "data_asset_name": asset_name,
+                "datasource_name": datasource_name,
+                "options": {
+                    "month": month,
+                    "year": year,
+                },
+            },
+            "expectation_suite_name": "default",
+        },
+    ]
+
+    result = checkpoint.run()
+
+    assert result.success
 
 
 if __name__ == "__main__":

@@ -34,14 +34,15 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.render import RenderedAtomicContent
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-)
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import DataContextKey
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
+        EphemeralDataContext,
+    )
 
 yaml = YAMLHandler()
 
@@ -4923,3 +4924,89 @@ def test_run_spark_checkpoint_with_schema(
     results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
     assert results.success is True
+
+
+@pytest.mark.unit
+def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
+    validator_with_mock_execution_engine,
+):
+    context = mock.MagicMock()
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "cannot be called with a validator and contain a batch_request" in str(
+        e.value
+    )
+
+
+@pytest.mark.unit
+def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raises_error(
+    ephemeral_context_with_defaults,
+    validator_with_mock_execution_engine,
+):
+    context = ephemeral_context_with_defaults
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(ValueError) as e:
+        _ = context.add_checkpoint(
+            name="my_checkpoint",
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "either a validator or validations list" in str(e.value)
+
+
+@pytest.mark.integration
+def test_checkpoint_with_validator_creates_validations_list(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    csv_path: pathlib.Path,
+):
+    context = ephemeral_context_with_defaults
+    pandas_datasource = context.sources.pandas_default
+
+    file_path = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert file_path.exists()
+
+    validator = pandas_datasource.read_csv(
+        filepath_or_buffer=file_path,
+    )
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint", validator=validator
+    )
+
+    validations = checkpoint.validations
+    assert len(validations) == 1
+
+    actual = validations[0]
+    expected = {
+        "batch_request": {
+            "data_asset_name": "#ephemeral_pandas_asset",
+            "datasource_name": "default_pandas_datasource",
+        },
+        "expectation_suite_name": "default",
+    }
+    assert actual == expected
