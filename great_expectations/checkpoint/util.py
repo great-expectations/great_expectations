@@ -7,7 +7,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 import requests
 
@@ -27,6 +27,9 @@ try:
     import boto3
 except ImportError:
     boto3 = None
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BlockConfigBatchRequestTypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +237,10 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    validation_batch_request: BatchRequestBase
+    | BlockConfigBatchRequestTypedDict
+    | dict
+    | None = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
