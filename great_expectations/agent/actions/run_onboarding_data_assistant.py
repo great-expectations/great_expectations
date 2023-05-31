@@ -82,13 +82,15 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
 
         checkpoint = self._context.add_checkpoint(**checkpoint_config)  # type: ignore[arg-type]
 
+        expectation_suite_id = expectation_suite.ge_cloud_id
+        checkpoint_id = checkpoint.ge_cloud_id
+        if expectation_suite_id is None or checkpoint_id is None:
+            raise ValueError("Cloud backed resources must have an ID.")
         return ActionResult(
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(
-                    id=expectation_suite.ge_cloud_id, type="ExpectationSuite"  # type: ignore[arg-type]
-                ),
-                CreatedResource(id=checkpoint.ge_cloud_id, type="Checkpoint"),  # type: ignore[arg-type]
+                CreatedResource(id=expectation_suite_id, type="ExpectationSuite"),
+                CreatedResource(id=checkpoint_id, type="Checkpoint"),
             ],
         )
