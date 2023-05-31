@@ -525,7 +525,7 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined]
+    assert dataframe_asset.dataframe.equals(df)
 
 
 @pytest.mark.integration
@@ -540,14 +540,14 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     context._save_project_config()
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined]
+    assert dataframe_asset.dataframe.equals(df)
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
-    assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined]
+    assert dataframe_asset.dataframe.equals(df)
 
 
 @pytest.mark.integration
@@ -566,7 +566,7 @@ def test_spark_data_adding_dataframe_in_cloud_context(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    assert dataframe_asset.dataframe.toPandas().equals(df)
 
 
 @pytest.mark.integration
@@ -584,17 +584,17 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
         name="fluent_pandas_datasource"
     ).add_dataframe_asset(name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    assert dataframe_asset.dataframe.toPandas().equals(df)
 
     datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
     context._save_project_config()
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    assert dataframe_asset.dataframe.toPandas().equals(df)
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
     dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
     ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
-    assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
+    assert dataframe_asset.dataframe.toPandas().equals(df)
