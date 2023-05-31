@@ -11,6 +11,7 @@ from typing import (
     Type,
     TypedDict,
     Union,
+    overload,
 )
 
 import pandas as pd
@@ -965,6 +966,23 @@ def batch_request_contains_runtime_parameters(
         and isinstance(batch_request, (dict, DictDot))
         and batch_request.get("runtime_parameters") is not None
     )
+
+
+@overload
+def get_batch_request_as_dict(  # type: ignore[misc] # Overload with None
+    batch_request: BatchRequestBase
+    | FluentBatchRequest
+    | dict
+    | BlockConfigBatchRequestTypedDict = ...,
+) -> BlockConfigBatchRequestTypedDict:
+    ...
+
+
+@overload
+def get_batch_request_as_dict(
+    batch_request: None = ...,
+) -> None:
+    ...
 
 
 def get_batch_request_as_dict(
