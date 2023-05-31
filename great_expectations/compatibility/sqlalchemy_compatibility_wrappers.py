@@ -111,8 +111,6 @@ def add_dataframe_to_db(
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
-        con = con.connect()
     with warnings.catch_warnings():
         # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
         # but using the base class here since sqlalchemy is an optional dependency and this
