@@ -12,7 +12,7 @@ Use this quickstart to install GX, connect to sample data, build your first Expe
 
 :::note Great Expectations Cloud
 
-This quickstart has been updated to work with both our open source and Cloud offerings of GX.
+You can use this quickstart with the open source Python version of GX or with Great Expectations Cloud.
 
 If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
 
