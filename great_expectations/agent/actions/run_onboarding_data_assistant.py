@@ -6,6 +6,7 @@ from great_expectations.agent.actions.action import (
     CreatedResource,
 )
 from great_expectations.agent.models import RunOnboardingDataAssistantEvent
+from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
@@ -41,6 +42,10 @@ class RunOnboardingDataAssistantAction(AgentAction):
             pass
 
         datasource = self._context.get_datasource(datasource_name=event.datasource_name)
+        if not isinstance(datasource, FluentDatasource):
+            raise ValueError(
+                "The RunOnboardingDataAssistant Action can only be used with a fluent-style datasource."
+            )
         asset = datasource.get_asset(asset_name=event.data_asset_name)
         try:
             batch_request = asset.build_batch_request()
