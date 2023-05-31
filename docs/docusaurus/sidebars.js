@@ -389,6 +389,7 @@ module.exports = {
     'contributing/contributing_maturity',
     'reference/customize_your_deployment',
     'reference/usage_statistics',
+    'conceptual_guides/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',

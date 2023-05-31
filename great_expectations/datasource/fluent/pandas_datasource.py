@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -325,6 +326,15 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 )  # read_xml doesn't exist for pandas < 1.3
 
 
+def _short_id() -> str:
+    """
+    Generate a unique id by shortening a uuid4.
+    Can expect collision after several million iterations.
+    https://gist.github.com/Kilo59/82f227d9dba4e5cce62bc22b245b2638
+    """
+    return str(uuid.uuid4()).replace("-", "")[:11]
+
+
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
@@ -513,8 +523,19 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         asset_names: Set[str] = self.get_asset_names()
 
+        in_cloud_context: bool = False
+        if self._data_context:
+            in_cloud_context = self._data_context._datasource_store.cloud_mode
+
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
-            if asset_name in asset_names:
+            if in_cloud_context:
+                # In cloud mode, we need to generate a unique name for the asset so that it gets persisted
+                asset_name = f"{asset.type}-{_short_id()}"
+                logger.info(
+                    f"Generating unique name for '{DEFAULT_PANDAS_DATA_ASSET_NAME}' asset '{asset_name}'"
+                )
+                asset.name = asset_name
+            elif asset_name in asset_names:
                 self.delete_asset(asset_name=asset_name)
 
         return super()._add_asset(asset=asset, connect_options=connect_options)
