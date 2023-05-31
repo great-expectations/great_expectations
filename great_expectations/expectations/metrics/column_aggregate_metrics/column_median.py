@@ -50,13 +50,12 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
 
-        element_values = sqlalchemy_engine.execute(
+        element_values = execution_engine.execute_query(
             sa.select(column)
             .order_by(column)
             .where(column != None)  # noqa: E711

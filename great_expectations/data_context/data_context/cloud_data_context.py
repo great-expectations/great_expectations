@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
@@ -801,7 +802,8 @@ class CloudDataContext(SerializableDataContext):
                 "cloud_mode": True,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
@@ -894,3 +896,10 @@ class CloudDataContext(SerializableDataContext):
             logger.debug(
                 "CloudDataContext._save_project_config() has no `fds_datasource` to update"
             )
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        url = result.validation_result_url
+        assert (
+            url
+        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        self._open_url_in_browser(url)
