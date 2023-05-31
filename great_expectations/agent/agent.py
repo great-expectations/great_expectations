@@ -174,6 +174,14 @@ class GXAgent:
         _result = None
         if error is None:
             _result = future.result()
+            print(
+                f"Completed job {event_context.event.type} ({event_context.correlation_id})"
+            )
+        else:
+            print(error)
+            print(
+                f"Failed to complete job {event_context.event.type} ({event_context.correlation_id})"
+            )
 
         # TODO lakitu-139: record job as complete and send results
 
