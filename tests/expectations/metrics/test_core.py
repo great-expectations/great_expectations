@@ -7,9 +7,13 @@ from typing import Dict, Tuple, Union
 import numpy as np
 import pandas as pd
 import pytest
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    FilesystemStoreBackendDefaults,
+)
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
@@ -24,6 +28,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.compatibility import pyspark
+
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
@@ -34,7 +39,7 @@ from great_expectations.self_check.util import (
     build_sa_engine,
     build_spark_engine,
 )
-from great_expectations.util import isclose
+from great_expectations.util import get_context, isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
@@ -294,8 +299,8 @@ def test_column_quoted_name_type_sa(sa):
 
     for column_name in [
         "non_existent_column",
-        '"NAMES"',
-        '"Names"',
+        "?NAMES?",
+        "*Names*",
     ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
@@ -333,7 +338,7 @@ def test_column_quoted_name_type_sa(sa):
         )
 
 
-def test_column_quoted_name_type_sa_handles_explicit_identifiers(sa):
+def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
     """
     Within SQLite, identifiers can be quoted using one of the following mechanisms:
     'keyword'		A keyword in single quotes is a string literal.
@@ -342,6 +347,9 @@ def test_column_quoted_name_type_sa_handles_explicit_identifiers(sa):
                     This quoting mechanism is used by MS Access and SQL Server and is included in SQLite for compatibility.
     `keyword`		A keyword enclosed in grave accents (ASCII code 96) is an identifier. This is not standard SQL.
                     This quoting mechanism is used by MySQL and is included in SQLite for compatibility.
+
+    When explicit quoted identifiers are passed in, we should use them as-is.
+    Explicit identifiers are used when the column contains a space or reserved word.
     """
     engine = build_sa_engine(
         pd.DataFrame(
@@ -377,62 +385,17 @@ def test_column_quoted_name_type_sa_handles_explicit_identifiers(sa):
     table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
     batch_column_list = metrics[table_columns_metric_id]
 
-    column_name: str
-    quoted_batch_column_list = [
-        sqlalchemy.quoted_name(value=str(column_name), quote=True)
-        for column_name in batch_column_list
-    ]
-    column_name = "More Names"
-    quoted_column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
-        batch_columns_list=quoted_batch_column_list,
-    )
-    assert sqlalchemy.quoted_name and isinstance(
-        quoted_column_name, sqlalchemy.quoted_name
-    )
-    assert quoted_column_name.quote is True
-
-    column_name = '"More Names"'
-    quoted_column_name = get_dbms_compatible_column_names(
-        column_names=column_name,
-        batch_columns_list=[
-            sqlalchemy.quoted_name(value=str('"More Names"'), quote=True)
-        ],
-    )
-    assert sqlalchemy.quoted_name and isinstance(
-        quoted_column_name, sqlalchemy.quoted_name
-    )
-    assert quoted_column_name.quote is True
-
-    # column_name = '"More Names"'
-    # str_column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=batch_column_list,
-    # )
-    # assert isinstance(str_column_name, str)
-
-    # column_name = '`More Names`'
-    # str_column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=batch_column_list,
-    # )
-    # assert isinstance(str_column_name, str)
-
-    # column_name = "[More Names]"
-    # str_column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=batch_column_list,
-    # )
-    # assert isinstance(str_column_name, str)
-
-    # quoted_column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=quoted_batch_column_list,
-    # )
-    # assert sqlalchemy.quoted_name and isinstance(
-    #     quoted_column_name, sqlalchemy.quoted_name
-    # )
-    # assert quoted_column_name.quote is True
+    for column_name in [
+        '"More Names"',
+        "[More Names]",
+        "`More Names`",
+    ]:
+        str_column_name = get_dbms_compatible_column_names(
+            column_names=column_name,
+            batch_columns_list=batch_column_list,
+        )
+        assert isinstance(str_column_name, str)
+        assert str_column_name == column_name
 
 
 def test_column_value_lengths_min_metric_sa(sa):
@@ -7066,3 +7029,84 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         {"a": 1.0, "b": 1.0, "c": 2.0},
         {"a": 4.0, "b": 4.0, "c": 4.0},
     ]
+
+
+def test_dx_524_explicit_string_identifiers_should_work_with_validator(spark_session):
+    metastore_dir = "/tmp/great_expectations_v3"
+
+    data_context_config = DataContextConfig(
+        store_backend_defaults=FilesystemStoreBackendDefaults(
+            root_directory=metastore_dir
+        ),
+    )
+    context = get_context(project_config=data_context_config)
+    batch_identifiers = [
+        "customer",
+    ]
+    my_spark_datasource_config = {
+        "name": "test_dataset",
+        "class_name": "Datasource",
+        "execution_engine": {"class_name": "SparkDFExecutionEngine"},
+        "data_connectors": {
+            "runtimedataconnector_test_dataset": {
+                "module_name": "great_expectations.datasource.data_connector",
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": batch_identifiers,
+            }
+        },
+    }
+
+    context.add_datasource(**my_spark_datasource_config)
+
+    data2 = [
+        ("James", 100),
+        ("Michael", 101),
+        ("Robert", 102),
+        ("Maria", 103),
+        ("Jen", 104),
+    ]
+
+    schema = pyspark.types.StructType(
+        [
+            pyspark.types.StructField("customer", pyspark.types.StringType(), True),
+            pyspark.types.StructField(
+                "order number", pyspark.types.IntegerType(), True
+            ),
+        ]
+    )
+    df = spark_session.createDataFrame(data=data2, schema=schema)
+
+    batch_request = RuntimeBatchRequest(
+        datasource_name="test_dataset",
+        data_connector_name="runtimedataconnector_test_dataset",
+        data_asset_name="test_dataset",
+        batch_identifiers={
+            "customer": "test",
+        },
+        runtime_parameters={"batch_data": df},  # Your dataframe goes here
+    )
+
+    context.add_or_update_expectation_suite(
+        expectation_suite_name="test_ge_unique_record"
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="test_ge_unique_record",
+    )
+
+    col_name = "`order number`"
+    result = validator.expect_column_values_to_be_unique(column=col_name)
+
+    assert result["success"]
+    assert result["expectation_config"]["kwargs"]["column"] == col_name
+    assert result["result"] == {
+        "element_count": 5,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+    }
