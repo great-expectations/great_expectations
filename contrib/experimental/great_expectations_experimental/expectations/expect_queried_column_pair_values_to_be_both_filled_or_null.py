@@ -92,7 +92,6 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
         metrics = convert_to_json_serializable(data=metrics)
         num_of_inconsistent_rows = list(
             metrics.get("query.template_values")[0].values()
