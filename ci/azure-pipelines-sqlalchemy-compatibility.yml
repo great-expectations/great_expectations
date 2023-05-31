@@ -132,6 +132,7 @@ stages:
               echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
               pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+          # see whaat the mgic .[???] statement is to not install dremio dependencies
 
           # TODO: Currently the below test only runs tests with postgresql. We should figure out what the
           # TODO: best way to test for sqlalchemy version compatibility and implement that here.

@@ -1141,7 +1141,6 @@ class TestConnectionPersistence:
 
         assert res == res2
 
-
     def test_same_connection_accessible_from_execution_engine_sqlite(
         self, sa, pd_dataframe: pd.DataFrame
     ):
@@ -1212,7 +1211,6 @@ class TestDialectRequiresPersistedConnection:
         assert not _dialect_requires_persisted_connection(
             connection_string=connection_string
         )
-
 
     @pytest.mark.unit
     def test__dialect_requires_persisted_connection_empty_url_raises_exception(
