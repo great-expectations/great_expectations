@@ -543,11 +543,9 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined]
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(
+    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
-    ).get_asset(
-        asset_name="my_df_asset"
-    )  # type: ignore[union-attr]
+    ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)  # type: ignore[attr-defined]
 
@@ -595,10 +593,8 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
 
     context = gx.get_context(context_root_dir=context.root_directory, cloud_mode=False)
-    dataframe_asset = context.get_datasource(
+    dataframe_asset = context.get_datasource(  # type: ignore[union-attr]
         datasource_name="fluent_pandas_datasource"
-    ).get_asset(
-        asset_name="my_df_asset"
-    )  # type: ignore[union-attr]
+    ).get_asset(asset_name="my_df_asset")
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)  # type: ignore[union-attr]
