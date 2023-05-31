@@ -14,6 +14,6 @@ import LinkCard from '/docs/components/LinkCard';
 <LinkCardGrid>
   <LinkCard topIcon label="Local filesystems" description="Install and configure GX locally." href="/docs/guides/setup/installation/local" icon="/docs/components/cloud_storage.svg" />
   <LinkCard topIcon label="Hosted environments" description="Install and configure GX in environments such as Databricks, AWS EMR, Google Cloud Composer, and others." href="/docs/guides/setup/installation/hosted_environment" icon="/docs/components/cloud_storage.svg" />
-  <LinkCard topIcon label="Cloud storage" description="Install and configure GX in environments where data is stored on a Cloud service." href="/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3" icon="/docs/components/cloud_storage.svg" />
-  <LinkCard topIcon label="SQL databases" description="Install and configure GX in environments using SQL databases." href="/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases" icon="./docs/components/cloud_storage.svg" />
+  <LinkCard topIcon label="Cloud storage" description="Install and configure GX in environments where data is stored on a Cloud service." href="/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3" icon="/images/cloud_storage.svg" />
+  <LinkCard topIcon label="SQL databases" description="Install and configure GX in environments using SQL databases." href="/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases" icon="/images/cloud_storage.svg" />
 </LinkCardGrid>
