@@ -152,8 +152,6 @@ Now that we have connected to data and defined an <TechnicalTag tag="expectation
 ```python title="Jupyter Notebook"
 checkpoint_name = None # name your checkpoint here
 assert checkpoint_name is not None, "Please set checkpoint_name."
-data_asset_name = None # name your table here
-assert data_asset_name is not None, "Please set data_asset_name."
 
 checkpoint_config = {
   "name": checkpoint_name,
@@ -161,9 +159,8 @@ checkpoint_config = {
       "expectation_suite_name": expectation_suite_name,
       "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
       "batch_request": {
-          "datasource_name": datasource_name,
-          "data_connector_name": data_connector_name,
-          "data_asset_name": data_asset_name,
+          "datasource_name": datasource.name,
+          "data_asset_name": asset.name,
       },
   }],
   "config_version": 1,
