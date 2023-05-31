@@ -1137,7 +1137,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
         }
 
         deep_filter_properties_iterable(
-            properties=batch_request_as_dict,
+            properties=batch_request_as_dict,  # type: ignore[call-overload] # TypeDict is dict at runtime
             inplace=True,
         )
 
