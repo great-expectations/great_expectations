@@ -80,15 +80,15 @@ class RunOnboardingDataAssistantAction(AgentAction):
             "class_name": "Checkpoint",
         }
 
-        checkpoint = self._context.add_checkpoint(**checkpoint_config)
+        checkpoint = self._context.add_checkpoint(**checkpoint_config)  # type: ignore[arg-type]
 
         return ActionResult(
             id=id,
             type=event.type,
             created_resources=[
                 CreatedResource(
-                    id=expectation_suite.ge_cloud_id, type="ExpectationSuite"
+                    id=expectation_suite.ge_cloud_id, type="ExpectationSuite"  # type: ignore[arg-type]
                 ),
-                CreatedResource(id=checkpoint.ge_cloud_id, type="Checkpoint"),
+                CreatedResource(id=checkpoint.ge_cloud_id, type="Checkpoint"),  # type: ignore[arg-type]
             ],
         )
