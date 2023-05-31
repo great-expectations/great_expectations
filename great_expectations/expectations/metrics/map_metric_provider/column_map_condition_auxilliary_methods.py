@@ -284,7 +284,7 @@ def _sqlalchemy_column_map_condition_values(
 
     return [
         val.unexpected_values
-        for val in execution_engine.engine.execute(query).fetchall()
+        for val in execution_engine.execute_query(query).fetchall()
     ]
 
 
@@ -331,7 +331,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
-    return execution_engine.engine.execute(query).fetchall()
+    return execution_engine.execute_query(query).fetchall()
 
 
 def _spark_column_map_condition_values(
