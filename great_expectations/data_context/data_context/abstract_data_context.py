@@ -1795,7 +1795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_checkpoint(
@@ -1995,7 +1995,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @new_method_or_class(version="0.15.48")
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
@@ -4144,7 +4144,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+                self._open_url_in_browser(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -5529,10 +5533,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    @public_api
+    @new_method_or_class(version="0.16.15")
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,
