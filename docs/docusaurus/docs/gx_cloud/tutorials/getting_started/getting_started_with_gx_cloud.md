@@ -177,7 +177,7 @@ print(checkpoint)
 Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
 
 ```python title="Jupyter Notebook"
-context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id, batch_request=batch_request)
+checkpoint.run()
 ```
 
 #### 4.3 Review your results
