@@ -1141,6 +1141,41 @@ class TestConnectionPersistence:
 
         assert res == res2
 
+
+    def test_same_connection_accessible_from_execution_engine_sqlite(
+        self, sa, pd_dataframe: pd.DataFrame
+    ):
+        """What does this test and why?
+
+        We want to make sure that the same connection is used for subsequent queries for databases that need it e.g.
+        sqlite and that connection is accessible from the execution engine.
+        Here we test that by creating a temp table and then querying it multiple times (each time pulling a connection
+        from the pool). The same connection should be accessible from the execution engine after each query.
+        """
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as con:
+            add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
+            connection = con
+        assert (
+            execution_engine.dialect_name == GXSqlDialect.SQLITE
+        ), "Error here means test setup failed."
+
+        create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
+        execution_engine.execute_query_in_transaction(sa.text(create_temp_table))
+
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
+        select_temp_table = "SELECT * FROM temp_table;"
+
+        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
+        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
     def test_get_connection_doesnt_close_on_exit_sqlite(self, sa):
         execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
         with execution_engine.get_connection() as connection:
@@ -1177,3 +1212,42 @@ class TestDialectRequiresPersistedConnection:
         assert not _dialect_requires_persisted_connection(
             connection_string=connection_string
         )
+
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_empty_url_raises_exception(
+        self, sa
+    ):
+        url = ""
+        with pytest.raises(sa.exc.ArgumentError):
+            _dialect_requires_persisted_connection(
+                url=url,
+            )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params(self):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = "postgresql://postgres@db_hostname/test_ci?client_encoding=utf8&application_name=test_ci"
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params_empty_url(
+        self,
+    ):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = ""
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )
