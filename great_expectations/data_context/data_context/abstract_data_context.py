@@ -4144,6 +4144,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
+                self._open_url_in_browser(url)
 
     @staticmethod
     def _open_url_in_browser(url: str) -> None:
