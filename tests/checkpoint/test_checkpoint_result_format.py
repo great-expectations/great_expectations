@@ -3521,12 +3521,12 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
             "batch_slice": -1,
         },
     )
-    runtime_batch_request = data_frame_asset.build_batch_request(
+    batch_request = data_frame_asset.build_batch_request(
         dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index
     )
 
     validator = context.get_validator(
-        batch_request=runtime_batch_request,
+        batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
     validator.expect_column_values_to_be_unique(column="animals")
@@ -3559,7 +3559,7 @@ runtime_configuration:
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name=expectation_suite_name,
-        batch_request=runtime_batch_request,
+        batch_request=batch_request,
     )
     assert result.success
     assert dict(

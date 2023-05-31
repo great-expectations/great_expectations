@@ -447,7 +447,7 @@ def test_dataframe_asset(
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
 
     assert (
-        "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object"
+        'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
         in str(exc_info.value)
     )
 

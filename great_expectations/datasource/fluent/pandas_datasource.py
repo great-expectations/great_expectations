@@ -599,6 +599,11 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator:
         batch_request: BatchRequest
         if isinstance(asset, DataFrameAsset):
+            if not isinstance(dataframe, pd.DataFrame):
+                raise ValueError(
+                    'Cannot execute "PandasDatasource.read_dataframe()" without a valid "dataframe" argument.'
+                )
+
             batch_request = asset.build_batch_request(dataframe=dataframe)
         else:
             batch_request = asset.build_batch_request()
