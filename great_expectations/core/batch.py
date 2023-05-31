@@ -686,7 +686,7 @@ class BatchData:
         return self._execution_engine
 
     # noinspection PyMethodMayBeStatic
-    def head(self, *args, **kwargs):
+    def head(self, *args, **kwargs) -> pd.DataFrame:
         # CONFLICT ON PURPOSE. REMOVE.
         return pd.DataFrame({})
 
