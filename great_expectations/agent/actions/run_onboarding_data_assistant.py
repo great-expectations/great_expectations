@@ -75,7 +75,7 @@ class RunOnboardingDataAssistantAction(AgentAction):
             "class_name": "Checkpoint",
         }
 
-        checkpoint = self._context.add_or_update_checkpoint(**checkpoint_config)
+        checkpoint = self._context.add_checkpoint(**checkpoint_config)
 
         return ActionResult(
             id=id,
