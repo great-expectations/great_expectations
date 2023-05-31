@@ -121,6 +121,7 @@ class GXAgent:
             self._handle_event, event_context=event_context
         )
         # TODO lakitu-139: record job as started
+        # RR: This seems like wrong place
 
         if self._current_task is not None:
             # add a callback for when the thread exits and pass it the event context
@@ -141,9 +142,16 @@ class GXAgent:
         # warning:  this method will not be executed in the main thread
 
         if event_context.event is not None:
+
             print(
                 f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
             )
+            # SEnd request to AMQP
+            # Send required to mercury BE
+            # PUT /organizations/<uuid:organization_id>/agent-jobs/<uuid:job_id>
+            # {
+            #   "status": "started",
+            # }
         handler = EventHandler(context=self._context)
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(event_context=event_context)
@@ -168,6 +176,24 @@ class GXAgent:
             _result = future.result()
 
         # TODO lakitu-139: record job as complete and send results
+        # {
+        #   "status": "completed",
+        #   "success": true,
+        #   "created_resources": [
+        #     {
+        #       "type": <resource type>,
+        #       "id": <resource id>,
+        #     }
+        #   ]
+        # }
+        # and on completion (failure):
+        # {
+        #   "status": "completed",
+        #   "success": false,
+        #   "stack_trace": <string of stack trace>,
+        #   "error_message": <error message pulled from stack trace>
+        #   ]
+        # }
 
         # ack message and cleanup resources
         event_context.processed_successfully()
@@ -189,6 +215,7 @@ class GXAgent:
             should_reject = False
         # ensure the correlation ids dict doesn't get too large:
         if len(self._correlation_ids.keys()) > MAX_KEYS:
+            # TODO Add error log
             self._correlation_ids.clear()
         return should_reject
 
