@@ -379,6 +379,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
         try:
+            breakpoint()
             response = self._session.post(url, json=data)
             response.raise_for_status()
             response_json = response.json()
