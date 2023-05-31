@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class BDSBatchRequestTypedDict(TypedDict):
+class BlockConfigBatchRequestTypedDict(TypedDict):
     datasource_name: str
     data_connector_name: str
     data_asset_name: str
@@ -341,7 +341,7 @@ class BatchRequestBase(SerializableDictDot):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
-    def to_dict(self) -> BDSBatchRequestTypedDict:  # type: ignore[override] # TypedDict is more specific dict type
+    def to_dict(self) -> BlockConfigBatchRequestTypedDict:  # type: ignore[override] # TypedDict is more specific dict type
         return standardize_batch_request_display_ordering(
             batch_request=super().to_dict()  # type: ignore[arg-type] # TypedDict is more specific dict type
         )
@@ -909,7 +909,7 @@ def materialize_batch_request(
     batch_request: BatchRequestBase | dict | None = None,
 ) -> FluentBatchRequest | BatchRequestBase | None:
     def _is_fluent_batch_request(
-        args: dict[str, Any] | BDSBatchRequestTypedDict
+        args: dict[str, Any] | BlockConfigBatchRequestTypedDict
     ) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -944,7 +944,7 @@ def batch_request_contains_batch_data(
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict
-    | BDSBatchRequestTypedDict
+    | BlockConfigBatchRequestTypedDict
     | None = None,
 ) -> bool:
     return (
@@ -957,7 +957,7 @@ def batch_request_contains_runtime_parameters(
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict
-    | BDSBatchRequestTypedDict
+    | BlockConfigBatchRequestTypedDict
     | None = None,
 ) -> bool:
     return (
@@ -971,9 +971,9 @@ def get_batch_request_as_dict(
     batch_request: BatchRequestBase
     | FluentBatchRequest
     | dict
-    | BDSBatchRequestTypedDict
+    | BlockConfigBatchRequestTypedDict
     | None = None,
-) -> BDSBatchRequestTypedDict | None:
+) -> BlockConfigBatchRequestTypedDict | None:
     if batch_request is None:
         return None
 
@@ -1127,7 +1127,7 @@ def _get_runtime_batch_request(  # noqa: PLR0913
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
-        batch_request_as_dict: BDSBatchRequestTypedDict = {
+        batch_request_as_dict: BlockConfigBatchRequestTypedDict = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
             "data_asset_name": data_asset_name,
@@ -1303,8 +1303,8 @@ def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
 
 
 def standardize_batch_request_display_ordering(
-    batch_request: BDSBatchRequestTypedDict,
-) -> BDSBatchRequestTypedDict:
+    batch_request: BlockConfigBatchRequestTypedDict,
+) -> BlockConfigBatchRequestTypedDict:
     batch_request_as_dict: dict = safe_deep_copy(data=batch_request)
     datasource_name: str = batch_request_as_dict["datasource_name"]
     data_connector_name: str = batch_request_as_dict["data_connector_name"]
