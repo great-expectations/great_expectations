@@ -1803,7 +1803,7 @@ def test_get_validator_with_column_identifiers(in_memory_runtime_context):
 
     col_name = '"order number"'
     # should not throw an error. This is a valid column name
-    result = my_validator.expect_column_values_to_be_unique(column=col_name)
+    my_validator.expect_column_values_to_be_unique(column=col_name)
 
 
 def test_get_validator_with_batch_list(in_memory_runtime_context):
@@ -1843,7 +1843,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
     assert len(my_validator.batches) == 2
     col_name = '"x"'
     # should not throw an error. This is a valid column name
-    result = my_validator.expect_column_values_to_be_unique(column=col_name)
+    my_validator.expect_column_values_to_be_unique(column=col_name)
 
 
 def test_get_batch_multiple_datasources_do_not_scan_all(
