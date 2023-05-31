@@ -15,6 +15,7 @@ from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import BlockConfigBatchRequestTypedDict
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -40,7 +41,9 @@ class Builder(SerializableDictDot):
             data_context: AbstractDataContext associated with this Builder
         """
         self._batch_list: Optional[List[Batch]] = None
-        self._batch_request: Union[BatchRequestBase, dict, None] = None
+        self._batch_request: BatchRequestBase | BlockConfigBatchRequestTypedDict | dict | None = (
+            None
+        )
         self._data_context: Optional[AbstractDataContext] = data_context
 
     """
@@ -56,11 +59,15 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
+    def batch_request(
+        self,
+    ) -> BatchRequestBase | BlockConfigBatchRequestTypedDict | dict | None:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, value: Optional[Union[BatchRequestBase, dict]]) -> None:
+    def batch_request(
+        self, value: BatchRequestBase | dict | BlockConfigBatchRequestTypedDict | None
+    ) -> None:
         if not (value is None or isinstance(value, dict)):
             value = get_batch_request_as_dict(batch_request=value)
 
