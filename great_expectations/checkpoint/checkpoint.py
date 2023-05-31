@@ -764,7 +764,7 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Union[int, float] = 1.0,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -820,9 +820,15 @@ constructor arguments.
 """
             )
 
+        if not config_version:
+            class_name = "LegacyCheckpoint"
+        else:
+            class_name = self.__class__.__name__
+
         checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
+            class_name=class_name,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -931,7 +937,7 @@ constructor arguments.
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Union[int, float] = 1.0,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
@@ -941,7 +947,9 @@ constructor arguments.
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
@@ -954,8 +962,13 @@ constructor arguments.
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
+        validator: Validator | None = None,
     ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
+
+        validations = cls._reconcile_validations(
+            validations=validations, validator=validator
+        )
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -1044,6 +1057,36 @@ constructor arguments.
         )
 
         return new_checkpoint
+
+    @staticmethod
+    def _reconcile_validations(
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validator: Validator | None = None,
+    ) -> list[dict] | None:
+        """
+        Helper to help resolve logic between validator and validations input
+        arguments to `construct_from_config_args`.
+        """
+        if validator:
+            if validations:
+                raise ValueError(
+                    "Please provide either a validator or validations list (but not both)."
+                )
+            validations = validator.convert_to_checkpoint_validations_list()
+
+        if not validations:
+            return None
+
+        # A lot of downstream logic depends on validations being a dict instead of a rich config type
+        # We should patch those instances so they can expect a CheckpointValidationConfig
+        validations = [
+            validation.to_dict()
+            if isinstance(validation, CheckpointValidationConfig)
+            else validation
+            for validation in validations
+        ]
+
+        return validations
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(
@@ -1199,6 +1242,7 @@ class LegacyCheckpoint(Checkpoint):
         super().__init__(
             name=name,
             data_context=data_context,
+            config_version=None,
             validation_operator_name=validation_operator_name,
             batches=batches,
         )
@@ -1410,7 +1454,7 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
