@@ -65,7 +65,6 @@ Windows support for the open source Python version of GX is currently unavailabl
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
-    The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
 ## Validate data
 
