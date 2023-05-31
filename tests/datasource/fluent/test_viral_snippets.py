@@ -6,6 +6,7 @@ import pathlib
 import random
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable
+from unittest import mock
 
 import pytest
 
@@ -267,7 +268,6 @@ def test_quickstart_workflow(
     In particular, this test covers the file-backend and cloud-backed usecases with this script.
     The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
     """
-
     # Slight deviation from the Quickstart here:
     #   1. Using existing contexts instead of `get_context`
     #   2. Using `read_csv` on a local file instead of making a network request
@@ -293,7 +293,10 @@ def test_quickstart_workflow(
     checkpoint_result = checkpoint.run()
 
     # View results
-    context.view_validation_result(checkpoint_result)
+    with mock.patch("webbrowser.open") as mock_open:
+        context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
 
 
 if __name__ == "__main__":
