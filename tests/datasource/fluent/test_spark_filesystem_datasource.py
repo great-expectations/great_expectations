@@ -67,17 +67,6 @@ def spark_filesystem_datasource(
     return spark_filesystem_datasource
 
 
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
-
-
 @pytest.mark.unit
 def test_construct_spark_filesystem_datasource(
     spark_filesystem_datasource: SparkFilesystemDatasource,
