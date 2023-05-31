@@ -180,17 +180,30 @@ class ExpectColumnPredictedCardinalityCategoryToBe(ColumnAggregateExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         cardinality_category_probabilities : CardinalityCategoryProbabilities = metrics["column.cardinality_category_probabilities"]
-        print(cardinality_category_probabilities)
         predicted_cardinality_category = cardinality_category_probabilities.predicted_cardinality_category
         success = predicted_cardinality_category == configuration.kwargs.get("cardinality_category")
+
+        if configuration.kwargs.get("depth") == 1:
+            predicted_probabilities = {
+                "INFINITE": cardinality_category_probabilities.infinite,
+                "FINITE": cardinality_category_probabilities.finite,
+            }
+        else:
+            predicted_probabilities = {
+                "UNIQUE": cardinality_category_probabilities.unique,
+                "DUPLICATED": cardinality_category_probabilities.duplicated,
+                "A_FEW": cardinality_category_probabilities.a_few,
+                "SEVERAL": cardinality_category_probabilities.several,
+                "MANY": cardinality_category_probabilities.many,
+            }
 
         rval = {
             "success": success,
             "result": {
-                "observed_value": predicted_cardinality_category
+                "observed_value": predicted_cardinality_category,
+                "predicted_probabilities": predicted_probabilities,
             }
         }
-        print("rval: ", rval)
 
         return rval
 

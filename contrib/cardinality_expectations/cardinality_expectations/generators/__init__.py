@@ -46,7 +46,8 @@ def gen_cardinality_params() -> CardinalityParams:
             is_finite=is_finite,
             category=category,
             k=count,
-            alpha=random.uniform(0,1),
+            # alpha=random.uniform(0,1)**2,
+            alpha=random.uniform(0,.5)**2,
         )
     else:
         is_finite = False
