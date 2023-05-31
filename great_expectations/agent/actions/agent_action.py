@@ -18,13 +18,13 @@ class ActionResult(BaseModel):
     created_resources: Sequence[CreatedResource]
 
 
-_TEvent = TypeVar("_TEvent", bound=Event)
+_EventT = TypeVar("_EventT", bound=Event)
 
 
-class AgentAction(Generic[_TEvent]):
+class AgentAction(Generic[_EventT]):
     def __init__(self, context: CloudDataContext):
         self._context = context
 
     @abstractmethod
-    def run(self, event: _TEvent, id: str) -> ActionResult:
+    def run(self, event: _EventT, id: str) -> ActionResult:
         ...
