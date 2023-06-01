@@ -1,5 +1,4 @@
 from typing import Literal, Sequence, Union
-from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
@@ -37,7 +36,7 @@ Event = Annotated[
 
 
 class CreatedResource(AgentBaseModel):
-    resource_id: UUID
+    resource_id: str
     type: str
 
 
@@ -46,7 +45,7 @@ class JobStarted(AgentBaseModel):
 
 
 class JobCompleted(AgentBaseModel):
-    status: Literal["complete"] = "complete"
+    status: Literal["complete"] = "completed"
     success: bool
     created_resources: Sequence[CreatedResource] = []
     error_stack_trace: Union[str, None] = None

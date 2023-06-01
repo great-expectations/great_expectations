@@ -29,26 +29,6 @@ def event():
     )
 
 
-def test_run_onboarding_data_assistant_event_requires_unique_expectation_suite(
-    context, event
-):
-    action = RunOnboardingDataAssistantAction(context=context)
-    id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
-    context.get_checkpoint.side_effect = StoreBackendError("test-message")
-
-    with pytest.raises(ValueError, match=r"Expectation Suite"):
-        action.run(event, id=id)
-
-
-def test_run_onboarding_data_assistant_event_requires_unique_checkpoint(context, event):
-    action = RunOnboardingDataAssistantAction(context=context)
-    id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
-    context.get_expectation_suite.side_effect = StoreBackendError("test-message")
-
-    with pytest.raises(ValueError, match=r"Checkpoint"):
-        action.run(event, id=id)
-
-
 def test_run_onboarding_data_assistant_event_raises_for_legacy_datasource(
     context, event
 ):

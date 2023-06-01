@@ -1,5 +1,5 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
-from uuid import UUID
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
@@ -20,26 +20,23 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
     def run(self, event: RunOnboardingDataAssistantEvent, id: str) -> ActionResult:
         expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
+        timestamp = datetime.utcnow()
 
-        # ensure resources we create don't already exist before we run the Data Assistant.
+        # ensure we have unique names for created resources
         try:
             self._context.get_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
-            raise ValueError(
-                f"Onboarding Assistant Expectation Suite `{expectation_suite_name}` already exists. "
-                + "Please rename or delete suite and try again"
-            )
+            # if that didn't error, this name exists, so we add the timestamp
+            expectation_suite_name = f"{expectation_suite_name} {timestamp}"
         except StoreBackendError:
             # resource is unique
             pass
 
         try:
             self._context.get_checkpoint(name=checkpoint_name)
-            raise ValueError(
-                f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. "
-                + "Please rename or delete Checkpoint and try again"
-            )
+            # if that didn't error, this name exists, so we add the timestamp
+            checkpoint_name = f"{checkpoint_name} {timestamp}"
         except StoreBackendError:
             # resource is unique
             pass
@@ -94,8 +91,8 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             type=event.type,
             created_resources=[
                 CreatedResource(
-                    resource_id=UUID(expectation_suite_id), type="ExpectationSuite"
+                    resource_id=expectation_suite_id, type="ExpectationSuite"
                 ),
-                CreatedResource(resource_id=UUID(checkpoint_id), type="Checkpoint"),
+                CreatedResource(resource_id=checkpoint_id, type="Checkpoint"),
             ],
         )
