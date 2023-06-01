@@ -148,8 +148,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        df = dataframe or self.dataframe
-        if not df:
+        if dataframe is None:
+            df = self.dataframe
+        else:
+            df = dataframe
+
+        if df is None:
             raise ValueError(
                 "Cannot build batch request for dataframe asset without a dataframe"
             )
