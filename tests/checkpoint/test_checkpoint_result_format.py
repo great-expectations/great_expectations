@@ -3515,12 +3515,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
 
     data_frame_asset = context.sources.add_pandas(
         name="pandas_datasource"
-    ).add_dataframe_asset(
-        name="IN_MEMORY_DATA_ASSET",
-        batch_metadata={
-            "batch_slice": -1,
-        },
-    )
+    ).add_dataframe_asset(name="IN_MEMORY_DATA_ASSET")
     batch_request = data_frame_asset.build_batch_request(
         dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index
     )
@@ -3537,6 +3532,9 @@ name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
 run_name_template: "%Y-%m-foo-bar-template-test"
+batch_request:
+  datasource_name: pandas_datasource
+  data_asset_name: IN_MEMORY_DATA_ASSET
 action_list:
     - name: store_validation_result
       action:
@@ -3556,7 +3554,19 @@ runtime_configuration:
 
     context.add_checkpoint(**checkpoint_config.to_json_dict())
 
-    result: CheckpointResult = context.run_checkpoint(
+    result: CheckpointResult
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert result.checkpoint_config.batch_request == {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+    }
+
+    # TODO: <Alex>06/01/2023: For "DataAsset" types containing ephemeral data references, best practices is to supply "batch_request" as argument to "run_checkpoint()" method.</Alex>
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,

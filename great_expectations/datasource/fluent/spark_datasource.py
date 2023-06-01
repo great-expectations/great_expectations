@@ -138,7 +138,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
         version="0.16.15",
     )
-    def build_batch_request(self, dataframe: _SparkDataFrameT) -> BatchRequest:
+    def build_batch_request(
+        self, dataframe: Optional[_SparkDataFrameT] = None
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
