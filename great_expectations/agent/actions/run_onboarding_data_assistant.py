@@ -1,11 +1,14 @@
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
-    CreatedResource,
 )
-from great_expectations.agent.models import RunOnboardingDataAssistantEvent
+from great_expectations.agent.models import (
+    CreatedResource,
+    RunOnboardingDataAssistantEvent,
+)
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions import StoreBackendError
 
@@ -90,7 +93,9 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(id=expectation_suite_id, type="ExpectationSuite"),
-                CreatedResource(id=checkpoint_id, type="Checkpoint"),
+                CreatedResource(
+                    resource_id=UUID(expectation_suite_id), type="ExpectationSuite"
+                ),
+                CreatedResource(resource_id=UUID(checkpoint_id), type="Checkpoint"),
             ],
         )

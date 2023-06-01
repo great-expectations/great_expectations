@@ -24,8 +24,12 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
-from great_expectations.agent.models import UnknownEvent
-from great_expectations.agent.models import JobCompleted, JobStarted, JobStatus
+from great_expectations.agent.models import (
+    JobCompleted,
+    JobStarted,
+    JobStatus,
+    UnknownEvent,
+)
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -242,6 +246,12 @@ class GXAgent:
             ) from validation_err
 
     def _update_status(self, job_id: str, status: JobStatus) -> None:
+        """Update GX Cloud on the status of a job.
+
+        Args:
+            job_id: job identifier, also known as correlation_id
+            status: pydantic model encapsulating the current status
+        """
         agent_sessions_url = (
             f"{self._config.gx_cloud_base_url}/organizations/{self._config.gx_cloud_organization_id}"
             + f"agent-jobs/{job_id}"
