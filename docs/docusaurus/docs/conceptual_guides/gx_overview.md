@@ -1,5 +1,5 @@
 ---
-title: Great Expectations
+title: GX Overview
 ---
 
 import PythonVersion from '/docs/components/_python_version.mdx';

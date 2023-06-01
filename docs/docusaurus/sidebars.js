@@ -2,7 +2,16 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Getting started',
+      items: [
+        {
+          type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+        },
+        {
+          type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+        }
+      ]
     },
     {
       type: 'category',
@@ -386,10 +395,10 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-    'contributing/contributing_maturity',
-    'reference/customize_your_deployment',
-    'reference/usage_statistics',
-    'conceptual_guides/expectation_classes',
+        'contributing/contributing_maturity',
+        'reference/customize_your_deployment',
+        'reference/usage_statistics',
+        'conceptual_guides/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',
@@ -460,6 +469,6 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-    'contributing/contributing',
+    'contributing/contributing'
   ]
 }
