@@ -12,21 +12,33 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture(autouse=True)
-def set_required_env_vars(monkeypatch):
+def set_required_env_vars(monkeypatch, org_id, token):
     env_vars = {
-        "GX_CLOUD_ORGANIZATION_ID": "4ea2985c-4fb7-4c53-9f8e-07b7e0506c3e",
-        "GX_CLOUD_ACCESS_TOKEN": "MTg0NDkyYmYtNTBiOS00ZDc1LTk3MmMtYjQ0M2NhZDA2NjJk",
+        "GX_CLOUD_ORGANIZATION_ID": org_id,
+        "GX_CLOUD_ACCESS_TOKEN": token,
     }
     monkeypatch.setattr(os, "environ", env_vars)
 
 
 @pytest.fixture
-def gx_agent_config(queue, connection_string):
+def gx_agent_config(queue, connection_string, org_id, token):
     config = GXAgentConfig(
         queue=queue,
         connection_string=connection_string,
+        gx_cloud_access_token=token,
+        gx_cloud_organization_id=org_id,
     )
     return config
+
+
+@pytest.fixture
+def org_id():
+    return "4ea2985c-4fb7-4c53-9f8e-07b7e0506c3e"
+
+
+@pytest.fixture
+def token():
+    return "MTg0NDkyYmYtNTBiOS00ZDc1LTk3MmMtYjQ0M2NhZDA2NjJk"
 
 
 @pytest.fixture

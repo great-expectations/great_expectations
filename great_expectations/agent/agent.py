@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
 from pydantic import AmqpDsn
-from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
@@ -25,6 +24,7 @@ from great_expectations.agent.message_service.subscriber import (
     SubscriberError,
 )
 from great_expectations.agent.models import (
+    AgentBaseModel,
     JobCompleted,
     JobStarted,
     JobStatus,
@@ -38,8 +38,7 @@ if TYPE_CHECKING:
 HandlerMap = Dict[str, OnMessageCallback]
 
 
-@dataclass(frozen=True)
-class GXAgentConfig:
+class GXAgentConfig(AgentBaseModel):
     """GXAgent configuration.
     Attributes:
         queue: name of queue
@@ -48,6 +47,9 @@ class GXAgentConfig:
 
     queue: str
     connection_string: AmqpDsn
+    gx_cloud_base_url: str = "https://api.greatexpectations.io"
+    gx_cloud_organization_id: str
+    gx_cloud_access_token: str
 
 
 class GXAgent:
@@ -239,7 +241,13 @@ class GXAgent:
 
         try:
             # pydantic will coerce the url to the correct type
-            return GXAgentConfig(queue=queue, connection_string=connection_string)
+            return GXAgentConfig(
+                queue=queue,
+                connection_string=connection_string,
+                gx_cloud_base_url=config.gx_cloud_base_url,
+                gx_cloud_organization_id=config.gx_cloud_organization_id,
+                gx_cloud_access_token=config.gx_cloud_access_token,
+            )
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"

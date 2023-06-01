@@ -72,7 +72,7 @@ def test_run_onboarding_data_assistant_event_creates_expectation_suite(context, 
     checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
     expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
     expectation_suite.ge_cloud_id = expectation_suite_id
-    checkpoint = context.add_checkpoint()
+    checkpoint = context.add_checkpoint.return_value
     checkpoint.ge_cloud_id = checkpoint_id
     datasource = MagicMock(spec=Datasource)
     context.get_datasource.return_value = datasource
@@ -95,7 +95,7 @@ def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):
     checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
     expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
     expectation_suite.ge_cloud_id = expectation_suite_id
-    checkpoint = context.add_checkpoint()
+    checkpoint = context.add_checkpoint.return_value
     checkpoint.ge_cloud_id = checkpoint_id
     datasource = MagicMock(spec=Datasource)
     context.get_datasource.return_value = datasource
@@ -130,7 +130,7 @@ def test_run_onboarding_data_assistant_action_returns_action_result(context, eve
     checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
     expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
     expectation_suite.ge_cloud_id = expectation_suite_id
-    checkpoint = context.add_checkpoint()
+    checkpoint = context.add_checkpoint.return_value
     checkpoint.ge_cloud_id = checkpoint_id
     datasource = MagicMock(spec=Datasource)
     context.get_datasource.return_value = datasource
