@@ -143,9 +143,11 @@ With the Expectation defined above, we are stating that we _expect_ the column o
 
 ### 4. Validate data
 
-#### 4.1 Create Checkpoint
+#### 4.1 Create and run Checkpoint
 
 Now that we have connected to data and defined an <TechnicalTag tag="expectation" text="Expectation"/>, it is time to validate whether our data meets the Expectation. To do this, we define a <TechnicalTag tag="checkpoint" text="Checkpoint"/>, which will allow us to repeat the <TechnicalTag tag="validation" text="Validation"/> in the future.
+
+Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
 
 ```python title="Jupyter Notebook"
 checkpoint_name = None # name your checkpoint here
@@ -167,25 +169,18 @@ checkpoint_config = {
 
 context.add_or_update_checkpoint(**checkpoint_config)
 checkpoint = context.get_checkpoint(checkpoint_name)
-print(checkpoint)
-```
 
-#### 4.2 Run Checkpoint
-
-Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
-
-```python title="Jupyter Notebook"
 checkpoint.run()
 ```
 
-#### 4.3 Review your results
+#### 4.2 Review your results
 
 After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a `validation_result_url` in the result, that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI.
 
 Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
 
 
-#### 4.4 (Optional) Add Slack notifications
+#### 4.3 (Optional) Add Slack notifications
 
 Add the `send_slack_notification_on_validation_result` Action to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> configuration.
 
