@@ -8,16 +8,23 @@ class EventBase(BaseModel):
     type: str
 
 
-class RunDataAssistantEvent(EventBase):
+class RunOnboardingDataAssistantEvent(EventBase):
     type: Literal[
         "onboarding_data_assistant_request.received"
     ] = "onboarding_data_assistant_request.received"
+    datasource_name: str
+    data_asset_name: str
 
 
 class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
+class UnknownEvent(EventBase):
+    type: Literal["unknown_event"] = "unknown_event"
+
+
 Event = Annotated[
-    Union[RunDataAssistantEvent, RunCheckpointEvent], Field(discriminator="type")
+    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Field(discriminator="type"),
 ]

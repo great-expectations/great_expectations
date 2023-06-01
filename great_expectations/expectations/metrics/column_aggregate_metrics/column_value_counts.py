@@ -120,7 +120,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sqlalchemy.Row] = execution_engine.engine.execute(
+        results: List[sqlalchemy.Row] = execution_engine.execute_query(
             query.select_from(selectable)
         ).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
