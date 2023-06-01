@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import warnings
+from asyncio import sleep
 from typing import Callable, Iterator, Sequence
 
 import pandas as pd
@@ -111,19 +112,25 @@ def add_dataframe_to_db(
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        df.to_sql(
-            name=name,
-            con=con,
-            schema=schema,
-            if_exists=if_exists,
-            index=index,
-            index_label=index_label,
-            chunksize=chunksize,
-            dtype=dtype,
-            method=method,
-        )
+    # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+    # but using the base class here since sqlalchemy is an optional dependency and this
+    # warning type only exists in sqlalchemy < 2.0.
+    # if pandas > 2.0 then we can just use
+    # breakpoint()
+    for i in range(5):
+        try:
+            df.to_sql(
+                name=name,
+                con=con,
+                schema=schema,
+                if_exists=if_exists,
+                index=index,
+                index_label=index_label,
+                chunksize=chunksize,
+                dtype=dtype,
+                method=method,
+            )
+            return
+        except Exception as e:
+            print(f"Exception {e} occurred.")
+            sleep(1)
