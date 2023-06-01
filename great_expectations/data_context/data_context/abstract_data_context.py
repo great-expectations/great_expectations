@@ -143,6 +143,7 @@ if not SQLAlchemyError:
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
@@ -1704,14 +1705,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: str = ...,
-        config_version: int | float | None = ...,
+        config_version: int | float = ...,
         template_name: str | None = ...,
-        module_name: str | None = ...,
-        class_name: str | None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: list[dict] | None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
@@ -1729,6 +1730,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1741,14 +1743,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_checkpoint(
         self,
         name: None = ...,
-        config_version: None = ...,
+        config_version: int | float = ...,
         template_name: None = ...,
-        module_name: None = ...,
-        class_name: None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
@@ -1764,6 +1766,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1790,17 +1793,22 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing checkpoint instead of individual constructor args",
     )
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
     def add_checkpoint(
         self,
         name: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -1818,6 +1826,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
@@ -1850,6 +1859,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -1886,6 +1896,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -1921,14 +1932,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: int | float | None = ...,
+        config_version: int | float = ...,
         template_name: str | None = ...,
-        module_name: str | None = ...,
-        class_name: str | None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: list[dict] | None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
@@ -1939,6 +1950,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1952,14 +1964,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: None = ...,
         id: None = ...,
-        config_version: None = ...,
+        config_version: int | float = ...,
         template_name: None = ...,
-        module_name: None = ...,
-        class_name: None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
@@ -1970,6 +1982,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: None = ...,
         expectation_suite_id: None = ...,
         default_validation_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1980,18 +1993,23 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2003,6 +2021,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
@@ -2028,6 +2047,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -2054,6 +2074,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -2063,14 +2084,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2083,6 +2104,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2121,6 +2143,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
+                validator=validator,
             )
 
         return checkpoint
@@ -2221,7 +2244,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2297,7 +2320,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -4121,7 +4144,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+                self._open_url_in_browser(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -5506,10 +5533,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    @public_api
+    @new_method_or_class(version="0.16.15")
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,

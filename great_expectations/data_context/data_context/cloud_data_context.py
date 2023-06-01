@@ -10,6 +10,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Union,
     cast,
@@ -54,6 +55,8 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
@@ -61,6 +64,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -694,14 +698,14 @@ class CloudDataContext(SerializableDataContext):
     def add_checkpoint(
         self,
         name: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -719,6 +723,7 @@ class CloudDataContext(SerializableDataContext):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
@@ -755,6 +760,7 @@ class CloudDataContext(SerializableDataContext):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -796,7 +802,8 @@ class CloudDataContext(SerializableDataContext):
                 "cloud_mode": True,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
@@ -889,3 +896,10 @@ class CloudDataContext(SerializableDataContext):
             logger.debug(
                 "CloudDataContext._save_project_config() has no `fds_datasource` to update"
             )
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        url = result.validation_result_url
+        assert (
+            url
+        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        self._open_url_in_browser(url)

@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 logger = logging.getLogger(__file__)
 
 
-if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):
+if not (azure.storage and azure.BlobServiceClient and azure.ContainerClient):  # type: ignore[truthy-function] # False if NotImported
     pytest.skip(
         'Could not import "azure.storage.blob" from Microsoft Azure cloud',
         allow_module_level=True,
@@ -431,7 +431,7 @@ def test_test_connection_failures(
         datasource_name=spark_abs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        azure_client=spark_abs_datasource._azure_client,
+        azure_client=spark_abs_datasource._azure_client,  # type: ignore[arg-type] # _azure_client could be None
         account_name=csv_asset.datasource._account_name,
         container="my_container",
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
