@@ -243,6 +243,8 @@ select = [
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "B", # bugbear - common python bugs & design issues
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
