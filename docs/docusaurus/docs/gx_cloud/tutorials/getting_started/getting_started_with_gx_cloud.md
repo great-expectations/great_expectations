@@ -78,9 +78,7 @@ Please note you should not include sensitive info/credentials directly in the co
 ```python title="Jupyter Notebook"
 # Give your datasource a name
 datasource_name = None
-datasource = context.sources.add_pandas(
-    datasource_name, use a different directory change this argument
-)
+datasource = context.sources.add_pandas(datasource_name)
 
 # Give your first Asset a name
 asset_name = None
