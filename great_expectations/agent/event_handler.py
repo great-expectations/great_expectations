@@ -3,19 +3,18 @@ from typing import List
 from pydantic import BaseModel
 
 from great_expectations.agent.message_service.subscriber import EventContext
-from great_expectations.agent.models import RunCheckpointEvent, RunDataAssistantEvent
+from great_expectations.agent.models import (
+    Resource,
+    RunCheckpointEvent,
+    RunDataAssistantEvent,
+)
 from great_expectations.data_context import CloudDataContext
-
-
-class CreatedResource(BaseModel):
-    type: str
-    id: str
 
 
 class EventHandlerResult(BaseModel):
     id: str
     type: str
-    created_resources: List[CreatedResource]
+    created_resources: List[Resource]
 
 
 class EventHandler:

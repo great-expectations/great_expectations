@@ -39,3 +39,6 @@ class JobCompleted(BaseModel):
     created_resources: list[Resource] = []
     error_stack_trace: str | None = None
     # error_message: str | None = None
+
+
+JobStatus = Union[JobStarted, JobCompleted]

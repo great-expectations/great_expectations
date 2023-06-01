@@ -24,6 +24,7 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
+from great_expectations.agent.models import JobCompleted, JobStarted, JobStatus
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -84,7 +85,6 @@ class GXAgent:
             print("GX-Agent is ready.")
             # Open a connection until encountering a shutdown event
             subscriber.consume(
-                # TODO: replace with queue from agent-sessions endpoint
                 queue=self._config.queue,
                 on_message=self._handle_event_as_thread_enter,
             )
@@ -120,8 +120,6 @@ class GXAgent:
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
-        # TODO lakitu-139: record job as started
-        # RR: This seems like wrong place
 
         if self._current_task is not None:
             # add a callback for when the thread exits and pass it the event context
@@ -129,6 +127,8 @@ class GXAgent:
                 self._handle_event_as_thread_exit, event_context=event_context
             )
             self._current_task.add_done_callback(on_exit_callback)
+
+        self._update_status(job_id=event_context.correlation_id, status=JobStarted())
 
     def _handle_event(self, event_context: EventContext) -> EventHandlerResult:
         """Pass events to EventHandler.
@@ -142,16 +142,9 @@ class GXAgent:
         # warning:  this method will not be executed in the main thread
 
         if event_context.event is not None:
-
             print(
                 f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
             )
-            # SEnd request to AMQP
-            # Send required to mercury BE
-            # PUT /organizations/<uuid:organization_id>/agent-jobs/<uuid:job_id>
-            # {
-            #   "status": "started",
-            # }
         handler = EventHandler(context=self._context)
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(event_context=event_context)
@@ -170,30 +163,15 @@ class GXAgent:
 
         # get results or errors from the thread
         error = future.exception()
-        # todo: underscore to appease linter - rename to `result` once this is used
-        _result = None
         if error is None:
-            _result = future.result()
-
-        # TODO lakitu-139: record job as complete and send results
-        # {
-        #   "status": "completed",
-        #   "success": true,
-        #   "created_resources": [
-        #     {
-        #       "type": <resource type>,
-        #       "id": <resource id>,
-        #     }
-        #   ]
-        # }
-        # and on completion (failure):
-        # {
-        #   "status": "completed",
-        #   "success": false,
-        #   "stack_trace": <string of stack trace>,
-        #   "error_message": <error message pulled from stack trace>
-        #   ]
-        # }
+            result: EventHandlerResult = future.result()
+            status = JobCompleted(
+                success=True,
+                created_resources=result.created_resources,
+            )
+        else:
+            status = JobCompleted(success=False, error_stack_trace=str(error))
+        self._update_status(job_id=event_context.correlation_id, status=status)
 
         # ack message and cleanup resources
         event_context.processed_successfully()
@@ -253,6 +231,14 @@ class GXAgent:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
             ) from validation_err
+
+    def _update_status(self, job_id: str, status: JobStatus) -> None:
+        agent_sessions_url = (
+            f"{self._config.gx_cloud_base_url}/organizations/{self._config.gx_cloud_organization_id}"
+            + f"agent-jobs/{job_id}"
+        )
+        session = create_session(access_token=self._config.gx_cloud_access_token)
+        session.patch(agent_sessions_url, data=status.dict())
 
 
 class GXAgentError(Exception):
