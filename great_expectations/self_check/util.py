@@ -77,7 +77,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
-    connection_manager,
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
@@ -933,10 +932,10 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
         engine = sa.create_engine(
@@ -964,7 +963,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-    # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+    # execution_engine.execute_query(sa.text(sql_query_string).execution_options(autocommit=True))
 
     # Add the data to the database as a new table
 
@@ -1029,24 +1028,26 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     else:
         sql_insert_method = None
 
-    _debug("Calling df.to_sql")
-    _start = time.time()
-    add_dataframe_to_db(
-        df=df,
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-        method=sql_insert_method,
-    )
-    _end = time.time()
-    _debug(
-        f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
-    )
-
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    with execution_engine.get_connection() as connection:
+        _debug("Calling df.to_sql")
+        _start = time.time()
+        add_dataframe_to_db(
+            df=df,
+            name=table_name,
+            con=connection,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+            method=sql_insert_method,
+        )
+        _end = time.time()
+        _debug(
+            f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
+        )
 
     if context is None:
         context = build_in_memory_runtime_context()
@@ -1173,12 +1174,12 @@ def build_pandas_engine(
     return execution_engine
 
 
-def build_sa_engine(
+def build_sa_execution_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
     batch_id: Optional[str] = None,
-    if_exists: str = "fail",
+    if_exists: str = "replace",
     index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
@@ -1196,9 +1197,9 @@ def build_sa_engine(
         dtype=dtype,
     )
 
-    execution_engine: SqlAlchemyExecutionEngine
-
-    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlalchemy_engine
+    )
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
