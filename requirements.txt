@@ -13,7 +13,6 @@ marshmallow>=3.7.1,<4.0.0
 mistune>=0.8.4
 nbformat>=5.0
 notebook>=6.4.10
-numpy>=1.18.5; python_version <= "3.7"
 numpy>=1.19.5; python_version == "3.8" or python_version == "3.9"
 numpy>=1.23.0; python_version >= "3.10"
 packaging
