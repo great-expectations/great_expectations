@@ -1,4 +1,5 @@
 from typing import Literal, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -21,3 +22,20 @@ class RunCheckpointEvent(EventBase):
 Event = Annotated[
     Union[RunDataAssistantEvent, RunCheckpointEvent], Field(discriminator="type")
 ]
+
+
+class Resource(BaseModel):
+    resource_id: UUID
+    type: str
+
+
+class JobStarted(BaseModel):
+    status: Literal["started"] = "started"
+
+
+class JobCompleted(BaseModel):
+    status: Literal["complete"] = "complete"
+    success: bool
+    created_resources: list[Resource] = []
+    error_stack_trace: str | None = None
+    # error_message: str | None = None
