@@ -337,7 +337,7 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
-
+@pytest.mark.unit
 def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
     """
     Within SQLite, identifiers can be quoted using one of the following mechanisms:
@@ -7031,7 +7031,13 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     ]
 
 
-def test_dx_524_explicit_string_identifiers_should_work_with_validator(spark_session):
+@pytest.mark.integration
+def test_explicit_string_identifiers_should_work_with_validator(spark_session):
+    """
+    Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
+    Ensures that the expectations can be used with a string identifier, resolves to the correct column
+    in SQL and a result is returned.
+    """
     metastore_dir = "/tmp/great_expectations_v3"
 
     data_context_config = DataContextConfig(
