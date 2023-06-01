@@ -24,17 +24,6 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
-
-
-@pytest.fixture
 def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
     return csv_path / "yellow_tripdata_sample_2018-03.csv"
 

@@ -104,6 +104,7 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -111,6 +112,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -799,11 +801,9 @@ def postgresql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"postgresql://postgres@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -817,11 +817,9 @@ def mysql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"mysql+pymysql://root@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -2970,7 +2968,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
@@ -8230,3 +8228,19 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return EphemeralDataContext(project_config=project_config)
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path

@@ -16,7 +16,7 @@ from great_expectations.util import get_context
 def update_data_docs_action():
     return {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        "action": {"class_name": "UpdateDataDocsAction"},
     }
 
 

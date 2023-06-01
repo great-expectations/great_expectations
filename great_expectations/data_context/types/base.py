@@ -19,6 +19,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Sequence,
     Set,
     Type,
     TypeVar,
@@ -42,7 +43,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
@@ -56,7 +56,13 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
+    from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.datasource.fluent.batch_request import (
+        BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -1819,23 +1825,24 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
+    DEFAULT_ACTION_LIST = [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction"},
+        },
+    ]
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
+            "action_list": DEFAULT_ACTION_LIST,
         }
     }
     DEFAULT_STORES = {
@@ -2582,7 +2589,17 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        expectation_suite_name: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        **kwargs,
+    ) -> None:
+        self.expectation_suite_name = expectation_suite_name
+        self.expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self.batch_request = batch_request
         super().__init__(id=id)
 
         for k, v in kwargs.items():
@@ -2800,14 +2817,14 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: Optional[str] = None,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -2838,7 +2855,9 @@ class CheckpointConfig(BaseYamlConfig):
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request or {}
-            self._action_list = action_list or []
+            if action_list is None:
+                action_list = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value  # type: ignore[assignment]
+            self._action_list = action_list
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
@@ -2867,19 +2886,19 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[has-type]
+        return self._validation_operator_name  # type: ignore[return-value]
 
     @validation_operator_name.setter
     def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value  # type: ignore[has-type]
+        self._validation_operator_name = value
 
     @property
     def batches(self) -> List[dict]:
-        return self._batches  # type: ignore[has-type]
+        return self._batches
 
     @batches.setter
     def batches(self, value: List[dict]) -> None:
-        self._batches = value  # type: ignore[has-type]
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
@@ -2914,8 +2933,8 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> float:
-        return self._config_version  # type: ignore[return-value]
+    def config_version(self) -> Union[int, float, None]:
+        return self._config_version
 
     @config_version.setter
     def config_version(self, value: float) -> None:
@@ -2986,11 +3005,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> List[dict]:
-        return self._action_list
+    def action_list(self) -> Sequence[ActionDict]:
+        return self._action_list  # type: ignore[return-value]
 
     @action_list.setter
-    def action_list(self, value: List[dict]) -> None:
+    def action_list(self, value: Sequence[ActionDict]) -> None:
         self._action_list = value
 
     @property
@@ -3113,10 +3132,13 @@ class CheckpointConfig(BaseYamlConfig):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -3149,9 +3171,6 @@ class CheckpointConfig(BaseYamlConfig):
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
 
-        if validations is None:
-            validations = []
-
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -3161,6 +3180,7 @@ class CheckpointConfig(BaseYamlConfig):
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
+            "validator": validator,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
