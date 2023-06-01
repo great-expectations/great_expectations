@@ -896,6 +896,12 @@ class RenderedAtomicValueSchema(Schema):
             ):
                 cleaned_serialized_dict.pop(key)
             elif (
+                key == "meta_notes"
+                and key in cleaned_serialized_dict
+                and not cleaned_serialized_dict.get(key, {}).get("content", None)
+            ):
+                cleaned_serialized_dict.pop(key)
+            elif (
                 key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
             ):
                 cleaned_serialized_dict.pop(key)

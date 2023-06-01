@@ -382,15 +382,20 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         else:
             meta_notes = values["configuration"].meta.get("notes")
 
-        if isinstance(meta_notes, dict):
+        if meta_notes and isinstance(meta_notes, dict):
             meta_notes_content = meta_notes.get("content") if meta_notes else None
 
             if isinstance(meta_notes_content, (list, tuple)):
                 meta_notes["content"] = list(meta_notes_content)
             elif isinstance(meta_notes_content, str):
                 meta_notes["content"] = [meta_notes_content]
-
             values["meta_notes"] = meta_notes
+        elif meta_notes and isinstance(meta_notes, str):
+            values["meta_notes"] = {
+                "content": [meta_notes],
+                "format": MetaNotesFormat.STRING,
+            }
+
         return values
 
     @root_validator()
