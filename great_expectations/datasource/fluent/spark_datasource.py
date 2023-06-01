@@ -132,7 +132,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
+    # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", its validation code must be deleted.</Alex>
     @new_argument(
         argument_name="dataframe",
         message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
@@ -148,7 +148,14 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        self.dataframe = dataframe
+        df = dataframe or self.dataframe
+        if not df:
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
+
+        self.dataframe = df
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -251,7 +258,6 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        # TODO: <Alex>05/31/2023: Upon removal of deprecated "dataframe" argument to "PandasDatasource.add_dataframe_asset()", default can be deleted.</Alex>
         dataframe: Optional[_SparkDataFrameT] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
