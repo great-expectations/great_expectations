@@ -1,12 +1,23 @@
+import json
 import os
+from typing import Callable
 
 import pytest
 
+from great_expectations.agent.actions import ActionResult
 from great_expectations.agent.agent import GXAgent, GXAgentConfig
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     ClientError,
 )
-from great_expectations.agent.message_service.subscriber import SubscriberError
+from great_expectations.agent.message_service.subscriber import (
+    EventContext,
+    SubscriberError,
+)
+from great_expectations.agent.models import (
+    JobCompleted,
+    JobStarted,
+    RunOnboardingDataAssistantEvent,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -59,6 +70,12 @@ def subscriber(mocker):
     """Patch for agent.Subscriber"""
     subscriber = mocker.patch("great_expectations.agent.agent.Subscriber")
     return subscriber
+
+
+@pytest.fixture
+def event_handler(mocker):
+    event_handler = mocker.patch("great_expectations.agent.agent.EventHandler")
+    return event_handler
 
 
 @pytest.fixture
@@ -154,3 +171,78 @@ def test_gx_agent_run_handles_subscriber_error_on_close(
     subscriber.close.side_effect = SubscriberError
     agent = GXAgent()
     agent.run()
+
+
+def test_gx_agent_run_updates_cloud_on_job_start(
+    subscriber, create_session, get_context, client, gx_agent_config, event_handler
+):
+    correlation_id = "4ae63677-4dd5-4fb0-b511-870e7a286e77"
+    url = f"{gx_agent_config.gx_cloud_base_url}/organizations/{gx_agent_config.gx_cloud_organization_id}/agent-jobs/{correlation_id}"
+    data = json.dumps(JobStarted().dict())
+
+    async def redeliver_message():
+        return None
+
+    event = RunOnboardingDataAssistantEvent(
+        datasource_name="test-ds", data_asset_name="test-da"
+    )
+
+    event_context = EventContext(
+        event=event,
+        correlation_id=correlation_id,
+        processed_successfully=lambda: None,
+        processed_with_failures=lambda: None,
+        redeliver_message=redeliver_message,
+    )
+    event_handler.return_value.handle_event.return_value = ActionResult(
+        id=correlation_id, type=event.type, created_resources=[]
+    )
+
+    def consume(queue: str, on_message: Callable[[EventContext], None]):
+        """util to allow us to test agent behavior without a subscriber."""
+        on_message(event_context)
+
+    subscriber().consume = consume
+
+    agent = GXAgent()
+    agent.run()
+
+    create_session.return_value.patch.assert_called_with(url, data=data)
+
+
+def test_gx_agent_run_updates_cloud_on_job_complete(
+    subscriber, create_session, get_context, client, gx_agent_config, event_handler
+):
+    correlation_id = "4ae63677-4dd5-4fb0-b511-870e7a286e77"
+    url = f"{gx_agent_config.gx_cloud_base_url}/organizations/{gx_agent_config.gx_cloud_organization_id}/agent-jobs/{correlation_id}"
+
+    async def redeliver_message():
+        return None
+
+    event = RunOnboardingDataAssistantEvent(
+        datasource_name="test-ds", data_asset_name="test-da"
+    )
+
+    event_context = EventContext(
+        event=event,
+        correlation_id=correlation_id,
+        processed_successfully=lambda: None,
+        processed_with_failures=lambda: None,
+        redeliver_message=redeliver_message,
+    )
+    event_handler.return_value.handle_event.return_value = ActionResult(
+        id=correlation_id, type=event.type, created_resources=[]
+    )
+    job_completed = JobCompleted(success=True, created_resources=[])
+    data = json.dumps(job_completed.dict())
+
+    def consume(queue: str, on_message: Callable[[EventContext], None]):
+        """util to allow us to test agent behavior without a subscriber."""
+        on_message(event_context)
+
+    subscriber().consume = consume
+
+    agent = GXAgent()
+    agent.run()
+
+    create_session.return_value.patch.assert_called_with(url, data=data)

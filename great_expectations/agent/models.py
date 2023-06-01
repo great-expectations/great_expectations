@@ -45,7 +45,7 @@ class JobStarted(AgentBaseModel):
 
 
 class JobCompleted(AgentBaseModel):
-    status: Literal["complete"] = "completed"
+    status: Literal["completed"] = "completed"
     success: bool
     created_resources: Sequence[CreatedResource] = []
     error_stack_trace: Union[str, None] = None

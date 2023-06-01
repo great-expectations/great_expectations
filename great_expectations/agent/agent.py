@@ -138,8 +138,6 @@ class GXAgent:
             )
             self._current_task.add_done_callback(on_exit_callback)
 
-        self._update_status(job_id=event_context.correlation_id, status=JobStarted())
-
     def _handle_event(self, event_context: EventContext) -> ActionResult:
         """Pass events to EventHandler.
 
@@ -150,7 +148,7 @@ class GXAgent:
             event_context: event with related properties and actions.
         """
         # warning:  this method will not be executed in the main thread
-
+        self._update_status(job_id=event_context.correlation_id, status=JobStarted())
         print(
             f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
         )
