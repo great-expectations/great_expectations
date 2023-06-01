@@ -3854,12 +3854,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiling_results = {"success": False, "results": []}
 
         total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()
+        total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
         name = data_asset_name
         # logger.info("\tProfiling '%s'..." % name)
 
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.now()  # noqa: DTZ005
 
         if expectation_suite_name is None:
             if batch_kwargs_generator_name is None and data_asset_name is None:
@@ -3935,13 +3935,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         total_expectations += new_expectation_count
 
         self.save_expectation_suite(expectation_suite)
-        duration = (datetime.datetime.now() - start_time).total_seconds()
+        duration = (
+            datetime.datetime.now() - start_time  # noqa: DTZ005
+        ).total_seconds()
         # noinspection PyUnboundLocalVariable
         logger.info(
             f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        total_duration = (
+            datetime.datetime.now() - total_start_time  # noqa: DTZ005
+        ).total_seconds()
         logger.info(
             f"""
 Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
@@ -5372,7 +5376,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 0,
                 0,
             )
-            total_start_time = datetime.datetime.now()
+            total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
             for name in data_asset_names_to_profiled:
                 logger.info(f"\tProfiling '{name}'...")
@@ -5407,7 +5411,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     skipped_data_assets += 1
 
             total_duration = (
-                datetime.datetime.now() - total_start_time
+                datetime.datetime.now() - total_start_time  # noqa: DTZ005
             ).total_seconds()
             logger.info(
                 f"""
