@@ -538,7 +538,6 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
 
     datasource = context.sources.add_or_update_pandas(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
-    context._save_project_config()
     _ = dataframe_asset.build_batch_request(dataframe=df)
     assert dataframe_asset.dataframe.equals(df)
 
@@ -588,7 +587,6 @@ def test_spark_data_adding_dataframe_in_file_reloaded_context(
 
     datasource = context.sources.add_or_update_spark(name="fluent_pandas_datasource")
     dataframe_asset = datasource.add_dataframe_asset(name="my_df_asset")
-    context._save_project_config()
     _ = dataframe_asset.build_batch_request(dataframe=spark_df)
     assert dataframe_asset.dataframe.toPandas().equals(df)
 
