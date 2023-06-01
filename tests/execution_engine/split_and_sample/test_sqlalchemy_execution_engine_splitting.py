@@ -97,7 +97,6 @@ def test_named_date_part_methods(
     )
 
 
-@pytest.mark.skip(reason="Not implemented")
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
@@ -126,16 +125,8 @@ def test_split_on_date_parts_single_date_parts(
         date_parts=date_parts,
     )
 
-    # using mock-alchemy
-    # assert ExpressionMatcher(result) == ExpressionMatcher(
-    #    sa.and_(
-    #        sa.extract("month", sa.column(column_name)) == 10,
-    #   )
-    # )
-
     # using values
     assert isinstance(result, sa.sql.elements.BinaryExpression)
-
     assert isinstance(result.comparator.type, sa.Boolean)
     assert isinstance(result.left, sa.sql.elements.Extract)
     assert result.left.field == "month"
@@ -143,7 +134,6 @@ def test_split_on_date_parts_single_date_parts(
     assert result.right.effective_value == 10
 
 
-@pytest.mark.skip(reason="Not implemented")
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
@@ -171,14 +161,6 @@ def test_split_on_date_parts_multiple_date_parts(
         batch_identifiers={column_name: batch_identifiers_for_column},
         date_parts=date_parts,
     )
-
-    # # using mock-alchemy
-    # assert ExpressionMatcher(result) == ExpressionMatcher(
-    #     sa.and_(
-    #         sa.extract("year", sa.column(column_name)) == 2018,
-    #         sa.extract("month", sa.column(column_name)) == 10,
-    #     )
-    # )
 
     # using values
     assert isinstance(result, sa.sql.elements.BooleanClauseList)
