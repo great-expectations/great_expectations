@@ -1395,7 +1395,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
             try:
-                if not self._connection:
+                if not self._connection or self._connection.closed:
                     self._connection = self.engine.connect()
                 yield self._connection
             finally:
@@ -1442,7 +1442,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
 
         with self.get_connection() as connection:
-            with connection.begin():
+            if not connection.closed:
                 result = connection.execute(query)
+            else:
+                with connection.begin():
+                    result = connection.execute(query)
 
         return result

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import logging
+import time
 import warnings
-from asyncio import sleep
 from typing import Callable, Iterator, Sequence
 
 import pandas as pd
@@ -133,4 +133,4 @@ def add_dataframe_to_db(
             return
         except Exception as e:
             print(f"Exception {e} occurred.")
-            sleep(1)
+            time.sleep(1)
