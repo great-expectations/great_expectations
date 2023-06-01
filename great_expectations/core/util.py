@@ -537,7 +537,7 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj = datetime_obj or datetime.datetime.now()
+    datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
@@ -573,7 +573,9 @@ def parse_string_to_datetime(
             """
         )
 
-    return datetime.datetime.strptime(datetime_string, datetime_format_string)
+    return datetime.datetime.strptime(  # noqa: DTZ007
+        datetime_string, datetime_format_string
+    )
 
 
 def datetime_to_int(dt: datetime.date) -> int:

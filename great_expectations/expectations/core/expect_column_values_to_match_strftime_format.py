@@ -181,8 +181,8 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     "$PARAMETER" in strftime_format
                 ), 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
             else:
-                datetime.strptime(
-                    datetime.strftime(datetime.now(), strftime_format),
+                datetime.strptime(  # noqa: DTZ007
+                    datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
                     strftime_format,
                 )
         except ValueError as e:
