@@ -6,11 +6,11 @@ import PythonVersion from '/docs/components/_python_version.mdx';
 
 Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, GX applies Expectations to data instead of code. For example, you could define an Expectation that a column contains no null values, and GX would run that Expectation against your data, and report if a null value was found.
 
+## Before you start
+
 Before you've even installed GX, working with GX starts with data.  Specifically, data you care about enough for quality to be important.  We call your data, in its original format, your **Source Data**.  The combination of your data in its original format and the location at which it is stored is your **Source Data System**.
 
 Your Source Data System could be CSV files in a folder, or a PostgreSQL database hosted on AWS, or any combination of numerous formats and environments.  Regardless of what your Source Data System is or where it resides, your next step in assuring its quality is implementing GX.
-
----
 
 ## Getting started with Great Expectations
 
@@ -20,14 +20,14 @@ Getting started with GX can be broken down into four steps.  First, you will ins
 
 Installation and Setup -> Connect to data -> Create Expectations -> Validate data
 
-## Install Great Expectations
+### Install Great Expectations
 
 GX is a library for <PythonVersion />, and can be installed using `pip`, a library installer bundled with Python installations.  Depending on your Source Data System, you may need to install GX with some additional dependencies (generally for SQL Source Data Systems, or environments like AWS).  We streamline this process by providing special `pip` commands for specific combinations of additional dependencies.
 
 For details on how to install GX and how to include any additional dependencies for your Source Data System, see [our installation guides](landing page: Setting up a GX environment->Installation and Dependencies).
 
 
-## Set up your GX Data Context
+### Set up your GX Data Context
 
 A Great Expectations project stores its configurations in a **Data Context**.  In Python, the Data Context object also serves as your entry point for the GX API, allowing you to further configure and interact with GX.  Your Data Context manages various classes and helps limit the objects you need to directly manage to get GX working on your data.
 
@@ -39,7 +39,7 @@ GX provides three types of Data Contexts:
 <!-- For details on how to initialize and instantiate a Data Context, see [our Data Context guides](landing page: Setting up a GX environment->Data Contexts). -->
 
 
-### (Optional) Configure your metadata Stores and Data Docs
+#### Optional configurations for metadata Stores and Data Docs
 
 **Stores** are connectors to the metadata GX uses.  This includes things like:
 - The Datasource and Data Asset configurations that tell GX how to connect to your Source Data System.
@@ -57,7 +57,7 @@ A GX Data Context comes with default configurations in place for your Stores.  B
 <!-- For more information on configuring Data Docs, see our [Data Docs guides](landing page:Setting up a GX environment->Data Docs). -->
 
 
-## Connect GX to your Source Data System
+### Connect GX to your Source Data System
 
 **Datasources** provide the interface between GX and your Source Data System.  Regardless of the original format of your Source Data, a Datasource will provide you a clear and consistent API for accessing that data in GX.
 
@@ -68,7 +68,7 @@ How you organize your Datasources into Data Assets and your Data Assets into Bat
 <!-- For more information on Datasources and Data Assets, see our [Connecting to data guides](Landing page: connecting to data). -->
 
 
-## Define your Expectations
+### Define your Expectations
 
 An **Expectation** is a verifiable assertion about data.  Expectations enhance communication about your data by describing the state it should conform to.  They also improve quality for data applications by giving you a verifiable standard to measure your data against.  They help you take the implicit assumptions about your data and make them explicit.  Having defined Expectations helps reduce the need to consult with domain experts about uncertainties and lets you avoid leaving insights about data in isolated silos.
 
@@ -88,7 +88,7 @@ For a full list of available Expectations, see [the Expectation Gallery](https:/
 
 <!-- For details on how to define Expectations, see our [Creating Expectations guides](landing page: Creating Expectations). -->
 
-## Validate your data
+### Validate your data
 
 A **Checkpoint** is the primary means for validating data in a production deployment of GX.  Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.  
 
@@ -97,7 +97,7 @@ One of the most powerful features of Checkpoints is that they can be configured 
 <!-- For more details on using Checkpoints to validate your data, see our [Validating data guides](landing page: validating data). -->
 <!-- For more details on integrating GX with your processes, see our [guide on including GX in a data pipeline](). -->
 
-### Evaluate Validation Results
+#### Evaluate Validation Results
 
 The **Validation Results** returned by GX function as a report on how well your data actually corresponds to what you expected of it.  You will be able to view this information in the Data Docs that are configured in your Data Context.  Evaluating your Validation Results will help you spot issues with your data.  You can then use that knowledge to decide how to proceed.  If the Validation Results show that your data meets your Expectations, you can confidently put it to use.
 
