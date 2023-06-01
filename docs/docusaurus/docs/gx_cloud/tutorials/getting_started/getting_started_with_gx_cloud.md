@@ -78,9 +78,8 @@ Please note you should not include sensitive info/credentials directly in the co
 ```python title="Jupyter Notebook"
 # Give your datasource a name
 datasource_name = None
-datasource = context.sources.add_pandas_filesystem(
-    datasource_name,
-    base_directory=".", # to use a different directory change this argument
+datasource = context.sources.add_pandas(
+    datasource_name, use a different directory change this argument
 )
 
 # Give your first Asset a name
@@ -90,7 +89,7 @@ path_to_data = None
 # path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 asset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
 
-# build batch request
+# Build batch request
 batch_request = asset.build_batch_request()
 ```
 
