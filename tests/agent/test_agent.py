@@ -8,6 +8,8 @@ from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
 )
 from great_expectations.agent.message_service.subscriber import SubscriberError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def set_required_env_vars(monkeypatch):

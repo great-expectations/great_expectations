@@ -10,9 +10,9 @@ from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
+from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.event_handler import (
     EventHandler,
-    EventHandlerResult,
 )
 from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
@@ -24,6 +24,7 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
+from great_expectations.agent.models import UnknownEvent
 from great_expectations.agent.models import JobCompleted, JobStarted, JobStatus
 from great_expectations.core.http import create_session
 
@@ -109,8 +110,10 @@ class GXAgent:
             # this event has been redelivered too many times - remove it from circulation
             event_context.processed_with_failures()
             return
-        elif self._can_accept_new_task() is not True or event_context.event is None:
-            # request that this message is redelivered later. If the event is None
+        elif self._can_accept_new_task() is not True or isinstance(
+            event_context.event, UnknownEvent
+        ):
+            # request that this message is redelivered later. If the event is UnknownEvent
             # we don't understand it, so requeue it in the hope that someone else does.
             loop = asyncio.get_event_loop()
             loop.create_task(event_context.redeliver_message())
@@ -130,7 +133,7 @@ class GXAgent:
 
         self._update_status(job_id=event_context.correlation_id, status=JobStarted())
 
-    def _handle_event(self, event_context: EventContext) -> EventHandlerResult:
+    def _handle_event(self, event_context: EventContext) -> ActionResult:
         """Pass events to EventHandler.
 
         Callback passed to Subscriber.consume which forwards events to
@@ -141,13 +144,14 @@ class GXAgent:
         """
         # warning:  this method will not be executed in the main thread
 
-        if event_context.event is not None:
-            print(
-                f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
-            )
+        print(
+            f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
+        )
         handler = EventHandler(context=self._context)
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
-        result = handler.handle_event(event_context=event_context)
+        result = handler.handle_event(
+            event=event_context.event, id=event_context.correlation_id
+        )
         return result
 
     def _handle_event_as_thread_exit(
@@ -164,13 +168,19 @@ class GXAgent:
         # get results or errors from the thread
         error = future.exception()
         if error is None:
-            result: EventHandlerResult = future.result()
+            result: ActionResult = future.result()
             status = JobCompleted(
                 success=True,
                 created_resources=result.created_resources,
             )
+            print(
+                f"Completed job {event_context.event.type} ({event_context.correlation_id})"
+            )
         else:
             status = JobCompleted(success=False, error_stack_trace=str(error))
+            print(
+                f"Failed to complete job {event_context.event.type} ({event_context.correlation_id})"
+            )
         self._update_status(job_id=event_context.correlation_id, status=status)
 
         # ack message and cleanup resources
@@ -193,7 +203,6 @@ class GXAgent:
             should_reject = False
         # ensure the correlation ids dict doesn't get too large:
         if len(self._correlation_ids.keys()) > MAX_KEYS:
-            # TODO Add error log
             self._correlation_ids.clear()
         return should_reject
 
