@@ -66,6 +66,7 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
 The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column.
+
 ## Validate data
 
 1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations:
