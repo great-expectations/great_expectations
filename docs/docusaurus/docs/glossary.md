@@ -15,8 +15,6 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 [**CLI:**](./terms/cli.md) Command Line Interface
 
-[**Catalog Asset:**](./terms/catalog_asset.md) A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.
-
 [**Checkpoint:**](./terms/checkpoint.md) The primary means for validating data in a production deployment of Great Expectations.
 
 [**Checkpoint Store:**](./terms/checkpoint_store.md) A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
