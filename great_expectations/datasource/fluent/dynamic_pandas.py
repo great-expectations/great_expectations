@@ -208,8 +208,8 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "xml": "XMLAsset",
 }
 
-_TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
-    "Literal": Literal,  # type: ignore[dict-item]
+_TYPE_REF_LOCALS: Final[Dict[str, Type | Any]] = {
+    "Literal": Literal,
     "Sequence": Sequence,
     "Hashable": Hashable,
     "Iterable": Iterable,
@@ -217,7 +217,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "FilePathOrBuffer": FilePath,
     "Pattern": Pattern,
     "CSVEngine": CSVEngine,
-    "IndexLabel": IndexLabel,  # type: ignore[dict-item] # <typing special form>
+    "IndexLabel": IndexLabel,
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
 }
