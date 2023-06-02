@@ -1641,7 +1641,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     df = pd.read_csv(filepath_or_buffer=csv_source_path)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1695,7 +1696,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2065,7 +2067,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()

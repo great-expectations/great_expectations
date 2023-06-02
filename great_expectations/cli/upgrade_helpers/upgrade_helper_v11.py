@@ -367,7 +367,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 store_backend._convert_key_to_filepath(source_key),
             )
             path_mod_timestamp = os.path.getmtime(source_path)
-            path_mod_iso_str = datetime.datetime.fromtimestamp(
+            path_mod_iso_str = datetime.datetime.fromtimestamp(  # noqa: DTZ006
                 path_mod_timestamp
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str

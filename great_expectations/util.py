@@ -1667,7 +1667,9 @@ def convert_ndarray_float_to_datetime_dtype(data: np.ndarray) -> np.ndarray:
     Note: Converts to "naive" "datetime.datetime" values (assumes "UTC" TimeZone based floating point timestamps).
     """
     value: Any
-    return np.asarray([datetime.datetime.utcfromtimestamp(value) for value in data])
+    return np.asarray(
+        [datetime.datetime.utcfromtimestamp(value) for value in data]  # noqa: DTZ004
+    )
 
 
 def convert_ndarray_float_to_datetime_tuple(
