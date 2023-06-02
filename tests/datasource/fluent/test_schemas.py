@@ -88,14 +88,6 @@ def test_vcs_schemas_match(
 
     schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
 
-    # TODO: remove this logic and make this fail once all json schemas are working
-    if schema_path.name in (
-        "SqliteTableAsset.json",
-        "SqliteQueryAsset.json",
-        "SASAsset.json",
-    ):
-        pytest.xfail(f"{schema_path.name} does not exist")
-
     json_str = schema_path.read_text().rstrip()
 
     schema_as_dict = json.loads(json_str)
