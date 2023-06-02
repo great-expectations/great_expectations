@@ -1,6 +1,8 @@
 import json
 import os
+from time import sleep
 from typing import Callable
+from unittest.mock import call
 
 import pytest
 
@@ -173,68 +175,32 @@ def test_gx_agent_run_handles_subscriber_error_on_close(
     agent.run()
 
 
-def test_gx_agent_run_updates_cloud_on_job_start(
+def test_gx_agent_updates_cloud_on_job_status(
     subscriber, create_session, get_context, client, gx_agent_config, event_handler
 ):
     correlation_id = "4ae63677-4dd5-4fb0-b511-870e7a286e77"
     url = f"{gx_agent_config.gx_cloud_base_url}/organizations/{gx_agent_config.gx_cloud_organization_id}/agent-jobs/{correlation_id}"
-    data = json.dumps(JobStarted().dict())
-
-    async def redeliver_message():
-        return None
-
-    event = RunOnboardingDataAssistantEvent(
-        datasource_name="test-ds", data_asset_name="test-da"
-    )
-
-    event_context = EventContext(
-        event=event,
-        correlation_id=correlation_id,
-        processed_successfully=lambda: None,
-        processed_with_failures=lambda: None,
-        redeliver_message=redeliver_message,
-    )
-    event_handler.return_value.handle_event.return_value = ActionResult(
-        id=correlation_id, type=event.type, created_resources=[]
-    )
-
-    def consume(queue: str, on_message: Callable[[EventContext], None]):
-        """util to allow us to test agent behavior without a subscriber."""
-        on_message(event_context)
-
-    subscriber().consume = consume
-
-    agent = GXAgent()
-    agent.run()
-
-    create_session.return_value.patch.assert_called_with(url, data=data)
-
-
-def test_gx_agent_run_updates_cloud_on_job_complete(
-    subscriber, create_session, get_context, client, gx_agent_config, event_handler
-):
-    correlation_id = "4ae63677-4dd5-4fb0-b511-870e7a286e77"
-    url = f"{gx_agent_config.gx_cloud_base_url}/organizations/{gx_agent_config.gx_cloud_organization_id}/agent-jobs/{correlation_id}"
-
-    async def redeliver_message():
-        return None
-
-    event = RunOnboardingDataAssistantEvent(
-        datasource_name="test-ds", data_asset_name="test-da"
-    )
-
-    event_context = EventContext(
-        event=event,
-        correlation_id=correlation_id,
-        processed_successfully=lambda: None,
-        processed_with_failures=lambda: None,
-        redeliver_message=redeliver_message,
-    )
-    event_handler.return_value.handle_event.return_value = ActionResult(
-        id=correlation_id, type=event.type, created_resources=[]
-    )
+    job_started_data = json.dumps(JobStarted().dict())
     job_completed = JobCompleted(success=True, created_resources=[])
-    data = json.dumps(job_completed.dict())
+    job_completed_data = json.dumps(job_completed.dict())
+
+    async def redeliver_message():
+        return None
+
+    event = RunOnboardingDataAssistantEvent(
+        datasource_name="test-ds", data_asset_name="test-da"
+    )
+
+    event_context = EventContext(
+        event=event,
+        correlation_id=correlation_id,
+        processed_successfully=lambda: None,
+        processed_with_failures=lambda: None,
+        redeliver_message=redeliver_message,
+    )
+    event_handler.return_value.handle_event.return_value = ActionResult(
+        id=correlation_id, type=event.type, created_resources=[]
+    )
 
     def consume(queue: str, on_message: Callable[[EventContext], None]):
         """util to allow us to test agent behavior without a subscriber."""
@@ -245,4 +211,12 @@ def test_gx_agent_run_updates_cloud_on_job_complete(
     agent = GXAgent()
     agent.run()
 
-    create_session.return_value.patch.assert_called_with(url, data=data)
+    sleep(0.00001)  # give the worker thread a chance to finish
+
+    create_session.return_value.patch.assert_has_calls(
+        calls=[
+            call(url, data=job_started_data),
+            call(url, data=job_completed_data),
+        ],
+        any_order=True,  # order not guaranteed due to threading
+    )
