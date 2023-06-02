@@ -49,6 +49,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: dict",
     "File: great_expectations/datasource/fluent/sources.py Name: add_datasource",
     "File: great_expectations/datasource/fluent/sources.py Name: delete_datasource",
+    "File: great_expectations/datasource/fluent/config_str.py Name: ConfigStr",
     "File: great_expectations/datasource/pandas_datasource.py Name: PandasDatasource",
     "File: great_expectations/datasource/simple_sqlalchemy_datasource.py Name: SimpleSqlalchemyDatasource",
     "File: great_expectations/datasource/sparkdf_datasource.py Name: SparkDFDatasource",

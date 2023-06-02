@@ -252,8 +252,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         try:
             if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-                result = engine.execute(
-                    "select schemaname, tablename from svv_external_tables"
+                result = self.execution_engine.execute_query(
+                    sa.text("select schemaname, tablename from svv_external_tables")
                 ).fetchall()
                 for row in result:
                     tables.append(

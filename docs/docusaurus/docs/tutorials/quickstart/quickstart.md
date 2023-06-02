@@ -46,13 +46,13 @@ Windows support for the open source Python version of GX is currently unavailabl
     ```
 ## Create a DataContext
 
-- Run the following command to import the `DataContext` object:
+- Run the following command to import the existing `DataContext` object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
 ## Connect to Data
 
-- Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
+- Run the following command to connect to existing `.csv` data stored in the `great_expectations` GitHub repository:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
     ```
@@ -65,9 +65,6 @@ Windows support for the open source Python version of GX is currently unavailabl
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
-    The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
-
-    To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
 
 ## Validate data
 

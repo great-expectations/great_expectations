@@ -1795,7 +1795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_checkpoint(
@@ -1995,7 +1995,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @new_method_or_class(version="0.15.48")
     @new_argument(
         argument_name="validator",
-        version="0.16.14",
+        version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
@@ -3854,12 +3854,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiling_results = {"success": False, "results": []}
 
         total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()
+        total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
         name = data_asset_name
         # logger.info("\tProfiling '%s'..." % name)
 
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.now()  # noqa: DTZ005
 
         if expectation_suite_name is None:
             if batch_kwargs_generator_name is None and data_asset_name is None:
@@ -3935,13 +3935,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         total_expectations += new_expectation_count
 
         self.save_expectation_suite(expectation_suite)
-        duration = (datetime.datetime.now() - start_time).total_seconds()
+        duration = (
+            datetime.datetime.now() - start_time  # noqa: DTZ005
+        ).total_seconds()
         # noinspection PyUnboundLocalVariable
         logger.info(
             f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        total_duration = (
+            datetime.datetime.now() - total_start_time  # noqa: DTZ005
+        ).total_seconds()
         logger.info(
             f"""
 Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
@@ -4144,7 +4148,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+                self._open_url_in_browser(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -5368,7 +5376,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 0,
                 0,
             )
-            total_start_time = datetime.datetime.now()
+            total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
             for name in data_asset_names_to_profiled:
                 logger.info(f"\tProfiling '{name}'...")
@@ -5403,7 +5411,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     skipped_data_assets += 1
 
             total_duration = (
-                datetime.datetime.now() - total_start_time
+                datetime.datetime.now() - total_start_time  # noqa: DTZ005
             ).total_seconds()
             logger.info(
                 f"""
@@ -5529,10 +5537,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    @public_api
+    @new_method_or_class(version="0.16.15")
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,
