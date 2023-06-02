@@ -432,6 +432,21 @@ def cloud_api_fake(cloud_details: CloudDetails):
                     "enabled": False,
                 },
                 "datasources": {},
+                "stores": {
+                    "default_expectations_store": {
+                        "class_name": "ExpectationsStore",
+                        "store_backend": {
+                            "class_name": "GXCloudStoreBackend",
+                            "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
+                            "ge_cloud_credentials": {
+                                "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
+                                "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
+                            },
+                            "ge_cloud_resource_type": "expectation_suite",
+                            "suppress_store_backend_id": True,
+                        },
+                    },
+                },
             },
             "DATASOURCE_NAMES": set(),
         }
