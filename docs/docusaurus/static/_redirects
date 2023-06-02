@@ -325,3 +325,8 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 
 ## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
 /docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler /docs/0.15.50/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler
+
+## Redirects for content reorg
+
+/docs/guides/setup/installation/local /docs/guides/setup/installation/install_gx
+/docs/guides/setup/installation/hosted_environment /docs/guides/setup/installation/install_gx

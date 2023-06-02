@@ -32,7 +32,7 @@ module.exports = {
             },
             {
               type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3'
+              id: 'guides/setup/optional_dependencies/cloud/install_gx_cloud_storage'
             },
             {
               type: 'doc',

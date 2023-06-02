@@ -14,6 +14,14 @@ import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
+You can install Great Expectations (GX) locally, or in environments such as Databricks, Amazon EMR, or Google Cloud Composer. Installing GX locally lets you test features and functionality to determine if it's suitable for your use case. 
+
+:::info Windows Support
+
+Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+
+:::
+
 <Tabs
   groupId="install-gx"
   defaultValue='local'
@@ -24,12 +32,6 @@ import Tabs from '@theme/Tabs';
   <TabItem value="local">
 
 <Preface />
-
-:::info Windows Support
-
-Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
-
-:::
 
 ## Check Python version
 <CheckPythonVersion />
@@ -46,16 +48,10 @@ Windows support for the open source Python version of GX is currently unavailabl
 </TabItem>
 <TabItem value="hosted">
 
-Great Expectations can be deployed in environments such as Databricks, AWS EMR, Google Cloud Composer, and others. These environments do not always have a typical file system where Great Expectations can be installed. See one of the following guides to install Great Expectations in a hosted environments:
+Great Expectations can be deployed in environments such as Databricks, Amazon EMR, or Google Cloud Composer. These environments do not always have a file system that allows a Great Expectations installation. To install Great Expectations in a hosted environment, see one of the following guides:
 
 - [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
 - [How to instantiate a Data Context on an EMR Spark cluster](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-
-:::info Windows Support
-
-Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
-
-:::
 
 </TabItem>
 </Tabs>
