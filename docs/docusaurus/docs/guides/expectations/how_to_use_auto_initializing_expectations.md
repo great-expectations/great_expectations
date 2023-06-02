@@ -5,7 +5,7 @@ title: How to use auto-initializing Expectations
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will walk you through the process of using a auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
+This guide will walk you through the process of using auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
 This guide assumes that you are creating and editing expectations in a Jupyter Notebook.  This process is covered in the guide: [How to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
 
@@ -84,9 +84,8 @@ Now that the Expectation's upper and lower bounds have come from the Batches, yo
 ```python name="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py save suite"
 ```
 
-
 ## Additional information
 
-To view the full scripts that were used in this page, see them on GitHub:
-- [is_expectation_auto_initializing.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py)
-- [auto_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py)
+The following scripts are used in this topic and are available in GitHub:
+- [is_expectation_auto_initializing.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py)
+- [auto_initializing_expect_column_mean_to_be_between.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py)
