@@ -121,7 +121,7 @@ CAN_HANDLE: Final[Set[str]] = {
 }
 
 TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
-    # Hashable causes `TypeError:issubclass() arg 1 must be a class`
+    # Hashable causes `TypeError:issubclass() arg 1 must be a class` on some versions of pydantic
     "Hashable": "str",
     "Sequence[Hashable]": "Sequence[str]",
     "Iterable[Hashable]": "Iterable[str]",
