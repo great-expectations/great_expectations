@@ -147,7 +147,7 @@ class _SignatureTuple(NamedTuple):
 
 class _FieldSpec(NamedTuple):
     # mypy doesn't consider Optional[SOMETHING] or Union[SOMETHING] a type. So what is it?
-    type: Type
+    type: Type | str
     default_value: object  # ... for required value
 
 
@@ -217,7 +217,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "FilePathOrBuffer": FilePath,
     "Pattern": Pattern,
     "CSVEngine": CSVEngine,
-    "IndexLabel": IndexLabel,
+    "IndexLabel": IndexLabel,  # type: ignore[dict-item] # <typing special form>
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
 }
@@ -349,7 +349,7 @@ def _to_pydantic_fields(
                     continue
 
             fields_dict[param_name] = _FieldSpec(
-                type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
+                type=_replace_builtins(type_), default_value=_get_default_value(param)
             )
 
     return fields_dict
