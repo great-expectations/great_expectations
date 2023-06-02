@@ -217,7 +217,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type | Any]] = {
     "FilePathOrBuffer": FilePath,
     "Pattern": Pattern,
     "CSVEngine": CSVEngine,
-    "IndexLabel": IndexLabel,
+    "IndexLabel": IndexLabel,  # type: ignore[dict-item] # <typing special form>
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
 }
