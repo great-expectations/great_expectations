@@ -71,13 +71,24 @@ def test_vcs_schemas_match(
             schema_as_dict: source dictionary (will be modified "in-situ")
 
         """
+
+        def _sort_any_of(d: dict) -> str:
+            if items := d.get("items"):
+                _sort_any_of(items)
+            if ref := d.get("$ref"):
+                return ref
+            if type_ := d.get("type"):
+                return type_
+            # return any string for sorting
+            return "z"
+
         key: str
         value: Any
         for key, value in schema_as_dict.items():
             if key == "required":
                 schema_as_dict[key] = sorted(value)
             elif key == "anyOf":
-                schema_as_dict[key] = sorted(value, key=lambda d: d.get("type", "z"))
+                schema_as_dict[key] = sorted(value, key=_sort_any_of)
 
             if isinstance(value, dict):
                 _sort_lists(schema_as_dict=value)
@@ -89,6 +100,7 @@ def test_vcs_schemas_match(
     print(f"pandas version: {PANDAS_VERSION}\n")
 
     schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
+    print(schema_path)
 
     json_str = schema_path.read_text().rstrip()
 
