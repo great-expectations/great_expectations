@@ -109,17 +109,10 @@ If you're using a Jupyter Notebook you'll automatically see the results of the c
 
 1. Optional. Run the following command if you haven't created an Expectation Suite:
 
-    ```python 
-    context.create_expectation_suite("my_expectation_suite")
+    ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite"
     ```
 
-2. Optional. Run the following command if you haven't added or updated your Expectation Suite:
-
-    ```python 
-    context.add_or_update_expectation_suite("my_expectation_suite")
-    ```
-
-3. Run the following command to create a Validator:
+2. Run the following command to create a Validator:
 
     ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
     ```
