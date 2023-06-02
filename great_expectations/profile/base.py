@@ -151,7 +151,7 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
-    @public_api
+    @public_api  # noqa: B027
     def validate(  # noqa: B027 # empty-method-without-abstract-decorator
         self, item_to_validate: Any
     ) -> None:

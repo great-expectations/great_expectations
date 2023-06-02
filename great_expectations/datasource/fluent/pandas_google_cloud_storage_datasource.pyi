@@ -31,18 +31,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError as PandasDatasourceError,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset as CSVAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ExcelAsset as ExcelAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    JSONAsset as JSONAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ParquetAsset as ParquetAsset,
-)
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import google
