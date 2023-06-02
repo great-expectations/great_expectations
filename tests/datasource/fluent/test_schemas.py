@@ -80,7 +80,7 @@ def test_vcs_schemas_match(
             if type_ := d.get("type"):
                 return type_
             # return any string for sorting
-            return "z"
+            return str(d)
 
         key: str
         value: Any
