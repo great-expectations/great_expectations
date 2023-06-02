@@ -1,6 +1,6 @@
 ---
-sidebar_label: "Connect Great Expectations to Datasources "
-title: "Connect Great Expectations to Datasources"
+sidebar_label: "Connect to a cloud Source Data System"
+title: "Connect Great Expectations to a cloud Source Data System"
 id: install_gx_cloud_storage
 description: Install and configure Great Expectations to access data stored on Amazon S3, Google Cloud Storage, and Microsoft Azure Blob Storage.
 ---
@@ -23,10 +23,11 @@ import GcpInstallDependencies from '/docs/components/setup/dependencies/_gcp_ins
 import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
 import AbsInstallDependencies from '/docs/components/setup/dependencies/_abs_install_dependencies.md'
 import AbsConfigureCredentialsInDataContext from '/docs/components/setup/dependencies/_abs_configure_credentials_in_data_context.md'
+import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access data stored Amazon S3, Google Cloud Storage (GCS), and  Microsoft Azure Blob Storage.
+This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access Source Data stored Amazon S3, Google Cloud Storage (GCS), and Microsoft Azure Blob Storage. GX uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
 
 <Tabs
   groupId="install-gx-cloud-storage"

@@ -14,7 +14,7 @@ import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-You can install Great Expectations (GX) locally, or in environments such as Databricks, Amazon EMR, or Google Cloud Composer. Installing GX locally lets you test features and functionality to determine if it's suitable for your use case. 
+You can install Great Expectations (GX) locally, or in hosted environments such as Databricks, Amazon EMR, or Google Cloud Composer. Installing GX locally lets you test features and functionality to determine if it's suitable for your use case. 
 
 :::info Windows Support
 
