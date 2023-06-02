@@ -29,7 +29,7 @@ import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
 
-This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access Source Data stored on Amazon S3, Google Cloud Storage (GCS), or Microsoft Azure Blob Storage. GX uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
+This is where you'll find information about creating your Great Expectations (GX) Python environment, installing GX locally, and how to configure the dependencies necessary to access Source Data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or SQL databases. GX uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
 
 <Tabs
   groupId="install-gx-cloud-storage"
