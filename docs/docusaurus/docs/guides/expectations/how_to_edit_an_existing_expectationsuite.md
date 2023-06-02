@@ -102,6 +102,8 @@ It runs the `expect_column_values_to_be_between` Expectation on the `passenger_c
 
 Here is the same configuration, but this time as a `ExpectationConfiguration` object.  
 
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_suite"
+```
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1"
 ```
 

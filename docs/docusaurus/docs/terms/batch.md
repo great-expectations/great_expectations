@@ -27,8 +27,6 @@ Batches are also used by <TechnicalTag relative="../" tag="validator" text="Vali
 
 When creating Expectations interactively, a <TechnicalTag relative="../" tag="validator" text="Validator" /> needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) covers using a Batch in this use case.
 
-To specify which Batches of data should be used when using Great Expectations to generate statistics and candidate Expectations for your data. see [How to create and edit Expectations with the User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
-
 During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> checks a Batch of data against Expectations from an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />. You must specify a Batch Request for the Checkpoint to run.
 
 ## Consistency
