@@ -764,15 +764,16 @@ class CloudDataContext(SerializableDataContext):
             checkpoint=checkpoint,
         )
 
-        checkpoint_config = self.checkpoint_store.create(
-            checkpoint_config=checkpoint.config
-        )
-
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        return Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
-        )
+        try:
+            return self.checkpoint_store.add_checkpoint(checkpoint)
+        except gx_exceptions.CheckpointError as e:
+            # deprecated-v0.16.16
+            warnings.warn(
+                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 "
+                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
+                DeprecationWarning,
+            )
+            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
