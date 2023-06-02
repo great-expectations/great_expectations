@@ -23,7 +23,7 @@ from typing import (
 )
 
 import numpy as np
-import scipy.stats as stats
+from scipy import stats
 from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as gx_exceptions

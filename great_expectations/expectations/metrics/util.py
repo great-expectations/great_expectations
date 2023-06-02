@@ -950,8 +950,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
-    return
-
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
     """Helper function that returns positional arguments for a scipy distribution using a dict of parameters.

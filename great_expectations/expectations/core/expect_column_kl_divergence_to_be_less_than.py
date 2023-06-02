@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple
 import altair as alt
 import numpy as np
 import pandas as pd
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001

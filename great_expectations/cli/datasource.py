@@ -92,7 +92,7 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     try:
         if not ctx.obj.assume_yes:
             if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
-                exit(0)
+                sys.exit(0)
 
         _datasource_new_flow(
             context,

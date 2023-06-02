@@ -8,7 +8,6 @@ import pyparsing as pp
 import pytest
 from moto import mock_s3
 
-import tests.test_utils as test_utils
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -41,6 +40,7 @@ from great_expectations.util import (
     get_context,
     is_library_loadable,
 )
+from tests import test_utils
 
 yaml = YAMLHandler()
 

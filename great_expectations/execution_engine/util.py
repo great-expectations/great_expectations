@@ -463,8 +463,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
-    return
-
 
 def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):
     """Creates an identical expectation for each of the given columns with the specified arguments, if any.

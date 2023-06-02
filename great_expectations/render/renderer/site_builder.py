@@ -4,7 +4,7 @@ import traceback
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
-import great_expectations.exceptions as exceptions
+from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
