@@ -74,7 +74,7 @@ def test_vcs_schemas_match(
         key: str
         value: Any
         for key, value in schema_as_dict.items():
-            if key == "required":
+            if key in ("required", "items"):
                 schema_as_dict[key] = sorted(value)
 
             if isinstance(value, dict):
