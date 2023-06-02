@@ -2746,9 +2746,12 @@ def _bigquery_dataset() -> str:
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
 ) -> sqlalchemy.Engine:
-    engine = sa.create_engine(
-        _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
-    )
+    with warnings.catch_warnings():
+        # Ignore warnings about Trino dialect not having implemented import_dbapi() method
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+        engine = sa.create_engine(
+            _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
+        )
     from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
