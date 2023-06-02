@@ -139,9 +139,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
-                metric_name=metric_name,
+                metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
