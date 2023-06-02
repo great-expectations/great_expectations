@@ -74,27 +74,19 @@ def test_vcs_schemas_match(
         key: str
         value: Any
         for key, value in schema_as_dict.items():
-            if key == "required":
+            if key in ("required", "items"):
                 schema_as_dict[key] = sorted(value)
 
             if isinstance(value, dict):
                 _sort_required_lists(schema_as_dict=value)
 
-    if _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
+    if "Pandas" in str(schema_dir) and _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
         pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
     print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {PANDAS_VERSION}\n")
 
     schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
-
-    # TODO: remove this logic and make this fail once all json schemas are working
-    if schema_path.name in (
-        "SqliteTableAsset.json",
-        "SqliteQueryAsset.json",
-        "SASAsset.json",
-    ):
-        pytest.xfail(f"{schema_path.name} does not exist")
 
     json_str = schema_path.read_text().rstrip()
 

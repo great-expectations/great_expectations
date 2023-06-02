@@ -1,6 +1,6 @@
 {
-    "title": "PickleAsset",
-    "description": "Load pickled pandas object (or any object) from file.\n\n.. warning::\n\n   Loading pickled data received from untrusted sources can be\n   unsafe. See `here <https://docs.python.org/3/library/pickle.html>`__.",
+    "title": "SASAsset",
+    "description": "Read SAS files stored as either XPORT or SAS7BDAT format files.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pickle",
+            "default": "sas",
             "enum": [
-                "pickle"
+                "sas"
             ],
             "type": "string"
         },
@@ -72,6 +72,27 @@
                 }
             ]
         },
+        "format": {
+            "title": "Format",
+            "type": "string"
+        },
+        "index": {
+            "title": "Index",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
@@ -92,10 +113,6 @@
                     "type": "object"
                 }
             ]
-        },
-        "storage_options": {
-            "title": "Storage Options",
-            "type": "object"
         }
     },
     "required": [

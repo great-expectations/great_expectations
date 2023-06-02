@@ -1,6 +1,6 @@
 {
-    "title": "FeatherAsset",
-    "description": "Load a feather-format object from the file path.",
+    "title": "SASAsset",
+    "description": "Read SAS files stored as either XPORT or SAS7BDAT format files.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "feather",
+            "default": "sas",
             "enum": [
-                "feather"
+                "sas"
             ],
             "type": "string"
         },
@@ -32,8 +32,8 @@
             "title": "Batch Metadata",
             "type": "object"
         },
-        "path": {
-            "title": "Path",
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
             "anyOf": [
                 {
                     "type": "string",
@@ -48,26 +48,52 @@
                 {}
             ]
         },
-        "columns": {
-            "title": "Columns",
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+        "format": {
+            "title": "Format",
+            "type": "string"
         },
-        "use_threads": {
-            "title": "Use Threads",
-            "default": true,
+        "index": {
+            "title": "Index",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
             "type": "boolean"
         },
-        "storage_options": {
-            "title": "Storage Options",
-            "type": "object"
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
         }
     },
     "required": [
         "name",
-        "path"
+        "filepath_or_buffer"
     ],
     "additionalProperties": false,
     "definitions": {
