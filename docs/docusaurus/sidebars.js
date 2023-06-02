@@ -18,7 +18,7 @@ module.exports = {
               value: '<h4>For use with local filesystems</h4>',
               defaultStyle: true
             },
-            'guides/setup/installation/local',
+            'guides/setup/installation/install_gx',
             {
               type: 'html',
               value: '<h4>For use in hosted environments</h4>',
