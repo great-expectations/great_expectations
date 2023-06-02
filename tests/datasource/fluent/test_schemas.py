@@ -64,6 +64,17 @@ def test_vcs_schemas_match(
     test pipeline, the test will be marked a `xfail` because the schemas will not match.
     """
 
+    def _sort_any_of(d: dict) -> str:
+        # print(f"{pf(d)}")
+        if items := d.get("items"):
+            _sort_any_of(items)
+        if ref := d.get("$ref"):
+            return ref
+        if type_ := d.get("type"):
+            return type_
+        # return any string for sorting
+        return "z"
+
     def _sort_lists(schema_as_dict: dict) -> None:
         """Sometimes "required" and "anyOf" lists come unsorted, causing misleading assertion failures; this corrects the issue.
 
@@ -71,17 +82,6 @@ def test_vcs_schemas_match(
             schema_as_dict: source dictionary (will be modified "in-situ")
 
         """
-
-        def _sort_any_of(d: dict) -> str:
-            if items := d.get("items"):
-                _sort_any_of(items)
-            if ref := d.get("$ref"):
-                return ref
-            if type_ := d.get("type"):
-                return type_
-            # return any string for sorting
-            return str(d)
-
         key: str
         value: Any
         for key, value in schema_as_dict.items():
