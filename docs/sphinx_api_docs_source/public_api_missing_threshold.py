@@ -109,4 +109,5 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/file_path_data_asset.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: read_parquet",
+    "File: great_expectations/util.py Name: read_parquet",
 ]
