@@ -179,6 +179,9 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "path": {"path": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buf": {"path_or_buf": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buffer": {"path_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "names": {  # problem with Sequence[Hashable] causes `TypeError:issubclass() arg 1 must be a class`
+        "names": _FieldSpec(Optional[Sequence[str]], None)
+    },
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -314,6 +317,37 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     return str_to_eval
 
 
+param_whitelist: set[str] = {
+    "comment",
+    "convert_float",
+    "converters",
+    "date_parser",
+    "decimal",
+    "dtype",
+    "engine",
+    # "false_values", #problem
+    "header",
+    "index_col",
+    "io",
+    "keep_default_na",
+    "mangle_dupe_cols",
+    "na_filter",
+    "na_values",
+    "names",
+    "nrows",
+    "parse_dates",
+    "sheet_name",
+    "skipfooter",
+    "skiprows",
+    "squeeze",
+    "storage_options",
+    "thousands",
+    # "true_values",  # problem
+    "usecols",
+    "verbose",
+}
+
+
 def _to_pydantic_fields(
     sig_tuple: _SignatureTuple, skip_first_param: bool
 ) -> Dict[str, _FieldSpec]:
@@ -330,6 +364,9 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
+        if param_name not in param_whitelist:
+            continue
+
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
