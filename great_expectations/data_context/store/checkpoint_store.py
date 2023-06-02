@@ -252,6 +252,7 @@ class CheckpointStore(ConfigurationStore):
     ) -> Checkpoint:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
+            # update parts of config that may have been updated by cloud (ids, default actions, etc.)
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
             checkpoint.config.validations = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get("validations")
