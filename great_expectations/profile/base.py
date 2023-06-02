@@ -69,19 +69,19 @@ class OrderedProfilerCardinality(OrderedEnum):
         Returns:
             The column cardinality
         """
-        if pct_unique == 1.0:
+        if pct_unique == 1.0:  # noqa: PLR2004
             cardinality = cls.UNIQUE
         elif num_unique == 1:
             cardinality = cls.ONE
-        elif num_unique == 2:
+        elif num_unique == 2:  # noqa: PLR2004
             cardinality = cls.TWO
-        elif 0 < num_unique < 20:
+        elif 0 < num_unique < 20:  # noqa: PLR2004
             cardinality = cls.VERY_FEW
-        elif 0 < num_unique < 60:
+        elif 0 < num_unique < 60:  # noqa: PLR2004
             cardinality = cls.FEW
         elif num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = cls.NONE
-        elif pct_unique > 0.1:
+        elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = cls.VERY_MANY
         else:
             cardinality = cls.MANY
@@ -221,7 +221,7 @@ class DatasetProfiler(DataAssetProfiler):
         return expectation_suite
 
     @classmethod
-    def profile(
+    def profile(  # noqa: PLR0913
         cls,
         data_asset,
         run_id=None,

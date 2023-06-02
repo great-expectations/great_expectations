@@ -35,7 +35,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,

@@ -41,7 +41,7 @@ class InlineStoreBackend(StoreBackend):
     Please note that is it only to be used with file-backed DataContexts (DataContext and FileDataContext).
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: FileDataContext,
         resource_type: DataContextVariableSchema,

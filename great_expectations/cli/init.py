@@ -43,7 +43,7 @@ if not SQLAlchemyError:
     default=True,
 )
 @click.pass_context
-def init(ctx: click.Context, usage_stats: bool) -> None:
+def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
     """
     Initialize a new Great Expectations project.
 
@@ -74,7 +74,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
                 sys.exit(0)
             else:
                 # Prompt to modify the project to add missing files
-                if not ctx.obj.assume_yes:
+                if not ctx.obj.assume_yes:  # noqa: PLR5501
                     if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
                         cli_message(RUN_INIT_AGAIN)
                         sys.exit(0)
