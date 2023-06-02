@@ -43,7 +43,7 @@ from great_expectations.datasource.fluent.interfaces import (
 
 try:
     # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
-    from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
+    from pandas._typing import CompressionOptions, CSVEngine, StorageOptions
 except ImportError:
     # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
     # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
@@ -54,7 +54,6 @@ except ImportError:
         ]
     ]
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
-    IndexLabel = Union[Hashable, Sequence[Hashable]]
     StorageOptions = Optional[Dict[str, Any]]
 
 try:
@@ -64,6 +63,10 @@ except ImportError:
     class _NoDefault(enum.Enum):  # type: ignore[no-redef]
         no_default = "NO_DEFAULT"
 
+
+# Replaced `Hashable` with `str`
+# Hashable causes `TypeError:issubclass() arg 1 must be a class`
+IndexLabel = Union[str, Sequence[str]]
 
 logger = logging.getLogger(__file__)
 
@@ -91,10 +94,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "bool",
     "None",
     # typing
-    "Hashable",
-    "Sequence[Hashable]",
     "Sequence[tuple[int, int]]",
-    "Sequence[Hashable]",
     "Sequence[str]",
     "Sequence[int]",
     "Sequence[tuple[int, int]]",
@@ -104,9 +104,9 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal['high', 'legacy']",
     "Literal['frame', 'series']",
     "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
+    "Literal[('xlrd', 'openpyxl', 'odf', 'pyxlsb')]",
     "Literal[None, 'header', 'footer', 'body', 'all']",
     "Iterable[object]",
-    "Iterable[Hashable]",
     # other
     "Pattern",  # re
     "Path",  # pathlib
@@ -118,6 +118,16 @@ CAN_HANDLE: Final[Set[str]] = {
     "IndexLabel",
     "CompressionOptions",
     "StorageOptions",
+}
+
+TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
+    # Hashable causes `TypeError:issubclass() arg 1 must be a class`
+    "Hashable": "str",
+    "Sequence[Hashable]": "Sequence[str]",
+    "Iterable[Hashable]": "Iterable[str]",
+    # TypeVars
+    "IntStrT": "Union[int, str]",
+    "list[IntStrT]": "List[Union[int, str]]",
 }
 
 NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
@@ -169,6 +179,9 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "path": {"path": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buf": {"path_or_buf": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "path_or_buffer": {"path_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "names": {  # problem with Sequence[Hashable] causes `TypeError:issubclass() arg 1 must be a class`
+        "names": _FieldSpec(Optional[Sequence[str]], None)
+    },
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -289,6 +302,8 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
         if type_str in CAN_HANDLE:
             types.append(type_str)
+        elif subbed_type := TYPE_SUBSTITUTIONS.get(type_str):
+            types.append(subbed_type)
         else:
             NEED_SPECIAL_HANDLING[param.name].add(type_str)
             logger.debug(f"skipping {param.name} type - {type_str}")
@@ -300,6 +315,37 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     else:
         str_to_eval = types[0]
     return str_to_eval
+
+
+param_whitelist: set[str] = {
+    "comment",
+    "convert_float",
+    "converters",
+    "date_parser",
+    "decimal",
+    "dtype",
+    "engine",
+    # "false_values", #problem
+    "header",
+    "index_col",
+    "io",
+    "keep_default_na",
+    "mangle_dupe_cols",
+    "na_filter",
+    "na_values",
+    "names",
+    "nrows",
+    "parse_dates",
+    "sheet_name",
+    "skipfooter",
+    "skiprows",
+    "squeeze",
+    "storage_options",
+    "thousands",
+    # "true_values",  # problem
+    "usecols",
+    "verbose",
+}
 
 
 def _to_pydantic_fields(
@@ -318,6 +364,9 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
+        if param_name not in param_whitelist:
+            continue
+
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
