@@ -159,7 +159,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
@@ -227,7 +227,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         params: Optional[dict] = None
         try:
             # if name is included in the key, add as a param
-            if len(key) > 2 and key[2]:
+            if len(key) > 2 and key[2]:  # noqa: PLR2004
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
@@ -246,7 +246,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
-            logger.debug(
+            logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
@@ -298,7 +298,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # for the ExpectationSuite endpoint. As such, this is a temporary fork to
             # ensure that legacy PATCH behavior is supported.
             if (
-                response_status_code == 405
+                response_status_code == 405  # noqa: PLR2004
                 and resource_type is GXCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = self._session.patch(url, json=data)
@@ -484,7 +484,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-        if len(key) == 3:
+        if len(key) == 3:  # noqa: PLR2004
             resource_object_name = key[2]
         else:
             resource_object_name = None
@@ -566,7 +566,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
     def _validate_key(self, key) -> None:
-        if not isinstance(key, tuple) or len(key) != 3:
+        if not isinstance(key, tuple) or len(key) != 3:  # noqa: PLR2004
             raise TypeError(
                 "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
             )

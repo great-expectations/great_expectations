@@ -46,7 +46,7 @@ class ColumnDomainBuilder(DomainBuilder):
         "semantic_type_filter",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
@@ -477,7 +477,7 @@ class ColumnDomainBuilder(DomainBuilder):
         elif isinstance(property_value, str):
             property_value = [property_value]
         else:
-            if not isinstance(property_value, property_value_type):
+            if not isinstance(property_value, property_value_type):  # noqa: PLR5501
                 raise ValueError(
                     f'Unrecognized "{property_name}" directive -- must be "{property_value_type}" (or string).'
                 )

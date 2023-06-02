@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Dict, Tuple
 
 import numpy as np
-import scipy.stats as stats
+from scipy import stats
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F

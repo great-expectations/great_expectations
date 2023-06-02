@@ -162,7 +162,7 @@ def test_add_custom_checkpoint_extensions(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_basic_checkpoint_config_validation(
+def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     mock_emit,
     empty_data_context_stats_enabled,
     common_action_list,

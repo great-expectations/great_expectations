@@ -78,7 +78,7 @@ class BatchDefinition(SerializableDictDot):
         BatchDefinition
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_connector_name: str,
@@ -229,7 +229,7 @@ class BatchRequestBase(SerializableDictDot):
     validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_connector_name: str,
@@ -492,7 +492,7 @@ class BatchRequest(BatchRequestBase):
         "batch_spec_passthrough",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_connector_name: str,
@@ -568,7 +568,7 @@ class RuntimeBatchRequest(BatchRequestBase):
         "batch_spec_passthrough",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_connector_name: str,
@@ -708,7 +708,7 @@ class Batch(SerializableDictDot):
         Batch instance created.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data: Optional[BatchDataType] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -947,7 +947,7 @@ def get_batch_request_as_dict(
     return batch_request
 
 
-def _get_block_batch_request(
+def _get_block_batch_request(  # noqa: PLR0913
     *,
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
@@ -1034,7 +1034,7 @@ def _get_block_batch_request(
     return BatchRequest(**batch_request_as_dict)
 
 
-def _get_runtime_batch_request(
+def _get_runtime_batch_request(  # noqa: PLR0913
     *,
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
@@ -1107,7 +1107,7 @@ def _get_runtime_batch_request(
         return None
 
 
-def get_batch_request_from_acceptable_arguments(
+def get_batch_request_from_acceptable_arguments(  # noqa: PLR0913
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,

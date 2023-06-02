@@ -204,7 +204,7 @@ class SqliteDatasource(SQLDatasource):
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str,

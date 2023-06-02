@@ -73,7 +73,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(
+    def _render_list(  # noqa: PLR0913, PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -137,7 +137,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             **kwargs,
                         )
             else:
-                if isinstance(obj_, ExpectationValidationResult):
+                if isinstance(obj_, ExpectationValidationResult):  # noqa: PLR5501
                     content_block_fn = (
                         cls._missing_content_block_fn
                         if exception_list_content_block
@@ -209,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(
+    def _render_other(  # noqa: PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -263,7 +263,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         **kwargs,
                     )
         else:
-            if isinstance(render_object, ExpectationValidationResult):
+            if isinstance(render_object, ExpectationValidationResult):  # noqa: PLR5501
                 content_block_fn = (
                     cls._missing_content_block_fn
                     if exception_list_content_block
@@ -291,7 +291,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):
+    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
         if not expectation.meta.get("notes"):
             return None
         else:
@@ -395,7 +395,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         cls, content_block, has_failed_evr, render_object=None
     ) -> None:
         header = cls._get_header()
-        if header != "":
+        if header != "":  # noqa: PLC1901
             content_block.header = header
 
     @classmethod

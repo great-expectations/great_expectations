@@ -97,7 +97,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Sequence[tuple[int, int]]",
     "Sequence[str]",
     "Sequence[int]",
-    "Sequence[tuple[int, int]]",
+    "Sequence[tuple[int, int]]",  # noqa: PLW0130
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
@@ -283,7 +283,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
         logger.debug(f"{param.name} has non-string annotations")
         # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
         union_types = getattr(annotation, "__args__", None)
-        if union_types and PANDAS_VERSION < 1.2:
+        if union_types and PANDAS_VERSION < 1.2:  # noqa: PLR2004
             # we could examine these types and only kick out certain blacklisted types
             # but once we drop python 3.7 support our min pandas version will make this
             # unneeded
@@ -295,7 +295,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     union_parts = annotation.split("|")
     str_to_eval: str
     for type_str in union_parts:
-        type_str = type_str.strip()
+        type_str = type_str.strip()  # noqa: PLW2901
 
         if type_str in CAN_HANDLE:
             types.append(type_str)
@@ -358,7 +358,7 @@ def _to_pydantic_fields(
 M = TypeVar("M", bound=Type[DataAsset])
 
 
-def _create_pandas_asset_model(
+def _create_pandas_asset_model(  # noqa: PLR0913
     model_name: str,
     model_base: M,
     type_field: Tuple[Union[Type, str], str],

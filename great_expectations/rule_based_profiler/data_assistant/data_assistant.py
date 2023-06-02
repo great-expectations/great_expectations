@@ -720,7 +720,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     execution_time_property_name="profiler_execution_time",
     pretty_print=False,
 )
-def run_profiler_on_data(
+def run_profiler_on_data(  # noqa: PLR0913
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
@@ -776,7 +776,7 @@ configuration included.
     result.citation = rule_based_profiler_result.citation
 
 
-def build_map_metric_rule(
+def build_map_metric_rule(  # noqa: PLR0913
     data_assistant_class_name: str,
     rule_name: str,
     expectation_type: str,

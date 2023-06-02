@@ -230,7 +230,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def self_check(self, pretty_print):
+    def self_check(self, pretty_print):  # noqa: PLR0912
         return_obj = {}
 
         if pretty_print:
@@ -247,7 +247,7 @@ class ExpectationsStore(Store):
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 

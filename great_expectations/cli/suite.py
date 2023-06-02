@@ -128,7 +128,7 @@ Assumes --interactive flag.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_new(
+def suite_new(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: Optional[str],
     interactive_flag: bool,
@@ -191,7 +191,7 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
     return profile
 
 
-def _process_suite_new_flags_and_prompt(
+def _process_suite_new_flags_and_prompt(  # noqa: PLR0913
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -238,7 +238,7 @@ def _process_suite_new_flags_and_prompt(
     return interactive_mode, profile
 
 
-def _suite_new_workflow(
+def _suite_new_workflow(  # noqa: PLR0913
     context: DataContext,
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
@@ -474,7 +474,7 @@ How would you like to create your Expectation Suite?
         show_default=False,
     )
     # Default option
-    if suite_create_method == "":
+    if suite_create_method == "":  # noqa: PLC1901
         profile = False
         interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
     elif suite_create_method == "1":
@@ -541,7 +541,7 @@ Assumes --interactive flag.  Incompatible with --datasource-name option.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_edit(
+def suite_edit(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: str,
     interactive_flag: bool,
@@ -606,7 +606,7 @@ def suite_edit(
     )
 
 
-def _process_suite_edit_flags_and_prompt(
+def _process_suite_edit_flags_and_prompt(  # noqa: PLR0913, PLR0912
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -717,7 +717,7 @@ How would you like to edit your Expectation Suite?
             show_default=False,
         )
         # Default option
-        if suite_edit_method == "":
+        if suite_edit_method == "":  # noqa: PLC1901
             interactive_mode = (
                 CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
             )
@@ -729,7 +729,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(  # noqa: C901 - 19
+def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913, PLR0915
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,

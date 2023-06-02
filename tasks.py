@@ -55,7 +55,7 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(
+def sort(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     check: bool = False,
@@ -94,7 +94,7 @@ def sort(
         "pty": _PTY_HELP_DESC,
     }
 )
-def fmt(
+def fmt(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -225,7 +225,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
-def type_check(
+def type_check(  # noqa: PLR0913, PLR0912
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -356,7 +356,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(
+def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
     integration: bool = False,
@@ -428,7 +428,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "target": "Set the target build stage to build.",
     }
 )
-def docker(
+def docker(  # noqa: PLR0913
     ctx: Context,
     name: str = "gx38local",
     tag: str = "latest",
@@ -654,7 +654,7 @@ def docs(
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     else:
-        if start:
+        if start:  # noqa: PLR5501
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
