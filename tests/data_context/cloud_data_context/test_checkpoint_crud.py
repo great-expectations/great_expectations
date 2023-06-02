@@ -50,15 +50,32 @@ def checkpoint_config_with_ids(
 
 @pytest.fixture
 def mocked_post_response(
-    mock_response_factory: Callable, checkpoint_id: str, validation_ids: Tuple[str, str]
+    mock_response_factory: Callable,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config_with_ids: dict,
 ) -> Callable[[], MockResponse]:
     validation_id_1, validation_id_2 = validation_ids
 
     def _mocked_post_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
         return mock_response_factory(
             {
                 "data": {
                     "id": checkpoint_id,
+                    "attributes": {
+                        "checkpoint_config": checkpoint_config_with_ids,
+                        "class_name": "Checkpoint",
+                        "created_by_id": created_by_id,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
+                        "name": "oss_test_checkpoint",
+                        "organization_id": f"{organization_id}",
+                    },
+                    "type": "checkpoint",
                     "validations": [
                         {"id": validation_id_1},
                         {"id": validation_id_2},
