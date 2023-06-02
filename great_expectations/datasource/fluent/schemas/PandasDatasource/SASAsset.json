@@ -1,0 +1,119 @@
+{
+    "title": "SASAsset",
+    "description": "Read SAS files stored as either XPORT or SAS7BDAT format files.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "sas",
+            "enum": [
+                "sas"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "format": {
+            "title": "Format",
+            "type": "string"
+        },
+        "index": {
+            "title": "Index",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "filepath_or_buffer"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

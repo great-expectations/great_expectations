@@ -35,7 +35,7 @@ class ValidationOperatorResult(DictDot):
     }
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
         run_results: Dict[

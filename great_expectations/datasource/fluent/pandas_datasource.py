@@ -212,7 +212,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -481,7 +481,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
     # End Abstract Methods
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,

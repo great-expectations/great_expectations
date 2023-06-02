@@ -11,7 +11,7 @@ from great_expectations.compatibility import sqlalchemy
 logger = logging.getLogger(__name__)
 
 
-def read_sql_table_as_df(
+def read_sql_table_as_df(  # noqa: PLR0913
     table_name,
     con,
     schema=None,
@@ -63,7 +63,7 @@ def read_sql_table_as_df(
         )
 
 
-def add_dataframe_to_db(
+def add_dataframe_to_db(  # noqa: PLR0913
     df: pd.DataFrame,
     name: str,
     con,

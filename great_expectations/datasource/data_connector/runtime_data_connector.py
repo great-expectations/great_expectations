@@ -41,7 +41,7 @@ class RuntimeDataConnector(DataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -93,7 +93,7 @@ class RuntimeDataConnector(DataConnector):
 
         for name, asset_config in config.items():
             if asset_config is None:
-                asset_config = {}
+                asset_config = {}  # noqa: PLW2901
 
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(

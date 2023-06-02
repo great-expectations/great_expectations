@@ -91,7 +91,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 pass
         return partition_ids
 
-    def _build_batch_kwargs(self, batch_parameters):
+    def _build_batch_kwargs(self, batch_parameters):  # noqa: PLR0912
         """Build batch kwargs from a partition id."""
         partition_id = batch_parameters.pop("partition_id", None)
         batch_kwargs = self._datasource.process_batch_parameters(batch_parameters)

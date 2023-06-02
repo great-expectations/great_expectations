@@ -59,7 +59,7 @@ def column_aggregate_value(
         def wrapper(metric_fn: Callable):
             @metric_value(engine=PandasExecutionEngine)
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -135,7 +135,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -198,7 +198,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,

@@ -54,7 +54,11 @@
             "type": "string"
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "storage_options": {
             "title": "Storage Options",
