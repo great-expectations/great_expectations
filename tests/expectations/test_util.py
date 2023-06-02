@@ -78,7 +78,6 @@ def get_table_columns_metric(
         metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
     )
     resolved_metrics.update(results)
-
     return table_columns_metric, resolved_metrics
 
 
@@ -404,11 +403,11 @@ def test_table_column_reflection_fallback(test_backends, sa):
             sa.MetaData(),
             schema=None,
         )
-        sqlalchemy_engine = cast(SqlAlchemyExecutionEngine, validator.execution_engine)
+        execution_engine = cast(SqlAlchemyExecutionEngine, validator.execution_engine)
         reflected_columns_list = column_reflection_fallback(
             selectable=selectable,
-            dialect=sqlalchemy_engine.engine.dialect,
-            sqlalchemy_engine=sqlalchemy_engine.engine,
+            dialect=execution_engine.engine.dialect,
+            execution_engine=execution_engine,
         )
         for column_name in [
             reflected_column_config["name"]
@@ -419,10 +418,11 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
     if validators_config:
         validator = list(validators_config.values())[0]
-
+        # breakpoint()
         validation_result = validator.expect_column_mean_to_be_between(
             column="age", min_value=10
         )
+
         assert validation_result.success
 
         validation_result = validator.expect_table_row_count_to_equal(value=5)

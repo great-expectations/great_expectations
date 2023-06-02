@@ -221,7 +221,11 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
+_PERSISTED_CONNECTION_DIALECTS = (
+    GXSqlDialect.SQLITE,
+    GXSqlDialect.MSSQL,
+    GXSqlDialect.MYSQL,
+)
 
 
 def _dialect_requires_persisted_connection(
@@ -1393,14 +1397,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
-        try:
-            if not self._connection or self._connection.closed:
-                self._connection = self.engine.connect()
-            yield self._connection
-        finally:
-            # Temp tables only persist within a connection for some dialects,
-            # so we need to keep the connection alive.
-            pass
+        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
+            try:
+                if not self._connection:
+                    self._connection = self.engine.connect()
+                yield self._connection
+            finally:
+                # Temp tables only persist within a connection for some dialects,
+                # so we need to keep the connection alive.
+                pass
+        else:
+            with self.engine.connect() as connection:
+                yield connection
 
     @public_api
     @new_method_or_class(version="0.16.14")
@@ -1415,7 +1423,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
             result = connection.execute(query)
 
@@ -1436,7 +1443,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
             if not connection.closed:
                 result = connection.execute(query)

@@ -1260,6 +1260,7 @@ class Expectation(metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
+        # graph validate
         expectation_validation_result_list: list[
             ExpectationValidationResult
         ] = validator.graph_validate(

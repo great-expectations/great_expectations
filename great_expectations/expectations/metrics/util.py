@@ -369,17 +369,11 @@ def get_sqlalchemy_column_metadata(
 def column_reflection_fallback(
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
-    sqlalchemy_engine: sqlalchemy.Engine,
+    execution_engine: SqlAlchemyExecutionEngine,
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
 
-    if isinstance(sqlalchemy_engine.engine, sqlalchemy.Engine):
-        connection = sqlalchemy_engine.engine.connect()
-    else:
-        connection = sqlalchemy_engine.engine
-
-    # with sqlalchemy_engine.begin() as connection:
-    with connection:
+    with execution_engine.get_connection() as connection:
         col_info_dict_list: List[Dict[str, str]]
         # noinspection PyUnresolvedReferences
         if dialect.name.lower() == "mssql":
@@ -498,7 +492,7 @@ def column_reflection_fallback(
                     match = rx.match(str(table_name).replace("\n", ""))
                     if match:
                         table_name = match.group(1)
-            schema_name = sqlalchemy_engine.dialect.default_schema_name
+            schema_name = execution_engine.engine.dialect.default_schema_name
 
             tables_table: sa.Table = sa.Table(
                 "tables",
