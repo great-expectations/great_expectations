@@ -6,53 +6,12 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Setting up a GX environment',
+      label: 'Set up your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_tiles' },
       items: [
-        {
-          type: 'category',
-          label: 'Installation and dependencies',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>For use with local filesystems</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/installation/install_gx',
-            {
-              type: 'html',
-              value: '<h4>For use in hosted environments</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/installation/hosted_environment',
-            {
-              type: 'html',
-              value: '<h4>For use with cloud storage</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/install_gx_cloud_storage'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
-            },
-            {
-              type: 'html',
-              value: '<h4>For use with SQL Databases</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
-            }
-          ]
-        },
+        'guides/setup/installation/install_gx',
+        'guides/setup/optional_dependencies/cloud/install_gx_cloud_storage',
+        'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases',
         {
           type: 'category',
           label: 'Data Contexts',
