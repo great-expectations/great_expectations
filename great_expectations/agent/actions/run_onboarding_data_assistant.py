@@ -20,7 +20,10 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
     def run(self, event: RunOnboardingDataAssistantEvent, id: str) -> ActionResult:
         expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
-        timestamp = datetime.utcnow()
+
+        # build tz aware timestamp
+        tz = datetime.now().astimezone().tzinfo
+        timestamp = datetime.now(tz=tz)
 
         # ensure we have unique names for created resources
         try:
