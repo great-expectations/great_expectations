@@ -20,9 +20,7 @@ import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_aft
 import PrereqGcpServiceAccount from '/docs/components/prerequisites/_gcp_service_account.md'
 import GcpVerifyCredentials from '/docs/components/setup/dependencies/_gcp_verify_credentials_configuration.md'
 import GcpInstallDependencies from '/docs/components/setup/dependencies/_gcp_install_dependencies.md'
-import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
 import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
-import PythonCreateVenv from '/docs/components/setup/python_environment/_python_create_venv.md'
 import AbsInstallDependencies from '/docs/components/setup/dependencies/_abs_install_dependencies.md'
 import AbsConfigureCredentialsInDataContext from '/docs/components/setup/dependencies/_abs_configure_credentials_in_data_context.md'
 import TabItem from '@theme/TabItem';
