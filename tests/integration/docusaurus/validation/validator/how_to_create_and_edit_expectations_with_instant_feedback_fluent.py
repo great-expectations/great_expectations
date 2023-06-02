@@ -16,6 +16,11 @@ data_asset = context.get_datasource("my_datasource").get_asset("my_data_asset")
 batch_request = data_asset.build_batch_request()
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite">
+context.create_expectation_suite("my_expectation_suite")
+assert "my_expectation_suite" in context.list_expectation_suite_names()
+# </snippet>
+
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data">
 validator = context.get_validator(
     batch_request=batch_request,
