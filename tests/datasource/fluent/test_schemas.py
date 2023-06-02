@@ -65,7 +65,6 @@ def test_vcs_schemas_match(
     """
 
     def _sort_any_of(d: dict) -> str:
-        # print(f"{pf(d)}")
         if items := d.get("items"):
             _sort_any_of(items)
         if ref := d.get("$ref"):
