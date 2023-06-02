@@ -109,6 +109,9 @@ def test_vcs_schemas_match(
     fluent_ds_or_asset_model_as_dict = fluent_ds_or_asset_model.schema()
     _sort_lists(schema_as_dict=fluent_ds_or_asset_model_as_dict)
 
+    if "Excel" in str(schema_path):
+        pytest.xfail(reason="Sorting of nested anOf key")
+
     assert (
         schema_as_dict == fluent_ds_or_asset_model_as_dict
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
