@@ -303,8 +303,8 @@ extend-exclude = [
     "F401",  # unused import
     "F403",  # star imports
     ]
-"great_expectations._version.py" = [
-    "PL",  # pylint - versioneer code
+"great_expectations/_version.py" = [
+    "PLR",  # pylint - versioneer code
 ]
 "great_expectations/compatibility/sqlalchemy.py" = [
     "TID251",  # flake8-banned-api
