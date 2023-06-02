@@ -317,37 +317,6 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     return str_to_eval
 
 
-param_whitelist: set[str] = {
-    "comment",
-    "convert_float",
-    "converters",
-    "date_parser",
-    "decimal",
-    "dtype",
-    "engine",
-    # "false_values", #problem
-    "header",
-    "index_col",
-    "io",
-    "keep_default_na",
-    "mangle_dupe_cols",
-    "na_filter",
-    "na_values",
-    "names",
-    "nrows",
-    "parse_dates",
-    "sheet_name",
-    "skipfooter",
-    "skiprows",
-    "squeeze",
-    "storage_options",
-    "thousands",
-    # "true_values",  # problem
-    "usecols",
-    "verbose",
-}
-
-
 def _to_pydantic_fields(
     sig_tuple: _SignatureTuple, skip_first_param: bool
 ) -> Dict[str, _FieldSpec]:
@@ -364,9 +333,6 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
-        if param_name not in param_whitelist:
-            continue
-
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
@@ -438,7 +404,6 @@ def _generate_pandas_data_asset_models(
 
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
-
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
         fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
