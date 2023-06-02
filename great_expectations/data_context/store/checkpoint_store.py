@@ -255,6 +255,8 @@ class CheckpointStore(ConfigurationStore):
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
             checkpoint.config.validations = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get("validations")
+            checkpoint.config.action_list = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get(
+                "action_list")
         return checkpoint
 
     @public_api
