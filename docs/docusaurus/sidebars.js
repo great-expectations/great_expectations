@@ -10,8 +10,7 @@ module.exports = {
       link: { type: 'doc', id: 'guides/setup/setup_overview_tiles' },
       items: [
         'guides/setup/installation/install_gx',
-        'guides/setup/optional_dependencies/cloud/install_gx_cloud_storage',
-        'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases',
+        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
           label: 'Data Contexts',
