@@ -245,6 +245,8 @@ select = [
     "B", # bugbear - common python bugs & design issues
     # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
     "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
+    # https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PL", # pylint
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
