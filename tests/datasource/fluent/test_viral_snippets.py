@@ -257,22 +257,8 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
     assert result.success
 
 
-@pytest.fixture
-def patch_cloud_data_context_attrs(monkeypatch: pytest.MonkeyPatch):
-    # TODO:expand `cloud_api_mock` to make this unnecessary
-    from great_expectations.data_context.data_context.cloud_data_context import (
-        CloudDataContext,
-    )
-
-    monkeypatch.setattr(
-        CloudDataContext, "expectations_store_name", "default_expectations_store"
-    )
-
-
 def test_quickstart_workflow(
-    empty_contexts: CloudDataContext | FileDataContext,
-    csv_path: pathlib.Path,
-    patch_cloud_data_context_attrs,
+    empty_contexts: CloudDataContext | FileDataContext, csv_path: pathlib.Path
 ):
     """
     What does this test do and why?

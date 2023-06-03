@@ -524,6 +524,8 @@ def cloud_api_fake(cloud_details: CloudDetails):
                     "enabled": False,
                 },
                 "datasources": {},
+                "checkpoint_store_name": "default_checkpoint_store",
+                "expectations_store_name": "default_expectations_store",
                 "stores": {
                     "default_expectations_store": {
                         "class_name": "ExpectationsStore",
@@ -535,6 +537,19 @@ def cloud_api_fake(cloud_details: CloudDetails):
                                 "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
                             },
                             "ge_cloud_resource_type": "expectation_suite",
+                            "suppress_store_backend_id": True,
+                        },
+                    },
+                    "default_checkpoint_store": {
+                        "class_name": "CheckpointStore",
+                        "store_backend": {
+                            "class_name": "GXCloudStoreBackend",
+                            "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
+                            "ge_cloud_credentials": {
+                                "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
+                                "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
+                            },
+                            "ge_cloud_resource_type": "checkpoint",
                             "suppress_store_backend_id": True,
                         },
                     },
