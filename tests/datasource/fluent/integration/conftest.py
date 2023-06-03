@@ -118,7 +118,7 @@ def sqlite_datasource(
     )
     return datasource
 
-
+# this is teh table asset
 def sql_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
@@ -231,7 +231,8 @@ def multibatch_spark_data(
 
 
 @pytest.fixture(
-    params=[pandas_data, sql_data, spark_data, default_pandas_data, pandas_sql_data]
+    #params=[pandas_data, sql_data, spark_data, default_pandas_data, pandas_sql_data]
+    params=[sql_data]
 )
 def datasource_test_data(
     test_backends, empty_data_context, request

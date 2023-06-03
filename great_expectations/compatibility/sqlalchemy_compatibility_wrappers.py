@@ -48,6 +48,8 @@ def read_sql_table_as_df(
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
     """
+    # does this need to be added to the connection thing? 
+    #breakpoint()
     if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
         con = con.connect()
     with warnings.catch_warnings():
