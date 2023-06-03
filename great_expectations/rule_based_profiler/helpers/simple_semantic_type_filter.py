@@ -75,10 +75,11 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             return [SemanticDomainTypes(semantic_types)]
 
         if isinstance(semantic_types, list):
-            if _is_sequence_of(semantic_types, SemanticDomainTypes):
-                return semantic_types
-
             semantic_type: Union[str, SemanticDomainTypes]
+
+            if _is_sequence_of(semantic_types, SemanticDomainTypes):
+                return [semantic_type for semantic_type in semantic_types]
+
             if _is_sequence_of(semantic_types, str):
                 semantic_types = [
                     semantic_type.lower() for semantic_type in semantic_types
