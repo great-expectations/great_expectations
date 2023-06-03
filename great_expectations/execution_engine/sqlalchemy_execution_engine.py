@@ -1440,9 +1440,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
-            with connection.begin():
+            if not connection.closed:
                 result = connection.execute(query)
+            else:
+                with connection.begin():
+                    result = connection.execute(query)
 
         return result
