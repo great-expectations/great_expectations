@@ -255,9 +255,12 @@ class CheckpointStore(ConfigurationStore):
             # update parts of config that may have been updated by cloud (ids, default actions, etc.)
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
-            checkpoint.config.validations = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get("validations")
-            checkpoint.config.action_list = checkpoint_ref.response["data"]["attributes"]["checkpoint_config"].get(
-                "action_list")
+            checkpoint.config.validations = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("validations")
+            checkpoint.config.action_list = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("action_list")
         return checkpoint
 
     @public_api
