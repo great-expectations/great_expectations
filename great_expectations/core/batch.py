@@ -974,7 +974,7 @@ def get_batch_request_as_dict(  # type: ignore[misc] # Overload with None
     | FluentBatchRequest
     | dict
     | BlockConfigBatchRequestTypedDict = ...,
-) -> BlockConfigBatchRequestTypedDict:
+) -> dict:
     ...
 
 
@@ -991,7 +991,7 @@ def get_batch_request_as_dict(
     | dict
     | BlockConfigBatchRequestTypedDict
     | None = None,
-) -> BlockConfigBatchRequestTypedDict | None:
+) -> dict | None:
     if batch_request is None:
         return None
 
