@@ -67,17 +67,18 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if semantic_types is None:
             return []
 
-        semantic_type: Union[str, SemanticDomainTypes]
+        if isinstance(semantic_types, SemanticDomainTypes):
+            return [semantic_types]
+
         if isinstance(semantic_types, str):
             semantic_types = semantic_types.lower()
-            return [
-                SemanticDomainTypes(semantic_type) for semantic_type in [semantic_types]
-            ]
-
-        if isinstance(semantic_types, SemanticDomainTypes):
-            return [semantic_type for semantic_type in [semantic_types]]
+            return [SemanticDomainTypes(semantic_types)]
 
         if isinstance(semantic_types, list):
+            if _is_sequence_of(semantic_types, SemanticDomainTypes):
+                return semantic_types
+
+            semantic_type: Union[str, SemanticDomainTypes]
             if _is_sequence_of(semantic_types, str):
                 semantic_types = [
                     semantic_type.lower() for semantic_type in semantic_types
@@ -86,9 +87,6 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                     SemanticDomainTypes(semantic_type)
                     for semantic_type in semantic_types
                 ]
-
-            if _is_sequence_of(semantic_types, SemanticDomainTypes):
-                return [semantic_type for semantic_type in semantic_types]
 
             raise ValueError(
                 "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
@@ -191,15 +189,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-        inferred_semantic_column_type: InferredSemanticDomainType = (
-            InferredSemanticDomainType(
-                semantic_domain_type=semantic_column_type,
-                details={
-                    "algorithm_type": "deterministic",
-                    "mechanism": "lookup_table",
-                    "source": "great_expectations.profile.base.ProfilerTypeMapping",
-                },
-            )
+        inferred_semantic_column_type: InferredSemanticDomainType = InferredSemanticDomainType(
+            semantic_domain_type=semantic_column_type,
+            details={
+                "algorithm_type": "deterministic",
+                "mechanism": "lookup_table",
+                "source": "great_expectations.core.profiler_types_mapping.ProfilerTypeMapping",
+            },
         )
 
         return inferred_semantic_column_type
