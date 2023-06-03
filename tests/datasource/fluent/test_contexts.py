@@ -16,12 +16,12 @@ from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
 from tests.datasource.fluent._fake_cloud_api import (
-    _DEFAULT_HEADERS,
+    DEFAULT_HEADERS,
     FAKE_DATASOURCE_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
-    _CallbackResult,
-    _CloudResponseSchema,
+    CallbackResult,
+    CloudResponseSchema,
 )
 from tests.datasource.fluent.conftest import (
     CloudDetails,
@@ -271,9 +271,9 @@ def test_cloud_context_delete_datasource(
 
 @pytest.fixture
 def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
-    def verify_asset_name_cb(request: PreparedRequest) -> _CallbackResult:
+    def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
-            payload = _CloudResponseSchema.from_datasource_json(request.body)
+            payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
             assert assets, "No assets found"
@@ -282,12 +282,12 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
-            return _CallbackResult(
+            return CallbackResult(
                 200,
-                headers=_DEFAULT_HEADERS,
+                headers=DEFAULT_HEADERS,
                 body=payload.json(),
             )
-        return _CallbackResult(500, _DEFAULT_HEADERS, "No body found")
+        return CallbackResult(500, DEFAULT_HEADERS, "No body found")
 
     cloud_url = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{FAKE_DATASOURCE_ID}"
 

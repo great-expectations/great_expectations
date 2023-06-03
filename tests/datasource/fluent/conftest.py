@@ -51,18 +51,18 @@ from tests.datasource.fluent._fake_cloud_api import (
     FAKE_EXPECTATION_SUITE_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
-    _delete_fake_db_datasources_cb,
-    _get_checkpoints_cb,
-    _get_db_datasources_cb,
-    _get_db_expectation_suite_by_id_cb,
-    _get_db_expectation_suites_cb,
-    _get_fake_db_cb,
-    _post_checkpoints_cb,
-    _post_db_expectation_suites_cb,
-    _post_fake_db_datasources_cb,
-    _post_validation_results_cb,
-    _put_db_datasources_cb,
     create_fake_db_seed_data,
+    delete_datasources_cb,
+    get_checkpoints_cb,
+    get_datasources_cb,
+    get_expectation_suite_by_id_cb,
+    get_expectation_suites_cb,
+    get_cb,
+    post_checkpoints_cb,
+    post_expectation_suites_cb,
+    post_datasources_cb,
+    post_validation_results_cb,
+    put_datasources_cb,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
@@ -217,57 +217,59 @@ def cloud_api_fake(cloud_details: CloudDetails):
     logger.info("Mocking the GX Cloud API")
 
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_mocker:
-        resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_cb)
+        resp_mocker.add_callback(responses.GET, dc_config_url, get_cb)
         resp_mocker.add_callback(
-            responses.GET, f"{datasources_url}/{FAKE_DATASOURCE_ID}", _get_fake_db_cb
+            responses.GET, f"{datasources_url}/{FAKE_DATASOURCE_ID}", get_cb
         )
         resp_mocker.add_callback(
             responses.DELETE,
             f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            _delete_fake_db_datasources_cb,
+            delete_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.PUT,
             f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            _put_db_datasources_cb,
+            put_datasources_cb,
         )
         resp_mocker.add_callback(
-            responses.POST, datasources_url, _post_fake_db_datasources_cb
+            responses.POST,
+            datasources_url,
+            post_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
             f"{datasources_url}",
-            _get_db_datasources_cb,
+            get_datasources_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
             f"{org_url_base}/expectation-suites",
-            _get_db_expectation_suites_cb,
+            get_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
             f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
-            _get_db_expectation_suite_by_id_cb,
+            get_expectation_suite_by_id_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
             f"{org_url_base}/expectation-suites",
-            _post_db_expectation_suites_cb,
+            post_expectation_suites_cb,
         )
         resp_mocker.add_callback(
             responses.GET,
             f"{org_url_base}/checkpoints",
-            _get_checkpoints_cb,
+            get_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
             f"{org_url_base}/checkpoints",
-            _post_checkpoints_cb,
+            post_checkpoints_cb,
         )
         resp_mocker.add_callback(
             responses.POST,
             f"{org_url_base}/validation-results",
-            _post_validation_results_cb,
+            post_validation_results_cb,
         )
 
         yield resp_mocker

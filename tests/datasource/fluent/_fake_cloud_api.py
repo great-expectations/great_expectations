@@ -44,9 +44,9 @@ FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
 FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
 
+DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 
 _CLOUD_API_FAKE_DB: dict = {}
-_DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 
 
 def create_fake_db_seed_data(dc_config_url: str) -> dict:
@@ -124,11 +124,11 @@ class _DatasourceSchema(pydantic.BaseModel):
         return self.attributes["datasource_config"]["name"]  # type: ignore[index]
 
 
-class _CloudResponseSchema(pydantic.BaseModel):
+class CloudResponseSchema(pydantic.BaseModel):
     data: _DatasourceSchema
 
     @classmethod
-    def from_datasource_json(cls, ds_payload: str | bytes) -> _CloudResponseSchema:
+    def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
         payload_dict = json.loads(ds_payload)
         data = {
             "id": payload_dict.get("id"),
@@ -139,7 +139,7 @@ class _CloudResponseSchema(pydantic.BaseModel):
         return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
 
 
-class _CallbackResult(NamedTuple):
+class CallbackResult(NamedTuple):
     status: int
     headers: dict[str, str]
     body: str
@@ -154,9 +154,9 @@ ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
 # ##################################
 
 
-def _get_fake_db_cb(
+def get_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     assert url
     LOGGER.debug(f"{request.method} {url}")
@@ -175,15 +175,15 @@ def _get_fake_db_cb(
                 {"code": "mock 404", "detail": f"NotFound at {url}", "source": None}
             ]
         )
-        result = _CallbackResult(404, headers={}, body=errors.json())
+        result = CallbackResult(404, headers={}, body=errors.json())
     else:
-        result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(item))
     return result
 
 
-def _delete_fake_db_datasources_cb(
+def delete_datasources_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     LOGGER.info(f"{request.method} {url}")
 
@@ -192,15 +192,15 @@ def _delete_fake_db_datasources_cb(
         errors = ErrorPayloadSchema(
             errors=[{"code": "mock 404", "detail": None, "source": None}]
         )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=errors.json())
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
     else:
-        result = _CallbackResult(204, headers=_DEFAULT_HEADERS, body="")
+        result = CallbackResult(204, headers=DEFAULT_HEADERS, body="")
     return result
 
 
-def _post_fake_db_datasources_cb(
+def post_datasources_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -208,9 +208,9 @@ def _post_fake_db_datasources_cb(
     datasource_path = f"{url}/{FAKE_DATASOURCE_ID}"
 
     if not request.body:
-        return _CallbackResult(
+        return CallbackResult(
             400,
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[{"code": "400", "detail": "Missing Body", "source": None}]
             ).json(),
@@ -218,7 +218,7 @@ def _post_fake_db_datasources_cb(
 
     try:
         LOGGER.info(f"POST request body -->\n{pf(json.loads(request.body), depth=4)}")
-        payload = _CloudResponseSchema.from_datasource_json(request.body)
+        payload = CloudResponseSchema.from_datasource_json(request.body)
 
         datasource_name: str = payload.data.name
         if datasource_name not in ds_names:
@@ -230,7 +230,7 @@ def _post_fake_db_datasources_cb(
             _CLOUD_API_FAKE_DB[datasource_path] = payload.dict()
             _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].add(payload.data.name)
 
-            result = _CallbackResult(201, headers=_DEFAULT_HEADERS, body=payload.json())
+            result = CallbackResult(201, headers=DEFAULT_HEADERS, body=payload.json())
         else:
             errors = ErrorPayloadSchema(
                 errors=[
@@ -241,14 +241,14 @@ def _post_fake_db_datasources_cb(
                     }
                 ]
             )
-            result = _CallbackResult(409, headers=_DEFAULT_HEADERS, body=errors.json())
+            result = CallbackResult(409, headers=DEFAULT_HEADERS, body=errors.json())
 
         return result
     except pydantic.ValidationError as val_err:
         LOGGER.exception(val_err)
-        return _CallbackResult(
+        return CallbackResult(
             400,
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[
                     {
@@ -260,18 +260,18 @@ def _post_fake_db_datasources_cb(
             ).json(),
         )
     except Exception as err:
-        return _CallbackResult(
+        return CallbackResult(
             500,
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[{"code": "mock 500", "detail": repr(err), "source": None}]
             ).json(),
         )
 
 
-def _put_db_datasources_cb(
+def put_datasources_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -280,27 +280,25 @@ def _put_db_datasources_cb(
         errors = ErrorPayload(
             errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
         )
-        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+        result = CallbackResult(400, headers=DEFAULT_HEADERS, body=json.dumps(errors))
     elif item is not MISSING:
         payload = json.loads(request.body)
         LOGGER.info(f"PUT request body -->\n{pf(payload, depth=6)}")
         _CLOUD_API_FAKE_DB[url] = payload
-        result = _CallbackResult(
-            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
     else:
         errors = ErrorPayload(
             errors=[{"code": "mock 404", "detail": None, "source": None}]
         )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=json.dumps(errors))
 
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _get_db_datasources_cb(
+def get_datasources_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -309,24 +307,22 @@ def _get_db_datasources_cb(
         errors = ErrorPayload(
             errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
         )
-        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+        result = CallbackResult(400, headers=DEFAULT_HEADERS, body=json.dumps(errors))
     elif item is not MISSING:
         payload = json.loads(request.body)
         _CLOUD_API_FAKE_DB[url] = payload
-        result = _CallbackResult(
-            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
     else:
         errors = ErrorPayload(
             errors=[{"code": "mock 404", "detail": None, "source": None}]
         )
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=json.dumps(errors))
 
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _get_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
+def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -346,14 +342,14 @@ def _get_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
 
     resp_body = {"data": exp_suite_list}
 
-    result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
+    result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _get_db_expectation_suite_by_id_cb(
+def get_expectation_suite_by_id_cb(
     request: PreparedRequest,
-) -> _CallbackResult:
+) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -364,15 +360,15 @@ def _get_db_expectation_suite_by_id_cb(
         expectation_id
     )
     if expectation_suite:
-        result = _CallbackResult(
-            200, headers=_DEFAULT_HEADERS, body=json.dumps(expectation_suite)
+        result = CallbackResult(
+            200, headers=DEFAULT_HEADERS, body=json.dumps(expectation_suite)
         )
     else:
-        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body="")
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
     return result
 
 
-def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
+def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -386,9 +382,9 @@ def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
 
     if name in exp_suite_names:
-        result = _CallbackResult(
+        result = CallbackResult(
             409,  # not really a 409 in prod but it's a more informative status code
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[
                     {
@@ -404,15 +400,13 @@ def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
         payload["data"]["id"] = id_
         exp_suites[id_] = payload
         exp_suite_names.add(name)
-        result = _CallbackResult(
-            201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
+        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _get_checkpoints_cb(requests: PreparedRequest) -> _CallbackResult:
+def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     url = requests.url
     LOGGER.debug(f"{requests.method} {url}")
 
@@ -431,12 +425,12 @@ def _get_checkpoints_cb(requests: PreparedRequest) -> _CallbackResult:
 
     resp_body = {"data": checkpoint_list}
 
-    result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
+    result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
+def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -450,9 +444,9 @@ def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
     checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
 
     if name in checkpoint_names:
-        result = _CallbackResult(
+        result = CallbackResult(
             409,  # not really a 409 in prod but it's a more informative status code
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[
                     {
@@ -468,15 +462,13 @@ def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
         payload["data"]["id"] = id_
         checkpoints[id_] = payload
         checkpoint_names.add(name)
-        result = _CallbackResult(
-            201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
-        )
+        result = CallbackResult(201, headers=DEFAULT_HEADERS, body=json.dumps(payload))
 
     LOGGER.debug(f"Response {result.status}")
     return result
 
 
-def _post_validation_results_cb(request: PreparedRequest) -> _CallbackResult:
+def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -488,9 +480,9 @@ def _post_validation_results_cb(request: PreparedRequest) -> _CallbackResult:
     if validation_id:
         raise NotImplementedError("TODO: Handling the validation_id success case")
     else:
-        result = _CallbackResult(
+        result = CallbackResult(
             422,  # 400 in prod but this is a more informative status code
-            headers=_DEFAULT_HEADERS,
+            headers=DEFAULT_HEADERS,
             body=ErrorPayloadSchema(
                 errors=[
                     {
