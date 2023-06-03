@@ -12,6 +12,7 @@ from typing import (
     Literal,
     NamedTuple,
     Optional,
+    Sequence,
     Union,
 )
 
@@ -330,9 +331,8 @@ def _get_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
     LOGGER.debug(f"{request.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
-    query_params = urllib.parse.parse_qs(parsed_url.query)
-    # print(f"{query_params=}")
-    queried_names: list[str] = query_params.get("name", [])
+    query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
+    queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
     exp_suite_list: list[dict] = list(exp_suites.values())
@@ -344,7 +344,6 @@ def _get_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
             in queried_names
         ]
 
-    # print(pf(exp_suite_list, depth=5))
     resp_body = {"data": exp_suite_list}
 
     result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
@@ -359,7 +358,7 @@ def _get_db_expectation_suite_by_id_cb(
     LOGGER.debug(f"{request.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
-    expectation_id: str = parsed_url.path.split("/")[-1]
+    expectation_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
 
     expectation_suite: dict = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"].get(
         expectation_id
@@ -385,10 +384,8 @@ def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
     exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
-    # print(f"{name=}\n{pf(exp_suites, depth=3)}\n")
 
     if name in exp_suite_names:
-        print("conflict")
         result = _CallbackResult(
             409,  # not really a 409 in prod but it's a more informative status code
             headers=_DEFAULT_HEADERS,
@@ -411,7 +408,6 @@ def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
             201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
         )
 
-    # print(pf(exp_suites, depth=3))
     LOGGER.debug(f"Response {result.status}")
     return result
 
@@ -421,9 +417,8 @@ def _get_checkpoints_cb(requests: PreparedRequest) -> _CallbackResult:
     LOGGER.debug(f"{requests.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
-    query_params = urllib.parse.parse_qs(parsed_url.query)
-    # print(f"{query_params=}")
-    queried_names: list[str] = query_params.get("name", [])
+    query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
+    queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
     checkpoint_list: list[dict] = list(checkpoints.values())
@@ -434,7 +429,6 @@ def _get_checkpoints_cb(requests: PreparedRequest) -> _CallbackResult:
             if d["data"]["attributes"]["checkpoint_name"] in queried_names
         ]
 
-    # print(pf(checkpoint_list, depth=5))
     resp_body = {"data": checkpoint_list}
 
     result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
@@ -454,10 +448,8 @@ def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
 
     checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
     checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
-    # print(f"{name=}\n{pf(checkpoints, depth=3)}\n")
 
     if name in checkpoint_names:
-        print("conflict")
         result = _CallbackResult(
             409,  # not really a 409 in prod but it's a more informative status code
             headers=_DEFAULT_HEADERS,
@@ -480,7 +472,6 @@ def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
             201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
         )
 
-    # print(pf(checkpoints, depth=3))
     LOGGER.debug(f"Response {result.status}")
     return result
 
@@ -513,6 +504,5 @@ def _post_validation_results_cb(request: PreparedRequest) -> _CallbackResult:
             ).json(),
         )
 
-    # print(pf(validation_results, depth=3))
     LOGGER.debug(f"Response {result.status}")
     return result
