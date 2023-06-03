@@ -388,7 +388,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
             body=ErrorPayloadSchema(
                 errors=[
                     {
-                        "code": "mock 409",
+                        "code": "mock 400/409",
                         "detail": f"'{name}' already defined",
                         "source": None,
                     }
@@ -450,7 +450,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
             body=ErrorPayloadSchema(
                 errors=[
                     {
-                        "code": "mock 409",
+                        "code": "mock 400/409",
                         "detail": f"'{name}' already defined",
                         "source": None,
                     }
@@ -486,7 +486,7 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
             body=ErrorPayloadSchema(
                 errors=[
                     {
-                        "code": "Mock 422",
+                        "code": "Mock 400/422",
                         "detail": "Field may not be null.",
                         "source": {
                             "pointer": "/data/attributes/result/meta/validation_id"
