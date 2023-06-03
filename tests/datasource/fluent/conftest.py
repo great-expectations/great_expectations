@@ -52,13 +52,17 @@ from tests.datasource.fluent._fake_cloud_api import (
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
     _delete_fake_db_datasources_cb,
+    _get_checkpoints_cb,
     _get_db_datasources_cb,
     _get_db_expectation_suite_by_id_cb,
     _get_db_expectation_suites_cb,
     _get_fake_db_cb,
+    _post_checkpoints_cb,
     _post_db_expectation_suites_cb,
     _post_fake_db_datasources_cb,
+    _post_validation_results_cb,
     _put_db_datasources_cb,
+    create_fake_db_seed_data,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
@@ -208,50 +212,7 @@ def cloud_api_fake(cloud_details: CloudDetails):
     datasources_url = f"{org_url_base}/datasources"
 
     assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
-    _CLOUD_API_FAKE_DB.update(
-        {
-            dc_config_url: {
-                "anonymous_usage_statistics": {
-                    "data_context_id": FAKE_DATA_CONTEXT_ID,
-                    "enabled": False,
-                },
-                "datasources": {},
-                "checkpoint_store_name": "default_checkpoint_store",
-                "expectations_store_name": "default_expectations_store",
-                "stores": {
-                    "default_expectations_store": {
-                        "class_name": "ExpectationsStore",
-                        "store_backend": {
-                            "class_name": "GXCloudStoreBackend",
-                            "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
-                            "ge_cloud_credentials": {
-                                "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
-                                "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
-                            },
-                            "ge_cloud_resource_type": "expectation_suite",
-                            "suppress_store_backend_id": True,
-                        },
-                    },
-                    "default_checkpoint_store": {
-                        "class_name": "CheckpointStore",
-                        "store_backend": {
-                            "class_name": "GXCloudStoreBackend",
-                            "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
-                            "ge_cloud_credentials": {
-                                "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
-                                "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
-                            },
-                            "ge_cloud_resource_type": "checkpoint",
-                            "suppress_store_backend_id": True,
-                        },
-                    },
-                },
-            },
-            "DATASOURCE_NAMES": set(),
-            "EXPECTATION_SUITE_NAMES": set(),
-            "EXPECTATION_SUITES": {},
-        }
-    )
+    _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(dc_config_url))
 
     logger.info("Mocking the GX Cloud API")
 
@@ -292,6 +253,21 @@ def cloud_api_fake(cloud_details: CloudDetails):
             responses.POST,
             f"{org_url_base}/expectation-suites",
             _post_db_expectation_suites_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/checkpoints",
+            _get_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/checkpoints",
+            _post_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/validation-results",
+            _post_validation_results_cb,
         )
 
         yield resp_mocker

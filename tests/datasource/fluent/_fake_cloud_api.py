@@ -41,10 +41,76 @@ FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
+FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
 
 
 _CLOUD_API_FAKE_DB: dict = {}
 _DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
+
+
+def create_fake_db_seed_data(dc_config_url: str) -> dict:
+    return {
+        dc_config_url: {
+            "anonymous_usage_statistics": {
+                "data_context_id": FAKE_DATA_CONTEXT_ID,
+                "enabled": False,
+            },
+            "datasources": {},
+            "checkpoint_store_name": "default_checkpoint_store",
+            "expectations_store_name": "default_expectations_store",
+            "evaluation_parameter_store_name": "default_evaluation_parameter_store",
+            "validations_store_name": "default_validations_store",
+            "stores": {
+                "default_evaluation_parameter_store": {
+                    "class_name": "EvaluationParameterStore"
+                },
+                "default_expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "GXCloudStoreBackend",
+                        "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
+                        "ge_cloud_credentials": {
+                            "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
+                            "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
+                        },
+                        "ge_cloud_resource_type": "expectation_suite",
+                        "suppress_store_backend_id": True,
+                    },
+                },
+                "default_checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "GXCloudStoreBackend",
+                        "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
+                        "ge_cloud_credentials": {
+                            "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
+                            "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
+                        },
+                        "ge_cloud_resource_type": "checkpoint",
+                        "suppress_store_backend_id": True,
+                    },
+                },
+                "default_validations_store": {
+                    "class_name": "ValidationsStore",
+                    "store_backend": {
+                        "class_name": "GXCloudStoreBackend",
+                        "ge_cloud_base_url": r"${GX_CLOUD_BASE_URL}",
+                        "ge_cloud_credentials": {
+                            "access_token": r"${GX_CLOUD_ACCESS_TOKEN}",
+                            "organization_id": r"${GX_CLOUD_ORGANIZATION_ID}",
+                        },
+                        "ge_cloud_resource_type": "validation_result",
+                        "suppress_store_backend_id": True,
+                    },
+                },
+            },
+        },
+        "DATASOURCE_NAMES": set(),
+        "EXPECTATION_SUITE_NAMES": set(),
+        "EXPECTATION_SUITES": {},
+        "CHECKPOINT_NAMES": set(),
+        "CHECKPOINTS": {},
+    }
 
 
 class _DatasourceSchema(pydantic.BaseModel):
@@ -80,6 +146,11 @@ class _CallbackResult(NamedTuple):
 
 ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
 ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
+
+
+# ##################################
+# Cloud API Mock Callbacks
+# ##################################
 
 
 def _get_fake_db_cb(
@@ -341,5 +412,107 @@ def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
         )
 
     # print(pf(exp_suites, depth=3))
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
+def _get_checkpoints_cb(requests: PreparedRequest) -> _CallbackResult:
+    url = requests.url
+    LOGGER.debug(f"{requests.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    query_params = urllib.parse.parse_qs(parsed_url.query)
+    # print(f"{query_params=}")
+    queried_names: list[str] = query_params.get("name", [])
+
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
+    checkpoint_list: list[dict] = list(checkpoints.values())
+    if queried_names:
+        checkpoint_list = [
+            d
+            for d in checkpoint_list
+            if d["data"]["attributes"]["checkpoint_name"] in queried_names
+        ]
+
+    # print(pf(checkpoint_list, depth=5))
+    resp_body = {"data": checkpoint_list}
+
+    result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
+def _post_checkpoints_cb(request: PreparedRequest) -> _CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    name = payload["data"]["attributes"]["checkpoint_config"]["name"]
+
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
+    checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
+    # print(f"{name=}\n{pf(checkpoints, depth=3)}\n")
+
+    if name in checkpoint_names:
+        print("conflict")
+        result = _CallbackResult(
+            409,  # not really a 409 in prod but it's a more informative status code
+            headers=_DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "mock 409",
+                        "detail": f"'{name}' already defined",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        id_ = FAKE_CHECKPOINT_ID
+        payload["data"]["id"] = id_
+        checkpoints[id_] = payload
+        checkpoint_names.add(name)
+        result = _CallbackResult(
+            201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+
+    # print(pf(checkpoints, depth=3))
+    LOGGER.debug(f"Response {result.status}")
+    return result
+
+
+def _post_validation_results_cb(request: PreparedRequest) -> _CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    validation_id = payload["data"]["attributes"]["result"]["meta"]["validation_id"]
+    if validation_id:
+        raise NotImplementedError("TODO: Handling the validation_id success case")
+    else:
+        result = _CallbackResult(
+            422,  # 400 in prod but this is a more informative status code
+            headers=_DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "Mock 422",
+                        "detail": "Field may not be null.",
+                        "source": {
+                            "pointer": "/data/attributes/result/meta/validation_id"
+                        },
+                    }
+                ]
+            ).json(),
+        )
+
+    # print(pf(validation_results, depth=3))
     LOGGER.debug(f"Response {result.status}")
     return result
