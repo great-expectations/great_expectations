@@ -1100,7 +1100,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
             )
         )[0]
 
-    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     return Validator(
         execution_engine=execution_engine,
@@ -1147,7 +1147,7 @@ def build_spark_validator_with_data(
             df.columns.tolist(),
         )
 
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type] # got DataFrame
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1203,7 +1203,7 @@ def build_sa_execution_engine(  # noqa: PLR0913
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     if batch_id is None:
         batch_id = batch.id

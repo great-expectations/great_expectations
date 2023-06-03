@@ -125,7 +125,8 @@ class UserConfigurableProfiler:
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
                 execution_engine=cast(
-                    ExecutionEngine, self.profile_dataset.data.execution_engine
+                    ExecutionEngine,
+                    self.profile_dataset.data.execution_engine,  # type: ignore[union-attr] # execution_engine
                 ),
                 batches=[self.profile_dataset],
             )
