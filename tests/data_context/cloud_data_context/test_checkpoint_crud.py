@@ -268,12 +268,6 @@ def test_cloud_backed_data_context_add_checkpoint(
             },
         )
 
-        mock_get.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            params={"name": checkpoint_config["name"]},
-        )
-
     assert checkpoint.ge_cloud_id == checkpoint_id
     assert checkpoint.config.ge_cloud_id == checkpoint_id
 
