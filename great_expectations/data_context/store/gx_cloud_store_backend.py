@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ErrorDetail(TypedDict):
     code: Optional[str]
     detail: Optional[str]
-    source: Optional[str]
+    source: Union[str, Dict[str, str], None]
 
 
 class ErrorPayload(TypedDict):
