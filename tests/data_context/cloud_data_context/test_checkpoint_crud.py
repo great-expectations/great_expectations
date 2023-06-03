@@ -293,15 +293,12 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     context = empty_cloud_data_context
 
     with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
         "requests.Session.put", autospec=True, side_effect=mocked_put_response
     ) as mock_put, mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
-        checkpoint_1 = context.add_checkpoint(**checkpoint_config)
-        checkpoint_2 = context.add_checkpoint(
-            ge_cloud_id=checkpoint_1.ge_cloud_id, **checkpoint_config
+        checkpoint = context.add_checkpoint(
+            ge_cloud_id=checkpoint_id, **checkpoint_config
         )
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -309,10 +306,20 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
             CheckpointConfig(**checkpoint_config)
         )
 
-        # Called during creation of `checkpoint_1`
-        mock_post.assert_called_once_with(
+        # Always called by store after POST and PATCH calls
+        assert mock_get.call_count == 3
+        mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
+            params=None,
+        )
+
+        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+
+        # Called during creation of `checkpoint` (which is `checkpoint_1` but updated)
+        mock_put.assert_called_once_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             json={
                 "data": {
                     "type": "checkpoint",
@@ -320,13 +327,14 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
                         "checkpoint_config": expected_checkpoint_config,
                         "organization_id": ge_cloud_organization_id,
                     },
+                    "id": checkpoint_id,
                 },
             },
         )
 
-        # Always called by store after POST and PATCH calls
-        assert mock_get.call_count == 2
-        mock_get.assert_called_with(
+    assert checkpoint.ge_cloud_id == checkpoint_id
+
+
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
             params={"name": checkpoint_config["name"]},
