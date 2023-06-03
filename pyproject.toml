@@ -70,7 +70,6 @@ exclude = [
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'core/batch\.py', # 29
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/base\.py', # 8
