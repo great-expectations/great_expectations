@@ -947,7 +947,11 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        engine = sa.create_engine(connection_string)
+        # This is the other place that we need to do the warning block?
+        with warnings.catch_warnings():
+            # Ignore warnings about Trino dialect not having implemented import_dbapi() method
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            engine = sa.create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
         engine = sa.create_engine(connection_string)
