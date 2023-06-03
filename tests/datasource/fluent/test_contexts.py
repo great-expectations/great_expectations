@@ -15,14 +15,16 @@ from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from tests.datasource.fluent.conftest import (
+from tests.datasource.fluent._fake_cloud_api import (
     _DEFAULT_HEADERS,
     FAKE_DATASOURCE_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
-    CloudDetails,
     _CallbackResult,
     _CloudResponseSchema,
+)
+from tests.datasource.fluent.conftest import (
+    CloudDetails,
 )
 
 if TYPE_CHECKING:
