@@ -74,6 +74,7 @@ DUMMY_JWT_TOKEN: Final[
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
 FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
+FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
 
 MISSING: Final = object()
 
@@ -402,6 +403,97 @@ def _get_db_datasources_callback(
     return result
 
 
+def _get_db_expectation_suites_callback(request: PreparedRequest) -> _CallbackResult:
+    url = request.url
+    logger.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    query_params = urllib.parse.parse_qs(parsed_url.query)
+    # print(f"{query_params=}")
+    queried_names: list[str] = query_params.get("name", [])
+
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
+    exp_suite_list: list[dict] = list(exp_suites.values())
+    if queried_names:
+        exp_suite_list = [
+            d
+            for d in exp_suite_list
+            if d["data"]["attributes"]["suite"]["expectation_suite_name"]
+            in queried_names
+        ]
+
+    # print(pf(exp_suite_list, depth=5))
+    resp_body = {"data": exp_suite_list}
+
+    result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(resp_body))
+    logger.debug(f"Response {result.status}")
+    return result
+
+
+def _get_db_expectation_suite_by_id_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    expectation_id: str = parsed_url.path.split("/")[-1]
+
+    expectation_suite: dict = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"].get(
+        expectation_id
+    )
+    if expectation_suite:
+        result = _CallbackResult(
+            200, headers=_DEFAULT_HEADERS, body=json.dumps(expectation_suite)
+        )
+    else:
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body="")
+    return result
+
+
+def _post_db_expectation_suites_callback(request: PreparedRequest) -> _CallbackResult:
+    url = request.url
+    logger.debug(f"{request.method} {url}")
+
+    if not request.body:
+        raise NotImplementedError("Handling missing body")
+
+    payload: dict = json.loads(request.body)
+    name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
+
+    exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
+    # print(f"{name=}\n{pf(exp_suites, depth=3)}\n")
+
+    if name in exp_suite_names:
+        print("conflict")
+        result = _CallbackResult(
+            409,  # not really a 409 in prod but it's a more informative status code
+            headers=_DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "mock 409",
+                        "detail": f"'{name}' already defined",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    else:
+        id_ = FAKE_EXPECTATION_SUITE_ID
+        payload["data"]["id"] = id_
+        exp_suites[id_] = payload
+        exp_suite_names.add(name)
+        result = _CallbackResult(
+            201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+
+    # print(pf(exp_suites, depth=3))
+    logger.debug(f"Response {result.status}")
+    return result
+
+
 class CloudDetails(NamedTuple):
     base_url: str
     org_id: str
@@ -449,6 +541,8 @@ def cloud_api_fake(cloud_details: CloudDetails):
                 },
             },
             "DATASOURCE_NAMES": set(),
+            "EXPECTATION_SUITE_NAMES": set(),
+            "EXPECTATION_SUITES": {},
         }
     )
 
@@ -478,6 +572,21 @@ def cloud_api_fake(cloud_details: CloudDetails):
             responses.GET,
             f"{datasources_url}",
             _get_db_datasources_callback,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/expectation-suites",
+            _get_db_expectation_suites_callback,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            _get_db_expectation_suite_by_id_callback,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/expectation-suites",
+            _post_db_expectation_suites_callback,
         )
 
         yield resp_mocker
