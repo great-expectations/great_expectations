@@ -251,8 +251,8 @@ def run_batch_head(
         batch_request=batch_request
     )
     assert len(batch_list) > 0
-    #breakpoint()
-    #breakpoint()
+    # breakpoint()
+    # breakpoint()
     # arbitrarily select the first batch for testing
     batch: Batch = batch_list[0]
     if success:
