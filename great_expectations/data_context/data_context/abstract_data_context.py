@@ -541,7 +541,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @property
-    def stores(self) -> dict[str, dict]:
+    def stores(self) -> dict:
         """A single holder for all Stores in this context"""
         return self._stores
 
