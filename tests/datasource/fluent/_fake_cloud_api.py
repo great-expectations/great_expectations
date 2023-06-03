@@ -82,7 +82,7 @@ ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
 ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
 
 
-def _get_fake_db_callback(
+def _get_fake_db_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -109,7 +109,7 @@ def _get_fake_db_callback(
     return result
 
 
-def _delete_fake_db_datasources_callback(
+def _delete_fake_db_datasources_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -126,7 +126,7 @@ def _delete_fake_db_datasources_callback(
     return result
 
 
-def _post_fake_db_datasources_callback(
+def _post_fake_db_datasources_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -197,7 +197,7 @@ def _post_fake_db_datasources_callback(
         )
 
 
-def _put_db_datasources_callback(
+def _put_db_datasources_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -226,7 +226,7 @@ def _put_db_datasources_callback(
     return result
 
 
-def _get_db_datasources_callback(
+def _get_db_datasources_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -254,7 +254,7 @@ def _get_db_datasources_callback(
     return result
 
 
-def _get_db_expectation_suites_callback(request: PreparedRequest) -> _CallbackResult:
+def _get_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
@@ -281,7 +281,7 @@ def _get_db_expectation_suites_callback(request: PreparedRequest) -> _CallbackRe
     return result
 
 
-def _get_db_expectation_suite_by_id_callback(
+def _get_db_expectation_suite_by_id_cb(
     request: PreparedRequest,
 ) -> _CallbackResult:
     url = request.url
@@ -302,7 +302,7 @@ def _get_db_expectation_suite_by_id_callback(
     return result
 
 
-def _post_db_expectation_suites_callback(request: PreparedRequest) -> _CallbackResult:
+def _post_db_expectation_suites_cb(request: PreparedRequest) -> _CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
