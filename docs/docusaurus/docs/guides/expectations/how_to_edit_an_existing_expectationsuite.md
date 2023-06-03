@@ -1,8 +1,8 @@
 ---
-title: How to Edit an Expectation Suite 
+title: How to Edit an Expectation Suite using ExpectationConfiguration
 tag: [how-to, getting started]
-description: Create an Expectation Suite using a Validator. Then, examine and modify specific Expectations in the Suite.
-keywords: [Expectations, ExpectationsSuite]
+description: Create an Expectation Suite using a Validator. Then, examine and modify specific Expectations in the Suite using Expectation Configuration.
+keywords: [Expectations, ExpectationsSuite, Expectation Configuration, ExpectationConfiguration]
 ---
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
