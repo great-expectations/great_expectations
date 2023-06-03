@@ -243,8 +243,10 @@ def test_cloud_backed_data_context_add_checkpoint(
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
+        "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
+        autospec=True,
+        return_value=False,
+    ) as _:
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
