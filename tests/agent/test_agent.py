@@ -191,11 +191,17 @@ def test_gx_agent_updates_cloud_on_job_status(
         datasource_name="test-ds", data_asset_name="test-da"
     )
 
+    end_test = False
+
+    def signal_subtask_finished():
+        nonlocal end_test
+        end_test = True
+
     event_context = EventContext(
         event=event,
         correlation_id=correlation_id,
-        processed_successfully=lambda: None,
-        processed_with_failures=lambda: None,
+        processed_successfully=signal_subtask_finished,
+        processed_with_failures=signal_subtask_finished,
         redeliver_message=redeliver_message,
     )
     event_handler.return_value.handle_event.return_value = ActionResult(
@@ -203,20 +209,27 @@ def test_gx_agent_updates_cloud_on_job_status(
     )
 
     def consume(queue: str, on_message: Callable[[EventContext], None]):
-        """util to allow us to test agent behavior without a subscriber."""
+        """util to allow testing agent behavior without a subscriber.
+
+        Replicates behavior of Subscriber.consume by invoking the on_message
+        parameter with an event_context.
+        """
+        nonlocal event_context
         on_message(event_context)
+
+        # we need the main thread to remain alive until event handler has finished
+        nonlocal end_test
+        while end_test is False:
+            sleep(0)  # defer control
 
     subscriber().consume = consume
 
     agent = GXAgent()
     agent.run()
 
-    sleep(0.00001)  # give the worker thread a chance to finish
-
     create_session.return_value.patch.assert_has_calls(
         calls=[
             call(url, data=job_started_data),
             call(url, data=job_completed_data),
         ],
-        any_order=True,  # order not guaranteed due to threading
     )

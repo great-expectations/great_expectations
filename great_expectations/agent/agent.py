@@ -222,7 +222,12 @@ class GXAgent:
             gx_cloud_organization_id: str
             gx_cloud_access_token: str
 
-        config = GxAgentConfigSettings()
+        try:
+            config = GxAgentConfigSettings()
+        except pydantic.ValidationError as validation_err:
+            raise GXAgentError(
+                f"Missing or badly formed environment variable\n{validation_err.errors()}"
+            ) from validation_err
 
         # obtain the broker url and queue name from Cloud
 
