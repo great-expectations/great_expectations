@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
+import re
 import urllib.parse
 import uuid
 from pprint import pformat as pf
@@ -9,25 +11,34 @@ from typing import (
     TYPE_CHECKING,
     Dict,
     Final,
+    Generator,
     Literal,
     NamedTuple,
     Optional,
     Sequence,
+    Set,
+    TypedDict,
     Union,
 )
 
 import pydantic
+import responses
 
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     ErrorDetail,
     ErrorPayload,
 )
+from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
     from requests import PreparedRequest
 
 
 LOGGER = logging.getLogger(__name__)
+
+# ##########################
+# Constants
+# ##########################
 
 MISSING: Final = object()
 
@@ -40,23 +51,108 @@ DUMMY_JWT_TOKEN: Final[
 # https://github.com/getsentry/responses/tree/master#dynamic-responses
 FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
-FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
 FAKE_EXPECTATION_SUITE_ID: Final[str] = str(uuid.uuid4())
 FAKE_CHECKPOINT_ID: Final[str] = str(uuid.uuid4())
+UUID_REGEX: Final[str] = r"[a-f0-9-]{36}"
 
 DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
 
-_CLOUD_API_FAKE_DB: dict = {}
+# ##########################
+# Models & Types
+# ##########################
 
 
-def create_fake_db_seed_data(dc_config_url: str) -> dict:
+class _DatasourceSchema(pydantic.BaseModel):
+    id: Optional[str] = None
+    type: Literal["datasource"]
+    attributes: Dict[str, Union[Dict, str]]
+
+    @property
+    def name(self) -> str:
+        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
+
+
+class CloudResponseSchema(pydantic.BaseModel):
+    data: _DatasourceSchema
+
+    @classmethod
+    def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
+        payload_dict = json.loads(ds_payload)
+        data = {
+            "id": payload_dict.get("id"),
+            "type": "datasource",
+            "attributes": payload_dict["data"]["attributes"],
+        }
+
+        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
+
+
+class CallbackResult(NamedTuple):
+    status: int
+    headers: dict[str, str]
+    body: str
+
+
+ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
+ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
+
+
+class CloudDetails(NamedTuple):
+    base_url: str
+    org_id: str
+    access_token: str
+
+
+FakeDBTypedDict = TypedDict(
+    "FakeDBTypedDict",
+    # using alternative syntax for creating type dict because of key names with hyphens
+    # https://peps.python.org/pep-0589/#alternative-syntax
+    {
+        "data-context-configuration": Dict[str, Union[str, dict]],
+        "DATASOURCE_NAMES": Set[str],
+        "DATASOURCES": Dict[str, dict],
+        "EXPECTATION_SUITE_NAMES": Set[str],
+        "EXPECTATION_SUITES": Dict[str, dict],
+        "CHECKPOINT_NAMES": Set[str],
+        "CHECKPOINTS": Dict[str, dict],
+    },
+)
+
+# ##########################
+# Helpers
+# ##########################
+
+
+@pydantic.validate_arguments
+def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTypedDict:
+    fds_config = fds_config or GxConfig(fluent_datasources=[])
+    datasource_names: set[str] = set()
+    datasource_config: dict[str, dict] = {}
+    datasources_by_id: dict[str, dict] = {}
+
+    for ds in fds_config._json_dict()["fluent_datasources"]:
+        name: str = ds["name"]
+        datasource_names.add(name)
+
+        id: str = str(uuid.uuid4())
+        ds["id"] = id
+
+        datasource_config[name] = ds
+        datasources_by_id[id] = ds
+
     return {
-        dc_config_url: {
+        "DATASOURCE_NAMES": datasource_names,
+        "DATASOURCES": datasources_by_id,
+        "EXPECTATION_SUITE_NAMES": set(),
+        "EXPECTATION_SUITES": {},
+        "CHECKPOINT_NAMES": set(),
+        "CHECKPOINTS": {},
+        "data-context-configuration": {
             "anonymous_usage_statistics": {
                 "data_context_id": FAKE_DATA_CONTEXT_ID,
                 "enabled": False,
             },
-            "datasources": {},
+            "datasources": datasource_config,
             "checkpoint_store_name": "default_checkpoint_store",
             "expectations_store_name": "default_expectations_store",
             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
@@ -106,78 +202,58 @@ def create_fake_db_seed_data(dc_config_url: str) -> dict:
                 },
             },
         },
-        "DATASOURCE_NAMES": set(),
-        "EXPECTATION_SUITE_NAMES": set(),
-        "EXPECTATION_SUITES": {},
-        "CHECKPOINT_NAMES": set(),
-        "CHECKPOINTS": {},
     }
-
-
-class _DatasourceSchema(pydantic.BaseModel):
-    id: Optional[str] = None
-    type: Literal["datasource"]
-    attributes: Dict[str, Union[Dict, str]]
-
-    @property
-    def name(self) -> str:
-        return self.attributes["datasource_config"]["name"]  # type: ignore[index]
-
-
-class CloudResponseSchema(pydantic.BaseModel):
-    data: _DatasourceSchema
-
-    @classmethod
-    def from_datasource_json(cls, ds_payload: str | bytes) -> CloudResponseSchema:
-        payload_dict = json.loads(ds_payload)
-        data = {
-            "id": payload_dict.get("id"),
-            "type": "datasource",
-            "attributes": payload_dict["data"]["attributes"],
-        }
-
-        return cls(data=data)  # type: ignore[arg-type] # pydantic type coercion
-
-
-class CallbackResult(NamedTuple):
-    status: int
-    headers: dict[str, str]
-    body: str
-
-
-ErrorPayloadSchema = pydantic.create_model_from_typeddict(ErrorPayload)
-ErrorPayloadSchema.update_forward_refs(ErrorDetail=ErrorDetail)
 
 
 # ##################################
 # Cloud API Mock Callbacks
 # ##################################
 
+# WARNING: this dict should always be cleared during test teardown
+_CLOUD_API_FAKE_DB: FakeDBTypedDict = {}  # type: ignore[typeddict-item] # will be assigned in `create_fake_db_seed_data`
 
-def get_cb(
+
+def get_dc_configuration_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
-    url = request.url
-    assert url
-    LOGGER.debug(f"{request.method} {url}")
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
+    resource_path: str = request.url.split("/")[-1]
+    dc_config = _CLOUD_API_FAKE_DB.get(resource_path)
+    LOGGER.debug(f"GET response body -->\n{pf(dc_config, depth=2)}")
+    if not dc_config:
+        raise NotImplementedError(f"{resource_path} should never be empty")
+    return CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(dc_config))
 
-    parsed_url = urllib.parse.urlparse(url)
 
-    _ = parsed_url.query
-    # TODO: do something with this
-    url = urllib.parse.urljoin(url, parsed_url.path)
+def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
+    LOGGER.debug(f"{request.method} {request.url}")
 
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    LOGGER.info(f"GET response body -->\n{pf(item, depth=2)}")
-    if item is MISSING:
-        errors = ErrorPayloadSchema(
-            errors=[
-                {"code": "mock 404", "detail": f"NotFound at {url}", "source": None}
-            ]
+    parsed_url = urllib.parse.urlparse(request.url)
+    datasource_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
+
+    datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
+    if datasource:
+        result = CallbackResult(
+            200, headers=DEFAULT_HEADERS, body=json.dumps(datasource)
         )
-        result = CallbackResult(404, headers={}, body=errors.json())
     else:
-        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(item))
+        result = CallbackResult(
+            404,
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "Mock 404",
+                        "detail": f"Datasource {datasource_id} not found",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
     return result
 
 
@@ -185,16 +261,24 @@ def delete_datasources_cb(
     request: PreparedRequest,
 ) -> CallbackResult:
     url = request.url
-    LOGGER.info(f"{request.method} {url}")
+    LOGGER.debug(f"{request.method} {url}")
 
-    item = _CLOUD_API_FAKE_DB.pop(url, MISSING)
-    if item is MISSING:
+    parsed_url = urllib.parse.urlparse(url)
+    datasource_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+
+    datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["DATASOURCES"]
+    deleted_ds = datasources.pop(datasource_id, None)
+    print(pf(deleted_ds, depth=5))
+    if deleted_ds:
+        ds_name = deleted_ds["data"]["attributes"]["datasource_config"]["name"]
+        _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].remove(ds_name)
+        LOGGER.debug(f"Deleted datasource '{ds_name}'")
+        result = CallbackResult(204, headers={}, body="")
+    else:
         errors = ErrorPayloadSchema(
             errors=[{"code": "mock 404", "detail": None, "source": None}]
         )
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body=errors.json())
-    else:
-        result = CallbackResult(204, headers=DEFAULT_HEADERS, body="")
     return result
 
 
@@ -205,7 +289,6 @@ def post_datasources_cb(
     LOGGER.debug(f"{request.method} {url}")
 
     ds_names: set[str] = _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"]
-    datasource_path = f"{url}/{FAKE_DATASOURCE_ID}"
 
     if not request.body:
         return CallbackResult(
@@ -217,17 +300,20 @@ def post_datasources_cb(
         )
 
     try:
-        LOGGER.info(f"POST request body -->\n{pf(json.loads(request.body), depth=4)}")
+        LOGGER.debug(f"POST request body -->\n{pf(json.loads(request.body), depth=4)}")
         payload = CloudResponseSchema.from_datasource_json(request.body)
 
         datasource_name: str = payload.data.name
         if datasource_name not in ds_names:
             datasource_id = payload.data.id
             if not datasource_id:
-                datasource_id = FAKE_DATASOURCE_ID
+                datasource_id = str(uuid.uuid4())
                 payload.data.id = datasource_id
+            assert (
+                datasource_id not in _CLOUD_API_FAKE_DB["DATASOURCES"]
+            ), f"ID collision for '{datasource_name}'"
 
-            _CLOUD_API_FAKE_DB[datasource_path] = payload.dict()
+            _CLOUD_API_FAKE_DB["DATASOURCES"][datasource_id] = payload.dict()
             _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].add(payload.data.name)
 
             result = CallbackResult(201, headers=DEFAULT_HEADERS, body=payload.json())
@@ -269,30 +355,34 @@ def post_datasources_cb(
         )
 
 
-def put_datasources_cb(
-    request: PreparedRequest,
-) -> CallbackResult:
-    url = request.url
-    LOGGER.debug(f"{request.method} {url}")
+def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
+    LOGGER.debug(f"{request.method} {request.url}")
+    if not request.url:
+        raise NotImplementedError("request.url should not be empty")
 
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     if not request.body:
-        errors = ErrorPayload(
+        errors = ErrorPayloadSchema(
             errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
         )
-        result = CallbackResult(400, headers=DEFAULT_HEADERS, body=json.dumps(errors))
-    elif item is not MISSING:
-        payload = json.loads(request.body)
-        LOGGER.info(f"PUT request body -->\n{pf(payload, depth=6)}")
-        _CLOUD_API_FAKE_DB[url] = payload
-        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
-    else:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
-        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=json.dumps(errors))
+        return CallbackResult(400, headers=DEFAULT_HEADERS, body=errors.json())
 
-    LOGGER.debug(f"Response {result.status}")
+    LOGGER.debug(f"PUT request body -->\n{pf(json.loads(request.body), depth=4)}")
+    payload = CloudResponseSchema.from_datasource_json(request.body)
+
+    parsed_url = urllib.parse.urlparse(request.url)
+    datasource_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
+
+    old_datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
+    if old_datasource:
+        if (
+            payload.data.name
+            != old_datasource["data"]["attributes"]["datasource_config"]["name"]
+        ):
+            raise NotImplementedError("Unsure how to handle name change")
+        _CLOUD_API_FAKE_DB["DATASOURCES"][datasource_id] = payload.dict()
+        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
+    else:
+        result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
     return result
 
 
@@ -302,22 +392,21 @@ def get_datasources_cb(
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
 
-    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
-    if not request.body:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
-        )
-        result = CallbackResult(400, headers=DEFAULT_HEADERS, body=json.dumps(errors))
-    elif item is not MISSING:
-        payload = json.loads(request.body)
-        _CLOUD_API_FAKE_DB[url] = payload
-        result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(payload))
-    else:
-        errors = ErrorPayload(
-            errors=[{"code": "mock 404", "detail": None, "source": None}]
-        )
-        result = CallbackResult(404, headers=DEFAULT_HEADERS, body=json.dumps(errors))
+    parsed_url = urllib.parse.urlparse(url)
+    query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
+    queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
+    all_datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["DATASOURCES"]
+    datasources_list: list[dict] = list(all_datasources.values())
+    if queried_names:
+        datasources_list = [
+            d
+            for d in datasources_list
+            if d["data"]["attributes"]["datasource_config"]["name"] in queried_names
+        ]
+
+    resp_body = {"data": datasources_list}
+    result = CallbackResult(200, headers=DEFAULT_HEADERS, body=json.dumps(resp_body))
     LOGGER.debug(f"Response {result.status}")
     return result
 
@@ -354,9 +443,9 @@ def get_expectation_suite_by_id_cb(
     LOGGER.debug(f"{request.method} {url}")
 
     parsed_url = urllib.parse.urlparse(url)
-    expectation_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
+    expectation_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    expectation_suite: dict = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"].get(
+    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"].get(
         expectation_id
     )
     if expectation_suite:
@@ -430,6 +519,34 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     return result
 
 
+def get_checkpoint_by_id_cb(request: PreparedRequest) -> CallbackResult:
+    url = request.url
+    LOGGER.debug(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+    checkpoint_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
+
+    if checkpoint := _CLOUD_API_FAKE_DB["CHECKPOINTS"].get(checkpoint_id):
+        result = CallbackResult(
+            200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint)
+        )
+    else:
+        result = CallbackResult(
+            404,
+            headers=DEFAULT_HEADERS,
+            body=ErrorPayloadSchema(
+                errors=[
+                    {
+                        "code": "mock 404",
+                        "detail": f"Checkpoint '{checkpoint_id}' not found",
+                        "source": None,
+                    }
+                ]
+            ).json(),
+        )
+    return result
+
+
 def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     url = request.url
     LOGGER.debug(f"{request.method} {url}")
@@ -498,3 +615,94 @@ def post_validation_results_cb(request: PreparedRequest) -> CallbackResult:
 
     LOGGER.debug(f"Response {result.status}")
     return result
+
+
+# #######################
+# RequestMocks
+# #######################
+
+
+@contextlib.contextmanager
+def gx_cloud_api_fake_ctx(
+    cloud_details: CloudDetails,
+    fds_config: GxConfig | None = None,
+    assert_all_requests_are_fired: bool = False,
+) -> Generator[responses.RequestsMock, None, None]:
+    """Mock the GX Cloud API for the lifetime of the context manager."""
+    org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
+    dc_config_url = f"{org_url_base}/data-context-configuration"
+
+    assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
+    _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(fds_config))
+
+    LOGGER.info("Mocking the GX Cloud API")
+
+    with responses.RequestsMock(
+        assert_all_requests_are_fired=assert_all_requests_are_fired
+    ) as resp_mocker:
+        resp_mocker.add_callback(responses.GET, dc_config_url, get_dc_configuration_cb)
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/datasources",
+            get_datasources_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/datasources",
+            post_datasources_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            get_datasource_by_id_cb,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            delete_datasources_cb,
+        )
+        resp_mocker.add_callback(
+            responses.PUT,
+            re.compile(f"{org_url_base}/datasources/{UUID_REGEX}"),
+            put_datasource_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/expectation-suites",
+            get_expectation_suites_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
+            get_expectation_suite_by_id_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/expectation-suites",
+            post_expectation_suites_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/checkpoints",
+            get_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/checkpoints",
+            post_checkpoints_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{org_url_base}/checkpoints/{FAKE_CHECKPOINT_ID}",
+            get_checkpoint_by_id_cb,
+        )
+        resp_mocker.add_callback(
+            responses.POST,
+            f"{org_url_base}/validation-results",
+            post_validation_results_cb,
+        )
+
+        yield resp_mocker
+
+    LOGGER.info(f"GX Cloud API Mock ending state ->\n{pf(_CLOUD_API_FAKE_DB, depth=2)}")
+    _CLOUD_API_FAKE_DB.clear()

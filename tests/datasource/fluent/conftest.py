@@ -3,7 +3,6 @@ from __future__ import annotations
 import functools
 import logging
 import pathlib
-import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -13,7 +12,6 @@ from typing import (
     Final,
     Generator,
     List,
-    NamedTuple,
     Optional,
     Type,
     Union,
@@ -46,23 +44,11 @@ from great_expectations.execution_engine import (
 from tests.datasource.fluent._fake_cloud_api import (
     _CLOUD_API_FAKE_DB,
     DUMMY_JWT_TOKEN,
-    FAKE_DATA_CONTEXT_ID,
-    FAKE_DATASOURCE_ID,
-    FAKE_EXPECTATION_SUITE_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    CloudDetails,
     create_fake_db_seed_data,
-    delete_datasources_cb,
-    get_checkpoints_cb,
-    get_datasources_cb,
-    get_expectation_suite_by_id_cb,
-    get_expectation_suites_cb,
-    get_cb,
-    post_checkpoints_cb,
-    post_expectation_suites_cb,
-    post_datasources_cb,
-    post_validation_results_cb,
-    put_datasources_cb,
+    gx_cloud_api_fake_ctx,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
@@ -190,12 +176,6 @@ def seed_ds_env_vars(
     return tuple((k, v) for k, v in config_sub_dict.items())
 
 
-class CloudDetails(NamedTuple):
-    base_url: str
-    org_id: str
-    access_token: str
-
-
 @pytest.fixture(scope="session")
 def cloud_details() -> CloudDetails:
     return CloudDetails(
@@ -207,75 +187,8 @@ def cloud_details() -> CloudDetails:
 
 @pytest.fixture
 def cloud_api_fake(cloud_details: CloudDetails):
-    org_url_base = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
-    datasources_url = f"{org_url_base}/datasources"
-
-    assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
-    _CLOUD_API_FAKE_DB.update(create_fake_db_seed_data(dc_config_url))
-
-    logger.info("Mocking the GX Cloud API")
-
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_mocker:
-        resp_mocker.add_callback(responses.GET, dc_config_url, get_cb)
-        resp_mocker.add_callback(
-            responses.GET, f"{datasources_url}/{FAKE_DATASOURCE_ID}", get_cb
-        )
-        resp_mocker.add_callback(
-            responses.DELETE,
-            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            delete_datasources_cb,
-        )
-        resp_mocker.add_callback(
-            responses.PUT,
-            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
-            put_datasources_cb,
-        )
-        resp_mocker.add_callback(
-            responses.POST,
-            datasources_url,
-            post_datasources_cb,
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{datasources_url}",
-            get_datasources_cb,
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{org_url_base}/expectation-suites",
-            get_expectation_suites_cb,
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{org_url_base}/expectation-suites/{FAKE_EXPECTATION_SUITE_ID}",
-            get_expectation_suite_by_id_cb,
-        )
-        resp_mocker.add_callback(
-            responses.POST,
-            f"{org_url_base}/expectation-suites",
-            post_expectation_suites_cb,
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            f"{org_url_base}/checkpoints",
-            get_checkpoints_cb,
-        )
-        resp_mocker.add_callback(
-            responses.POST,
-            f"{org_url_base}/checkpoints",
-            post_checkpoints_cb,
-        )
-        resp_mocker.add_callback(
-            responses.POST,
-            f"{org_url_base}/validation-results",
-            post_validation_results_cb,
-        )
-
-        yield resp_mocker
-
-    logger.info(f"Ending state ->\n{pf(_CLOUD_API_FAKE_DB, depth=1)}")
-    _CLOUD_API_FAKE_DB.clear()
+    with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
+        yield requests_mock
 
 
 @pytest.fixture
@@ -456,34 +369,14 @@ def seed_cloud(
     `get_context()` calls.
     """
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
 
-    by_id = {}
-    fds_config = {}
-    datasource_names: set[str] = set()
-    for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
-        name: str = datasource["name"]
-        datasource["id"] = str(uuid.uuid4())
-        fds_config[name] = datasource
-        by_id[datasource["id"]] = datasource
-        datasource_names.add(name)
+    fake_db_data = create_fake_db_seed_data(fds_config=fluent_only_config)
+    _CLOUD_API_FAKE_DB.update(fake_db_data)  # type: ignore[typeddict-item]
 
-    _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"] = datasource_names
+    seeded_datasources = _CLOUD_API_FAKE_DB["data-context-configuration"]["datasources"]
+    logger.info(f"Seeded Datasources ->\n{pf(seeded_datasources, depth=2)}")
+    assert seeded_datasources
 
-    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
-    assert fds_config
-
-    cloud_api_fake.upsert(
-        responses.GET,
-        dc_config_url,
-        json={
-            "anonymous_usage_statistics": {
-                "data_context_id": FAKE_DATA_CONTEXT_ID,
-                "enabled": False,
-            },
-            "datasources": fds_config,
-        },
-    )
     yield cloud_api_fake
 
     assert len(cloud_api_fake.calls) >= 1, f"{org_url_base} was never called"

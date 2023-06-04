@@ -218,8 +218,10 @@ def test_ctx_delete_removes_datasource_from_yaml(
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
 
 
-def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext):
-    context = seeded_file_context
+def test_checkpoint_with_validator_workflow(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    context = seeded_contexts
 
     datasource_name = "sqlite_taxi"
     asset_name = "my_asset"
@@ -237,6 +239,8 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
     validator.save_expectation_suite()
 
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
+
+    _: str | None = checkpoint.validations[0].pop("expectation_suite_ge_cloud_id", None)  # type: ignore[union-attr]
 
     assert checkpoint.validations == [
         {
