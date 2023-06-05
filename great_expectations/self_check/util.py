@@ -1065,22 +1065,22 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         # warning type only exists in sqlalchemy < 2.0.
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         context.datasources["my_test_datasource"] = Datasource(
-        name="my_test_datasource",
-        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-        execution_engine={
-            "class_name": "SqlAlchemyExecutionEngine",
-            "connection_string": connection_string,
-        },
-        data_connectors={
-            "my_sql_data_connector": {
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "assets": {
-                    "my_asset": {
-                        "table_name": "animal_names",
+            name="my_test_datasource",
+            # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+            execution_engine={
+                "class_name": "SqlAlchemyExecutionEngine",
+                "connection_string": connection_string,
+            },
+            data_connectors={
+                "my_sql_data_connector": {
+                    "class_name": "ConfiguredAssetSqlDataConnector",
+                    "assets": {
+                        "my_asset": {
+                            "table_name": "animal_names",
+                        },
                     },
                 },
             },
-        },
         )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
     context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
