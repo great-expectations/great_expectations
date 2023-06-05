@@ -98,6 +98,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Sequence[str]",
     "Sequence[int]",
     "Sequence[tuple[int, int]]",  # noqa: PLW0130
+    # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
