@@ -161,6 +161,7 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     else:
         # our query is now a subquery. and a subquery is not executable(?)
         # TODO : make this better. Converting to string feels gross
-        my_subquery = sql_statement_with_post_compile_to_string(execution_engine, sql)
-        return_value = pd.read_sql_query(sql=my_subquery, con=con, **kwargs)
+        #my_subquery = sql_statement_with_post_compile_to_string(execution_engine, sql)
+        #return_value = pd.read_sql_query(sql=my_subquery, con=con, **kwargs)
+        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
     return return_value
