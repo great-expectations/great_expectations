@@ -2900,7 +2900,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
 
-        unexpected_rows = None
+        unexpected_rows: pd.DataFrame | None = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
@@ -3488,7 +3488,7 @@ def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     unexpected_index_query: Optional[str] = None,
     # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
     unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
-    unexpected_rows=None,
+    unexpected_rows: pd.DataFrame | None = None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
