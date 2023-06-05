@@ -2864,14 +2864,12 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: dict[
-            str, int | str | bool | list[str] | None
-        ] | str = self.get_result_format(
+        result_format: str | dict[str, Any] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
         include_unexpected_rows: bool
-        unexpected_index_column_names: int | str | bool | list[str] | None
+        unexpected_index_column_names: int | str | list[str] | None
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
