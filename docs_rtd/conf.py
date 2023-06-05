@@ -254,7 +254,7 @@ texinfo_documents = [
 autodoc_member_order = "bysource"
 
 
-def process_docstring(app, what, name, obj, options, lines):
+def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     from docs_rtd.feature_annotation_parser import parse_feature_annotation
 
     docstring = "\n".join(lines)

@@ -492,7 +492,6 @@ class MockResponse:
             raise requests.exceptions.HTTPError(
                 f"Mock {self.status_code} HTTPError", response=self
             )
-        return None
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"

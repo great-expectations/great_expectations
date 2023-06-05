@@ -38,7 +38,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         "single_batch_mode",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: Optional[str] = None,

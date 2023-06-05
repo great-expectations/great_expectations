@@ -130,7 +130,7 @@ class BatchRequest(pydantic.BaseModel):
         return options
 
     @public_api
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -162,7 +162,7 @@ class BatchRequest(pydantic.BaseModel):
         )
 
     @public_api
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,

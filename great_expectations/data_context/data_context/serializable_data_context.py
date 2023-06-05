@@ -89,7 +89,9 @@ class SerializableDataContext(AbstractDataContext):
         """
         raise NotImplementedError
 
-    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+    def _check_for_usage_stats_sync(  # noqa: PLR0911
+        self, project_config: DataContextConfig
+    ) -> bool:
         """
         If there are differences between the DataContextConfig used to instantiate
         the DataContext and the DataContextConfig assigned to `self.config`, we want

@@ -14,6 +14,8 @@ extend-ignore = [
     "B011", # assert-false - common pattern in pytest
     # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
     "DTZ", # naive tz in tests is not always a problem
+    "PLR2004", # magic value comparison is common test pattern
+    "PLR0913", # too many arguments
 ]
 
 [isort]
