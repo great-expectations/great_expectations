@@ -15,44 +15,9 @@ module.exports = {
           type: 'category',
           label: 'Data Contexts',
           items: [
-            {
-              type: 'html',
-              value: '<h4>Quickstart Data Context</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context',
-              label: 'How to quickly instantiate a Data Context'
-            },
-            {
-              type: 'html',
-              value: '<h4>Filesystem Data Contexts</h4>',
-              defaultStyle: true
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
-              label: 'How to initialize a Filesystem Data Context in Python'
-            },
-            {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context',
-              label: 'How to instantiate a specific Filesystem Data Context'
-            },
-            {
-              type: 'html',
-              value: '<h4>In-memory Data Contexts</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
+            'guides/setup/instantiating_data_contexts/instantiate_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
-            {
-              type: 'html',
-              value: '<h4>Data Context Configuration</h4>',
-              defaultStyle: true
-            },
-            'guides/setup/configuring_data_contexts/how_to_configure_credentials'
+            'guides/setup/configuring_data_contexts/how_to_configure_credentials',
           ]
         },
         {

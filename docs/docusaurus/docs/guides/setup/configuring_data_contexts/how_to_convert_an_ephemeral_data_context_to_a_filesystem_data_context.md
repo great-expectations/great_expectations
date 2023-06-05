@@ -1,5 +1,5 @@
 ---
-title: How to convert an Ephemeral Data Context to a Filesystem Data Context
+title: Convert an Ephemeral Data Context to a Filesystem Data Context
 tag: [how-to, setup]
 keywords: [Great Expectations, Ephemeral Data Context, Filesystem Data Context]
 ---
