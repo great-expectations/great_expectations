@@ -233,7 +233,7 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
     LOGGER.debug(f"{request.method} {request.url}")
 
     parsed_url = urllib.parse.urlparse(request.url)
-    datasource_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
+    datasource_id = parsed_url.path.split("/")[-1]
 
     datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
     if datasource:
@@ -370,7 +370,7 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
     payload = CloudResponseSchema.from_datasource_json(request.body)
 
     parsed_url = urllib.parse.urlparse(request.url)
-    datasource_id = parsed_url.path.split("/")[-1]  # type: ignore[arg-type]
+    datasource_id = parsed_url.path.split("/")[-1]
 
     old_datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
     if old_datasource:
