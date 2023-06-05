@@ -78,7 +78,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 <S3InstallDependencies />
 
-## Verify that GX has been installed correctly
+### Verify the GX has been installed correctly
 
 <GxVerifyInstallation />
 
