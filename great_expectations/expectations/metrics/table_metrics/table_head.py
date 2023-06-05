@@ -88,8 +88,9 @@ class TableHead(TableMetricProvider):
                 if metric_value_kwargs["fetch_all"]:
                     with execution_engine.get_connection() as con:                    
                         df = pandas_read_sql_query(
-                        sql=selectable,
-                        con=con,
+                            sql=selectable,
+                            con=con,
+                            execution_engine=execution_engine,
                         )
                 else:
                     # passing chunksize causes the Iterator to be returned
@@ -97,6 +98,7 @@ class TableHead(TableMetricProvider):
                         df_chunk_iterator = pandas_read_sql_query(
                             sql=selectable,
                             con=con,
+                            execution_engine=execution_engine,
                             chunksize=abs(n_rows),
                         )
                         df = TableHead._get_head_df_from_df_iterator(

@@ -4,6 +4,7 @@ import warnings
 from typing import Callable
 
 import pandas as pd
+import re
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import (
@@ -85,8 +86,44 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
         return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     return return_value
 
+def sql_statement_with_post_compile_to_string(
+    engine, select_statement: sqlalchemy.Select
+) -> str:
+    """
+    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
+    from sqlalchemy documentation.
 
-def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
+    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
+    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
+    return unexpected_index_values.
+
+    Args:
+        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
+        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
+    Returns:
+        String representation of select_statement
+
+    """
+    sqlalchemy_connection: sqlalchemy.engine.base.Connection = engine.engine
+    compiled = select_statement.compile(
+        sqlalchemy_connection,
+        compile_kwargs={"render_postcompile": True},
+        dialect=engine.dialect,
+    )
+    dialect_name: str = engine.dialect_name
+
+    if dialect_name in ["sqlite", "trino", "mssql"]:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+
+    query_as_string += ";"
+    return query_as_string
+def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     """Suppress deprecation warnings while executing the pandas read_sql_query function.
 
     Note this only passes params straight to pandas read_sql_query method, please
@@ -119,5 +156,8 @@ def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
     else:
-        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+        # our query is now a subquery. and a subquery is not executable(?)
+        # TODO : make this better. Converting to string feels gross
+        my_subquery = sql_statement_with_post_compile_to_string(execution_engine, sql)
+        return_value = pd.read_sql_query(sql=my_subquery, con=con, **kwargs)
     return return_value
