@@ -1059,8 +1059,12 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     assert (
         context is not None
     ), 'Instance of any child of "AbstractDataContext" class is required.'
-
-    context.datasources["my_test_datasource"] = Datasource(
+    with warnings.catch_warnings():
+        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+        # but using the base class here since sqlalchemy is an optional dependency and this
+        # warning type only exists in sqlalchemy < 2.0.
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+        context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
         execution_engine={
@@ -1077,7 +1081,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
                 },
             },
         },
-    )
+        )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
     context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
