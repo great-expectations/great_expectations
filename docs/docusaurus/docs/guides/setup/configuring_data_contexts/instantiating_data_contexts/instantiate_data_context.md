@@ -18,7 +18,7 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
 
 <Tabs
   groupId="install-gx"
-  defaultValue='local'
+  defaultValue='quick'
   values={[
   {label: 'Quickstart', value:'quick'},
   {label: 'Filesystem Data Context - Python', value:'python'},
