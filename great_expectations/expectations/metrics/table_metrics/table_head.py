@@ -58,7 +58,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913, PLR0915
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -77,7 +77,7 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        #breakpoint()
+        # breakpoint()
         # do we make a new execution engine? is that the problem?
         if (table_name is None) or (
             sqlalchemy._anonymous_label
@@ -86,7 +86,7 @@ class TableHead(TableMetricProvider):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    with execution_engine.get_connection() as con:                    
+                    with execution_engine.get_connection() as con:
                         df = pandas_read_sql_query(
                             sql=selectable,
                             con=con,
@@ -130,9 +130,9 @@ class TableHead(TableMetricProvider):
                         # passing chunksize causes the Iterator to be returned
                         df_chunk_iterator = read_sql_table_as_df(
                             table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=con,
-                        chunksize=abs(n_rows),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            chunksize=abs(n_rows),
                         )
                         df = TableHead._get_head_df_from_df_iterator(
                             df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
@@ -181,10 +181,10 @@ class TableHead(TableMetricProvider):
             if n_rows <= 0 and not fetch_all:
                 with execution_engine.get_connection() as con:
                     df_chunk_iterator = pandas_read_sql(
-                    sql=sql, con=con, chunksize=abs(n_rows)
+                        sql=sql, con=con, chunksize=abs(n_rows)
                     )
                     df = TableHead._get_head_df_from_df_iterator(
-                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
             else:
                 with execution_engine.get_connection() as con:

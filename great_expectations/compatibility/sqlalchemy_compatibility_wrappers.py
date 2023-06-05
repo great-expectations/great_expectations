@@ -7,8 +7,6 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
-from great_expectations.compatibility import sqlalchemy
-
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +47,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
     """
     # does this need to be added to the connection thing?
-    #breakpoint()
+    # breakpoint()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         # is this where the pandas 2.0 is messing us up?
@@ -57,15 +55,15 @@ def read_sql_table_as_df(  # noqa: PLR0913
         # this is where we are getting messed up. Lets do it.
         # TODO: handle the schema somehow
         # TODO: handle columns somehow
-        schema=schema
-        columns=columns
+        schema = schema
+        columns = columns
         return pd.read_sql_query(
-            sql=f'''SELECT * FROM {table_name}''',
+            sql=f"""SELECT * FROM {table_name}""",
             con=con,
             index_col=index_col,
             coerce_float=coerce_float,
             parse_dates=parse_dates,
-            chunksize=chunksize
+            chunksize=chunksize,
         )
 
 

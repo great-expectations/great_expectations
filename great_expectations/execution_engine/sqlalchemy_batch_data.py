@@ -162,7 +162,7 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
 
-            #breakpoint()
+            # breakpoint()
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)

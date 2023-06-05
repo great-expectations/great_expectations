@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import re
 import warnings
 from typing import Callable
 
 import pandas as pd
-import re
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.not_imported import (
@@ -86,6 +86,7 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
         return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     return return_value
 
+
 def sql_statement_with_post_compile_to_string(
     engine, select_statement: sqlalchemy.Select
 ) -> str:
@@ -123,6 +124,8 @@ def sql_statement_with_post_compile_to_string(
 
     query_as_string += ";"
     return query_as_string
+
+
 def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     """Suppress deprecation warnings while executing the pandas read_sql_query function.
 
