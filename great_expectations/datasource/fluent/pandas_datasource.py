@@ -944,12 +944,24 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._add_asset(asset=asset)
 
+    @public_api
     def read_parquet(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
+        """
+        Read a parquet file and return a Validator associated with it.
+
+        Args:
+            path: The path to the parquet file.
+            asset_name (optional): The asset name to use for the parquet file, should you wish to use or refer to it again.
+            **kwargs: Additional kwargs to pass to the parquet reader.
+
+        Returns:
+            A Validator using the parquet file as a DataAsset
+        """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
             name=name,
