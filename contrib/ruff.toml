@@ -9,6 +9,10 @@ extend-ignore = [
     "TCH001",
     # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
     "TID251",  # banned-api - is used to prevent opaque attribute errors caused by missing optional dependencies
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # TODO: probably want to enable this for contrib as well.
+    # https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PL", # pylint TODO: enable this for contrib
 ]
 
 [isort]

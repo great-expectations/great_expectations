@@ -10,6 +10,36 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.16.15
+* [FEATURE] Checker for correct Python code snippets in documentation. ([#8000](https://github.com/great-expectations/great_expectations/pull/8000))
+* [FEATURE] Add scaffolding for gx-agent ([#7837](https://github.com/great-expectations/great_expectations/pull/7837))
+* [FEATURE] Cloud - generate unique asset names for `pandas_default` assets ([#8020](https://github.com/great-expectations/great_expectations/pull/8020))
+* [FEATURE] Connect to Cloud for agent config ([#8006](https://github.com/great-expectations/great_expectations/pull/8006))
+* [FEATURE] Add `AbstractDataContext.view_validation_result` ([#8033](https://github.com/great-expectations/great_expectations/pull/8033))
+* [FEATURE] Add Onboarding Data Assistant agent action ([#7882](https://github.com/great-expectations/great_expectations/pull/7882))
+* [FEATURE] put 'How to connect to postgresql data' under test ([#7988](https://github.com/great-expectations/great_expectations/pull/7988))
+* [BUGFIX] Remove perpetually failing test -- in preparation for release. ([#8040](https://github.com/great-expectations/great_expectations/pull/8040))
+* [BUGFIX] meta_notes rendered inline can fail schema validation for a valid string-only configuration ([#8044](https://github.com/great-expectations/great_expectations/pull/8044))
+* [BUGFIX] Ensure That DataFrame for Fluent Datasource Pandas/Spark DataFrame Data Assets is specified only in one API method ([#8032](https://github.com/great-expectations/great_expectations/pull/8032))
+* [DOCS] Add Windows Support Admonition ([#7991](https://github.com/great-expectations/great_expectations/pull/7991))
+* [DOCS] Update how_to_edit_an_existing_expectationsuite.md ([#8007](https://github.com/great-expectations/great_expectations/pull/8007))
+* [DOCS] Adds redirects for removed UserConfigurableProfiler documentation ([#8026](https://github.com/great-expectations/great_expectations/pull/8026))
+* [DOCS] Create New Expectation Classes Conceptual Guide ([#8004](https://github.com/great-expectations/great_expectations/pull/8004))
+* [DOCS] Check simple spelling and word order error using ChatGPT-based program ([#8029](https://github.com/great-expectations/great_expectations/pull/8029))
+* [DOCS] Update Quickstart to Reflect User Feedback ([#8027](https://github.com/great-expectations/great_expectations/pull/8027))
+* [DOCS] Cloud - Getting started uses Fluent Datasources ([#8035](https://github.com/great-expectations/great_expectations/pull/8035))
+* [MAINTENANCE] Update `teams.yml` ([#8011](https://github.com/great-expectations/great_expectations/pull/8011))
+* [MAINTENANCE] Add sensible default values to Checkpoint APIs ([#7992](https://github.com/great-expectations/great_expectations/pull/7992))
+* [MAINTENANCE] Removing xfails that we're added to get release out. ([#8014](https://github.com/great-expectations/great_expectations/pull/8014))
+* [MAINTENANCE] Remove reference to Superconductive from CITATION.cff ([#8016](https://github.com/great-expectations/great_expectations/pull/8016))
+* [MAINTENANCE] Deleting References to UserConfigurableProfiler Documentation ([#7983](https://github.com/great-expectations/great_expectations/pull/7983))
+* [MAINTENANCE] mypy 1.3 + azure deps in type-checking step ([#8012](https://github.com/great-expectations/great_expectations/pull/8012))
+* [MAINTENANCE] Bump tornado from 6.1.0 to 6.3.2 in /docs_rtd ([#8003](https://github.com/great-expectations/great_expectations/pull/8003))
+* [MAINTENANCE] Add support for `Validator` in Checkpoint CRUD ([#7999](https://github.com/great-expectations/great_expectations/pull/7999))
+* [MAINTENANCE] Remove unused .dockerignore ([#8030](https://github.com/great-expectations/great_expectations/pull/8030))
+* [MAINTENANCE] Fluent Datasource Update: Credentials Doc update ([#7968](https://github.com/great-expectations/great_expectations/pull/7968))
+* [MAINTENANCE] Persist connection for backends that need a connection to keep temporary tables alive ([#7607](https://github.com/great-expectations/great_expectations/pull/7607))
+
 ### 0.16.14
 * [FEATURE] Add "batch.columns()" convenience method to Fluent DataAsset implementation. ([#7926](https://github.com/great-expectations/great_expectations/pull/7926))
 * [FEATURE] Implementing Python code snippets under test for "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark" ([#7927](https://github.com/great-expectations/great_expectations/pull/7927))

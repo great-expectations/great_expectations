@@ -69,7 +69,7 @@ as of v0.13.12 and will be removed in v0.16.
                 )
 
             # Avoid duplicate base classes.
-            b = alias or b
+            b = alias or b  # noqa: PLW2901
             if b not in fixed_bases:
                 fixed_bases.append(b)
 

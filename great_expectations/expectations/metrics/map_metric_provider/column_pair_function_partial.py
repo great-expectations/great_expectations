@@ -76,7 +76,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -139,7 +139,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -206,7 +206,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
