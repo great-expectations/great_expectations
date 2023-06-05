@@ -20,14 +20,16 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
   groupId="install-gx"
   defaultValue='quick'
   values={[
-  {label: 'Filesystem (Quick)', value:'quick'},
+  {label: 'Existing Filesystem', value:'quick'},
   {label: 'Filesystem with Python', value:'python'},
   {label: 'Specific Filesystem', value:'specific'},
   {label: 'Ephemeral', value:'ephemeral'},
   ]}>
 <TabItem value="quick">
 
-## Filesystem (Quick)
+## Existing Filesystem
+
+Learn how to instantiate an existing Filesystem Data Context so that you can continue working with previously defined GX configurations
 
 ### Prerequisites
 
