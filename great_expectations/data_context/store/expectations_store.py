@@ -186,17 +186,17 @@ class ExpectationsStore(Store):
 
         return suite_dict
 
-    def add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs):
         try:
-            return super().add(key=key, value=value, **kwargs)
+            return super()._add(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs):
         try:
-            return super().update(key=key, value=value, **kwargs)
+            return super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
