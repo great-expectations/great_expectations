@@ -1,3 +1,4 @@
+import json
 import pathlib
 import subprocess
 
@@ -25,7 +26,13 @@ def example() -> None:
     help="Stop example and clean up. Default false.",
     default=False,
 )
-def example_postgres(stop: bool) -> None:
+@click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+def example_postgres(stop: bool, url: bool) -> None:
     """Start a postgres database example."""
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "postgres"
@@ -35,6 +42,27 @@ def example_postgres(stop: bool) -> None:
         stop_commands = ["docker", "compose", "down"]
         subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done stopping containers.</green>")
+    elif url:
+        container_name = "gx_postgres_example_jupyter"
+        url_commands = [
+            "docker",
+            "exec",
+            container_name,
+            "jupyter",
+            "server",
+            "list",
+            "--json",
+        ]
+        url_json = subprocess.run(
+            url_commands,
+            cwd=example_directory,
+            capture_output=True,
+        ).stdout
+        raw_json = json.loads(url_json)
+        notebook_url = (
+            f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
+        )
+        cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
     else:
         cli_message(
             "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"

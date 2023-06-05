@@ -23,6 +23,7 @@ services:
 
   jupyter:
     image: gx/postgres_example_jupyter
+    container_name: gx_postgres_example_jupyter
     build:
       context: .
       dockerfile: jupyter.Dockerfile
