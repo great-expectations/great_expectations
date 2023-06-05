@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Instantiate a Data Context"
-title: "instantiate a Data Context"
+title: "Instantiate a Data Context"
 id: instantiate_data_context
 description: Create and configure a Great Expectations Data Context.
 ---
@@ -20,10 +20,10 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
   groupId="install-gx"
   defaultValue='quick'
   values={[
-  {label: 'Quickstart', value:'quick'},
-  {label: 'Filesystem Data Context - Python', value:'python'},
-  {label: 'Specific Filesystem Data Context', value:'specific'},
-  {label: 'Ephemeral Data Context', value:'ephemeral'},
+  {label: 'Filesystem', value:'quick'},
+  {label: 'Filesystem with Python', value:'python'},
+  {label: 'Specific Filesystem', value:'specific'},
+  {label: 'Ephemeral', value:'ephemeral'},
   ]}>
 <TabItem value="quick">
 
@@ -64,9 +64,7 @@ If you have GX Cloud configured on your system, `get_context()` instantiates and
 </TabItem>
 <TabItem value="python">
 
-A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX, and when using the <TechnicalTag tag="cli" text="CLI" />.
-
-Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
+A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX. Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ## Prerequisites
 
