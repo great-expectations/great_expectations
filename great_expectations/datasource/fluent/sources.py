@@ -440,7 +440,7 @@ class _SourceFactories:
         if (
             name_or_datasource
             and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"
+            and "name" not in "kwargs"  # noqa: PLR0133
         ) or (
             name_or_datasource is None
             and "name" in kwargs

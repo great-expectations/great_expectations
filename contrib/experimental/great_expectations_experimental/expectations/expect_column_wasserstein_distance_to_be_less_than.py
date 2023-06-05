@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
