@@ -2240,7 +2240,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_add_datasource_from_yaml_sql_datasource(
+def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     mock_emit,
     sa,
     test_backends,

@@ -18,7 +18,7 @@ class _Callable(Protocol):
     __call__: Callable
 
 
-def _print_method(
+def _print_method(  # noqa: PLR0912
     method: _Callable,
     method_name: str | None = None,
     default_override: str = "...",

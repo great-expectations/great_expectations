@@ -33,7 +33,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         return column_nonnull_elements.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -79,7 +79,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            if len(column_values) == 1:
+            if len(column_values) == 1:  # noqa: PLR5501
                 column_median = column_values[0][0]  # The only value
             else:
                 column_median = column_values[1][0]  # True center value
@@ -87,7 +87,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         return column_median
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

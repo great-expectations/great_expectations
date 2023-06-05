@@ -229,8 +229,6 @@ To resolve these errors, configure Docker to run on another port and confirm the
 
 ### MySQL
 
-The `mysql` Docker image can't be used with Mac computers with Apple M1 chips.
-
 If another service is using port 3306, Docker might start the container but silently fail to set up the port.
 
 1. CD to `assets/docker/mysql` in your `great_expectations` repository, and then and run the following command:

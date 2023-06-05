@@ -202,7 +202,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -252,7 +252,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -270,7 +270,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         + ", at least $mostly_pct % of the time."
                     )
             else:
-                if include_column_name:
+                if include_column_name:  # noqa: PLR5501
                     template_str = (
                         f"$column value types must belong to this set: {values_string}."
                     )
@@ -279,7 +279,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         f"value types must belong to this set: {values_string}."
                     )
         else:
-            if include_column_name:
+            if include_column_name:  # noqa: PLR5501
                 template_str = "$column value types may be any value, but observed value will be reported"
             else:
                 template_str = (
@@ -307,7 +307,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(  # noqa: C901 - 16
+    def _validate_pandas(  # noqa: C901, PLR0912
         self,
         actual_column_type,
         expected_types_list,

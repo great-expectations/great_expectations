@@ -51,7 +51,7 @@ class DataConnector:
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -119,7 +119,7 @@ class DataConnector:
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)  # type: ignore[arg-type] # got ExecutionEngine
         return (
             batch_data,
             batch_spec,

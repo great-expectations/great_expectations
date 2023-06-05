@@ -74,7 +74,7 @@ class ValidationOperator:
 
         raise NotImplementedError
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -302,7 +302,7 @@ class ActionListValidationOperator(ValidationOperator):
         # if not isinstance(item, (DataAsset, Validator)):
         if isinstance(item, tuple):
             if not (
-                len(item) == 2
+                len(item) == 2  # noqa: PLR2004
                 and isinstance(item[0], dict)
                 and isinstance(item[1], str)
             ):
@@ -315,7 +315,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -441,7 +441,7 @@ class ActionListValidationOperator(ValidationOperator):
             evaluation_parameters=evaluation_parameters,
         )
 
-    def _run_actions(
+    def _run_actions(  # noqa: PLR0913
         self,
         batch: Union[Batch, DataAsset],
         expectation_suite_identifier: ExpectationSuiteIdentifier,
@@ -654,7 +654,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context,
         action_list,
@@ -675,7 +675,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.stop_on_first_error = stop_on_first_error
         self.base_expectation_suite_name = base_expectation_suite_name
 
-        assert len(expectation_suite_name_suffixes) == 2
+        assert len(expectation_suite_name_suffixes) == 2  # noqa: PLR2004
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, str)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
@@ -803,7 +803,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: C901 - complexity 18
+    def run(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         assets_to_validate,
         run_id=None,

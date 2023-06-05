@@ -162,7 +162,7 @@ if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
 
-def _get_dialect_type_module(dialect):
+def _get_dialect_type_module(dialect):  # noqa: PLR0912
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects
     """
@@ -303,7 +303,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     """
 
     # noinspection PyUnusedLocal
-    def __init__(  # noqa: C901 - 17
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         name: Optional[str] = None,
         credentials: Optional[dict] = None,
@@ -635,7 +635,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     @public_api
-    def get_domain_records(  # noqa: C901 - 24
+    def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
     ) -> sqlalchemy.Selectable:
@@ -661,7 +661,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_manager.batch_data_cache:
+            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
                 data_object = cast(
                     SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
                 )
@@ -794,7 +794,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if != "neither":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -845,7 +845,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "never":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -999,7 +999,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise GreatExpectationsError("column_list must contain at least 2 columns")
 
         # Checking if case-sensitive and using appropriate name
@@ -1251,7 +1251,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            if self.dialect_name == GXSqlDialect.SQLITE:
+            if self.dialect_name == GXSqlDialect.SQLITE:  # noqa: PLR5501
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()
