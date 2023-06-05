@@ -39,3 +39,27 @@ my_batch_request = data_asset.build_batch_request(dataframe=dataframe)
 assert my_batch_request.datasource_name == "my_pandas_datasource"
 assert my_batch_request.data_asset_name == "taxi_dataframe"
 assert my_batch_request.options == {}
+
+batches = data_asset.get_batch_list_from_batch_request(my_batch_request)
+assert len(batches) == 1
+assert set(batches[0].columns()) == {
+    "VendorID",
+    "tpep_pickup_datetime",
+    "tpep_dropoff_datetime",
+    "passenger_count",
+    "trip_distance",
+    "RatecodeID",
+    "store_and_fwd_flag",
+    "PULocationID",
+    "DOLocationID",
+    "payment_type",
+    "fare_amount",
+    "extra",
+    "mta_tax",
+    "tip_amount",
+    "tolls_amount",
+    "improvement_surcharge",
+    "total_amount",
+    "congestion_surcharge",
+    "airport_fee",
+}
