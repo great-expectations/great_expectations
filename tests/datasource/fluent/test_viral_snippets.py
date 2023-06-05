@@ -6,7 +6,6 @@ import pathlib
 import random
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable
-from unittest import mock
 
 import pytest
 
@@ -17,6 +16,8 @@ from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
 # apply markers to entire test module
@@ -262,7 +263,9 @@ def test_checkpoint_with_validator_workflow(
 
 
 def test_quickstart_workflow(
-    empty_contexts: CloudDataContext | FileDataContext, csv_path: pathlib.Path
+    empty_contexts: CloudDataContext | FileDataContext,
+    csv_path: pathlib.Path,
+    mocker: MockerFixture,
 ):
     """
     What does this test do and why?
@@ -297,8 +300,8 @@ def test_quickstart_workflow(
     checkpoint_result = checkpoint.run()
 
     # View results
-    with mock.patch("webbrowser.open") as mock_open:
-        context.view_validation_result(checkpoint_result)
+    mock_open = mocker.patch("webbrowser.open")
+    context.view_validation_result(checkpoint_result)
 
     mock_open.assert_called_once()
 
