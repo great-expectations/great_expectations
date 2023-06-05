@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from scipy import stats as stats
+from scipy import stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -282,7 +282,6 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
             configuration=configuration,

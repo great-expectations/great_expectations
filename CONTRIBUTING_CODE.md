@@ -20,7 +20,7 @@ To modify existing Great Expectations code, you complete the following tasks:
 
 - [Submit a pull request](#submit-a-pull-request)
 
-To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
+To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel.
 
 To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/develop/docs) in the `docs` repository.
 
@@ -63,9 +63,9 @@ To submit a custom package to Great Expectations for consideration, see [CONTRIB
     ```
 ## Install Python dependencies
 
-Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a Custom Expectation. 
+Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a Custom Expectation.
 
-1. Run the following command to create a virtual environment in your local repository using Python versions 3.7 to 3.11, activate the environment, and then install the necessary dependencies:
+1. Run the following command to create a virtual environment in your local repository using Python versions 3.8 to 3.11, activate the environment, and then install the necessary dependencies:
 
     ```python
     python3 -m venv gx_dev
@@ -102,21 +102,21 @@ Python dependencies are required to modify Great Expectations code, submit a new
     If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
 
     `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
-    
+
     `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
 
-5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors. 
+5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
 
 6. Run the following command to confirm pandas and SQLAlchemy with SQLite tests are passing:
 
    ```sh
     ulimit -n 4096
-    
+
     pytest -v
    ```
 ## Create a virtual environment (optional)
 
-A virtual environment allows you to create and test code without affecting the primary Great Expectations codebase. 
+A virtual environment allows you to create and test code without affecting the primary Great Expectations codebase.
 
 ### Python
 
@@ -125,7 +125,7 @@ A virtual environment allows you to create and test code without affecting the p
    ```python
     python3 -m venv <path_to_environments_folder\>/great_expectations_dev
    ```
-2. Run the following command to activate the virtual environment: 
+2. Run the following command to activate the virtual environment:
 
    ```python
     <source path_to_environments_folder\>/great_expectations_dev/bin/activate
@@ -137,7 +137,7 @@ A virtual environment allows you to create and test code without affecting the p
    ```python
     conda create --name great_expectations_dev
    ```
-2. Run the following command to activate the virtual environment: 
+2. Run the following command to activate the virtual environment:
 
    ```python
     conda activate great_expectations_dev
@@ -229,8 +229,6 @@ To resolve these errors, configure Docker to run on another port and confirm the
 
 ### MySQL
 
-The `mysql` Docker image can't be used with Mac computers with Apple M1 chips.
-
 If another service is using port 3306, Docker might start the container but silently fail to set up the port.
 
 1. CD to `assets/docker/mysql` in your `great_expectations` repository, and then and run the following command:
@@ -270,12 +268,12 @@ Use the following information to use Spark for code testing.
 
 - Java. See [Java downloads](https://www.java.com/en/download/).
 
-- The PATH or JAVA_HOME environment variables set correctly. See [Setting Java variables in Windows](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-windows) or [Setting Java variables in Linux](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-linux). 
+- The PATH or JAVA_HOME environment variables set correctly. See [Setting Java variables in Windows](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-windows) or [Setting Java variables in Linux](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-linux).
 
 On Mac, run the following commands to set the PATH and JAVA_HOME environment variables:
 ```
 export JAVA_HOME=`/usr/libexec/java_home`
-export PATH=$PATH:$JAVA_HOME/bin 
+export PATH=$PATH:$JAVA_HOME/bin
 ```
 
 
@@ -301,7 +299,7 @@ Great Expectations code is not tested against all SQL database types. Continuous
 
 To perform unit testing, run `pytest` in the `great_expectations` directory root. By default, tests are run against `pandas` and `sqlite`. You can use `pytest` flags to test additional backends like `postgresql`, `spark`, and `mssql`. For example, to run a test against PostgreSQL backend, you run `pytest --postgresql`.
 
-The following are the supported `pytest` flags for general testing:   
+The following are the supported `pytest` flags for general testing:
 
 - `--spark`: Execute tests against Spark backend.
 - `--postgresql`: Execute tests against PostgreSQL.
@@ -310,7 +308,7 @@ The following are the supported `pytest` flags for general testing:
 - `--bigquery`: Execute tests against Google BigQuery (requires additional set up).
 - `--aws`: Execute tests against AWS resources such as Amazon S3, Amazon Redshift, and Athena (requires additional setup).
 
-To skip all local backend tests (except pandas), run `pytest --no-sqlalchemy`. 
+To skip all local backend tests (except pandas), run `pytest --no-sqlalchemy`.
 
 Testing can generate warning messages. These warnings are often caused by dependencies such as pandas or SQLAlchemy. Run `pytest --no-sqlalchemy --disable-pytest-warnings` to suppress these warnings.
 
@@ -325,7 +323,7 @@ Testing can generate warning messages. These warnings are often caused by depend
 4. Run the following command to test your project with the `GE_TEST_BIGQUERY_PROJECT` and `GE_TEST_BIGQUERY_DATASET` environment variables:
 
     ```bash
-    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> 
+    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT>
     GE_TEST_BIGQUERY_DATASET=test_ci
     pytest tests/test_definitions/test_expectations_cfe.py --bigquery
     ```
@@ -496,9 +494,9 @@ Test the performance of code changes to determine they perform as expected. BigQ
     - [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix.
 
     - [MAINTENANCE] for PRs that focus on updating repository settings or related changes.
-		
+
     - [CONTRIB] for the contribution of Custom Expectations and supporting work into the `contrib/` directory.
-      
+
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
     In the section for design review, include a description of any prior discussion or coordination on the features in the PR, such as mentioning the number of the issue where discussion has taken place. For example: Closes #123”, linking to a relevant discuss or slack article, citing a team meeting, or even noting that no discussion is relevant because the issue is small.
@@ -517,7 +515,6 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 
 - The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
 
-- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
+- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion.
 
 - The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.
-

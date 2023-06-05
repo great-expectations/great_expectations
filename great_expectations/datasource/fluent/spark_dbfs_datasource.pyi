@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Optional, Union
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,  # noqa: TCH001
@@ -34,7 +32,7 @@ logger: Logger
 class SparkDBFSDatasource(SparkFilesystemDatasource):
     type: Literal["spark_dbfs"]  # type: ignore[assignment]
 
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

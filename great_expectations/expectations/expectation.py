@@ -246,7 +246,7 @@ def param_method(param_name: str) -> Callable:
                         renderer_configuration=renderer_configuration
                     )
                 else:
-                    if return_type is RendererConfiguration:
+                    if return_type is RendererConfiguration:  # noqa: PLR5501
                         return_obj = renderer_configuration
                     else:
                         return_obj = None
@@ -810,7 +810,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
-    def _diagnostic_unexpected_table_renderer(
+    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -871,7 +871,7 @@ class Expectation(metaclass=MetaExpectation):
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
                         string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
+                    elif unexpected_value == "":  # noqa: PLC1901
                         string_unexpected_value = "EMPTY"
                     else:
                         string_unexpected_value = "null"
@@ -1222,7 +1222,7 @@ class Expectation(metaclass=MetaExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @public_api
-    def validate(
+    def validate(  # noqa: PLR0913
         self,
         validator: Validator,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1277,7 +1277,7 @@ class Expectation(metaclass=MetaExpectation):
         return self._configuration
 
     @public_api
-    def run_diagnostics(
+    def run_diagnostics(  # noqa: PLR0913
         self,
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
@@ -1342,7 +1342,7 @@ class Expectation(metaclass=MetaExpectation):
             _tests_to_include = [
                 test for test in example.tests if test.include_in_gallery
             ]
-            example = deepcopy(example)
+            example = deepcopy(example)  # noqa: PLW2901
             if _tests_to_include:
                 example.tests = _tests_to_include
                 gallery_examples.append(example)
@@ -1537,7 +1537,6 @@ class Expectation(metaclass=MetaExpectation):
 
         included_examples = []
         for i, example in enumerate(all_examples, 1):
-
             included_test_cases = []
             # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
             # See:
@@ -1797,7 +1796,7 @@ class Expectation(metaclass=MetaExpectation):
         return supported_renderers
 
     @classmethod
-    def _get_test_results(
+    def _get_test_results(  # noqa: PLR0913
         cls,
         expectation_type: str,
         test_data_cases: List[ExpectationTestDataCases],
@@ -1920,7 +1919,9 @@ class Expectation(metaclass=MetaExpectation):
 
         return test_results
 
-    def _get_rendered_result_as_string(self, rendered_result) -> str:  # noqa: C901 - 16
+    def _get_rendered_result_as_string(  # noqa: C901, PLR0912
+        self, rendered_result
+    ) -> str:
         """Convenience method to get rendered results as strings."""
 
         result: str = ""
@@ -2171,7 +2172,7 @@ class Expectation(metaclass=MetaExpectation):
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    def _get_maturity_checklist(
+    def _get_maturity_checklist(  # noqa: PLR0913
         self,
         library_metadata: Union[
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
@@ -2366,7 +2367,7 @@ class BatchExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(  # noqa: C901 - 21
+    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2568,7 +2569,8 @@ class QueryExpectation(BatchExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.upper() != "" and x.upper() not in valid_sql_tokens_and_types
+                if x.upper() != ""  # noqa: PLC1901
+                and x.upper() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
@@ -3486,7 +3488,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         )
 
 
-def _format_map_output(  # noqa: C901 - 22
+def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     result_format: dict,
     success: bool,
     element_count: Optional[int] = None,

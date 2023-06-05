@@ -16,6 +16,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
@@ -227,7 +228,9 @@ def test_set(
     )
 
     with mock.patch("requests.Session.post", autospec=True) as mock_post:
-        store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
+        store_backend.set(
+            ("checkpoint", None, None), my_simple_checkpoint_config_serialized
+        )
         mock_post.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
@@ -246,7 +249,7 @@ def test_set(
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                ("action_list", []),
+                                ("action_list", list(Checkpoint.DEFAULT_ACTION_LIST)),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),

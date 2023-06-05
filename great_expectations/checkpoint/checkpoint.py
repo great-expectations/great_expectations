@@ -4,12 +4,24 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
-
-from typing_extensions import Literal
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+    cast,
+)
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
+from great_expectations.checkpoint.configurator import (
+    ActionDicts,
+    SimpleCheckpointConfigurator,
+)
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
     does_batch_request_in_validations_contain_batch_data,
@@ -40,9 +52,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import (
-    GXCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -57,6 +67,7 @@ from great_expectations.util import (
 from great_expectations.validation_operators import ActionListValidationOperator
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.core.expectation_validation_result import (
         ExpectationSuiteValidationResult,
         ExpectationSuiteValidationResultMeta,
@@ -112,6 +123,10 @@ class BaseCheckpoint(ConfigPeer):
     instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
     """
 
+    DEFAULT_ACTION_LIST: ClassVar[
+        Sequence[ActionDict]
+    ] = ActionDicts.DEFAULT_ACTION_LIST
+
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
@@ -139,7 +154,7 @@ class BaseCheckpoint(ConfigPeer):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
-    def run(  # noqa: C901 - complexity 19
+    def run(  # noqa: C901, PLR0913, PLR0915
         self,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -148,7 +163,7 @@ class BaseCheckpoint(ConfigPeer):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -427,7 +442,7 @@ class BaseCheckpoint(ConfigPeer):
     def _substitute_config_variables(self, config: dict) -> dict:
         return self.data_context.config_provider.substitute_config(config)
 
-    def _run_validation(
+    def _run_validation(  # noqa: PLR0913
         self,
         substituted_runtime_config: dict,
         async_validation_operator_results: List[AsyncResult],
@@ -480,7 +495,9 @@ class BaseCheckpoint(ConfigPeer):
                 include_rendered_content=include_rendered_content,
             )
 
-            action_list: list | None = substituted_validation_dict.get("action_list")
+            action_list: Sequence[ActionDict] | None = substituted_validation_dict.get(
+                "action_list"
+            )
             runtime_configuration_validation = substituted_validation_dict.get(
                 "runtime_configuration", {}
             )
@@ -582,7 +599,7 @@ class BaseCheckpoint(ConfigPeer):
             and isinstance(self.validations, list)
             and len(self.validations) > 0
         )
-        action_list: Optional[list] = self.action_list
+        action_list: Optional[Sequence[ActionDict]] = self.action_list
         action_list_present: bool = (
             action_list is not None
             and isinstance(action_list, list)
@@ -635,7 +652,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return None
 
     @property
-    def action_list(self) -> List[Dict]:
+    def action_list(self) -> Sequence[ActionDict]:
         try:
             return self.config.action_list
         except AttributeError:
@@ -743,11 +760,11 @@ class Checkpoint(BaseCheckpoint):
     --ge-feature-maturity-info--
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Union[int, float, None] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -755,7 +772,7 @@ class Checkpoint(BaseCheckpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -803,9 +820,15 @@ constructor arguments.
 """
             )
 
+        if not config_version:
+            class_name = "LegacyCheckpoint"
+        else:
+            class_name = self.__class__.__name__
+
         checkpoint_config = CheckpointConfig(
             name=name,
             config_version=config_version,
+            class_name=class_name,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -829,7 +852,7 @@ constructor arguments.
 
         self._validator = validator
 
-    def run_with_runtime_args(
+    def run_with_runtime_args(  # noqa: PLR0913
         self,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -838,7 +861,7 @@ constructor arguments.
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -909,22 +932,24 @@ constructor arguments.
         return self.run(**checkpoint_run_arguments)
 
     @classmethod
-    def construct_from_config_args(
+    def construct_from_config_args(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
+        module_name: str = "great_expectations.checkpoint",
         class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
@@ -937,8 +962,13 @@ constructor arguments.
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
+        validator: Validator | None = None,
     ) -> Checkpoint:
         checkpoint_config: Union[CheckpointConfig, dict]
+
+        validations = cls._reconcile_validations(
+            validations=validations, validator=validator
+        )
 
         # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -978,11 +1008,11 @@ constructor arguments.
             "default_validation_id": default_validation_id,
         }
 
-        detault_checkpoints_module_name = "great_expectations.checkpoint"
+        default_checkpoints_module_name = "great_expectations.checkpoint"
 
         klass = load_class(
             class_name=class_name,
-            module_name=module_name or detault_checkpoints_module_name,
+            module_name=module_name or default_checkpoints_module_name,
         )
         if issubclass(klass, SimpleCheckpoint):
             checkpoint_config.update(
@@ -1022,11 +1052,41 @@ constructor arguments.
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": detault_checkpoints_module_name,
+                "module_name": default_checkpoints_module_name,
             },
         )
 
         return new_checkpoint
+
+    @staticmethod
+    def _reconcile_validations(
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        validator: Validator | None = None,
+    ) -> list[dict] | None:
+        """
+        Helper to help resolve logic between validator and validations input
+        arguments to `construct_from_config_args`.
+        """
+        if validator:
+            if validations:
+                raise ValueError(
+                    "Please provide either a validator or validations list (but not both)."
+                )
+            validations = validator.convert_to_checkpoint_validations_list()
+
+        if not validations:
+            return None
+
+        # A lot of downstream logic depends on validations being a dict instead of a rich config type
+        # We should patch those instances so they can expect a CheckpointValidationConfig
+        validations = [
+            validation.to_dict()
+            if isinstance(validation, CheckpointValidationConfig)
+            else validation
+            for validation in validations
+        ]
+
+        return validations
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(
@@ -1182,6 +1242,7 @@ class LegacyCheckpoint(Checkpoint):
         super().__init__(
             name=name,
             data_context=data_context,
+            config_version=None,
             validation_operator_name=validation_operator_name,
             batches=batches,
         )
@@ -1197,7 +1258,7 @@ class LegacyCheckpoint(Checkpoint):
     def batches(self) -> Optional[List[dict]]:
         return self._batches
 
-    def _run_default_validation_operator(
+    def _run_default_validation_operator(  # noqa: PLR0913
         self,
         assets_to_validate: List,
         run_id: Optional[Union[str, RunIdentifier]] = None,
@@ -1263,7 +1324,7 @@ class LegacyCheckpoint(Checkpoint):
                 result_format=result_format,
             )
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         run_id=None,
         evaluation_parameters=None,
@@ -1337,7 +1398,9 @@ class LegacyCheckpoint(Checkpoint):
 
             for suite_name in batch["expectation_suite_names"]:
                 suite = self.data_context.get_expectation_suite(suite_name)
-                batch = self.data_context.get_batch(batch_kwargs, suite)
+                batch = self.data_context.get_batch(  # noqa: PLW2901
+                    batch_kwargs, suite
+                )
 
                 batches_to_validate.append(batch)
 
@@ -1389,11 +1452,11 @@ class SimpleCheckpoint(Checkpoint):
     name: str
 
     # noinspection PyUnusedLocal
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         data_context,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Optional[Union[int, float]] = 1.0,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -1401,7 +1464,7 @@ class SimpleCheckpoint(Checkpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
@@ -1460,7 +1523,7 @@ class SimpleCheckpoint(Checkpoint):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
-    def run(
+    def run(  # noqa: PLR0913
         self,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -1469,7 +1532,7 @@ class SimpleCheckpoint(Checkpoint):
             Union[BatchRequestBase, FluentBatchRequest, dict]
         ] = None,
         validator: Optional[Validator] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,

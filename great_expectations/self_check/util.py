@@ -33,6 +33,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
@@ -76,7 +77,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
-    connection_manager,
 )
 from great_expectations.util import (
     build_in_memory_runtime_context,
@@ -122,91 +122,14 @@ if sqlalchemy.sqlite:
 else:
     SQLITE_TYPES = {}
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
-try:
-    # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as BigQueryDialect
-    import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-    # noinspection PyTypeChecker
-    bigquery_types_tuple = None
-    BIGQUERY_TYPES = {
-        "INTEGER": sqla_bigquery.INTEGER,
-        "NUMERIC": sqla_bigquery.NUMERIC,
-        "STRING": sqla_bigquery.STRING,
-        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-        "BYTES": sqla_bigquery.BYTES,
-        "BOOL": sqla_bigquery.BOOL,
-        "BOOLEAN": sqla_bigquery.BOOLEAN,
-        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-        "TIME": sqla_bigquery.TIME,
-        "FLOAT": sqla_bigquery.FLOAT,
-        "DATE": sqla_bigquery.DATE,
-        "DATETIME": sqla_bigquery.DATETIME,
-    }
-    try:
-        # noinspection PyUnresolvedReferences
-        from sqlalchemy_bigquery import GEOGRAPHY
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    BIGQUERY_TYPES,
+    GEOGRAPHY,
+)
 
-        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
-    except ImportError:
-        # BigQuery GEOGRAPHY support is optional
-        pass
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.dialects.registry.register(
-            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-        )
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
-            BIGQUERY_TYPES = {
-                "INTEGER": sqla_bigquery.INTEGER,
-                "NUMERIC": sqla_bigquery.NUMERIC,
-                "STRING": sqla_bigquery.STRING,
-                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-                "BYTES": sqla_bigquery.BYTES,
-                "BOOL": sqla_bigquery.BOOL,
-                "BOOLEAN": sqla_bigquery.BOOLEAN,
-                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-                "TIME": sqla_bigquery.TIME,
-                "FLOAT": sqla_bigquery.FLOAT,
-                "DATE": sqla_bigquery.DATE,
-                "DATETIME": sqla_bigquery.DATETIME,
-            }
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            # noinspection PyTypeChecker
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-            BIGQUERY_TYPES = {}
-
-    except (ImportError, AttributeError):
-        sqla_bigquery = None
-        # noinspection PyTypeChecker
-        bigquery_types_tuple = None
-        BigQueryDialect = None
-        pybigquery = None
-        BIGQUERY_TYPES = {}
-
+if GEOGRAPHY:
+    BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
@@ -502,7 +425,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(  # noqa: C901 - 110
+def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
     dataset_type,
     data,
     schemas=None,
@@ -517,7 +440,7 @@ def get_dataset(  # noqa: C901 - 110
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
             pandas_schema = {}
-            for (key, value) in schema.items():
+            for key, value in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
                 # Further, some changes in pandas internal about how datetimes are created means to support pandas
                 # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -531,7 +454,7 @@ def get_dataset(  # noqa: C901 - 110
                     continue
                 elif value.lower() in ["date"]:
                     df[key] = pd.to_datetime(df[key]).dt.date
-                    value = "object"
+                    value = "object"  # noqa: PLW2901
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -543,7 +466,6 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-
         spark_types = {
             "StringType": pyspark.types.StringType,
             "IntegerType": pyspark.types.IntegerType,
@@ -650,7 +572,7 @@ def get_dataset(  # noqa: C901 - 110
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901 - 31
+def get_test_validator_with_data(  # noqa: C901, PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -714,7 +636,7 @@ def _get_test_validator_with_data_pandas(
         if pk_column:
             schema["pk_index"] = "int"
         pandas_schema = {}
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             # Note, these are just names used in our internal schemas to build datasets *for internal tests*
             # Further, some changes in pandas internal about how datetimes are created means to support pandas
             # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -728,7 +650,7 @@ def _get_test_validator_with_data_pandas(
                 continue
             elif value.lower() in ["date"]:
                 df[key] = execute_pandas_to_datetime(df[key]).dt.date
-                value = "object"
+                value = "object"  # noqa: PLW2901
             try:
                 type_ = np.dtype(value)
             except TypeError:
@@ -755,7 +677,7 @@ def _get_test_validator_with_data_pandas(
     )
 
 
-def _get_test_validator_with_data_sqlalchemy(
+def _get_test_validator_with_data_sqlalchemy(  # noqa: PLR0913
     df: pd.DataFrame,
     execution_engine: str,
     schemas: dict | None,
@@ -789,13 +711,12 @@ def _get_test_validator_with_data_sqlalchemy(
     )
 
 
-def _get_test_validator_with_data_spark(  # noqa: C901 - 19
+def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
     data: dict,
     schemas: dict | None,
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-
     spark_types: Dict[str, Callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
@@ -940,7 +861,7 @@ def build_pandas_validator_with_data(
     )
 
 
-def build_sa_validator_with_data(  # noqa: C901 - 39
+def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     df,
     sa_engine_name,
     table_name,
@@ -980,7 +901,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     except AttributeError:
         pass
     try:
-        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_classes["bigquery"] = BigQueryDialect  # type: ignore[assignment]
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
@@ -1011,10 +932,10 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mysql":
         connection_string = f"mysql+pymysql://root@{db_hostname}/test_ci"
-        engine = connection_manager.get_connection(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
         engine = sa.create_engine(
@@ -1042,7 +963,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-    # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
+    # execution_engine.execute_query(sa.text(sql_query_string).execution_options(autocommit=True))
 
     # Add the data to the database as a new table
 
@@ -1107,24 +1028,26 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     else:
         sql_insert_method = None
 
-    _debug("Calling df.to_sql")
-    _start = time.time()
-    add_dataframe_to_db(
-        df=df,
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-        method=sql_insert_method,
-    )
-    _end = time.time()
-    _debug(
-        f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
-    )
-
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    with execution_engine.get_connection() as connection:
+        _debug("Calling df.to_sql")
+        _start = time.time()
+        add_dataframe_to_db(
+            df=df,
+            name=table_name,
+            con=connection,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+            method=sql_insert_method,
+        )
+        _end = time.time()
+        _debug(
+            f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
+        )
 
     if context is None:
         context = build_in_memory_runtime_context()
@@ -1177,7 +1100,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
             )
         )[0]
 
-    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     return Validator(
         execution_engine=execution_engine,
@@ -1224,7 +1147,7 @@ def build_spark_validator_with_data(
             df.columns.tolist(),
         )
 
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type] # got DataFrame
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1251,12 +1174,12 @@ def build_pandas_engine(
     return execution_engine
 
 
-def build_sa_engine(
+def build_sa_execution_engine(  # noqa: PLR0913
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
     batch_id: Optional[str] = None,
-    if_exists: str = "fail",
+    if_exists: str = "replace",
     index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
@@ -1274,13 +1197,13 @@ def build_sa_engine(
         dtype=dtype,
     )
 
-    execution_engine: SqlAlchemyExecutionEngine
-
-    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlalchemy_engine
+    )
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     if batch_id is None:
         batch_id = batch.id
@@ -1560,7 +1483,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
     return False
 
 
-def build_test_backends_list(  # noqa: C901 - 48
+def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     include_pandas=True,
     include_spark=False,
     include_sqlalchemy=True,
@@ -1601,7 +1524,6 @@ def build_test_backends_list(  # noqa: C901 - 48
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
-
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
@@ -1631,7 +1553,7 @@ def build_test_backends_list(  # noqa: C901 - 48
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
-                if raise_exceptions_for_backends is True:
+                if raise_exceptions_for_backends is True:  # noqa: PLR5501
                     raise ValueError(
                         f"backend-specific tests are requested, but unable to connect to the database at "
                         f"{connection_string}"
@@ -1819,7 +1741,7 @@ def build_test_backends_list(  # noqa: C901 - 48
     return test_backends
 
 
-def generate_expectation_tests(  # noqa: C901 - 43
+def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
@@ -1872,7 +1794,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
         _debug(f"test_data_case {i}/{num_test_data_cases}")
-        d = copy.deepcopy(d)
+        d = copy.deepcopy(d)  # noqa: PLW2901
         dialects_to_include = {}
         engines_to_include = {}
 
@@ -1925,7 +1847,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             dialects_to_include[backend] = True
                             engines_to_include["sqlalchemy"] = True
                     else:
-                        if backend == "pandas" and "pandas" in engines_implemented:
+                        if (  # noqa: PLR5501
+                            backend == "pandas" and "pandas" in engines_implemented
+                        ):
                             engines_to_include["pandas"] = True
                         elif backend == "spark" and "spark" in engines_implemented:
                             engines_to_include["spark"] = True
@@ -1975,7 +1899,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                 for sup in suppress_test_fors
             ]
             only_fors_ok = []
-            for i, only_for in enumerate(only_fors):
+            for i, only_for in enumerate(only_fors):  # noqa: PLW2901
                 if not only_for:
                     only_fors_ok.append(True)
                     continue
@@ -2163,7 +2087,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     return parametrized_tests
 
 
-def should_we_generate_this_test(
+def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2171,7 +2095,6 @@ def should_we_generate_this_test(
     extra_debug_info: str = "",
     debug_logger: Optional[logging.Logger] = None,
 ):
-
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
@@ -2224,7 +2147,9 @@ def should_we_generate_this_test(
                     if major == "0" and minor in ["22", "23"]:
                         return True
                 elif "pandas>=024" in expectation_test_case.only_for:
-                    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
+                    if (major == "0" and int(minor) >= 24) or int(  # noqa: PLR2004
+                        major
+                    ) >= 1:
                         return True
 
             if ignore_only_for:
@@ -2326,7 +2251,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901 - 16
+def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2454,10 +2379,9 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(  # noqa: C901 - 52
+def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
     test, result, data_asset=None, pk_column=False
 ) -> None:
-
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
     if pk_column:
@@ -2572,7 +2496,7 @@ def check_json_test_result(  # noqa: C901 - 52
                             rtol=test["tolerance"],
                         )
                 else:
-                    if isinstance(value, dict) and "values" in value:
+                    if isinstance(value, dict) and "values" in value:  # noqa: PLR5501
                         try:
                             assert np.allclose(
                                 result["result"]["observed_value"]["values"],

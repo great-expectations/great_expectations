@@ -12,11 +12,10 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -122,7 +121,7 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: C901 - complexity 17
+    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,

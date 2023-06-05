@@ -1,6 +1,6 @@
 import copy
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+from typing import Any, Dict, Final, List, Optional, Set, TypeVar, Union
 
 from pyparsing import (
     Literal,
@@ -13,7 +13,6 @@ from pyparsing import (
     alphas,
     nums,
 )
-from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -638,7 +637,7 @@ def _get_parameter_node_attribute_names(
 
     attribute_name: str
     for attribute_name_as_list in attribute_names_as_lists:
-        attribute_name_as_list = (
+        attribute_name_as_list = (  # noqa: PLW2901
             _get_parameter_name_parts_up_to_including_reserved_literal(
                 attribute_name_as_list=attribute_name_as_list
             )

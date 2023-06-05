@@ -111,11 +111,11 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     progress = float(gathered) / max_work_amount
                     excess: float = progress - 1.0
                     if excess > 0:
-                        if 0.0 < excess <= 1.0:
+                        if 0.0 < excess <= 1.0:  # noqa: PLR2004
                             max_work_amount += 2.0 * excess * max_work_amount
-                        elif 1.0 < excess <= 2.0:
+                        elif 1.0 < excess <= 2.0:  # noqa: PLR2004
                             max_work_amount += 5.0 * excess * max_work_amount
-                        elif 2.0 < excess <= 1.0e1:
+                        elif 2.0 < excess <= 1.0e1:  # noqa: PLR2004
                             max_work_amount += 1.0e1 * excess * max_work_amount
                         else:
                             max_work_amount += 1.0e2 * excess * max_work_amount

@@ -49,11 +49,8 @@
             ]
         },
         "orient": {
-            "title": "Orient"
-        },
-        "typ": {
-            "title": "Typ",
-            "default": "frame"
+            "title": "Orient",
+            "type": "string"
         },
         "dtype": {
             "title": "Dtype",
@@ -64,7 +61,18 @@
         },
         "convert_dates": {
             "title": "Convert Dates",
-            "default": true
+            "default": true,
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
         },
         "keep_default_dates": {
             "title": "Keep Default Dates",
@@ -82,10 +90,12 @@
             "type": "boolean"
         },
         "date_unit": {
-            "title": "Date Unit"
+            "title": "Date Unit",
+            "type": "string"
         },
         "encoding": {
-            "title": "Encoding"
+            "title": "Encoding",
+            "type": "string"
         },
         "encoding_errors": {
             "title": "Encoding Errors",

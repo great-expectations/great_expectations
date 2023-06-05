@@ -58,7 +58,6 @@ def prompt_profile_to_create_a_suite(
     data_context: FileDataContext,
     expectation_suite_name: str,
 ) -> None:
-
     cli_message(
         string="""
 Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
@@ -82,7 +81,7 @@ When you run this notebook, Great Expectations will store these expectations in 
     confirm_proceed_or_exit()
 
 
-def get_or_create_expectation_suite(
+def get_or_create_expectation_suite(  # noqa: PLR0913
     expectation_suite_name: Optional[str],
     data_context: FileDataContext,
     data_asset_name: Optional[str] = None,
@@ -405,7 +404,7 @@ def select_datasource(
     return data_source
 
 
-def load_data_context_with_error_handling(
+def load_data_context_with_error_handling(  # noqa: PLR0912
     directory: Optional[str], from_cli_upgrade_command: bool = False
 ) -> Optional[FileDataContext]:
     """Return a DataContext with good error handling and exit codes."""
@@ -597,7 +596,7 @@ To learn more about the upgrade process, visit \
     sys.exit(0)
 
 
-def upgrade_project_one_or_multiple_versions_increment(
+def upgrade_project_one_or_multiple_versions_increment(  # noqa: PLR0912
     directory: str,
     context: FileDataContext,
     ge_config_version: float,
@@ -835,7 +834,7 @@ def upgrade_project_up_to_one_version_increment(
     sys.exit(0)
 
 
-def confirm_proceed_or_exit(
+def confirm_proceed_or_exit(  # noqa: PLR0913
     confirm_prompt: str = "Would you like to proceed?",
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
@@ -895,8 +894,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         }
     """
 
-    if config_file_location is not None and config_file_location != "":
-
+    if config_file_location is not None and config_file_location != "":  # noqa: PLC1901
         config_file_location_path = Path(config_file_location)
 
         # If the file or directory exists, treat it appropriately

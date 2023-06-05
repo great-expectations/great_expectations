@@ -50,7 +50,6 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
 def test_config_variables_on_context_without_config_variables_filepath_configured(
     data_context_without_config_variables_filepath_configured,
 ):
-
     # test the behavior on a context that does not config_variables_filepath (the location of
     # the file with config variables values) configured.
 
@@ -190,7 +189,8 @@ def test_substitute_config_variable():
 
     # Null cases
     assert (
-        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
+        config_substitutor.substitute_config_variable("", config_variables_dict)
+        == ""  # noqa: PLC1901
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
@@ -697,7 +697,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     context.add_datasource(
         initialize=False,
         name="test_datasource",
-        **datasource_config_schema.dump(datasource_config)
+        **datasource_config_schema.dump(datasource_config),
     )
 
     assert context.list_datasources()[0]["execution_engine"]["credentials"] == {

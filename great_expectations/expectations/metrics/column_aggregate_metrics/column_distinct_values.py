@@ -45,23 +45,26 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         """
         selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
-        (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        (
+            selectable,
+            _,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
         column: sqlalchemy.ColumnClause = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy.Engine]
+        distinct_values: List[sqlalchemy.Row]
         if hasattr(column, "is_not"):
-            distinct_values = sqlalchemy_engine.execute(
+            distinct_values = execution_engine.execute_query(
                 sa.select(column)
                 .where(column.is_not(None))
                 .distinct()
                 .select_from(selectable)
             ).fetchall()
         else:
-            distinct_values = sqlalchemy_engine.execute(
+            distinct_values = execution_engine.execute_query(
                 sa.select(column)
                 .where(column.isnot(None))
                 .distinct()
@@ -84,7 +87,11 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         """
         df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
-        (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
+        (
+            df,
+            _,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]

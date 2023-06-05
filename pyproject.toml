@@ -5,6 +5,7 @@ requires = ["setuptools", "wheel"]
 # build-backend = "setuptools.build_meta"
 
 [tool.black]
+target-version = ["py38", "py39", "py310"]
 extend_excludes = '''
 (
      docs/.*
@@ -69,7 +70,6 @@ exclude = [
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'core/batch\.py', # 29
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/base\.py', # 8
@@ -200,6 +200,16 @@ exclude = [
     'tests/datasource/fluent/tasks\.py',
 ]
 
+[[tool.mypy.overrides]]
+# need to use override because a mypy bug prevents ignoring an assignment warning inline
+# for `from azure import storage`
+module = [
+  "great_expectations.compatibility.azure",
+]
+disable_error_code = [
+    'assignment',  # cannot assign NotImported to a ModuleType
+    ]
+
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
 init_typed = true
@@ -207,7 +217,7 @@ warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 88
 select = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -232,6 +242,10 @@ select = [
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "B", # bugbear - common python bugs & design issues
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
+    # https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PL", # pylint
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -288,6 +302,9 @@ extend-exclude = [
     "F401",  # unused import
     "F403",  # star imports
     ]
+"great_expectations/_version.py" = [
+    "PLR",  # pylint - versioneer code
+]
 "great_expectations/compatibility/sqlalchemy.py" = [
     "TID251",  # flake8-banned-api
 ]

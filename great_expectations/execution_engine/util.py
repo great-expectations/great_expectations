@@ -56,7 +56,7 @@ def is_valid_continuous_partition_object(partition_object):
         return False
 
     if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:
+        if len(partition_object["tail_weights"]) != 2:  # noqa: PLR2004
             return False
         comb_weights = partition_object["tail_weights"] + partition_object["weights"]
     else:
@@ -191,7 +191,9 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):  # noqa: C901 - 18
+def infer_distribution_parameters(  # noqa: C901, PLR0912
+    data, distribution, params=None
+):
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -325,7 +327,9 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
+def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
+    distribution, params
+):
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -395,32 +399,32 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
-    elif isinstance(params, tuple) or isinstance(params, list):
+    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
         scale = None
 
         # `params` is a tuple or a list
         if distribution == "beta":
-            if len(params) < 2:
+            if len(params) < 2:  # noqa: PLR2004
                 raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
                 raise ValueError(f"Invalid parameters: {beta_msg}")
-            if len(params) == 4:
+            if len(params) == 4:  # noqa: PLR2004
                 scale = params[3]
-            elif len(params) > 4:
+            elif len(params) > 4:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {norm_msg}")
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {gamma_msg}")
-            if len(params) == 3:
+            if len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            if len(params) > 3:
+            if len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {gamma_msg}")
@@ -434,26 +438,25 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         #        raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         elif distribution == "uniform":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {chi2_msg}")
-            elif len(params) == 3:
+            elif len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            elif len(params) > 3:
+            elif len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
@@ -463,8 +466,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         raise ValueError(
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
-
-    return
 
 
 def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):

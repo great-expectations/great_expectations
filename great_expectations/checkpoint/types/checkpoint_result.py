@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Literal, Optional
 
 from marshmallow import Schema, fields, post_load, pre_dump
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -66,7 +65,7 @@ class CheckpointResult(SerializableDictDot):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
         run_results: dict[

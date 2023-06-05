@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from inspect import Parameter, Signature
-from typing import TYPE_CHECKING, Callable, ForwardRef, Type
-
-from typing_extensions import Protocol
+from typing import TYPE_CHECKING, Callable, ForwardRef, Protocol, Type
 
 from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
@@ -20,7 +18,7 @@ class _Callable(Protocol):
     __call__: Callable
 
 
-def _print_method(
+def _print_method(  # noqa: PLR0912
     method: _Callable,
     method_name: str | None = None,
     default_override: str = "...",
@@ -108,7 +106,6 @@ def print_datasource_crud_signatures(
     datasource_type_lookup = source_factories.type_lookup
 
     for datasource_name in datasource_type_lookup.type_names():
-
         for method_name_tmplt in method_name_templates:
             method_name = method_name_tmplt.format(datasource_name)
 

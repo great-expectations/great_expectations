@@ -60,7 +60,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     }
 
     # FIXME add tests for new partitioner functionality
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -216,7 +216,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 data_asset_name=data_asset_name, **batch_parameters, **batch_kwargs
             )
 
-    def _build_batch_kwargs_from_key(
+    def _build_batch_kwargs_from_key(  # noqa: PLR0913
         self,
         key,
         asset_config=None,
@@ -311,7 +311,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
 
-    def _build_asset_iterator(
+    def _build_asset_iterator(  # noqa: PLR0913
         self,
         asset_config,
         iterator_dict,

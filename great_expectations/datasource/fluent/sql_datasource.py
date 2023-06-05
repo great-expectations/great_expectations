@@ -8,14 +8,15 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Literal,
     Optional,
+    Protocol,
     Type,
     Union,
     cast,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
@@ -856,7 +857,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        return sa.text(self.table_name)
+        return sa.text(self.qualified_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -958,7 +959,7 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str,

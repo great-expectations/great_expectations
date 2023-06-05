@@ -278,7 +278,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         class_name: str,
@@ -485,7 +485,7 @@ class RuleConfigSchema(NotNullSchema):
 
 
 class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -696,7 +696,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     config_version = fields.Float(
         required=True,
         allow_none=False,
-        validate=lambda x: x == 1.0,
+        validate=lambda x: x == 1.0,  # noqa: PLR2004
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },

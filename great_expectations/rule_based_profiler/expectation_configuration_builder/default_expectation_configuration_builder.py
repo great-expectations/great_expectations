@@ -75,7 +75,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         "kwargs",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,

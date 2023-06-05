@@ -45,7 +45,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -61,7 +61,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
         super().__init__(

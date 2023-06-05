@@ -133,7 +133,9 @@ def expectation_config_expect_multicolumn_sum_to_equal() -> ExpectationConfigura
 
 
 @pytest.fixture()
-def expectation_config_expect_column_pair_values_to_be_equal() -> ExpectationConfiguration:
+def expectation_config_expect_column_pair_values_to_be_equal() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_pair_values_to_be_equal",
         kwargs={"column_A": "ordered_item", "column_B": "received_item"},
@@ -152,7 +154,9 @@ def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfigu
 
 
 @pytest.fixture()
-def expectation_config_expect_column_values_to_not_be_in_set() -> ExpectationConfiguration:
+def expectation_config_expect_column_values_to_not_be_in_set() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_in_set",
         kwargs={
@@ -3509,10 +3513,19 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
     expectation_suite_name = "metrics_exp"
     context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
 
-    context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
-        name="IN_MEMORY_DATA_ASSET",
-        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    data_frame_asset = context.sources.add_pandas(
+        name="pandas_datasource"
+    ).add_dataframe_asset(name="IN_MEMORY_DATA_ASSET")
+    batch_request = data_frame_asset.build_batch_request(
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index
     )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator.expect_column_values_to_be_unique(column="animals")
+    validator.save_expectation_suite(discard_failed_expectations=False)
 
     checkpoint_config_yml = """
 name: my_checkpoint
@@ -3522,8 +3535,6 @@ run_name_template: "%Y-%m-foo-bar-template-test"
 batch_request:
   datasource_name: pandas_datasource
   data_asset_name: IN_MEMORY_DATA_ASSET
-  batch_slice: -1
-expectation_suite_name: None
 action_list:
     - name: store_validation_result
       action:
@@ -3543,15 +3554,34 @@ runtime_configuration:
 
     context.add_checkpoint(**checkpoint_config.to_json_dict())
 
-    result: CheckpointResult = context.run_checkpoint(
+    result: CheckpointResult
+
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name=expectation_suite_name,
     )
-
-    expected_batch_request = {
+    assert result.checkpoint_config.batch_request == {
         "datasource_name": "pandas_datasource",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_slice": -1,
     }
 
-    assert result.checkpoint_config.batch_request == expected_batch_request
+    # TODO: <Alex>06/01/2023: For "DataAsset" types containing ephemeral data references, best practices is to supply "batch_request" as argument to "run_checkpoint()" method.</Alex>
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+        batch_request=batch_request,
+    )
+    assert result.success
+    assert dict(
+        sorted(
+            list(result.run_results.values())[0]["validation_result"][
+                "statistics"
+            ].items(),
+            key=lambda element: element[0],
+        )
+    ) == {
+        "evaluated_expectations": 1,
+        "successful_expectations": 1,
+        "success_percent": 100.0,
+        "unsuccessful_expectations": 0,
+    }

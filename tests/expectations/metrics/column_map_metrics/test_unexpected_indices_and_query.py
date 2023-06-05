@@ -15,7 +15,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.self_check.util import (
     build_pandas_engine,
-    build_sa_engine,
+    build_sa_execution_engine,
     build_spark_engine,
 )
 from great_expectations.validator.computed_metric import MetricValue
@@ -90,7 +90,7 @@ def _build_table_columns_and_unexpected(
     # get table_columns_metric
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # unexpected_condition metric
@@ -141,7 +141,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [3, 4, 5]
 
 
@@ -171,7 +171,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [
             {"animals": "giraffe", "pk_1": 3},
             {"animals": "lion", "pk_1": 4},
@@ -186,7 +186,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -205,7 +205,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert val == [
             {"animals": "giraffe", "pk_1": 3},
             {"animals": "lion", "pk_1": 4},
@@ -226,7 +226,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
         },
     }
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -255,7 +255,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
-    engine = build_sa_engine(df=df, sa=sa)
+    engine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -273,7 +273,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert (
             val == "SELECT pk_1, animals \n"
             "FROM test \n"
@@ -294,7 +294,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         },
     }
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
 
     (
         table_columns_metric,
@@ -313,7 +313,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for key, val in results.items():
         assert (
             val == "SELECT animals \n"
             "FROM test \n"

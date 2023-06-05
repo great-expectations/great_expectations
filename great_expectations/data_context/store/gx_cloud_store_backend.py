@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import logging
 from abc import ABCMeta
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urljoin
 
 import requests
@@ -18,6 +20,9 @@ from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +50,16 @@ class ResponsePayload(TypedDict):
 AnyPayload = Union[ResponsePayload, ErrorPayload]
 
 
+class RequestPayloadDataField(TypedDict):
+    attributes: dict
+    id: NotRequired[str]
+    type: str
+
+
+class RequestPayload(TypedDict):
+    data: RequestPayloadDataField
+
+
 def construct_url(
     base_url: str,
     organization_id: str,
@@ -66,8 +81,8 @@ def construct_json_payload(
     attributes_key: str,
     attributes_value: Any,
     **kwargs: dict,
-) -> dict:
-    data = {
+) -> RequestPayload:
+    data: RequestPayload = {
         "data": {
             "type": resource_type,
             "attributes": {
@@ -144,7 +159,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
@@ -212,7 +227,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         params: Optional[dict] = None
         try:
             # if name is included in the key, add as a param
-            if len(key) > 2 and key[2]:
+            if len(key) > 2 and key[2]:  # noqa: PLR2004
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
@@ -231,7 +246,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
-            logger.debug(
+            logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
@@ -283,7 +298,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # for the ExpectationSuite endpoint. As such, this is a temporary fork to
             # ensure that legacy PATCH behavior is supported.
             if (
-                response_status_code == 405
+                response_status_code == 405  # noqa: PLR2004
                 and resource_type is GXCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = self._session.patch(url, json=data)
@@ -382,7 +397,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
-            )
+            ) from http_exc
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendTransientError(
@@ -392,7 +407,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def ge_cloud_base_url(self) -> str:
@@ -469,7 +484,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-        if len(key) == 3:
+        if len(key) == 3:  # noqa: PLR2004
             resource_object_name = key[2]
         else:
             resource_object_name = None
@@ -549,3 +564,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             id=id,
             resource_name=name,
         )
+
+    def _validate_key(self, key) -> None:
+        if not isinstance(key, tuple) or len(key) != 3:  # noqa: PLR2004
+            raise TypeError(
+                "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
+            )
+
+        resource_type, id, resource_name = key
+        try:
+            GXCloudRESTResource(resource_type)
+        except ValueError:
+            raise TypeError(
+                f"The provided resource_type {resource_type} is not a valid GXCloudRESTResource"
+            )

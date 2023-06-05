@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseAnonymizer(ABC):
-
     # Any class that starts with this __module__ is considered a "core" object
     CORE_GX_OBJECT_MODULE_PREFIX = "great_expectations"
 
@@ -119,7 +118,7 @@ class BaseAnonymizer(ABC):
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
-    def _anonymize_object_info(
+    def _anonymize_object_info(  # noqa: PLR0913
         self,
         anonymized_info_dict: dict,
         object_: Optional[object] = None,
@@ -168,7 +167,6 @@ class BaseAnonymizer(ABC):
             if self._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
             else:
-
                 # Chetan - 20220311 - If we can't identify the class in question, we iterate through the parents.
                 # While GX rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
                 # it is important to recognize that this is possibility.

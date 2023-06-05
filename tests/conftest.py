@@ -104,6 +104,7 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
@@ -111,6 +112,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -128,7 +130,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")
+    pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = get_or_create_spark_application(
@@ -799,11 +801,9 @@ def postgresql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"postgresql://postgres@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -817,11 +817,9 @@ def mysql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"mysql+pymysql://root@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -1643,7 +1641,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     df = pd.read_csv(filepath_or_buffer=csv_source_path)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1697,7 +1696,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2067,7 +2067,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2970,7 +2971,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
@@ -7810,7 +7811,6 @@ def multibatch_generic_csv_generator():
         num_event_batches: Optional[int] = 20,
         num_events_per_batch: Optional[int] = 5,
     ) -> List[str]:
-
         if start_date is None:
             start_date = datetime.datetime(2000, 1, 1)
 
@@ -8034,7 +8034,6 @@ def spark_df_from_pandas_df():
         spark_session,
         pandas_df,
     ):
-
         spark_df = spark_session.createDataFrame(
             [
                 tuple(
@@ -8232,3 +8231,19 @@ def ephemeral_context_with_defaults() -> EphemeralDataContext:
         store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     )
     return EphemeralDataContext(project_config=project_config)
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path

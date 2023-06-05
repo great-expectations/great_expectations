@@ -42,6 +42,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 from great_expectations.exceptions import (
@@ -180,7 +181,7 @@ class Validator:
     RUNTIME_KEYS = DEFAULT_RUNTIME_CONFIGURATION.keys()
 
     # noinspection PyUnusedLocal
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         execution_engine: ExecutionEngine,
         interactive_evaluation: bool = True,
@@ -328,8 +329,6 @@ class Validator:
     ) -> Any:
         """Convenience method, return the value of the requested metric.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric: MetricConfiguration
 
@@ -344,8 +343,6 @@ class Validator:
     ) -> Dict[str, Any]:
         """
         Convenience method that resolves requested metrics (specified as dictionary, keyed by MetricConfiguration ID).
-
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
 
         Args:
             metrics: Dictionary of desired metrics to be resolved; metric_name is key and MetricConfiguration is value.
@@ -365,8 +362,6 @@ class Validator:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
-
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
@@ -381,11 +376,15 @@ class Validator:
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
-        """
-        Convenience method to obtain Batch columns.
+        """Convenience method to obtain Batch columns.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
@@ -396,7 +395,7 @@ class Validator:
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """Return the first several rows or records from a Batch of data.
+        """Convenience method to return the first several rows or records from a Batch of data.
 
         Args:
             n_rows: The number of rows to return.
@@ -466,7 +465,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:  # noqa: C901 - complexity 16
+    def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -479,7 +478,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args, **kwargs):
+        def inst_expectation(*args, **kwargs):  # noqa: PLR0912
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
@@ -601,7 +600,7 @@ class Validator:
 
         return inst_expectation
 
-    def _build_expectation_configuration(
+    def _build_expectation_configuration(  # noqa: PLR0913
         self,
         expectation_type: str,
         expectation_kwargs: dict,
@@ -787,7 +786,7 @@ class Validator:
 
         return inst_rule_based_profiler
 
-    def _build_rule_based_profiler_from_config_and_runtime_args(
+    def _build_rule_based_profiler_from_config_and_runtime_args(  # noqa: PLR0913
         self,
         expectation_type: str,
         expectation_kwargs: dict,
@@ -1156,7 +1155,7 @@ class Validator:
         )
         return validation_graph
 
-    def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
+    def _resolve_suite_level_graph_and_process_metric_evaluation_errors(  # noqa: PLR0913
         self,
         graph: ValidationGraph,
         runtime_configuration: dict,
@@ -1351,7 +1350,7 @@ class Validator:
         self._default_expectation_args[argument] = value
 
     @public_api
-    def get_expectation_suite(  # noqa: C901 - complexity 17
+    def get_expectation_suite(  # noqa: C901, PLR0912, PLR0913
         self,
         discard_failed_expectations: bool = True,
         discard_result_format_kwargs: bool = True,
@@ -1444,7 +1443,7 @@ class Validator:
         return expectation_suite
 
     @public_api
-    def save_expectation_suite(
+    def save_expectation_suite(  # noqa: PLR0913
         self,
         filepath: Optional[str] = None,
         discard_failed_expectations: bool = True,
@@ -1504,7 +1503,7 @@ class Validator:
         message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",
         version="0.13.0",
     )
-    def validate(  # noqa: C901 - Complexity 31
+    def validate(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         expectation_suite: str | ExpectationSuite | None = None,
         run_id: str | RunIdentifier | Dict[str, str] | None = None,
@@ -1752,7 +1751,7 @@ class Validator:
             {parameter_name: convert_to_json_serializable(parameter_value)}
         )
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment: str,
         batch_spec: Optional[dict] = None,
@@ -1782,8 +1781,8 @@ class Validator:
 
         Args:
             function (func): The function to be tested. (Must be a valid expectation function.)
-            *args          : Positional arguments to be passed the the function
-            **kwargs       : Keyword arguments to be passed the the function
+            *args          : Positional arguments to be passed the function
+            **kwargs       : Keyword arguments to be passed the function
 
         Returns:
             A JSON-serializable expectation result object.
@@ -1822,7 +1821,7 @@ class Validator:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in unmet_dependency_ids:
+                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 
@@ -1919,7 +1918,7 @@ class Validator:
             else:
                 runtime_configuration.update({"result_format": result_format})
         else:
-            if result_format is not None:
+            if result_format is not None:  # noqa: PLR5501
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration
@@ -1949,6 +1948,26 @@ class Validator:
             success=success,
             success_percent=success_percent,
         )
+
+    def convert_to_checkpoint_validations_list(
+        self,
+    ) -> list[CheckpointValidationConfig]:
+        """
+        Generates a list of validations to be used in the construction of a Checkpoint.
+
+        Returns:
+            A list of CheckpointValidationConfigs (one for each batch in the Validator).
+        """
+        validations = []
+        for batch in self.batch_cache.values():
+            validation = CheckpointValidationConfig(
+                expectation_suite_name=self.expectation_suite_name,
+                expectation_suite_ge_cloud_id=self.expectation_suite.ge_cloud_id,
+                batch_request=batch.batch_request,
+            )
+            validations.append(validation)
+
+        return validations
 
 
 class BridgeValidator:
