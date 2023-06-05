@@ -1,5 +1,4 @@
 import asyncio
-import json
 from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -269,7 +268,7 @@ class GXAgent:
             + f"/agent-jobs/{job_id}"
         )
         session = create_session(access_token=self._config.gx_cloud_access_token)
-        data = json.dumps(status.dict())
+        data = status.json()
         session.patch(agent_sessions_url, data=data)
 
 
