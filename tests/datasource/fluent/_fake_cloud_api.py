@@ -110,11 +110,11 @@ FakeDBTypedDict = TypedDict(
     {
         "data-context-configuration": Dict[str, Union[str, dict]],
         "DATASOURCE_NAMES": Set[str],
-        "DATASOURCES": Dict[str, dict],
+        "datasources": Dict[str, dict],
         "EXPECTATION_SUITE_NAMES": Set[str],
-        "EXPECTATION_SUITES": Dict[str, dict],
+        "expectation_suites": Dict[str, dict],
         "CHECKPOINT_NAMES": Set[str],
-        "CHECKPOINTS": Dict[str, dict],
+        "checkpoints": Dict[str, dict],
     },
 )
 
@@ -142,11 +142,11 @@ def create_fake_db_seed_data(fds_config: Optional[GxConfig] = None) -> FakeDBTyp
 
     return {
         "DATASOURCE_NAMES": datasource_names,
-        "DATASOURCES": datasources_by_id,
+        "datasources": datasources_by_id,
         "EXPECTATION_SUITE_NAMES": set(),
-        "EXPECTATION_SUITES": {},
+        "expectation_suites": {},
         "CHECKPOINT_NAMES": set(),
-        "CHECKPOINTS": {},
+        "checkpoints": {},
         "data-context-configuration": {
             "anonymous_usage_statistics": {
                 "data_context_id": FAKE_DATA_CONTEXT_ID,
@@ -235,7 +235,7 @@ def get_datasource_by_id_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     datasource_id = parsed_url.path.split("/")[-1]
 
-    datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
+    datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if datasource:
         result = CallbackResult(
             200, headers=DEFAULT_HEADERS, body=json.dumps(datasource)
@@ -266,7 +266,7 @@ def delete_datasources_cb(
     parsed_url = urllib.parse.urlparse(url)
     datasource_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["DATASOURCES"]
+    datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
     deleted_ds = datasources.pop(datasource_id, None)
     print(pf(deleted_ds, depth=5))
     if deleted_ds:
@@ -310,10 +310,10 @@ def post_datasources_cb(
                 datasource_id = str(uuid.uuid4())
                 payload.data.id = datasource_id
             assert (
-                datasource_id not in _CLOUD_API_FAKE_DB["DATASOURCES"]
+                datasource_id not in _CLOUD_API_FAKE_DB["datasources"]
             ), f"ID collision for '{datasource_name}'"
 
-            _CLOUD_API_FAKE_DB["DATASOURCES"][datasource_id] = payload.dict()
+            _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
             _CLOUD_API_FAKE_DB["DATASOURCE_NAMES"].add(payload.data.name)
 
             result = CallbackResult(201, headers=DEFAULT_HEADERS, body=payload.json())
@@ -372,14 +372,14 @@ def put_datasource_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(request.url)
     datasource_id = parsed_url.path.split("/")[-1]
 
-    old_datasource: dict | None = _CLOUD_API_FAKE_DB["DATASOURCES"].get(datasource_id)
+    old_datasource: dict | None = _CLOUD_API_FAKE_DB["datasources"].get(datasource_id)
     if old_datasource:
         if (
             payload.data.name
             != old_datasource["data"]["attributes"]["datasource_config"]["name"]
         ):
             raise NotImplementedError("Unsure how to handle name change")
-        _CLOUD_API_FAKE_DB["DATASOURCES"][datasource_id] = payload.dict()
+        _CLOUD_API_FAKE_DB["datasources"][datasource_id] = payload.dict()
         result = CallbackResult(200, headers=DEFAULT_HEADERS, body=payload.json())
     else:
         result = CallbackResult(404, headers=DEFAULT_HEADERS, body="")
@@ -396,7 +396,7 @@ def get_datasources_cb(
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
-    all_datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["DATASOURCES"]
+    all_datasources: dict[str, dict] = _CLOUD_API_FAKE_DB["datasources"]
     datasources_list: list[dict] = list(all_datasources.values())
     if queried_names:
         datasources_list = [
@@ -419,7 +419,7 @@ def get_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
-    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
     exp_suite_list: list[dict] = list(exp_suites.values())
     if queried_names:
         exp_suite_list = [
@@ -445,7 +445,7 @@ def get_expectation_suite_by_id_cb(
     parsed_url = urllib.parse.urlparse(url)
     expectation_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"].get(
+    expectation_suite: dict | None = _CLOUD_API_FAKE_DB["expectation_suites"].get(
         expectation_id
     )
     if expectation_suite:
@@ -468,7 +468,7 @@ def post_expectation_suites_cb(request: PreparedRequest) -> CallbackResult:
     name = payload["data"]["attributes"]["suite"]["expectation_suite_name"]
 
     exp_suite_names: set[str] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITE_NAMES"]
-    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["EXPECTATION_SUITES"]
+    exp_suites: dict[str, dict] = _CLOUD_API_FAKE_DB["expectation_suites"]
 
     if name in exp_suite_names:
         result = CallbackResult(
@@ -503,7 +503,7 @@ def get_checkpoints_cb(requests: PreparedRequest) -> CallbackResult:
     query_params = urllib.parse.parse_qs(parsed_url.query)  # type: ignore[type-var]
     queried_names: Sequence[str] = query_params.get("name", [])  # type: ignore[assignment]
 
-    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_list: list[dict] = list(checkpoints.values())
     if queried_names:
         checkpoint_list = [
@@ -526,7 +526,7 @@ def get_checkpoint_by_id_cb(request: PreparedRequest) -> CallbackResult:
     parsed_url = urllib.parse.urlparse(url)
     checkpoint_id: str = parsed_url.path.split("/")[-1]  # type: ignore[arg-type,assignment]
 
-    if checkpoint := _CLOUD_API_FAKE_DB["CHECKPOINTS"].get(checkpoint_id):
+    if checkpoint := _CLOUD_API_FAKE_DB["checkpoints"].get(checkpoint_id):
         result = CallbackResult(
             200, headers=DEFAULT_HEADERS, body=json.dumps(checkpoint)
         )
@@ -557,7 +557,7 @@ def post_checkpoints_cb(request: PreparedRequest) -> CallbackResult:
     payload: dict = json.loads(request.body)
     name = payload["data"]["attributes"]["checkpoint_config"]["name"]
 
-    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["CHECKPOINTS"]
+    checkpoints: dict[str, dict] = _CLOUD_API_FAKE_DB["checkpoints"]
     checkpoint_names: set[str] = _CLOUD_API_FAKE_DB["CHECKPOINT_NAMES"]
 
     if name in checkpoint_names:
