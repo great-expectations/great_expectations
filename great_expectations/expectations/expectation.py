@@ -2825,21 +2825,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if include_unexpected_rows:
-            metric_kwargs = get_metric_kwargs(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
@@ -2885,9 +2870,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names = None
-        include_unexpected_rows = None
-
+        include_unexpected_rows: bool
+        unexpected_index_column_names: Union[int, str, List[str]] | None
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
@@ -2895,6 +2879,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             unexpected_index_column_names = result_format.get(
                 "unexpected_index_column_names", None
             )
+        else:
+            include_unexpected_rows = False
+            unexpected_index_column_names = None
 
         total_count: Optional[int] = metrics.get("table.row_count")
         null_count: Optional[int] = metrics.get(
@@ -2912,6 +2899,7 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         unexpected_index_query: Optional[str] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
+
         unexpected_rows = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(
@@ -3118,6 +3106,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
