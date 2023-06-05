@@ -1,4 +1,3 @@
-import json
 import os
 from time import sleep
 from typing import Callable
