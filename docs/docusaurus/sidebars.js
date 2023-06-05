@@ -15,7 +15,7 @@ module.exports = {
           type: 'category',
           label: 'Data Contexts',
           items: [
-            'guides/setup/instantiating_data_contexts/instantiate_data_context',
+            'guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials',
           ]
