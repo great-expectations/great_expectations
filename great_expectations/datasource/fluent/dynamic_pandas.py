@@ -98,6 +98,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Sequence[str]",
     "Sequence[int]",
     "Sequence[tuple[int, int]]",  # noqa: PLW0130
+    # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
@@ -106,6 +107,9 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
     "Literal[('xlrd', 'openpyxl', 'odf', 'pyxlsb')]",
     "Literal[None, 'header', 'footer', 'body', 'all']",
+    "Literal[('high', 'legacy')]",
+    "Literal[(None, 'header', 'footer', 'body', 'all')]",
+    "Literal[('frame', 'series')]",
     "Iterable[object]",
     # other
     "Pattern",  # re

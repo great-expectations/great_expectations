@@ -268,7 +268,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, id: str, value: Any) -> bool:
+    def _put(self, id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -343,20 +343,23 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         key: Tuple[GXCloudRESTResource, ...],
         value: Any,
-        **kwargs: dict,
+        **kwargs,
     ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         resource = key[0]
         id: str = key[1]
 
-        # if key has an id, perform _update instead
+        # if key has an id, perform _put instead
 
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
-            # _update returns a bool
-            return self._update(id=id, value=value)
+            # _put returns a bool
+            return self._put(id=id, value=value)
 
+        return self._post(value=value, **kwargs)
+
+    def _post(self, value: Any, **kwargs) -> GXCloudResourceRef:
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]

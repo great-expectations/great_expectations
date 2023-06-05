@@ -407,6 +407,9 @@ filterwarnings = [
     # Example Actual Warning: (found in test_data_context)
     # UserWarning: Warning. An existing `config_variables.yml` was found here
     'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
+    # Example Actual Warning: DeprecationWarning: A Checkpoint named oss_test_checkpoint already exists.;
+    # using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 and will be removed in v0.18. Please use add_or_update_checkpoint instead.
+    'ignore: A Checkpoint named :DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------

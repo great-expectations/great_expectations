@@ -151,6 +151,16 @@
             "title": "Displayed Only",
             "default": true,
             "type": "boolean"
+        },
+        "extract_links": {
+            "title": "Extract Links",
+            "enum": [
+                "header",
+                "footer",
+                "body",
+                "all"
+            ],
+            "type": "string"
         }
     },
     "required": [

@@ -74,17 +74,17 @@ class ProfilerStore(ConfigurationStore):
 
         return profiler_config_dict
 
-    def add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs):
         try:
-            return super().add(key=key, value=value, **kwargs)
+            return super()._add(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ProfilerError(
                 f"A Profiler named {value.name} already exists."
             )
 
-    def update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs):
         try:
-            return super().update(key=key, value=value, **kwargs)
+            return super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ProfilerNotFoundError(
                 f"Could not find an existing Profiler named {value.name}."
