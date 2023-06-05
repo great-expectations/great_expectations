@@ -267,16 +267,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _move(self) -> None:  # type: ignore[override]
         pass
 
-    def update(self, key, value, **kwargs):
-        """
-        Essentially `set` but validates that a given key-value pair does already exist.
-        """
-        if not self.has_key(key):
-            raise StoreBackendError(
-                f"Store does not have a value associated the following key: {key}."
-            )
-        return self._update(id=key[1], value=value)
-
     # TODO: GG 20220810 return the `ResponsePayload`
     def _put(self, id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
