@@ -118,7 +118,7 @@ Create your GX Python environment, install Great Expectations locally, and then 
 
 <PythonCreateVenv />
 
-## Install GX with optional dependencies for GCS
+### Install optional dependencies
 
 <GcpInstallDependencies />
 
