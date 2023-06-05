@@ -343,7 +343,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         key: Tuple[GXCloudRESTResource, ...],
         value: Any,
-        **kwargs: dict,
+        **kwargs,
     ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         resource = key[0]
@@ -357,6 +357,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # _put returns a bool
             return self._put(id=id, value=value)
 
+        return self._post(value=value, **kwargs)
+
+    def _post(self, value: Any, kwargs) -> GXCloudResourceRef:
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]
