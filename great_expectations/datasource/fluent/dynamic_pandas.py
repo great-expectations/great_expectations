@@ -107,6 +107,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal[('xlrd', 'openpyxl', 'odf', 'pyxlsb')]",
     "Literal[None, 'header', 'footer', 'body', 'all']",
     "Literal[('high', 'legacy')]",
+    "Literal[(None, 'header', 'footer', 'body', 'all')]",
     "Iterable[object]",
     # other
     "Pattern",  # re
