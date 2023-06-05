@@ -338,6 +338,14 @@
             "default": false,
             "type": "boolean"
         },
+        "float_precision": {
+            "title": "Float Precision",
+            "enum": [
+                "high",
+                "legacy"
+            ],
+            "type": "string"
+        },
         "storage_options": {
             "title": "Storage Options",
             "type": "object"
