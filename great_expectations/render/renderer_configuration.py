@@ -71,7 +71,7 @@ class _RendererValueBase(BaseModel):
     def __len__(self) -> int:
         return len(self.__fields__)
 
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -200,7 +200,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             allow_mutation = False
 
         @root_validator(pre=True)
-        def _validate_param_type_matches_value(cls, values: dict) -> dict:
+        def _validate_param_type_matches_value(  # noqa: PLR0912
+            cls, values: dict
+        ) -> dict:
             """
             This root_validator ensures that a value can be parsed by its RendererValueType.
             If RendererValueType.OBJECT is passed, it is treated as valid for any value.

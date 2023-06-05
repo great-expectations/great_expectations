@@ -130,7 +130,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")
+    pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = get_or_create_spark_application(

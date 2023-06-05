@@ -71,7 +71,7 @@ class FluentBaseModel(pydantic.BaseModel):
         return config
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -88,7 +88,7 @@ class FluentBaseModel(pydantic.BaseModel):
         ...
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: pathlib.Path,
         *,
@@ -104,7 +104,7 @@ class FluentBaseModel(pydantic.BaseModel):
     ) -> pathlib.Path:
         ...
 
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
         *,
@@ -145,7 +145,7 @@ class FluentBaseModel(pydantic.BaseModel):
             return stream_or_path
         return stream_or_path.getvalue()
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -187,7 +187,7 @@ class FluentBaseModel(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
-    def _json_dict(
+    def _json_dict(  # noqa: PLR0913
         self,
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
@@ -218,7 +218,7 @@ class FluentBaseModel(pydantic.BaseModel):
             )
         )
 
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,

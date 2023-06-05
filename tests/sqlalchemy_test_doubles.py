@@ -30,7 +30,6 @@ class _MockConnection:
 
     def execute(self, statement):
         self.statement = statement
-        return
 
 
 class MockSaEngine:
