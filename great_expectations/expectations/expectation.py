@@ -2864,9 +2864,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
+        result_format: dict[
+            str, int | str | bool | List[str] | None
+        ] | str = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
