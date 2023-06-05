@@ -108,6 +108,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal[None, 'header', 'footer', 'body', 'all']",
     "Literal[('high', 'legacy')]",
     "Literal[(None, 'header', 'footer', 'body', 'all')]",
+    "Literal[('frame', 'series')]",
     "Iterable[object]",
     # other
     "Pattern",  # re

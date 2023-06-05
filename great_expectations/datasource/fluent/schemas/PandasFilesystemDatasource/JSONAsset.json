@@ -76,6 +76,15 @@
             "title": "Orient",
             "type": "string"
         },
+        "typ": {
+            "title": "Typ",
+            "default": "frame",
+            "enum": [
+                "frame",
+                "series"
+            ],
+            "type": "string"
+        },
         "dtype": {
             "title": "Dtype",
             "type": "object"
