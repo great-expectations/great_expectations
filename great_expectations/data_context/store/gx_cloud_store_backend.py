@@ -359,7 +359,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return self._post(value=value, **kwargs)
 
-    def _post(self, value: Any, kwargs) -> GXCloudResourceRef:
+    def _post(self, value: Any, **kwargs) -> GXCloudResourceRef:
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]
