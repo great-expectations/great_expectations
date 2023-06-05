@@ -1239,5 +1239,5 @@ def write_schema_to_file(target_dir: str) -> None:
 if __name__ == "__main__":
     import sys
 
-    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."  # noqa: PLR2004
     write_schema_to_file(target_dir)

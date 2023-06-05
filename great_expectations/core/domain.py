@@ -188,7 +188,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
                 if key == INFERRED_SEMANTIC_TYPE_KEY:
                     column_name: str
                     semantic_type: Union[str, SemanticDomainTypes]
-                    value = {
+                    value = {  # noqa: PLW2901
                         column_name: SemanticDomainTypes(semantic_type.lower()).value
                         if isinstance(semantic_type, str)
                         else semantic_type.value

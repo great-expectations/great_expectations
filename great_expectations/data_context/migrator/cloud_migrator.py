@@ -94,7 +94,7 @@ class CloudMigrator:
         self._unsuccessful_validations: Dict[str, dict] = {}
 
     @classmethod
-    def migrate(
+    def migrate(  # noqa: PLR0913
         cls,
         context: AbstractDataContext,
         test_migrate: bool,
@@ -256,7 +256,7 @@ class CloudMigrator:
         for obj in obj_collection[:10]:
             print(f"    {obj['name']}")
 
-        if length > 10:
+        if length > 10:  # noqa: PLR2004
             extra = length - 10
             print(f"    ({extra} other {obj_name.lower()}(s) not displayed)")
 

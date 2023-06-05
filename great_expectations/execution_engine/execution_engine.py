@@ -137,7 +137,7 @@ class ExecutionEngine(ABC):
 
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
         caching: bool = True,
@@ -785,7 +785,7 @@ class ExecutionEngine(ABC):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )

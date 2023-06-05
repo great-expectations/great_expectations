@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
@@ -86,7 +87,7 @@ def _extract_fluent_datasources(config_dict: dict) -> dict:
 class CloudDataContext(SerializableDataContext):
     """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[PathStr] = None,
@@ -157,7 +158,7 @@ class CloudDataContext(SerializableDataContext):
         return self._apply_global_config_overrides(config=project_data_context_config)
 
     @staticmethod
-    def _resolve_cloud_args(
+    def _resolve_cloud_args(  # noqa: PLR0913
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
@@ -264,7 +265,7 @@ class CloudDataContext(SerializableDataContext):
         session = create_session(access_token=cloud_config.access_token)
 
         response = session.get(cloud_url)
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}", response=response
             )
@@ -694,7 +695,7 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
 
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
         config_version: int | float = 1.0,
@@ -801,7 +802,8 @@ class CloudDataContext(SerializableDataContext):
                 "cloud_mode": True,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
@@ -894,3 +896,10 @@ class CloudDataContext(SerializableDataContext):
             logger.debug(
                 "CloudDataContext._save_project_config() has no `fds_datasource` to update"
             )
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        url = result.validation_result_url
+        assert (
+            url
+        ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
+        self._open_url_in_browser(url)
