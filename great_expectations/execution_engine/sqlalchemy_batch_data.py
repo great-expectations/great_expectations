@@ -161,6 +161,8 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
+
+            #breakpoint()
         else:
             if query:
                 self._selectable = sa.text(query)

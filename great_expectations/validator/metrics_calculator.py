@@ -135,6 +135,9 @@ class MetricsCalculator:
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
         )
+        #breakpoint()
+        # {('table.row_count.aggregate_fn', 'batch_id=test_datasource-my_asset-year_2019-month_1', ()): (<sqlalchemy.sql.functions.count at 0x41a4d0f70; count>, {'batch_id': 'test_datasource-my_asset-year_2019-month_1'}, {}), ('table.row_count', 'batch_id=test_datasource-my_asset-year_2019-month_1', ()): 10000}
+        # so the issue is that we dont have table.head() as something that is resolved
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
             for metric_configuration in metrics.values()

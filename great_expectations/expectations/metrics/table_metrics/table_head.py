@@ -77,6 +77,8 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
+        #breakpoint()
+        # do we make a new execution engine? is that the problem?
         if (table_name is None) or (
             sqlalchemy._anonymous_label
             and isinstance(table_name, sqlalchemy._anonymous_label)
@@ -84,20 +86,22 @@ class TableHead(TableMetricProvider):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pandas_read_sql_query(
+                    with execution_engine.get_connection() as con:                    
+                        df = pandas_read_sql_query(
                         sql=selectable,
-                        con=execution_engine.engine,
-                    )
+                        con=con,
+                        )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pandas_read_sql_query(
-                        sql=selectable,
-                        con=execution_engine.engine,
-                        chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
+                    with execution_engine.get_connection() as con:
+                        df_chunk_iterator = pandas_read_sql_query(
+                            sql=selectable,
+                            con=con,
+                            chunksize=abs(n_rows),
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -112,22 +116,25 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = read_sql_table_as_df(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
-                    )
+                    # this is the part that is run
+                    with execution_engine.get_connection() as con:
+                        df = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                        )
                 else:
-                    # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = read_sql_table_as_df(
-                        table_name=getattr(selectable, "name", None),
+                    with execution_engine.get_connection() as con:
+                        # passing chunksize causes the Iterator to be returned
+                        df_chunk_iterator = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
+                        con=con,
                         chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -170,14 +177,16 @@ class TableHead(TableMetricProvider):
 
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             if n_rows <= 0 and not fetch_all:
-                df_chunk_iterator = pandas_read_sql(
-                    sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
-                )
-                df = TableHead._get_head_df_from_df_iterator(
+                with execution_engine.get_connection() as con:
+                    df_chunk_iterator = pandas_read_sql(
+                    sql=sql, con=con, chunksize=abs(n_rows)
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
                     df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                )
+                    )
             else:
-                df = pandas_read_sql_query(sql=sql, con=execution_engine.engine)
+                with execution_engine.get_connection() as con:
+                    df = pandas_read_sql_query(sql=sql, con=con)
 
         return df
 

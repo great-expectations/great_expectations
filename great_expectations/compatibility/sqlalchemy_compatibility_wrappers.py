@@ -49,21 +49,36 @@ def read_sql_table_as_df(
             rows to include in each chunk.
     """
     # does this need to be added to the connection thing?
-    # breakpoint()
-    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
-        con = con.connect()
+    #breakpoint()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        return pd.read_sql_table(
-            table_name=table_name,
+        # is this where the pandas 2.0 is messing us up?
+        # this is where we are getting messed up
+        # this is where we are getting messed up. Lets do it.
+        # TODO: handle the schema somehow
+        # TODO: handle columns somehow
+        schema=schema
+        columns=columns
+        return pd.read_sql_query(
+            sql=f'''SELECT * FROM {table_name}''',
             con=con,
-            schema=schema,
             index_col=index_col,
             coerce_float=coerce_float,
             parse_dates=parse_dates,
-            columns=columns,
-            chunksize=chunksize,
+            chunksize=chunksize
         )
+
+
+        #return pd.read_sql_table(
+        #    table_name=table_name,
+        #    con=con,
+        #    schema=schema,
+        #    index_col=index_col,
+        #    coerce_float=coerce_float,
+        #    parse_dates=parse_dates,
+        #    columns=columns,
+        #    chunksize=chunksize,
+        #    )
 
 
 def add_dataframe_to_db(

@@ -181,7 +181,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
         "i_am_illegal_key": "i_am_illegal_value",
     }
 
-    # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
+    # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,

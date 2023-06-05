@@ -247,6 +247,8 @@ def run_batch_head(
     success: bool,
 ) -> None:
     _, datasource, _, batch_request = datasource_test_data
+    # get batch from batch request
+    # this is first called and create the temp table. how do we ensure that this connection isn't dropped.
     batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
     )

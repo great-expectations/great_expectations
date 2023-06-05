@@ -1353,7 +1353,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-
+        # oo is this where we create a temp_table?
+        #breakpoint()
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
@@ -1370,6 +1371,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             selectable: Union[
                 sqlalchemy.Selectable, str
             ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+            # this is where we are first creating the temp table
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,
@@ -1419,7 +1421,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
+        #breakpoint()
         with self.get_connection() as connection:
             result = connection.execute(query)
 
@@ -1440,6 +1442,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
+        #breakpoint()
+        # this is shouldn't have been closedj
         with self.get_connection() as connection:
             if not connection.closed:
                 result = connection.execute(query)
