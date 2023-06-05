@@ -31,22 +31,28 @@ Windows support for the open source Python version of GX is currently unavailabl
   ]}>
   <TabItem value="local">
 
+## Local
+
+install Great Expectations (GX) locally
+
 <Preface />
 
-## Check Python version
+### Check Python version
 <CheckPythonVersion />
 
-## Choose installation method
+### Choose installation method
 <ChooseInstallationMethod />
 
-## Install GX
+### Install GX
 <InstallGreatExpectations />
 
-## Confirm GX installation
+### Confirm GX installation
 <VerifyGeInstallSucceeded />
 
 </TabItem>
 <TabItem value="hosted">
+
+## Hosted
 
 Great Expectations can be deployed in environments such as Databricks, Amazon EMR, or Google Cloud Composer. These environments do not always have a file system that allows a Great Expectations installation. To install Great Expectations in a hosted environment, see one of the following guides:
 

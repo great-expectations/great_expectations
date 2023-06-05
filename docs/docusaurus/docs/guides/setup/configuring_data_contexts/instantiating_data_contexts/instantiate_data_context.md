@@ -20,25 +20,26 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
   groupId="install-gx"
   defaultValue='quick'
   values={[
-  {label: 'Filesystem', value:'quick'},
+  {label: 'Filesystem (Quick)', value:'quick'},
   {label: 'Filesystem with Python', value:'python'},
   {label: 'Specific Filesystem', value:'specific'},
   {label: 'Ephemeral', value:'ephemeral'},
   ]}>
 <TabItem value="quick">
 
-## Prerequisites
+## Filesystem (Quick)
+
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-
 </Prerequisites>
 
-## Import GX
+### Import GX
 
 <GxImport />
 
-## Run the `get_context(...)` method
+### Run the `get_context(...)` method
 
 To quickly acquire a Data Context, use the `get_context(...)` method without any defined parameters:
 
@@ -57,33 +58,35 @@ If you have GX Cloud configured on your system, `get_context()` instantiates and
 
 :::
 
-## Verify Data Context content 
+### Verify Data Context content 
 
 <DataContextVerifyContents />
 
 </TabItem>
 <TabItem value="python">
 
+## Python
+
 A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX. Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 </Prerequisites>
 
-## Import GX
+### Import GX
 
 <GxImport />
 
-## Determine the folder to initialize the Data Context in
+### Determine the folder to initialize the Data Context in
 
 Run the following command to initialize your Filesystem Data Context in an empty folder:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
-## Create a context
+### Create a context
 
 You provide the path for your empty folder to the GX library's `FileDataContext.create(...)` method as the `project_root_dir` parameter.  Because you are providing a path to an empty folder, `FileDataContext.create(...)` initializes a Filesystem Data Context in that location.
 
@@ -98,16 +101,18 @@ If the `project_root_dir` provided to the `FileDataContext.create(...)` method p
 If a Data Context already exists in `project_root_dir`, the `FileDataContext.create(...)` method will not re-initialize it.  Instead, `FileDataContext.create(...)` instantiates and returns the existing Data Context.
 :::
 
-## Verify the Data Context content 
+### Verify the Data Context content 
 
 <DataContextVerifyContents />
 
 </TabItem>
 <TabItem value="specific">
 
+## Specific
+
 If you're using GX for multiple projects, you might want to use a different Data Context for each project. Use the information provided here to instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
@@ -115,18 +120,18 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 </Prerequisites>
 
-## Import GX
+### Import GX
 
 <GxImport />
 
-## Specify a folder containing a previously initialized Filesystem Data Context
+### Specify a folder containing a previously initialized Filesystem Data Context
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder identifies the specific Filesystem Data Context to instantiate.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder"
 ```
 
-## Run the `get_context(...)` method
+### Run the `get_context(...)` method
 
 You provide the path for your empty folder to the GX library's `get_context(...)` method as the `context_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
 
@@ -139,18 +144,20 @@ If the `context_root_dir` provided to the `get_context(...)` method points to a 
 The `get_context(...)` method instantiates and returns the newly initialized Data Context.
 :::
 
-## Verify the Data Context content 
+### Verify the Data Context content 
 
 <DataContextVerifyContents />
 
 </TabItem>
 <TabItem value="ephemeral">
 
+## Ephemeral
+
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
 An Ephemeral Data Context does not persist beyond the current Python session. To keep the contents of your Ephemeral Data Context for future use, see [How to convert an Ephemeral Data Context to a Filesystem Data Context](/docs/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context).
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites>
 
@@ -158,7 +165,7 @@ An Ephemeral Data Context does not persist beyond the current Python session. To
 
 </Prerequisites> 
 
-## Import classes
+### Import classes
 
 To create your Data Context, you'll create a configuration that uses in-memory Metadata Stores. 
 
@@ -172,14 +179,14 @@ To create your Data Context, you'll create a configuration that uses in-memory M
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
     ```
 
-## Create the Data Context configuration
+### Create the Data Context configuration
 
 Run the following command to create a Data Context configuration that specifies the use of in-memory Metadata Stores and pass in an instance of the `InMemoryStoreBackendDefaults` class as a parameter when initializing an instance of the `DataContextConfig` class:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
 ```
 
-## Instantiate an Ephemeral Data Context
+### Instantiate an Ephemeral Data Context
 
 Run the following command to initialize the `EphemeralDataContext` class while passing in the `DataContextConfig` instance you created as the value of the `project_config` parameter.
 
@@ -192,7 +199,7 @@ Run the following command to initialize the `EphemeralDataContext` class while p
 
 :::
 
-## Connect GX to source data systems
+### Connect GX to source data systems
 
 Now that you have an Ephemeral Data Context you can connect GX to your data. See the following topics:
 
