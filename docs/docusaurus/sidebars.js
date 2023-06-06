@@ -23,16 +23,7 @@ module.exports = {
         'guides/setup/configuring_metadata_stores/configure_expectation_stores',
         'guides/setup/configuring_metadata_stores/configure_result_stores',
         'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore',
-        {
-          type: 'category',
-          label: 'Data Docs',
-          items: [
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs',
-            'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
-          ]
-        },
+        'guides/setup/configuring_data_docs/host_and_share_data_docs',
       ]
     },
     {
