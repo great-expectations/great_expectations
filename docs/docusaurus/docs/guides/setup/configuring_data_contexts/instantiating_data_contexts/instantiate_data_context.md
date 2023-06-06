@@ -29,7 +29,7 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
 
 ## Existing Filesystem
 
-Learn how to instantiate an existing Filesystem Data Context so that you can continue working with previously defined GX configurations
+Instantiate an existing Filesystem Data Context so that you can continue working with previously defined GX configurations.
 
 ### Prerequisites
 
@@ -69,7 +69,7 @@ If you have GX Cloud configured on your system, `get_context()` instantiates and
 
 ## Python
 
-A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX. Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
+A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX. Use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ### Prerequisites
 
@@ -112,7 +112,7 @@ If a Data Context already exists in `project_root_dir`, the `FileDataContext.cre
 
 ## Specific
 
-If you're using GX for multiple projects, you might want to use a different Data Context for each project. Use the information provided here to instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.
+If you're using GX for multiple projects, you might want to use a different Data Context for each project. Instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.
 
 ### Prerequisites
 

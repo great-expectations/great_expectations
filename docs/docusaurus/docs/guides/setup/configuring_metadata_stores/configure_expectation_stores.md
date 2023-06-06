@@ -19,6 +19,8 @@ import Tabs from '@theme/Tabs';
 
 An Expectation Store is a connector to store and retrieve information about collections of verifiable assertions about data.
 
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. Use the information provided here to configure a store for your Expectations.
+
 <Tabs
   groupId="configure-expectation-stores"
   defaultValue='amazon'
@@ -58,7 +60,7 @@ An Expectation Store is a connector to store and retrieve information about coll
 
 ## Microsoft Azure Blob Storage
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  Use the information provided here to configure a new storage location for Expectations in Azure Blob Storage.
+Use the information provided here to configure a new storage location for Expectations in Microsoft Azure Blob Storage.
 
 ### Prerequisites
 
@@ -167,7 +169,7 @@ If your Expectations have not been copied to Azure Blob Storage, the message "No
 
 ## GCS
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  Use the information provided here to configure a new storage location for Expectations in Google Cloud Storage (GCS).
+Use the information provided here to configure a new storage location for Expectations in GCS.
 
 To view all the code used in this topic, see [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py).
 
@@ -255,7 +257,7 @@ If your Expectations were not copied to Azure Blob Storage, a message indicating
 
 ## Filesystem
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations`` folder. Use the information provided here to configure a new storage location for Expectations on your filesystem.
+Use the information provided here to configure a new storage location for Expectations on your Filesystem.
 
 ### Prerequisites
 
@@ -364,7 +366,7 @@ diff --git a/great_expectations/expectations/npi_expectations.json b/great_expec
 
 ## PostgreSQL
 
-By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  Use the information provided here to configure Great Expectations to store Expectations in a PostgreSQL database.
+Use the information provided here to configure an Expectations store in a PostgreSQL database.
 
 ### Prerequisites
 
