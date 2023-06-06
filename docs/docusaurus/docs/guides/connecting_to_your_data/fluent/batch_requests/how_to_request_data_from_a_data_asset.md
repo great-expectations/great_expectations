@@ -58,7 +58,7 @@ We will use the `build_batch_request(...)` method of our Data Asset to generate 
 
 For `dataframe` Data Assets, the `dataframe` is always specified as the argument of exactly one API method:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe"
 ```
 
 ### 5. Verify that the correct Batches were returned

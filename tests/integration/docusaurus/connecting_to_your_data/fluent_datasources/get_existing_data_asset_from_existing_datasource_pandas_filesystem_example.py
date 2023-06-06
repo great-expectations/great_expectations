@@ -44,6 +44,15 @@ print(my_asset.batch_request_options)
 
 assert my_asset.batch_request_options == ("year", "month", "path")
 
+import pandas as pd
+
+dataframe = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe">
+my_batch_request = my_asset.build_batch_request(dataframe=dataframe)
+# </snippet>
+
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
 my_batch_request = my_asset.build_batch_request()
