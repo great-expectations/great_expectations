@@ -22,19 +22,9 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Metadata Stores',
+          label: 'Configure Expectation Stores',
           items: [
-            {
-              type: 'category',
-              label: 'Expectation Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql'
-              ]
-            },
+            'guides/setup/configuring_metadata_stores/configure_expectation_stores',
             {
               type: 'category',
               label: 'Validation Result Stores',
@@ -70,7 +60,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connecting to data',
+      label: 'Connect to data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
         {
@@ -165,7 +155,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Creating Expectations',
+      label: 'Create Expectations',
       link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
       items: [
         {
@@ -197,7 +187,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Creating Custom Expectations',
+          label: 'Create Custom Expectations',
           items: [
             'guides/expectations/creating_custom_expectations/overview',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
@@ -229,7 +219,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Validating data',
+      label: 'Validate data',
       link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
       items: [
         {
