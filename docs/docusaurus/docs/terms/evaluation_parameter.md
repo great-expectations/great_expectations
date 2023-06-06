@@ -20,7 +20,7 @@ When creating Expectations based on introspection of Data, it can be useful to r
 
 ```python title="Python code"
 eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
-downstream_batch.expect_table_row_count_to_equal(
+validator.expect_table_row_count_to_equal(
     value={
         '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
     }
