@@ -2154,8 +2154,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return checkpoint
 
-    @staticmethod
-    def _determine_default_action_list() -> Sequence[ActionDict]:
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         return Checkpoint.DEFAULT_ACTION_LIST

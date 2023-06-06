@@ -3004,7 +3004,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def action_list(self) -> Sequence[ActionDict]:
-        return self._action_list  # type: ignore[return-value]
+        return self._action_list
 
     @action_list.setter
     def action_list(self, value: Sequence[ActionDict]) -> None:
