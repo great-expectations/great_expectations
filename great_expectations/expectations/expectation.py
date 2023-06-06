@@ -1108,7 +1108,7 @@ class Expectation(metaclass=MetaExpectation):
             # }
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX-SINGLE_BATCH -- All GX codebase tests pass in single-Batch mode.</Alex>
-            # TODO: <Alex>ALEX -- To support single-Batch Expectations, uncomment code between the next two (2) "TODO" comments and comment out the single-Batch code between two (2) "TODO" comments in section above.</Alex>
+            # TODO: <Alex>ALEX -- To support single-Batch Expectations, uncomment code between the next two (2) "TODO" comments and comment out the multi-Batch code between two (2) "TODO" comments in section above.</Alex>
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX -- This access/lookup can be simplified.</Alex>
             # noinspection PyTypeChecker
