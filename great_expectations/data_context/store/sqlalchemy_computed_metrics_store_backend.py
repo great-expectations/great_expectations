@@ -1,12 +1,16 @@
 import datetime
 import logging
 import os
+import pathlib
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.computed_metrics.computed_metric import (
     ComputedMetric as ComputedMetricBusinessObject,
 )
@@ -31,27 +35,17 @@ from great_expectations.util import (
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
     from alembic.config import Config as AlembicConfig
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import SQLAlchemyError
-    from sqlalchemy.orm import scoped_session, sessionmaker
-
-    make_url = import_make_url()
 except ImportError:
-    logger.debug("No SqlAlchemy module available.")
-    sa = None
-    Engine = None
-    SQLAlchemyError = None
-    URL = None
-    scoped_session = None
-    sessionmaker = None
+    logger.debug("No Alembic module available.")
     AlembicConfig = None
+
+if sa:
+    make_url = import_make_url()
 
 
 class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
-    def __init__(
+    def __init__(  # noqa PLR0913
         self,
         credentials=None,
         url=None,
@@ -274,7 +268,12 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
 
         if not results:
             raise gx_exceptions.InvalidKeyError(
-                f'Query for invalid key "{str(filtering_criteria)}" encountered.'
+                # TODO: <Alex>ALEX</Alex>
+                # f'Query for invalid key "{str(filtering_criteria)}" encountered.'
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                f'Query for invalid key "{str(key)}" encountered.'
+                # TODO: <Alex>ALEX</Alex>
             )
 
         return results[0]
@@ -350,7 +349,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
 
         return results
 
-    def create(
+    def create(  # noqa PLR0913
         self,
         batch_id: str,
         metric_name: str,
@@ -372,7 +371,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         value: Optional[Any] = None,
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
-        timestamp = datetime.datetime.now()
+        timestamp = datetime.datetime.now()  # noqa DTZ005
         if created_at is None:
             created_at = timestamp
 
@@ -487,7 +486,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             for sa_computed_metric_model_obj in results
         ]
 
-    def _build_engine(self, credentials, **kwargs) -> Engine:
+    def _build_engine(self, credentials, **kwargs) -> sqlalchemy.Engine:
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -515,7 +514,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple[URL, dict]:
+    ) -> Tuple[sqlalchemy.URL, dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -533,7 +532,9 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         private_key_path = credentials.pop("private_key_path")
         private_key_passphrase = credentials.pop("private_key_passphrase")
 
-        with Path(private_key_path).expanduser().resolve().open(mode="rb") as key:
+        with pathlib.Path(private_key_path).expanduser().resolve().open(
+            mode="rb"
+        ) as key:
             try:
                 p_key = serialization.load_pem_private_key(
                     key.read(),
@@ -569,7 +570,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         try:
             yield session
             session.commit()
-        except Exception as e:
+        except Exception:
             session.rollback()
             raise
         finally:
@@ -577,11 +578,11 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             session.remove()
 
     def _get_scoped_db_session(self):
-        scoped_db_session = scoped_session(self._get_session_maker())
+        scoped_db_session = sqlalchemy.scoped_session(self._get_session_maker())
         return scoped_db_session
 
     def _get_session_maker(self):
-        session_maker = sessionmaker(bind=self._engine)
+        session_maker = sqlalchemy.sessionmaker(bind=self._engine)
         return session_maker
 
     @staticmethod
@@ -703,11 +704,13 @@ def get_sqlalchemy_connection_string_from_alembic_config() -> str:
 def get_alembic_config_file_path():
     return file_relative_path(
         __file__,
-        os.path.join(
-            "..",
-            "..",
-            "computed_metrics",
-            "db",
-            "alembic.ini",
+        str(
+            pathlib.Path(
+                "..",
+                "..",
+                "computed_metrics",
+                "db",
+                "alembic.ini",
+            )
         ),
     )

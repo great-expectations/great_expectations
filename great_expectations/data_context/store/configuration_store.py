@@ -139,7 +139,7 @@ class ConfigurationStore(Store):
             if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 
@@ -150,18 +150,16 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
-    def determine_key(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
+    def _determine_key(
+        self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
+        assert bool(name) ^ bool(id), "Must provide either name or id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id or self.ge_cloud_mode:
+        if id or self.ge_cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
-                cloud_id=ge_cloud_id,
+                id=id,
                 resource_name=name,
             )
         else:

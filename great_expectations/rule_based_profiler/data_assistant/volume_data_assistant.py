@@ -17,7 +17,9 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
@@ -29,6 +31,7 @@ from great_expectations.rule_based_profiler.rule import Rule
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+    from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 
 class VolumeDataAssistant(DataAssistant):

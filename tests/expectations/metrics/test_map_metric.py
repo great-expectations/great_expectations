@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -35,15 +38,16 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility import sqlalchemy
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":  # noqa: F821
+) -> sqlalchemy.Engine:  # noqa: F821
     if "sqlite" in test_backends:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
                 __file__, "../../test_sets/metrics_test.db"
@@ -66,7 +70,8 @@ def sqlite_table_for_unexpected_rows_with_index(
             # use try-except block to ensure we don't keep modifying the database
             # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
             try:
-                df.to_sql(
+                add_dataframe_to_db(
+                    df=df,
                     name="animal_names",
                     con=sqlite_engine,
                     index=False,
@@ -370,12 +375,22 @@ def test_get_map_metric_dependencies():
 
 
 def test_is_sqlalchemy_metric_selectable():
-    assert MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=CompoundColumnsUnique
+    with pytest.warns(DeprecationWarning) as record:
+        assert MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=CompoundColumnsUnique
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
-    assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=ColumnValuesNonNull
+    with pytest.warns(DeprecationWarning) as record:
+        assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=ColumnValuesNonNull
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
 
@@ -816,6 +831,8 @@ def test_spark_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "df.filter(F.expr((animals IS NOT NULL) AND (NOT "
+        "(animals IN (cat, fish, dog)))))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1025,6 +1042,10 @@ def test_sqlite_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "SELECT animals \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1079,7 +1100,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
             {"animals": "lion", "pk_1": 4},
             {"animals": "zebra", "pk_1": 5},
         ],
-        "unexpected_index_query": "SELECT animals, pk_1 \n"
+        "unexpected_index_query": "SELECT pk_1, animals \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'));",

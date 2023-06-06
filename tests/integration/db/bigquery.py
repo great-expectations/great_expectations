@@ -72,9 +72,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite")
 validator: Validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -108,9 +106,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite_2", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite_2")
 with pytest.warns(DeprecationWarning):
     validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite_2"

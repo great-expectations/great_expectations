@@ -2,14 +2,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationDetails,
-    MetricComputationResult,
+    MetricComputationDetails,  # noqa: TCH001
+    MetricComputationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -35,7 +37,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     and metric_name as arguments.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: str,

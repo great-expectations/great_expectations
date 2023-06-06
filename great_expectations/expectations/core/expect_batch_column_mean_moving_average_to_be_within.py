@@ -1,33 +1,16 @@
 # TODO: <Alex>ALEX -- Remove unused imports after final implementation (including configuration validation and rendering) is completed.</Alex>
 import itertools
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationValidationResult,
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
-    render_evaluation_parameter_string,
 )
-from great_expectations.render import (
-    LegacyDescriptiveRendererType,
-    LegacyRendererType,
-    RenderedStringTemplateContent,
-)
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.renderer_configuration import RendererConfiguration
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-
-if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
 
 
 class ExpectBatchColumnMeanMovingAverageToBeWithin(ColumnExpectation):

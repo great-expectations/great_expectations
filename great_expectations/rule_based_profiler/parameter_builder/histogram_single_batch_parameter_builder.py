@@ -6,10 +6,11 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
+    _is_iterable_of_numeric_dtypes,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -24,7 +25,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -49,7 +50,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         "reduce_scalar_metric",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         bins: str = "uniform",
@@ -68,7 +69,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             bins: Partitioning strategy (one of "uniform", "ntile", "quantile", "percentile", or "auto"); please refer
             to "ColumnPartition" (great_expectations/expectations/metrics/column_aggregate_metrics/column_partition.py).
             n_bins: Number of bins for histogram computation (ignored and recomputed if "bins" argument is "auto").
-            allow_relative_error: Used for partitionong strategy values that involve quantiles (all except "uniform").
+            allow_relative_error: Used for partitioning strategy values that involve quantiles (all except "uniform").
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -133,7 +134,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        bins: MetricValue = column_partition_parameter_node[
+        bins: MetricValue | None = column_partition_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
@@ -148,7 +149,11 @@ elements.
         # TODO: <Alex>ALEX -- extra subscripting in compliance with multi-Batch metrics.</Alex>
         bins = bins[0]
         # TODO: <Alex>ALEX</Alex>
-        if not (np.issubdtype(bins.dtype, np.number) or np.all(pd.isnull(bins))):
+        if not (
+            np.issubdtype(bins.dtype, np.number)
+            or np.all(pd.isnull(bins))
+            or _is_iterable_of_numeric_dtypes(bins)
+        ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.

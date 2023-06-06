@@ -2,6 +2,7 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
+import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
@@ -234,7 +235,7 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     snapshot.assert_match(res)
 
 
-def test_atomic_diagnostic_observed_value_with_boolean_columun_expect_column_kl_divergence_to_be_less_than(
+def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`

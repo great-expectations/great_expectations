@@ -69,7 +69,7 @@ def main(
     print("Done constructing a DataContext.")
     print("Building a suite and validating.")
     df = pd.DataFrame({"a": [1, 2, 3]})
-    context.create_expectation_suite("testing.batch")
+    context.add_expectation_suite("testing.batch")
     batch = context.get_batch(
         batch_kwargs={"datasource": "pandas", "dataset": df},
         expectation_suite_name="testing.batch",

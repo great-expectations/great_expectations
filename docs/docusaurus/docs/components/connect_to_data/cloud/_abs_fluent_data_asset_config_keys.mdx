@@ -1,0 +1,14 @@
+import CodeBlock from '@theme/CodeBlock';
+
+To specify data to connect to you will need the following elements:
+- `name`: A name by which you can reference the Data Asset in the future.
+- `batching_regex`: A regular expression that indicates which files to treat as batches in your Data Asset and how to identify them.
+- `abs_container`: The name of your Azure Blob Storage container.
+- `abs_name_starts_with`: A string indicating what part of the `batching_regex` to truncate from the final batch names.
+
+```python title="Python code"
+asset_name = "my_taxi_data_asset"
+batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+abs_container = "my_container"
+abs_name_starts_with = "data/taxi_yellow_tripdata_samples/"
+```

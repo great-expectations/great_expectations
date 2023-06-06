@@ -1,15 +1,14 @@
 from typing import Dict, Optional
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
@@ -18,11 +17,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
     metric_name = "column.distinct_dates"
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -43,11 +38,12 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
 
         # get all unique dates from timestamp
-        query = sa.select([sa.func.Date(column).distinct()]).select_from(selectable)
-        all_unique_dates = [i[0] for i in sqlalchemy_engine.execute(query).fetchall()]
+        query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
+        all_unique_dates = [
+            i[0] for i in execution_engine.execute_query(query).fetchall()
+        ]
 
         # Only sqlite returns as strings, so make date objects be strings
         if all_unique_dates and isinstance(all_unique_dates[0], date):
@@ -57,7 +53,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         return all_unique_dates
 
 
-class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
+class ExpectColumnToHaveNoDaysMissing(ColumnAggregateExpectation):
     """Expect No missing days in date column."""
 
     from datetime import datetime, timedelta
@@ -130,7 +126,6 @@ class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        import math
         from datetime import datetime, timedelta
 
         # returns the distinct dates of the column

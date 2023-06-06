@@ -3,7 +3,6 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
@@ -19,11 +18,12 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -103,7 +103,7 @@ def test_new_self_check_after_adding_named_asset_a(
         basic_datasource_with_assets.data_connectors["runtime"]
     )
     # noinspection PyUnusedLocal
-    res: List[
+    res: List[  # noqa: F841
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=RuntimeBatchRequest(
@@ -136,7 +136,7 @@ def test_new_self_check_after_adding_new_asset_c(
     runtime_data_connector: RuntimeDataConnector = (
         basic_datasource_with_assets.data_connectors["runtime"]
     )
-    res: List[
+    res: List[  # noqa: F841
         BatchDefinition
     ] = runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=RuntimeBatchRequest(
@@ -204,7 +204,7 @@ execution_engine:
 
 def test_batch_identifiers_missing_from_named_asset():
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
-        basic_datasource: Datasource = instantiate_class_from_config(
+        basic_datasource: Datasource = instantiate_class_from_config(  # noqa: F841
             config=yaml.load(
                 """
 class_name: Datasource
@@ -244,7 +244,7 @@ def test_error_checking_unknown_datasource(basic_datasource):
     # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -267,7 +267,7 @@ def test_error_checking_unknown_data_connector(basic_datasource):
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -288,7 +288,7 @@ def test_error_checking_missing_runtime_parameters(basic_datasource):
     # test for missing runtime_parameters arg
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal, PyArgumentList
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -455,7 +455,7 @@ def test_error_checking_too_many_runtime_parameters(basic_datasource):
     # test for too many runtime_parameters keys
     with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -568,7 +568,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
 
     with pytest.raises(gx_exceptions.DataConnectorError) as data_connector_error:
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
@@ -822,7 +822,7 @@ def test_data_references_cache_updating_after_batch_request(
         "my_data_asset_2",
     ]
 
-    assert test_runtime_data_connector.get_data_reference_list_count() == 3
+    assert test_runtime_data_connector.get_data_reference_count() == 3
 
 
 def test_data_references_cache_updating_after_batch_request_named_assets(

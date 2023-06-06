@@ -5,19 +5,20 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import BatchDefinition, BatchMarkers
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
-from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -43,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name, metric_kwargs):
+def get_metric_kwargs_id(metric_kwargs: dict) -> str | None:
     ###
     #
     # WARNING
@@ -54,15 +55,38 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if metric_kwargs is None:
+        metric_kwargs = {}
+
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
+
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
+
     return None
 
 
+@public_api
 class ExpectationValidationResult(SerializableDictDot):
-    def __init__(
+    """An Expectation validation result.
+
+    Args:
+        success: Whether the Expectation validation was successful.
+        expectation_config: The configuration of the Expectation that was validated.
+        result: The result details that can take one of many result formats.
+        meta: Metadata associated with the validation result.
+        exception_info: Any exception information that was raised during validation. Takes the form:
+            raised_exception: boolean
+            exception_traceback: Optional, str
+            exception_message: Optional, str
+        rendered_content: Inline content for rendering.
+
+    Raises:
+        InvalidCacheValueError: Raised if the result does not pass validation.
+    """
+
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         expectation_config: Optional[ExpectationConfiguration] = None,
@@ -104,14 +128,14 @@ class ExpectationValidationResult(SerializableDictDot):
         #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
+            return other == self
         try:
             if self.result and other.result:
                 common_keys = set(self.result.keys()) & other.result.keys()
                 result_dict = self.to_json_dict()["result"]
                 other_result_dict = other.to_json_dict()["result"]
                 contents_equal = all(
-                    [result_dict[k] == other_result_dict[k] for k in common_keys]
+                    result_dict[k] == other_result_dict[k] for k in common_keys
                 )
             else:
                 contents_equal = False
@@ -266,23 +290,31 @@ class ExpectationValidationResult(SerializableDictDot):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+            result["unexpected_percent"] < 0
+            or result["unexpected_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0 or result["missing_percent"] > 100
+            result["missing_percent"] < 0
+            or result["missing_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
             result["unexpected_percent_nonmissing"] < 0
-            or result["unexpected_percent_nonmissing"] > 100
+            or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_count") and result["missing_count"] < 0:
             return False
         return True
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ExpectationValidationResult.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationValidationResult.
+        """
         myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -312,23 +344,24 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             curr_metric_kwargs = get_metric_kwargs_id(
-                metric_name, self.expectation_config.kwargs
+                metric_kwargs=self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
-                    "Requested metric_kwargs_id (%s) does not match the configuration of this "
-                    "ExpectationValidationResult (%s)."
-                    % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
+                    "Requested metric_kwargs_id ({}) does not match the configuration of this "
+                    "ExpectationValidationResult ({}).".format(
+                        metric_kwargs_id or "None", curr_metric_kwargs or "None"
+                    )
                 )
-            if len(metric_name_parts) < 2:
+            if len(metric_name_parts) < 2:  # noqa: PLR2004
                 raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
-            elif len(metric_name_parts) == 2:
+            elif len(metric_name_parts) == 2:  # noqa: PLR2004
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
@@ -338,7 +371,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     )
             elif metric_name_parts[1] == "result":
                 try:
-                    if len(metric_name_parts) == 3:
+                    if len(metric_name_parts) == 3:  # noqa: PLR2004
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
@@ -407,15 +440,73 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     validation_time: str
 
 
+@public_api
 class ExpectationSuiteValidationResult(SerializableDictDot):
-    def __init__(
+    """The result of a batch of data validated against an Expectation Suite.
+
+    When a Checkpoint is run, it produces an instance of this class. The primary property
+    of this class is `results`, which contains the individual ExpectationValidationResult
+    instances which were produced by the Checkpoint run.
+
+    ExpectationSuiteValidationResult.success will be True if all Expectations passed, otherwise it will be False.
+
+    ExpectationSuiteValidationResult.statistics contains information about the Checkpoint run.:
+
+    ```python
+    {
+        "evaluated_expectations": 14,
+        "success_percent": 71.42857142857143,
+        "successful_expectations": 10,
+        "unsuccessful_expectations": 4
+    }
+    ```
+
+    The meta property is an instance of ExpectationSuiteValidationResultMeta, and
+    contains information identifying the resources used during the Checkpoint run.:
+
+    ```python
+    {
+        "active_batch_definition": {
+          "batch_identifiers": {},
+          "data_asset_name": "taxi_data_1.csv",
+          "data_connector_name": "default_inferred_data_connector_name",
+          "datasource_name": "pandas"
+        },
+        "batch_markers": {
+          "ge_load_time": "20220727T154327.630107Z",
+          "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
+        },
+        "batch_spec": {
+          "path": "/Users/username/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
+        },
+        "checkpoint_name": "single_validation_checkpoint",
+        "expectation_suite_name": "taxi_suite_1",
+        "great_expectations_version": "0.15.15",
+        "run_id": {
+          "run_name": "20220727-114327-my-run-name-template",
+          "run_time": "2022-07-27T11:43:27.625252+00:00"
+        },
+        "validation_time": "20220727T154327.701100Z"
+    }
+    ```
+
+    Args:
+        success: Boolean indicating the success or failure of this collection of results, or None.
+        results: List of ExpectationValidationResults, or None.
+        evaluation_parameters: Dict of Evaluation Parameters used to produce these results, or None.
+        statistics: Dict of values describing the results.
+        meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
+
+    """
+
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         results: Optional[list] = None,
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:
@@ -456,7 +547,13 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @public_api
     def to_json_dict(self):
+        """Returns a JSON-serializable dict representation of this ExpectationSuiteValidationResult.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationSuiteValidationResult.
+        """
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -470,12 +567,12 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         metric_value = None
         # Expose overall statistics
         if metric_name_parts[0] == "statistics":
-            if len(metric_name_parts) == 2:
+            if len(metric_name_parts) == 2:  # noqa: PLR2004
                 return self.statistics.get(metric_name_parts[1])
             else:
                 raise gx_exceptions.UnavailableMetricError(
@@ -561,9 +658,20 @@ class ExpectationSuiteValidationResultSchema(Schema):
             )
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_validation_result(self, data, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationSuiteValidationResult(**data)
 
 

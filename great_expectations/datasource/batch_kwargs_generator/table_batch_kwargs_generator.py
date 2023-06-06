@@ -1,9 +1,9 @@
 import logging
-import warnings
 from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
@@ -12,16 +12,6 @@ from great_expectations.exceptions import BatchKwargsError, GreatExpectationsErr
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import reflection
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    reflection = None
-    logger.debug("Unable to import sqlalchemy.")
 
 
 class AssetConfigurationSchema(Schema):
@@ -98,15 +88,15 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         if datasource is not None:
             self.engine = datasource.engine
             try:
-                self.inspector = sqlalchemy.inspect(self.engine)
+                self.inspector = sqlalchemy.Inspector.inspect(self.engine)
 
-            except sqlalchemy.exc.OperationalError:
+            except sqlalchemy.OperationalError:
                 logger.warning(
                     f"Unable to create inspector from engine in batch kwargs generator '{name}'"
                 )
                 self.inspector = None
 
-    def _get_iterator(  # noqa: C901 - 19
+    def _get_iterator(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         data_asset_name,
         query_parameters=None,
@@ -148,7 +138,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             project_id = None
             schema_name = None
             split_data_asset_name = data_asset_name.split(".")
-            if len(split_data_asset_name) == 2:
+            if len(split_data_asset_name) == 2:  # noqa: PLR2004
                 schema_name = split_data_asset_name[0]
                 if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     table_name = data_asset_name
@@ -159,7 +149,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 table_name = split_data_asset_name[0]
 
             elif (
-                len(split_data_asset_name) == 3
+                len(split_data_asset_name) == 3  # noqa: PLR2004
                 and self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
             ):
                 project_id = split_data_asset_name[0]  # noqa: F841
@@ -283,20 +273,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             )
         )
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
             "already be referenced by accessing a data_asset with the name of the "

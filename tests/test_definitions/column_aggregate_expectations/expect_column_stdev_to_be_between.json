@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_stdev_to_be_between",
   "datasets": [
     {
+      "dataset_name": "expect_column_stdev_to_be_between_1",
       "data": {
         "dist1": [
           1,
@@ -30,6 +31,9 @@
           "include_in_gallery": true,
           "exact_match_out": false,
           "tolerance": 0.000000000001,
+          "suppress_test_for": [
+            "snowflake"
+          ],
           "in": {
             "column": "dist1",
             "min_value": 0.5,
@@ -44,12 +48,30 @@
           "title": "vacuously_true",
           "exact_match_out": false,
           "tolerance": 0.000000000001,
+          "suppress_test_for": [
+            "snowflake"
+          ],
           "in": {
             "column": "dist1"
           },
           "out": {
             "success": true,
             "observed_value": 1.1547005383792517
+          }
+        },
+        {
+          "title": "vacuously_true_snowflake",
+          "exact_match_out": false,
+          "tolerance": 0.000000000001,
+          "only_for": [
+            "snowflake"
+          ],
+          "in": {
+            "column": "dist1"
+          },
+          "out": {
+            "success": true,
+            "observed_value": 1.1547003940416753
           }
         },
         {
@@ -148,6 +170,9 @@
           "include_in_gallery": true,
           "exact_match_out": false,
           "tolerance": 0.000000000001,
+          "suppress_test_for": [
+            "snowflake"
+          ],
           "in": {
             "column": "dist1",
             "min_value": 0,
@@ -156,6 +181,24 @@
           "out": {
             "success": false,
             "observed_value": 1.1547005383792517
+          }
+        },
+        {
+          "title": "negative_test_snowflake",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "tolerance": 0.000000000001,
+          "only_for": [
+            "snowflake"
+          ],
+          "in": {
+            "column": "dist1",
+            "min_value": 0,
+            "max_value": 1
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.1547003940416753
           }
         },
         {

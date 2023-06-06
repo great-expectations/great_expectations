@@ -9,8 +9,11 @@ from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVa
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import ConfigNotFoundError
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
+)
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
@@ -116,7 +119,7 @@ def test_data_context_root_dir_returns_data_context(
 
 
 @pytest.mark.unit
-def test_base_context_invalid_root_dir(clear_env_vars):
+def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -132,8 +135,11 @@ def test_base_context_invalid_root_dir(clear_env_vars):
         data_docs_sites={},
         validation_operators={},
     )
+
+    context_root_dir = tmp_path / "root"
+    context_root_dir.mkdir()
     assert isinstance(
-        gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
+        gx.get_context(project_config=config, context_root_dir=context_root_dir),
         FileDataContext,
     )
 
@@ -167,7 +173,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
 def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(GXCloudConfigurationError):
         gx.get_context(cloud_mode=True),
 
 
@@ -201,6 +207,7 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "default_expectations_store"
+        assert context.variables.include_rendered_content.globally
 
         config: DataContextConfig = DataContextConfig(
             config_version=3.0,
@@ -230,6 +237,39 @@ def test_cloud_context_with_in_memory_config_overrides(
 
 
 @pytest.mark.unit
-def test_invalid_root_dir_gives_error(clear_env_vars):
-    with pytest.raises(ConfigNotFoundError):
-        gx.get_context(context_root_dir="i/dont/exist")
+def test_get_context_with_no_arguments_returns_ephemeral_with_sensible_defaults():
+    context = gx.get_context()
+    assert isinstance(context, EphemeralDataContext)
+
+    defaults = InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
+    assert context.config.stores == defaults.stores
+
+
+@pytest.mark.parametrize("ge_cloud_mode", [True, None])
+@pytest.mark.cloud
+def test_cloud_context_include_rendered_content(
+    set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
+):
+    with mock.patch.object(
+        CloudDataContext,
+        "retrieve_data_context_config_from_cloud",
+        return_value=empty_ge_cloud_data_context_config,
+    ):
+        context = gx.get_context(cloud_mode=ge_cloud_mode)
+        assert isinstance(
+            context,
+            CloudDataContext,
+        )
+        assert context.variables.include_rendered_content.globally
+
+
+@pytest.mark.integration
+def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathlib.Path):
+    root = tmp_path / "root"
+    context_root_dir = root.joinpath("great_expectations")
+    assert not context_root_dir.exists()
+
+    context = gx.get_context(context_root_dir=context_root_dir)
+
+    assert isinstance(context, FileDataContext)
+    assert context_root_dir.exists()

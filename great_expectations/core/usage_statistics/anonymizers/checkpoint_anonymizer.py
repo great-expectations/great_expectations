@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core import RunIdentifier  # noqa: TCH001
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
@@ -63,7 +63,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     # noinspection PyUnusedLocal
-    def _anonymize_checkpoint_run(  # noqa: C901 - complexity 21
+    def _anonymize_checkpoint_run(  # noqa: C901, PLR0912, PLR0915
         self, obj: object, **kwargs
     ) -> dict:
         """
@@ -225,7 +225,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
             anonymized_expectation_suite_ge_cloud_id = None
         else:
             anonymized_expectation_suite_ge_cloud_id = self._anonymize_string(
-                str(expectation_suite_ge_cloud_id)
+                expectation_suite_ge_cloud_id
             )
 
         for attribute_name in sorted(CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS):

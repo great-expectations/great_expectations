@@ -30,7 +30,7 @@ def test_add_datasource(empty_data_context):
     config_filename = context.root_directory + "/great_expectations.yml"
 
     # Config can't be instantiated
-    with pytest.raises(TypeError):
+    with pytest.raises(gx_exceptions.DatasourceInitializationError):
         context.add_datasource(
             "my_new_datasource",
             **{

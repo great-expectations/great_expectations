@@ -2,7 +2,6 @@ import copy
 import inspect
 import json
 import logging
-import warnings
 from collections import OrderedDict
 from datetime import datetime
 from functools import reduce, wraps
@@ -13,6 +12,10 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.dataset import Dataset
@@ -20,36 +23,6 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.util import validate_mostly
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark.sql.types as sparktypes
-    from pyspark.ml.feature import Bucketizer
-    from pyspark.sql import SQLContext, Window
-    from pyspark.sql.functions import (
-        array,
-        col,
-        count,
-        countDistinct,
-        datediff,
-        desc,
-        expr,
-        isnan,
-        lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
-        lit,
-        monotonically_increasing_id,
-        stddev_samp,
-        struct,
-        udf,
-        when,
-    )
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class MetaSparkDFDataset(Dataset):
@@ -64,7 +37,7 @@ class MetaSparkDFDataset(Dataset):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def column_map_expectation(cls, func):
+    def column_map_expectation(cls, func):  # noqa: PLR0915
         """Constructs an expectation using column-map semantics.
 
 
@@ -79,7 +52,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             column,
             mostly=None,
@@ -96,7 +69,7 @@ class MetaSparkDFDataset(Dataset):
 
             # Rename column so we only have to handle dot notation here
             eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
-            self.spark_df = self.spark_df.withColumn(eval_col, col(column))
+            self.spark_df = self.spark_df.withColumn(eval_col, F.col(column))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -111,7 +84,7 @@ class MetaSparkDFDataset(Dataset):
             else:
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
-            col_df = self.spark_df.select(col(eval_col))  # pyspark.sql.DataFrame
+            col_df = self.spark_df.select(F.col(eval_col))  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
             col_df.persist()
@@ -156,7 +129,7 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if isinstance(val, str):
-                                val = parse(val)
+                                val = parse(val)  # noqa: PLW2901
                             parsed_maybe_limited_unexpected_list.append(
                                 datetime.strftime(val, output_strftime_format)
                             )
@@ -210,7 +183,7 @@ class MetaSparkDFDataset(Dataset):
         return inner_wrapper
 
     @classmethod
-    def column_pair_map_expectation(cls, func):
+    def column_pair_map_expectation(cls, func):  # noqa: PLR0915
         """
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
@@ -219,7 +192,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0913, PLR0912
             self,
             column_A,
             column_B,
@@ -234,8 +207,8 @@ class MetaSparkDFDataset(Dataset):
             eval_col_B = f"__eval_col_B_{column_B.replace('.', '__').replace('`', '_')}"
 
             self.spark_df = self.spark_df.withColumn(
-                eval_col_A, col(column_A)
-            ).withColumn(eval_col_B, col(column_B))
+                eval_col_A, F.col(column_A)
+            ).withColumn(eval_col_B, F.col(column_B))
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -251,7 +224,7 @@ class MetaSparkDFDataset(Dataset):
                 unexpected_count_limit = result_format["partial_unexpected_count"]
 
             cols_df = self.spark_df.select(eval_col_A, eval_col_B).withColumn(
-                "__row", monotonically_increasing_id()
+                "__row", F.monotonically_increasing_id()
             )  # pyspark.sql.DataFrame
 
             # a couple of tests indicate that caching here helps performance
@@ -286,7 +259,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    lit(False).alias("__null_val"),
+                    F.lit(False).alias("__null_val"),
                 )
             else:
                 raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
@@ -330,7 +303,7 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if isinstance(val[0], str) and isinstance(val[1], str):
-                                val = (parse(val[0]), parse(val[1]))
+                                val = (parse(val[0]), parse(val[1]))  # noqa: PLW2901
                             parsed_maybe_limited_unexpected_list.append(
                                 (
                                     datetime.strftime(val[0], output_strftime_format),
@@ -384,7 +357,7 @@ class MetaSparkDFDataset(Dataset):
         return inner_wrapper
 
     @classmethod
-    def multicolumn_map_expectation(cls, func):
+    def multicolumn_map_expectation(cls, func):  # noqa: PLR0915
         """
         The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
         evaluating truthiness of some condition on a per row basis across a set of columns.
@@ -393,7 +366,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             column_list,
             mostly=None,
@@ -407,7 +380,7 @@ class MetaSparkDFDataset(Dataset):
             for col_name in column_list:
                 eval_col = f"__eval_col_{col_name.replace('.', '__').replace('`', '_')}"
                 eval_cols.append(eval_col)
-                self.spark_df = self.spark_df.withColumn(eval_col, col(col_name))
+                self.spark_df = self.spark_df.withColumn(eval_col, F.col(col_name))
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -432,7 +405,7 @@ class MetaSparkDFDataset(Dataset):
                     [
                         *eval_cols,
                         reduce(
-                            lambda a, b: a & b, [col(c).isNull() for c in eval_cols]
+                            lambda a, b: a & b, [F.col(c).isNull() for c in eval_cols]
                         ).alias("__null_val"),
                     ]
                 )
@@ -441,13 +414,13 @@ class MetaSparkDFDataset(Dataset):
                     [
                         *eval_cols,
                         reduce(
-                            lambda a, b: a | b, [col(c).isNull() for c in eval_cols]
+                            lambda a, b: a | b, [F.col(c).isNull() for c in eval_cols]
                         ).alias("__null_val"),
                     ]
                 )
             elif ignore_row_if == "never":
                 boolean_mapped_skip_values = temp_df.select(
-                    [*eval_cols, lit(False).alias("__null_val")]
+                    [*eval_cols, F.lit(False).alias("__null_val")]
                 )
             else:
                 raise ValueError(f"Unknown value of ignore_row_if: {ignore_row_if}")
@@ -487,7 +460,9 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if all(isinstance(v, str) for k, v in val):
-                                val = OrderedDict((k, parse(v)) for k, v in val)
+                                val = OrderedDict(  # noqa: PLW2901
+                                    (k, parse(v)) for k, v in val
+                                )
                             parsed_maybe_limited_unexpected_list.append(
                                 OrderedDict(
                                     (k, datetime.strftime(v, output_strftime_format))
@@ -641,7 +616,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return self.spark_df.columns
 
     def get_column_nonnull_count(self, column):
-        return self.spark_df.filter(col(column).isNotNull()).count()
+        return self.spark_df.filter(F.col(column).isNotNull()).count()
 
     def get_column_mean(self, column):
         # TODO need to apply this logic to other such methods?
@@ -669,7 +644,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         pass
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        temp_column = self.spark_df.select(column).where(F.col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
         result = temp_column.agg({column: "max"}).collect()
@@ -678,7 +653,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return result[0][0]
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
+        temp_column = self.spark_df.select(column).where(F.col(column).isNotNull())
         if parse_strings_as_datetimes:
             temp_column = self._apply_dateutil_parse(temp_column)
         result = temp_column.agg({column: "min"}).collect()
@@ -693,14 +668,14 @@ class SparkDFDataset(MetaSparkDFDataset):
             raise ValueError("collate parameter is not supported in SparkDFDataset")
         value_counts = (
             self.spark_df.select(column)
-            .where(col(column).isNotNull())
+            .where(F.col(column).isNotNull())
             .groupBy(column)
             .count()
         )
         if sort == "value":
             value_counts = value_counts.orderBy(column)
         elif sort == "count":
-            value_counts = value_counts.orderBy(desc("count"))
+            value_counts = value_counts.orderBy(F.desc("count"))
         value_counts = value_counts.collect()
         series = pd.Series(
             [row["count"] for row in value_counts],
@@ -710,7 +685,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         return series
 
     def get_column_unique_count(self, column):
-        return self.spark_df.agg(countDistinct(column)).collect()[0][0]
+        return self.spark_df.agg(F.countDistinct(column)).collect()[0][0]
 
     def get_column_modes(self, column):
         """leverages computation done in _get_column_value_counts"""
@@ -747,7 +722,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
 
     def get_column_stdev(self, column):
-        return self.spark_df.select(stddev_samp(col(column))).collect()[0][0]
+        return self.spark_df.select(F.stddev_samp(F.col(column))).collect()[0][0]
 
     def get_column_hist(self, column, bins):
         """return a list of counts corresponding to bins"""
@@ -768,8 +743,10 @@ class SparkDFDataset(MetaSparkDFDataset):
             added_max = True
             bins.append(float("inf"))
 
-        temp_column = self.spark_df.select(column).where(col(column).isNotNull())
-        bucketizer = Bucketizer(splits=bins, inputCol=column, outputCol="buckets")
+        temp_column = self.spark_df.select(column).where(F.col(column).isNotNull())
+        bucketizer = pyspark.Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets"
+        )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 
         # This is painful to do, but: bucketizer cannot handle values outside of a range
@@ -784,7 +761,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         # We'll try for an optimization by asking for it at the same time
         if added_max:
             upper_bound_count = (
-                temp_column.select(column).filter(col(column) == bins[-2]).count()
+                temp_column.select(column).filter(F.col(column) == bins[-2]).count()
             )
         else:
             upper_bound_count = 0
@@ -811,7 +788,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return hist
 
-    def get_column_count_in_range(
+    def get_column_count_in_range(  # noqa: PLR0913
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         if min_val is None and max_val is None:
@@ -822,14 +799,14 @@ class SparkDFDataset(MetaSparkDFDataset):
         result = self.spark_df.select(column)
         if min_val is not None:
             if strict_min:
-                result = result.filter(col(column) > min_val)
+                result = result.filter(F.col(column) > min_val)
             else:
-                result = result.filter(col(column) >= min_val)
+                result = result.filter(F.col(column) >= min_val)
         if max_val is not None:
             if strict_max:
-                result = result.filter(col(column) < max_val)
+                result = result.filter(F.col(column) < max_val)
             else:
-                result = result.filter(col(column) <= max_val)
+                result = result.filter(F.col(column) <= max_val)
         return result.count()
 
     # Utils
@@ -837,13 +814,13 @@ class SparkDFDataset(MetaSparkDFDataset):
     def _apply_dateutil_parse(column):
         assert len(column.columns) == 1, "Expected DataFrame with 1 column"
         col_name = column.columns[0]
-        _udf = udf(parse, sparktypes.TimestampType())
+        _udf = F.udf(parse, pyspark.types.TimestampType())
         return column.withColumn(col_name, _udf(col_name))
 
     # Expectations
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(
+    def expect_column_values_to_be_in_set(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         value_set,  # List[Any]
@@ -856,7 +833,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         if value_set is None:
             # vacuously true
-            return column.withColumn("__success", lit(True))
+            return column.withColumn("__success", F.lit(True))
         if parse_strings_as_datetimes:
             column = self._apply_dateutil_parse(column)
             value_set = [
@@ -874,7 +851,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(
+    def expect_column_values_to_not_be_in_set(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         value_set,  # List[Any]
@@ -896,7 +873,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_between(
+    def expect_column_values_to_be_between(  # noqa: PLR0911, PLR0913, PLR0912
         self,
         column,
         min_value=None,
@@ -927,23 +904,23 @@ class SparkDFDataset(MetaSparkDFDataset):
             if strict_max:
                 return column.withColumn(
                     "__success",
-                    when(column[0] < max_value, lit(True)).otherwise(lit(False)),
+                    F.when(column[0] < max_value, F.lit(True)).otherwise(F.lit(False)),
                 )
             else:
                 return column.withColumn(
                     "__success",
-                    when(column[0] <= max_value, lit(True)).otherwise(lit(False)),
+                    F.when(column[0] <= max_value, F.lit(True)).otherwise(F.lit(False)),
                 )
         elif max_value is None:
             if strict_min:
                 return column.withColumn(
                     "__success",
-                    when(column[0] > min_value, lit(True)).otherwise(lit(False)),
+                    F.when(column[0] > min_value, F.lit(True)).otherwise(F.lit(False)),
                 )
             else:
                 return column.withColumn(
                     "__success",
-                    when(column[0] >= min_value, lit(True)).otherwise(lit(False)),
+                    F.when(column[0] >= min_value, F.lit(True)).otherwise(F.lit(False)),
                 )
         else:
             if min_value > max_value:
@@ -951,35 +928,35 @@ class SparkDFDataset(MetaSparkDFDataset):
             if strict_min and strict_max:
                 return column.withColumn(
                     "__success",
-                    when(
-                        (min_value < column[0]) & (column[0] < max_value), lit(True)
-                    ).otherwise(lit(False)),
+                    F.when(
+                        (min_value < column[0]) & (column[0] < max_value), F.lit(True)
+                    ).otherwise(F.lit(False)),
                 )
             elif strict_min:
                 return column.withColumn(
                     "__success",
-                    when(
-                        (min_value < column[0]) & (column[0] <= max_value), lit(True)
-                    ).otherwise(lit(False)),
+                    F.when(
+                        (min_value < column[0]) & (column[0] <= max_value), F.lit(True)
+                    ).otherwise(F.lit(False)),
                 )
             elif strict_max:
                 return column.withColumn(
                     "__success",
-                    when(
-                        (min_value <= column[0]) & (column[0] < max_value), lit(True)
-                    ).otherwise(lit(False)),
+                    F.when(
+                        (min_value <= column[0]) & (column[0] < max_value), F.lit(True)
+                    ).otherwise(F.lit(False)),
                 )
             else:
                 return column.withColumn(
                     "__success",
-                    when(
-                        (min_value <= column[0]) & (column[0] <= max_value), lit(True)
-                    ).otherwise(lit(False)),
+                    F.when(
+                        (min_value <= column[0]) & (column[0] <= max_value), F.lit(True)
+                    ).otherwise(F.lit(False)),
                 )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(
+    def expect_column_value_lengths_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -991,16 +968,20 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         if min_value is None and max_value is None:
-            return column.withColumn("__success", lit(True))
+            return column.withColumn("__success", F.lit(True))
         elif min_value is None:
             return column.withColumn(
                 "__success",
-                when(length_(column[0]) <= max_value, lit(True)).otherwise(lit(False)),
+                F.when(F.length(column[0]) <= max_value, F.lit(True)).otherwise(
+                    F.lit(False)
+                ),
             )
         elif max_value is None:
             return column.withColumn(
                 "__success",
-                when(length_(column[0]) >= min_value, lit(True)).otherwise(lit(False)),
+                F.when(F.length(column[0]) >= min_value, F.lit(True)).otherwise(
+                    F.lit(False)
+                ),
             )
         # FIXME: whether the below condition is enforced seems to be somewhat inconsistent
 
@@ -1010,15 +991,15 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return column.withColumn(
             "__success",
-            when(
-                (min_value <= length_(column[0])) & (length_(column[0]) <= max_value),
-                lit(True),
-            ).otherwise(lit(False)),
+            F.when(
+                (min_value <= F.length(column[0])) & (F.length(column[0]) <= max_value),
+                F.lit(True),
+            ).otherwise(F.lit(False)),
         )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_unique(
+    def expect_column_values_to_be_unique(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1028,12 +1009,13 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn(
-            "__success", count(lit(1)).over(Window.partitionBy(column[0])) <= 1
+            "__success",
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(column[0])) <= 1,
         )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_value_lengths_to_equal(
+    def expect_column_value_lengths_to_equal(  # noqa: PLR0913
         self,
         column,
         value,  # int
@@ -1045,12 +1027,12 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         return column.withColumn(
             "__success",
-            when(length_(column[0]) == value, lit(True)).otherwise(lit(False)),
+            F.when(F.length(column[0]) == value, F.lit(True)).otherwise(F.lit(False)),
         )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_strftime_format(
+    def expect_column_values_to_match_strftime_format(  # noqa: PLR0913
         self,
         column,
         strftime_format,  # str
@@ -1063,15 +1045,16 @@ class SparkDFDataset(MetaSparkDFDataset):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.strptime(  # noqa: DTZ007
+                datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError(f"Unable to use provided strftime_format. {e.message}")
 
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -1080,12 +1063,12 @@ class SparkDFDataset(MetaSparkDFDataset):
             except ValueError:
                 return False
 
-        success_udf = udf(is_parseable_by_format)
+        success_udf = F.udf(is_parseable_by_format)
         return column.withColumn("__success", success_udf(column[0]))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(
+    def expect_column_values_to_not_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1098,7 +1081,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_null(
+    def expect_column_values_to_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1111,7 +1094,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_json_schema(
+    def expect_column_values_to_match_json_schema(  # noqa: PLR0913
         self,
         column,
         json_schema,
@@ -1135,13 +1118,13 @@ class SparkDFDataset(MetaSparkDFDataset):
             except:
                 raise
 
-        matches_json_schema_udf = udf(matches_json_schema, sparktypes.StringType())
+        matches_json_schema_udf = F.udf(matches_json_schema, pyspark.types.StringType())
 
         return column.withColumn("__success", matches_json_schema_udf(column[0]))
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_json_parseable(
+    def expect_column_values_to_be_json_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1157,13 +1140,13 @@ class SparkDFDataset(MetaSparkDFDataset):
             except:
                 return False
 
-        is_json_udf = udf(is_json, sparktypes.StringType())
+        is_json_udf = F.udf(is_json, pyspark.types.StringType())
 
         return column.withColumn("__success", is_json_udf(column[0]))
 
     @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
-    def expect_column_values_to_be_of_type(
+    def expect_column_values_to_be_of_type(  # noqa: PLR0913
         self,
         column,
         type_,
@@ -1175,7 +1158,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         # Rename column so we only have to handle dot notation here
         eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
-        self.spark_df = self.spark_df.withColumn(eval_col, col(column))
+        self.spark_df = self.spark_df.withColumn(eval_col, F.col(column))
         if mostly is not None:
             raise ValueError(
                 "SparkDFDataset does not support column map semantics for column types"
@@ -1195,7 +1178,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                 # vacuously true
                 success = True
             else:
-                success = issubclass(col_type, getattr(sparktypes, type_))
+                success = issubclass(col_type, getattr(pyspark.types, type_))
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
@@ -1204,7 +1187,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @DataAsset.expectation(["column", "type_list", "mostly"])
-    def expect_column_values_to_be_in_type_list(
+    def expect_column_values_to_be_in_type_list(  # noqa: PLR0913
         self,
         column,
         type_list: List[str],
@@ -1216,7 +1199,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         # Rename column so we only have to handle dot notation here
         eval_col = f"__eval_col_{column.replace('.', '__').replace('`', '_')}"
-        self.spark_df = self.spark_df.withColumn(eval_col, col(column))
+        self.spark_df = self.spark_df.withColumn(eval_col, F.col(column))
 
         if mostly is not None:
             raise ValueError(
@@ -1238,7 +1221,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             types = []
             for type_ in type_list:
                 try:
-                    type_class = getattr(sparktypes, type_)
+                    type_class = getattr(pyspark.types, type_)
                     types.append(type_class)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
@@ -1250,7 +1233,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_regex(
+    def expect_column_values_to_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1264,7 +1247,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex(
+    def expect_column_values_to_not_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1278,7 +1261,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_regex_list(
+    def expect_column_values_to_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1301,7 +1284,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex_list(
+    def expect_column_values_to_not_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1316,7 +1299,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_equal(
+    def expect_column_pair_values_to_be_equal(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1333,12 +1316,12 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
         return join_df.withColumn(
             "__success",
-            when(col(column_A_name) == col(column_B_name), True).otherwise(False),
+            F.when(F.col(column_A_name) == F.col(column_B_name), True).otherwise(False),
         )
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_A_to_be_greater_than_B(
+    def expect_column_pair_values_A_to_be_greater_than_B(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1359,7 +1342,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_B_name = column_B.schema.names[1]
 
         if parse_strings_as_datetimes:
-            _udf = udf(parse, sparktypes.TimestampType())
+            _udf = F.udf(parse, pyspark.types.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
                 f"__ts_{column_A_name}",
@@ -1381,17 +1364,21 @@ class SparkDFDataset(MetaSparkDFDataset):
         if or_equal:
             return join_df.withColumn(
                 "__success",
-                when(col(column_A_name) >= col(column_B_name), True).otherwise(False),
+                F.when(F.col(column_A_name) >= F.col(column_B_name), True).otherwise(
+                    False
+                ),
             )
         else:
             return join_df.withColumn(
                 "__success",
-                when(col(column_A_name) > col(column_B_name), True).otherwise(False),
+                F.when(F.col(column_A_name) > F.col(column_B_name), True).otherwise(
+                    False
+                ),
             )
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_in_set(
+    def expect_column_pair_values_to_be_in_set(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1410,54 +1397,25 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
 
         join_df = join_df.withColumn(
-            "combine_AB", array(col(column_A_name), col(column_B_name))
+            "combine_AB", F.array(F.col(column_A_name), F.col(column_B_name))
         )
 
         value_set_df = (
-            SQLContext(self.spark_df._sc)
+            pyspark.SQLContext(self.spark_df._sc)
             .createDataFrame(value_pairs_set, ["col_A", "col_B"])
-            .select(array("col_A", "col_B").alias("set_AB"))
+            .select(F.array("col_A", "col_B").alias("set_AB"))
         )
 
         return join_df.join(
             value_set_df, join_df["combine_AB"] == value_set_df["set_AB"], "left"
         ).withColumn(
-            "__success", when(col("set_AB").isNull(), lit(False)).otherwise(lit(True))
-        )
-
-    def expect_multicolumn_values_to_be_unique(
-        self,
-        column_list,  # pyspark.sql.DataFrame
-        mostly=None,
-        ignore_row_if="all_values_are_missing",
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
-            "Please use expect_select_column_values_to_be_unique_within_record instead."
-        )
-        # deprecated-v0.13.4
-        warnings.warn(
-            deprecation_warning,
-            DeprecationWarning,
-        )
-
-        return self.expect_select_column_values_to_be_unique_within_record(
-            column_list=column_list,
-            mostly=mostly,
-            ignore_row_if=ignore_row_if,
-            result_format=result_format,
-            include_config=include_config,
-            catch_exceptions=catch_exceptions,
-            meta=meta,
+            "__success",
+            F.when(F.col("set_AB").isNull(), F.lit(False)).otherwise(F.lit(True)),
         )
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_select_column_values_to_be_unique_within_record(
+    def expect_select_column_values_to_be_unique_within_record(  # noqa: PLR0913
         self,
         column_list,  # pyspark.sql.DataFrame
         mostly=None,
@@ -1473,7 +1431,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         for i in range(0, len(column_names) - 1):
             # Negate the `eqNullSafe` result and append to the conditions.
             conditions.append(
-                ~(col(column_names[i]).eqNullSafe(col(column_names[i + 1])))
+                ~(F.col(column_names[i]).eqNullSafe(F.col(column_names[i + 1])))
             )
 
         return column_list.withColumn(
@@ -1482,7 +1440,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_compound_columns_to_be_unique(
+    def expect_compound_columns_to_be_unique(  # noqa: PLR0913
         self,
         column_list,  # pyspark.sql.DataFrame
         mostly=None,
@@ -1492,17 +1450,17 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-
         # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
         return column_list.withColumn(
             "__success",
-            count(lit(1)).over(Window.partitionBy(struct(*column_names))) <= 1,
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
+            <= 1,
         )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_increasing(
+    def expect_column_values_to_be_increasing(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         strictly=False,
@@ -1520,51 +1478,58 @@ class SparkDFDataset(MetaSparkDFDataset):
         na_types = [
             isinstance(column.schema[column_name].dataType, typ)
             for typ in [
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ]
         ]
 
         # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
-            column = column.filter(~isnan(column[0]))
+            column = column.filter(~F.isnan(column[0]))
 
         if parse_strings_as_datetimes:
             # convert column to timestamp format
             column = self._apply_dateutil_parse(column)
             # create constant column to order by in window function to preserve order of original df
-            column = column.withColumn("constant", lit("constant")).withColumn(
-                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            column = column.withColumn("constant", F.lit("constant")).withColumn(
+                "lag", F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant")))
             )
 
-            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+            column = column.withColumn(
+                "diff", F.datediff(F.col(column_name), F.col("lag"))
+            )
 
         else:
             column = (
-                column.withColumn("constant", lit("constant"))
-                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
-                .withColumn("diff", column[0] - col("lag"))
+                column.withColumn("constant", F.lit("constant"))
+                .withColumn(
+                    "lag",
+                    F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant"))),
+                )
+                .withColumn("diff", column[0] - F.col("lag"))
             )
 
         # replace lag first row null with 1 so that it is not flagged as fail
         column = column.withColumn(
-            "diff", when(col("diff").isNull(), 1).otherwise(col("diff"))
+            "diff", F.when(F.col("diff").isNull(), 1).otherwise(F.col("diff"))
         )
 
         if strictly:
             return column.withColumn(
-                "__success", when(col("diff") >= 1, lit(True)).otherwise(lit(False))
+                "__success",
+                F.when(F.col("diff") >= 1, F.lit(True)).otherwise(F.lit(False)),
             )
 
         else:
             return column.withColumn(
-                "__success", when(col("diff") >= 0, lit(True)).otherwise(lit(False))
+                "__success",
+                F.when(F.col("diff") >= 0, F.lit(True)).otherwise(F.lit(False)),
             )
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_decreasing(
+    def expect_column_values_to_be_decreasing(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         strictly=False,
@@ -1582,51 +1547,58 @@ class SparkDFDataset(MetaSparkDFDataset):
         na_types = [
             isinstance(column.schema[column_name].dataType, typ)
             for typ in [
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ]
         ]
 
         # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
         if any(na_types):
-            column = column.filter(~isnan(column[0]))
+            column = column.filter(~F.isnan(column[0]))
 
         if parse_strings_as_datetimes:
             # convert column to timestamp format
             column = self._apply_dateutil_parse(column)
             # create constant column to order by in window function to preserve order of original df
-            column = column.withColumn("constant", lit("constant")).withColumn(
-                "lag", lag(column[0]).over(Window.orderBy(col("constant")))
+            column = column.withColumn("constant", F.lit("constant")).withColumn(
+                "lag", F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant")))
             )
 
-            column = column.withColumn("diff", datediff(col(column_name), col("lag")))
+            column = column.withColumn(
+                "diff", F.datediff(F.col(column_name), F.col("lag"))
+            )
 
         else:
             column = (
-                column.withColumn("constant", lit("constant"))
-                .withColumn("lag", lag(column[0]).over(Window.orderBy(col("constant"))))
-                .withColumn("diff", column[0] - col("lag"))
+                column.withColumn("constant", F.lit("constant"))
+                .withColumn(
+                    "lag",
+                    F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant"))),
+                )
+                .withColumn("diff", column[0] - F.col("lag"))
             )
 
         # replace lag first row null with -1 so that it is not flagged as fail
         column = column.withColumn(
-            "diff", when(col("diff").isNull(), -1).otherwise(col("diff"))
+            "diff", F.when(F.col("diff").isNull(), -1).otherwise(F.col("diff"))
         )
 
         if strictly:
             return column.withColumn(
-                "__success", when(col("diff") <= -1, lit(True)).otherwise(lit(False))
+                "__success",
+                F.when(F.col("diff") <= -1, F.lit(True)).otherwise(F.lit(False)),
             )
 
         else:
             return column.withColumn(
-                "__success", when(col("diff") <= 0, lit(True)).otherwise(lit(False))
+                "__success",
+                F.when(F.col("diff") <= 0, F.lit(True)).otherwise(F.lit(False)),
             )
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_multicolumn_sum_to_equal(
+    def expect_multicolumn_sum_to_equal(  # noqa: PLR0913
         self,
         column_list,
         sum_total,
@@ -1647,8 +1619,10 @@ class SparkDFDataset(MetaSparkDFDataset):
                 expected sum of columns
         """
         expression = "+".join([f"COALESCE({col}, 0)" for col in column_list.columns])
-        column_list = column_list.withColumn("actual_total", expr(expression))
+        column_list = column_list.withColumn("actual_total", F.expr(expression))
         return column_list.withColumn(
             "__success",
-            when(col("actual_total") == sum_total, lit(True)).otherwise(lit(False)),
+            F.when(F.col("actual_total") == sum_total, F.lit(True)).otherwise(
+                F.lit(False)
+            ),
         )

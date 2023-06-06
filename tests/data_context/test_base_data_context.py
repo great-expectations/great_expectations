@@ -171,13 +171,13 @@ def test_get_config_with_variables_substituted(
 
 
 @pytest.fixture
-def prepare_validator_for_cloud_e2e() -> Callable[
-    [CloudDataContext], Tuple[Validator, str]
-]:
+def prepare_validator_for_cloud_e2e() -> (
+    Callable[[CloudDataContext], Tuple[Validator, str]]
+):
     def _closure(context: CloudDataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
-        expectation_suite_ge_cloud_id = suites[0].cloud_id
+        expectation_suite_ge_cloud_id = suites[0].id
 
         # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
         # To limit the number of generated suites, we limit the randomization to 20 numbers.
@@ -188,10 +188,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[
         if expectation_suite_ge_cloud_id in context.list_expectation_suite_names():
             context.delete_expectation_suite(ge_cloud_id=expectation_suite_ge_cloud_id)
 
-        suite = context.create_expectation_suite(
+        suite = context.add_expectation_suite(
             suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,
-            overwrite_existing=True,
         )
 
         # Set up a number of Expectations and confirm proper assignment
@@ -214,10 +213,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[
         for config in configs:
             suite.add_expectation(expectation_configuration=config)
 
-        context.save_expectation_suite(
+        suite.ge_cloud_id = expectation_suite_ge_cloud_id
+        context.add_or_update_expectation_suite(
             expectation_suite=suite,
-            ge_cloud_id=expectation_suite_ge_cloud_id,
-            overwrite_existing=True,
         )
 
         assert len(suite.expectations) == 4
@@ -332,7 +330,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
 
     validator.save_expectation_suite()
     assert len(validator.expectation_suite.expectations) == 5
@@ -342,5 +340,5 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
     assert len(suite_on_context.expectations) == 5

@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableColumnCountToBeBetween(TableExpectation):
+class ExpectTableColumnCountToBeBetween(BatchExpectation):
     """Expect the number of columns to be between two values.
 
     expect_table_column_count_to_be_between is a \

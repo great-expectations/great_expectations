@@ -2,12 +2,12 @@ import logging
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,

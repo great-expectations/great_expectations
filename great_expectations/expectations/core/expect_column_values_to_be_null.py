@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import parse_result_format
@@ -10,7 +10,7 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     _format_map_output,
@@ -31,7 +31,9 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -118,7 +120,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -152,7 +154,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -272,5 +274,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ),
             unexpected_index_list=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+            ),
+            unexpected_index_query=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
             ),
         )

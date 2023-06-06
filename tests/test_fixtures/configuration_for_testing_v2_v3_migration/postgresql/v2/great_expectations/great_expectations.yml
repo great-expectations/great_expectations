@@ -13,6 +13,7 @@ config_version: 2.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml datasources">
 datasources:
   my_postgres_datasource:
     class_name: SqlAlchemyDatasource
@@ -21,6 +22,7 @@ datasources:
       module_name: great_expectations.dataset
       class_name: SqlAlchemyDataset
     connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
+# </snippet>
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
@@ -53,6 +55,7 @@ plugins_directory: plugins/
 validation_operators:
   action_list_operator:
     class_name: ActionListValidationOperator
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml action_list">
     action_list:
       - name: store_validation_result
         action:
@@ -63,6 +66,7 @@ validation_operators:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
+# </snippet>
 
 stores:
 # Stores are configurable places to store things like Expectations, Validations

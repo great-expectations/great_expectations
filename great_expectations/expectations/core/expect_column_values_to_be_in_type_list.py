@@ -6,9 +6,10 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
+from great_expectations.compatibility import pyspark
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -38,22 +39,19 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.util import get_pyathena_potential_type
+from great_expectations.util import (
+    get_pyathena_potential_type,
+    get_trino_potential_type,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
@@ -204,7 +202,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 renderer_configuration=renderer_configuration,
             )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -254,7 +252,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -272,7 +270,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         + ", at least $mostly_pct % of the time."
                     )
             else:
-                if include_column_name:
+                if include_column_name:  # noqa: PLR5501
                     template_str = (
                         f"$column value types must belong to this set: {values_string}."
                     )
@@ -281,7 +279,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         f"value types must belong to this set: {values_string}."
                     )
         else:
-            if include_column_name:
+            if include_column_name:  # noqa: PLR5501
                 template_str = "$column value types may be any value, but observed value will be reported"
             else:
                 template_str = (
@@ -309,7 +307,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(  # noqa: C901 - 16
+    def _validate_pandas(  # noqa: C901, PLR0912
         self,
         actual_column_type,
         expected_types_list,
@@ -408,6 +406,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         else:
                             real_type = potential_type
                         types.append(real_type)
+                    elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                        potential_type = get_trino_potential_type(type_module, type_)
+                        types.append(type(potential_type))
                     else:
                         potential_type = getattr(type_module, type_)
                         types.append(potential_type)
@@ -437,7 +438,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             types = []
             for type_ in expected_types_list:
                 try:
-                    type_class = getattr(sparktypes, type_)
+                    type_class = getattr(pyspark.types, type_)
                     types.append(type_class)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")
@@ -457,10 +458,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
-        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(

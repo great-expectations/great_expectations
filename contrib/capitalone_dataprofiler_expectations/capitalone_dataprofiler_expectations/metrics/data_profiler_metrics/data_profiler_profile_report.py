@@ -1,9 +1,11 @@
 import dataprofiler as dp
+from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+    DataProfilerProfileMetricProvider,
+)
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.metric_provider import metric_value
-
-from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
 
 
 class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
@@ -22,7 +24,9 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
     ):
         profile_path = metric_value_kwargs["profile_path"]
         try:
-            profile = dp.Profiler.load(profile_path)
+            profile: dp.profilers.profile_builder.BaseProfiler = dp.Profiler.load(
+                profile_path
+            )
             profile_report = profile.report(
                 report_options={"output_format": "serializable"}
             )
@@ -34,3 +38,7 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
             raise ValueError(
                 "'profile_path' does not point to a valid DataProfiler stored profile."
             )
+        except Exception as e:
+            raise gx_exceptions.MetricError(
+                message=str(e),
+            ) from e

@@ -1,15 +1,16 @@
 import os
 from typing import List
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
+context = gx.get_context()
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
-context = gx.get_context()
-
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py datasource config">
 datasource_config = {
     "name": "my_azure_datasource",
     "class_name": "Datasource",
@@ -37,6 +38,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -57,7 +59,9 @@ datasource_config["data_connectors"]["configured_data_connector_name"][
     "name_starts_with"
 ] = "data/taxi_yellow_tripdata_samples/"
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py test datasource config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
 context.add_datasource(**datasource_config)
 
@@ -72,9 +76,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

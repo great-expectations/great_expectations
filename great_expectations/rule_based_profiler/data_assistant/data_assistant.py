@@ -5,17 +5,21 @@ from inspect import isabstract
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
+    UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.datasource.fluent.interfaces import (
+    Batch as FluentBatch,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfilerResult,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -31,8 +35,8 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentVariablesDirectives,
+    RuntimeEnvironmentDomainTypeDirectives,  # noqa: TCH001
+    RuntimeEnvironmentVariablesDirectives,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -63,7 +67,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.util import camel_to_snake, measure_execution_time
 
 if TYPE_CHECKING:
-    from great_expectations.validator.validator import Validator
+    from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 
 class MetaDataAssistant(ABCMeta):
@@ -139,9 +143,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
-                metric_name=metric_name,
+                metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
@@ -466,7 +469,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
-                candidate_regexes=None,
+                candidate_regexes=f"{VARIABLES_KEY}candidate_regexes",
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
@@ -514,7 +517,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self._data_context = (
             self._validator.data_context if self._validator is not None else None
         )
-        self._batches: Optional[Dict[str, Union[Batch, XBatch]]] = (
+        self._batches: Optional[Dict[str, Union[Batch, FluentBatch]]] = (
             self._validator.batches if self._validator is not None else None
         )
 
@@ -584,7 +587,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
@@ -724,7 +727,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         batch_id: str
         batch: Batch
@@ -743,7 +746,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     execution_time_property_name="profiler_execution_time",
     pretty_print=False,
 )
-def run_profiler_on_data(
+def run_profiler_on_data(  # noqa: PLR0913
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
@@ -799,7 +802,7 @@ configuration included.
     result.citation = rule_based_profiler_result.citation
 
 
-def build_map_metric_rule(
+def build_map_metric_rule(  # noqa: PLR0913
     data_assistant_class_name: str,
     rule_name: str,
     expectation_type: str,

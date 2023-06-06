@@ -1,0 +1,21 @@
+# This contains a list of git commit hashes that should be ignored when viewing the git blame on github.
+# It can also be passed to `--ignore-revs-file` if using git locally.
+# https://git-scm.com/docs/git-blame#Documentation/git-blame.txt---ignore-revltrevgt
+# A typical use of these would be if a large formatting change was applied across the whole codebase but otherwise
+# no runtime changes were made. Each entry should be preceded with a comment explaining the change.
+#
+# https://black.readthedocs.io/en/stable/guides/introducing_black_to_your_project.html#avoiding-ruining-git-blame
+# Apply noqa markers for all TCH001 violations
+f5e7df1846102d9a62cc9b9110387925ffae60cc
+# Apply noqa markers for all PTH (use-pathlib) violations
+# https://github.com/great-expectations/great_expectations/pull/7290
+597b2b625569b6f5f110f8230ac26ab405167da6
+# Apply noqa markers for TID251 (sqlalchemy) violations
+# https://github.com/great-expectations/great_expectations/pull/7564
+e55b3484a86f654e8b819041dd6cc73730e01a8f
+# python 3.7 -> 3.8 Ruff auto-fixes
+# https://github.com/great-expectations/great_expectations/pull/7945
+85b81029c759dc2b6a8c8956a5babb19e3280494
+# black 2.2 -> 2.3 formatting changes
+# https://github.com/great-expectations/great_expectations/pull/7946
+582fe60179b9b8bf31ba0a394bfa669f495ce8c6

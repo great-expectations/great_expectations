@@ -1,0 +1,93 @@
+{
+    "title": "FeatherAsset",
+    "description": "Load a feather-format object from the file path.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "feather",
+            "enum": [
+                "feather"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "path": {
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "use_threads": {
+            "title": "Use Threads",
+            "default": true,
+            "type": "boolean"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "path"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

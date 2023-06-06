@@ -1,10 +1,10 @@
 from typing import List
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py datasource_config">
@@ -62,9 +62,7 @@ batch_request.runtime_parameters[
     "path"
 ] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -92,9 +90,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

@@ -6,12 +6,7 @@ from geopy import geocoders
 from geopy.distance import distance, lonlat
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -22,7 +17,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.geometry.distance_to_address"
     condition_value_keys = (
@@ -39,8 +33,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-
+    def _pandas(cls, column, **kwargs):  # noqa: C901 - 24
         column_shape_format = kwargs.get("column_shape_format")
         place = kwargs.get("place")
         geocoder = kwargs.get("geocoder")
@@ -67,7 +60,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
                 # Specify the default parameters for Nominatim and run query. User is responsible for config and query params otherwise.
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
-            except:
+            except Exception:
                 raise Exception(
                     "Geocoding configuration and query failed to produce a valid result."
                 )

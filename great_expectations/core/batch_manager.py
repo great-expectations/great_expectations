@@ -9,8 +9,8 @@ from great_expectations.core.batch import (
     BatchDataType,
     BatchDefinition,
     BatchMarkers,
+    _get_fluent_batch_class,
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 
 if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
@@ -147,13 +147,13 @@ class BatchManager:
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, (Batch, XBatch)
+                    batch, (Batch, _get_fluent_batch_class())
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))
 
             self._execution_engine.load_batch_data(
-                batch_id=batch.id, batch_data=batch.data
+                batch_id=batch.id, batch_data=batch.data  # type: ignore[arg-type] # batch.data could be None
             )
 
             self._batch_cache[batch.id] = batch

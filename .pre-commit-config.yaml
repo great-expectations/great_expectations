@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.4.0
     hooks:
       - id: check-ast
       - id: check-json
@@ -12,19 +12,15 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.3.0
     hooks:
-      - id: black
+      - id: black-jupyter
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.230'
+    rev: 'v0.0.270'
     hooks:
       - id: ruff
-        files: ^(great_expectations/core)  # TODO: expand to all of gx
+        files: ^(great_expectations|contrib|scripts|tasks\.py) # TODO: add tests/  docs/ etc.
         args: ["--fix"]
 # https://pre-commit.ci/
 ci:

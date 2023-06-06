@@ -513,13 +513,13 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
     _ = get_context(project_config=in_code_data_context_project_config)
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store. Exception was: \n Unable to set object in s3."
         )
         == 1
     )
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store. Exception was: \n Unable to set object in s3."
         )
         == 1
     )

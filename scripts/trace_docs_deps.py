@@ -115,7 +115,7 @@ def find_docusaurus_refs_in_file(file: str) -> Set[str]:
         return file_refs
 
     for match in matches:
-        path: str = os.path.join(os.path.dirname(file), match)
+        path: str = os.path.join(os.path.dirname(file), match)  # noqa: PTH118, PTH120
         # only interested in looking at .py files for now (excludes .yml files)
         if path[-3:] == ".py":
             file_refs.add(path)

@@ -146,7 +146,6 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
 def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension(
     tmp_path_factory,
 ):
-
     filename_no_extension_fixtures = [
         {
             "input_path": "relative/path/to/file/no_extension",
@@ -204,7 +203,6 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
 
 
 def test_parse_cli_config_file_location_empty_paths():
-
     posix_fixtures = [
         {
             "input_path": None,
@@ -524,3 +522,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_batch_request_using_datasource_name_has_data_asset_name_(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    batch_request = toolkit.get_batch_request_using_datasource_name(
+        in_memory_runtime_context, "my_datasource"
+    )
+    assert batch_request["data_asset_name"] == "default_data_asset_name"

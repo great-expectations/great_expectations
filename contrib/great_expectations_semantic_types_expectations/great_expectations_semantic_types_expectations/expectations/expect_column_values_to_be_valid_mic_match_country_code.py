@@ -3,13 +3,11 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
-import json
 from typing import Optional
 
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -28,14 +26,13 @@ def is_valid_mic_match_country_code(mic: str, country_code, df) -> bool:
                 return False
         else:
             return False
-    except Exception as e:
+    except Exception:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidMicMatchCountryCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_mic_match_country_code"
     condition_value_keys = ("country_code",)

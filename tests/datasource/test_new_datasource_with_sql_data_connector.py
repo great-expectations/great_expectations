@@ -3,36 +3,24 @@ import os
 import random
 from typing import Optional, Union
 
+import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.datasource import (
     BaseDatasource,
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.exceptions.exceptions import ExecutionEngineError
-
-logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
-
-import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context.util import (
-    file_relative_path,
-    instantiate_class_from_config,
-)
 from great_expectations.validator.validator import Validator
 
 try:
@@ -40,15 +28,14 @@ try:
 except ImportError:
     sqlalchemy = None
 
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-    except ImportError:
-        sqla_bigquery = None
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as sqla_bigquery,
+)
 
-yaml = YAML()
+yaml = YAMLHandler()
+
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -61,7 +48,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
 
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
     # noinspection PyUnusedLocal
-    conn: sa.engine.base.Connection = sqlite_engine.connect()
+    conn: sa.engine.base.Connection = sqlite_engine.connect()  # noqa: F841
     datasource_config: str = f"""
         class_name: Datasource
 
@@ -97,7 +84,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
 
     try:
         # noinspection PyUnusedLocal
-        my_sql_datasource: Optional[
+        my_sql_datasource: Optional[  # noqa: F841
             Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
@@ -114,7 +101,9 @@ def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
@@ -199,7 +188,9 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     context: DataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     config: str = f"""
     name: my_datasource
@@ -266,7 +257,9 @@ def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
 
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
@@ -358,7 +351,9 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     context: DataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     config: str = f"""
     name: my_datasource
@@ -443,7 +438,9 @@ def test_SimpleSqlalchemyDatasource(empty_data_context):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     # Absolutely minimal starting config
@@ -734,8 +731,8 @@ tables:
 
 
 @pytest.mark.skipif(
-    sqla_bigquery is None,
-    reason="sqlalchemy_bigquery/pybigquery is not installed",
+    not sqla_bigquery,
+    reason="sqlalchemy_bigquery is not installed",
 )
 @pytest.mark.integration
 def test_basic_instantiation_with_bigquery_creds(sa):
@@ -800,7 +797,9 @@ def test_skip_inapplicable_tables(empty_data_context):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     my_sql_datasource = context.test_yaml_config(

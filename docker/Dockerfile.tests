@@ -10,7 +10,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip
 
 FROM base as build_local
 WORKDIR /great_expectations
-COPY . .
+COPY ./requirements.txt ./requirements-dev.txt ./constraints-dev.txt ./
+COPY ./reqs ./reqs
 
 FROM base AS build_github
 # BRANCH is the branch name you want to build
@@ -22,14 +23,18 @@ WORKDIR /great_expectations
 FROM build_${SOURCE} AS dev
 ARG GE_USAGE_STATISTICS_URL="https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 env GE_USAGE_STATISTICS_URL="${GE_USAGE_STATISTICS_URL}"
+ENV SQLALCHEMY_WARN_20="true"
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
-RUN pip install .
 CMD [ "python", "--version"]
 
 FROM dev as test
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
     --constraint constraints-dev.txt
+COPY . .
+RUN pip install .
 
 FROM dev as dev-tools
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
     --requirement reqs/requirements-dev-tools.txt --constraint constraints-dev.txt
+COPY . .
+RUN pip install .

@@ -1,0 +1,140 @@
+{
+    "title": "SQLQueryAsset",
+    "description": "Read SQL query into a DataFrame.\n\nReturns a DataFrame corresponding to the result set of the query\nstring. Optionally provide an `index_col` parameter to use one of the\ncolumns as the index, otherwise default integer index will be used.\n\nParameters\n----------\nsql : str SQL query or SQLAlchemy Selectable (select or text object)\n    SQL query to be executed.\ncon : SQLAlchemy connectable, str, or sqlite3 connection\n    Using SQLAlchemy makes it possible to use any DB supported by that\n    library. If a DBAPI2 object, only sqlite3 is supported.\nindex_col : str or list of str, optional, default: None\n    Column(s) to set as index(MultiIndex).\ncoerce_float : bool, default True\n    Attempts to convert values of non-string, non-numeric objects (like\n    decimal.Decimal) to floating point. Useful for SQL result sets.\nparams : list, tuple or dict, optional, default: None\n    List of parameters to pass to execute method.  The syntax used\n    to pass parameters is database driver dependent. Check your\n    database driver documentation for which of the five syntax styles,\n    described in PEP 249's paramstyle, is supported.\n    Eg. for psycopg2, uses %(name)s so use params={'name' : 'value'}.\nparse_dates : list or dict, default: None\n    - List of column names to parse as dates.\n    - Dict of ``{column_name: format string}`` where format string is\n      strftime compatible in case of parsing string times, or is one of\n      (D, s, ns, ms, us) in case of parsing integer timestamps.\n    - Dict of ``{column_name: arg dict}``, where the arg dict corresponds\n      to the keyword arguments of :func:`pandas.to_datetime`\n      Especially useful with databases without native Datetime support,\n      such as SQLite.\nchunksize : int, default None\n    If specified, return an iterator where `chunksize` is the number of\n    rows to include in each chunk.\ndtype : Type name or dict of columns\n    Data type for data or columns. E.g. np.float64 or\n    {\u2018a\u2019: np.float64, \u2018b\u2019: np.int32, \u2018c\u2019: \u2018Int64\u2019}.\n\n    .. versionadded:: 1.3.0\n\nReturns\n-------\nDataFrame or Iterator[DataFrame]\n\nSee Also\n--------\nread_sql_table : Read SQL database table into a DataFrame.\nread_sql : Read SQL query or database table into a DataFrame.\n\nNotes\n-----\nAny datetime values with time zone information parsed via the `parse_dates`\nparameter will be converted to UTC.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "sql_query",
+            "enum": [
+                "sql_query"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "sql": {
+            "title": "Sql"
+        },
+        "con": {
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "coerce_float": {
+            "title": "Coerce Float",
+            "default": true,
+            "type": "boolean"
+        },
+        "params": {
+            "title": "Params",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "parse_dates": {
+            "title": "Parse Dates",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "sql",
+        "con"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

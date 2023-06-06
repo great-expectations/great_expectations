@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -102,17 +102,20 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the Expectation.
+        """Validates the configuration of an Expectation.
 
-        For `expect_column_values_to_match_regex_list`
-        we require that the `configuraton.kwargs` contain a `regex_list` key that is either
-        a non-empty `list[str]` or a `dict[list]` with `$PARAMETER` key with list of regexes.
+        For `expect_column_values_to_not_match_regex_list` it is required that:
+            - 'regex_list' kwarg is of type list or dict
+            - if 'regex_list' is list, assert is non-empty and each entry is of type str
+            - if 'regex_list' is dict, assert a key "$PARAMETER" is present
 
         Args:
-            configuration: The ExpectationConfiguration to be validated.
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
 
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                  Expectation.
         """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
@@ -120,7 +123,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             assert "regex_list" in configuration.kwargs, "regex_list is required"
             assert isinstance(
                 configuration.kwargs["regex_list"], (list, dict)
-            ), "regex_list must be a list of regexes"
+            ), "regex_list must be a list or dict of regexes"
             if (
                 not isinstance(configuration.kwargs["regex_list"], dict)
                 and len(configuration.kwargs["regex_list"]) > 0
@@ -170,7 +173,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -219,7 +222,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

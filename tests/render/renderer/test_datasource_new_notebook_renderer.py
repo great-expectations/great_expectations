@@ -14,7 +14,6 @@ def construct_datasource_new_notebook_assets():
         datasource_name: str,
         datasource_yaml: str,
     ):
-
         pandas_header = [
             {
                 "cell_type": "markdown",
@@ -94,7 +93,7 @@ If any of these configuration options are not applicable, they can be removed. T
 
 Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector), [ConfiguredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector), and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 
-Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control.""",
+Credentials will not be saved until you run the last cell.""",
                 "metadata": {},
             }
         ]

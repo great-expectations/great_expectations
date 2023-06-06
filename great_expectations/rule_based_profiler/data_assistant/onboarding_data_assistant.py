@@ -40,6 +40,7 @@ from great_expectations.rule_based_profiler.rule import Rule
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+    from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 
 class OnboardingDataAssistant(DataAssistant):
@@ -778,7 +779,6 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
-
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
         text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
@@ -904,6 +904,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
+            "candidate_regexes": None,
             "success_ratio": 7.5e-1,
         }
         parameter_builders: List[ParameterBuilder] = [

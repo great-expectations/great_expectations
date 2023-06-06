@@ -2,7 +2,6 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -12,6 +11,7 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     ColumnPairDomainBuilder,
@@ -24,7 +24,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 # noinspection PyPep8Naming

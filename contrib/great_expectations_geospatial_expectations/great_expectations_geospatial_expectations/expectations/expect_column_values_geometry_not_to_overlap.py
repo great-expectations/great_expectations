@@ -1,19 +1,12 @@
-import json
 from typing import Optional
 
 import geopandas
 import numpy as np
-import rtree
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -23,7 +16,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     metric_name = "column_values.geometry_not_overlap"
 
@@ -52,7 +44,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesGeometryNotToOverlap(ColumnExpectation):
+class ExpectColumnValuesGeometryNotToOverlap(ColumnAggregateExpectation):
     """Expect geometries in this column Not to overlap with each other. If any two geometries do overlap, expectation will return False.
 
     For more information look here \
@@ -140,7 +132,6 @@ class ExpectColumnValuesGeometryNotToOverlap(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine=None,
     ):
-
         success = metrics.get("column_values.geometry_not_overlap").get("success")
         indices = metrics.get("column_values.geometry_not_overlap").get("indices")
 

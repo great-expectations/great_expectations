@@ -10,17 +10,17 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
-import io
 import json
 import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final, Union
 
 import invoke
 
-from scripts import check_public_api_docstrings, check_type_hint_coverage
+from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
+from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -32,9 +32,8 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
-    from great_expectations.experimental.datasources.experimental_base_model import (
-        ExperimentalBaseModel,
-    )
+
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -56,19 +55,19 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(
+def sort(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     check: bool = False,
     exclude: str | None = None,
-    ruff: bool = False,
-    isort: bool = False,  # isort is the current default
+    ruff: bool = False,  # isort is the current default
+    isort: bool = False,
     pty: bool = True,
 ):
     """Sort module imports."""
     if ruff and isort:
         raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
-    if ruff:
+    if not isort:
         cmds = [
             "ruff",
             path,
@@ -95,7 +94,7 @@ def sort(
         "pty": _PTY_HELP_DESC,
     }
 )
-def fmt(
+def fmt(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -132,7 +131,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
@@ -183,7 +185,7 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"], iterable=("paths",))
+@invoke.task(aliases=("docstring",), iterable=("paths",))
 def docstrings(ctx: Context, paths: list[str] | None = None):
     """
     Check public API docstrings.
@@ -192,8 +194,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
     To pass multiple items:
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
-    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
-    sys.path.append(str(scripts_path))
 
     if paths:
         select_paths = [pathlib.Path(p) for p in paths]
@@ -208,19 +208,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         )
 
 
-@invoke.task(aliases=["type-cov"])  # type: ignore
-def type_coverage(ctx: Context):
-    """
-    Check total type-hint coverage compared to `develop`.
-    """
-    try:
-        check_type_hint_coverage.main()
-    except AssertionError as err:
-        raise invoke.Exit(
-            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
-        )
-
-
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
@@ -231,9 +218,14 @@ def type_coverage(ctx: Context):
         " The daemon will be started and re-used for subsequent calls."
         " For detailed usage see `dmypy --help`.",
         "clear-cache": "Clear the local mypy cache directory.",
+        "check-stub-sources": "Check the implementation `.py` files for any `.pyi`"
+        " stub files in `great_expectations`."
+        " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
+        " This should be run in CI in addition to the normal type-checking step.",
+        "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
-def type_check(
+def type_check(  # noqa: PLR0913, PLR0912
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -242,7 +234,9 @@ def type_check(
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
+    check_stub_sources: bool = False,
     ci: bool = False,
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -260,7 +254,9 @@ def type_check(
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
+            check_stub_sources=check_stub_sources,
             ci=False,
+            python_version=python_version,
         )
         return  # don't run twice
 
@@ -278,6 +274,16 @@ def type_check(
         bin = "mypy"
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
+
+    if check_stub_sources:
+        # see --help docs for explanation of this flag
+        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+            source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
+                f"{stub_file.name[:-1]}"
+            )
+            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            ge_pkgs.append(str(relative_path))
+
     cmds = [
         bin,
         *ge_pkgs,
@@ -293,6 +299,8 @@ def type_check(
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if python_version:
+        cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -348,7 +356,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(
+def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
     integration: bool = False,
@@ -417,9 +425,10 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "detach": "Run container in background and print container ID. Defaults to False.",
         "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
         "cmd": "Command for docker image. Default is bash.",
+        "target": "Set the target build stage to build.",
     }
 )
-def docker(
+def docker(  # noqa: PLR0913
     ctx: Context,
     name: str = "gx38local",
     tag: str = "latest",
@@ -427,6 +436,7 @@ def docker(
     detach: bool = False,
     cmd: str = "bash",
     py: float = PYTHON_VERSION_DEFAULT,
+    target: str | None = None,
 ):
     """
     Build or run gx docker image.
@@ -434,7 +444,9 @@ def docker(
 
     _exit_with_error_if_not_in_repo_root(task_name="docker")
 
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
 
     cmds = ["docker"]
 
@@ -453,6 +465,8 @@ def docker(
                 ".",
             ]
         )
+        if target:
+            cmds.extend(["--target", target])
 
     else:
         cmds.append("run")
@@ -475,66 +489,244 @@ def docker(
 
 
 @invoke.task(
-    aliases=("schema",),
+    aliases=("schema", "schemas"),
     help={
-        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
-        "save_path": (
-            "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
-            " If not provided the schema will be sent to the console."
-        ),
+        "sync": "Update the json schemas at `great_expectations/datasource/fluent/schemas`",
         "indent": "Indent size for nested json objects. Default: 4",
+        "clean": "Delete all schema files and sub directories."
+        " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
 def type_schema(
     ctx: Context,
-    type: str,
-    save_path: str | pathlib.Path | None = None,
+    sync: bool = False,
+    clean: bool = False,
     indent: int = 4,
 ):
     """
-    Show the jsonschema for a given ZEP `type`
+    Show all the json schemas for Fluent Datasources & DataAssets
 
-    Example: invoke schema sqlite
-
-    --list to show all available types
+    Generate json schema for each Datasource & DataAsset with `--sync`.
     """
-    from great_expectations.experimental.datasources.sources import _SourceFactories
+    import pandas
 
-    buffer = io.StringIO()
+    from great_expectations.datasource.fluent import (
+        _PANDAS_SCHEMA_VERSION,
+        BatchRequest,
+        Datasource,
+    )
+    from great_expectations.datasource.fluent.sources import (
+        _iter_all_registered_types,
+    )
 
-    if type == "--list":
-        buffer.write(
-            "--------------------\nRegistered ZEP types\n--------------------\n"
-        )
-        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
-    elif type == "--help" or type == "-h":
-        ctx.run("invoke --help schema")
-    else:
-        try:
-            model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
-            buffer.write(model.schema_json(indent=indent))
-        except KeyError:
-            raise invoke.Exit(
-                f"No '{type}' type found. Try 'invoke schema --list' to see available types",
-                code=1,
+    schema_dir_root: Final[pathlib.Path] = (
+        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
+    )
+    if clean:
+        file_count = len(list(schema_dir_root.glob("**/*.json")))
+        print(f"🗑️ removing schema directory and contents - {file_count} .json files")
+        shutil.rmtree(schema_dir_root)
+
+    schema_dir_root.mkdir(exist_ok=True)
+
+    datasource_dir: pathlib.Path = schema_dir_root
+
+    if not sync:
+        print("--------------------\nRegistered Fluent types\n--------------------\n")
+
+    name_model = [
+        ("BatchRequest", BatchRequest),
+        (Datasource.__name__, Datasource),
+        *_iter_all_registered_types(),
+    ]
+
+    for name, model in name_model:
+        if issubclass(model, Datasource):
+            datasource_dir = schema_dir_root.joinpath(model.__name__)
+            datasource_dir.mkdir(exist_ok=True)
+            schema_dir = schema_dir_root
+            print("-" * shutil.get_terminal_size()[0])
+        else:
+            schema_dir = datasource_dir
+            print("  ", end="")
+
+        if not sync:
+            print(f"{name} - {model.__name__}.json")
+            continue
+
+        if (
+            datasource_dir.name.startswith("Pandas")
+            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+        ):
+            print(
+                f"🙈  {name} - was generated with pandas"
+                f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
             )
+            continue
 
-    text: str = buffer.getvalue()
-    if save_path:
-        save_path = pathlib.Path(save_path).resolve()
-        save_path.write_text(text)
-        print(f"'{type}' schema written to {save_path}")
-    else:
-        print(text)
+        try:
+            schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+            json_str: str = model.schema_json(indent=indent) + "\n"
+
+            if schema_path.exists():
+                if json_str == schema_path.read_text():
+                    print(f"✅  {name} - {schema_path.name} unchanged")
+                    continue
+
+            schema_path.write_text(json_str)
+            print(f"🔃  {name} - {schema_path.name} schema updated")
+        except TypeError as err:
+            print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+    raise invoke.Exit(code=0)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
+    curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
     exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
     if filedir != curdir:
         raise invoke.Exit(
             exit_message,
             code=1,
         )
+
+
+@invoke.task
+def api_docs(ctx: Context):
+    """Build api documentation."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+    sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
+
+    doc_builder = SphinxInvokeDocsBuilder(
+        ctx=ctx, api_docs_source_path=sphinx_api_docs_source_dir, repo_root=repo_root
+    )
+
+    doc_builder.build_docs()
+
+
+@invoke.task(
+    name="docs",
+    help={
+        "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
+        "clean": "Remove directories and files from versioned docs and code. Default False.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "lint": "Run the linter",
+    },
+)
+def docs(
+    ctx: Context,
+    build: bool = False,
+    clean: bool = False,
+    start: bool = False,
+    lint: bool = False,
+):
+    """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+
+    print("Running invoke docs from:", repo_root)
+    old_pwd = pathlib.Path.cwd()
+    docusaurus_dir = repo_root / "docs/docusaurus"
+    os.chdir(docusaurus_dir)
+    if clean:
+        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
+        ctx.run(" ".join(rm_cmds), echo=True)
+        rm_rf_cmds = [
+            "rm",
+            "-rf",
+            "versioned_code",
+            "versioned_docs",
+            "versioned_sidebars",
+        ]
+        ctx.run(" ".join(rm_rf_cmds), echo=True)
+    elif lint:
+        ctx.run(" ".join(["yarn lint"]), echo=True)
+    else:
+        if start:  # noqa: PLR5501
+            ctx.run(" ".join(["yarn start"]), echo=True)
+        else:
+            print("Making sure docusaurus dependencies are installed.")
+            ctx.run(" ".join(["yarn install"]), echo=True)
+
+            if build:
+                build_docs_cmd = "../build_docs"
+            else:
+                build_docs_cmd = "../build_docs_locally.sh"
+
+            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
+            ctx.run(build_docs_cmd, echo=True)
+
+    os.chdir(old_pwd)
+
+
+@invoke.task(
+    name="public-api",
+    help={
+        "write_to_file": "Write items to be addressed to public_api_report.txt, default False",
+    },
+)
+def public_api_task(
+    ctx: Context,
+    write_to_file: bool = False,
+):
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="public-api", correct_dir=repo_root
+    )
+
+    # Docs folder is not reachable from install of Great Expectations
+    api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
+    sys.path.append(str(api_docs_dir.resolve()))
+
+    public_api_report.generate_public_api_report(write_to_file=write_to_file)
+
+
+def _exit_with_error_if_not_run_from_correct_dir(
+    task_name: str, correct_dir: Union[pathlib.Path, None] = None
+) -> None:
+    """Exit if the command was not run from the correct directory."""
+    if not correct_dir:
+        correct_dir = pathlib.Path(__file__).parent
+    curdir = pathlib.Path.cwd()
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    if correct_dir != curdir:
+        raise invoke.Exit(
+            exit_message,
+            code=1,
+        )
+
+
+@invoke.task(
+    aliases=("links",),
+    help={"skip_external": "Skip external link checks (is slow), default is True"},
+)
+def link_checker(ctx: Context, skip_external: bool = True):
+    """Checks the Docusaurus docs for broken links"""
+    import docs.checks.docs_link_checker as checker
+
+    path: str = "docs/docusaurus/docs"
+    docs_root: str = "docs/docusaurus/docs"
+    site_prefix: str = "docs"
+
+    code, message = checker.scan_docs(
+        path=path,
+        docs_root=docs_root,
+        site_prefix=site_prefix,
+        skip_external=skip_external,
+    )
+    raise invoke.Exit(message, code)

@@ -20,8 +20,11 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         "asset_2/20190102__asset_2.csv",
     ]
     for file in mock_files:
-        os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
-        open(os.path.join(base_directory, file), "w").close()
+        os.makedirs(  # noqa: PTH103
+            os.path.join(base_directory, file.split("/")[0]),  # noqa: PTH118
+            exist_ok=True,
+        )
+        open(os.path.join(base_directory, file), "w").close()  # noqa: PTH118
 
     subdir_reader_generator = SubdirReaderBatchKwargsGenerator(
         "test_generator",
@@ -53,7 +56,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_2")
     ]
     with pytest.raises(BatchKwargsError):
-        not_an_asset_kwargs = [
+        not_an_asset_kwargs = [  # noqa: F841
             kwargs
             for kwargs in subdir_reader_generator.get_iterator(
                 data_asset_name="not_an_asset"
@@ -63,9 +66,9 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     assert len(asset_1_kwargs) == 3
     paths = [kwargs["path"] for kwargs in asset_1_kwargs]
     assert set(paths) == {
-        os.path.join(base_directory, "asset_1/20190101__asset_1.csv"),
-        os.path.join(base_directory, "asset_1/20190102__asset_1.csv"),
-        os.path.join(base_directory, "asset_1/20190103__asset_1.csv"),
+        os.path.join(base_directory, "asset_1/20190101__asset_1.csv"),  # noqa: PTH118
+        os.path.join(base_directory, "asset_1/20190102__asset_1.csv"),  # noqa: PTH118
+        os.path.join(base_directory, "asset_1/20190103__asset_1.csv"),  # noqa: PTH118
     }
     partitions = subdir_reader_generator.get_available_partition_ids(
         data_asset_name="asset_1"
@@ -82,8 +85,8 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     assert len(asset_2_kwargs) == 2
     paths = [kwargs["path"] for kwargs in asset_2_kwargs]
     assert set(paths) == {
-        os.path.join(base_directory, "asset_2/20190101__asset_2.csv"),
-        os.path.join(base_directory, "asset_2/20190102__asset_2.csv"),
+        os.path.join(base_directory, "asset_2/20190101__asset_2.csv"),  # noqa: PTH118
+        os.path.join(base_directory, "asset_2/20190102__asset_2.csv"),  # noqa: PTH118
     }
     partitions = subdir_reader_generator.get_available_partition_ids(
         data_asset_name="asset_2"
@@ -105,8 +108,11 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
     ]
     for file in mock_files:
         if "/" in file:
-            os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
-        open(os.path.join(base_directory, file), "w").close()
+            os.makedirs(  # noqa: PTH103
+                os.path.join(base_directory, file.split("/")[0]),  # noqa: PTH118
+                exist_ok=True,
+            )
+        open(os.path.join(base_directory, file), "w").close()  # noqa: PTH118
 
     # If we have files, we should see them as individual assets
     subdir_reader_generator = SubdirReaderBatchKwargsGenerator(
@@ -132,13 +138,17 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
     kwargs = subdir_reader_generator.build_batch_kwargs(
         data_asset_name="20190101__asset_1", partition_id="20190101__asset_1"
     )
-    assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+    assert kwargs["path"] == os.path.join(  # noqa: PTH118
+        base_directory, "20190101__asset_1.csv"
+    )
 
     # We should also be able to pass a limit
     kwargs = subdir_reader_generator.build_batch_kwargs(
         data_asset_name="20190101__asset_1", partition_id="20190101__asset_1", limit=10
     )
-    assert kwargs["path"] == os.path.join(base_directory, "20190101__asset_1.csv")
+    assert kwargs["path"] == os.path.join(  # noqa: PTH118
+        base_directory, "20190101__asset_1.csv"
+    )
     assert kwargs["reader_options"]["nrows"] == 10
 
 
@@ -157,8 +167,11 @@ def test_subdir_reader_configurable_reader_method(
     ]
     for file in mock_files:
         if "/" in file:
-            os.makedirs(os.path.join(base_directory, file.split("/")[0]), exist_ok=True)
-        open(os.path.join(base_directory, file), "w").close()
+            os.makedirs(  # noqa: PTH103
+                os.path.join(base_directory, file.split("/")[0]),  # noqa: PTH118
+                exist_ok=True,
+            )
+        open(os.path.join(base_directory, file), "w").close()  # noqa: PTH118
 
     # If we have files, we should see them as individual assets
     subdir_reader_generator = SubdirReaderBatchKwargsGenerator(

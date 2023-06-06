@@ -24,9 +24,8 @@ yarn snippet-check ./tests/integration/docusaurus/connecting_to_your_data/dataso
 
 # The following imports are used as part of verifying that all example snippets are consistent.
 # Users may disregard them.
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (
     is_subset,
 )
@@ -39,6 +38,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
     get_partial_config_universal_datasource_config_elements,
 )
 
+yaml = YAMLHandler()
 data_context: gx.DataContext = gx.get_context()
 
 
@@ -809,7 +809,6 @@ def section_10_test_your_configuration_with_test_yaml_config():
             1,
         ),
     ):
-
         test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
         datasource_check = test_result.self_check(max_examples=12)
 

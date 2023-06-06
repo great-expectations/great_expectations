@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.content_block.content_block import (
@@ -27,7 +27,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
                     "string_template": {
@@ -59,7 +59,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -82,7 +82,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
 
         if result.success:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -109,7 +109,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
             )
         else:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",

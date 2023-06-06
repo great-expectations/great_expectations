@@ -3,9 +3,8 @@ import traceback
 import warnings
 from copy import deepcopy
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
-    ExpectColumnKlDivergenceToBeLessThan,
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
@@ -87,7 +86,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(cls, expectation_type):  # noqa: PLR0915
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )

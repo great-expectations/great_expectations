@@ -1,21 +1,19 @@
-import json
 from typing import Optional
 
 import pytz
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 
 
 def is_valid_timezone(timezone: str) -> bool:
@@ -29,14 +27,12 @@ def is_valid_timezone(timezone: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesIanaTimezone(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.iana_timezone"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         return column.apply(lambda x: is_valid_timezone(x))
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -47,8 +43,7 @@ class ColumnValuesIanaTimezone(ColumnMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-
-        tz_udf = F.udf(is_valid_timezone, sparktypes.BooleanType())
+        tz_udf = F.udf(is_valid_timezone, pyspark.types.BooleanType())
 
         return tz_udf(column)
 

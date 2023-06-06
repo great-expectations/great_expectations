@@ -4,18 +4,22 @@ import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.domain import Domain
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.builder import Builder
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     init_rule_parameter_builders,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -73,7 +77,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
-    def build_expectation_configuration(
+    def build_expectation_configuration(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -107,7 +111,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             domain=domain, variables=variables, parameters=parameters
         )
 
-    def resolve_validation_dependencies(
+    def resolve_validation_dependencies(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,

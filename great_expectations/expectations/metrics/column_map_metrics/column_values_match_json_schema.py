@@ -2,12 +2,13 @@ import json
 
 import jsonschema
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -58,7 +59,7 @@ class ColumnValuesMatchJsonSchema(ColumnMapMetricProvider):
                 raise
 
         matches_json_schema_udf = F.udf(
-            lambda val: matches_json_schema(val=val), sparktypes.BooleanType()
+            lambda val: matches_json_schema(val=val), pyspark.types.BooleanType()
         )
 
         return matches_json_schema_udf(column)

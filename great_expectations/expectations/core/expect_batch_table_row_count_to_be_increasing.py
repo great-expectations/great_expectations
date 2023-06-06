@@ -15,7 +15,6 @@ from great_expectations.expectations.expectation import (
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import RendererConfiguration
-from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectBatchTableRowCountToBeIncreasing(TableExpectation):

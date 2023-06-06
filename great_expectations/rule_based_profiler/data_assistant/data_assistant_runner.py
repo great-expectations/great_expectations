@@ -7,20 +7,24 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 from makefun import create_function
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchRequestBase
+from great_expectations.core.batch import BatchRequestBase  # noqa: TCH001
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.rule_based_profiler import BaseRuleBasedProfiler
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
+from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa: TCH001
+from great_expectations.rule_based_profiler.data_assistant import (
+    DataAssistant,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
 from great_expectations.util import deep_filter_properties_iterable
 
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
@@ -34,7 +38,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.validator.validator import Validator
+    from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 
 class NumericRangeEstimatorType(Enum):
@@ -65,7 +69,7 @@ class DataAssistantRunner:
 
         self._profiler = self.get_profiler()
 
-        setattr(self, "run", self.run_impl())
+        self.run = self.run_impl()
 
     def get_profiler(self) -> BaseRuleBasedProfiler:
         """

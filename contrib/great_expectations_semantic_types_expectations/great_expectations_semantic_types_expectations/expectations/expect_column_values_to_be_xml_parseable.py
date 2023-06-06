@@ -2,6 +2,8 @@ from typing import Optional
 
 from lxml import etree
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -12,10 +14,8 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    ExpectationConfiguration,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -29,7 +29,7 @@ from great_expectations.render.util import (
 )
 
 try:
-    import sqlalchemy as sa
+    pass
 except ImportError:
     pass
 
@@ -41,9 +41,9 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         def is_xml(val):
             try:
-                xml_doc = etree.fromstring(val)
+                etree.fromstring(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         return column.map(is_xml)
@@ -52,12 +52,12 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
     def _spark(cls, column, **kwargs):
         def is_xml(val):
             try:
-                xml_doc = etree.fromstring(val)
+                etree.fromstring(val)
                 return True
-            except:
+            except Exception:
                 return False
 
-        is_xml_udf = F.udf(is_xml, sparktypes.BooleanType())
+        is_xml_udf = F.udf(is_xml, pyspark.types.BooleanType())
 
         return is_xml_udf(column)
 
@@ -135,7 +135,7 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (

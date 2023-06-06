@@ -1,11 +1,12 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.exceptions import DataContextError
 from tests.test_utils import check_athena_table_count, clean_athena_db
+
+yaml = YAMLHandler()
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:
@@ -74,9 +75,7 @@ try:
         f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
     )
 except DataContextError:
-    suite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 # </snippet>
 

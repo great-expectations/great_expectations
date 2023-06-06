@@ -138,123 +138,17 @@ def test_BasicDatasetProfiler_null_column():
     )
 
 
-def test_BasicDatasetProfiler_partially_null_column(dataset):
-    """
-    Unit test to check the expectations that BasicDatasetProfiler creates for a partially null column.
-    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
-    the fixture.
-
-    "nulls" is the partially null column in the fixture dataset
-    """
-    expectations_config, evr_config = BasicDatasetProfiler.profile(dataset)
-
-    assert {
-        "expect_column_to_exist",
-        "expect_column_values_to_be_in_type_list",
-        "expect_column_unique_value_count_to_be_between",
-        "expect_column_proportion_of_unique_values_to_be_between",
-        "expect_column_values_to_not_be_null",
-        "expect_column_values_to_be_in_set",
-        "expect_column_values_to_be_unique",
-    } == {
-        expectation.expectation_type
-        for expectation in expectations_config.expectations
-        if expectation.kwargs.get("column") == "nulls"
-    }
-
-
-def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_dataset):
-    """
-    Unit test to check the expectations that BasicDatasetProfiler creates for a low cardinality
-    non numeric column.
-    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
-    the fixture.
-    """
-    expectations_config, evr_config = BasicDatasetProfiler.profile(
-        non_numeric_low_card_dataset
-    )
-
-    assert {
-        "expect_column_to_exist",
-        "expect_column_values_to_be_in_type_list",
-        "expect_column_unique_value_count_to_be_between",
-        "expect_column_distinct_values_to_be_in_set",
-        "expect_column_proportion_of_unique_values_to_be_between",
-        "expect_column_values_to_not_be_null",
-        "expect_column_values_to_be_in_set",
-        "expect_column_values_to_not_match_regex",
-    } == {
-        expectation.expectation_type
-        for expectation in expectations_config.expectations
-        if expectation.kwargs.get("column") == "lowcardnonnum"
-    }
-
-
-def test_BasicDatasetProfiler_non_numeric_high_cardinality(
-    non_numeric_high_card_dataset,
-):
-    """
-    Unit test to check the expectations that BasicDatasetProfiler creates for a high cardinality
-    non numeric column.
-    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
-    the fixture.
-    """
-    expectations_config, evr_config = BasicDatasetProfiler.profile(
-        non_numeric_high_card_dataset
-    )
-
-    assert {
-        "expect_column_to_exist",
-        "expect_column_values_to_be_in_type_list",
-        "expect_column_unique_value_count_to_be_between",
-        "expect_column_proportion_of_unique_values_to_be_between",
-        "expect_column_values_to_not_be_null",
-        "expect_column_values_to_be_in_set",
-        "expect_column_values_to_not_match_regex",
-    } == {
-        expectation.expectation_type
-        for expectation in expectations_config.expectations
-        if expectation.kwargs.get("column") == "highcardnonnum"
-    }
-
-
-def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset):
-    """
-    Unit test to check the expectations that BasicDatasetProfiler creates for a high cardinality
-    numeric column.
-    The test is executed against all the backends (Pandas, Spark, etc.), because it uses
-    the fixture.
-    """
-    expectations_config, evr_config = BasicDatasetProfiler.profile(
-        numeric_high_card_dataset
-    )
-
-    assert {
-        "expect_column_to_exist",
-        "expect_table_row_count_to_be_between",
-        "expect_table_columns_to_match_ordered_list",
-        "expect_column_values_to_be_in_type_list",
-        "expect_column_unique_value_count_to_be_between",
-        "expect_column_proportion_of_unique_values_to_be_between",
-        "expect_column_values_to_not_be_null",
-        "expect_column_values_to_be_in_set",
-        "expect_column_values_to_be_unique",
-    } == {
-        expectation.expectation_type for expectation in expectations_config.expectations
-    }
-
-
 def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
-    context.create_expectation_suite("default")
+    context.add_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
     base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
         "base_directory"
     ]
     batch_kwargs = {
         "datasource": "rad_datasource",
-        "path": os.path.join(base_dir, "f1.csv"),
+        "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
     batch = context.get_batch(batch_kwargs, "default")
     expectation_suite, validation_results = BasicDatasetProfiler.profile(batch)
@@ -389,7 +283,7 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
         "SubdirReaderBatchKwargsGenerator",
         **{
             "base_directory": str(filesystem_csv_2),
-        }
+        },
     )
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)

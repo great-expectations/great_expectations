@@ -2,27 +2,22 @@ import logging
 
 from marshmallow import Schema
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.computed_metrics.computed_metric import computedMetricSchema
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    logger.debug("No SqlAlchemy module available.")
-    sa = None
-
 from great_expectations.computed_metrics.db.models.base import (
     AccountMixin,
     ArchiveMixin,
-)
-from great_expectations.computed_metrics.db.models.base import (
-    Base as SqlAlchemyModelBase,
-)
-from great_expectations.computed_metrics.db.models.base import (
     PrimaryKeyMixin,
     SoftDeleteMixin,
     TimestampsMixin,
+)
+from great_expectations.computed_metrics.db.models.base import (
+    Base as SqlAlchemyModelBase,
 )
 
 # TODO: <Alex>ALEX</Alex>

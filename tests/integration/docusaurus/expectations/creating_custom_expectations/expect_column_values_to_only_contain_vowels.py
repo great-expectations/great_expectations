@@ -1,12 +1,5 @@
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 

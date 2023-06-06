@@ -1,8 +1,5 @@
-import json
 from typing import Any, Dict, Optional, Tuple
 
-import aequitas.plot as ap
-import pandas as pd
 from aequitas.bias import Bias
 from aequitas.fairness import Fairness
 from aequitas.group import Group
@@ -12,10 +9,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
-    TableExpectation,
-)
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -27,7 +21,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
-
     metric_name = "table.modeling.binary.model_bias"
     value_keys = ("y_true", "y_pred", "reference_group", "alpha")
 
@@ -100,7 +93,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableBinaryLabelModelBias(TableExpectation):
+class ExpectTableBinaryLabelModelBias(BatchExpectation):
     """Expect fairness in a model by calculating disparities among features, score (binary or continuous), and a label (binary) in a table using Aequitas.
 
     Using Aeqitas we evaluate predicted and true values to evaluate certain metrics \
@@ -261,7 +254,6 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         runtime_configuration=None,
         execution_engine=None,
     ):
-
         fairness = metrics["table.modeling.binary.model_bias"]
         partial_success = configuration["kwargs"].get("partial_success")
         if partial_success:

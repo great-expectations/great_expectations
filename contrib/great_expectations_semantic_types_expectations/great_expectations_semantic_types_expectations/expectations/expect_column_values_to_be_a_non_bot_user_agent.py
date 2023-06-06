@@ -1,33 +1,13 @@
-import json
-
 from user_agents import parse
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 # Need to install external dependency package of user_agents
 
@@ -36,7 +16,6 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesEqualNonBotUserAgent(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.equal_non_bot_user_agent"

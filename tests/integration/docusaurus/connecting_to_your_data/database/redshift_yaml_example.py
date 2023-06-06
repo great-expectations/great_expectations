@@ -1,9 +1,12 @@
 import os
 
-from ruamel import yaml
-
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
+# </snippet>
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
 redshift_password = os.environ.get("REDSHIFT_PASSWORD")
@@ -23,9 +26,13 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py get_context">
 context = gx.get_context()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource_yaml">
 datasource_yaml = f"""
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
 class_name: Datasource
 execution_engine:
@@ -39,7 +46,9 @@ data_connectors:
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
        include_schema_name: true
+# </snippet>
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -48,11 +57,14 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py test datasource config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py load data with query">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -61,13 +73,12 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
@@ -78,9 +89,7 @@ batch_request = BatchRequest(
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

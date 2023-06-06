@@ -1,0 +1,50 @@
+import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+
+
+This guide will take you through the process of creating <TechnicalTag tag="expectation" text="Expectations" /> in Interactive Mode.  The term "Interactive Mode" denotes the fact that you are interacting with your data as you work.  In other words, you have access to a <TechnicalTag tag="datasource" text="Datasource" /> and can specify a <TechnicalTag tag="batch" text="Batch" /> of data to be used to create Expectations against.  Working in interactive mode will not edit your data: you are only using it to run your Expectations against.
+
+## Prerequisites
+
+<Prerequisites>
+
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Created a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview).
+
+</Prerequisites>
+
+## Steps
+
+### 1. Import Great Expectations and get a Data Context
+
+### 2. Build a Batch Request using a previously created Data Asset
+
+### 3. Create a Validator
+
+:::info Working outside of a Jupyter Notebook
+
+In a Jupyter Notebook, the results for a given cell are automatically displayed when you run the cell.  If you're using a different interpreter, you might need to add the following method to explicitly print these results:
+
+```python title="Python code" name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py inspect_data_no_jupyter"
+```
+
+:::
+
+### 4. Create an Expectation
+
+:::info Working outside of a Jupyter Notebook
+
+If you're using a different interpreter, you might need to add the following method to explicitly print these results:
+
+```python title="Python code" name=name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py interactive_validation_no_jupyter"
+```
+
+:::
+
+### 5. Repeat step 4 to edit Expectation values or add additional Expectations
+
+
+### 6. Save your Expectations
+
+## Next steps
+

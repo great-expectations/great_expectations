@@ -1,7 +1,7 @@
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # YAML

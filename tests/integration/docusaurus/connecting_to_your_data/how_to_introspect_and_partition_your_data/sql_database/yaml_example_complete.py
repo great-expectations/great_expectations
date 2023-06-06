@@ -1,11 +1,18 @@
-from ruamel import yaml
-
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
+# </snippet>
+
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">
 context = gx.get_context()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -75,6 +82,7 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                 sampling_kwargs:
                     p: 1.0e-1
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -83,9 +91,13 @@ CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
@@ -101,9 +113,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name: str = "main.yellow_tripdata_sample_2019_01"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -112,8 +122,8 @@ print(validator.head(n_rows=10))
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 batch_data = batch_list[0].data
-num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+num_rows = batch_data.execution_engine.execute_query(
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).one()[0]
 assert num_rows == 10000
 
@@ -165,24 +175,28 @@ assert len(batch_list) == 6
 # In addition, a randomly sampled fraction of each partition's batch data is obtained.
 # Finally, a randomly sampled fraction of each partition's batch data is selected and returned as the final batch list.
 # This BatchRequest specifies multiple batches, which is useful for dataset exploration and data analysis.
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py batch_request">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="by_num_riders_random_sample",
     data_asset_name="<YOUR_DATA_ASSET_NAME>",
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name: str = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py assertions">
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
-num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+num_rows = batch_data.execution_engine.execute_query(
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).scalar()
 assert num_rows < 200
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)

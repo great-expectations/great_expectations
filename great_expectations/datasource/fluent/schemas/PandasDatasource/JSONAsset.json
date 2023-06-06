@@ -1,0 +1,178 @@
+{
+    "title": "JSONAsset",
+    "description": "Convert a JSON string to pandas object.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "json",
+            "enum": [
+                "json"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "path_or_buf": {
+            "title": "Path Or Buf",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "orient": {
+            "title": "Orient",
+            "type": "string"
+        },
+        "typ": {
+            "title": "Typ",
+            "default": "frame",
+            "enum": [
+                "frame",
+                "series"
+            ],
+            "type": "string"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "convert_axes": {
+            "title": "Convert Axes"
+        },
+        "convert_dates": {
+            "title": "Convert Dates",
+            "default": true,
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "keep_default_dates": {
+            "title": "Keep Default Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "numpy": {
+            "title": "Numpy",
+            "default": false,
+            "type": "boolean"
+        },
+        "precise_float": {
+            "title": "Precise Float",
+            "default": false,
+            "type": "boolean"
+        },
+        "date_unit": {
+            "title": "Date Unit",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
+        "lines": {
+            "title": "Lines",
+            "default": false,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "nrows": {
+            "title": "Nrows",
+            "type": "integer"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "path_or_buf"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

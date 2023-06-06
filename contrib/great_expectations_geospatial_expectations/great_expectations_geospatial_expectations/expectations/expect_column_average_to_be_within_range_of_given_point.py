@@ -1,5 +1,5 @@
 """
-This is a template for creating custom ColumnExpectations.
+This is a template for creating custom ColumnAggregateExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations
 """
@@ -12,7 +12,7 @@ from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
@@ -30,9 +30,8 @@ from great_expectations.render.util import substitute_none_for_missing
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnCoordinatesDistance(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.coordinates.distance"
     value_keys = ("center_point",)
@@ -71,7 +70,7 @@ class ColumnCoordinatesDistance(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnExpectation):
+class ExpectColumnAverageToBeWithinRangeOfGivenPoint(ColumnAggregateExpectation):
     """Expect the average of a column of degree-decimal, lat/lon coordinates to be in range of a given point."""
 
     # These examples will be shown in the public gallery.

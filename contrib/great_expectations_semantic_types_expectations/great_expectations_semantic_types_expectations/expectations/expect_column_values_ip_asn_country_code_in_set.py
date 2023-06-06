@@ -3,13 +3,11 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
-import json
 from typing import Optional
 
 from ipwhois import IPWhois
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -31,7 +29,6 @@ def is_ip_asn_country_code_in_set(addr: str, country_codes) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBePrivateIpV6(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.ip_asn_country_code_in_set"
     condition_value_keys = ("country_codes",)

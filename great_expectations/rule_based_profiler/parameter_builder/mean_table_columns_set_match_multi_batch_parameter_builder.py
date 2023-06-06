@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -19,7 +21,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -52,7 +54,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         "reduce_scalar_metric",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,

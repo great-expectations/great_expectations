@@ -1,16 +1,16 @@
 from typing import List
 
-from ruamel import yaml
-
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.util import get_context
 
+yaml = YAMLHandler()
 # </snippet>
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
@@ -78,9 +78,7 @@ batch_request.runtime_parameters[
 ] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation">
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -108,9 +106,7 @@ batch_request.data_asset_name = (
 )
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2">
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

@@ -78,6 +78,7 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     )
     validator = get_test_validator_with_data(
         execution_engine="postgresql",
+        table_name="expect_column_value_z_scores_to_be_less_than_impl_1",
         data=df,
         context=context,
     )
