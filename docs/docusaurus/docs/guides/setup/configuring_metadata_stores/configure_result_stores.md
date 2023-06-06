@@ -12,12 +12,17 @@ import IdentifyYourDataContextValidationResultsStore from './components_how_to_c
 import UpdateYourConfigurationFileToIncludeANewStoreForValidationResultsOnS from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 import CopyExistingValidationResultsToTheSBucketThisStepIsOptional from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_copy_existing_validation_results_to_the_s_bucket_this_step_is_optional.mdx'
 import ConfirmThatTheValidationsResultsStoreHasBeenCorrectlyConfigured from './components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_validations_results_store_has_been_correctly_configured.mdx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-A Validation Results Store is a connector that is used to store and retrieve information about objects generated when data is Validated against an Expectation. By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results might include sensitive or regulated data that should not be committed to a source control system.
+A Validation Results Store is a connector that is used to store and retrieve information about objects generated when data is Validated against an Expectation. By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Use the information provided here to configure a store for your Validation Results.
 
-Use the information provided here to configure a store for your Validation Results.
+:::caution
+
+Validation Results can include sensitive or regulated data that should not be committed to a source control system.
+
+:::
 
 
 <Tabs
@@ -288,7 +293,7 @@ Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_che
 
 ## PostgreSQL
 
-By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
+Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
 
 ### Prerequisites
 
