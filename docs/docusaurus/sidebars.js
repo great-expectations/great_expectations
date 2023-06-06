@@ -13,7 +13,7 @@ module.exports = {
         'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
-          label: 'Data Contexts',
+          label: 'Configure Data Contexts',
           items: [
             'guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
@@ -21,18 +21,8 @@ module.exports = {
           ]
         },
         'guides/setup/configuring_metadata_stores/configure_expectation_stores',
+        'guides/setup/configuring_metadata_stores/configure_result_stores',
         'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore',
-        {
-          type: 'category',
-          label: 'Validation Result Stores',
-          items: [
-            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
-            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
-            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
-            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
-            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
-              ]
-            },
         {
           type: 'category',
           label: 'Data Docs',
@@ -43,7 +33,6 @@ module.exports = {
             'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
           ]
         },
-        { type: 'doc', id: 'guides/setup/index', label: 'Index' }
       ]
     },
     {
