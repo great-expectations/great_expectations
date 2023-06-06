@@ -741,7 +741,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -789,7 +789,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -839,7 +839,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -889,7 +889,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,

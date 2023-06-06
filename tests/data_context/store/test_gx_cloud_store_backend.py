@@ -249,7 +249,7 @@ def test_set(
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                ("action_list", list(Checkpoint.DEFAULT_ACTION_LIST)),
+                                ("action_list", []),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),

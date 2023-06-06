@@ -225,7 +225,7 @@ def serialized_configuration_bundle() -> dict:
                 "config_version": 1.0,
                 "module_name": "great_expectations.checkpoint",
                 "name": "my_checkpoint",
-                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+                "action_list": [],
                 "batch_request": {},
                 "evaluation_parameters": {},
                 "expectation_suite_ge_cloud_id": None,
