@@ -16,7 +16,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
