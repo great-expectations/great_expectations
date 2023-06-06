@@ -17,7 +17,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Data Docs translate Expectations, Validation Results, and other metadata into human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current. Use the information provide here to host and share Data Docs stored on a filesystem or a Source Data System.
+Data Docs translate Expectations, Validation Results, and other metadata into human-readable documentation. Automatically compiling your data documentation from your data tests in the form of Data Docs keeps your documentation current. Use the information provided here to host and share Data Docs stored on a filesystem or a Source Data System.
 
 <Tabs
   groupId="host-and-share-data-docs"
