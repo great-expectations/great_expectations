@@ -2855,9 +2855,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request or {}
-            if action_list is None:
-                action_list = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value  # type: ignore[assignment]
-            self._action_list = action_list
+            self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []

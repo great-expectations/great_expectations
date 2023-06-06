@@ -2118,6 +2118,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
 
+        action_list = action_list or self._determine_default_action_list()
+
         if not checkpoint:
             assert (
                 name
@@ -2151,6 +2153,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         return checkpoint
+
+    @staticmethod
+    def _determine_default_action_list() -> Sequence[ActionDict]:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.DEFAULT_ACTION_LIST
 
     @public_api
     @new_argument(
