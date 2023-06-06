@@ -55,6 +55,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
         # this is where we are getting messed up. Lets do it.
         # TODO: handle the schema somehow
         # TODO: handle columns somehow
+        # TODO: Don - This might be a candidate for backend-specific handling, since sqlite is the only one that seems to be breaking
         schema = schema
         columns = columns
         return pd.read_sql_query(
