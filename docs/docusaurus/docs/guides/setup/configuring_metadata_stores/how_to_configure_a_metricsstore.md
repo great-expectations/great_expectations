@@ -1,5 +1,5 @@
 ---
-title: How to configure and use a MetricStore
+title: Configure a MetricStore
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 

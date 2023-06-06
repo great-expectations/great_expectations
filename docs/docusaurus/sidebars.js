@@ -20,31 +20,19 @@ module.exports = {
             'guides/setup/configuring_data_contexts/how_to_configure_credentials',
           ]
         },
+        'guides/setup/configuring_metadata_stores/configure_expectation_stores',
+        'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore',
         {
           type: 'category',
-          label: 'Configure Expectation Stores',
+          label: 'Validation Result Stores',
           items: [
-            'guides/setup/configuring_metadata_stores/configure_expectation_stores',
-            {
-              type: 'category',
-              label: 'Validation Result Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
+            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
+            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
+            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
+            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
+            'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
               ]
             },
-            {
-              type: 'category',
-              label: 'Metric Stores',
-              items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
-              ]
-            }
-          ]
-        },
         {
           type: 'category',
           label: 'Data Docs',
