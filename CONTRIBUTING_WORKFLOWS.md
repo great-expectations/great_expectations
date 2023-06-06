@@ -1,6 +1,6 @@
 # Workflows
 
-The Great Experience code base has various places where you can contribute code to. This document describes several workflows you might want to run to get started.
+The Great Expectations code base has various places where you can contribute code to. This document describes several workflows you might want to run to get started.
 
 First, make sure you have cloned the repository and installed the Python dependencies. Read more on this in [Contribute a code change](CONTRIBUTING_CODE.md).
 
@@ -46,6 +46,6 @@ python3 docs/checks/docs_link_checker.py -p docs -r docs -s docs --skip-external
 
 Generates a glossary page in our docs:
 
-```sh { name=glossary }
-python3 scripts/build_glossary_page.py
+```sh { name=glossary cwd=./scripts }
+python3 ./build_glossary_page.py
 ```
