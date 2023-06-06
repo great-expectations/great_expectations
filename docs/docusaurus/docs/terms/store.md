@@ -6,9 +6,6 @@ hoverText: A connector to store and retrieve information about metadata in Great
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 A Store is a connector to store and retrieve information about metadata in Great Expectations. Stores are available from your Data Context.
 

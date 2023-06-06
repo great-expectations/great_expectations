@@ -5,9 +5,6 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 import NextSteps from '/docs/guides/connecting_to_your_data/components/next_steps.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 This guide will help you {do something.} {That something is important or useful, because of some reason.}
 

@@ -6,10 +6,6 @@ hoverText: A collection of verifiable assertions about data.
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
 An Expectation Suite is a collection of verifiable assertions about data.
 
 Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, you can group all the Expectations about a given table in a given database into an Expectation Suite and name it `my_database.my_table`. Expectation Suite names are customizable, and the only constraint is that it must be unique to a given project.
