@@ -329,9 +329,10 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         count_selectable = count_selectable.select_from(selectable)
 
     try:
+        # here is where the MSSQL error is happening
         if execution_engine.dialect_name == GXSqlDialect.MSSQL:
             with execution_engine.get_connection() as connection:
-                with connection.begin():
+                if not connection.closed:
                     temp_table_name: str = generate_temporary_table_name(
                         default_table_name_prefix="#ge_temp_"
                     )
@@ -345,6 +346,21 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                         ),
                     )
                     temp_table_obj.create(bind=connection, checkfirst=True)
+                else:
+                    with connection.begin():
+                        temp_table_name: str = generate_temporary_table_name(
+                        default_table_name_prefix="#ge_temp_"
+                        )
+                        metadata: sa.MetaData = sa.MetaData()
+                        metadata.reflect(bind=connection)
+                        temp_table_obj: sa.Table = sa.Table(
+                        temp_table_name,
+                        metadata,
+                        sa.Column(
+                            "condition", sa.Integer, primary_key=False, nullable=False
+                        ),
+                        )
+                        temp_table_obj.create(bind=connection, checkfirst=True)
 
             inner_case_query: sqlalchemy.Insert = temp_table_obj.insert().from_select(
                 [count_case_statement],
