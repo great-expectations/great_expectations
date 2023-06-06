@@ -5,7 +5,13 @@ id: host_and_share_data_docs
 description: Host and share Data Docs stored on a filesystem or a Source Data System.
 ---
 
-
+import Preface from './components_how_to_host_and_share_data_docs_on_amazon_s3/_preface.mdx'
+import CreateAnS3Bucket from './components_how_to_host_and_share_data_docs_on_amazon_s3/_create_an_s3_bucket.mdx'
+import ConfigureYourBucketPolicyToEnableAppropriateAccess from './components_how_to_host_and_share_data_docs_on_amazon_s3/_configure_your_bucket_policy_to_enable_appropriate_access.mdx'
+import ApplyThePolicy from './components_how_to_host_and_share_data_docs_on_amazon_s3/_apply_the_policy.mdx'
+import AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml from './components_how_to_host_and_share_data_docs_on_amazon_s3/_add_a_new_s3_site_to_the_data_docs_sites_section_of_your_great_expectationsyml.mdx'
+import TestThatYourConfigurationIsCorrectByBuildingTheSite from './components_how_to_host_and_share_data_docs_on_amazon_s3/_test_that_your_configuration_is_correct_by_building_the_site.mdx'
+import AdditionalNotes from './components_how_to_host_and_share_data_docs_on_amazon_s3/_additional_notes.mdx'
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import TabItem from '@theme/TabItem';
@@ -21,11 +27,30 @@ Data Docs translate Expectations, Validation Results, and other metadata into hu
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
   {label: 'Google Cloud Service', value:'gcs'},
   {label: 'Filesystem', value:'filesystem'},
-  {label: 'PostgreSQL', value:'postgresql'},
   ]}>
 <TabItem value="amazon">
 
 ## Amazon S3
+
+<Preface />
+
+### Create an S3 bucket
+<CreateAnS3Bucket />
+
+### Configure your bucket policy
+<ConfigureYourBucketPolicyToEnableAppropriateAccess />
+
+### Apply the policy
+<ApplyThePolicy />
+
+### Add a new S3 site to `great_expectations.yml`
+<AddANewS3SiteToTheDataDocsSitesSectionOfYourGreatExpectationsYml />
+
+### Test your configuration
+<TestThatYourConfigurationIsCorrectByBuildingTheSite />
+
+### Additional notes
+<AdditionalNotes />
 
 </TabItem>
 <TabItem value="azure">
@@ -138,7 +163,6 @@ Run the following Python code to build and open your Data Docs:
 3. Optional. Add access to a Virtual Network.
 
 4. Optional. Add IP ranges to the firewall. See [Configure Azure Storage firewalls and virtual networks](https://docs.microsoft.com/en-us/azure/storage/common/storage-network-security?tabs=azure-portal).
-
 
 </TabItem>
 <TabItem value="gcs">
