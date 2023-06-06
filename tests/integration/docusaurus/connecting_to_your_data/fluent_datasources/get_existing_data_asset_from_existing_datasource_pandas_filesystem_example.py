@@ -47,8 +47,8 @@ assert my_asset.batch_request_options == ("year", "month", "path")
 import pandas as pd
 
 dataframe = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
-my_datasource = context.sources.add_pandas(name="my_pandas_datasource")
-my_asset = my_datasource.add_dataframe_asset(name="my_asset")
+my_ephemeral_datasource = context.sources.add_pandas(name="my_pandas_datasource")
+my_asset = my_ephemeral_datasource.add_dataframe_asset(name="my_ephemeral_asset")
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe">
