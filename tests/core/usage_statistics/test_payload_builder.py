@@ -1,3 +1,9 @@
+from unittest import mock
+
+from great_expectations import __version__ as gx_version
+from great_expectations.core.usage_statistics.payload_builder import (
+    UsageStatisticsPayloadBuilder,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -68,3 +74,21 @@ def test_usage_statistics_handler_build_envelope(
 
     assert envelope["version"] == "1.0.2"
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"
+
+
+def test_determine_hashed_mac_address():
+    builder = UsageStatisticsPayloadBuilder(
+        data_context=mock.Mock(),
+        data_context_id="00000000-0000-0000-0000-000000000001",
+        gx_version=gx_version,
+    )
+
+    # Picking an arbitrary 48-bit positive integer as a mock MAC addr
+    with mock.patch("uuid.getnode", return_value=170040650683345) as mock_node:
+        hashed_mac_address = builder._determine_hashed_mac_address()
+
+    mock_node.assert_called_once()
+    assert (
+        hashed_mac_address
+        == "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f"
+    )
