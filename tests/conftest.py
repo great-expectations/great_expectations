@@ -111,6 +111,8 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    from pyspark.sql import DataFrame
+
     from great_expectations.compatibility import pyspark
     from great_expectations.compatibility.sqlalchemy import Engine
 
@@ -2306,7 +2308,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 @pytest.fixture(scope="module")
 def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     try:
-        from pyspark.sql import DataFrame
+        pass
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
