@@ -23,7 +23,7 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     # They will also be executed as unit tests for your Expectation.
     examples = []
 
-    # Here your regex is used to create a custom metric for this expectation
+    # Here your set is used to create a custom metric for this expectation
     map_metric = SetBasedColumnMapExpectation.register_metric(
         set_camel_name=set_camel_name,
         set_=set_,

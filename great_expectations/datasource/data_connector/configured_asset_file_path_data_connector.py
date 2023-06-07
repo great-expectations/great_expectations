@@ -38,7 +38,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -74,7 +74,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
         for name, asset_config in config.items():
             if asset_config is None:
-                asset_config = {}
+                asset_config = {}  # noqa: PLW2901
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
                 runtime_environment=self,

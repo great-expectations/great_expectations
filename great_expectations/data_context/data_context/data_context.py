@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 
 @overload
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
     cloud_mode: Literal[False] = ...,
@@ -44,7 +44,7 @@ def DataContext(
 
 
 @overload
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: Optional[PathStr] = ...,
     runtime_environment: Optional[dict] = ...,
     cloud_mode: bool = ...,
@@ -67,7 +67,7 @@ def DataContext(
 @deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
-def DataContext(
+def DataContext(  # noqa: PLR0913
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
@@ -184,7 +184,7 @@ def DataContext(
     return context
 
 
-def _resolve_cloud_args(
+def _resolve_cloud_args(  # noqa: PLR0913
     cloud_mode: bool = False,
     cloud_base_url: Optional[str] = None,
     cloud_access_token: Optional[str] = None,

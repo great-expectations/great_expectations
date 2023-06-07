@@ -39,7 +39,7 @@ class BaseDatasource:
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         execution_engine: Optional[dict] = None,
@@ -444,7 +444,7 @@ class Datasource(BaseDatasource):
 
     recognized_batch_parameters: set = {"limit"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         execution_engine: Optional[dict] = None,
@@ -493,7 +493,13 @@ class Datasource(BaseDatasource):
             )
 
     def __getattr__(self, attr: str):
-        fluent_datasource_attrs: set[str] = {"get_data_asset", "read_csv"}
+        fluent_datasource_attrs: set[str] = set()
+        from great_expectations.datasource.fluent import PandasDatasource
+
+        # PandasDatasource has all the `read_*` methods + the normal Datasource methods
+        fluent_datasource_attrs.update(
+            {a for a in dir(PandasDatasource) if not a.startswith("_")}
+        )
         if attr.startswith("add_"):
             from great_expectations.datasource.fluent.sources import (  # isort: skip
                 _iter_all_registered_types,

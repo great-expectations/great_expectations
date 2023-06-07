@@ -1,9 +1,9 @@
 black[jupyter]==23.3.0 # Linting / code style
 Click>=7.1.2         # CLI tooling
 cookiecutter==2.1.1  # Project templating
-mypy==1.2.0          # Type checker
+mypy==1.3.0          # Type checker
 pydantic>=1.0,<2.0    # Needed for mypy plugin
 pytest>=5.3.5        # Test framework
-ruff==0.0.269        # Linting / code style
+ruff==0.0.271        # Linting / code style
 twine==3.7.1         # Packaging
 wheel==0.38.1        # Packaging

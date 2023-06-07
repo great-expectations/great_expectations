@@ -4,7 +4,8 @@ import pytest
 
 from docs.prepare_prior_versions import (
     _update_tag_references_for_correct_version_substitution,
-    _use_relative_imports_for_tag_references_substitution,
+    _use_relative_path_for_imports_substitution,
+    _use_relative_path_for_imports_substitution_path_starting_with_forwardslash,
 )
 
 
@@ -31,7 +32,7 @@ def test__update_tag_references_for_correct_version_substitution():
 
 
 @pytest.mark.unit
-def test__use_relative_imports_for_tag_references_substitution():
+def test__use_relative_path_for_imports_substitution():
     contents = """import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
@@ -45,7 +46,7 @@ This guide will help you connect to your data stored on GCS using Pandas.
         "docs/docusaurus/versioned_docs/version-0.14.13/guides/connecting_to_your_data/cloud/gcs/pandas.md"
     )
 
-    updated_contents = _use_relative_imports_for_tag_references_substitution(
+    updated_contents = _use_relative_path_for_imports_substitution(
         contents, path_to_versioned_docs, file_path
     )
 
@@ -53,6 +54,36 @@ This guide will help you connect to your data stored on GCS using Pandas.
 import TechnicalTag from '../../../../term_tags/_tag.mdx';
 
 This guide will help you connect to your data stored on GCS using Pandas.
+"""
+
+    assert updated_contents == expected_contents
+
+
+@pytest.mark.unit
+def test__use_relative_path_for_imports_substitution_path_starting_with_forwardslash():
+    contents = """import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import TechnicalTag from '/docs/term_tags/_tag.mdx';
+
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
+"""
+
+    path_to_versioned_docs = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/"
+    )
+    file_path = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.14.13/tutorials/getting_started/tutorial_connect_to_data.md"
+    )
+
+    updated_contents = (
+        _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
+            contents, path_to_versioned_docs, file_path
+        )
+    )
+
+    expected_contents = """import UniversalMap from '../../images/universal_map/_universal_map.mdx';
+import TechnicalTag from '../../term_tags/_tag.mdx';
+
+<UniversalMap setup='inactive' connect='active' create='inactive' validate='inactive'/>
 """
 
     assert updated_contents == expected_contents

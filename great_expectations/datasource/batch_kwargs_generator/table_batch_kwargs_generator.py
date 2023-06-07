@@ -96,7 +96,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 self.inspector = None
 
-    def _get_iterator(  # noqa: C901 - 19
+    def _get_iterator(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         data_asset_name,
         query_parameters=None,
@@ -138,7 +138,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             project_id = None
             schema_name = None
             split_data_asset_name = data_asset_name.split(".")
-            if len(split_data_asset_name) == 2:
+            if len(split_data_asset_name) == 2:  # noqa: PLR2004
                 schema_name = split_data_asset_name[0]
                 if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     table_name = data_asset_name
@@ -149,7 +149,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 table_name = split_data_asset_name[0]
 
             elif (
-                len(split_data_asset_name) == 3
+                len(split_data_asset_name) == 3  # noqa: PLR2004
                 and self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
             ):
                 project_id = split_data_asset_name[0]  # noqa: F841

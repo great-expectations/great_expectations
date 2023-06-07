@@ -11,7 +11,7 @@ from great_expectations.compatibility import sqlalchemy
 logger = logging.getLogger(__name__)
 
 
-def read_sql_table_as_df(
+def read_sql_table_as_df(  # noqa: PLR0913
     table_name,
     con,
     schema=None,
@@ -63,7 +63,7 @@ def read_sql_table_as_df(
         )
 
 
-def add_dataframe_to_db(
+def add_dataframe_to_db(  # noqa: PLR0913
     df: pd.DataFrame,
     name: str,
     con,
@@ -111,8 +111,6 @@ def add_dataframe_to_db(
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
-        con = con.connect()
     with warnings.catch_warnings():
         # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
         # but using the base class here since sqlalchemy is an optional dependency and this

@@ -16,7 +16,7 @@ from great_expectations.util import get_context
 def update_data_docs_action():
     return {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        "action": {"class_name": "UpdateDataDocsAction"},
     }
 
 
@@ -126,7 +126,8 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
     datasource = context.get_datasource(datasource_name=datasource_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    datasource.add_dataframe_asset(name="my_other_dataframe_asset", dataframe=test_df)
+    asset = datasource.add_dataframe_asset(name="my_other_dataframe_asset")
+    _ = asset.build_batch_request(dataframe=test_df)
 
     # create expectation suite
     suite = context.add_expectation_suite("my_expectation_suite")

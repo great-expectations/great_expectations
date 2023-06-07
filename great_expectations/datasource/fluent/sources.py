@@ -10,7 +10,6 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    Final,
     Generator,
     List,
     NamedTuple,
@@ -21,14 +20,17 @@ from typing import (
     Union,
 )
 
-from typing_extensions import TypeAlias
-
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+)
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pydantic
+    from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource import BaseDatasource, LegacyDatasource
@@ -42,10 +44,6 @@ if TYPE_CHECKING:
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
-
-DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
 
 
 class DefaultPandasDatasourceError(Exception):
@@ -441,7 +439,7 @@ class _SourceFactories:
         if (
             name_or_datasource
             and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"
+            and "name" not in "kwargs"  # noqa: PLR0133
         ) or (
             name_or_datasource is None
             and "name" in kwargs
@@ -496,25 +494,37 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs: str
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             new_datasource: Optional[Datasource] = self._datasource_passed_in(
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name = (
-                new_datasource.name
+            datasource_name: str = (
+                new_datasource.name  # type: ignore[assignment] # always a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
-                datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name,
                 datasource_type,
             )
+
+            # preserve any pre-existing id for usage with cloud
+            id_: uuid.UUID | None = getattr(
+                self._data_context.datasources.get(datasource_name), "id", None
+            )
+            if id_:
+                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
+                if name_or_datasource and not isinstance(name_or_datasource, str):
+                    name_or_datasource.id = id_
+                else:
+                    kwargs["id"] = id_
+
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name=datasource_name, _call_store=False
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).

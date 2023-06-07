@@ -135,6 +135,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Essentially `set` but validates that a given key-value pair does not already exist.
         """
+        return self._add(key=key, value=value, **kwargs)
+
+    def _add(self, key, value, **kwargs):
         if self.has_key(key):
             raise StoreBackendError(f"Store already has the following key: {key}.")
         return self.set(key=key, value=value, **kwargs)
@@ -143,6 +146,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Essentially `set` but validates that a given key-value pair does already exist.
         """
+        return self._update(key=key, value=value, **kwargs)
+
+    def _update(self, key, value, **kwargs):
         if not self.has_key(key):
             raise StoreBackendError(
                 f"Store does not have a value associated the following key: {key}."
@@ -153,6 +159,9 @@ class StoreBackend(metaclass=ABCMeta):
         """
         Conditionally calls `add` or `update` based on the presence of the given key.
         """
+        return self._add_or_update(key=key, value=value, **kwargs)
+
+    def _add_or_update(self, key, value, **kwargs):
         if self.has_key(key):
             return self.update(key=key, value=value, **kwargs)
         return self.add(key=key, value=value, **kwargs)

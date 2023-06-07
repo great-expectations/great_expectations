@@ -1,9 +1,7 @@
 import datetime
 import json
 import os
-from typing import List, Optional, Tuple, Union
-
-from ruamel.yaml.comments import CommentedMap
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -14,6 +12,9 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
 )
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 
 class UpgradeHelperV13(BaseUpgradeHelper):
@@ -407,7 +408,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if manual_steps_required:
+            if manual_steps_required:  # noqa: PLR5501
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper does not have any automated upgrade steps to perform as part of upgrading your project to be \
