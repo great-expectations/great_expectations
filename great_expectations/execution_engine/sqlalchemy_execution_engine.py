@@ -1459,7 +1459,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         with self.get_connection() as connection:
             if not connection.closed:
                 result = connection.execute(query)
-                result = connection.commit()
+                connection.commit()
             else:
                 with connection.begin():
                     result = connection.execute(query)
