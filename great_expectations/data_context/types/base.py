@@ -2855,22 +2855,6 @@ class CheckpointConfig(BaseYamlConfig):
         return CheckpointConfigSchema
 
     @property
-    def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[return-value]
-
-    @validation_operator_name.setter
-    def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value
-
-    @property
-    def batches(self) -> List[dict]:
-        return self._batches
-
-    @batches.setter
-    def batches(self, value: List[dict]) -> None:
-        self._batches = value
-
-    @property
     def ge_cloud_id(self) -> Optional[str]:
         return self._ge_cloud_id
 
@@ -2903,7 +2887,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> Union[int, float, None]:
+    def config_version(self) -> Union[int, float]:
         return self._config_version
 
     @config_version.setter
