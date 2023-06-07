@@ -15,7 +15,6 @@ import pydantic
 from pydantic import StrictStr
 from pydantic.json import pydantic_encoder
 from pydantic.schema import default_ref_template
-from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -24,6 +23,8 @@ from great_expectations.datasource.data_connector.batch_filter import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
