@@ -143,7 +143,7 @@ The following information is required when you create an Amazon S3 Datasource:
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_s3_using_spark.py create_datasource"
     ```
 
-### 3. Add data to the Datasource as a Data Asset
+### Add data to the Datasource as a Data Asset
 
 Run the following Python code:
 
@@ -152,7 +152,7 @@ Run the following Python code:
 
 <BatchingRegexExplaination storage_location_type="S3 bucket" />
 
-## Next steps
+### Next steps
 
 <AfterCreateNonSqlDatasource />
 
