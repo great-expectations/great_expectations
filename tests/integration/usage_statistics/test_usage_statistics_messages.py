@@ -256,6 +256,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-03-28T01:14:21.155Z",
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
+            "mac_address": TEST_MAC_ADDRESS,
             "ge_version": "0.11.9.manual_test",
         },
         # "new-style" expectation type system
@@ -369,6 +370,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-03-28T01:14:21.155Z",
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
+            "mac_address": TEST_MAC_ADDRESS,
             "ge_version": "0.13.0.manual_test",
         },
         data_context_init_with_dependencies,
@@ -2582,8 +2584,9 @@ valid_usage_statistics_messages = {
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:36:50.979Z",
-            "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
-            "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
+            "data_context_id": TEST_DATA_CONTEXT_ID,
+            "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
+            "mac_address": TEST_MAC_ADDRESS,
         },
         message_stubs=[
             {

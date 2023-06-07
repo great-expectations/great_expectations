@@ -5212,6 +5212,9 @@
       "type": "string",
       "format": "uuid"
     },
+    "mac_address": {
+      "type": "string"
+    },
     "event_time": {
       "type": "string",
       "format": "date-time"
@@ -5521,6 +5524,7 @@
     "event_time",
     "data_context_id",
     "data_context_instance_id",
+    "mac_address",
     "ge_version",
     "event",
     "success",
