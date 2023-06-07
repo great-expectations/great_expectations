@@ -14,7 +14,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
