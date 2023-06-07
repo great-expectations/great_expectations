@@ -360,9 +360,9 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
+        "great_expectations.data_context.store.GXCloudStoreBackend._get",
         autospec=True,
-        return_value=False,
+        side_effect=StoreBackendError("Does not exist."),
     ) as _:
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
