@@ -1,9 +1,9 @@
 import json
 import os
 import shutil
+from typing import TYPE_CHECKING
 
 import pytest
-from nbformat.notebooknode import NotebookNode
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
@@ -28,6 +28,9 @@ from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import run_notebook
+
+if TYPE_CHECKING:
+    from nbformat.notebooknode import NotebookNode
 
 
 @pytest.fixture
