@@ -4,6 +4,7 @@ import atexit
 import copy
 import datetime
 import enum
+import hashlib
 import json
 import logging
 import platform
@@ -11,6 +12,7 @@ import signal
 import sys
 import threading
 import time
+import uuid
 from functools import wraps
 from queue import Queue
 from types import FrameType
@@ -182,6 +184,8 @@ class UsageStatisticsHandler:
         message["data_context_id"] = self._data_context_id
         message["data_context_instance_id"] = self._data_context_instance_id
 
+        message["mac_address"] = self._determine_hashed_mac_address()
+
         message["event_time"] = (
             datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S.%f"
@@ -197,6 +201,11 @@ class UsageStatisticsHandler:
             message["event_duration"] = delta_t
 
         return message
+
+    def _determine_hashed_mac_address(self) -> str:
+        address = uuid.UUID(int=uuid.getnode())
+        hashed_address = hashlib.sha256(address.bytes)
+        return hashed_address.hexdigest()
 
     @staticmethod
     def validate_message(message: dict, schema: dict) -> bool:
