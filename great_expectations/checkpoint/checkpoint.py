@@ -1025,6 +1025,7 @@ constructor arguments.
                 }
             )
         elif klass == LegacyCheckpoint:
+            checkpoint_config.pop("action_list", None)
             checkpoint_config.update(
                 {
                     # Next two fields are for LegacyCheckpoint configuration
