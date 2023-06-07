@@ -36,11 +36,11 @@ This is where you'll find information about creating your Great Expectations (GX
   defaultValue='amazon'
   values={[
   {label: 'Amazon S3', value:'amazon'},
-  {label: 'Google Cloud Storage', value:'gcs'},
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
+  {label: 'Google Cloud Storage', value:'gcs'},
   {label: 'SQL databases', value:'sql'},
   ]}>
-  <TabItem value="amazon">
+<TabItem value="amazon">
 
 ## Amazon S3
 
@@ -88,7 +88,49 @@ Now that you have installed GX with the necessary dependencies for working with 
 
 <LinksAfterInstallingGx />
 
-  </TabItem>
+</TabItem>
+<TabItem value="azure">
+
+## Microsoft Azure Blob Storage
+
+Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on Microsoft Azure Blob Storage.
+
+### Prerequisites
+
+<Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- The ability to install Python modules with pip
+- <PrereqAbsConfiguredAnAbsAccount />
+
+</Prerequisites>
+
+### Check your Python version
+
+<PythonCheckVersion />
+
+<TipPythonOrPython3Executable />
+
+### Create a Python virtual environment
+
+<PythonCreateVenv />
+
+### Install GX with optional dependencies for Azure Blob Storage
+
+<AbsInstallDependencies />
+
+### Verify that GX has been installed correctly
+
+<GxVerifyInstallation />
+
+### Configure the `config_variables.yml` file with your Azure Storage credentials
+
+<AbsConfigureCredentialsInDataContext />
+
+### Next steps
+
+<AbsFurtherConfiguration />
+
+</TabItem>
 <TabItem value="gcs">
 
 ## GCS
@@ -131,48 +173,6 @@ Create your GX Python environment, install Great Expectations locally, and then 
 Now that you have installed GX with the necessary dependencies for working with GCS, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
 
 <LinksAfterInstallingGx />
-
-</TabItem>
-<TabItem value="azure">
-
-## Microsoft Azure Blob Storage
-
-Create your GX Python environment, install Great Expectations locally, and then configure the necessary dependencies to access data stored on Microsoft Azure Blob Storage.
-
-### Prerequisites
-
-<Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- The ability to install Python modules with pip
-- <PrereqAbsConfiguredAnAbsAccount />
-
-</Prerequisites>
-
-### Check your Python version
-
-<PythonCheckVersion />
-
-<TipPythonOrPython3Executable />
-
-### Create a Python virtual environment
-
-<PythonCreateVenv />
-
-### Install GX with optional dependencies for Azure Blob Storage
-
-<AbsInstallDependencies />
-
-### Verify that GX has been installed correctly
-
-<GxVerifyInstallation />
-
-### Configure the `config_variables.yml` file with your Azure Storage credentials
-
-<AbsConfigureCredentialsInDataContext />
-
-### Next steps
-
-<AbsFurtherConfiguration />
 
 </TabItem>
 <TabItem value="sql">
