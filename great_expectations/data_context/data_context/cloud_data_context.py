@@ -775,6 +775,16 @@ class CloudDataContext(SerializableDataContext):
             )
             return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
+        default_actions = super()._determine_default_action_list()
+
+        # Data docs are not relevant to Cloud and should be excluded
+        return [
+            action
+            for action in default_actions
+            if action["action"]["class_name"] != "UpdateDataDocsAction"
+        ]
+
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 

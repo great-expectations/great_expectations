@@ -5,6 +5,7 @@ import copy
 import logging
 from collections import UserDict
 from typing import (
+    TYPE_CHECKING,
     Generator,
     Hashable,
     Iterable,
@@ -16,7 +17,8 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 logger = logging.getLogger(__name__)
 

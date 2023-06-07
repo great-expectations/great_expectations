@@ -32,7 +32,6 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -142,6 +141,8 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -2118,6 +2119,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
 
+        action_list = action_list or self._determine_default_action_list()
+
         if not checkpoint:
             assert (
                 name
@@ -2151,6 +2154,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         return checkpoint
+
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.DEFAULT_ACTION_LIST
 
     @public_api
     @new_argument(
