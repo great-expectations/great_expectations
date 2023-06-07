@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pytest
+
 from great_expectations import __version__ as gx_version
 from great_expectations.core.usage_statistics.payload_builder import (
     UsageStatisticsPayloadBuilder,
