@@ -507,7 +507,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # trino needs this
                 # TODO: do we need to add to the url is not none case?
                 with warnings.catch_warnings():
-                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+                    warnings.filterwarnings(
+                        action="ignore", category=DeprecationWarning
+                    )
                     self.engine = sa.create_engine(connection_string, **kwargs)
         elif url is not None:
             parsed_url = make_url(url)
@@ -522,7 +524,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # trino needs this
                 # TODO: do we need to add to the url is not none case?
                 with warnings.catch_warnings():
-                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+                    warnings.filterwarnings(
+                        action="ignore", category=DeprecationWarning
+                    )
                     self.engine = sa.create_engine(url, **kwargs)
         else:
             raise InvalidConfigError(
