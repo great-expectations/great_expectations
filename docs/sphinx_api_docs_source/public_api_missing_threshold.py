@@ -40,8 +40,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/data_connector/asset/asset.py Name: Asset",
     "File: great_expectations/datasource/fluent/config.py Name: get_datasource",
     "File: great_expectations/datasource/fluent/fluent_base_model.py Name: dict",
-    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: add_csv_asset",
-    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: add_table_asset",
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: dict",
     "File: great_expectations/datasource/fluent/sources.py Name: add_datasource",
     "File: great_expectations/datasource/fluent/sources.py Name: delete_datasource",
