@@ -3,6 +3,8 @@ sidebar_label: "Connect to a Source Data System"
 title: "Connect to a Source Data System"
 id: connect_gx_source_data_system
 description: Install and configure Great Expectations to access data stored on Amazon S3, Google Cloud Storage, Microsoft Azure Blob Storage, and SQL databases.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
