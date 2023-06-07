@@ -248,7 +248,7 @@ class CheckpointStore(ConfigurationStore):
         key: GXCloudIdentifier | ConfigurationIdentifier,
         checkpoint: Checkpoint,
         persistence_fn: Callable,
-    ) -> Checkpoint:
+    ) -> Checkpoint | CheckpointConfig:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudResourceRef):
             # return CheckpointConfig from cloud POST response to account for any defaults/new ids added in cloud
@@ -257,6 +257,11 @@ class CheckpointStore(ConfigurationStore):
             ]
             checkpoint_config["ge_cloud_id"] = checkpoint_config.pop("id")
             return self.deserialize(checkpoint_config)
+        elif self.ge_cloud_mode:
+            # if in cloud mode and checkpoint_ref is not a GXCloudResourceRef, a PUT operation occurred
+            # re-fetch and return CheckpointConfig from cloud to account for any defaults/new ids added in cloud
+            return self.get_checkpoint(name=checkpoint.name, id=None)
+
         return checkpoint
 
     @public_api
