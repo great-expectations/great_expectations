@@ -1,8 +1,8 @@
 ---
 sidebar_label: "Connect to filesystem Source Data"
 title: "Connect to filesystem Source Data"
-id: connect_source_data
-description: Connect to data stored in files on a filesystem.
+id: connect_filesystem_source_data
+description: Connect to Source Data stored in filesystem files.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
