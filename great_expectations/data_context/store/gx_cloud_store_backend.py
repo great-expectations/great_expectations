@@ -542,6 +542,18 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
 
+    def _add_or_update(self, key, value, **kwargs):
+        try:
+            existing = self._get(key)
+        except StoreBackendError as e:
+            logger.info(f"Could not find object associated with key {key}: {e}")
+            existing = None
+        if existing is not None:
+            id = key[1] if key[1] is not None else existing["data"]["id"]
+            key = (key[0], id, key[2])
+            return self.set(key=key, value=value, **kwargs)
+        return self.add(key=key, value=value, **kwargs)
+
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         try:
             _ = self._get(key)
