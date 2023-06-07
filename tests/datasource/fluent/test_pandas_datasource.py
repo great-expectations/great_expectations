@@ -7,7 +7,6 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -32,6 +31,8 @@ from great_expectations.util import camel_to_snake
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.data_context import AbstractDataContext
 
 

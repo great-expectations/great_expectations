@@ -6,8 +6,6 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
-    "File: great_expectations/checkpoint/checkpoint.py Name: LegacyCheckpoint",
-    "File: great_expectations/checkpoint/checkpoint.py Name: run",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_suite.py Name: show_expectations_by_expectation_type",

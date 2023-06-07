@@ -62,6 +62,11 @@ Now that we have the `name` and `dataframe` for our Data Asset, we can create th
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
 ```
 
+For `dataframe` Data Assets, the `dataframe` is always specified as the argument of exactly one API method:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
+```
+
 ## Next steps
 
 Now that you have connected to your data, you may want to look into:

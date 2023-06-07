@@ -83,13 +83,6 @@ migration_guide = [
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
-    IntegrationTestFixture(
-        name="migration_guide_spark_v2_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
 ]
 
 creating_custom_expectations = [
