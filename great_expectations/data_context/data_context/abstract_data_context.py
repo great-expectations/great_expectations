@@ -32,7 +32,6 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -142,6 +141,8 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
