@@ -12,6 +12,7 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import (
@@ -39,6 +40,13 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
+
+# apply markers to entire test module
+pytestmark = [
+    pytest.mark.skipif(
+        PANDAS_VERSION > 2.0, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
+    )
+]
 
 
 # TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
