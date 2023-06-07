@@ -72,6 +72,9 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+        if "delimiter" in gcs_options:
+            delimiter = gcs_options.pop("delimiter")
+
         self._bucket_or_name = bucket_or_name
         self._prefix = prefix
         self._delimiter = delimiter
