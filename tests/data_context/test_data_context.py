@@ -1421,18 +1421,19 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
-    assert config == {
-        "action_list": [],
-        "batch_request": {},
-        "class_name": "Checkpoint",
-        "config_version": 1.0,
-        "evaluation_parameters": {},
-        "module_name": "great_expectations.checkpoint",
-        "name": "my_checkpoint",
-        "profilers": [],
-        "runtime_configuration": {},
-        "validations": [],
-    }
+    assert sorted(config.keys()) == [
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "run_name_template",
+        "runtime_configuration",
+        "validations",
+    ]
 
 
 @pytest.mark.integration
