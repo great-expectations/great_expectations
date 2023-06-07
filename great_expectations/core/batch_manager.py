@@ -153,7 +153,7 @@ class BatchManager:
                 logger.error(str(e))
 
             self._execution_engine.load_batch_data(
-                batch_id=batch.id, batch_data=batch.data
+                batch_id=batch.id, batch_data=batch.data  # type: ignore[arg-type] # batch.data could be None
             )
 
             self._batch_cache[batch.id] = batch

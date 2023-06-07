@@ -82,7 +82,7 @@ def parse_grep(lines: list[str]) -> list[str]:
     if closing_tag_count == 1:
         only_one_closing_tag = True
 
-    if len(lines) == 2 and example_present and only_one_closing_tag:
+    if len(lines) == 2 and example_present and only_one_closing_tag:  # noqa: PLR2004
         return []
     else:
         return lines

@@ -201,7 +201,7 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
     split_docstring = existing_docstring.split("\n", 1)
 
     docstring = ""
-    if len(split_docstring) == 2:
+    if len(split_docstring) == 2:  # noqa: PLR2004
         short_description, docstring = split_docstring
         docstring = (
             f"{short_description.strip()}\n"

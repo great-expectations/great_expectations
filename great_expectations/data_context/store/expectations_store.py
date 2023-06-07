@@ -186,17 +186,17 @@ class ExpectationsStore(Store):
 
         return suite_dict
 
-    def add(self, key, value, **kwargs):
+    def _add(self, key, value, **kwargs):
         try:
-            return super().add(key=key, value=value, **kwargs)
+            return super()._add(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"An ExpectationSuite named {value.expectation_suite_name} already exists."
             )
 
-    def update(self, key, value, **kwargs):
+    def _update(self, key, value, **kwargs):
         try:
-            return super().update(key=key, value=value, **kwargs)
+            return super()._update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
@@ -230,7 +230,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def self_check(self, pretty_print):
+    def self_check(self, pretty_print):  # noqa: PLR0912
         return_obj = {}
 
         if pretty_print:
@@ -247,7 +247,7 @@ class ExpectationsStore(Store):
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 

@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(  # noqa: C901 - 16
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         table_name,
         key_columns,

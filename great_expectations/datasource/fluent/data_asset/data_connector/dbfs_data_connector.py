@@ -38,7 +38,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
@@ -71,7 +71,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         )
 
     @classmethod
-    def build_data_connector(
+    def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
         data_asset_name: str,

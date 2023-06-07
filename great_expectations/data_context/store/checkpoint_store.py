@@ -19,7 +19,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.refs import (
-    GXCloudIDAwareRef,
     GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (  # noqa: TCH001
@@ -251,9 +250,16 @@ class CheckpointStore(ConfigurationStore):
         persistence_fn: Callable,
     ) -> Checkpoint:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
+        if isinstance(checkpoint_ref, GXCloudResourceRef):
+            # update parts of config that may have been updated by cloud (ids, default actions, etc.)
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
+            checkpoint.config.validations = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("validations")
+            checkpoint.config.action_list = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("action_list")
         return checkpoint
 
     @public_api

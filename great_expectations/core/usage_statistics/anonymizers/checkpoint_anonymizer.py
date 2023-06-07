@@ -63,7 +63,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     # noinspection PyUnusedLocal
-    def _anonymize_checkpoint_run(  # noqa: C901 - complexity 21
+    def _anonymize_checkpoint_run(  # noqa: C901, PLR0912, PLR0915
         self, obj: object, **kwargs
     ) -> dict:
         """
