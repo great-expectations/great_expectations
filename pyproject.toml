@@ -265,8 +265,6 @@ ignore = [
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
-    # doesn't catch errors or help with circular imports and tedious to apply
-    "TCH002", # typing-only-third-party-import
     # minimal cost for standard lib imports; keep this disabled
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
