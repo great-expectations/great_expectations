@@ -116,7 +116,7 @@ class DataFrameAsset(_PandasDataAsset):
 
     @new_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message=...,
         version="0.16.15",
     )
     def build_batch_request(
@@ -158,7 +158,7 @@ class PandasDatasource(_PandasDatasource):
     def test_connection(self, test_assets: bool = ...) -> None: ...
     @deprecated_argument(
         argument_name="dataframe",
-        message='The "dataframe" argument is no longer part of "PandasDatasource.add_dataframe_asset()" method call; instead, "dataframe" is the required argument to "DataFrameAsset.build_batch_request()" method.',
+        message=...,
         version="0.16.15",
     )
     def add_dataframe_asset(
