@@ -312,8 +312,8 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
         assert mock_get.call_count == 3
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            params=None,
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            params={"name": "oss_test_checkpoint"},
         )
 
         expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
