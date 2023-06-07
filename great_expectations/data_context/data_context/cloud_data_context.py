@@ -710,9 +710,6 @@ class CloudDataContext(SerializableDataContext):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -752,8 +749,6 @@ class CloudDataContext(SerializableDataContext):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,

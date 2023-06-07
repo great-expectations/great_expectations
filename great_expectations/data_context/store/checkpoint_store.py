@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import itertools
 import logging
 import os
 import random
@@ -153,26 +152,6 @@ class CheckpointStore(ConfigurationStore):
             raise gx_exceptions.InvalidCheckpointConfigError(
                 message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
-
-        if checkpoint_config.config_version is None:
-            config_dict: dict = checkpoint_config.to_json_dict()
-            batches: Optional[dict] = config_dict.get("batches")
-            if not (
-                batches is not None
-                and (
-                    len(batches) == 0
-                    or {"batch_kwargs", "expectation_suite_names"}.issubset(
-                        set(
-                            itertools.chain.from_iterable(
-                                item.keys() for item in batches
-                            )
-                        )
-                    )
-                )
-            ):
-                raise gx_exceptions.CheckpointError(
-                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
-                )
 
         return checkpoint_config
 
