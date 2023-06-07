@@ -262,6 +262,7 @@ def _spark_multicolumn_map_condition_values(
             domain_values.select(column_selector).toPandas().to_dict("records")
         )
     else:
+        # here is the call that doesn't work
         domain_values = (
             domain_values.select(column_selector)
             .limit(result_format["partial_unexpected_count"])

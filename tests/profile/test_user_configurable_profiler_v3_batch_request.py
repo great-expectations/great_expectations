@@ -84,8 +84,8 @@ def get_spark_runtime_validator(context, df):
         }
     )
     # this is the problem
-    sdf = spark.createDataFrame(df)
-    #res = sdf.toPandas()
+    spark.createDataFrame(df)
+    # res = sdf.toPandas()
     batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
@@ -1113,7 +1113,8 @@ def test_profiler_all_expectation_types_sqlalchemy(
 @pytest.mark.xfail(
     reason="This spark currently does not allow for conversion datetime into datetime",
     run=True,
-    strict=True)
+    strict=True,
+)
 def test_expect_compound_columns_to_be_unique(
     taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
