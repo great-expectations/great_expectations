@@ -402,7 +402,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config_with_ids: dict,
-    mocked_post_response: Callable[[], MockResponse],
+    mocked_put_response: Callable[[], MockResponse],
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -416,7 +416,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
-        "requests.Session.put", autospec=True, side_effect=mocked_post_response
+        "requests.Session.put", autospec=True, side_effect=mocked_put_response
     ) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
