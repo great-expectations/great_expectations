@@ -7,8 +7,6 @@ import sys
 import uuid
 from typing import TYPE_CHECKING
 
-from typing_extensions import TypedDict
-
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,
@@ -16,20 +14,8 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired
-
     from great_expectations.core import ExpectationSuite
     from great_expectations.data_context import AbstractDataContext
-
-
-class UsageStatisticsEnvelope(TypedDict):
-    version: str
-    ge_version: str
-    data_context_id: str
-    data_context_instance_id: str
-    mac_address: str
-    event_time: str
-    event_duration: NotRequired[str]
 
 
 class UsageStatisticsPayloadBuilder:
@@ -89,7 +75,7 @@ class UsageStatisticsPayloadBuilder:
 
         return serialized_dependencies
 
-    def build_envelope(self, message: dict) -> UsageStatisticsEnvelope:
+    def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.2"  # Not actually being utilized by analytics
         message["ge_version"] = self._gx_version
 
