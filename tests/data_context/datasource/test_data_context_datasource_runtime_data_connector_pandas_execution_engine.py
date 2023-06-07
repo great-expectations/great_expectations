@@ -1,6 +1,5 @@
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
-import pandas as pd
 import pytest
 
 import great_expectations
@@ -11,6 +10,9 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 yaml = YAMLHandler()
 

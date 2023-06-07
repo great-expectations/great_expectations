@@ -3,9 +3,8 @@ import datetime
 import json
 import logging
 import os
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import numpy as np
 import pytest
 
 import great_expectations as gx
@@ -22,6 +21,9 @@ from great_expectations.util import (
     is_ndarray_datetime_dtype,
     lint_code,
 )
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 @pytest.fixture
