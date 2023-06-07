@@ -1422,7 +1422,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
     assert config == {
-        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+        "action_list": [],
         "batch_request": {},
         "class_name": "Checkpoint",
         "config_version": 1.0,

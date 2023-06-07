@@ -576,7 +576,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+        "action_list": [],
         "profilers": [],
     }
 
@@ -1272,7 +1272,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "expectation_suite_name": "users.delivery",
         "run_name_template": None,
         "batch_request": None,
-        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
+        "action_list": [],
         "evaluation_parameters": {},
         "runtime_configuration": {},
         "profilers": [],
@@ -3013,7 +3013,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
             {
                 "name": "store_evaluation_params",
                 "action": {
-                    "class_name": "StoreEvaluationParametersAction",
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
                 },
             },
             {
