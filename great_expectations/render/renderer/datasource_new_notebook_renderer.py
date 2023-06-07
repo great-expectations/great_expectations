@@ -48,7 +48,7 @@ Glad you asked! Datasources are versatile. Please see our [How To Guides](https:
 
 Give your datasource a unique name:"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         context: AbstractDataContext,
         datasource_type: DatasourceTypes,

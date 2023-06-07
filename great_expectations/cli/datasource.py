@@ -92,7 +92,7 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     try:
         if not ctx.obj.assume_yes:
             if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
-                exit(0)
+                sys.exit(0)
 
         _datasource_new_flow(
             context,
@@ -329,7 +329,7 @@ class BaseDatasourceNewYamlHelper:
 class FilesYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for pandas/spark helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
@@ -435,7 +435,7 @@ class SparkYamlHelper(FilesYamlHelper):
 class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for SQL helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,

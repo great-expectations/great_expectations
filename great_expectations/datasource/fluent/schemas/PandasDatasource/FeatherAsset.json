@@ -49,7 +49,11 @@
             ]
         },
         "columns": {
-            "title": "Columns"
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "use_threads": {
             "title": "Use Threads",

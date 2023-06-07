@@ -36,7 +36,7 @@ class QueryTemplateValues(QueryMetricProvider):
         return query_reformatted
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -83,9 +83,10 @@ class QueryTemplateValues(QueryMetricProvider):
         else:
             query = cls.get_query(query, template_dict, f"({selectable})")
 
-        engine: sqlalchemy.Engine = execution_engine.engine
         try:
-            result: List[sqlalchemy.Row] = engine.execute(sa.text(query)).fetchall()
+            result: List[sqlalchemy.Row] = execution_engine.execute_query(
+                sa.text(query)
+            ).fetchall()
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
@@ -95,7 +96,7 @@ class QueryTemplateValues(QueryMetricProvider):
         return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

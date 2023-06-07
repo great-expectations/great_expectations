@@ -185,7 +185,7 @@ def select_data_connector_name(
     if num_available_data_asset_names_by_data_connector == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    elif num_available_data_asset_names_by_data_connector == 2:
+    elif num_available_data_asset_names_by_data_connector == 2:  # noqa: PLR2004
         # if only default data_connectors are configured, select default_inferred_asset_data_connector
         default_data_connector = _check_default_data_connectors(
             available_data_asset_names_by_data_connector_dict
@@ -250,7 +250,7 @@ def _get_data_asset_name_from_data_connector(
         return None
 
     # If we have a large number of assets, give the user the ability to paginate or search
-    if num_data_assets > 100:
+    if num_data_assets > 100:  # noqa: PLR2004
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
@@ -426,7 +426,7 @@ Would you like to continue?"""
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
-        if len(data_asset_name.split(".")) < 3:
+        if len(data_asset_name.split(".")) < 3:  # noqa: PLR2004
             project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)  # type: ignore[attr-defined]
             data_asset_name = f"{project_id}.{data_asset_name}"
 

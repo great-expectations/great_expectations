@@ -73,7 +73,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         SplitterMethod.SPLIT_ON_HASHED_COLUMN: LexicographicSorter,
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,

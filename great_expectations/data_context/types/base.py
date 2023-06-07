@@ -189,7 +189,7 @@ class BaseYamlConfig(SerializableDictDot):
 
 
 class SorterConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         class_name=None,
@@ -307,7 +307,7 @@ class SorterConfigSchema(Schema):
 
 
 class AssetConfig(SerializableDictDot):
-    def __init__(  # noqa: C901 - complexity 16
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
@@ -488,7 +488,7 @@ class AssetConfigSchema(Schema):
 
 
 class DataConnectorConfig(AbstractConfig):
-    def __init__(  # noqa: C901 - 20
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         class_name,
         name: Optional[str] = None,
@@ -732,7 +732,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     # noinspection PyUnusedLocal
     @validates_schema  # noqa: C901
-    def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
+    def validate_schema(self, data, **kwargs):  # noqa: C901, PLR0912
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
@@ -963,7 +963,7 @@ continue.
 
 
 class ExecutionEngineConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         class_name,
         module_name=None,
@@ -1086,7 +1086,7 @@ configuration to continue.
 
 
 class DatasourceConfig(AbstractConfig):
-    def __init__(  # noqa: C901 - 21
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[
             str
@@ -1411,7 +1411,7 @@ class NotebookTemplateConfigSchema(Schema):
 
 
 class NotebookConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         class_name,
         module_name,
@@ -1632,7 +1632,7 @@ class GXCloudConfig(DictDot):
 
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
-        validate=lambda x: 0 < x < 100,
+        validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
@@ -1906,7 +1906,7 @@ class BaseStoreBackendDefaults(DictDot):
     For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults and you may be able to specify less parameters.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
@@ -1960,7 +1960,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
@@ -2173,7 +2173,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
@@ -2303,7 +2303,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
@@ -2417,7 +2417,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(  # noqa: C901 - 21
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2689,7 +2689,7 @@ class CheckpointConfigSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
-        validate=lambda x: (0 < x < 100) or x is None,
+        validate=lambda x: (0 < x < 100) or x is None,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number or None."},
         required=False,
         allow_none=True,
@@ -2814,7 +2814,7 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_ge_cloud_id: Your expectation suite
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
         config_version: Union[int, float, None] = 1.0,
@@ -2855,9 +2855,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
             self._batch_request = batch_request or {}
-            if action_list is None:
-                action_list = DataContextConfigDefaults.DEFAULT_ACTION_LIST.value  # type: ignore[assignment]
-            self._action_list = action_list
+            self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
@@ -3006,7 +3004,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     @property
     def action_list(self) -> Sequence[ActionDict]:
-        return self._action_list  # type: ignore[return-value]
+        return self._action_list
 
     @action_list.setter
     def action_list(self, value: Sequence[ActionDict]) -> None:
@@ -3126,7 +3124,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
-    def resolve_config_using_acceptable_arguments(
+    def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
         checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
