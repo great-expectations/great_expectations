@@ -133,6 +133,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
+from great_expectations.checkpoint import Checkpoint
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -142,7 +143,6 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
@@ -2082,7 +2082,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = (
+            self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     def _resolve_add_checkpoint_args(  # noqa: PLR0913
         self,
