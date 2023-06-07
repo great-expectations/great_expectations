@@ -18,6 +18,7 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
@@ -448,6 +449,64 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
 
     assert checkpoint.ge_cloud_id == checkpoint_id
     assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config_with_ids: dict,
+    mocked_put_response: Callable[[], MockResponse],
+    mocked_get_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    When saving, it should use the id from the response to create the checkpoint.
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.put", autospec=True, side_effect=mocked_put_response
+    ) as mock_put, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_response,
+    ) as _:
+        checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
+        checkpoint_config.pop("id")
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(**checkpoint_config)
+        )
+
+        mock_put.assert_called_once_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                    "id": checkpoint_id,
+                },
+            },
+        )
 
     assert checkpoint.config.validations[0]["id"] == validation_id_1
     assert checkpoint.validations[0]["id"] == validation_id_1
