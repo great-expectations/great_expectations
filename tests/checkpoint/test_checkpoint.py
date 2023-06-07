@@ -14,7 +14,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -127,21 +127,6 @@ def test_add_custom_checkpoint_extensions(
     checkpoint = context.add_checkpoint(**checkpoint_config)
     assert issubclass(checkpoint.__class__, SimpleCheckpoint)
     assert checkpoint.__class__.__name__ == "ExtendedSimpleCheckpoint"
-
-    checkpoint_config: dict = {
-        "class_name": "ExtendedLegacyCheckpoint",
-        "module_name": "extended_checkpoint",
-        "name": "my_custom_extended_legacy_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as icpce:
-        context.add_checkpoint(**checkpoint_config)
-
-    assert (
-        str(icpce.value)
-        == 'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
-    )
 
     checkpoint_config: dict = {
         "class_name": "ExtendedCheckpointIllegalBaseClass",
@@ -1304,65 +1289,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     data_context.delete_checkpoint(name="my_base_checkpoint")
     data_context.delete_checkpoint(name="my_fancy_checkpoint")
     assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.integration
-@pytest.mark.slow  # 1.05s
-def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    filesystem_csv_data_context_with_validation_operators,
-    common_action_list,
-):
-    rad_datasource = list(
-        filter(
-            lambda element: element["name"] == "rad_datasource",
-            filesystem_csv_data_context_with_validation_operators.list_datasources(),
-        )
-    )[0]
-    base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
-        "base_directory"
-    ]
-    batch_kwargs: dict = {
-        "path": base_directory + "/f1.csv",
-        "datasource": "rad_datasource",
-        "reader_method": "read_csv",
-    }
-
-    checkpoint_config_dict: dict = {
-        "name": "my_checkpoint",
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {"batch_kwargs": batch_kwargs, "expectation_suite_names": ["my_suite"]}
-        ],
-    }
-
-    checkpoint: LegacyCheckpoint = LegacyCheckpoint(
-        data_context=filesystem_csv_data_context_with_validation_operators,
-        **checkpoint_config_dict,
-    )
-
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        checkpoint.run()
-
-    assert (
-        len(
-            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
-        )
-        == 0
-    )
-
-    filesystem_csv_data_context_with_validation_operators.add_expectation_suite(
-        "my_suite"
-    )
-    checkpoint.run()
-
-    assert (
-        len(
-            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
-        )
-        == 1
-    )
 
 
 @pytest.mark.integration
