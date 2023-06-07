@@ -72,6 +72,9 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+        if gcs_options is None:
+            gcs_options = {}
+
         if "delimiter" in gcs_options:
             delimiter = gcs_options.pop("delimiter")
 
@@ -79,9 +82,6 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
-
-        if gcs_options is None:
-            gcs_options = {}
 
         try:
             credentials = None  # If configured with gcloud CLI / env vars
