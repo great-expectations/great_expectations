@@ -17,7 +17,6 @@ from typing import (
 
 import pydantic
 from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.pyspark import DataFrame, pyspark
@@ -39,6 +38,8 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
