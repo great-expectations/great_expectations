@@ -418,9 +418,9 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
     with mock.patch(
         "requests.Session.put", autospec=True, side_effect=mocked_post_response
     ) as mock_put, mock.patch(
-        "great_expectations.data_context.store.StoreBackend.has_key",
+        "requests.Session.get",
         autospec=True,
-        return_value=True,
+        side_effect=mocked_get_response,
     ) as _:
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
 
