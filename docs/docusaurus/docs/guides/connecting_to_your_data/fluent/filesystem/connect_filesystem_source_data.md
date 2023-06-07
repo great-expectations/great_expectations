@@ -20,7 +20,6 @@ import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesys
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
 import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
-import Introduction from '/docs/components/connect_to_data/intros/_abs_pandas_or_spark.mdx'
 import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
 import AbsBatchingRegexExample from '/docs/components/connect_to_data/cloud/_abs_batching_regex_explaination.md'
 
