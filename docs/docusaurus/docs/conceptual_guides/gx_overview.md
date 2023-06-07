@@ -92,7 +92,7 @@ For a full list of available Expectations, see [the Expectation Gallery](https:/
 
 A **Checkpoint** is the primary means for validating data in a production deployment of GX.  Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.  
 
-One of the most powerful features of Checkpoints is that they can be configured to run **Actions**, which will do some process based on the Validation Results generated when a Checkpoint is run. Typical uses include sending email, slack, or custom notifications. Another common use case is updating Data Docs sites. However, Actions can be created to do anything you are capable of programing in Python. This gives you an incredibly versatile tool for integrating Checkpoints in your pipeline's workflow!
+One of the most powerful features of Checkpoints is that you can configure them to run Actions. The Validation Results generated when a Checkpoint runs determine what Actions are performed. Typical use cases include sending email, Slack, or custom notifications. Another common use case is updating Data Docs sites. Actions can be used to do anything you are capable of programming in Python. Actions are a versatile tool for integrating Checkpoints in your pipeline's workflow.
 
 <!-- For more details on using Checkpoints to validate your data, see our [Validating data guides](landing page: validating data). -->
 <!-- For more details on integrating GX with your processes, see our [guide on including GX in a data pipeline](). -->
