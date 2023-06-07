@@ -1,0 +1,379 @@
+{
+    "title": "CSVAsset",
+    "description": "Read a comma-separated values (csv) file into DataFrame.\n\nAlso supports optionally iterating or breaking of the file\ninto chunks.\n\nAdditional help can be found in the online docs for\n`IO Tools <https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "csv",
+            "enum": [
+                "csv"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
+        },
+        "sep": {
+            "title": "Sep",
+            "type": "string"
+        },
+        "delimiter": {
+            "title": "Delimiter",
+            "type": "string"
+        },
+        "header": {
+            "title": "Header",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "enum": [
+                        "infer"
+                    ],
+                    "type": "string"
+                }
+            ]
+        },
+        "names": {
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "enum": [
+                        false
+                    ],
+                    "type": "boolean"
+                }
+            ]
+        },
+        "usecols": {
+            "title": "Usecols",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "squeeze": {
+            "title": "Squeeze",
+            "type": "boolean"
+        },
+        "prefix": {
+            "title": "Prefix",
+            "type": "string"
+        },
+        "mangle_dupe_cols": {
+            "title": "Mangle Dupe Cols",
+            "default": true,
+            "type": "boolean"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "engine": {
+            "title": "Engine",
+            "enum": [
+                "c",
+                "python",
+                "pyarrow",
+                "python-fwf"
+            ],
+            "type": "string"
+        },
+        "converters": {
+            "title": "Converters"
+        },
+        "true_values": {
+            "title": "True Values"
+        },
+        "false_values": {
+            "title": "False Values"
+        },
+        "skipinitialspace": {
+            "title": "Skipinitialspace",
+            "default": false,
+            "type": "boolean"
+        },
+        "skiprows": {
+            "title": "Skiprows",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "skipfooter": {
+            "title": "Skipfooter",
+            "default": 0,
+            "type": "integer"
+        },
+        "nrows": {
+            "title": "Nrows",
+            "type": "integer"
+        },
+        "na_values": {
+            "title": "Na Values"
+        },
+        "keep_default_na": {
+            "title": "Keep Default Na",
+            "default": true,
+            "type": "boolean"
+        },
+        "na_filter": {
+            "title": "Na Filter",
+            "default": true,
+            "type": "boolean"
+        },
+        "verbose": {
+            "title": "Verbose",
+            "default": false,
+            "type": "boolean"
+        },
+        "skip_blank_lines": {
+            "title": "Skip Blank Lines",
+            "default": true,
+            "type": "boolean"
+        },
+        "parse_dates": {
+            "title": "Parse Dates"
+        },
+        "infer_datetime_format": {
+            "title": "Infer Datetime Format",
+            "default": false,
+            "type": "boolean"
+        },
+        "keep_date_col": {
+            "title": "Keep Date Col",
+            "default": false,
+            "type": "boolean"
+        },
+        "date_parser": {
+            "title": "Date Parser"
+        },
+        "dayfirst": {
+            "title": "Dayfirst",
+            "default": false,
+            "type": "boolean"
+        },
+        "cache_dates": {
+            "title": "Cache Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "thousands": {
+            "title": "Thousands",
+            "type": "string"
+        },
+        "decimal": {
+            "title": "Decimal",
+            "default": ".",
+            "type": "string"
+        },
+        "lineterminator": {
+            "title": "Lineterminator",
+            "type": "string"
+        },
+        "quotechar": {
+            "title": "Quotechar",
+            "default": "\"",
+            "type": "string"
+        },
+        "quoting": {
+            "title": "Quoting",
+            "default": 0,
+            "type": "integer"
+        },
+        "doublequote": {
+            "title": "Doublequote",
+            "default": true,
+            "type": "boolean"
+        },
+        "escapechar": {
+            "title": "Escapechar",
+            "type": "string"
+        },
+        "comment": {
+            "title": "Comment",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
+        "dialect": {
+            "title": "Dialect",
+            "type": "string"
+        },
+        "error_bad_lines": {
+            "title": "Error Bad Lines",
+            "type": "boolean"
+        },
+        "warn_bad_lines": {
+            "title": "Warn Bad Lines",
+            "type": "boolean"
+        },
+        "on_bad_lines": {
+            "title": "On Bad Lines"
+        },
+        "delim_whitespace": {
+            "title": "Delim Whitespace",
+            "default": false,
+            "type": "boolean"
+        },
+        "low_memory": {
+            "title": "Low Memory",
+            "default": true
+        },
+        "memory_map": {
+            "title": "Memory Map",
+            "default": false,
+            "type": "boolean"
+        },
+        "float_precision": {
+            "title": "Float Precision",
+            "enum": [
+                "high",
+                "legacy"
+            ],
+            "type": "string"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "filepath_or_buffer"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

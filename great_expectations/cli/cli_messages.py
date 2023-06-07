@@ -1,4 +1,6 @@
-from great_expectations import DataContext
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 
 GREETING = r"""<cyan>
   ___              _     ___                  _        _   _
@@ -56,7 +58,7 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
     - Run `<green>great_expectations suite --help</green>` to create, edit, list, profile Expectation Suites.
     - Run `<green>great_expectations docs --help</green>` to build and manage Data Docs sites.
 
-  <cyan>Edit your configuration in {DataContext.GE_YML} to:</cyan>
+  <cyan>Edit your configuration in {FileDataContext.GX_YML} to:</cyan>
     - Move Stores to the cloud
     - Add Slack notifications, PagerDuty alerts, etc.
     - Customize your Data Docs
@@ -65,3 +67,52 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 """
 
 SECTION_SEPARATOR = "\n================================================================================\n"
+
+CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+
+CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+
+FLUENT_DATASOURCE_LIST_WARNING = """We've detected that you have at least one fluent style Datasource in your Data Context. Fluent style Datasources cannot be listed via the CLI.
+If you would like to see a list of your fluent style Datasources, you can run the following code:
+
+context = gx.get_context()
+context.list_datasources()
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.list_datasources
+"""
+
+FLUENT_DATASOURCE_DELETE_ERROR = """Fluent style Datasources can not be deleted via the CLI.
+If you would like to delete a fluent style Datasource, you can run the following code:
+
+context = gx.get_context()
+context.delete_datasource(datasource_name)
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource
+"""
+
+DATASOURCE_NEW_WARNING = """As of V0.16, the preferred method for adding a Datasource is using the fluent method of configuration, and not using the CLI.
+You can read more about this here: https://greatexpectations.io/blog/the-fluent-way-to-connect-to-data-sources-in-gx
+If you would like to proceed anyway, press Y."""
+
+SUITE_EDIT_FLUENT_DATASOURCE_ERROR = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to edit an Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+"""
+
+SUITE_EDIT_FLUENT_DATASOURCE_WARNING = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to edit an Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+If you would like to use a block config style Datasource, you can select it here to proceed.
+"""
+
+SUITE_NEW_FLUENT_DATASOURCE_ERROR = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Expectation Suite interactively with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+"""
+
+SUITE_NEW_FLUENT_DATASOURCE_WARNING = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Expectation Suite interactively with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+If you would like to create a new Expectation Suite with your fluent style Datasource using the Onboarding Assistant, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/#2-prepare-a-new-expectation-suite
+If you would like to use a block config style Datasource, you can select it here to proceed.
+"""

@@ -2,12 +2,13 @@ from copy import deepcopy
 from typing import Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -16,44 +17,50 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 
-class ExpectTableRowCountToEqualOtherTable(TableExpectation):
+class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 
-    expect_table_row_count_to_equal_other_table is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_row_count_to_equal_other_table is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Args:
         other_table_name (str): \
             The name of the other table.
 
     Other Parameters:
-        result_format (string or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        expect_table_row_count_to_be_between
+        [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
+        [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
 
     library_metadata = {
@@ -78,28 +85,17 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
     args_keys = ("other_table_name",)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="other_table_name", param_type=RendererValueType.STRING
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
-        template_str = "Row count must equal the row count of table $other_table_name."
-
-        params_with_json_schema = {
-            "other_table_name": {
-                "schema": {"type": "string"},
-                "value": params.get("other_table_name"),
-            },
-        }
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = (
+            "Row count must equal the row count of table $other_table_name."
+        )
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -112,9 +108,6 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
         template_str = "Row count must equal the row count of table $other_table_name."
@@ -198,9 +191,11 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         )
         return validation_dependencies
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        """Validates the configuration of an Expectation. This expectation has no configuration."""
         super().validate_configuration(configuration)
 
     def _validate(

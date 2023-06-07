@@ -1,4 +1,12 @@
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
+from unittest.mock import Mock
+
+import pytest
+
+from great_expectations.core import (
+    ExpectationSuiteValidationResult,
+    RunIdentifier,
+)
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
@@ -7,7 +15,33 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render.renderer import MicrosoftTeamsRenderer
 
 
-def test_MicrosoftTeams_validation_results_with_datadocs():
+@pytest.mark.parametrize(
+    "result_meta,result_batch_id,",
+    [
+        (
+            {
+                "great_expectations_version": "v0.8.0__develop",
+                "expectation_suite_name": "asset.default",
+                "run_id": "test_100",
+            },
+            BatchIdentifier(
+                batch_identifier="1234", data_asset_name="expected_asset_name"
+            ),
+        ),
+        (
+            {
+                "great_expectations_version": "v0.8.0__develop",
+                "expectation_suite_name": "asset.default",
+                "run_id": "test_100",
+                "active_batch_definition": Mock(
+                    BatchDefinition, data_asset_name="expected_asset_name"
+                ),
+            },
+            "1234",
+        ),
+    ],
+)
+def test_MicrosoftTeams_validation_results_with_datadocs(result_meta, result_batch_id):
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -17,11 +51,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
             "unsuccessful_expectations": 0,
             "success_percent": None,
         },
-        meta={
-            "great_expectations_version": "v0.8.0__develop",
-            "expectation_suite_name": "asset.default",
-            "run_id": "test_100",
-        },
+        meta=result_meta,
     )
 
     validation_result_suite_identifier = ValidationResultIdentifier(
@@ -29,9 +59,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
         run_id=RunIdentifier(
             run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"
         ),
-        batch_identifier=BatchIdentifier(
-            batch_identifier="1234", data_asset_name="asset"
-        ),
+        batch_identifier=result_batch_id,
     )
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
@@ -73,7 +101,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
                                                     "text": "May "
                                                     "08 "
                                                     "2012 "
-                                                    "07:14:45",
+                                                    "15:14:45+0800",
                                                     "type": "TextBlock",
                                                     "wrap": "true",
                                                 },
@@ -101,7 +129,8 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
                                 },
                                 {
                                     "horizontalAlignment": "left",
-                                    "text": "**Data asset " "name:** asset",
+                                    "text": "**Data asset "
+                                    "name:** expected_asset_name",
                                     "type": "TextBlock",
                                 },
                                 {

@@ -1,33 +1,13 @@
-import json
-
 from scipy import stats
 
 # !!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
@@ -71,9 +51,14 @@ class ColumnValuesNotOutliers(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
-    """
-    Expect Column Values to not be outliers. User is asked to specify the column, method and multiplier. Currently
-    standard deviation (std) and inter-quantile range (iqr) are supported.
+    """Expect Column Values to not be outliers.
+
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        method (str): Either "std" (standard deviation) or "iqr" (inter-quantile range)
+        multiplier (float): multiplier
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

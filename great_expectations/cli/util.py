@@ -38,7 +38,8 @@ def verify_library_dependent_modules(
         success = False
 
     if do_reload:
-        reload_modules(module_names=module_names_to_reload)
+        reload_modules(module_names=module_names_to_reload)  # type: ignore[arg-type]
+        # len() check above verifies not None (must be a list)
 
     return success
 
@@ -77,13 +78,6 @@ but the package `{pip_library_name}` containing this library is not installed.
     status_code: int = execute_shell_command_with_progress_polling(
         f"pip install {pip_library_name}"
     )
-
-    # project_distribution: Distribution = get_project_distribution()
-    # if project_distribution:
-    #     project_name: str = project_distribution.metadata['Name']
-    #     version: str = project_distribution.metadata['Version']
-    #
-    # pkg_resources.working_set = pkg_resources.WorkingSet._build_master()
 
     working_set: WorkingSet = pkg_resources.working_set
     # noinspection SpellCheckingInspection

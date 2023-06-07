@@ -61,10 +61,11 @@ def perform_check(suppress_output: bool) -> bool:
             "black --check .",
             "Please ensure that your files are linted properly with `black .`",
         ),
+        # TODO: update this (or don't)
         Command(
-            "isort",
-            "isort --profile black --check .",
-            "Please ensure that your imports are sorted properly with `isort --profile black .`",
+            "ruff",
+            "ruff --select I --fix .",
+            "Please ensure that your imports are sorted properly with `ruff --select I --fix .`",
         ),
         Command(
             "pytest",
@@ -155,9 +156,9 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
         A GreatExpectationsContribPackageManifest instance to represent the current package's state.
     """
     # If config file isn't found, create a blank JSON and write to disk
-    if not os.path.exists(path):
+    if not os.path.exists(path):  # noqa: PTH110
         instance = GreatExpectationsContribPackageManifest()
-        logger.debug(f"Could not find existing package JSON; instantiated a new one")
+        logger.debug("Could not find existing package JSON; instantiated a new one")
         return instance
 
     with open(path) as f:

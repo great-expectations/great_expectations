@@ -12,6 +12,7 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
@@ -22,7 +23,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
@@ -132,8 +132,8 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     root_dir: str = context.root_directory
 
     expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name, overwrite_existing=True
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
 
     notebook_path: str = os.path.join(root_dir, f"run_onboarding_data_assistant.ipynb")
@@ -143,7 +143,7 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
 
     import uuid
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
@@ -152,9 +152,9 @@ def run_onboarding_data_assistant_result_jupyter_notebook_with_new_cell(
     )
     from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
-    import great_expectations.exceptions as ge_exceptions
+    import great_expectations.exceptions as gx_exceptions
 
-    context = ge.get_context()
+    context = gx.get_context()
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -276,10 +276,10 @@ def test_onboarding_data_assistant_metrics_count(
         domain,
         parameter_values_for_fully_qualified_parameter_names,
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
-        if domain.is_superset(domain_key):
+        if domain.is_superset(other=domain_key):
             num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 2
+    assert num_metrics == 4
 
     num_metrics = 0
     for (
@@ -288,7 +288,7 @@ def test_onboarding_data_assistant_metrics_count(
     ) in bobby_onboarding_data_assistant_result.metrics_by_domain.items():
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 150
+    assert num_metrics == 300
 
 
 @pytest.mark.integration
@@ -879,7 +879,7 @@ def test_onboarding_data_assistant_plot_metrics_stdout(
         bobby_onboarding_data_assistant_result
     )
 
-    metrics_calculated = 150
+    metrics_calculated = 300
     metrics_plots_implemented = 102
 
     f = io.StringIO()

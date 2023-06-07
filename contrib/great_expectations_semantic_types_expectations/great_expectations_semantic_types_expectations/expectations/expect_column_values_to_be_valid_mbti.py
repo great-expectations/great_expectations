@@ -15,7 +15,6 @@ MBTI_REGEX = r"^(?i)([EI][NS][FT][PJ])$"
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidMbti(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_mbti"
 
@@ -42,7 +41,7 @@ class ColumnValuesToBeValidMbti(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMbti(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid Myers–Briggs Type Indicator (MBTI)."""
+    """Expect column values to conform to the valid Myers–Briggs Type Indicator (MBTI)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -105,8 +104,7 @@ class ExpectColumnValuesToBeValidMbti(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

@@ -1,16 +1,12 @@
 import copy
-from typing import Callable, Tuple, Type
+from typing import Callable, Optional, Tuple
 from unittest import mock
 
+import pandas as pd
 import pytest
 
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -22,6 +18,7 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
@@ -53,15 +50,32 @@ def checkpoint_config_with_ids(
 
 @pytest.fixture
 def mocked_post_response(
-    mock_response_factory: Callable, checkpoint_id: str, validation_ids: Tuple[str, str]
+    mock_response_factory: Callable,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config_with_ids: dict,
 ) -> Callable[[], MockResponse]:
     validation_id_1, validation_id_2 = validation_ids
 
     def _mocked_post_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
         return mock_response_factory(
             {
                 "data": {
                     "id": checkpoint_id,
+                    "attributes": {
+                        "checkpoint_config": checkpoint_config_with_ids,
+                        "class_name": "Checkpoint",
+                        "created_by_id": created_by_id,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
+                        "name": "oss_test_checkpoint",
+                        "organization_id": f"{organization_id}",
+                    },
+                    "type": "checkpoint",
                     "validations": [
                         {"id": validation_id_1},
                         {"id": validation_id_2},
@@ -102,19 +116,15 @@ def mocked_get_response(
                 "data": {
                     "attributes": {
                         "checkpoint_config": checkpoint_config_with_ids,
-                        "created_at": "2022-08-02T17:55:45.107550",
+                        "class_name": "Checkpoint",
                         "created_by_id": created_by_id,
-                        "deleted": False,
-                        "deleted_at": None,
-                        "desc": None,
+                        "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                        "description": "My First checkpoint.",
+                        "id": checkpoint_id,
                         "name": "oss_test_checkpoint",
                         "organization_id": f"{organization_id}",
-                        "updated_at": "2022-08-02T17:55:45.107550",
                     },
                     "id": checkpoint_id,
-                    "links": {
-                        "self": f"/organizations/{organization_id}/checkpoints/{checkpoint_id}"
-                    },
                     "type": "checkpoint",
                 },
             },
@@ -124,29 +134,96 @@ def mocked_get_response(
     return _mocked_get_response
 
 
+@pytest.fixture
+def mocked_get_by_name_response(
+    mock_response_factory: Callable,
+    checkpoint_config_with_ids: dict,
+    checkpoint_id: str,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_by_name_response(*args, **kwargs):
+        created_by_id = "c06ac6a2-52e0-431e-b878-9df624edc8b8"
+        organization_id = "046fe9bc-c85b-4e95-b1af-e4ce36ba5384"
+
+        return mock_response_factory(
+            {
+                "data": [
+                    {
+                        "attributes": {
+                            "checkpoint_config": checkpoint_config_with_ids,
+                            "class_name": "Checkpoint",
+                            "created_by_id": created_by_id,
+                            "default_validation_id": "4cb29141-db66-4dac-a74b-8360779e3da3",
+                            "description": "My First checkpoint.",
+                            "id": checkpoint_id,
+                            "name": "oss_test_checkpoint",
+                            "organization_id": f"{organization_id}",
+                        },
+                        "id": checkpoint_id,
+                        "type": "checkpoint",
+                    }
+                ],
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
-            id="BaseDataContext",
-        ),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
-        pytest.param(
-            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
-        ),
-    ],
-)
+def test_cloud_backed_data_context_get_checkpoint_by_name(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config: dict,
+    mocked_get_by_name_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should get from a Cloud-backed CheckpointStore when calling `get_checkpoint`.
+    When provided only a name, it should hit ".../checkpoints?name=my-checkpoint-name"
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+    ) as mock_get:
+        checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
+
+        mock_get.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            params={"name": checkpoint_config["name"]},
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_get_checkpoint_no_identifier_raises_error(
+    empty_cloud_data_context: CloudDataContext,
+) -> None:
+    context = empty_cloud_data_context
+
+    with pytest.raises(ValueError):
+        context.get_checkpoint()
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_cloud_backed_data_context_add_checkpoint(
-    data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
+    empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
@@ -154,25 +231,22 @@ def test_cloud_backed_data_context_add_checkpoint(
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request,
 ) -> None:
     """
-    All Cloud-backed contexts (DataContext, BaseDataContext, and CloudDataContext) should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
     When saving, it should use the id from the response to create the checkpoint.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
-
-    # Make sure the fixture has the right configuration
-    assert isinstance(context, data_context_type)
-    assert context.ge_cloud_mode
+    context = empty_cloud_data_context
 
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_response
-    ) as mock_get:
+        "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
+        autospec=True,
+        return_value=False,
+    ) as _:
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -194,12 +268,6 @@ def test_cloud_backed_data_context_add_checkpoint(
             },
         )
 
-        mock_get.assert_called_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            params={"name": checkpoint_config["name"]},
-        )
-
     assert checkpoint.ge_cloud_id == checkpoint_id
     assert checkpoint.config.ge_cloud_id == checkpoint_id
 
@@ -212,27 +280,8 @@ def test_cloud_backed_data_context_add_checkpoint(
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "data_context_fixture_name,data_context_type",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "empty_base_data_context_in_cloud_mode",
-            BaseDataContext,
-            id="BaseDataContext",
-        ),
-        pytest.param("empty_data_context_in_cloud_mode", DataContext, id="DataContext"),
-        pytest.param(
-            "empty_cloud_data_context", CloudDataContext, id="CloudDataContext"
-        ),
-    ],
-)
 def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
-    data_context_fixture_name: str,
-    data_context_type: Type[AbstractDataContext],
+    empty_cloud_data_context: CloudDataContext,
     checkpoint_config: dict,
     checkpoint_id: str,
     mocked_post_response: Callable[[], MockResponse],
@@ -240,24 +289,16 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    request,
 ) -> None:
-    context = request.getfixturevalue(data_context_fixture_name)
-
-    # Make sure the fixture has the right configuration
-    assert isinstance(context, data_context_type)
-    assert context.ge_cloud_mode
+    context = empty_cloud_data_context
 
     with mock.patch(
-        "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ) as mock_post, mock.patch(
         "requests.Session.put", autospec=True, side_effect=mocked_put_response
     ) as mock_put, mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
-        checkpoint_1 = context.add_checkpoint(**checkpoint_config)
-        checkpoint_2 = context.add_checkpoint(
-            ge_cloud_id=checkpoint_1.ge_cloud_id, **checkpoint_config
+        checkpoint = context.add_checkpoint(
+            ge_cloud_id=checkpoint_id, **checkpoint_config
         )
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -265,32 +306,17 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
             CheckpointConfig(**checkpoint_config)
         )
 
-        # Called during creation of `checkpoint_1`
-        mock_post.assert_called_once_with(
-            mock.ANY,  # requests.Session object
-            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "checkpoint_config": expected_checkpoint_config,
-                        "organization_id": ge_cloud_organization_id,
-                    },
-                },
-            },
-        )
-
         # Always called by store after POST and PATCH calls
-        assert mock_get.call_count == 2
+        assert mock_get.call_count == 3
         mock_get.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
-            params={"name": checkpoint_config["name"]},
+            params=None,
         )
 
         expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
 
-        # Called during creation of `checkpoint_2` (which is `checkpoint_1` but updated)
+        # Called during creation of `checkpoint` (which is `checkpoint_1` but updated)
         mock_put.assert_called_once_with(
             mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
@@ -306,7 +332,126 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
             },
         )
 
-    assert checkpoint_1.ge_cloud_id == checkpoint_2.ge_cloud_id
+    assert checkpoint.ge_cloud_id == checkpoint_id
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config: dict,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_get_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    When saving, it should use the id from the response to create the checkpoint.
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ) as mock_post, mock.patch(
+        "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
+        autospec=True,
+        return_value=False,
+    ) as _:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(**checkpoint_config)
+        )
+
+        mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                },
+            },
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config_with_ids: dict,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_get_response: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    When saving, it should use the id from the response to create the checkpoint.
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.put", autospec=True, side_effect=mocked_post_response
+    ) as mock_put, mock.patch(
+        "great_expectations.data_context.store.StoreBackend.has_key",
+        autospec=True,
+        return_value=True,
+    ) as _:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
+
+        # Round trip through schema to mimic updates made during store serialization process
+        ge_cloud_id = checkpoint_config_with_ids.pop("id")
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(ge_cloud_id=ge_cloud_id, **checkpoint_config_with_ids)
+        )
+        expected_checkpoint_config["ge_cloud_id"] = checkpoint_id
+
+        mock_put.assert_called_once_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints/{checkpoint_id}",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                    "id": checkpoint_id,
+                },
+            },
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
 
 
 @pytest.mark.xfail(
@@ -321,7 +466,7 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
     mock_save_project_config: mock.MagicMock,
     checkpoint_config: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     checkpoint = context.add_checkpoint(**checkpoint_config)
 
@@ -334,6 +479,98 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
         checkpoint.config.to_json_dict()
         == checkpoint_stored_in_cloud.config.to_json_dict()
     )
+
+
+@pytest.mark.e2e
+@pytest.mark.cloud
+def test_cloud_data_context_run_checkpoint_e2e():
+    """
+    What does this test do and why?
+
+    Tests the `run_checkpoint` method against the GX Cloud dev environment.
+    Note that this test relies on some prerequisite state (which has be configured
+    externally of this test).
+
+    For reference, the following scripts were run to:
+
+    === Set up the prerequisite Datasource ===
+    ```
+    datasource_yaml = '''
+    name: nathan_test_pandas_datasource
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        runtime_data_connector:
+            class_name: RuntimeDataConnector
+            batch_identifiers: ["test_identifier"]
+    '''
+
+    datasource = context.test_yaml_config(datasource_yaml)
+    datasource = context.add_datasource(datasource=datasource)
+    ```
+
+    === Set up the prerequisite Checkpoint ===
+    ```
+    batch_request = {
+        "datasource_name": "oss_test_pandas_datasource",
+        "data_connector_name": "runtime_data_connector",
+        "data_asset_name": "test_df",
+    }
+
+    config = {
+        "action_list": [
+            {
+                "action": {"class_name": "StoreValidationResultAction"},
+                "name": "store_validation_result",
+            },
+            {
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+                "name": "store_evaluation_params",
+            },
+        ],
+        "batch_request": batch_request,
+        "class_name": "Checkpoint",
+        "config_version": 1.0,
+        "evaluation_parameters": {"table_row_count": 3},
+        "expectation_suite_name": "evaluation_parameters_rendering",
+        "module_name": "great_expectations.checkpoint",
+        "name": "OSS_E2E_run_checkpoint",
+    }
+
+    checkpoint = context.add_checkpoint(**config)
+    ```
+    """
+    context = get_context(cloud_mode=True)
+
+    checkpoint_name = "OSS_E2E_run_checkpoint"
+
+    cloud_id: Optional[str] = None
+    checkpoint_identifiers = context.list_checkpoints()
+    for identifier in checkpoint_identifiers:
+        if identifier.resource_name == checkpoint_name:
+            cloud_id = identifier.id
+            break
+
+    assert cloud_id, f"Could not find checkpoint '{checkpoint_name}' in Cloud"
+
+    test_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3],
+            "b": [4, 5, 6],
+        }
+    )
+    # The datasource/data_connector/data_asset are all preconfigured in Cloud
+    batch_request = RuntimeBatchRequest(
+        datasource_name="oss_test_pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="test_df",
+        runtime_parameters={"batch_data": test_df},
+        batch_identifiers={"test_identifier": "my_id"},
+    )
+
+    result = context.run_checkpoint(ge_cloud_id=cloud_id, batch_request=batch_request)
+    assert result.success
 
 
 @pytest.fixture
@@ -445,11 +682,13 @@ def test_list_checkpoints(
 ) -> None:
     project_path_name = "foo/bar/baz"
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
     )
 
     checkpoint_1, checkpoint_2 = checkpoint_names_and_ids
@@ -465,12 +704,12 @@ def test_list_checkpoints(
     assert checkpoints == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_1,
+            id=checkpoint_id_1,
             resource_name=checkpoint_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            ge_cloud_id=checkpoint_id_2,
+            id=checkpoint_id_2,
             resource_name=checkpoint_name_2,
         ),
     ]

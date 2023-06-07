@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -10,12 +11,13 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
     """Expect all values in a specific column to exist in another table's column.
+
     Args:
-        template_dict: a dictionary containing the following keys:
-             "first_table_column" - name of the main table column
-             "second_table_column" - name of the column to compare to, in the second table
-             "second_table_full_name"
-             "condition": additional condition added in the where clause, provide "1=1" if not needed.
+        template_dict: dict containing the following keys: \
+             first_table_column (name of the main table column), \
+             second_table_column (name of the column to compare to in the second table), \
+             second_table_full_name, \
+             condition (additional condition added in the where clause, provide "1=1" if not needed)
     """
 
     library_metadata = {
@@ -60,16 +62,11 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        success = False
-
-        query_result = metrics.get("query.template_values")
-        num_of_missing_rows = query_result[0][0]
-
-        if num_of_missing_rows == 0:
-            success = True
+        metrics = convert_to_json_serializable(data=metrics)
+        num_of_missing_rows = list(metrics.get("query.template_values")[0].values())[0]
 
         return {
-            "success": success,
+            "success": num_of_missing_rows == 0,
             "result": {
                 "Rows with IDs in first table missing in second table": num_of_missing_rows
             },
@@ -79,19 +76,16 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "msid": ["aaa", "bbb"],
                     },
                 },
                 {
-                    "dataset_name": "test_2",
                     "data": {
                         "msid": ["aaa", "aaa"],
                     },
                 },
                 {
-                    "dataset_name": "test_3",
                     "data": {
                         "msid": [
                             "aaa",
@@ -108,6 +102,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                     },
                 },
             ],
+            "only_for": ["sqlite", "redshift"],
             "tests": [
                 {
                     "title": "basic_negative_test",
@@ -122,7 +117,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                         },
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_positive_test",
@@ -137,14 +131,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         },
     ]

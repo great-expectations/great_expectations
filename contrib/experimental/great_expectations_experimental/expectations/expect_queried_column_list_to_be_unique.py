@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
@@ -9,15 +10,14 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedColumnListToBeUnique(QueryExpectation):
-    """Expect multiple columns (such as a compound key) to be unique
+    """Expect multiple columns (such as a compound key) to be unique.
+
     Args:
-    *****
-    template_dict: dict with the following keys:
-        column_list - columns to check uniqueness on - separated by comma
+        template_dict: dict with the following keys: \
+            column_list (columns to check uniqueness on separated by comma)
     """
 
     metric_dependencies = ("query.template_values",)
-
     query = """
             SELECT COUNT(1) FROM (
             SELECT {column_list}, COUNT(1)
@@ -33,6 +33,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         "query",
         "template_dict",
         "batch_id",
+        "row_condition",
+        "condition_parser",
     )
     default_kwarg_values = {
         "include_config": True,
@@ -54,10 +56,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         Returns:
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
-
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
     def _validate(
         self,
@@ -66,9 +65,8 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
-        query_result = metrics.get("query.template_values")
-        num_of_duplicates = query_result[0][0]
+        metrics = convert_to_json_serializable(data=metrics)
+        num_of_duplicates = list(metrics.get("query.template_values")[0].values())[0]
 
         if not num_of_duplicates:
             return {
@@ -89,7 +87,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "unique_num": [1, 2, 3, 4, 5, 6],
                         "unique_str": ["a", "b", "c", "d", "e", "f"],
@@ -100,6 +97,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     },
                 },
             ],
+            "only_for": ["spark", "sqlite", "bigquery", "trino", "redshift"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -111,7 +109,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -120,10 +117,24 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
                     "in": {
                         "template_dict": {
                             "column_list": "duplicate_num,duplicate_str,duplicate_str2",
+                            "row_condition": "1=1",
+                            "condition_parser": "great_expectations__experimental__",
                         }
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "passing_condition_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "template_dict": {
+                            "column_list": "unique_num,unique_str,duplicate_str2",
+                            "row_condition": 'col("duplicate_str2")!="a"',
+                            "condition_parser": "great_expectations__experimental__",
+                        }
+                    },
+                    "out": {"success": True},
                 },
             ],
         }
@@ -131,7 +142,7 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
 
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@itaise"],
+        "contributors": ["@itaise", "@maayaniti"],
     }
 
 

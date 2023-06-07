@@ -3,13 +3,13 @@ from __future__ import annotations
 import abc
 import datetime
 import enum
-from typing import Callable, List, Union
+from typing import Callable, ClassVar, List, Type
 
 import ruamel
 from dateutil.parser import parse
 from ruamel.yaml import yaml_object
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 
 yaml = ruamel.yaml.YAML()
 
@@ -26,7 +26,7 @@ class DatePart(enum.Enum):
     MINUTE = "minute"
     SECOND = "second"
 
-    def __eq__(self, other: Union[str, DatePart]):
+    def __eq__(self, other: str | DatePart):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
@@ -35,7 +35,7 @@ class DatePart(enum.Enum):
         return hash(self.value)
 
     @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+    def to_yaml(cls, representer, node):
         """
         Method allows for yaml-encodable representation of ENUM, using internal methods of ruamel.
         pattern was found in the following stackoverflow thread:
@@ -59,7 +59,7 @@ class SplitterMethod(enum.Enum):
     SPLIT_ON_MULTI_COLUMN_VALUES = "split_on_multi_column_values"
     SPLIT_ON_HASHED_COLUMN = "split_on_hashed_column"
 
-    def __eq__(self, other: Union[str, SplitterMethod]):
+    def __eq__(self, other: str | SplitterMethod):  # type: ignore[override] # expects `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         return self.value.lower() == other.value.lower()
@@ -75,7 +75,7 @@ class DataSplitter(abc.ABC):
     date_part e.g. DataSplitter.date_part.MONTH
     """
 
-    date_part: DatePart = DatePart
+    date_part: ClassVar[Type[DatePart]] = DatePart
 
     def get_splitter_method(self, splitter_method_name: str) -> Callable:
         """Get the appropriate splitter method from the method name.
@@ -86,7 +86,7 @@ class DataSplitter(abc.ABC):
         Returns:
             splitter method.
         """
-        splitter_method_name: str = self._get_splitter_method_name(splitter_method_name)
+        splitter_method_name = self._get_splitter_method_name(splitter_method_name)
 
         return getattr(self, splitter_method_name)
 
@@ -106,9 +106,7 @@ class DataSplitter(abc.ABC):
             return splitter_method_name
 
     @staticmethod
-    def _convert_date_parts(
-        date_parts: Union[List[DatePart], List[str]]
-    ) -> List[DatePart]:
+    def _convert_date_parts(date_parts: List[DatePart] | List[str]) -> List[DatePart]:
         """Convert a list of date parts to DatePart objects.
 
         Args:
@@ -123,7 +121,7 @@ class DataSplitter(abc.ABC):
         ]
 
     @staticmethod
-    def _validate_date_parts(date_parts: Union[List[DatePart], List[str]]) -> None:
+    def _validate_date_parts(date_parts: List[DatePart] | List[str]) -> None:
         """Validate that date parts exist and are of the correct type.
 
         Args:
@@ -133,13 +131,14 @@ class DataSplitter(abc.ABC):
             None, this method raises exceptions if the config is invalid.
         """
         if len(date_parts) == 0:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "date_parts are required when using split_on_date_parts."
             )
         if not all(
-            (isinstance(dp, DatePart)) or (isinstance(dp, str)) for dp in date_parts
+            (isinstance(dp, DatePart)) or (isinstance(dp, str))  # noqa: PLR1701
+            for dp in date_parts
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "date_parts should be of type DatePart or str."
             )
 
@@ -156,13 +155,13 @@ class DataSplitter(abc.ABC):
         try:
             [DatePart(date_part_string) for date_part_string in date_part_strings]
         except ValueError as e:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f"{e} please only specify strings that are supported in DatePart: {[dp.value for dp in DatePart]}"
             )
 
     def _convert_datetime_batch_identifiers_to_date_parts_dict(
         self,
-        column_batch_identifiers: Union[datetime.datetime, str, dict],
+        column_batch_identifiers: datetime.datetime | str | dict,
         date_parts: List[DatePart],
     ) -> dict:
         """Convert batch identifiers to a dict of {date_part as str: date_part value}.
@@ -176,9 +175,7 @@ class DataSplitter(abc.ABC):
         """
 
         if isinstance(column_batch_identifiers, str):
-            column_batch_identifiers: datetime.datetime = parse(
-                column_batch_identifiers
-            )
+            column_batch_identifiers = parse(column_batch_identifiers)
 
         if isinstance(column_batch_identifiers, datetime.datetime):
             return {

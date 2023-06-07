@@ -2,11 +2,12 @@ from typing import Dict, Optional
 
 import pytest
 
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -34,16 +35,18 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     }
 
     # Omitting "single_batch_mode" argument in order to exercise default (False) behavior.
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(
@@ -51,7 +54,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -64,6 +67,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -114,17 +118,19 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         "data_asset_name": "my_reports",
     }
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(
@@ -132,7 +138,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -149,6 +155,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -199,17 +206,19 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         "data_asset_name": "my_reports",
     }
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="row_count",
-        metric_name="table.row_count",
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
-        enforce_numeric_metric=True,
-        replace_nan_with_zero=True,
-        reduce_scalar_metric=True,
-        evaluation_parameter_builder_configs=None,
-        data_context=data_context,
+    metric_multi_batch_parameter_builder: ParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="row_count",
+            metric_name="table.row_count",
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=f"{VARIABLES_KEY}single_batch_mode",
+            enforce_numeric_metric=True,
+            replace_nan_with_zero=True,
+            reduce_scalar_metric=True,
+            evaluation_parameter_builder_configs=None,
+            data_context=data_context,
+        )
     )
 
     domain = Domain(
@@ -217,7 +226,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -234,6 +243,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (

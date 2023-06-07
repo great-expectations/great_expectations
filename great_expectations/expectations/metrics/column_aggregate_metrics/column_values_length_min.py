@@ -1,5 +1,7 @@
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -10,7 +12,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 
 
 class ColumnValuesLengthMin(ColumnAggregateMetricProvider):
@@ -23,9 +24,9 @@ class ColumnValuesLengthMin(ColumnAggregateMetricProvider):
     @column_aggregate_partial(
         engine=SqlAlchemyExecutionEngine, filter_column_isnull=True
     )
-    def _sqlalchemy(cls, column, **kwargs: dict):  # type: ignore[no-untyped-def]
+    def _sqlalchemy(cls, column, **kwargs: dict):
         return sa.func.min(sa.func.length(column))
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine, filter_column_isnull=True)
-    def _spark(cls, column, **kwargs: dict):  # type: ignore[no-untyped-def]
+    def _spark(cls, column, **kwargs: dict):
         return F.min(F.length(column))

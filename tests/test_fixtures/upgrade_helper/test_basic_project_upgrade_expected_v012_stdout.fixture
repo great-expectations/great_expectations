@@ -59,7 +59,7 @@ The config_version of your great_expectations.yml has been automatically increme
 
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json
 ++=====================================================++
 || UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
 ++=====================================================++
@@ -108,7 +108,7 @@ The config_version of your great_expectations.yml has been automatically increme
 
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20190926T134241.000000Z.json
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20190926T134241.000000Z.json
 
 ================================================================================
 

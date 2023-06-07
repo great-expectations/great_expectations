@@ -20,6 +20,7 @@ from great_expectations.render.renderer.content_block import (
     ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
@@ -91,6 +92,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
                 "./output/test_render_profiling_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -125,6 +127,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
                 "./output/test_render_expectation_suite_column_section_renderer"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -413,7 +416,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "markdown",
+                "format": MetaNotesFormat.MARKDOWN,
                 "content": [
                     "#### These are expectation notes \n - you can use markdown \n - or just strings"
                 ],
@@ -575,7 +578,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "string",
+                "format": MetaNotesFormat.STRING,
                 "content": [
                     "This is a",
                     "string list,",
@@ -740,7 +743,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "string",
+                "format": MetaNotesFormat.STRING,
                 "content": "This is just a single string, assigned to the 'content' key of a notes dict.",
             },
         },

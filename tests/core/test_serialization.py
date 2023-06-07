@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
@@ -12,6 +14,7 @@ from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
@@ -33,20 +36,13 @@ from great_expectations.util import (
     requires_lossy_conversion,
 )
 
-try:
-    from pyspark.sql.types import IntegerType, StructField, StructType
-except ImportError:
-    IntegerType = None
-    StructField = None
-    StructType = None
-
 
 @pytest.fixture
-def spark_schema(spark_session) -> "StructType":
-    return StructType(
+def spark_schema(spark_session: pyspark.SparkSession) -> pyspark.types.StructType:
+    return pyspark.types.StructType(
         [
-            StructField("a", IntegerType(), True, None),
-            StructField("b", IntegerType(), True, None),
+            pyspark.types.StructField("a", pyspark.types.IntegerType(), True, None),
+            pyspark.types.StructField("b", pyspark.types.IntegerType(), True, None),
         ]
     )
 
@@ -55,7 +51,9 @@ def spark_schema(spark_session) -> "StructType":
 # Spark schemas. They follow the pattern described in:
 # https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
 @pytest.fixture
-def checkpoint_config_spark(spark_session) -> CheckpointConfig:
+def checkpoint_config_spark(
+    spark_session: pyspark.SparkSession,
+) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
@@ -78,7 +76,7 @@ def checkpoint_config_spark(spark_session) -> CheckpointConfig:
 
 @pytest.fixture
 def checkpoint_config_with_schema_spark(
-    spark_session, spark_schema
+    spark_session: pyspark.SparkSession, spark_schema
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
@@ -103,7 +101,9 @@ def checkpoint_config_with_schema_spark(
 
 
 @pytest.fixture
-def datasource_config_spark(spark_session) -> DatasourceConfig:
+def datasource_config_spark(
+    spark_session: pyspark.SparkSession,
+) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
         class_name="Datasource",
@@ -132,7 +132,7 @@ def datasource_config_spark(spark_session) -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_schema_at_asset_level_spark(
-    spark_session, spark_schema
+    spark_session: pyspark.SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -165,7 +165,7 @@ def datasource_config_with_schema_at_asset_level_spark(
 
 @pytest.fixture
 def datasource_config_with_schema_at_data_connector_level_spark(
-    spark_session, spark_schema
+    spark_session: pyspark.SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -741,7 +741,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -789,7 +789,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -839,7 +839,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -889,7 +889,7 @@ def test_checkpoint_config_print(
                 ],
             ),
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -937,12 +937,12 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 
 
 @pytest.mark.parametrize(
-    "checkpoint_config,expected_serialized_checkpoint_config",
+    "checkpoint_config_fixture_name,expected_serialized_checkpoint_config",
     [
         pytest.param(
             "checkpoint_config_spark",
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -978,7 +978,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
         pytest.param(
             "checkpoint_config_with_schema_spark",
             {
-                "action_list": [],
+                "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                 "batch_request": {},
                 "class_name": "Checkpoint",
                 "config_version": 1.0,
@@ -1033,15 +1033,14 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 )
 @pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
-    checkpoint_config: Union[CheckpointConfig, str],
+    checkpoint_config_fixture_name: str,
     expected_serialized_checkpoint_config: dict,
-    spark_session: "SparkSession",
+    spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
     # request.getfixturevalue()
-    if isinstance(checkpoint_config, str):
-        checkpoint_config = request.getfixturevalue(checkpoint_config)
+    checkpoint_config = request.getfixturevalue(checkpoint_config_fixture_name)
 
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config
@@ -1185,7 +1184,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
-    spark_session: "SparkSession",
+    spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1254,7 +1253,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
-    spark_session: "SparkSession",
+    spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1320,7 +1319,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,
-    spark_session: "SparkSession",
+    spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call

@@ -7,11 +7,11 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
 
@@ -22,7 +22,7 @@ from great_expectations.datasource.data_connector.inferred_asset_s3_data_connect
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @mock_s3
@@ -61,7 +61,7 @@ def test_basic_instantiation():
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -195,7 +195,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -973,17 +973,19 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_inferred_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: InferredAssetS3DataConnector = (  # noqa: F841
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "my_inferred_asset_filesystem_data_connector",
+                    "execution_engine": PandasExecutionEngine(),
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -1038,17 +1040,19 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_inferred_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: InferredAssetS3DataConnector = (  # noqa: F841
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "my_inferred_asset_filesystem_data_connector",
+                    "execution_engine": PandasExecutionEngine(),
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -1057,7 +1061,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
     "path,expectation",
     [("BUCKET/DIR/FILE.CSV", does_not_raise())]
     + [
-        (f"BUCKET/DIR/FILE{c}CSV", pytest.raises(ge_exceptions.ParserError))
+        (f"BUCKET/DIR/FILE{c}CSV", pytest.raises(gx_exceptions.ParserError))
         for c in INVALID_S3_CHARS
     ],
 )

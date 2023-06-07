@@ -1,16 +1,21 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     substitute_none_for_missing,
@@ -28,13 +33,15 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectTableRowCountToBeBetween(TableExpectation):
+
+class ExpectTableRowCountToBeBetween(BatchExpectation):
     """Expect the number of rows to be between two values.
 
-    expect_table_row_count_to_be_between is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_row_count_to_be_between is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Keyword Args:
         min_value (int or None): \
@@ -44,23 +51,21 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -70,7 +75,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
           no maximum.
 
     See Also:
-        expect_table_row_count_to_equal
+        [expect_table_row_count_to_equal](https://greatexpectations.io/expectations/expect_table_row_count_to_equal)
     """
 
     library_metadata = {
@@ -169,79 +174,65 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "max_value",
     )
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
 
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                                    Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
-        cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+    def _prescriptive_template(
+        cls, renderer_configuration: RendererConfiguration
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "min_value",
-                "max_value",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        # format params
-        params_with_json_schema = {
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["min_value"] is None and params["max_value"] is None:
+        params = renderer_configuration.params
+
+        if not params.min_value and not params.max_value:
             template_str = "May have any number of rows."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
 
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if params.min_value and params.max_value:
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value rows."
-            elif params["min_value"] is None:
+            elif not params.min_value:
                 template_str = f"Must have {at_most_str} $max_value rows."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"Must have {at_least_str} $min_value rows."
 
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -254,12 +245,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            configuration.kwargs,  # type: ignore[union-attr]
             [
                 "min_value",
                 "max_value",
@@ -282,7 +271,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,

@@ -1,17 +1,18 @@
 import random
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
     InferredAssetAWSGlueDataCatalogDataConnector,
 )
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 def test_basic_instantiation(glue_titanic_catalog):
@@ -95,7 +96,7 @@ def test_instantiation_from_a_config(
             - db_test.tb_titanic_without_partitions
         glue_introspection_directives:
             database_name: db_test
-        """,
+        """,  # noqa: F541
         runtime_environment={
             "execution_engine": "execution_engine",
         },
@@ -137,7 +138,7 @@ def test_instantiation_with_included_tables(glue_titanic_catalog):
 
 
 def test_instantiation_with_invalid_database_name(glue_titanic_catalog):
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         InferredAssetAWSGlueDataCatalogDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
@@ -190,32 +191,48 @@ def test_get_batch_data_and_metadata_without_partitions(
 
 
 def test_get_batch_data_and_metadata_with_partitions(
+    in_memory_runtime_context,
     glue_titanic_catalog,
     test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
 ):
     execution_engine = (
         test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine
     )
-    my_data_connector = InferredAssetAWSGlueDataCatalogDataConnector(
-        name="my_data_connector",
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"] = Datasource(
+        name="FAKE_Datasource_NAME",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine=execution_engine.config,
+        data_connectors={
+            "my_data_connector": {
+                "class_name": "InferredAssetAWSGlueDataCatalogDataConnector",
+                "catalog_id": "catalog_A",
+                "data_asset_name_prefix": "prefix__",
+                "data_asset_name_suffix": "__suffix",
+            },
+        },
+    )
+    # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
+    in_memory_runtime_context.datasources["FAKE_Datasource_NAME"]._execution_engine = execution_engine  # type: ignore[union-attr]
+
+    my_data_connector = in_memory_runtime_context.datasources[
+        "FAKE_Datasource_NAME"
+    ].data_connectors["my_data_connector"]
+
+    batch_definition = BatchDefinition(
         datasource_name="FAKE_Datasource_NAME",
-        execution_engine=test_cases_for_aws_glue_data_catalog_data_connector_spark_execution_engine,
-        catalog_id="catalog_A",
-        data_asset_name_prefix="prefix__",
-        data_asset_name_suffix="__suffix",
+        data_connector_name="my_data_connector",
+        data_asset_name="prefix__db_test.tb_titanic_with_partitions__suffix",
+        batch_identifiers=IDDict({"PClass": "1st", "SexCode": "0"}),
     )
     batch_data, _, __ = my_data_connector.get_batch_data_and_metadata(
-        batch_definition=BatchDefinition(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_data_connector",
-            data_asset_name="prefix__db_test.tb_titanic_with_partitions__suffix",
-            batch_identifiers=IDDict({"PClass": "1st", "SexCode": "0"}),
-        )
+        batch_definition=batch_definition
     )
 
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)
 
-    validator = Validator(execution_engine, batches=[batch])
+    validator = Validator(
+        execution_engine, batches=[batch], data_context=in_memory_runtime_context
+    )
 
     assert validator.expect_column_values_to_be_in_set("PClass", ["1st"]).success
     assert validator.expect_column_values_to_be_in_set("SexCode", ["0"]).success

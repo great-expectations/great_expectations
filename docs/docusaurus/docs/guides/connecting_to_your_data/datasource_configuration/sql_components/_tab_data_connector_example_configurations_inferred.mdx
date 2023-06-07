@@ -1,0 +1,44 @@
+import TipInferredDataConnectorOverview from '../components/_tip_inferred_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorRequiredKeysOverview from './_part_data_connector_required_keys_overview.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+import NoteOptionalDataConnectorKeys from './_note_optional_data_connector_keys.mdx'
+
+<TipInferredDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_inferred_data_connector" />
+
+At this point, your configuration should look like:
+
+```python name="sql datasource configuration with empty inferred sql data_connector"
+```
+
+#### Required Data Connector configuration keys
+
+<PartDataConnectorRequiredKeysOverview data_connector_type="InferredAssetSqlDataConnector" data_connector_name="name_of_my_inferred_data_connector" inferred={true} configured={false} runtime={false} />
+
+For this example, you will be using the `InferredAssetSqlDataConnector` as your `class_name`.  This is a subclass of the `InferredAssetDataConnector` that is specialized to support SQL Execution Engines, such as the `SqlAlchemyExecutionEngine`.  This key/value entry will therefore look like:
+
+```python name="define data_connector class_name for inferred sql datasource"
+```
+
+<TipCustomDataConnectorModuleName />
+
+With this value added your full configuration should now look like:
+
+```python name="inferred sql datasource configuration with data_connector class_name defined"
+```
+
+#### Optional Data Connector configuration key for defining introspection behaviour
+
+There is an optional key that can be defined for your Data Connector to alter the default behaviour of introspection methods such as those used by auto-initializing Expectations and Data Assistants.  This key is:
+
+<NoteOptionalDataConnectorKeys introspection={true} />
+
+:::tip
+
+You will find a list of the valid keys for the `introspection_directives` dictionary and their corresponding values in the [Introspection directives subsection of the Additional notes](#introspection-directives) at the end of this guide.
+
+:::
+
+There are also optional keys that you can define to alter how Data Assets are inferred, how they are split into Batches, and how data is sampled from Batches.  This guide will go over those in the next section.

@@ -1,9 +1,9 @@
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 
 def test_concurrency_disabled_by_default():
@@ -22,7 +22,7 @@ def test_concurrency_enabled_with_config():
 
 
 def test_data_context_concurrency_property():
-    data_context = BaseDataContext(
+    data_context = get_context(
         project_config=DataContextConfig(
             concurrency=ConcurrencyConfig(enabled=True),
             store_backend_defaults=InMemoryStoreBackendDefaults(),

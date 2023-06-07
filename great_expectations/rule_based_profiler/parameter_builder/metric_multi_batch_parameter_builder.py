@@ -4,14 +4,16 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationDetails,
-    MetricComputationResult,
+    MetricComputationDetails,  # noqa: TCH001
+    MetricComputationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -34,7 +36,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     and metric_name as arguments.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: str,
@@ -125,7 +127,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -151,6 +153,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,

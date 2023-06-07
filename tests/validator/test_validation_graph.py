@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValueZScoresToBeLessThan
@@ -31,6 +31,16 @@ def metric_edge(
 
 
 @pytest.fixture
+def validation_graph_with_no_edges() -> ValidationGraph:
+    class DummyExecutionEngine:
+        pass
+
+    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
+
+    return ValidationGraph(execution_engine=execution_engine, edges=None)
+
+
+@pytest.fixture
 def validation_graph_with_single_edge(metric_edge: MetricEdge) -> ValidationGraph:
     class DummyExecutionEngine:
         pass
@@ -50,7 +60,9 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 
 
 @pytest.fixture
-def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
+def expect_column_value_z_scores_to_be_less_than_expectation_config() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
@@ -65,15 +77,11 @@ def expect_column_value_z_scores_to_be_less_than_expectation_config() -> Expecta
 @pytest.fixture
 def expect_column_values_to_be_unique_expectation_validation_graph(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
+    validation_graph_with_no_edges: ValidationGraph,
 ) -> ExpectationValidationGraph:
-    class DummyExecutionEngine:
-        pass
-
-    execution_engine = cast(ExecutionEngine, DummyExecutionEngine)
-
     return ExpectationValidationGraph(
-        execution_engine=execution_engine,
         configuration=expect_column_values_to_be_unique_expectation_config,
+        graph=validation_graph_with_no_edges,
     )
 
 
@@ -112,6 +120,7 @@ def expect_column_value_z_scores_to_be_less_than_expectation_validation_graph():
     return graph
 
 
+# noinspection PyPep8Naming
 @pytest.mark.unit
 def test_ValidationGraph_init_no_input_edges() -> None:
     class DummyExecutionEngine:
@@ -159,10 +168,43 @@ def test_ValidationGraph_add(metric_edge: MetricEdge) -> None:
     assert metric_edge.id in graph.edge_ids
 
 
+def test_ExpectationValidationGraph_constructor(
+    expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
+    validation_graph_with_no_edges: ValidationGraph,
+):
+    with pytest.raises(ValueError) as ve:
+        # noinspection PyUnusedLocal,PyTypeChecker
+        expectation_validation_graph = ExpectationValidationGraph(
+            configuration=None,
+            graph=None,
+        )
+
+    assert ve.value.args == (
+        'Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object.',
+    )
+
+    with pytest.raises(ValueError) as ve:
+        # noinspection PyUnusedLocal,PyTypeChecker
+        expectation_validation_graph = ExpectationValidationGraph(
+            configuration=expect_column_values_to_be_unique_expectation_config,
+            graph=None,
+        )
+
+    assert ve.value.args == (
+        'Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object.',
+    )
+
+    expectation_validation_graph = ExpectationValidationGraph(
+        configuration=expect_column_values_to_be_unique_expectation_config,
+        graph=validation_graph_with_no_edges,
+    )
+    assert len(expectation_validation_graph.graph.edges) == 0
+
+
 @pytest.mark.unit
 def test_ExpectationValidationGraph_update(
-    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
     validation_graph_with_single_edge: ValidationGraph,
+    expect_column_values_to_be_unique_expectation_validation_graph: ExpectationValidationGraph,
 ) -> None:
     assert (
         len(expect_column_values_to_be_unique_expectation_validation_graph.graph.edges)
@@ -263,7 +305,7 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
     graph = ValidationGraph(execution_engine=execution_engine)
 
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError) as e:
         graph.build_metric_dependency_graph(
             metric_configuration=MetricConfiguration(
                 metric_name="column_values.not_a_metric",
@@ -307,7 +349,7 @@ def test_resolve_validation_graph_with_bad_config_catch_exceptions_true():
             if failed_metric_configuration.id in [
                 metric_configuration.id for metric_configuration in metrics_to_resolve
             ]:
-                raise ge_exceptions.MetricResolutionError(
+                raise gx_exceptions.MetricResolutionError(
                     message='Error: The column "not_in_table" in BatchData does not exist.',
                     failed_metrics=[failed_metric_configuration],
                 )

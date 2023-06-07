@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -13,25 +14,24 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
-    """Expect Slowly changing table type II to have no gaps between the 'end date' of each row, and the next
-    'start date' in the next row.
-    Args:
-        template_dict: a dictionary containing the following keys:
-            "primary_key": primary key column name (or multiple columns, comma separated)
-            "open_date_column": name of the column representing open date
-            "close_date_column": name of the column representing clode date
+    """Expect Slowly changing table type II to have no gaps between the 'end date' of each row, and the next 'start date' in the next row.
 
-        threshold: an optional parameter - default is zero.
+    Args:
+        template_dict: dict with the following keys: \
+            primary_key (primary key column name or multiple columns, comma separated), \
+            open_date_column (name of the column representing open date), \
+            close_date_column (name of the column representing clode date)
+        threshold: an optional parameter - default is zero. \
             if the ratio of "gaps" to total table rows is higher than threshold - error will be raised.
     """
 
     metric_dependencies = ("query.template_values",)
 
     query = """
-    SELECT SUM(CASE WHEN {close_date_column} != COALESCE(next_start_date, {close_date_column}) THEN 1 ELSE 0 END), 
+    SELECT SUM(CASE WHEN {close_date_column} != COALESCE(next_start_date, {close_date_column}) THEN 1 ELSE 0 END),
     COUNT(1)
-    FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY 
-    {open_date_column}) AS next_start_date 
+    FROM(SELECT {primary_key}, {close_date_column}, LEAD({open_date_column}) OVER(PARTITION BY {primary_key} ORDER BY
+    {open_date_column}) AS next_start_date
     FROM {active_batch})
     """
 
@@ -67,20 +67,20 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
-        success = False
         threshold = configuration["kwargs"].get("threshold")
         if not threshold:
             threshold = self.default_kwarg_values["threshold"]
-        query_result = metrics.get("query.template_values")
-        holes_count, total_count = query_result[0]
-        error_rate = holes_count / total_count
 
-        if error_rate <= threshold:
-            success = True
+        metrics = convert_to_json_serializable(data=metrics)
+        holes_count: int
+        total_count: int
+        holes_count, total_count = list(
+            metrics.get("query.template_values")[0].values()
+        )
+        error_rate = float(holes_count) / total_count
 
         return {
-            "success": success,
+            "success": error_rate <= threshold,
             "result": {
                 "threshold": threshold,
                 "holes_count": holes_count,
@@ -104,7 +104,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "msid": [
                             "aaa",
@@ -177,6 +176,13 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": [
+                "mysql",
+                "mssql",
+                "postgresql",
+                "bigquery",
+                "snowflake",
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -190,7 +196,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -205,14 +210,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         "threshold": 0.1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         },
     ]

@@ -4,7 +4,9 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 
 class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectation):
-    """Checks if each value matches a regex for ICD10 codes. Does NOT ensure
+    """Expect column values to have valid ICD10 code format.
+
+    Checks if each value matches a regex for ICD10 codes. Does NOT ensure \
     the given code actually exists in any version of the ICD10.
     """
 
@@ -21,8 +23,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     regex_camel_name = "ICD10Codes"
     regex = "[A-Za-z][0-9][A-Za-z0-9](?:\\.[A-Za-z0-9]{0,4})?\\Z"
@@ -34,6 +35,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
                 "valid_icd10": ["Z99.0", "Z08", "J09.X2", "S22.000A"],
                 "invalid_icd10": ["XXX.X", "AA2.01", "2A", "S22.0000A"],
             },
+            "suppress_test_for": ["mssql", "bigquery", "redshift", "snowflake"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -49,7 +51,6 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
                     "out": {"success": False, "unexpected_index_list": [0, 1, 2, 3]},
                 },
             ],
-            "test_backends": [{"backend": "pandas", "dialects": None}],
         }
     ]
 
@@ -62,9 +63,7 @@ class ExpectColumnValuesToHaveValidICD10CodeFormat(RegexBasedColumnMapExpectatio
     # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": ["typed-entities", "hackathon"],
-        "contributors": [
-            "@zachlindsey",
-        ],
+        "contributors": ["@zachlindsey", "@mkopec87"],
     }
 
 

@@ -98,14 +98,14 @@ If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``g
 .. code-block:: python
 
     from datetime import datetime
-    import great_expectations as ge
+    import great_expectations as gx
     import great_expectations.jupyter_ux
     from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-    # Data Context is a GE object that represents your project.
+    # Data Context is a GX object that represents your project.
     # Your project's great_expectations.yml contains all the config
-    # options for the project's GE Data Context.
-    context = ge.data_context.DataContext()
+    # options for the project's GX Data Context.
+    context = gx.data_context.DataContext()
 
     # Create a new empty Expectation Suite
     # and give it a name

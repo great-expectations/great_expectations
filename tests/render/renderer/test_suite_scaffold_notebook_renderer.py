@@ -4,10 +4,10 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
-from great_expectations import DataContext
 from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
+from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
@@ -33,11 +33,11 @@ def test_notebook_execution_with_pandas_backend(
     # part of this test.
     context = titanic_data_context_no_data_docs_no_checkpoint_store
     root_dir = context.root_directory
-    uncommitted_dir = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     suite_name = "my_suite"
-    suite = context.create_expectation_suite(suite_name)
+    suite = context.add_expectation_suite(suite_name)
 
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
+    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")  # noqa: PTH118
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
 
     # Sanity check test setup
@@ -60,15 +60,15 @@ def test_notebook_execution_with_pandas_backend(
         }
     ]
     assert context.get_validation_result(suite_name) == {}
-    notebook_path = os.path.join(uncommitted_dir, f"{suite_name}.ipynb")
-    assert not os.path.isfile(notebook_path)
+    notebook_path = os.path.join(uncommitted_dir, f"{suite_name}.ipynb")  # noqa: PTH118
+    assert not os.path.isfile(notebook_path)  # noqa: PTH113
 
     # Create notebook
     renderer = SuiteScaffoldNotebookRenderer(
         titanic_data_context_no_data_docs_no_checkpoint_store, suite, batch_kwargs
     )
     renderer.render_to_disk(notebook_path)
-    assert os.path.isfile(notebook_path)
+    assert os.path.isfile(notebook_path)  # noqa: PTH113
 
     with open(notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
@@ -78,12 +78,12 @@ def test_notebook_execution_with_pandas_backend(
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Useful to inspect executed notebook
-    output_notebook = os.path.join(uncommitted_dir, "output.ipynb")
+    output_notebook = os.path.join(uncommitted_dir, "output.ipynb")  # noqa: PTH118
     with open(output_notebook, "w") as f:
         nbformat.write(nb, f)
 
     # Assertions about output
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result = context.get_validation_result(suite_name)
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 2,

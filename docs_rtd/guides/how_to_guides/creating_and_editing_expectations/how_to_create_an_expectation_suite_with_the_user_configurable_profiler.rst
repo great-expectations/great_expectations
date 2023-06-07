@@ -27,9 +27,9 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
             .. code-block:: python
 
-                import great_expectations as ge
+                import great_expectations as gx
                 from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
-                context = ge.data_context.DataContext(
+                context = gx.data_context.DataContext(
                     context_root_dir='path/to/my/context/root/directory/great_expectations'
                 )
 

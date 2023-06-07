@@ -5,6 +5,9 @@ import pytest
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
 )
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import _registered_expectations
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
@@ -15,7 +18,6 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 
 def test_expectation_self_check():
-
     my_expectation = ExpectColumnValuesToEqualThree()
     expectation_diagnostic = my_expectation.run_diagnostics()
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
@@ -189,12 +191,6 @@ def test_expectation_self_check():
                         }
                     ],
                 },
-                {
-                    "doc_url": None,
-                    "message": "Passes all linting checks",
-                    "passed": True,
-                    "sub_messages": [],
-                },
             ],
             "production": [
                 {
@@ -215,7 +211,6 @@ def test_expectation_self_check():
 
 
 def test_include_in_gallery_flag():
-
     my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
@@ -279,8 +274,8 @@ def test_self_check_on_an_existing_expectation():
             "custom": [],
         },
         "metrics": [
-            "column_values.nonnull.unexpected_count",
-            "column_values.match_regex.unexpected_count",
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             "table.row_count",
             "column_values.match_regex.unexpected_values",
         ],
@@ -344,7 +339,6 @@ def test_self_check_on_an_existing_expectation():
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
 def test_expectation__get_renderers():
-
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 

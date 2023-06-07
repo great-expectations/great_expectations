@@ -4,11 +4,17 @@ from typing import Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
+import pandas as pd
 from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+)
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
@@ -22,7 +28,15 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
-from great_expectations.util import deep_filter_properties_iterable, lint_code
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    get_context,
+    lint_code,
+)
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
     EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
@@ -61,12 +75,11 @@ validator.expectation_suite = result.get_expectation_suite(
 def test_suite_help_output(caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
+    result: Result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
-        """
-Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
+        """Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
 
   Expectation Suite operations
 
@@ -94,7 +107,7 @@ Commands:
 def test_suite_demo_deprecation_message(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -102,7 +115,7 @@ def test_suite_demo_deprecation_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite demo",
+        "suite demo",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -157,7 +170,8 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    # NOTE: There is a race condition in this test
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -169,7 +183,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input="\n",
         catch_exceptions=False,
     )
@@ -198,7 +212,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
@@ -272,7 +286,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -284,7 +298,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
@@ -313,7 +327,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
@@ -387,7 +401,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -399,7 +413,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name}",
+        f"suite new --expectation-suite {expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -426,7 +440,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
@@ -500,7 +514,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -512,7 +526,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name} --no-jupyter",
+        f"suite new --expectation-suite {expectation_suite_name} --no-jupyter",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -543,7 +557,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
@@ -612,7 +626,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -623,7 +637,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 nonexistent_file.json --no-jupyter
 """,
         catch_exceptions=False,
@@ -633,7 +647,7 @@ nonexistent_file.json --no-jupyter
     stdout: str = result.stdout
     assert 'The JSON file with the path "nonexistent_file.json' in stdout
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()
 
     assert mock_subprocess.call_count == 0
@@ -691,7 +705,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -707,7 +721,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -718,7 +732,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     assert "Error" in stdout
     assert "occurred while attempting to load the JSON file with the path" in stdout
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()
 
     assert mock_subprocess.call_count == 0
@@ -777,7 +791,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -799,7 +813,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -860,7 +874,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
@@ -934,12 +948,12 @@ def test_suite_edit_without_suite_name_raises_error(
     empty_data_context_stats_enabled,
 ):
     """This is really only testing click missing arguments"""
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
+    result: Result = runner.invoke(cli, "suite edit", catch_exceptions=False)
     assert result.exit_code == 2
 
     assert (
@@ -975,13 +989,13 @@ def test_suite_edit_datasource_and_batch_request_error(
     empty_data_context_stats_enabled,
 ):
     """This is really only testing click missing arguments"""
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -993,7 +1007,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
+        f"suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1055,7 +1069,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     assert not context.list_expectation_suites()
 
@@ -1065,7 +1079,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite edit not_a_real_suite",
+        "suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1128,13 +1142,13 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -1146,7 +1160,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource-name not_real",
+        f"suite edit {expectation_suite_name} --interactive --datasource-name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1229,7 +1243,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     - NOT open Data Docs
     - open jupyter
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1264,7 +1278,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1285,7 +1298,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     mock_webbrowser.reset_mock()
 
     # remove the citations from the suite
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -1293,7 +1306,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     assert isinstance(suite, ExpectationSuite)
 
     suite.meta.pop("citations", None)
-    context.save_expectation_suite(expectation_suite=suite)
+    context.add_or_update_expectation_suite(expectation_suite=suite)
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
@@ -1302,7 +1315,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1484,7 +1496,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1519,7 +1531,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1542,7 +1553,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -1556,7 +1567,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1721,7 +1731,8 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     - NOT open Data Docs
     - open jupyter
     """
-    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1756,7 +1767,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1780,7 +1790,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     mock_subprocess.reset_mock()
 
     # remove the citations from the suite
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -1788,7 +1798,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     assert isinstance(suite, ExpectationSuite)
 
     suite.meta.pop("citations", None)
-    context.save_expectation_suite(expectation_suite=suite)
+    context.update_expectation_suite(expectation_suite=suite)
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
@@ -1797,7 +1807,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1976,9 +1985,9 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     The command should:
     - NOT open Data Docs
-    - NOT open jupyter
     """
-    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -2013,7 +2022,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -2036,7 +2044,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -2050,7 +2058,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2198,7 +2205,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     monkeypatch,
     empty_data_context_stats_enabled,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -2207,7 +2214,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -2231,7 +2238,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite edit {expectation_suite_name} --interactive --batch-request
+        f"""suite edit {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -2288,7 +2295,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
 def test_suite_list_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     config_file_path: str = os.path.join(
         context.root_directory, "great_expectations.yml"
     )
@@ -2299,7 +2306,7 @@ def test_suite_list_with_zero_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
 
@@ -2345,7 +2352,7 @@ def test_suite_list_with_zero_suites(
 def test_suite_list_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -2357,7 +2364,7 @@ def test_suite_list_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
 
@@ -2365,7 +2372,7 @@ def test_suite_list_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2411,21 +2418,21 @@ def test_suite_list_with_one_suite(
 def test_suite_list_with_multiple_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
 
     # noinspection PyUnusedLocal
-    suite_0: ExpectationSuite = context.create_expectation_suite(
+    suite_0: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="a.warning"
     )
     # noinspection PyUnusedLocal
-    suite_1: ExpectationSuite = context.create_expectation_suite(
+    suite_1: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="b.warning"
     )
     # noinspection PyUnusedLocal
-    suite_2: ExpectationSuite = context.create_expectation_suite(
+    suite_2: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="c.warning"
     )
 
@@ -2436,7 +2443,7 @@ def test_suite_list_with_multiple_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2484,14 +2491,14 @@ def test_suite_list_with_multiple_suites(
 def test_suite_delete_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2536,12 +2543,12 @@ def test_suite_delete_with_zero_suites(
 def test_suite_delete_with_non_existent_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2556,7 +2563,7 @@ def test_suite_delete_with_non_existent_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2601,7 +2608,7 @@ def test_suite_delete_with_non_existent_suite(
 def test_suite_delete_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = empty_data_context_stats_enabled.root_directory
@@ -2610,7 +2617,7 @@ def test_suite_delete_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2631,7 +2638,7 @@ def test_suite_delete_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="\n",
         catch_exceptions=False,
     )
@@ -2682,7 +2689,7 @@ def test_suite_delete_with_one_suite(
 def test_suite_delete_canceled_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = empty_data_context_stats_enabled.root_directory
@@ -2691,7 +2698,7 @@ def test_suite_delete_canceled_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2712,7 +2719,7 @@ def test_suite_delete_canceled_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="n\n",
         catch_exceptions=False,
     )
@@ -2756,7 +2763,7 @@ def test_suite_delete_canceled_with_one_suite(
 def test_suite_delete_with_one_suite_assume_yes_flag(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -2765,7 +2772,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2786,7 +2793,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"--assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2836,7 +2843,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2865,7 +2872,7 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     - send a DataContext init success message
     - send a new fail message
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
@@ -2875,7 +2882,6 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--interactive",
@@ -2941,7 +2947,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     - send a DataContext init success message
     - send a new fail message
     """
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -2949,7 +2955,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 
     expectation_suite_name: str = "test_suite_name"
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2975,7 +2981,6 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3054,7 +3059,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     - send a DataContext init success message
     - send a new success message
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -3079,7 +3084,6 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3165,7 +3169,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     expected_expectation_configurations: List[
@@ -3284,7 +3288,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     - send a DataContext init success message
     - send a new success message
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -3309,7 +3313,6 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3390,7 +3393,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
         replacement_string="",
     )
 
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
 
     expected_expectation_configurations: List[
@@ -3500,14 +3503,14 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     mock_subprocess: mock.MagicMock,
     mock_emit: mock.MagicMock,
     monkeypatch: Any,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: FileDataContext,
 ):
     """
     We call the "suite new --profile" command with a named profiler argument
 
     The command should create a new notebook
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -3535,7 +3538,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3633,14 +3635,14 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     mock_subprocess: mock.MagicMock,
     mock_emit: mock.MagicMock,
     monkeypatch: Any,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: FileDataContext,
 ):
     """
     We call the "suite new --profile" command with a named profiler argument
 
     The command should create a new notebook and open it in Jupyter
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -3667,7 +3669,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -4051,7 +4052,7 @@ def test__process_suite_new_flags_and_prompt(
     """
 
     usage_event_end: str = "cli.suite.new.end"
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     # test happy paths
     if not error_expected:
@@ -4413,7 +4414,7 @@ def test__process_suite_edit_flags_and_prompt(
     """
 
     usage_event_end: str = "cli.suite.edit.end"
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     # test happy paths
     if not error_expected:
@@ -4486,3 +4487,173 @@ def test__process_suite_edit_flags_and_prompt(
                 }
             ),
         ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_fluent_datasources_message(
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    context = data_context_with_fluent_datasource_and_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_block_datasources_no_message(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
+):
+    context = data_context_with_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_fluent_datasources_message(
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_NEW_FLUENT_DATASOURCE_ERROR in result.stdout
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    context = data_context_with_fluent_datasource_and_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_block_datasources_no_message(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
+):
+    context = data_context_with_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite new",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_NEW_FLUENT_DATASOURCE_WARNING not in result.stdout
+    assert SUITE_NEW_FLUENT_DATASOURCE_ERROR not in result.stdout

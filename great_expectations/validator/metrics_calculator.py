@@ -1,29 +1,21 @@
-import logging
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.exception_info import ExceptionInfo
+import logging
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+
+import pandas as pd
+
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
+
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class MetricsCalculator:
@@ -37,6 +29,7 @@ class MetricsCalculator:
 
         Args:
             execution_engine: ExecutionEngine to perform metrics computation.
+            show_progress_bars: Directive for whether or not to show progress bars.
         """
         self._execution_engine: ExecutionEngine = execution_engine
         self._show_progress_bars: bool = show_progress_bars
@@ -49,14 +42,24 @@ class MetricsCalculator:
     def show_progress_bars(self, enable: bool) -> None:
         self._show_progress_bars = enable
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """
         Convenience method to run "table.columns" metric.
+
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
-            }
+            domain_kwargs = {}
+
+        if domain_kwargs.get("batch_id") is None:
+            domain_kwargs[
+                "batch_id"
+            ] = self._execution_engine.batch_manager.active_batch_id
 
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(
@@ -67,21 +70,32 @@ class MetricsCalculator:
 
         return columns
 
+    @public_api
     def head(
         self,
         n_rows: int = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """
-        Convenience method to run "table.head" metric.
+        """Convenience method to return the first several rows or records from a Batch of data.
+
+        Args:
+            n_rows: The number of rows to return.
+            domain_kwargs: If provided, the domain for which to return records.
+            fetch_all: If True, ignore n_rows and return the entire batch.
+
+        Returns:
+            A Pandas DataFrame containing the records' data.
         """
         if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
-            }
+            domain_kwargs = {}
 
-        data: Any = self.get_metric(
+        if domain_kwargs.get("batch_id") is None:
+            domain_kwargs[
+                "batch_id"
+            ] = self._execution_engine.batch_manager.active_batch_id
+
+        df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs=domain_kwargs,
@@ -91,18 +105,6 @@ class MetricsCalculator:
                 },
             )
         )
-
-        if isinstance(
-            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            df = pd.DataFrame(data=data)
-        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
-            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
-            df = pd.DataFrame(data=rows)
-        else:
-            raise ge_exceptions.GreatExpectationsError(
-                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
-            )
 
         return df.reset_index(drop=True, inplace=False)
 
@@ -132,7 +134,6 @@ class MetricsCalculator:
             metric_configurations=list(metrics.values()),
             runtime_configuration=None,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
         return {
             metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
@@ -145,14 +146,12 @@ class MetricsCalculator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -161,13 +160,18 @@ class MetricsCalculator:
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
         )
-        resolved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = self.resolve_validation_graph_and_handle_aborted_metrics_info(
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
         )
         return resolved_metrics
 
@@ -200,20 +204,24 @@ class MetricsCalculator:
 
         return graph
 
-    @staticmethod
     def resolve_validation_graph_and_handle_aborted_metrics_info(
+        self,
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
+    ) -> Tuple[
+        Dict[Tuple[str, str, str], MetricValue],
+        Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ]:
         """
         Args:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -226,11 +234,10 @@ class MetricsCalculator:
         (
             resolved_metrics,
             aborted_metrics_info,
-        ) = MetricsCalculator.resolve_validation_graph(
+        ) = self.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
         )
 
         if aborted_metrics_info:
@@ -238,15 +245,17 @@ class MetricsCalculator:
                 f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 
-        return resolved_metrics
+        return (
+            resolved_metrics,
+            aborted_metrics_info,
+        )
 
-    @staticmethod
     def resolve_validation_graph(
+        self,
         graph: ValidationGraph,
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-        show_progress_bars: bool = True,
     ) -> Tuple[
         Dict[Tuple[str, str, str], MetricValue],
         Dict[
@@ -261,7 +270,6 @@ class MetricsCalculator:
             graph: "ValidationGraph" object, containing "metric_edge" structures with "MetricConfiguration" objects.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
-            show_progress_bars: Directive for whether or not to show progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -275,6 +283,6 @@ class MetricsCalculator:
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
-            show_progress_bars=show_progress_bars,
+            show_progress_bars=self._show_progress_bars,
         )
         return resolved_metrics, aborted_metrics_info

@@ -29,7 +29,6 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-
     map_metric = "column_values.equal_three"
     success_keys = ("mostly",)
     # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
@@ -40,6 +39,7 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
 
     examples = [
         {
+            "dataset_name": "mostly_threes_second_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
             },
@@ -187,9 +187,9 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 class ExpectColumnValuesToEqualThree__BrokenIteration(
     ExpectColumnValuesToEqualThree__SecondIteration
 ):
-
     examples = [
         {
+            "dataset_name": "mostly_threes_third_broken_iteration",
             "data": {
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
                 "broken_column": [3, 3, 3, 3, 3, 3, 2, -1, "b", "b"],

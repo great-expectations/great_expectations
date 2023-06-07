@@ -1,10 +1,8 @@
-import json
 from typing import Optional
 
 import us
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -15,7 +13,7 @@ from great_expectations.expectations.metrics import (
 
 def is_valid_state(state: str, dc_statehood: bool):
     list_of_states = [str(x) for x in us.states.STATES]
-    if dc_statehood == True:
+    if dc_statehood is True:
         list_of_states.append("District Of Columbia")
     else:
         pass
@@ -32,7 +30,6 @@ def is_valid_state(state: str, dc_statehood: bool):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSState(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_state"
 
@@ -55,8 +52,9 @@ class ColumnValuesToBeValidUSState(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSState(ColumnMapExpectation):
     """Expect values in this column to be valid state abbreviations.
-    See https://pypi.org/project/us/ for more information.
-    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50
+
+    See https://pypi.org/project/us/ for more information. \
+    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50. \
     dc_statehood defaults to True, though can be overriden by end users
     """
 
@@ -124,8 +122,7 @@ class ExpectColumnValuesToBeValidUSState(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

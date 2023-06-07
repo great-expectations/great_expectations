@@ -14,7 +14,6 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
 from tests.test_utils import LoadedTable, get_connection_string_and_dialect
 
 if __name__ == "test_script_module":
-
     dialect: str
     connection_string: str
     dialect, connection_string = get_connection_string_and_dialect(

@@ -79,12 +79,11 @@ class ColumnValuesAreUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapMetricProv
 class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     ColumnMapExpectation
 ):
-    """
-    Given a zipcode and a radius, this expectation checks that all zipcodes in a column of a table are within a specified
-    radius, in miles, of the given zipcode.
-    """
+    """Expect column values to be US zip codes within a specified number of miles of a given zipcode."""
 
-    def validate_configuration(self, configuration) -> None:
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -97,8 +96,7 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [

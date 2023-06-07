@@ -1,20 +1,20 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "anonymized-usage-statistics-record",
   "definitions": {
     "anonymized_string": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-string",
       "type": "string",
       "minLength": 32,
       "maxLength": 32
     },
     "anonymized_datasource_name": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-datasource-name",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -32,22 +32,22 @@
       ]
     },
     "anonymized_datasource": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-datasource",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -139,22 +139,22 @@
       ]
     },
     "anonymized_store": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-store",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -211,11 +211,11 @@
       ]
     },
     "anonymized_class_info": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-class-info",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -245,26 +245,26 @@
       ]
     },
     "anonymized_validation_operator": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-validation-operator",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_action_list": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action-list",
           "definitions": {
             "anonymized_action": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -329,11 +329,11 @@
       ]
     },
     "anonymized_action": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-action",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -364,15 +364,15 @@
       ]
     },
     "anonymized_action_list": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-action-list",
       "definitions": {
         "anonymized_action": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -410,29 +410,29 @@
       }
     },
     "empty_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "empty-payload",
       "type": "object",
       "properties": {},
       "additionalProperties": false
     },
     "anonymized_init_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-init-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -462,22 +462,22 @@
           ]
         },
         "anonymized_datasource": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_class_info": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-class-info",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -569,26 +569,26 @@
           ]
         },
         "anonymized_validation_operator": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-validation-operator",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_action_list": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action-list",
               "definitions": {
                 "anonymized_action": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-action",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -653,22 +653,22 @@
           ]
         },
         "anonymized_data_docs_site": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-data-docs-site",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_class_info": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-class-info",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -728,22 +728,22 @@
           ]
         },
         "anonymized_store": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-store",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_class_info": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-class-info",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -800,11 +800,11 @@
           ]
         },
         "anonymized_action": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -835,15 +835,15 @@
           ]
         },
         "anonymized_action_list": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action-list",
           "definitions": {
             "anonymized_action": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -881,11 +881,11 @@
           }
         },
         "anonymized_expectation_suite": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-expectation-suite",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -940,7 +940,7 @@
           ]
         },
         "package_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "package-info",
           "type": "object",
           "properties": {
@@ -976,7 +976,8 @@
       "properties": {
         "version": {
           "enum": [
-            "1.0.0"
+            "1.0.0",
+            "1.0.1"
           ]
         },
         "platform.system": {
@@ -1045,33 +1046,33 @@
       "additionalProperties": false
     },
     "anonymized_run_validation_operator_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-run-validation-operator-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_batch": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -1122,11 +1123,11 @@
           ]
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1163,22 +1164,22 @@
       "additionalProperties": false
     },
     "anonymized_data_docs_site": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-data-docs-site",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1238,22 +1239,22 @@
       ]
     },
     "anonymized_batch_request": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-batch-request",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1357,22 +1358,22 @@
       "additionalProperties": false
     },
     "anonymized_batch": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-batch",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1423,11 +1424,11 @@
       ]
     },
     "anonymized_expectation_suite": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-expectation-suite",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -1482,11 +1483,11 @@
       ]
     },
     "anonymized_get_or_edit_or_save_expectation_suite_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -1505,11 +1506,11 @@
       "additionalProperties": false
     },
     "anonymized_cli_suite_expectation_suite_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-cli-suite-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -1560,22 +1561,22 @@
       }
     },
     "anonymized_cli_suite_new_expectation_suite_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-cli-suite-new-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_cli_suite_expectation_suite_payload": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-cli-suite-expectation-suite-payload",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1637,22 +1638,22 @@
       }
     },
     "anonymized_cli_suite_edit_expectation_suite_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-cli-suite-edit-expectation-suite-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_cli_suite_expectation_suite_payload": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-cli-suite-expectation-suite-payload",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1717,7 +1718,7 @@
       }
     },
     "anonymized_cli_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-cli-payload",
       "type": "object",
       "properties": {
@@ -1735,7 +1736,7 @@
       "additionalProperties": false
     },
     "anonymized_cli_new_ds_choice_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-cli-new-ds-choice-payload",
       "type": "object",
       "properties": {
@@ -1758,7 +1759,7 @@
       "additionalProperties": false
     },
     "anonymized_datasource_sqlalchemy_connect_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-datasource-sqlalchemy-connect-payload",
       "type": "object",
       "properties": {
@@ -1777,22 +1778,22 @@
       "additionalProperties": false
     },
     "anonymized_test_yaml_config_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-test-yaml-config-payload",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -1867,33 +1868,33 @@
       "additionalProperties": false
     },
     "anonymized_validation": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-validation",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -1997,15 +1998,15 @@
           "additionalProperties": false
         },
         "anonymized_action_list": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action-list",
           "definitions": {
             "anonymized_action": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -2058,37 +2059,37 @@
       "additionalProperties": false
     },
     "anonymized_validations": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-validations",
       "definitions": {
         "anonymized_validation": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-validation",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -2192,15 +2193,15 @@
               "additionalProperties": false
             },
             "anonymized_action_list": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action-list",
               "definitions": {
                 "anonymized_action": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-action",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -2260,29 +2261,29 @@
       }
     },
     "anonymized_checkpoint_run": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-checkpoint-run-payload",
       "definitions": {
         "empty_payload": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "empty-payload",
           "type": "object",
           "properties": {},
           "additionalProperties": false
         },
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -2300,11 +2301,11 @@
           ]
         },
         "anonymized_run_time": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-run-time",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -2322,22 +2323,22 @@
           ]
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -2441,11 +2442,11 @@
           "additionalProperties": false
         },
         "anonymized_action": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -2476,15 +2477,15 @@
           ]
         },
         "anonymized_action_list": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-action-list",
           "definitions": {
             "anonymized_action": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -2522,33 +2523,33 @@
           }
         },
         "anonymized_validation": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-validation",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -2652,15 +2653,15 @@
               "additionalProperties": false
             },
             "anonymized_action_list": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-action-list",
               "definitions": {
                 "anonymized_action": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-action",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -2713,37 +2714,37 @@
           "additionalProperties": false
         },
         "anonymized_validations": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-validations",
           "definitions": {
             "anonymized_validation": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-validation",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_batch_request": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-batch-request",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
                       "maxLength": 32
                     },
                     "anonymized_datasource_name": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-datasource-name",
                       "definitions": {
                         "anonymized_string": {
-                          "$schema": "http://json-schema.org/draft-04/schema#",
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "title": "anonymized-string",
                           "type": "string",
                           "minLength": 32,
@@ -2847,15 +2848,15 @@
                   "additionalProperties": false
                 },
                 "anonymized_action_list": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-action-list",
                   "definitions": {
                     "anonymized_action": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-action",
                       "definitions": {
                         "anonymized_string": {
-                          "$schema": "http://json-schema.org/draft-04/schema#",
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "title": "anonymized-string",
                           "type": "string",
                           "minLength": 32,
@@ -2983,7 +2984,7 @@
       ]
     },
     "anonymized_legacy_profiler_build_suite_payload": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-legacy-profiler-build-suite-payload",
       "type": "object",
       "properties": {
@@ -3045,33 +3046,33 @@
       "additionalProperties": false
     },
     "anonymized_domain_builder": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-domain-builder",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -3175,11 +3176,11 @@
           "additionalProperties": false
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -3216,33 +3217,33 @@
       ]
     },
     "anonymized_parameter_builder": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-parameter-builder",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -3346,11 +3347,11 @@
           "additionalProperties": false
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -3391,11 +3392,11 @@
       ]
     },
     "anonymized_expectation_configuration_builder": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-expectation-configuration-builder",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
@@ -3428,22 +3429,22 @@
       ]
     },
     "anonymized_rule": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-rules",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -3461,22 +3462,22 @@
           ]
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -3580,33 +3581,33 @@
           "additionalProperties": false
         },
         "anonymized_domain_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-domain-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -3710,11 +3711,11 @@
               "additionalProperties": false
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -3751,33 +3752,33 @@
           ]
         },
         "anonymized_parameter_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-parameter-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -3881,11 +3882,11 @@
               "additionalProperties": false
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -3926,11 +3927,11 @@
           ]
         },
         "anonymized_expectation_configuration_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-expectation-configuration-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -3993,40 +3994,40 @@
       ]
     },
     "anonymized_rule_based_profiler_run": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "anonymized-rule-based-profiler-run-payload",
       "definitions": {
         "empty_payload": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "empty-payload",
           "type": "object",
           "properties": {},
           "additionalProperties": false
         },
         "anonymized_string": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-string",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_rule": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-rules",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -4044,22 +4045,22 @@
               ]
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -4163,33 +4164,33 @@
               "additionalProperties": false
             },
             "anonymized_domain_builder": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-domain-builder",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_batch_request": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-batch-request",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
                       "maxLength": 32
                     },
                     "anonymized_datasource_name": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-datasource-name",
                       "definitions": {
                         "anonymized_string": {
-                          "$schema": "http://json-schema.org/draft-04/schema#",
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "title": "anonymized-string",
                           "type": "string",
                           "minLength": 32,
@@ -4293,11 +4294,11 @@
                   "additionalProperties": false
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -4334,33 +4335,33 @@
               ]
             },
             "anonymized_parameter_builder": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-parameter-builder",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_batch_request": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-batch-request",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
                       "maxLength": 32
                     },
                     "anonymized_datasource_name": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-datasource-name",
                       "definitions": {
                         "anonymized_string": {
-                          "$schema": "http://json-schema.org/draft-04/schema#",
+                          "$schema": "https://json-schema.org/draft/2020-12/schema",
                           "title": "anonymized-string",
                           "type": "string",
                           "minLength": 32,
@@ -4464,11 +4465,11 @@
                   "additionalProperties": false
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -4509,11 +4510,11 @@
               ]
             },
             "anonymized_expectation_configuration_builder": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-expectation-configuration-builder",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -4576,11 +4577,11 @@
           ]
         },
         "anonymized_datasource_name": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-datasource-name",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -4598,22 +4599,22 @@
           ]
         },
         "anonymized_batch_request": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-batch-request",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -4717,33 +4718,33 @@
           "additionalProperties": false
         },
         "anonymized_domain_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-domain-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -4847,11 +4848,11 @@
               "additionalProperties": false
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -4888,33 +4889,33 @@
           ]
         },
         "anonymized_parameter_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-parameter-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_batch_request": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-batch-request",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
                 },
                 "anonymized_datasource_name": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-datasource-name",
                   "definitions": {
                     "anonymized_string": {
-                      "$schema": "http://json-schema.org/draft-04/schema#",
+                      "$schema": "https://json-schema.org/draft/2020-12/schema",
                       "title": "anonymized-string",
                       "type": "string",
                       "minLength": 32,
@@ -5018,11 +5019,11 @@
               "additionalProperties": false
             },
             "anonymized_datasource_name": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-datasource-name",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "title": "anonymized-string",
                   "type": "string",
                   "minLength": 32,
@@ -5063,11 +5064,11 @@
           ]
         },
         "anonymized_expectation_configuration_builder": {
-          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
           "title": "anonymized-expectation-configuration-builder",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/draft-04/schema#",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
               "title": "anonymized-string",
               "type": "string",
               "minLength": 32,
@@ -5142,7 +5143,7 @@
       ]
     },
     "package_info": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "package-info",
       "type": "object",
       "properties": {
@@ -5174,7 +5175,7 @@
       "additionalProperties": false
     },
     "cloud_migrate": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
       "title": "cloud-migrate",
       "type": "object",
       "properties": {
@@ -5193,7 +5194,8 @@
   "properties": {
     "version": {
       "enum": [
-        "1.0.0"
+        "1.0.0",
+        "1.0.1"
       ]
     },
     "ge_version": {

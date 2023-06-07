@@ -1,12 +1,13 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -15,6 +16,10 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
@@ -34,60 +39,52 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
+
+class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     """Expect the number of unique values to be between a minimum value and a maximum value.
 
-            expect_column_unique_value_count_to_be_between is a \
-            :func:`column_aggregate_expectation
-            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    expect_column_unique_value_count_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-            Args:
-                column (str): \
-                    The column name.
-                min_value (int or None): \
-                    The minimum number of unique values allowed.
-                max_value (int or None): \
-                    The maximum number of unique values allowed.
+    Args:
+        column (str): \
+            The column name.
+        min_value (int or None): \
+            The minimum number of unique values allowed.
+        max_value (int or None): \
+            The maximum number of unique values allowed.
 
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-            Returns:
-                An ExpectationSuiteValidationResult
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
+    Notes:
+        * min_value and max_value are both inclusive.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be an int \
+          representing the number of unique values the column
 
-                    {
-                        "observed_value": (int) The number of unique values in the column
-                    }
-
-                * min_value and max_value are both inclusive.
-                * If min_value is None, then max_value is treated as an upper bound
-                * If max_value is None, then min_value is treated as a lower bound
-
-            See Also:
-                :func:`expect_column_proportion_of_unique_values_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine
-                .expect_column_proportion_of_unique_values_to_be_between>`
-
-            """
+    See Also:
+        [expect_column_proportion_of_unique_values_to_be_between](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -196,119 +193,79 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
 
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(  # noqa: PLR0912
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("mostly", RendererValueType.NUMBER),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "mostly",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        at_least_str, at_most_str = handle_strict_min_max(params)
+        params = renderer_configuration.params
 
-        if (params["min_value"] is None) and (params["max_value"] is None):
+        if not params.min_value and not params.max_value:
             template_str = "may have any number of unique values."
         else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if params["min_value"] is None:
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
+
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
+                )
+                if not params.min_value:
                     template_str = f"must have {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
-                elif params["max_value"] is None:
+                elif not params.max_value:
                     template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is None:
+                if not params.min_value:  # noqa: PLR5501
                     template_str = f"must have {at_most_str} $max_value unique values."
-                elif params["max_value"] is None:
+                elif not params.max_value:
                     template_str = f"must have {at_least_str} $min_value unique values."
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -344,7 +301,9 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if (  # noqa: PLR5501
+                params["mostly"] is not None and params["mostly"] < 1.0  # noqa: PLR2004
+            ):
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -356,7 +315,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is None:
+                if params["min_value"] is None:  # noqa: PLR5501
                     template_str = f"must have {at_most_str} $max_value unique values."
                 elif params["max_value"] is None:
                     template_str = f"must have {at_least_str} $min_value unique values."

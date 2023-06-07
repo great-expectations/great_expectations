@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
+from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
 
 
 def test__get_dependency_names():
@@ -47,31 +47,34 @@ def test__get_dependency_names():
         "1",
         "-",
     ]
-    ge_dependencies = GEDependencies()
+    ge_dependencies = GXDependencies()
     observed_dependencies = ge_dependencies._get_dependency_names(mock_dependencies)
     assert observed_dependencies == expected_dependendencies
 
 
 @pytest.mark.integration
 def test_required_dependency_names_match_requirements_file():
-    """If there is a mismatch, GEDependencies should change to match our requirements.txt file.
+    """If there is a mismatch, GXDependencies should change to match our requirements.txt file.
 
-    See GEDependencies for a utility to check for a mismatch.
+    See GXDependencies for a utility to check for a mismatch.
     """
-    ge_dependencies = GEDependencies()
+    ge_dependencies = GXDependencies()
     assert (
-        ge_dependencies.get_required_dependency_names()
+        sorted(ge_dependencies.get_required_dependency_names())
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
     )
 
 
 @pytest.mark.integration
 def test_dev_dependency_names_match_requirements_file():
-    """If there is a mismatch, GEDependencies should change to match our requirements-dev*.txt files.
+    """If there is a mismatch, GXDependencies should change to match our requirements-dev*.txt files.
 
-    See GEDependencies for a utility to check for a mismatch.
+    See GXDependencies for a utility to check for a mismatch.
     """
-    ge_dependencies = GEDependencies()
+    ge_dependencies = GXDependencies()
     assert ge_dependencies.get_dev_dependency_names() == set(
         ge_dependencies.get_dev_dependency_names_from_requirements_file()
-    ) - set(GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING)
+    ) - {
+        name.lower()
+        for name in GXDependencies.GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
+    }

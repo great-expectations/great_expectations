@@ -16,7 +16,6 @@ BASE_API_URL = "https://content.airhex.com/api/v3.7.4/airports/?iata="
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidIataCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_iata_code"
 
@@ -53,18 +52,22 @@ class ColumnValuesToBeValidIataCode(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid IATA airport codes."""
+    """Expect column values to be valid IATA airport codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
+            # https://www.ccra.com/airport-codes has a searchable list of codes
             "data": {
                 "valid_airport_codes": ["MCO", "SFO", "LAX", "JFK", "LGA", "EWR"],
                 "invalid_airport_codes": [
                     "XYZ",
                     "UWU",
                     "MEME",
+                    "FFF",
+                    "ZZZ",
+                    "ABC",
                 ],
             },
             "tests": [
@@ -97,7 +100,7 @@ class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -110,8 +113,7 @@ class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

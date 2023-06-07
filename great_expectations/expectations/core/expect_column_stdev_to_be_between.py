@@ -1,16 +1,21 @@
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -29,67 +34,59 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectColumnStdevToBeBetween(ColumnExpectation):
+
+class ExpectColumnStdevToBeBetween(ColumnAggregateExpectation):
     """Expect the column standard deviation to be between a minimum value and a maximum value.
-            Uses sample standard deviation (normalized by N-1).
 
-            expect_column_stdev_to_be_between is a \
-            :func:`column_aggregate_expectation
-            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    Uses sample standard deviation (normalized by N-1).
 
-            Args:
-                column (str): \
-                    The column name.
-                min_value (float or None): \
-                    The minimum value for the column standard deviation.
-                max_value (float or None): \
-                    The maximum value for the column standard deviation.
-                strict_min (boolean):
-                    If True, the column standard deviation must be strictly larger than min_value, default=False
-                strict_max (boolean):
-                    If True, the column standard deviation must be strictly smaller than max_value, default=False
+    expect_column_stdev_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations).
 
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`. \
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
+    Args:
+        column (str): \
+            The column name.
+        min_value (float or None): \
+            The minimum value for the column standard deviation.
+        max_value (float or None): \
+            The maximum value for the column standard deviation.
+        strict_min (boolean): \
+            If True, the column standard deviation must be strictly larger than min_value, default=False
+        strict_max (boolean): \
+            If True, the column standard deviation must be strictly smaller than max_value, default=False
 
-            Returns:
-                An ExpectationSuiteValidationResult
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-                    {
-                        "observed_value": (float) The true standard deviation for the column
-                    }
+    Notes:
+        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be a float \
+          representing the true standard deviation for the column
 
-                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-                * If min_value is None, then max_value is treated as an upper bound
-                * If max_value is None, then min_value is treated as a lower bound
-
-            See Also:
-                :func:`expect_column_mean_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_mean_to_be_between>`
-
-                :func:`expect_column_median_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_median_to_be_between>`
-
-            """
+    See Also:
+        [expect_column_mean_to_be_between](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
+        [expect_column_median_to_be_between](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -197,103 +194,68 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         "strict_max",
     )
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        template_str: str = ""
+        params = renderer_configuration.params
 
-        if (params["min_value"] is None) and (params["max_value"] is None):
+        if not params.min_value and not params.max_value:
             template_str = "standard deviation may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
 
-            if params["min_value"] is not None and params["max_value"] is not None:
+            if params.min_value and params.max_value:
                 template_str = f"standard deviation must be {at_least_str} $min_value and {at_most_str} $max_value."
-            elif params["min_value"] is None:
+            elif not params.min_value:
                 template_str = f"standard deviation must be {at_most_str} $max_value."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"standard deviation must be {at_least_str} $min_value."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return template_str, params_with_json_schema, styling
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

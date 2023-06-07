@@ -8,9 +8,9 @@ The block below is not rendered in the final documentation, but *does* affect th
 
 .. invisible-code-block: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     import pandas as pd
-    npi = ge.dataset.PandasDataset({"provider_id": [1,2,3]})
+    npi = gx.dataset.PandasDataset({"provider_id": [1,2,3]})
     from great_expectations.core import ExpectationValidationResult, ExpectationConfiguration
     res = npi.expect_column_values_to_be_unique("provider_id")
 
@@ -74,7 +74,7 @@ This block is tested only in that it must not raise an exception. No output test
 These three lines will be evaluated as classic doctest:
 
 >>> df = pd.read_csv("/opt/data/titanic/Titanic.csv")
->>> df = ge.dataset.PandasDataset(df)
+>>> df = gx.dataset.PandasDataset(df)
 >>> res = df.expect_column_values_to_be_in_set("Sex", ["male", "female"])
 
 This section would often fail, but will be skipped because of the Sphinx comment. It **will** be rendered.
@@ -108,4 +108,3 @@ This section would often fail, but will be skipped because of the Sphinx comment
         }
       }
     }
-

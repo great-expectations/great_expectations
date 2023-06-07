@@ -11,6 +11,7 @@ from great_expectations.expectations.metrics import (
 
 HTTP_STATUS_NAME_LIST = [s.name.lower().replace("_", " ") for s in HTTPStatus]
 
+
 # This method compares a string to the valid HTTP status name
 def is_valid_http_status_name(name: str) -> bool:
     name_plain = name.lower().replace("_", " ")
@@ -20,7 +21,6 @@ def is_valid_http_status_name(name: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidHttpStatusName(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_http_status_name"
 
@@ -42,7 +42,7 @@ class ColumnValuesToBeValidHttpStatusName(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidHttpStatusName(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid HTTP status name."""
+    """Expect column values to conform to valid HTTP status names."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -105,8 +105,7 @@ class ExpectColumnValuesToBeValidHttpStatusName(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

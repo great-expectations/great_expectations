@@ -1,3 +1,4 @@
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml full">
 # in the test_v3_checkpoint.yml file
 name: test_v3_checkpoint
 config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration
@@ -29,5 +30,4 @@ validations:
         index: -1
     expectation_suite_name: Titanic.profiled
 profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
+# </snippet>

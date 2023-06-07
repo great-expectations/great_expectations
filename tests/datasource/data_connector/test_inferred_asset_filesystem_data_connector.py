@@ -2,11 +2,11 @@ from typing import List
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
@@ -15,7 +15,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 def test_basic_instantiation(tmp_path_factory):
@@ -47,7 +47,7 @@ def test_basic_instantiation(tmp_path_factory):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -177,7 +177,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -900,9 +900,9 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetFilesystemDataConnector = (
+        my_data_connector: InferredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -961,9 +961,9 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetFilesystemDataConnector = (
+        my_data_connector: InferredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={

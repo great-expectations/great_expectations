@@ -13,6 +13,7 @@ config_version: 3.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/great_expectations.yml full">
 datasources:
   my_datasource:
     module_name: great_expectations.datasource
@@ -32,6 +33,7 @@ datasources:
           group_names:
             - data_asset_name
           pattern: (.*)
+# </snippet>
       default_runtime_data_connector_name:
         class_name: RuntimeDataConnector
         batch_identifiers:
@@ -42,7 +44,7 @@ datasources:
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the great_expectations.yml file, it will attempt
 # to replace the value of `my_key` with the value from an environment
 # variable `my_value` or a corresponding key read from this config file,

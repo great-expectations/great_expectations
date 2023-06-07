@@ -4,7 +4,7 @@ from typing import Optional, Union
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
@@ -45,7 +45,7 @@ class ConfigurationStore(Store):
         runtime_environment: Optional[dict] = None,
     ) -> None:
         if not issubclass(self._configuration_class, BaseYamlConfig):
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
             )
 
@@ -92,7 +92,7 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
@@ -104,7 +104,7 @@ class ConfigurationStore(Store):
             config: CommentedMap = yaml.load(value)
         try:
             return self._configuration_class.from_commented_map(commented_map=config)
-        except ge_exceptions.InvalidBaseYamlConfigError:
+        except gx_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
 
@@ -139,7 +139,7 @@ class ConfigurationStore(Store):
             if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 
@@ -150,18 +150,17 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
-    @staticmethod
-    def determine_key(
-        name: Optional[str], ge_cloud_id: Optional[str]
+    def _determine_key(
+        self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
+        assert bool(name) ^ bool(id), "Must provide either name or id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
+        if id or self.ge_cloud_mode:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.CHECKPOINT,
+                id=id,
+                resource_name=name,
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]

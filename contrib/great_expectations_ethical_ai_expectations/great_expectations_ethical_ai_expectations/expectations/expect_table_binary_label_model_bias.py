@@ -1,23 +1,17 @@
-import json
 from typing import Any, Dict, Optional, Tuple
 
-import aequitas.plot as ap
-import pandas as pd
 from aequitas.bias import Bias
 from aequitas.fairness import Fairness
 from aequitas.group import Group
 from aequitas.preprocessing import preprocess_input_df
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
-    TableExpectation,
-)
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
-    MetricDomainTypes,
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -27,7 +21,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
-
     metric_name = "table.modeling.binary.model_bias"
     value_keys = ("y_true", "y_pred", "reference_group", "alpha")
 
@@ -100,17 +93,16 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableBinaryLabelModelBias(TableExpectation):
-    """Expect fairness in a model by calculating disparities among features, score (binary or continuous), and a label (binary) in a table using Aequitas .
+class ExpectTableBinaryLabelModelBias(BatchExpectation):
+    """Expect fairness in a model by calculating disparities among features, score (binary or continuous), and a label (binary) in a table using Aequitas.
 
-    Using Aeqitas we evaluate predicted and true values to evaluate certain metrics
-    on how a classider model imposes bias on a given attribute group. Requirescolumns
-    score (binary or continuous) and label_value (binary). For more information
+    Using Aeqitas we evaluate predicted and true values to evaluate certain metrics \
+    on how a classider model imposes bias on a given attribute group. Requires columns \
+    score (binary or continuous) and label_value (binary). For more information \
     go to https://dssg.github.io/aequitas/examples/compas_demo.html
 
-    expect_table_binary_label_model_bias is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_binary_label_model_bias is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Args:
         y_true (str): \
@@ -118,7 +110,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         y_pred (str): \
             The column name of the modeled y value. Must be binary or continuous
 
-    Other Parameters:
+    Keyword Args:
         partial_success (boolean): \
             If True, expectations will pass if supervised or supervised fairness are observed even \
             if overall fairness was false.
@@ -130,8 +122,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
             determination. Default is .05
 
     Returns:
-        An ExpectationSuiteValidationResult
-
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -228,8 +219,7 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         #        columns = configuration.kwargs.get("important_columns")
         y_true = configuration.kwargs.get("y_true")
@@ -264,7 +254,6 @@ class ExpectTableBinaryLabelModelBias(TableExpectation):
         runtime_configuration=None,
         execution_engine=None,
     ):
-
         fairness = metrics["table.modeling.binary.model_bias"]
         partial_success = configuration["kwargs"].get("partial_success")
         if partial_success:

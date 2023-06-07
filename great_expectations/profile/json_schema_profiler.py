@@ -4,10 +4,12 @@ from typing import Any, Dict, List, Optional, Union
 
 import jsonschema
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import Profiler
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,23 @@ class JsonSchemaProfiler(Profiler):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         super().__init__(configuration)
 
+    @public_api
     def validate(self, schema: dict) -> bool:  # type: ignore[override]
+        """
+        Check if `schema` can be profiled.
+
+        Args:
+            schema: A `dict` representing a JSON Schema.
+
+        Returns:
+            True if `schema` can be profiled.
+
+        Raises:
+            TypeError: If `schema` is not a `dict`.
+            KeyError: If `schema` does not have a top level `type` key.
+            TypeError: If the top level `type` is not a JSON object.
+        """
+
         if not isinstance(schema, dict):
             raise TypeError(
                 f"This profiler requires a schema of type dict and was passed a {type(schema)}"
@@ -110,12 +128,12 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }
         suite = ExpectationSuite(
-            suite_name, expectations=expectations, meta=meta, data_context=None  # type: ignore[arg-type]
+            suite_name, expectations=expectations, meta=meta, data_context=None
         )
         suite.add_citation(
             comment=f"This suite was built by the {self.__class__.__name__}",
@@ -173,7 +191,7 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }

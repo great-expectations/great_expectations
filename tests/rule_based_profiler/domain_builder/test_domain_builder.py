@@ -2,16 +2,16 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
     ColumnPairDomainBuilder,
@@ -24,7 +24,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 # noinspection PyPep8Naming
@@ -348,7 +348,7 @@ def test_column_pair_domain_builder_wrong_column_names(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
@@ -404,8 +404,8 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
             "rule_name": "my_rule",
             "domain_type": "column_pair",
             "domain_kwargs": {
-                "column_A": "event_type",
-                "column_B": "user_id",
+                "column_A": "user_id",
+                "column_B": "event_type",
             },
             "details": {
                 INFERRED_SEMANTIC_TYPE_KEY: {
@@ -420,8 +420,8 @@ def test_column_pair_domain_builder_correct_sorted_column_names(
 
     # Also test that the dot notation is supported properly throughout the dictionary fields of the Domain object.
     assert domain.domain_type.value == "column_pair"
-    assert domain.domain_kwargs.column_A == "event_type"
-    assert domain.domain_kwargs.column_B == "user_id"
+    assert domain.domain_kwargs.column_A == "user_id"
+    assert domain.domain_kwargs.column_B == "event_type"
 
 
 @pytest.mark.integration
@@ -455,7 +455,7 @@ def test_multi_column_domain_builder_wrong_column_list(
         data_context=data_context,
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
@@ -465,7 +465,7 @@ def test_multi_column_domain_builder_wrong_column_list(
         excinfo.value
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request

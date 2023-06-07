@@ -5,30 +5,42 @@ import datetime
 import decimal
 import itertools
 import logging
+import numbers
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequestBase
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
 from great_expectations.rule_based_profiler.builder import Builder
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     build_metric_domain_kwargs,
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
@@ -46,9 +58,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_parseable_date
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validation_graph import (
+    ValidationGraph,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -78,7 +93,7 @@ class ParameterBuilder(ABC, Builder):
         ```
     """
 
-    exclude_field_names: Set[str] = Builder.exclude_field_names | {
+    exclude_field_names: ClassVar[Set[str]] = Builder.exclude_field_names | {
         "evaluation_parameter_builders",
     }
 
@@ -115,7 +130,7 @@ class ParameterBuilder(ABC, Builder):
             data_context=self._data_context,
         )
 
-    def build_parameters(
+    def build_parameters(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -123,7 +138,7 @@ class ParameterBuilder(ABC, Builder):
         parameter_computation_impl: Optional[Callable] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         Args:
@@ -133,8 +148,10 @@ class ParameterBuilder(ABC, Builder):
             parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
             batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         """
+        runtime_configuration = runtime_configuration or {}
+
         fully_qualified_parameter_names: List[
             str
         ] = get_fully_qualified_parameter_names(
@@ -142,6 +159,12 @@ class ParameterBuilder(ABC, Builder):
             variables=variables,
             parameters=parameters,
         )
+
+        # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+        recompute_existing_parameter_values: bool = runtime_configuration.get(
+            "recompute_existing_parameter_values", False
+        )
+
         if (
             recompute_existing_parameter_values
             or self.raw_fully_qualified_parameter_name
@@ -159,7 +182,7 @@ class ParameterBuilder(ABC, Builder):
                 variables=variables,
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             if parameter_computation_impl is None:
@@ -169,7 +192,7 @@ class ParameterBuilder(ABC, Builder):
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             parameter_values: Dict[str, Any] = {
@@ -184,19 +207,18 @@ class ParameterBuilder(ABC, Builder):
                 parameter_values=parameter_values,
             )
 
-    def resolve_evaluation_dependencies(
+    def resolve_evaluation_dependencies(  # noqa: PLR0913
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         fully_qualified_parameter_names: Optional[List[str]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """
-
         # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
         evaluation_parameter_builders: List[
             ParameterBuilder
@@ -235,7 +257,7 @@ class ParameterBuilder(ABC, Builder):
                     domain=domain,
                     variables=variables,
                     parameters=parameters,
-                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
     @abstractmethod
@@ -244,7 +266,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -317,7 +339,7 @@ class ParameterBuilder(ABC, Builder):
             parameters=parameters,
         )
 
-    def get_metrics(
+    def get_metrics(  # noqa: PLR0913
         self,
         metric_name: str,
         metric_domain_kwargs: Optional[
@@ -329,6 +351,7 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        runtime_configuration: Optional[dict] = None,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -344,6 +367,7 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -352,7 +376,7 @@ class ParameterBuilder(ABC, Builder):
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         if not metric_name:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Utilizing "{self.__class__.__name__}.get_metrics()" requires valid "metric_name" to be \
 specified (empty "metric_name" value detected)."""
             )
@@ -364,7 +388,7 @@ specified (empty "metric_name" value detected)."""
             parameters=parameters,
         )
         if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of Batch identifiers."
             )
 
@@ -455,17 +479,22 @@ specified (empty "metric_name" value detected)."""
         graph: ValidationGraph = (
             validator.metrics_calculator.build_metric_dependency_graph(
                 metric_configurations=metrics_to_resolve,
-                runtime_configuration=None,
+                runtime_configuration=runtime_configuration,
             )
         )
 
-        resolved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ]
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
-            runtime_configuration=None,
+            runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
-            show_progress_bars=True,
         )
 
         # Step-5: Map resolved metrics to their attributes for identification and recovery by receiver.
@@ -560,7 +589,7 @@ specified (empty "metric_name" value detected)."""
         )
 
     @staticmethod
-    def _sanitize_metric_computation(
+    def _sanitize_metric_computation(  # noqa: PLR0913
         parameter_builder: ParameterBuilder,
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
@@ -638,15 +667,16 @@ specified (empty "metric_name" value detected)."""
 
                         batch_metric_values.append(0.0)
                     elif not (
-                        (
+                        (  # noqa: PLR1701
                             isinstance(metric_value, (str, np.str_))
                             and is_parseable_date(value=metric_value)
                         )
                         or isinstance(metric_value, datetime.datetime)
+                        or isinstance(metric_value, numbers.Number)
                         or isinstance(metric_value, decimal.Decimal)
                         or np.issubdtype(metric_value.dtype, np.number)
                     ):
-                        raise ge_exceptions.ProfilerExecutionError(
+                        raise gx_exceptions.ProfilerExecutionError(
                             message=f"""Applicability of {parameter_builder.__class__.__name__} is restricted to \
 numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(type(metric_value))}" was computed).
 """
@@ -656,7 +686,7 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
                 else:
                     batch_metric_values.append(metric_value)
 
-            metric_values_by_batch_id[batch_id] = batch_metric_values
+            metric_values_by_batch_id[batch_id] = np.asarray(batch_metric_values)
 
         attributed_resolved_metrics.metric_values_by_batch_id = (
             metric_values_by_batch_id

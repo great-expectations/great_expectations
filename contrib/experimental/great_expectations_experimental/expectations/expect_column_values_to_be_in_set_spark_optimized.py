@@ -1,40 +1,25 @@
-import warnings
 from typing import Dict, Optional
 
-import numpy as np
-
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.exceptions.exceptions import MetricResolutionError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
-from great_expectations.expectations.metrics.map_metric_provider import (
-    ColumnMapMetricProvider,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-    column_condition_partial,
-    metric_partial,
-)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
-
     metric_name = "column_values.in_set.spark_optimized"
     value_keys = (
         "column",
         "value_set",
     )
 
-    @metric_value(
-        engine=SparkDFExecutionEngine,
-        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
@@ -72,8 +57,8 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
-    """Expect each column value to be in a given set; optimized using `join` for spark backends.
+class ExpectColumnValuesToBeInSetSparkOptimized(ColumnAggregateExpectation):
+    """Expect each column value to be in a given set; optimized using **join** for spark backends.
 
     Args:
         column (str): \
@@ -83,10 +68,9 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
         strict (boolean or None) : If True, percentage of values in set must exceed mostly.
-
     """
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
@@ -99,7 +83,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
     default_kwarg_values = {"mostly": 1, "strict": True, "value_set": []}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -113,8 +97,7 @@ class ExpectColumnValuesToBeInSetSparkOptimized(ColumnExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         value_set = configuration.kwargs.get(
             "value_set"
         ) or self.default_kwarg_values.get("value_set")

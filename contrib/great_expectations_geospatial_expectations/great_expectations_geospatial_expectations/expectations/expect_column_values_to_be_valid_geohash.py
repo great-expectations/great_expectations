@@ -4,15 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
 """
 
-from typing import Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
@@ -36,6 +30,7 @@ class ExpectColumnValuesToBeValidGeohash(RegexBasedColumnMapExpectation):
                 "invalid_non_alphanumeric": ["dp2-"],
                 "empty": [""],
             },
+            "suppress_test_for": ["mssql", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",

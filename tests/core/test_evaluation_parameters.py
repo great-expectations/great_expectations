@@ -1,19 +1,24 @@
 import math
 from datetime import datetime, timedelta
 from timeit import timeit
+from typing import Any, Dict
 
 import dateutil
-import pandas
+import pandas as pd
 import pytest
 
-from great_expectations.core import ExpectationValidationResult
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
     parse_evaluation_parameter,
 )
-from great_expectations.exceptions import DataContextError, EvaluationParameterError
+from great_expectations.data_context import DataContext
+from great_expectations.exceptions import EvaluationParameterError
 
 
 @pytest.mark.unit
@@ -85,7 +90,7 @@ def test_parse_evaluation_parameter():
         == 9
     )
 
-    # Non GE URN syntax fails
+    # Non GX URN syntax fails
     with pytest.raises(EvaluationParameterError) as err:
         parse_evaluation_parameter("urn:ieee:not_ge * 10", {"urn:ieee:not_ge": 1})
     assert "Parse Failure" in str(err.value)
@@ -114,7 +119,7 @@ def test_parse_evaluation_parameter():
     with pytest.raises(EvaluationParameterError) as e:
         parse_evaluation_parameter("foo + bar", {"foo": 2})
     assert (
-        "Error while evaluating evaluation parameter expression: could not convert string to float"
+        "Error while evaluating evaluation parameter expression: Unknown string format: bar"
         in str(e.value)
     )
 
@@ -298,79 +303,141 @@ def test_deduplicate_evaluation_parameter_dependencies():
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "dataframe,evaluation_parameters,expectation_type,expectation_kwargs,expected_expectation_validation_result",
+    [
+        (
+            pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]}),
+            (
+                ("my_min", 1),
+                ("my_max", 5),
+            ),
+            "expect_table_row_count_to_be_between",
+            {
+                "min_value": {
+                    "$PARAMETER": "my_min",
+                },
+                "max_value": {
+                    "$PARAMETER": "my_max",
+                },
+            },
+            ExpectationValidationResult(
+                expectation_config=ExpectationConfiguration(
+                    expectation_type="expect_table_row_count_to_be_between",
+                    kwargs={
+                        "min_value": 1,
+                        "max_value": 5,
+                    },
+                    meta={"substituted_parameters": {"min_value": 1, "max_value": 5}},
+                    ge_cloud_id=None,
+                ),
+                meta={},
+                exception_info={
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None,
+                },
+                success=True,
+                result={"observed_value": 3},
+            ),
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "my_date": [
+                        datetime(year=2017, month=1, day=1),
+                        datetime(year=2018, month=1, day=1),
+                        datetime(year=2019, month=1, day=1),
+                        datetime(year=2020, month=1, day=1),
+                    ]
+                }
+            ),
+            (
+                ("my_min_date", datetime(2016, 12, 10)),
+                ("my_max_date", datetime(2022, 12, 13)),
+            ),
+            "expect_column_values_to_be_between",
+            {
+                "column": "my_date",
+                "min_value": {"$PARAMETER": "my_min_date"},
+                "max_value": {"$PARAMETER": "my_max_date - timedelta(weeks=1)"},
+            },
+            ExpectationValidationResult(
+                expectation_config=ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_between",
+                    kwargs={
+                        "column": "my_date",
+                        "min_value": "2016-12-10T00:00:00",
+                        "max_value": "2022-12-06T00:00:00",
+                        "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
+                    },
+                    meta={
+                        "substituted_parameters": {
+                            "min_value": "2016-12-10T00:00:00",
+                            "max_value": "2022-12-06T00:00:00",
+                        }
+                    },
+                    ge_cloud_id=None,
+                ),
+                meta={},
+                exception_info={
+                    "raised_exception": False,
+                    "exception_traceback": None,
+                    "exception_message": None,
+                },
+                success=True,
+                result={
+                    "element_count": 4,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "partial_unexpected_list": [],
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0,
+                },
+            ),
+        ),
+    ],
+)
 def test_evaluation_parameters_for_between_expectations_parse_correctly(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+    dataframe: pd.DataFrame,
+    evaluation_parameters: Dict[str, Any],
+    expectation_type: str,
+    expectation_kwargs: Dict[str, dict],
+    expected_expectation_validation_result: ExpectationValidationResult,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    # Note that if you modify this batch request, you may save the new version as a .json file
-    #  to pass in later via the --batch-request option
-    df = pandas.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
-    batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_runtime_data_connector",
-        "data_asset_name": "foo",
-        "runtime_parameters": {"batch_data": df},
-        "batch_identifiers": {
+    expectation_suite_name = "test_suite"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    batch_request = RuntimeBatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_runtime_data_connector",
+        data_asset_name="foo",
+        runtime_parameters={"batch_data": dataframe},
+        batch_identifiers={
             "pipeline_stage_name": "kickoff",
             "airflow_run_id": "1234",
         },
-    }
-
-    # Feel free to change the name of your suite here. Renaming this will not remove the other one.
-    expectation_suite_name = "abcde"
-    try:
-        suite = context.get_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(
-            f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} '
-            f"expectations."
-        )
-    except DataContextError:
-        suite = context.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name
-        )
-        print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
+    )
 
     validator = context.get_validator(
-        batch_request=RuntimeBatchRequest(**batch_request),
+        batch_request=batch_request,
         expectation_suite_name=expectation_suite_name,
     )
-    column_names = [
-        f'"{column_name}"' for column_name in validator.metrics_calculator.columns()
-    ]
-    print(f"Columns: {', '.join(column_names)}.")
 
-    validator.set_evaluation_parameter("my_min", 1)
-    validator.set_evaluation_parameter("my_max", 5)
+    for evaluation_parameter in evaluation_parameters:
+        validator.set_evaluation_parameter(*evaluation_parameter)
 
-    result = validator.expect_table_row_count_to_be_between(
-        min_value={"$PARAMETER": "my_min", "$PARAMETER.upstream_row_count": 10},
-        max_value={"$PARAMETER": "my_max", "$PARAMETER.upstream_row_count": 50},
+    actual_expectation_validation_result = getattr(validator, expectation_type)(
+        **expectation_kwargs
     )
 
-    assert result == ExpectationValidationResult(
-        **{
-            "expectation_config": {
-                "meta": {"substituted_parameters": {"min_value": 1, "max_value": 5}},
-                "kwargs": {
-                    "min_value": 1,
-                    "max_value": 5,
-                    "batch_id": "15fe04adb6ff20b9fc6eda486b7a36b7",
-                },
-                "expectation_type": "expect_table_row_count_to_be_between",
-                "ge_cloud_id": None,
-            },
-            "meta": {},
-            "exception_info": {
-                "raised_exception": False,
-                "exception_traceback": None,
-                "exception_message": None,
-            },
-            "success": True,
-            "result": {"observed_value": 3},
-        }
+    assert (
+        actual_expectation_validation_result == expected_expectation_validation_result
     )
 
 

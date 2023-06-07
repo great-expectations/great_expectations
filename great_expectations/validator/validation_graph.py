@@ -16,14 +16,18 @@ from typing import (
 
 from tqdm.auto import tqdm
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import IDDict
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core import IDDict  # noqa: TCH001
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
@@ -53,7 +57,11 @@ class MetricEdge:
     def id(self):
         if self.right:
             return self.left.id, self.right.id
+
         return self.left.id, None
+
+    def __repr__(self):
+        return f"<{self._left.__repr__()}|{self._right.__repr__()}>"
 
 
 class ValidationGraph:
@@ -198,7 +206,7 @@ class ValidationGraph:
 
         return resolved_metrics, aborted_metrics_info
 
-    def _resolve(  # noqa: C901 - complexity 16
+    def _resolve(  # noqa: C901, PLR0912, PLR0915
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
@@ -273,7 +281,7 @@ class ValidationGraph:
                 )
                 progress_bar.update(len(computable_metrics))
                 progress_bar.refresh()
-            except ge_exceptions.MetricResolutionError as err:
+            except gx_exceptions.MetricResolutionError as err:
                 if catch_exceptions:
                     exception_traceback = traceback.format_exc()
                     exception_message = str(err)
@@ -332,7 +340,7 @@ class ValidationGraph:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in unmet_dependency_ids:
+                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 
@@ -353,15 +361,29 @@ class ValidationGraph:
             ):
                 metric_kwargs[key] = default_kwarg_values[key]
 
+    def __repr__(self):
+        edge: MetricEdge
+        return ", ".join([edge.__repr__() for edge in self._edges])
+
 
 class ExpectationValidationGraph:
     def __init__(
         self,
-        execution_engine: ExecutionEngine,
         configuration: ExpectationConfiguration,
+        graph: ValidationGraph,
     ) -> None:
+        if configuration is None:
+            raise ValueError(
+                """Instantiation of "ExpectationValidationGraph" requires valid "ExpectationConfiguration" object."""
+            )
+
+        if graph is None:
+            raise ValueError(
+                """Instantiation of "ExpectationValidationGraph" requires valid "ValidationGraph" object."""
+            )
+
         self._configuration = configuration
-        self._graph = ValidationGraph(execution_engine=execution_engine)
+        self._graph = graph
 
     @property
     def configuration(self) -> ExpectationConfiguration:

@@ -2,7 +2,7 @@
 # These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
 # about usage statistics. Please reach out to the Great Expectations with any questions!
 ###
-
+from typing import List
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
@@ -14,7 +14,8 @@ from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
 
-SCHEMA: str = "http://json-schema.org/draft-04/schema#"
+SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
+ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,
@@ -297,7 +298,7 @@ anonymized_init_payload_schema = {
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "platform.system": {"type": "string", "maxLength": 256},
         "platform.release": {"type": "string", "maxLength": 256},
         "version_info": {"type": "string", "maxLength": 256},
@@ -960,7 +961,7 @@ anonymized_usage_statistics_record_schema = {
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
@@ -1229,7 +1230,7 @@ def write_schema_to_file(target_dir: str) -> None:
     import os
 
     file: str = "usage_statistics_record_schema.json"
-    out: str = os.path.join(target_dir, file)
+    out: str = os.path.join(target_dir, file)  # noqa: PTH118
 
     with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
@@ -1238,5 +1239,5 @@ def write_schema_to_file(target_dir: str) -> None:
 if __name__ == "__main__":
     import sys
 
-    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."  # noqa: PLR2004
     write_schema_to_file(target_dir)

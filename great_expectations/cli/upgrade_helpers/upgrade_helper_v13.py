@@ -5,9 +5,9 @@ from typing import List, Optional, Tuple, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
@@ -115,7 +115,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
             if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
                 self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
-        except ge_exceptions.InvalidTopLevelConfigKeyError:
+        except gx_exceptions.InvalidTopLevelConfigKeyError:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
@@ -159,10 +159,8 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
     def manual_steps_required(self) -> bool:
         return any(
-            [
-                len(manual_upgrade_item.keys()) > 0
-                for manual_upgrade_item in self.upgrade_checklist["manual"].values()
-            ]
+            len(manual_upgrade_item.keys()) > 0
+            for manual_upgrade_item in self.upgrade_checklist["manual"].values()
         )
 
     def get_upgrade_overview(self) -> Tuple[str, bool]:
@@ -409,7 +407,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if manual_steps_required:
+            if manual_steps_required:  # noqa: PLR5501
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper does not have any automated upgrade steps to perform as part of upgrading your project to be \
@@ -440,7 +438,7 @@ A log detailing the upgrade can be found here:
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
-        dest_path = os.path.join(
+        dest_path = os.path.join(  # noqa: PTH118
             self.data_context.root_directory,
             "uncommitted",
             "logs",
@@ -448,7 +446,7 @@ A log detailing the upgrade can be found here:
             f"UpgradeHelperV13_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
-        os.makedirs(dest_dir, exist_ok=True)
+        os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103
 
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)

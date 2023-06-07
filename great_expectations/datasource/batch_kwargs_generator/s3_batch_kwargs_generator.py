@@ -1,7 +1,6 @@
 import datetime
 import logging
 import re
-import warnings
 from typing import Dict, Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -61,7 +60,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     }
 
     # FIXME add tests for new partitioner functionality
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -217,7 +216,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 data_asset_name=data_asset_name, **batch_parameters, **batch_kwargs
             )
 
-    def _build_batch_kwargs_from_key(
+    def _build_batch_kwargs_from_key(  # noqa: PLR0913
         self,
         key,
         asset_config=None,
@@ -312,7 +311,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
 
-    def _build_asset_iterator(
+    def _build_asset_iterator(  # noqa: PLR0913
         self,
         asset_config,
         iterator_dict,
@@ -329,20 +328,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 limit=limit,
             )
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def get_available_partition_ids(self, data_asset_name=None):
         if data_asset_name not in self._iterators:
             self._iterators[data_asset_name] = {}
         iterator_dict = self._iterators[data_asset_name]

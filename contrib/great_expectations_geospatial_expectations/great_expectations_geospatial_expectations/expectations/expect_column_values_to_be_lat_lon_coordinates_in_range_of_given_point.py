@@ -7,6 +7,8 @@ For detailed instructions on how to use it, please see:
 from math import cos, pi, sqrt
 from typing import Any, List, Optional, Union
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -22,7 +24,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,
@@ -36,7 +37,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.coordinates.in_range"
     condition_value_keys = ("center_point", "range", "unit", "projection")
@@ -83,12 +83,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
             if unit == "kilometers":
                 distances = F.udf(
                     lambda x, y=center_point: fcc_projection(x, y),
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
                     lambda x, y=center_point: fcc_projection(x, y) * 1.609344,
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
                 range = range * 1.609344
 
@@ -100,12 +100,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
             if unit == "kilometers":
                 distances = F.udf(
                     lambda x, y=center_point: pythagorean_projection(x, y),
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
                     lambda x, y=center_point: pythagorean_projection(x, y) * 1.609344,
-                    sparktypes.FloatType(),
+                    pyspark.types.FloatType(),
                 )
                 range = range * 1.609344
 
@@ -173,60 +173,51 @@ def pythagorean_projection(loc1, loc2):
 class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpectation):
     """Expect values in a column to be tuples of degree-decimal (latitude, longitude) within a specified range of a given degree-decimal (latitude, longitude) point.
 
-    expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point is a :func:`column_map_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
             The column name.
 
-
     Keyword Args:
         center_point (tuple(float, float) or list(float, float)): \
-            The point from which to measure to the column points.
+            The point from which to measure to the column points. \
             Must be a tuple or list of exactly two (2) floats.
-
         unit (str or None): \
-            The unit of distance with which to measure.
-            Must be one of: [miles, kilometers]
-            Default: kilometers
+            The unit of distance with which to measure. \
+            Must be one of: [miles, kilometers]. Default: kilometers
 
         range (int or float): \
             The range in [miles, kilometers] from your specified center_point to measure.
 
         projection (str or None): \
-            The method by which to calculate distance between points.
-            Must be one of: [fcc, pythagorean]
-            Default: pythagorean
+            The method by which to calculate distance between points. \
+            Must be one of: [fcc, pythagorean]. Default: pythagorean
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-    Projections:
-        fcc: \
-            Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
-            projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
-
-        pythagorean: \
-            Calculates the distance in kilometers between two lat/lon points on
-            a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
+    Notes:
+        * fcc projection: Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth \
+          projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
+        * pythagorean projection: Calculates the distance in kilometers between two lat/lon points on \
+          a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
     def validate_configuration(
@@ -296,6 +287,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
                     "null",
                 ],
             },
+            "suppress_test_for": ["spark"],
             "tests": [
                 {
                     "title": "basic_positive_test",

@@ -7,7 +7,7 @@ import pandas as pd
 import pandas.api.types as ptypes
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
@@ -87,7 +87,7 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
 def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
     bucket, keys = test_s3_files
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(
         path=full_path,
@@ -311,7 +311,9 @@ def test_get_batch_with_split_on_whole_table_filesystem(
 ):
     test_df = PandasExecutionEngine().get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
@@ -374,7 +376,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
@@ -494,7 +496,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 
 
 def test_get_batch_with_split_on_hashed_column(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(

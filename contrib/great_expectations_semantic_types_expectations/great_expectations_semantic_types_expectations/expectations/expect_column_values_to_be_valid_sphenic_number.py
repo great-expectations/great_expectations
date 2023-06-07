@@ -28,7 +28,6 @@ def is_valid_sphenic_number(num: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidSphenicNumber(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_sphenic_number"
 
@@ -50,7 +49,7 @@ class ColumnValuesToBeValidSphenicNumber(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSphenicNumber(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid sphenic number."""
+    """Expect column values to be valid sphenic numbers."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -102,7 +101,7 @@ class ExpectColumnValuesToBeValidSphenicNumber(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -115,8 +114,7 @@ class ExpectColumnValuesToBeValidSphenicNumber(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

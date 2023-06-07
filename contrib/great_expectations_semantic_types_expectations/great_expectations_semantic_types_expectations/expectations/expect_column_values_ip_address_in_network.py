@@ -4,11 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 import ipaddress
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -27,7 +25,6 @@ def is_ip_address_in_network(addr: str, ip_network) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesIpAddressInNetwork(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.ip_address_in_network"
     condition_value_keys = ("ip_network",)
@@ -50,7 +47,7 @@ class ColumnValuesIpAddressInNetwork(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesIpAddressInNetwork(ColumnMapExpectation):
-    """Expect the provided IP address in the network which passed in the parameters"""
+    """Expect column values to be IP addresses in the specified network ranges."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -130,8 +127,7 @@ class ExpectColumnValuesIpAddressInNetwork(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

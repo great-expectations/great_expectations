@@ -1,15 +1,9 @@
-import json
 from typing import Optional
 
 import zipcodes
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -35,7 +29,6 @@ def is_valid_rhode_island_zip(zip: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidRhodeIslandZip(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_rhode_island_zip"
 
@@ -58,6 +51,7 @@ class ColumnValuesToBeValidRhodeIslandZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidRhodeIslandZip(ColumnMapExpectation):
     """Expect values in this column to be valid Rhode Island zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -113,8 +107,7 @@ class ExpectColumnValuesToBeValidRhodeIslandZip(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

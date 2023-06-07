@@ -2,7 +2,7 @@ from typing import Iterator
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
@@ -241,7 +241,7 @@ def test_create_three_batch_definitions_sort_numerically():
     )
 
     batch_list = [one, two, three, i_should_not_work]
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 
@@ -275,9 +275,11 @@ def test_date_time():
     sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
     assert sorted_batch_list == [first, second, third]
 
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         # numeric date_time_format
-        i_dont_work = DateTimeSorter(name="date", datetime_format=12345, orderby="desc")
+        i_dont_work = DateTimeSorter(  # noqa: F841
+            name="date", datetime_format=12345, orderby="desc"
+        )
 
     my_date_is_not_a_string = BatchDefinition(
         datasource_name="C",
@@ -289,7 +291,7 @@ def test_date_time():
     batch_list = [first, second, third, my_date_is_not_a_string]
     my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
 
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list)
 
 

@@ -7,7 +7,7 @@ from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResult,  # noqa: TCH001
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -27,7 +27,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
 
 logger = logging.getLogger(__name__)
@@ -101,9 +101,9 @@ class ValidationResultsPageRenderer(Renderer):
         )
 
         # Add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
+        if "datasource" not in batch_kwargs:
             # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
-            if len(expectation_suite_name.split(".")) == 4:
+            if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
         columns = self._group_evrs_by_column(validation_results, expectation_suite_name)
@@ -186,7 +186,7 @@ class ValidationResultsPageRenderer(Renderer):
                 if self._data_context is not None
                 else None
             )
-        except:
+        except Exception:
             suite_meta = None
         meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
@@ -208,7 +208,6 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks: List[RenderedTableContent],
         validation_results: ExpectationSuiteValidationResult,
     ) -> CollapseContent:
-
         attrs = [
             ("batch_markers", "Batch Markers"),
             ("batch_kwargs", "Batch Kwargs"),
@@ -364,7 +363,7 @@ class ValidationResultsPageRenderer(Renderer):
             + str(expectation_suite_name).split(".")
         )
         expectation_suite_path = (
-            f"{os.path.join(*expectation_suite_path_components)}.html"
+            f"{os.path.join(*expectation_suite_path_components)}.html"  # noqa: PTH118
         )
         # TODO: deprecate dual batch api support in 0.14
         batch_kwargs = (
@@ -796,8 +795,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     # TODO: Update tests
     @classmethod
-    def _render_expectation_suite_notes(cls, expectations):
-
+    def _render_expectation_suite_notes(cls, expectations):  # noqa: PLR0912
         content = []
 
         total_expectations = len(expectations.expectations)
@@ -934,7 +932,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):
+    def render(self, validation_results):  # noqa: C901, PLR0912
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -957,7 +955,7 @@ class ProfilingResultsPageRenderer(Renderer):
         # add datasource key to batch_kwargs if missing
         if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
-            if len(expectation_suite_name.split(".")) == 4:
+            if len(expectation_suite_name.split(".")) == 4:  # noqa: PLR2004
                 if "batch_kwargs" in validation_results.meta:
                     batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
                 else:

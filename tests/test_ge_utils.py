@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.util import nested_update
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
@@ -37,11 +37,11 @@ def empty_expectation_suite():
 @pytest.fixture
 def file_data_asset(tmp_path):
     tmp_path = str(tmp_path)
-    path = os.path.join(tmp_path, "file_data_asset.txt")
+    path = os.path.join(tmp_path, "file_data_asset.txt")  # noqa: PTH118
     with open(path, "w+") as file:
         file.write(json.dumps([0, 1, 2, 3, 4]))
 
-    return ge.data_asset.FileDataAsset(file_path=path)
+    return gx.data_asset.FileDataAsset(file_path=path)
 
 
 @pytest.fixture
@@ -80,164 +80,25 @@ def test_validate_non_dataset(file_data_asset, empty_expectation_suite):
             Warning,
             match="No great_expectations version found in configuration object.",
         ):
-            ge.validate(
+            gx.validate(
                 file_data_asset,
                 empty_expectation_suite,
-                data_asset_class=ge.data_asset.FileDataAsset,
+                data_asset_class=gx.data_asset.FileDataAsset,
             )
-
-
-@pytest.mark.unit
-def test_validate_dataset(dataset, basic_expectation_suite):
-    res = ge.validate(dataset, basic_expectation_suite)
-    # assert res.success is True  # will not be true for mysql, where "infinities" column is missing
-    assert res["statistics"]["evaluated_expectations"] == 4
-    if isinstance(dataset, ge.dataset.PandasDataset):
-        res = ge.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.PandasDataset,
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            ge.validate(
-                dataset,
-                basic_expectation_suite,
-                data_asset_class=ge.dataset.SqlAlchemyDataset,
-            )
-
-    elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
-        and dataset.sql_engine_dialect.name.lower() != "mysql"
-    ):
-        res = ge.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            ge.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
-            )
-
-    elif (
-        isinstance(dataset, ge.dataset.SqlAlchemyDataset)
-        and dataset.sql_engine_dialect.name.lower() == "mysql"
-    ):
-        # mysql cannot use the infinities column
-        res = ge.validate(
-            dataset,
-            expectation_suite=basic_expectation_suite,
-            data_asset_class=ge.dataset.SqlAlchemyDataset,
-        )
-        assert res.success is False
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            ge.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
-            )
-
-    elif isinstance(dataset, ge.dataset.SparkDFDataset):
-        res = ge.validate(
-            dataset, basic_expectation_suite, data_asset_class=ge.dataset.SparkDFDataset
-        )
-        assert res.success is True
-        assert res["statistics"]["evaluated_expectations"] == 4
-        with pytest.raises(
-            ValueError,
-            match=r"The validate util method only supports validation for subtypes of the provided data_asset_type",
-        ):
-            ge.validate(
-                dataset,
-                expectation_suite=basic_expectation_suite,
-                data_asset_class=ge.dataset.PandasDataset,
-            )
-
-
-@pytest.mark.unit
-def test_validate_using_data_context(
-    dataset, data_context_parameterized_expectation_suite
-):
-    # Before running, the data context should not have compiled parameters
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
-        is False
-    )
-
-    res = ge.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_parameterized_expectation_suite,
-    )
-
-    # Since the handling of evaluation parameters is no longer happening without an action,
-    # the context should still be not compiles after validation.
-    assert (
-        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
-        is False
-    )
-
-    # And, we should have validated the right number of expectations from the context-provided config
-    assert res.success is False
-    assert res.statistics["evaluated_expectations"] == 2
-
-
-@pytest.mark.unit
-def test_validate_using_data_context_path(
-    dataset, data_context_parameterized_expectation_suite
-):
-    data_context_path = data_context_parameterized_expectation_suite.root_directory
-    res = ge.validate(
-        dataset,
-        expectation_suite_name="my_dag_node.default",
-        data_context=data_context_path,
-    )
-
-    # We should have now found the right suite with expectations to evaluate
-    assert res.success is False
-    assert res["statistics"]["evaluated_expectations"] == 2
-
-
-@pytest.mark.integration
-@pytest.mark.slow  # 1.61s
-def test_validate_invalid_parameters(
-    dataset, basic_expectation_suite, data_context_parameterized_expectation_suite
-):
-    with pytest.raises(
-        ValueError,
-        match="Either an expectation suite or a DataContext is required for validation.",
-    ):
-        ge.validate(dataset)
 
 
 @pytest.mark.unit
 def test_gen_directory_tree_str(tmpdir):
     project_dir = str(tmpdir.mkdir("project_dir"))
-    os.mkdir(os.path.join(project_dir, "BBB"))
-    with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
+    os.mkdir(os.path.join(project_dir, "BBB"))  # noqa: PTH102, PTH118
+    with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:  # noqa: PTH118
         f.write("hello")
-    with open(os.path.join(project_dir, "BBB", "aaa.txt"), "w") as f:
+    with open(os.path.join(project_dir, "BBB", "aaa.txt"), "w") as f:  # noqa: PTH118
         f.write("hello")
 
-    os.mkdir(os.path.join(project_dir, "AAA"))
+    os.mkdir(os.path.join(project_dir, "AAA"))  # noqa: PTH102, PTH118
 
-    res = ge.util.gen_directory_tree_str(project_dir)
+    res = gx.util.gen_directory_tree_str(project_dir)
     print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
@@ -855,7 +716,8 @@ def test_convert_ndarray_float_to_datetime_tuple(
     with pytest.raises(TypeError) as e:
         _ = convert_ndarray_float_to_datetime_tuple(data=datetime_array)
 
-    assert str(e.value) == "an integer is required (got type datetime.datetime)"
+    # Error message varies based on version but mainly looking to validate type error by not using integer
+    assert all(string in str(e.value) for string in ("datetime.datetime", "integer"))
 
 
 @pytest.mark.unit

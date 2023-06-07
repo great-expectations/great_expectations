@@ -1,15 +1,15 @@
-"""Provide GE package dependencies.
+"""Provide GX package dependencies.
 
-This module contains static lists of GE dependencies, along with a utility for
+This module contains static lists of GX dependencies, along with a utility for
 checking and updating these static lists.
 
     Typical usage example:
-        ge_dependencies = GEDependencies()
+        ge_dependencies = GXDependencies()
         print(ge_dependencies.get_required_dependency_names())
         print(ge_dependencies.get_dev_dependency_names())
 
     To verify lists are accurate, you can run this file or execute main() from
-    within a cloned GE repository. This will check the existing requirements
+    within a cloned GX repository. This will check the existing requirements
     files against the static lists returned via the methods above in the
     usage example and raise exceptions if there are discrepancies.
 """
@@ -18,7 +18,7 @@ import re
 from typing import Dict, List, Set
 
 
-class GEDependencies:
+class GXDependencies:
     """Store and provide dependencies when requested.
 
     Also acts as a utility to check stored dependencies match our
@@ -28,7 +28,7 @@ class GEDependencies:
     """
 
     """This list should be kept in sync with our requirements.txt file."""
-    GE_REQUIRED_DEPENDENCIES: List[str] = sorted(
+    GX_REQUIRED_DEPENDENCIES: List[str] = sorted(
         [
             "altair",
             "Click",
@@ -63,32 +63,34 @@ class GEDependencies:
     )
 
     """This list should be kept in sync with our requirements-dev*.txt files."""
-    ALL_GE_DEV_DEPENDENCIES: List[str] = sorted(
+    ALL_GX_DEV_DEPENDENCIES: List[str] = sorted(
         [
             "PyMySQL",
+            "adr-tools-python",
             "azure-identity",
             "azure-keyvault-secrets",
             "azure-storage-blob",
             "black",
             "boto3",
+            "docstring-parser",
             "feather-format",
-            "flake8",
+            "ruff",
             "flask",
             "freezegun",
             "gcsfs",
+            "google-cloud-bigquery",
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "invoke",
-            "isort",
             "mistune",
             "mock-alchemy",
             "moto",
             "mypy",
             "nbconvert",
             "openpyxl",
+            "pika",
             "pre-commit",
             "psycopg2-binary",
-            "pydantic",  # dev dependency because of mypy plugin
             "pyarrow",
             "pyathena",
             "pyfakefs",
@@ -103,9 +105,8 @@ class GEDependencies:
             "pytest-order",
             "pytest-random-order",
             "pytest-timeout",
-            "pyupgrade",
             "requirements-parser",
-            "s3fs",
+            "responses",
             "snapshottest",
             "snowflake-connector-python",
             "snowflake-sqlalchemy",
@@ -119,24 +120,24 @@ class GEDependencies:
         ]
     )
 
-    GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
+    GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
         # requirements-dev-contrib.txt:
+        "adr-tools-python",
         "black",
-        "flake8",
+        "ruff",
         "invoke",
-        "isort",
         "mypy",
         "pre-commit",
         "pytest-cov",
         "pytest-order",
         "pytest-random-order",
-        "pyupgrade",
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
         "mistune",
         "mock-alchemy",
         "moto",
+        "ipykernel",
         "nbconvert",
         "py",
         "pyfakefs",
@@ -146,7 +147,7 @@ class GEDependencies:
         "pytest-icdiff",
         "pytest-timeout",
         "requirements-parser",
-        "s3fs",
+        "responses",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
@@ -175,6 +176,7 @@ class GEDependencies:
         "global-land-mask",
         "gtin",
         "holidays",
+        # "indiapins",      # Currently a broken package
         "ipwhois",
         "isbnlib",
         "langid",
@@ -182,6 +184,7 @@ class GEDependencies:
         "phonenumbers",
         "price_parser",
         "primefac",
+        "prophet",
         "pwnedpasswords",
         "py-moneyed",
         "pydnsbl",
@@ -195,7 +198,6 @@ class GEDependencies:
         "scikit-learn",
         "shapely",
         "simple_icd_10",
-        "sklearn",
         "sympy",
         "tensorflow",
         "timezonefinder",
@@ -204,10 +206,12 @@ class GEDependencies:
         "uszipcode",
         "yahoo_fin",
         "zipcodes",
+        # requirements-dev-api-docs-test.txt
+        "docstring-parser",
     ]
 
-    GE_DEV_DEPENDENCIES: Set[str] = set(ALL_GE_DEV_DEPENDENCIES) - set(
-        GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
+    GX_DEV_DEPENDENCIES: Set[str] = set(ALL_GX_DEV_DEPENDENCIES) - set(
+        GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
     )
 
     DEV_REQUIREMENTS_PREFIX = "requirements-dev"
@@ -231,29 +235,30 @@ class GEDependencies:
         return req_dict
 
     def get_required_dependency_names(self) -> List[str]:
-        """Sorted list of required GE dependencies"""
-        return self.GE_REQUIRED_DEPENDENCIES
+        """Sorted list of required GX dependencies"""
+        return [name.lower() for name in self.GX_REQUIRED_DEPENDENCIES]
 
     def get_dev_dependency_names(self) -> Set[str]:
-        """Set of dev GE dependencies"""
-        return self.GE_DEV_DEPENDENCIES
+        """Set of dev GX dependencies"""
+        return {name.lower() for name in self.GX_DEV_DEPENDENCIES}
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of required dependencies.
+        """Get unique names of required dependencies. Lowercase names.
 
         Returns:
             List of string names of required dependencies.
         """
         return sorted(
-            set(
-                self._get_dependency_names_from_requirements_file(
+            {
+                name.lower()
+                for name in self._get_dependency_names_from_requirements_file(
                     self._requirements_paths[self.PRIMARY_REQUIREMENTS_FILE]
                 )
-            )
+            }
         )
 
     def get_dev_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of dependencies from all dev requirements files.
+        """Get unique lowercase names of dependencies from all dev requirements files.
         Returns:
             List of string names of dev dependencies.
         """
@@ -270,7 +275,7 @@ class GEDependencies:
                 dev_dependency_path.absolute()
             )
             dev_dependency_names.update(dependency_names)
-        return sorted(dev_dependency_names)
+        return sorted(name.lower() for name in dev_dependency_names)
 
     def _get_dependency_names_from_requirements_file(
         self, filepath: pathlib.Path
@@ -310,7 +315,7 @@ class GEDependencies:
 
 def main() -> None:
     """Run this module to generate a list of packages from requirements files to update our static lists"""
-    ge_dependencies = GEDependencies()
+    ge_dependencies = GXDependencies()
     print("\n\nRequired Dependencies:\n\n")
     print(ge_dependencies.get_required_dependency_names_from_requirements_file())
     print("\n\nDev Dependencies:\n\n")
@@ -318,14 +323,14 @@ def main() -> None:
     assert (
         ge_dependencies.get_required_dependency_names()
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
-    ), "Mismatch between required dependencies in requirements files and in GEDependencies"
+    ), "Mismatch between required dependencies in requirements files and in GXDependencies"
     assert ge_dependencies.get_dev_dependency_names() == set(
         ge_dependencies.get_dev_dependency_names_from_requirements_file()
     ) - set(
-        GEDependencies.GE_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
-    ), "Mismatch between dev dependencies in requirements files and in GEDependencies"
+        GXDependencies.GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
+    ), "Mismatch between dev dependencies in requirements files and in GXDependencies"
     print(
-        "\n\nRequired and Dev dependencies in requirements files match those in GEDependencies"
+        "\n\nRequired and Dev dependencies in requirements files match those in GXDependencies"
     )
 
 

@@ -2,7 +2,7 @@
 Test the expectation decorator's ability to substitute parameters
 at evaluation time, and store parameters in expectation_suite
 """
-
+import datetime
 import json
 from typing import Dict
 
@@ -59,7 +59,7 @@ def validator_with_titanic_1911_asset(
 
     register_expectation(ExpectNothing)
 
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.create_expectation_suite(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.add_expectation_suite(
         expectation_suite_name="titanic_1911_suite"
     )
     batch_request = BatchRequest(
@@ -101,7 +101,8 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
     )
 
     validator_with_titanic_1911_asset.set_evaluation_parameter(
-        "my_second_parameter", [1, 2, "value", None, np.nan]
+        "my_second_parameter",
+        [1, 2, "value", None, np.nan, datetime.datetime(year=2022, month=12, day=15)],
     )
     assert validator_with_titanic_1911_asset.get_evaluation_parameter(
         "my_second_parameter"
@@ -110,7 +111,8 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
         2,
         "value",
         None,
-        np.nan,
+        None,
+        "2022-12-15T00:00:00",
     ]
 
     with pytest.raises(TypeError):

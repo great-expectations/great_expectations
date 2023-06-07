@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Final, Optional, Union
 from unittest import mock
 
 import pytest
@@ -33,9 +33,12 @@ class StubConfigurationProvider(_ConfigurationProvider):
         return self._config_values
 
 
+_STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
+
+
 class FakeAbstractDataContext(AbstractDataContext):
     def __init__(
-        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
     ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
@@ -58,10 +61,13 @@ class FakeAbstractDataContext(AbstractDataContext):
         """Abstract method. Only a stub is needed."""
         pass
 
+    def _init_project_config(self, project_config):
+        """Abstract method. Only a stub is needed."""
+        pass
+
 
 @pytest.mark.unit
 def test_save_datasource_empty_store(datasource_config_with_names: DatasourceConfig):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -75,8 +81,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
-
+    ) as mock_set, pytest.deprecated_call():
         saved_datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = context.save_datasource(datasource_to_save)
@@ -102,7 +107,6 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
 def test_save_datasource_overwrites_on_name_collision(
     datasource_config_with_names: DatasourceConfig,
 ):
-
     context = FakeAbstractDataContext()
     # Make sure the fixture has the right configuration
     assert len(context.list_datasources()) == 0
@@ -116,8 +120,7 @@ def test_save_datasource_overwrites_on_name_collision(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
-
+    ) as mock_set, pytest.deprecated_call():
         context.save_datasource(datasource_to_save)
 
         assert len(context.list_datasources()) == 1

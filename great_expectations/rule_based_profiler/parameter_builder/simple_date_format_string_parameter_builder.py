@@ -3,19 +3,24 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationResult,
-    MetricValues,
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -103,7 +108,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
@@ -173,7 +178,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -190,6 +195,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -197,7 +206,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # This should never happen.
         if len(metric_computation_result.attributed_resolved_metrics) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
@@ -212,7 +221,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"Result of metric computations for {self.__class__.__name__} is empty."
             )
 
@@ -254,9 +263,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name="column_values.match_strftime_format.unexpected_count",
+            metric_name=f"column_values.match_strftime_format.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_strftime_metric_value_kwargs_list,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,

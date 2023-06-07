@@ -1,10 +1,10 @@
 import datetime
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 # Feel free to change the name of your suite here. Renaming this will not
 # remove the other one.

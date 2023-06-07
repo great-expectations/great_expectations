@@ -10,11 +10,12 @@ from great_expectations.expectations.expectation import (
 
 class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
     """Expect column values to be unique, with an filter.
+
     Args:
-    *****
-    template_dict: dict with the following keys:
-    column_to_check - column to check uniqueness on. can be multiple column names separated by comma
-    condition - the filter - for boolean column, you can provide just the column name (evaluated to True)"""
+        template_dict: dict with the following keys: \
+            column_to_check (column to check uniqueness on. can be multiple column names separated by comma), \
+            condition (the filter for boolean column, you can provide just the column name evaluated to True)
+    """
 
     metric_dependencies = ("query.template_values",)
 
@@ -59,8 +60,6 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
     def _validate(
         self,
@@ -69,9 +68,8 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
         query_result = metrics.get("query.template_values")
-        query_result = dict(query_result)
+
         if not query_result:
             return {
                 "info": "The column values are unique, under the condition",
@@ -83,7 +81,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": "The column values are not unique, under the condition",
-                    "observed_value": query_result,
+                    "observed_value": query_result[:10],
                 },
             }
 
@@ -91,7 +89,6 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "uuid": [1, 2, 2, 3, 4, 4],
                         "is_open": [True, False, True, True, True, True],

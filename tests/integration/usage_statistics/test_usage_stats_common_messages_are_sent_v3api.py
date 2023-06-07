@@ -4,11 +4,11 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.util import get_context
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -17,13 +17,14 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
     USAGE_STATISTICS_QA_URL,
 )
 
+yaml: YAMLHandler = YAMLHandler()
+
 USAGE_STATISTICS_URL = USAGE_STATISTICS_QA_URL
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
-
     return DataContextConfig(
         **{
             "commented_map": {},
@@ -86,9 +87,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     )  # Undo the project-wide test default
     assert os.getenv("GE_USAGE_STATS") is None
 
-    context: BaseDataContext = BaseDataContext(
-        in_memory_data_context_config_usage_stats_enabled
-    )
+    context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     # Note, we lose the `data_context.__init__` event because it was emitted before closing the worker
     context._usage_statistics_handler._close_worker()
@@ -131,15 +130,14 @@ def test_common_usage_stats_are_sent_no_mocking(
         batch_identifiers={"default_identifier_name": "default_identifier"},
     )
 
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
     expected_events.append("data_context.get_batch_list")
     validator.expect_table_row_count_to_equal(value=2)
     validator.save_expectation_suite()
+
     expected_events.append("data_context.save_expectation_suite")
 
     checkpoint_yaml = """
@@ -158,7 +156,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("data_context.test_yaml_config")
 
     # Note: add_checkpoint is not instrumented as of 20211215
-    context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+    context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
     context.run_checkpoint(
         checkpoint_name="my_checkpoint",

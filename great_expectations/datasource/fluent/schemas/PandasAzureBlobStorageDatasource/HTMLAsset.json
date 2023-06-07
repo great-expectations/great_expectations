@@ -1,0 +1,419 @@
+{
+    "title": "HTMLAsset",
+    "description": "Read HTML tables into a ``list`` of ``DataFrame`` objects.\n\nParameters\n----------\nio : str, path object, or file-like object\n    String, path object (implementing ``os.PathLike[str]``), or file-like\n    object implementing a string ``read()`` function.\n    The string can represent a URL or the HTML itself. Note that\n    lxml only accepts the http, ftp and file url protocols. If you have a\n    URL that starts with ``'https'`` you might try removing the ``'s'``.\n\nmatch : str or compiled regular expression, optional\n    The set of tables containing text matching this regex or string will be\n    returned. Unless the HTML is extremely simple you will probably need to\n    pass a non-empty string here. Defaults to '.+' (match any non-empty\n    string). The default value will return all tables contained on a page.\n    This value is converted to a regular expression so that there is\n    consistent behavior between Beautiful Soup and lxml.\n\nflavor : str, optional\n    The parsing engine to use. 'bs4' and 'html5lib' are synonymous with\n    each other, they are both there for backwards compatibility. The\n    default of ``None`` tries to use ``lxml`` to parse and if that fails it\n    falls back on ``bs4`` + ``html5lib``.\n\nheader : int or list-like, optional\n    The row (or list of rows for a :class:`~pandas.MultiIndex`) to use to\n    make the columns headers.\n\nindex_col : int or list-like, optional\n    The column (or list of columns) to use to create the index.\n\nskiprows : int, list-like or slice, optional\n    Number of rows to skip after parsing the column integer. 0-based. If a\n    sequence of integers or a slice is given, will skip the rows indexed by\n    that sequence.  Note that a single element sequence means 'skip the nth\n    row' whereas an integer means 'skip n rows'.\n\nattrs : dict, optional\n    This is a dictionary of attributes that you can pass to use to identify\n    the table in the HTML. These are not checked for validity before being\n    passed to lxml or Beautiful Soup. However, these attributes must be\n    valid HTML table attributes to work correctly. For example, ::\n\n        attrs = {'id': 'table'}\n\n    is a valid attribute dictionary because the 'id' HTML tag attribute is\n    a valid HTML attribute for *any* HTML tag as per `this document\n    <https://html.spec.whatwg.org/multipage/dom.html#global-attributes>`__. ::\n\n        attrs = {'asdf': 'table'}\n\n    is *not* a valid attribute dictionary because 'asdf' is not a valid\n    HTML attribute even if it is a valid XML attribute.  Valid HTML 4.01\n    table attributes can be found `here\n    <http://www.w3.org/TR/REC-html40/struct/tables.html#h-11.2>`__. A\n    working draft of the HTML 5 spec can be found `here\n    <https://html.spec.whatwg.org/multipage/tables.html>`__. It contains the\n    latest information on table attributes for the modern web.\n\nparse_dates : bool, optional\n    See :func:`~read_csv` for more details.\n\nthousands : str, optional\n    Separator to use to parse thousands. Defaults to ``','``.\n\nencoding : str, optional\n    The encoding used to decode the web page. Defaults to ``None``.``None``\n    preserves the previous encoding behavior, which depends on the\n    underlying parser library (e.g., the parser library will try to use\n    the encoding provided by the document).\n\ndecimal : str, default '.'\n    Character to recognize as decimal point (e.g. use ',' for European\n    data).\n\nconverters : dict, default None\n    Dict of functions for converting values in certain columns. Keys can\n    either be integers or column labels, values are functions that take one\n    input argument, the cell (not column) content, and return the\n    transformed content.\n\nna_values : iterable, default None\n    Custom NA values.\n\nkeep_default_na : bool, default True\n    If na_values are specified and keep_default_na is False the default NaN\n    values are overridden, otherwise they're appended to.\n\ndisplayed_only : bool, default True\n    Whether elements with \"display: none\" should be parsed.\n\nextract_links : {None, \"all\", \"header\", \"body\", \"footer\"}\n    Table elements in the specified section(s) with <a> tags will have their\n    href extracted.\n\n    .. versionadded:: 1.5.0\n\nReturns\n-------\ndfs\n    A list of DataFrames.\n\nSee Also\n--------\nread_csv : Read a comma-separated values (csv) file into DataFrame.\n\nNotes\n-----\nBefore using this function you should read the :ref:`gotchas about the\nHTML parsing libraries <io.html.gotchas>`.\n\nExpect to do some cleanup after you call this function. For example, you\nmight need to manually assign column names if the column names are\nconverted to NaN when you pass the `header=0` argument. We try to assume as\nlittle as possible about the structure of the table and push the\nidiosyncrasies of the HTML contained in the table to the user.\n\nThis function searches for ``<table>`` elements and only for ``<tr>``\nand ``<th>`` rows and ``<td>`` elements within each ``<tr>`` or ``<th>``\nelement in the table. ``<td>`` stands for \"table data\". This function\nattempts to properly handle ``colspan`` and ``rowspan`` attributes.\nIf the function has a ``<thead>`` argument, it is used to construct\nthe header, otherwise the function attempts to find the header within\nthe body (by putting rows with only ``<th>`` elements into the header).\n\nSimilar to :func:`~read_csv` the `header` argument is applied\n**after** `skiprows` is applied.\n\nThis function will *always* return a list of :class:`DataFrame` *or*\nit will fail, e.g., it will *not* return an empty list.\n\nExamples\n--------\nSee the :ref:`read_html documentation in the IO section of the docs\n<io.read_html>` for some examples of reading in HTML tables.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "html",
+            "enum": [
+                "html"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
+        },
+        "connect_options": {
+            "title": "Connect Options",
+            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+            "type": "object"
+        },
+        "splitter": {
+            "title": "Splitter",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/SplitterColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/SplitterMultiColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/SplitterDividedInteger"
+                },
+                {
+                    "$ref": "#/definitions/SplitterModInteger"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYear"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYearAndMonth"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                },
+                {
+                    "$ref": "#/definitions/SplitterDatetimePart"
+                }
+            ]
+        },
+        "match": {
+            "title": "Match",
+            "default": ".+",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "string",
+                    "format": "regex"
+                }
+            ]
+        },
+        "flavor": {
+            "title": "Flavor",
+            "type": "string"
+        },
+        "header": {
+            "title": "Header",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "skiprows": {
+            "title": "Skiprows",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "attrs": {
+            "title": "Attrs",
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "parse_dates": {
+            "title": "Parse Dates",
+            "default": false,
+            "type": "boolean"
+        },
+        "thousands": {
+            "title": "Thousands",
+            "default": ",",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "decimal": {
+            "title": "Decimal",
+            "default": ".",
+            "type": "string"
+        },
+        "converters": {
+            "title": "Converters",
+            "type": "object"
+        },
+        "na_values": {
+            "title": "Na Values",
+            "type": "array",
+            "items": {}
+        },
+        "keep_default_na": {
+            "title": "Keep Default Na",
+            "default": true,
+            "type": "boolean"
+        },
+        "displayed_only": {
+            "title": "Displayed Only",
+            "default": true,
+            "type": "boolean"
+        },
+        "extract_links": {
+            "title": "Extract Links",
+            "enum": [
+                "header",
+                "footer",
+                "body",
+                "all"
+            ],
+            "type": "string"
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "SplitterColumnValue": {
+            "title": "SplitterColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_column_value",
+                    "enum": [
+                        "split_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterMultiColumnValue": {
+            "title": "SplitterMultiColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_multi_column_values",
+                    "enum": [
+                        "split_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDividedInteger": {
+            "title": "SplitterDividedInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_divided_integer",
+                    "enum": [
+                        "split_on_divided_integer"
+                    ],
+                    "type": "string"
+                },
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "divisor"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterModInteger": {
+            "title": "SplitterModInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_mod_integer",
+                    "enum": [
+                        "split_on_mod_integer"
+                    ],
+                    "type": "string"
+                },
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "mod"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYear": {
+            "title": "SplitterYear",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year",
+                    "enum": [
+                        "split_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonth": {
+            "title": "SplitterYearAndMonth",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month",
+                    "enum": [
+                        "split_on_year_and_month"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonthAndDay": {
+            "title": "SplitterYearAndMonthAndDay",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month_and_day",
+                    "enum": [
+                        "split_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDatetimePart": {
+            "title": "SplitterDatetimePart",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_date_parts",
+                    "enum": [
+                        "split_on_date_parts"
+                    ],
+                    "type": "string"
+                },
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "column_name",
+                "datetime_parts"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

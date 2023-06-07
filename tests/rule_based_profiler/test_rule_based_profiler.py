@@ -5,8 +5,11 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequest
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -964,7 +967,7 @@ def test_run_profiler_without_dynamic_args(
         rules=None,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -1007,7 +1010,7 @@ def test_run_profiler_with_dynamic_args(
         rules=rules,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -1092,10 +1095,10 @@ def test_get_profiler_with_too_many_args_raises_error(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id="my_ge_cloud_id",
+            id="my_ge_cloud_id",
         )
 
-    assert "either name or ge_cloud_id" in str(e.value)
+    assert "either name or id" in str(e.value)
 
 
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
@@ -1167,41 +1170,47 @@ def test_add_profiler(
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode = False
+    mock_data_context.cloud_mode = False
+
+    profiler_args = profiler_config_with_placeholder_args.to_dict()
+    for attr in ("class_name", "module_name"):
+        profiler_args.pop(attr)
+
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-        profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
+        **profiler_args,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=profiler_key, value=profiler_config_with_placeholder_args
-    )
+    mock_data_context.profiler_store.add.asset_called_once()
 
 
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
-    mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
     ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode.return_value = True
-    profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-        profiler_config_with_placeholder_args,
-        data_context=mock_data_context,
-        profiler_store=mock_data_context.profiler_store,
-    )
+    profiler_args = profiler_config_with_placeholder_args.to_dict()
+    for attr in ("class_name", "module_name"):
+        profiler_args.pop(attr)
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext",
+        spec=CloudDataContext,
+    ) as mock_data_context:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
+            data_context=mock_data_context,
+            profiler_store=mock_data_context.profiler_store,
+            **profiler_args,
+        )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=ge_cloud_profiler_key, value=profiler_config_with_placeholder_args
-    )
+    mock_data_context.profiler_store.add.assert_called_once()
 
 
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
@@ -1209,41 +1218,41 @@ def test_add_profiler_ge_cloud_mode(
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     mock_data_context: mock.MagicMock,
 ):
-    profiler_config = RuleBasedProfilerConfig(
-        name="my_profiler_config",
-        config_version=1.0,
-        rules={
-            "rule_1": {
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "batch_request": {
-                        "runtime_parameters": {
-                            "batch_data": pd.DataFrame()  # Cannot be serialized in store
-                        }
-                    },
+    name = "my_profiler_config"
+    config_version = 1.0
+    rules = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+                "batch_request": {
+                    "runtime_parameters": {
+                        "batch_data": pd.DataFrame()  # Cannot be serialized in store
+                    }
                 },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    },
-                ],
-            }
-        },
-    )
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                },
+            ],
+        }
+    }
 
     with pytest.raises(InvalidConfigError) as e:
         RuleBasedProfiler.add_profiler(
-            profiler_config,
             data_context=mock_data_context,
             profiler_store=mock_data_context.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
         )
 
     assert "batch_data found in batch_request" in str(e.value)
@@ -1264,7 +1273,7 @@ def test_get_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert isinstance(profiler, RuleBasedProfiler)
@@ -1275,12 +1284,12 @@ def test_get_profiler(
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(
             data_context=mock_data_context,
             profiler_store=empty_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert "Non-existent Profiler" in str(e.value)
@@ -1296,7 +1305,7 @@ def test_delete_profiler(
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert mock_remove_key.call_count == 1
@@ -1313,21 +1322,21 @@ def test_delete_profiler_with_too_many_args_raises_error(
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id="my_ge_cloud_id",
+            id="my_ge_cloud_id",
         )
 
-    assert "either name or ge_cloud_id" in str(e.value)
+    assert "either name or id" in str(e.value)
 
 
 @pytest.mark.unit
 def test_delete_profiler_non_existent_profiler_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_non_existent_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert "Non-existent Profiler" in str(e.value)
@@ -1408,7 +1417,6 @@ def test_add_rule_overwrite_first_rule(
     mock_data_context: mock.MagicMock,
     sample_rule_dict: dict,
 ):
-
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rbp",
         config_version=1.0,

@@ -3,8 +3,8 @@ import random
 
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchSpec
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
@@ -158,7 +158,7 @@ class PandasDataSampler(DataSampler):
             hash_func = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
-                ge_exceptions.ExecutionEngineError(
+                gx_exceptions.ExecutionEngineError(
                     f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
                        Reference to {hash_function_name} cannot be found."""
                 )

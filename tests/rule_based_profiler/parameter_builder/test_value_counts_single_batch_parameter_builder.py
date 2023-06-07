@@ -3,8 +3,8 @@ from typing import Dict, Optional
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -69,6 +69,7 @@ def test_value_counts_single_batch_parameter_builder_alice(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_node_as_dict: dict = {

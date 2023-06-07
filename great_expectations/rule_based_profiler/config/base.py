@@ -72,7 +72,7 @@ class NotNullSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump(pass_original=True)
     def remove_nulls_and_keep_unknowns(
-        self, output: dict, original: Type[DictDot], **kwargs
+        self, output: dict, original: DictDot, **kwargs
     ) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
         Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
@@ -101,7 +101,7 @@ class NotNullSchema(Schema):
             clean_falsy=False,
         )
 
-        return cleaned_output
+        return cleaned_output  # type: ignore[return-value] # filter_properties_dict could return None
 
 
 class DomainBuilderConfig(SerializableDictDot):
@@ -278,7 +278,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         class_name: str,
@@ -485,7 +485,7 @@ class RuleConfigSchema(NotNullSchema):
 
 
 class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -506,16 +506,16 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
-    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[no-untyped-def]
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[override] # super type accepts Dict
         """Override parent implementation to pop unnecessary attrs from config.
 
         Please see parent BaseYamlConfig for more details.
         """
         try:
-            schema_instance: Any = cls._get_schema_instance()
+            schema_instance: Schema = cls._get_schema_instance()
             config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
-            config.pop("class_name", None)
-            config.pop("module_name", None)
+            config.pop("class_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
+            config.pop("module_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
@@ -618,13 +618,13 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         runtime_rules: Dict[str, dict] = {
             name: RuleBasedProfilerConfig._substitute_variables_in_config(
                 rule=rule,
-                variables_container=effective_variables,
+                variables_container=effective_variables,  # type: ignore[arg-type] # could be None
             )
             for name, rule in effective_rules_dict.items()
         }
 
         return cls(
-            name=profiler.config.name,
+            name=profiler.config.name,  # type: ignore[arg-type] # name could be None
             config_version=profiler.config.config_version,
             variables=runtime_variables,
             rules=runtime_rules,
@@ -696,7 +696,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     config_version = fields.Float(
         required=True,
         allow_none=False,
-        validate=lambda x: x == 1.0,
+        validate=lambda x: x == 1.0,  # noqa: PLR2004
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },

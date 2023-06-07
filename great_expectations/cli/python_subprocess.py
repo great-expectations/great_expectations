@@ -3,7 +3,7 @@ import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
@@ -20,7 +20,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -40,9 +40,8 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
             env=env,
-            universal_newlines=True,
+            text=True,
         )
         sh_out: str = res.stdout.strip()
         logger.info(sh_out)
@@ -67,7 +66,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -76,7 +75,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
 
     bar_length_100_percent: int = 100
 
-    max_work_amount: int = bar_length_100_percent
+    max_work_amount: Union[int, float] = bar_length_100_percent
 
     poll_period_seconds: int = 1
 
@@ -106,17 +105,17 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                 errors=None,
             ) as proc:
                 poll_status_code: Optional[int] = proc.poll()
-                poll_stdout: str = proc.stdout.readline()
+                poll_stdout: str = proc.stdout.readline()  # type: ignore[union-attr] # stdout could be None
                 while poll_status_code is None:
                     gathered += max([len(poll_stdout), poll_period_seconds])
                     progress = float(gathered) / max_work_amount
                     excess: float = progress - 1.0
                     if excess > 0:
-                        if 0.0 < excess <= 1.0:
+                        if 0.0 < excess <= 1.0:  # noqa: PLR2004
                             max_work_amount += 2.0 * excess * max_work_amount
-                        elif 1.0 < excess <= 2.0:
+                        elif 1.0 < excess <= 2.0:  # noqa: PLR2004
                             max_work_amount += 5.0 * excess * max_work_amount
-                        elif 2.0 < excess <= 1.0e1:
+                        elif 2.0 < excess <= 1.0e1:  # noqa: PLR2004
                             max_work_amount += 1.0e1 * excess * max_work_amount
                         else:
                             max_work_amount += 1.0e2 * excess * max_work_amount
@@ -125,7 +124,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     bar.update(0)
                     time.sleep(poll_period_seconds)
                     poll_status_code = proc.poll()
-                    poll_stdout = proc.stdout.readline()
+                    poll_stdout = proc.stdout.readline()  # type: ignore[union-attr] # stdout could be None
                 status_code = proc.returncode
                 if status_code != poll_status_code:
                     status_code = 1

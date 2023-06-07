@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
@@ -10,6 +9,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,

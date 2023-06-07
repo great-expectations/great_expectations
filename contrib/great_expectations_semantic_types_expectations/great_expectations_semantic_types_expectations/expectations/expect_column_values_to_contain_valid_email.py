@@ -1,32 +1,14 @@
-import json
 import re  # regular expressions
 
-# !!! This giant block of imports should be something simpler, such as:
-from great_expectations import *
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 EMAIL_REGEX = r"[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,7}$"
 
@@ -60,7 +42,7 @@ class ColumnValuesContainValidEmail(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
-    """Expects values in given column to be valid email addresses."""
+    """Expect values in given column to be valid email addresses."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
 
@@ -77,8 +59,7 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     examples = [
         {

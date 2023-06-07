@@ -6,23 +6,27 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 
 from makefun import create_function
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequestBase
-from great_expectations.core.config_peer import ConfigOutputModes, ConfigOutputModeType
-from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.rule_based_profiler import BaseRuleBasedProfiler
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch import BatchRequestBase  # noqa: TCH001
+from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
+from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa: TCH001
+from great_expectations.rule_based_profiler.data_assistant import (
+    DataAssistant,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_validator_with_expectation_suite,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
@@ -65,7 +69,7 @@ class DataAssistantRunner:
 
         self._profiler = self.get_profiler()
 
-        setattr(self, "run", self.run_impl())
+        self.run = self.run_impl()
 
     def get_profiler(self) -> BaseRuleBasedProfiler:
         """
@@ -78,7 +82,7 @@ class DataAssistantRunner:
 
     def get_profiler_config(
         self,
-        mode: ConfigOutputModeType = ConfigOutputModes.JSON_DICT,
+        mode: ConfigOutputModes = ConfigOutputModes.JSON_DICT,
     ) -> Union[BaseYamlConfig, dict, str]:
         """
         This method returns configuration of effective "BaseRuleBasedProfiler", corresponding to this instance's
@@ -124,7 +128,7 @@ class DataAssistantRunner:
             """
             if batch_request is None:
                 data_assistant_name: str = self._data_assistant_cls.data_assistant_type
-                raise ge_exceptions.DataAssistantExecutionError(
+                raise gx_exceptions.DataAssistantExecutionError(
                     message=f"""Utilizing "{data_assistant_name}.run()" requires valid "batch_request" to be specified \
 (empty or missing "batch_request" detected)."""
                 )
@@ -272,15 +276,18 @@ class DataAssistantRunner:
         conflicting_domain_type_attribute_names: List[str] = []
 
         rule: Rule
-        domain_builder: DomainBuilder
+        domain_builder: Optional[DomainBuilder]
         domain_builder_attributes: List[str]
         key: str
         accessor_method: Callable
         accessor_method_return_type: Type
         property_value: Any
-        parameter: Parameter
+        parameter: Optional[Parameter]
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
+            assert (
+                domain_builder
+            ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
                 accessor_method = getattr_static(domain_builder, key, None).fget
@@ -337,11 +344,18 @@ class DataAssistantRunner:
     @staticmethod
     def _get_rule_domain_type_attributes(rule: Rule) -> List[str]:
         klass: type = rule.domain_builder.__class__
-        sig: Signature = signature(obj=klass.__init__)
+        sig: Signature = signature(obj=klass.__init__)  # type: ignore[misc] # mypy does not like direct __init__ access
         parameters: Dict[str, Parameter] = dict(sig.parameters)
+
+        domain_builder = rule.domain_builder
+        assert (
+            domain_builder
+        ), f"The underlying domain_builder on rule {rule.name} must be non-null"
+        exclude_field_names = domain_builder.exclude_field_names
+
         attribute_names: List[str] = list(
             filter(
-                lambda element: element not in rule.domain_builder.exclude_field_names,
+                lambda element: element not in exclude_field_names,
                 list(parameters.keys())[1:],
             )
         )

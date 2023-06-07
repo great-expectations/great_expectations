@@ -4,9 +4,10 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -17,16 +18,16 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def">
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
     metric_dependencies = ("query.column",)
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
     query = """
             SELECT {col},
             CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
@@ -34,7 +35,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             GROUP BY {col}
             """
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py success_keys">
     success_keys = (
         "column",
         "value",
@@ -57,7 +58,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -78,7 +79,8 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function">
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py _validate function signature">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -87,10 +89,12 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         # </snippet>
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = metrics.get("query.column")
+        query_result = dict([element.values() for element in query_result])
+
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
-        query_result = metrics.get("query.column")
-        query_result = dict(query_result)
 
         if isinstance(value, list):
             success = all(
@@ -114,12 +118,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         }
         # </snippet>
 
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py examples">
     examples = [
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "col1": [1, 2, 2, 3, 4],
                         "col2": ["a", "a", "b", "b", "a"],
@@ -199,7 +202,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         },
     ]
     # </snippet>
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py library_metadata">
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
@@ -209,7 +212,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="expect_queried_column_value_frequency_to_meet_threshold.py print_diagnostic_checklist()">
     ExpectQueriedColumnValueFrequencyToMeetThreshold().print_diagnostic_checklist()
     # </snippet>
 

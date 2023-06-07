@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import random
 import uuid
 from typing import Dict
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -163,23 +166,60 @@ class ExpectationsStore(Store):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
-        ge_cloud_expectation_suite_id = response_json["data"]["id"]
-        expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-        expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
+        suite_data: Dict
+        # if only the expectation_suite_name is passed, a list will be returned
+        if isinstance(response_json["data"], list):
+            if len(response_json["data"]) == 1:
+                suite_data = response_json["data"][0]
+            else:
+                raise ValueError(
+                    "More than one Expectation Suite was found with the expectation_suite_name."
+                )
+        else:
+            suite_data = response_json["data"]
+        ge_cloud_suite_id: str = suite_data["id"]
+        suite_dict: Dict = suite_data["attributes"]["suite"]
+        suite_dict["ge_cloud_id"] = ge_cloud_suite_id
 
-        return expectation_suite_dict
+        return suite_dict
+
+    def _add(self, key, value, **kwargs):
+        try:
+            return super()._add(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ExpectationSuiteError(
+                f"An ExpectationSuite named {value.expectation_suite_name} already exists."
+            )
+
+    def _update(self, key, value, **kwargs):
+        try:
+            return super()._update(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ExpectationSuiteError(
+                f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
+            )
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
+
+    def _validate_key(  # type: ignore[override]
+        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
+    ) -> None:
+        if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
+            raise ValueError(
+                "GXCloudIdentifier for ExpectationsStore must contain either "
+                "an id or a resource_name, but neither are present."
+            )
+        return super()._validate_key(key=key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             # GXCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
@@ -190,7 +230,7 @@ class ExpectationsStore(Store):
         else:
             return self._expectationSuiteSchema.loads(value)
 
-    def self_check(self, pretty_print):
+    def self_check(self, pretty_print):  # noqa: PLR0912
         return_obj = {}
 
         if pretty_print:
@@ -207,14 +247,14 @@ class ExpectationsStore(Store):
                 print(f"\t{len_keys} keys found:")
                 for key in return_obj["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),

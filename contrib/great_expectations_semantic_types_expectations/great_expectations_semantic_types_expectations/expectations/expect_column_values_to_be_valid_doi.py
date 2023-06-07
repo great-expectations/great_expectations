@@ -15,7 +15,6 @@ DOI_REGEX = r"^(?i)10.\d{4,9}/[-._;()/:A-Z0-9]+$"
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidDoi(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_doi"
 
@@ -42,7 +41,7 @@ class ColumnValuesToBeValidDoi(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidDoi(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid DOI format."""
+    """Expect column values to be valid DOI format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -107,8 +106,7 @@ class ExpectColumnValuesToBeValidDoi(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

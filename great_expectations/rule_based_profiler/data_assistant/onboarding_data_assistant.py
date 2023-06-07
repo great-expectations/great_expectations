@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant.data_assistant import (
@@ -9,7 +10,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
     OnboardingDataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     CategoricalColumnDomainBuilder,
     ColumnDomainBuilder,
@@ -37,7 +37,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -208,6 +208,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         table_row_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -355,6 +356,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -366,6 +368,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -377,6 +380,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_quantile_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs={
                 "quantiles": f"{VARIABLES_KEY}quantiles",
                 "allow_relative_error": f"{VARIABLES_KEY}allow_relative_error",
@@ -391,6 +395,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_median_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -402,6 +407,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_mean_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -413,6 +419,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_standard_deviation_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -653,6 +660,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -664,6 +672,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_values_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -770,7 +779,6 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
-
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
         text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
@@ -810,6 +818,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_min_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -821,6 +830,7 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_max_length_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
@@ -894,6 +904,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
+            "candidate_regexes": None,
             "success_ratio": 7.5e-1,
         }
         parameter_builders: List[ParameterBuilder] = [
@@ -946,7 +957,7 @@ class OnboardingDataAssistant(DataAssistant):
             DataAssistant.commonly_used_parameter_builders.get_column_distinct_values_count_metric_multi_batch_parameter_builder()
         )
         metric_name: str = "column.value_counts"
-        name: str = sanitize_parameter_name(name=metric_name)
+        name: str = sanitize_parameter_name(name=metric_name, suffix=None)
         column_value_counts_metric_multi_batch_parameter_builder_for_metrics = (
             MetricMultiBatchParameterBuilder(
                 name=name,
@@ -975,12 +986,14 @@ class OnboardingDataAssistant(DataAssistant):
         ]
         column_distinct_values_count_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name=None,
+            suffix=None,
             metric_value_kwargs=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
         )
 
         column_unique_proportion_range_parameter_builder_for_validations: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name="column.unique_proportion",
+            suffix=None,
             metric_value_kwargs=None,
         )
 

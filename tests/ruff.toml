@@ -1,0 +1,22 @@
+# tests/ specific ruff linter overrides
+
+# root linter settings are defined in the file below
+extend = "../pyproject.toml"
+
+extend-ignore = [
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    # This is likely to be a high-touch rule. Doing this in `tests` doesn't help circular imports.
+    # Let's differ this for tests until there are auto-fixes
+    "TCH001",
+    # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
+    "TID251",  # banned-api - is used to prevent opaque attribute errors caused by missing optional dependencies
+    # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    "B011", # assert-false - common pattern in pytest
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # naive tz in tests is not always a problem
+    "PLR2004", # magic value comparison is common test pattern
+    "PLR0913", # too many arguments
+]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]

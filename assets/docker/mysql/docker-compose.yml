@@ -1,6 +1,7 @@
 version: '3.2'
 services:
   mysql_db:
+    platform: linux/amd64
     image: mysql:8.0.20
     volumes:
         - ./conf.d:/etc/mysql/conf.d

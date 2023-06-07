@@ -23,7 +23,6 @@ def is_valid_base64(code: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidBase64(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_base64"
 
@@ -45,7 +44,7 @@ class ColumnValuesToBeValidBase64(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidBase64(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid base64 code."""
+    """Expect column values to be valid base64 codes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -108,8 +107,7 @@ class ExpectColumnValuesToBeValidBase64(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

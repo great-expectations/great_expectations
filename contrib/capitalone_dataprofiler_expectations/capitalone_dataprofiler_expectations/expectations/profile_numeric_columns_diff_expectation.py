@@ -2,12 +2,13 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 
-class ProfileNumericColumnsDiffExpectation(TableExpectation):
+class ProfileNumericColumnsDiffExpectation(BatchExpectation):
     profile_metric = None
 
     @classmethod
@@ -19,8 +20,8 @@ class ProfileNumericColumnsDiffExpectation(TableExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies = super().get_validation_dependencies(
+    ) -> ValidationDependencies:
+        dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
         assert isinstance(

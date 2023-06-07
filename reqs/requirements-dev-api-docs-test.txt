@@ -1,0 +1,1 @@
+docstring-parser==0.15

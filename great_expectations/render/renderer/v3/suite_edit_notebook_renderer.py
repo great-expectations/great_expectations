@@ -1,19 +1,20 @@
+from __future__ import annotations
+
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jinja2
 import nbformat
 
-from great_expectations import DataContext
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
-    NotebookConfig,
-    NotebookTemplateConfig,
+    NotebookConfig,  # noqa: TCH001
+    NotebookTemplateConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
@@ -25,6 +26,11 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     """
@@ -35,7 +41,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     - Make it easy to edit a suite where only JSON exists.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         custom_templates_module: Optional[str] = None,
         header_markdown: Optional[NotebookTemplateConfig] = None,
@@ -50,7 +56,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[DataContext] = None,
+        context: Optional[AbstractDataContext] = None,
     ) -> None:
         super().__init__(context=context)
         custom_loader: list = []
@@ -102,7 +108,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.table_expectation_code = table_expectation_code
 
     @staticmethod
-    def from_data_context(data_context: DataContext):
+    def from_data_context(data_context: AbstractDataContext):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
             suite_edit_notebook_config = data_context.notebooks.get("suite_edit")

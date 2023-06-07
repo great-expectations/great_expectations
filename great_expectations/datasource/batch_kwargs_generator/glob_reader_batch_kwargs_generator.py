@@ -3,7 +3,6 @@ import glob
 import logging
 import os
 import re
-import warnings
 from typing import Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -56,7 +55,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         "limit",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -101,16 +100,19 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:
+        if (
+            os.path.isabs(self._base_directory)  # noqa: PTH117
+            or self._datasource.data_context is None
+        ):
             return self._base_directory
         else:
-            return os.path.join(
+            return os.path.join(  # noqa: PTH118
                 self._datasource.data_context.root_directory, self._base_directory
             )
 
     def get_available_data_asset_names(self):
         known_assets = []
-        if not os.path.isdir(self.base_directory):
+        if not os.path.isdir(self.base_directory):  # noqa: PTH112
             return {"names": [(asset, "path") for asset in known_assets]}
         for data_asset_name in self.asset_globs.keys():
             batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
@@ -120,19 +122,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         return {"names": [(asset, "path") for asset in known_assets]}
 
     # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def get_available_partition_ids(self, data_asset_name=None):
         glob_config = self._get_data_asset_config(data_asset_name)
         batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
         partition_ids = [
@@ -187,7 +177,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             paths (list)
         """
         glob_config = self._get_data_asset_config(data_asset_name)
-        return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        return glob.glob(
+            os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
+        )
 
     def _get_data_asset_config(self, data_asset_name):
         try:
@@ -204,7 +196,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
         glob_config = self._get_data_asset_config(data_asset_name)
-        paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        paths = glob.glob(
+            os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
+        )
         return self._build_batch_kwargs_path_iter(
             paths,
             glob_config,
@@ -213,7 +207,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             limit=limit,
         )
 
-    def _build_batch_kwargs_path_iter(
+    def _build_batch_kwargs_path_iter(  # noqa: PLR0913
         self,
         path_list,
         glob_config,
@@ -230,7 +224,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 limit=limit,
             )
 
-    def _build_batch_kwargs_from_path(
+    def _build_batch_kwargs_from_path(  # noqa: PLR0913
         self, path, glob_config, reader_method=None, reader_options=None, limit=None
     ):
         batch_kwargs = self._datasource.process_batch_parameters(

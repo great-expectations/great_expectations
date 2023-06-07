@@ -15,7 +15,6 @@ IMDB_ID_REGEX = r"^ev\d{7}\/(19|20)\d{2}(\/[12])?|tt\d{7,8}\/characters\/nm\d{7,
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidImdbId(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_imdb_id"
 
@@ -42,7 +41,7 @@ class ColumnValuesToBeValidImdbId(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidImdbId(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid IMDB ID format."""
+    """Expect column values to conform to valid IMDB ID format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -107,8 +106,7 @@ class ExpectColumnValuesToBeValidImdbId(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

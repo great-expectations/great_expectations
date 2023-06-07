@@ -3,8 +3,6 @@ This is a template for creating custom ColumnMapExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
-import datetime
-import json
 import socket
 import ssl
 from datetime import datetime
@@ -13,7 +11,6 @@ from typing import Optional
 from dateutil.parser import parse
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -32,7 +29,7 @@ def get_certificate_exp_date(host, port=443, timeout=1):
         expiry_date = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
         before_date = datetime.strptime(cert["notBefore"], "%b %d %H:%M:%S %Y %Z")
         return before_date, expiry_date
-    except Exception as e:
+    except Exception:
         return parse("1900-01-01"), parse("1900-01-01")
     finally:
         sock.close()
@@ -50,14 +47,13 @@ def has_valid_cert(url: str) -> bool:
             return True
         else:
             return False
-    except Exception as e:
+    except Exception:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesUrlHasGotValidCert(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_cert"
 
@@ -79,7 +75,7 @@ class ColumnValuesUrlHasGotValidCert(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesUrlHasGotValidCert(ColumnMapExpectation):
-    """Expect provided url has got valid cert. (NotBefore < now < NotAfter"""
+    """Expect provided url has got valid cert. (NotBefore < now < NotAfter)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -135,7 +131,7 @@ class ExpectColumnValuesUrlHasGotValidCert(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -149,8 +145,7 @@ class ExpectColumnValuesUrlHasGotValidCert(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

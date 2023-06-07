@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 
 SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
@@ -15,7 +15,7 @@ SINGLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     ),
     pytest.param(
         {"month": 10, "unsupported": 5},
-        marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.InvalidConfigError),
+        marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.InvalidConfigError),
         id="month_dict, unsupported batch identifier",
     ),
     pytest.param(
@@ -80,7 +80,7 @@ MULTIPLE_DATE_PART_BATCH_IDENTIFIERS: List[pytest.param] = [
     ),
     pytest.param(
         {"year": 2018, "month": 10, "unsupported": 5},
-        marks=pytest.mark.xfail(strict=True, raises=ge_exceptions.InvalidConfigError),
+        marks=pytest.mark.xfail(strict=True, raises=gx_exceptions.InvalidConfigError),
         id="year_and_month_dict, unsupported batch identifier",
     ),
     pytest.param(

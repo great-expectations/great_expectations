@@ -3,11 +3,12 @@ from typing import Any, Collection, Dict, List, Optional, Set, cast
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_nested_collection_of_sets,
@@ -26,11 +27,9 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     # noinspection PyUnusedLocal
-    parameter_builder: ValueSetMultiBatchParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_name",
-            data_context=data_context,
-        )
+    parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_name",
+        data_context=data_context,
     )
 
 
@@ -43,10 +42,8 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ValueSetMultiBatchParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                data_context=data_context,
-            )
+        parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+            data_context=data_context,
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
         excinfo.value
@@ -77,7 +74,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_event_type_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -93,6 +90,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -155,7 +153,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_user_agent_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -171,6 +169,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -222,7 +221,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_passenger_count_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
@@ -249,6 +248,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -300,7 +300,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_store_and_fwd_flag_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
@@ -327,6 +327,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (

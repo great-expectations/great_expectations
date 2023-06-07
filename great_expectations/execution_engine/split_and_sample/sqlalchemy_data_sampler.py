@@ -1,26 +1,20 @@
-from typing import Optional, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from typing import TYPE_CHECKING, Optional, Union
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
-try:
-    from sqlalchemy.engine import Dialect
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
-except ImportError:
-    Selectable = None
-    BinaryExpression = None
-    BooleanClauseList = None
-    Dialect = None
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 class SqlAlchemyDataSampler(DataSampler):
@@ -28,10 +22,10 @@ class SqlAlchemyDataSampler(DataSampler):
 
     def sample_using_limit(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[Selectable] = None,
-    ) -> Union[str, BinaryExpression, BooleanClauseList]:
+        where_clause: Optional[sqlalchemy.Selectable] = None,
+    ) -> Union[str, sqlalchemy.BinaryExpression, sqlalchemy.BooleanClauseList]:
         """Sample using a limit with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since SqlAlchemy's semantics
@@ -51,7 +45,7 @@ class SqlAlchemyDataSampler(DataSampler):
 
         # Split clause should be permissive of all values if not supplied.
         if where_clause is None:
-            if execution_engine.dialect_name == GESqlDialect.SQLITE:
+            if execution_engine.dialect_name == GXSqlDialect.SQLITE:
                 where_clause = sa.text("1 = 1")
             else:
                 where_clause = sa.true()
@@ -61,10 +55,10 @@ class SqlAlchemyDataSampler(DataSampler):
         # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
         # so the business logic for building the query needs to be different.
         dialect_name: str = execution_engine.dialect_name
-        if dialect_name == GESqlDialect.ORACLE:
+        if dialect_name == GXSqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
-            raw_query: Selectable = (
+            raw_query: sqlalchemy.Selectable = (
                 sa.select("*")
                 .select_from(
                     sa.table(table_name, schema=batch_spec.get("schema_name", None))
@@ -79,10 +73,10 @@ class SqlAlchemyDataSampler(DataSampler):
             )
             query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
             return query
-        elif dialect_name == GESqlDialect.MSSQL:
+        elif dialect_name == GXSqlDialect.MSSQL:
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
-            selectable_query: Selectable = (
+            selectable_query: sqlalchemy.Selectable = (
                 sa.select("*")
                 .select_from(
                     sa.table(table_name, schema=batch_spec.get("schema_name", None))
@@ -122,21 +116,21 @@ class SqlAlchemyDataSampler(DataSampler):
             None
         """
         if not isinstance(n, (str, int)):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
             )
         if isinstance(n, str) and not n.isdigit():
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
                 "parseable as an integer."
             )
 
     @staticmethod
     def sample_using_random(
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[Selectable] = None,
-    ) -> Selectable:
+        where_clause: Optional[sqlalchemy.Selectable] = None,
+    ) -> sqlalchemy.Selectable:
         """Sample using random data with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since we use the where clause
@@ -151,19 +145,28 @@ class SqlAlchemyDataSampler(DataSampler):
         Returns:
             Sqlalchemy selectable.
         """
+        try:
+            table_name: str = batch_spec["table_name"]
+        except KeyError as e:
+            raise ValueError(
+                "A table name must be specified when using sample_using_random. "
+                "Please update your configuration"
+            ) from e
+        try:
+            p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
+        except (KeyError, TypeError) as e:
+            raise ValueError(
+                "To use sample_using_random you must specify the parameter 'p' in "
+                "the 'sampling_kwargs' configuration."
+            ) from e
 
-        # TODO: AJB 20220429 WARNING THIS METHOD IS NOT COVERED BY TESTS
-
-        table_name: str = batch_spec["table_name"]
-
-        num_rows: int = execution_engine.engine.execute(
-            sa.select([sa.func.count()])
+        num_rows: int = execution_engine.execute_query(
+            sa.select(sa.func.count())
             .select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))
             )
             .where(where_clause)
         ).scalar()
-        p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
         sample_size: int = round(p * num_rows)
         return (
             sa.select("*")
@@ -178,7 +181,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_mod(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sqlalchemy.Selectable:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -205,7 +208,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_a_list(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sqlalchemy.Selectable:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -231,7 +234,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_md5(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sqlalchemy.Selectable:
         """Hash the values in the named column using md5, and only keep rows that match the given hash_value.
 
         Args:

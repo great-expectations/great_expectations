@@ -16,7 +16,11 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     from pyathena import sqlalchemy_athena
 
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_of_type_string_dialect_pyathena_1",
+    )
 
     # Monkey-patch dialect for testing purposes.
     validator.execution_engine.dialect_module = sqlalchemy_athena
@@ -53,9 +57,12 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
 
 
 def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
-
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_of_type_string_dialect_sqlite_1",
+    )
 
     result = validator.expect_column_values_to_be_of_type("col", type_="TEXT")
 

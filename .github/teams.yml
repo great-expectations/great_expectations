@@ -1,25 +1,52 @@
-# To add an additional team, simply add a top-level key with a list of associated GitHub user handles
+# This file allows our autolabeler action to label PR's based on the author's GitHub handle.
+# To add an additional team, simply add a top-level key with a list of users.
+# NOTE - this should be kept in sync with the GX org's teams
 
-core-team:
-  - '@jcampbell'       # James Campbell
-  - '@NathanFarmer'    # Nathan Farmer
+dx:
   - '@Shinnnyshinshin' # Will Shin
-  - '@Super-Tanner'    # Tanner Beam
   - '@alexsherstinsky' # Alex Sherstinsky
   - '@anthonyburdi'    # Anthony Burdi
-  - '@cdkini'          # Chetan Kini
-  - '@donaldheppner'   # Don Heppner
-  - '@billdirks'       # Bill Dirks
-  - '@Kilo59'          # Gabriel Gore
+  - '@kenwade4'        # Ken Wade
 
 devrel:
-  - '@AFineDayFor'     # Hannah Stokes
   - '@Rachel-Reverie'  # Rachel Reverie
   - '@austiezr'        # Austin Robinson
-  - '@kenwade4'        # Ken Wade
+  - '@kwcanuck'        # Rob Gray
   - '@kyleaton'        # Kyle Eaton
   - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
+  - '@tjholsman'       # TJ Holsman
 
-cloud:
+core:
+  - '@DrewHoo'         # Drew Hoover
+  - '@HaebichanGX'     # Haebichan Jung
+  - '@Kilo59'          # Gabriel Gore
+  - '@NathanFarmer'    # Nathan Farmer
+  - '@Shinnnyshinshin' # Will Shin
+  - '@Super-Tanner'    # Tanner Beam
+  - '@TrangPham'       # Thu Pham
+  - '@abegong'         # Abe Gong
+  - '@alexsherstinsky' # Alex Sherstinsky
+  - '@allensallinger'  # Allen Sallinger
+  - '@anthonyburdi'    # Anthony Burdi
+  - '@billdirks'       # Bill Dirks
+  - '@cdkini'          # Chetan Kini
+  - '@dctalbot'        # David Talbot
+  - '@donaldheppner'   # Don Heppner
+  - '@elenajdanova'    # Elena Jdanova
+  - '@jcampbell'       # James Campbell
+  - '@josectobar'      # José Tobar
+  - '@joshua-stauffer' # Josh Stauffer
+  - '@joshzzheng'      # Josh Zheng
+  - '@jshaikGX'        # Javed Shaik
+  - '@kenwade4'        # Ken Wade
+  - '@lockettks'       # Kim Mathieu
   - '@roblim'          # Rob Lim
+  - '@rreinoldsc'      # Robby Reinold
+  - '@sujensen'        # Susan Jensen
+  - '@tyler-hoffman'   # Tyler Hoffman
+  - '@wookasz'         # Łukasz Lempart
+
+bot:
+  - '@dependabot'
+  - '@dependabot[bot]'

@@ -5,10 +5,10 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
 from great_expectations.self_check.util import expectationSuiteSchema
+from great_expectations.util import get_context
 
 
 @pytest.fixture()
@@ -29,7 +29,7 @@ def parameterized_expectation_suite(empty_data_context_stats_enabled):
 def validation_operators_data_context(
     basic_data_context_config_for_validation_operator, filesystem_csv_4
 ):
-    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
+    data_context = get_context(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
         "my_datasource",
@@ -41,7 +41,7 @@ def validation_operators_data_context(
             }
         },
     )
-    data_context.create_expectation_suite("f1.foo")
+    data_context.add_expectation_suite("f1.foo")
 
     df = data_context.get_batch(
         batch_kwargs=data_context.build_batch_kwargs(
@@ -55,12 +55,11 @@ def validation_operators_data_context(
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f1.failure"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f1.warning"
-    )
+    failure_expectations.expectation_suite_name = "f1.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+
+    warning_expectations.expectation_suite_name = "f1.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
 
     return data_context
 
@@ -109,8 +108,9 @@ def test_run_validation_operator_raises_error_if_no_matching_validation_operator
 def test_validation_operator_evaluation_parameters(
     validation_operators_data_context, parameterized_expectation_suite
 ):
-    validation_operators_data_context.save_expectation_suite(
-        parameterized_expectation_suite, "param_suite"
+    parameterized_expectation_suite.expectation_suite_name = "param_suite"
+    validation_operators_data_context.add_expectation_suite(
+        expectation_suite=parameterized_expectation_suite
     )
     res = validation_operators_data_context.run_validation_operator(
         "store_val_res_and_extract_eval_params",
@@ -129,8 +129,9 @@ def test_validation_operator_evaluation_parameters(
     )
     assert res["success"] is True
 
-    validation_operators_data_context.save_expectation_suite(
-        parameterized_expectation_suite, "param_suite.failure"
+    parameterized_expectation_suite.expectation_suite_name = "param_suite.failure"
+    validation_operators_data_context.add_expectation_suite(
+        expectation_suite=parameterized_expectation_suite
     )
     res = validation_operators_data_context.run_validation_operator(
         "errors_and_warnings_validation_operator",
@@ -243,9 +244,9 @@ def test_action_list_operator(validation_operators_data_context):
         ][0]
     )
 
-    first_validation_result = data_context.stores["validation_result_store"].get(
-        validation_result_store_keys[0]
-    )
+    first_validation_result = data_context.stores[  # noqa: F841
+        "validation_result_store"
+    ].get(validation_result_store_keys[0])
     assert (
         data_context.stores["validation_result_store"]
         .get(validation_result_store_keys[0])
@@ -271,7 +272,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
 
     # We want to demonstrate running the validation operator with both a pre-built batch (DataAsset) and with
     # a tuple of parameters for get_batch
-    results = data_context.run_validation_operator(
+    results = data_context.run_validation_operator(  # noqa: F841
         assets_to_validate=[batch],
         run_id=RunIdentifier(run_name="test-100"),
         validation_operator_name="errors_and_warnings_validation_operator",

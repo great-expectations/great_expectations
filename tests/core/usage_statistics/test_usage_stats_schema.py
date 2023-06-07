@@ -98,15 +98,15 @@ def test_init_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
             # non-empty payload
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_init_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_init_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_data_asset_validate_message():
@@ -116,15 +116,15 @@ def test_data_asset_validate_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
             # non-empty payload
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_batch_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_batch_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_data_context_add_datasource_message():
@@ -134,15 +134,15 @@ def test_data_context_add_datasource_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
             # non-empty payload
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_datasource_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_datasource_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_data_context_get_batch_list_message():
@@ -152,14 +152,14 @@ def test_data_context_get_batch_list_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_batch_request_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_batch_request_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_checkpoint_run_message():
@@ -169,14 +169,14 @@ def test_checkpoint_run_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_checkpoint_run_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_checkpoint_run_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_run_validation_operator_message():
@@ -184,14 +184,14 @@ def test_run_validation_operator_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_run_validation_operator_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_run_validation_operator_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_legacy_profiler_build_suite_message():
@@ -201,14 +201,14 @@ def test_legacy_profiler_build_suite_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_legacy_profiler_build_suite_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_legacy_profiler_build_suite_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_data_context_save_expectation_suite_message():
@@ -220,14 +220,14 @@ def test_data_context_save_expectation_suite_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_datasource_sqlalchemy_connect_message():
@@ -238,14 +238,14 @@ def test_datasource_sqlalchemy_connect_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_datasource_sqlalchemy_connect_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_datasource_sqlalchemy_connect_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_cli_data_asset_validate():
@@ -254,12 +254,11 @@ def test_cli_data_asset_validate():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
 
 
 def test_cli_new_ds_choice_message():
@@ -269,10 +268,10 @@ def test_cli_new_ds_choice_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # non-empty payload
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_cli_new_ds_choice_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_cli_new_ds_choice_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_cli_suite_new_message():
@@ -282,14 +281,14 @@ def test_cli_suite_new_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_cli_suite_expectation_suite_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_cli_suite_expectation_suite_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_cli_suite_edit_message():
@@ -299,14 +298,14 @@ def test_cli_suite_edit_message():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_cli_suite_expectation_suite_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_cli_suite_expectation_suite_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 @pytest.mark.slow  # 2.42s
@@ -317,14 +316,14 @@ def test_test_yaml_config_messages():
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
             # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_test_yaml_config_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_test_yaml_config_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_usage_stats_empty_payload_messages():
@@ -337,14 +336,14 @@ def test_usage_stats_empty_payload_messages():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                empty_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=empty_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_usage_stats_expectation_suite_messages():
@@ -353,14 +352,14 @@ def test_usage_stats_expectation_suite_messages():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                empty_payload_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=empty_payload_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 @pytest.mark.slow  # 5.20s
@@ -392,10 +391,10 @@ def test_usage_stats_cli_payload_messages():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
 
 
 def test_rule_based_profiler_run_message():
@@ -404,14 +403,14 @@ def test_rule_based_profiler_run_message():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_rule_based_profiler_run_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_rule_based_profiler_run_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_cloud_migrate_event():
@@ -420,14 +419,14 @@ def test_cloud_migrate_event():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                cloud_migrate_schema,
-            )
+            jsonschema.validators.Draft202012Validator(
+                schema=anonymized_usage_statistics_record_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message)
+            jsonschema.validators.Draft202012Validator(
+                schema=cloud_migrate_schema,
+                format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+            ).validate(message["event_payload"])
 
 
 def test_usage_stats_schema_in_codebase_is_up_to_date() -> None:

@@ -1,10 +1,8 @@
-import json
 from typing import Optional
 
 import geonamescache
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -30,7 +28,6 @@ def is_valid_us_county_name(county: str):
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidUSCountyName(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_us_county_name"
 
@@ -53,6 +50,7 @@ class ColumnValuesToBeValidUSCountyName(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSCountyName(ColumnMapExpectation):
     """Expect values in this column to be valid us county names.
+
     See https://github.com/yaph/geonamescache for more information.
     """
 
@@ -106,7 +104,7 @@ class ExpectColumnValuesToBeValidUSCountyName(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -120,8 +118,7 @@ class ExpectColumnValuesToBeValidUSCountyName(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

@@ -18,27 +18,27 @@ from great_expectations.expectations.expectation import (
 
 
 # This class defines the Expectation itself
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def">
 class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
     # This is the id string of the Metric(s) used by this Expectation.
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py metric_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
     # </snippet>
 
     # This is the default, baked-in SQL Query for this QueryExpectation
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query">
     query = """
             SQL QUERY GOES HERE
             """
     # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py success_keys">
     success_keys = ("query",)
     # </snippet>
 
@@ -54,7 +54,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -67,8 +67,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
             None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
@@ -82,7 +81,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py _validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -96,12 +95,12 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py examples">
     examples = []
     # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -112,6 +111,6 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist">
     ExpectQueryToMatchSomeCriteria().print_diagnostic_checklist()
     # </snippet>

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -11,13 +12,17 @@ class SlackRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         validation_result=None,
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
+        validation_result_urls: list[str] | None = None,
     ):
+        if validation_result_urls is None:
+            validation_result_urls = []
+
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -71,12 +76,28 @@ class SlackRenderer(Renderer):
                 status = "Success :tada:"
 
             else:
-                if show_failed_expectations:
+                if show_failed_expectations:  # noqa: PLR5501
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )
+            summary_text = ""
+            if validation_result_urls:
+                # This adds hyperlinks for defined URL
+                if len(validation_result_urls) == 1:
+                    title_hlink = f"*<{validation_result_urls[0]} | Validation Result>*"
+                else:
+                    title_hlink = "*Validation Result*"
+                batch_validation_status_hlinks = "".join(
+                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
+                    for validation_result_url in validation_result_urls
+                )
+                summary_text += f"""{title_hlink}
+{batch_validation_status_hlinks}
+                """
+            else:
+                summary_text += f"*Batch Validation Status*: {status}"
 
-            summary_text = f"""*Batch Validation Status*: {status}
+            summary_text += f"""
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
 *Run ID*: `{run_id}`
@@ -195,7 +216,7 @@ class SlackRenderer(Renderer):
             )
         return report_element
 
-    def create_failed_expectations_text(self, validation_results: List[dict]) -> str:
+    def create_failed_expectations_text(self, validation_results: list[dict]) -> str:
         failed_expectations_str = "\n*Failed Expectations*:\n"
         for expectation in validation_results:
             if not expectation["success"]:

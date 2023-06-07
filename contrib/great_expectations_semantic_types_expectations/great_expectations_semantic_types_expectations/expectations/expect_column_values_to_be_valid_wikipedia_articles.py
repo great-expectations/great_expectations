@@ -1,33 +1,13 @@
-import json
-
 import requests
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    render_evaluation_parameter_string,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
@@ -35,7 +15,6 @@ from great_expectations.validator.validator import Validator
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
     # for information on how to choose an id string for your Metric.
@@ -73,9 +52,10 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
-    """This Expectation checks whether a column contains valid titles/slugs of Wikipedia articles.
-    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status
-    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website
+    """Expect column values to be valid Wikipedia article titles/slugs.
+
+    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status \
+    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website \
     exist" type checks, e.g. for things like user handles, dictionary entries, etc.
     """
 

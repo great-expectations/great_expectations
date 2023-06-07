@@ -11,6 +11,11 @@ from freezegun import freeze_time
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
@@ -26,16 +31,12 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.data_assistant_result.plot_result import (
     PlotResult,
 )
-from great_expectations.rule_based_profiler.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    RAW_PARAMETER_KEY,
     ParameterNode,
 )
 from great_expectations.util import deep_filter_properties_iterable
@@ -47,7 +48,10 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(domain_type=MetricDomainTypes.TABLE, rule_name="table_rule",): {
+        Domain(
+            domain_type=MetricDomainTypes.TABLE,
+            rule_name="table_rule",
+        ): {
             "$parameter.table_row_count": {
                 "value": [
                     10000,
@@ -1531,6 +1535,31 @@ def quentin_implicit_invocation_result_frozen_time(
     return cast(VolumeDataAssistantResult, data_assistant_result)
 
 
+def _assert_quentin_expected_metrics_by_domain_serialized(
+    actual_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+    expected_metrics_by_domain: Dict[Domain, Dict[str, ParameterNode]],
+):
+    """
+    # TODO: <Alex>TODO: 12/5/2022</Alex>
+    Comparison with raw "numpy.ndarray" objects requires tedius inspections of structures and sub-structures of result.
+    For now, remove raw values from test (they are non-serialized version of values access through "PARAMETER_KEY" key).
+    """
+    domain: Domain
+    parameter_values_for_fully_qualified_parameter_names: Dict[str, ParameterNode]
+    # noinspection PyTypeChecker
+    metrics_by_domain_serialized: Dict[Domain, Dict[str, ParameterNode]] = {
+        domain: dict(
+            filter(
+                lambda element: element[0].find(RAW_PARAMETER_KEY) == (-1),
+                parameter_values_for_fully_qualified_parameter_names.items(),
+            )
+        )
+        for domain, parameter_values_for_fully_qualified_parameter_names in actual_metrics_by_domain.items()
+    }
+
+    assert metrics_by_domain_serialized == expected_metrics_by_domain
+
+
 def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     context: DataContext,
     new_cell: str,
@@ -1551,8 +1580,8 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     root_dir: str = context.root_directory
 
     expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name, overwrite_existing=True
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
 
     notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
@@ -1562,7 +1591,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
 
     import uuid
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.validator.validator import Validator
     from great_expectations.rule_based_profiler.data_assistant import (
@@ -1571,9 +1600,9 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     )
     from great_expectations.rule_based_profiler.data_assistant_result import DataAssistantResult
     from great_expectations.rule_based_profiler.helpers.util import get_validator_with_expectation_suite
-    import great_expectations.exceptions as ge_exceptions
+    import great_expectations.exceptions as gx_exceptions
 
-    context = ge.get_context()
+    context = gx.get_context()
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -1723,7 +1752,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_explicit_insta
         name=data_assistant_name
     )
 
-    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+    _assert_quentin_expected_metrics_by_domain_serialized(
+        actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
+        expected_metrics_by_domain=quentin_expected_metrics_by_domain,
+    )
 
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in data_assistant_result.expectation_configurations:
@@ -1792,7 +1824,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         name=registered_data_assistant_name
     )
 
-    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+    _assert_quentin_expected_metrics_by_domain_serialized(
+        actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
+        expected_metrics_by_domain=quentin_expected_metrics_by_domain,
+    )
 
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in data_assistant_result.expectation_configurations:
@@ -1915,7 +1950,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
         name=registered_data_assistant_name
     )
 
-    assert data_assistant_result.metrics_by_domain == quentin_expected_metrics_by_domain
+    _assert_quentin_expected_metrics_by_domain_serialized(
+        actual_metrics_by_domain=data_assistant_result.metrics_by_domain,
+        expected_metrics_by_domain=quentin_expected_metrics_by_domain,
+    )
 
     expectation_configuration: ExpectationConfiguration
 

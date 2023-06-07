@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
@@ -118,7 +118,7 @@ class RuleState:
         if not allow_duplicates and domain.id in [
             domain_cursor.id for domain_cursor in self.domains
         ]:
-            raise ge_exceptions.ProfilerConfigurationError(
+            raise gx_exceptions.ProfilerConfigurationError(
                 f"""Error: Domain\n{domain}\nalready exists.  In order to add it, either pass "allow_duplicates=True" \
 or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{domain.id}" as argument first.
 """
@@ -142,7 +142,7 @@ or call "RuleState.remove_domain_if_exists()" with Domain having ID equal to "{d
         overwrite: bool = True,
     ) -> None:
         if not overwrite and domain.id in self.parameters:
-            raise ge_exceptions.ProfilerConfigurationError(
+            raise gx_exceptions.ProfilerConfigurationError(
                 f"""Error: ParameterContainer for Domain\n{domain}\nalready exists.  In order to overwrite it, either \
 pass "overwrite=True" or call "RuleState.remove_parameter_container_from_domain()" with Domain having ID equal to \
 "{domain.id}" as argument first.

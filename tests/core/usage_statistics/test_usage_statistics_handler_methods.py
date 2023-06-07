@@ -12,9 +12,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     get_profiler_run_usage_statistics,
 )
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import get_context
 from tests.core.usage_statistics.util import usage_stats_invalid_messages_exist
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -23,7 +23,6 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
-
     return DataContextConfig(
         **{
             "commented_map": {},
@@ -131,9 +130,7 @@ def test_usage_statistics_handler_build_envelope(
 ):
     """This test is for a happy path only but will fail if there is an exception thrown in build_envelope"""
 
-    context: BaseDataContext = BaseDataContext(
-        in_memory_data_context_config_usage_stats_enabled
-    )
+    context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,
@@ -156,25 +153,22 @@ def test_usage_statistics_handler_build_envelope(
         "data_context_instance_id",
         "event_time",
     ]
-    assert all([key in envelope.keys() for key in required_keys])
+    assert all(key in envelope.keys() for key in required_keys)
 
-    assert envelope["version"] == "1.0.0"
+    assert envelope["version"] == "1.0.1"
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"
 
 
 def test_usage_statistics_handler_validate_message_failure(
     caplog, in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
-
     # caplog default is WARNING and above, we want to see DEBUG level messages for this test
     caplog.set_level(
         level=logging.DEBUG,
         logger="great_expectations.core.usage_statistics.usage_statistics",
     )
 
-    context: BaseDataContext = BaseDataContext(
-        in_memory_data_context_config_usage_stats_enabled
-    )
+    context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,
@@ -197,16 +191,13 @@ def test_usage_statistics_handler_validate_message_failure(
 def test_usage_statistics_handler_validate_message_success(
     caplog, in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
-
     # caplog default is WARNING and above, we want to see DEBUG level messages for this test
     caplog.set_level(
         level=logging.DEBUG,
         logger="great_expectations.core.usage_statistics.usage_statistics",
     )
 
-    context: BaseDataContext = BaseDataContext(
-        in_memory_data_context_config_usage_stats_enabled
-    )
+    context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,

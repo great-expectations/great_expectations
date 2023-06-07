@@ -5,20 +5,21 @@ to help enable the core team to safely upgrade package dependencies to gain
 access to features of new package versions.
 
     Typical usage example:
-        ge_execution_environment = GEExecutionEnvironment()
+        ge_execution_environment = GXExecutionEnvironment()
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
+from __future__ import annotations
 
 import enum
 import sys
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, cast
 
 from marshmallow import Schema, fields
 from packaging import version
 
-from great_expectations.core.usage_statistics.package_dependencies import GEDependencies
+from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
 
 if sys.version_info < (3, 8):
     # Note: importlib_metadata is included in the python standard library as importlib
@@ -49,8 +50,8 @@ class PackageInfoSchema(Schema):
     version = fields.Str(required=False, allow_none=True)
 
 
-class GEExecutionEnvironment:
-    """The list of GE dependencies with version and install information.
+class GXExecutionEnvironment:
+    """The list of GX dependencies with version and install information.
 
     This does not return any dependencies that are not specified directly in
     either requirements.txt or any requirements-dev*.txt files.
@@ -59,7 +60,7 @@ class GEExecutionEnvironment:
     """
 
     def __init__(self) -> None:
-        self._ge_dependencies = GEDependencies()
+        self._ge_dependencies = GXDependencies()
         self._all_installed_packages: List[str] = []
         self._get_all_installed_packages()
 
@@ -69,7 +70,7 @@ class GEExecutionEnvironment:
 
     @property
     def dependencies(self) -> List[PackageInfo]:
-        """The list of GE dependencies with version and install information.
+        """The list of GX dependencies with version and install information.
 
         This does not return any dependencies that are not specified directly in
         either requirements.txt or any requirements-dev*.txt files.
@@ -100,11 +101,14 @@ class GEExecutionEnvironment:
         """
         if not self._all_installed_packages:
             # Only retrieve once
-            self._all_installed_packages = [
-                item.metadata.get("Name")
-                for item in metadata.distributions()
-                if item.metadata.get("Name") is not None
-            ]
+            package_names: list[str] = []
+            for package in metadata.distributions():
+                package_name = package.metadata.get("Name")
+                if package_name:
+                    package_names.append(package_name)
+            package_names = [pn.lower() for pn in package_names]
+            self._all_installed_packages = package_names
+
         return self._all_installed_packages
 
     def _build_dependencies_info(
@@ -124,12 +128,17 @@ class GEExecutionEnvironment:
         """
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
-
             package_version: Optional[version.Version]
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True
-                package_version = version.parse(metadata.version(dependency_name))  # type: ignore[assignment]
+                # Chetan - 20221213 - Due to mypy inconsistencies, we need to follow this pattern to ensure
+                # we end up with a version.Version obj. Casting the parse result sometimes leads to redundant
+                # cast errors
+                parsed_version = version.parse(metadata.version(dependency_name))
+                if not isinstance(parsed_version, version.Version):
+                    parsed_version = cast(version.Version, parsed_version)
+                package_version = parsed_version
             else:
                 installed = False
                 package_version = None

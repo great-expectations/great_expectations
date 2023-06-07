@@ -26,7 +26,7 @@ Steps
     # great_expectations/uncommitted/config_variables.yml
 
     my_postgres_db_yaml_creds:
-      drivername: postgres
+      drivername: postgresql
       host: 127.0.0.778
       port: '7987'
       username: administrator

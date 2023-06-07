@@ -3,7 +3,7 @@ from typing import List, Union
 
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -237,7 +237,7 @@ class PandasDataSplitter(DataSplitter):
             hash_method = getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
-                ge_exceptions.ExecutionEngineError(
+                gx_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                         Reference to {hash_function_name} cannot be found."""
                 )

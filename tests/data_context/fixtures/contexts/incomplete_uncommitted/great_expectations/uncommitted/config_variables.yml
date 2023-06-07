@@ -3,7 +3,7 @@ ge_comment_preservation_key: 1
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the config file it will attempt to replace the value
 # of `my_key` with the value from an environment variable `my_value` or a
 # corresponding key read from the file specified using

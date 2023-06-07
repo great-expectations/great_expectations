@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Type
 
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+from great_expectations.rule_based_profiler.data_assistant import (
+    DataAssistant,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     DataAssistantRunner,
 )
@@ -31,7 +33,7 @@ class DataAssistantDispatcher:
         """
         self._data_context = data_context
 
-        self._data_assistant_runner_cache = {}
+        self._data_assistant_runner_cache: dict = {}
 
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.

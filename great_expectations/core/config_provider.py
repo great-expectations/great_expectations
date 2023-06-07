@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Type, cast
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 yaml = YAMLHandler()
 
@@ -148,12 +148,12 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
             defined_path: str = self._substitutor.substitute_config_variable(  # type: ignore[assignment]
                 self._config_variables_file_path, env_vars
             )
-            if not os.path.isabs(defined_path):
+            if not os.path.isabs(defined_path):  # noqa: PTH117
                 root_directory: str = self._root_directory or os.curdir
             else:
                 root_directory = ""
 
-            var_path = os.path.join(root_directory, defined_path)
+            var_path = os.path.join(root_directory, defined_path)  # noqa: PTH118
             with open(var_path) as config_variables_file:
                 contents = config_variables_file.read()
 
@@ -173,8 +173,8 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
     """
     Responsible for the management of a user's GX Cloud credentials.
 
-    See `GeCloudConfig` for more information. Note that this is only registered on the primary
-    config provider when in a Cloud-backend environment.
+    See `GXCloudConfig` for more information. Note that this is only registered on the primary
+    config provider when in a Cloud-backed environment.
     """
 
     def __init__(self, cloud_config: GXCloudConfig) -> None:
@@ -185,8 +185,26 @@ class _CloudConfigurationProvider(_AbstractConfigurationProvider):
             GXCloudEnvironmentVariable,
         )
 
-        return {
-            GXCloudEnvironmentVariable.BASE_URL: self._cloud_config.base_url,
-            GXCloudEnvironmentVariable.ACCESS_TOKEN: self._cloud_config.access_token,
-            GXCloudEnvironmentVariable.ORGANIZATION_ID: self._cloud_config.organization_id,  # type: ignore[dict-item]
+        base_url = self._cloud_config.base_url
+        access_token = self._cloud_config.access_token
+        organization_id = self._cloud_config.organization_id
+
+        cloud_values: Dict[str, str] = {
+            GXCloudEnvironmentVariable.BASE_URL: base_url,
+            GXCloudEnvironmentVariable.ACCESS_TOKEN: access_token,
+            # <GX_RENAME> Deprecated as of 0.15.37
+            GXCloudEnvironmentVariable._OLD_BASE_URL: base_url,
+            GXCloudEnvironmentVariable._OLD_ACCESS_TOKEN: access_token,
         }
+
+        # organization_id is nullable so we conditionally include it in the output
+        if organization_id:
+            cloud_values.update(
+                {
+                    GXCloudEnvironmentVariable.ORGANIZATION_ID: organization_id,
+                    # <GX_RENAME> Deprecated as of 0.15.37
+                    GXCloudEnvironmentVariable._OLD_ORGANIZATION_ID: organization_id,
+                }
+            )
+
+        return cloud_values

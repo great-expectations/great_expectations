@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.cli import cli
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
@@ -38,7 +38,7 @@ def titanic_data_context_clean_usage_stats_enabled(
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_ena
     shutil.copy(
         titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 def test_project_check_on_missing_ge_dir_guides_user_to_fix(
@@ -93,7 +93,6 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
 def test_project_check_on_valid_project_says_so(
     mock_emit, caplog, monkeypatch, titanic_data_context_clean_usage_stats_enabled
 ):
-
     context = titanic_data_context_clean_usage_stats_enabled
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -142,7 +141,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output

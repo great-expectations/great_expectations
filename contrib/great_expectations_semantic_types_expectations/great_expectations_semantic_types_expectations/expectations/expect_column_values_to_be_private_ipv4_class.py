@@ -4,11 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 import ipaddress
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -30,7 +28,7 @@ def is_private_ip_address_in_class(addr: str, ip_class) -> bool:
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("192.168.0.0/16"):
                     return True
         return False
-    except Exception as e:
+    except Exception:
         return False
 
 
@@ -59,7 +57,7 @@ class ColumnValuesToBePrivateIpv4Class(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBePrivateIpv4Class(ColumnMapExpectation):
-    """Expect the provided private IP v4 address in the IP class (A, B, C) which passed in the parameters"""
+    """Expect column values to be private IPv4 addresses in the given IP class (A, B, C)."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -139,8 +137,7 @@ class ExpectColumnValuesToBePrivateIpv4Class(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
