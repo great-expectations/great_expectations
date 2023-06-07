@@ -63,6 +63,10 @@ class UsageStatsExceptionPrefix(enum.Enum):
 
 
 class UsageStatisticsPayloadBuilder:
+    """
+    Responsible for encapsulating payload construction logic.
+    """
+
     def __init__(
         self,
         data_context: AbstractDataContext,
@@ -148,6 +152,11 @@ class UsageStatisticsPayloadBuilder:
 
 
 class UsageStatisticsHandler:
+    """
+    Orchestrates between the UsageStatisticsPayloadBuilder and Anonymizer to construct
+    payloads, obfuscate them, and emit them to a target endpoint.
+    """
+
     def __init__(
         self,
         data_context: AbstractDataContext,
