@@ -562,7 +562,8 @@ def column_reflection_fallback(
                 )
                 .alias("column_info")
             )
-            col_info_tuples_list = connection.execute(col_info_query).fetchall()
+
+            col_info_tuples_list = connection.execute(sa.select(col_info_query)).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
                 {
