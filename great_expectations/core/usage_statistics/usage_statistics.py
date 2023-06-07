@@ -301,10 +301,13 @@ def usage_statistics_enabled_method(
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
-            # if a function like `build_data_docs()` is being called as a `dry_run`
-            # then we dont want to emit usage_statistics. We just return the function without sending a usage_stats message
-            if "dry_run" in kwargs and kwargs["dry_run"]:
+            # If a function like `build_data_docs()` is being called as a `dry_run`,
+            # then we dont want to emit usage_statistics. We just return the function without sending a usage_stats message.
+            # This is also the case when no handler is present (usage stats are disabled).
+            handler = get_usage_statistics_handler(list(args))
+            if not handler or kwargs.get("dry_run"):
                 return func(*args, **kwargs)
+
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
@@ -327,14 +330,12 @@ def usage_statistics_enabled_method(
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
 
-                handler = get_usage_statistics_handler(list(args))
-                if handler:
-                    event_duration_property_name: str = (
-                        f"{event_name}.duration".replace(".", "_")
-                    )
-                    setattr(handler, event_duration_property_name, delta_t)
-                    handler.emit(message)
-                    delattr(handler, event_duration_property_name)
+                event_duration_property_name: str = f"{event_name}.duration".replace(
+                    ".", "_"
+                )
+                setattr(handler, event_duration_property_name, delta_t)
+                handler.emit(message)
+                delattr(handler, event_duration_property_name)
 
             return result
 
