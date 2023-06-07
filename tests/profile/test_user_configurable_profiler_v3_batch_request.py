@@ -83,7 +83,9 @@ def get_spark_runtime_validator(context, df):
             # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
         }
     )
-    df = spark.createDataFrame(df)
+    # this is the problem
+    sdf = spark.createDataFrame(df)
+    #res = sdf.toPandas()
     batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
@@ -217,6 +219,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
+        date_format="%Y-%m-%d %H:%M:%S",
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -1107,6 +1110,10 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
+@pytest.mark.xfail(
+    reason="This spark currently does not allow for conversion datetime into datetime",
+    run=True,
+    strict=True)
 def test_expect_compound_columns_to_be_unique(
     taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
