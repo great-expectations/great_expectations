@@ -76,6 +76,7 @@ def test_usage_statistics_handler_build_envelope(
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"
 
 
+@pytest.mark.unit
 def test_determine_hashed_mac_address():
     builder = UsageStatisticsPayloadBuilder(
         data_context=mock.Mock(),
