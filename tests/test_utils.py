@@ -14,7 +14,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import Engine
+from great_expectations.compatibility.sqlalchemy import Engine, inspect
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -595,7 +595,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(  # noqa: PLR0912
+def load_data_into_test_database(  # noqa: PLR0912, PLR0915
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,
@@ -650,6 +650,14 @@ def load_data_into_test_database(  # noqa: PLR0912
             "install optional sqlalchemy dependency for support."
         )
         return return_value
+
+    if engine.dialect.name.lower().startswith("mysql"):
+        # Don't attempt to DROP TABLE IF EXISTS on a table that doesn't exist in mysql because it will error
+        inspector = inspect(engine)
+        db_name = connection_string.split("/")[-1]
+        table_names = [name for name in inspector.get_table_names(schema=db_name)]
+        drop_existing_table = table_name in table_names
+
     if engine.dialect.name.lower() == "bigquery":
         # bigquery is handled in a special way
         load_data_into_test_bigquery_database_with_bigquery_client(
