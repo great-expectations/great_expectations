@@ -83,7 +83,7 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
             if "PYTEST_CURRENT_TEST" in os.environ:
-                self._engine = connection_manager.get_engine(connection_string)
+                self._engine = connection_manager.get_connection(connection_string)
             else:
                 self._engine = sa.create_engine(connection_string, **kwargs)
             # TODO: <Alex>ALEX</Alex>
