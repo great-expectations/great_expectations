@@ -76,7 +76,7 @@ class UsageStatisticsPayloadBuilder:
         return serialized_dependencies
 
     def build_envelope(self, message: dict) -> dict:
-        message["version"] = "1.0.2"  # Not actually being utilized by analytics
+        message["version"] = "1.1.0"  # Not actually being utilized by analytics
         message["ge_version"] = self._gx_version
 
         message["data_context_id"] = self._data_context_id

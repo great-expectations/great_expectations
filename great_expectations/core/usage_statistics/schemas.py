@@ -15,7 +15,7 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
-ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1", "1.0.2"]
+ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1", "1.1.0"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,

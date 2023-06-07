@@ -56,7 +56,7 @@ def usage_statistics_envelope():
         "ge_version": "0.16.15+29.gcf5a3002a.dirty",
         "mac_address": "d510e8ebe029f3c526a5fa4b921f4589f7e78d28e7732a3559ecf6c84528f940",
         "success": True,
-        "version": "1.0.2",
+        "version": "1.1.0",
         "x-forwarded-for": "00.000.00.000, 00.000.000.000",
     }
 
