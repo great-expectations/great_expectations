@@ -1,9 +1,8 @@
 import copy
 import logging
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
-import pandas as pd
 
 from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
@@ -24,6 +23,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 logger = logging.getLogger(__name__)
 
