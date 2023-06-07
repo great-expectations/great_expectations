@@ -31,7 +31,6 @@ module.exports = {
       label: 'Connect to data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
-        'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
         'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
         {
           type: 'category',
