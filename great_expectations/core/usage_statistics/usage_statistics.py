@@ -69,6 +69,7 @@ class UsageStatisticsHandler:
     ) -> None:
         self._url = usage_statistics_url
 
+        self._data_context_id = data_context_id
         self._builder = UsageStatisticsPayloadBuilder(
             data_context=data_context,
             data_context_id=data_context_id,
