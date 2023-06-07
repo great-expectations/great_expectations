@@ -31,48 +31,8 @@ module.exports = {
       label: 'Connect to data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
-        {
-          type: 'category',
-          label: 'Filesystem Datasources',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>Local Filesystems</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas',
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Google Cloud Storage</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Azure Blob Storage</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
-            {
-              type: 'html',
-              value: '<h4>Amazon Web Services S3</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'In-memory Datasources',
-          items: [
-            'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas'
-          ]
-        },
+        'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
+        'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
         {
           type: 'category',
           label: 'SQL Datasources',

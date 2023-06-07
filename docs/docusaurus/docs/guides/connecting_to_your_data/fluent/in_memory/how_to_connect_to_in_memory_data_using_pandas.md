@@ -1,7 +1,7 @@
 ---
-title: How to connect to in-memory data using Pandas
+title: Connect to in-memory data using Pandas
 tag: [how-to, connect to data]
-description: A technical guide on connecting Great Expectations to a Pandas in-memory DataFrame.
+description: Connect Great Expectations to a Pandas in-memory DataFrame.
 keywords: [Great Expectations, Pandas, Filesystem]
 ---
 
