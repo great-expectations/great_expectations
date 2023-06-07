@@ -1,11 +1,11 @@
 import datetime
 import json
 import os
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
+from great_expectations.checkpoint import Checkpoint  # noqa: TCH001
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
@@ -100,8 +100,8 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
 
     def _process_checkpoint_config_for_checklist(self) -> None:
-        legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
-        checkpoint: Union[Checkpoint, LegacyCheckpoint]
+        legacy_checkpoints: List[Checkpoint] = []
+        checkpoint: Checkpoint
         checkpoint_name: str
         try:
             for checkpoint_name in sorted(self.data_context.list_checkpoints()):
