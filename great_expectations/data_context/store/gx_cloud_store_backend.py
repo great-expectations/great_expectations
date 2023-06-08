@@ -542,6 +542,13 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
 
+    def _update(self, key, value, **kwargs):
+        existing = self._get(key)
+        if key[1] is None:
+            key = (key[0], existing["data"]["id"], key[2])
+
+        return self.set(key=key, value=value, **kwargs)
+
     def _add_or_update(self, key, value, **kwargs):
         try:
             existing = self._get(key)
