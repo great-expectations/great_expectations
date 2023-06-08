@@ -18,7 +18,6 @@ from typing import (
 )
 
 import pytest
-import responses
 from pytest import MonkeyPatch
 
 import great_expectations as gx
@@ -53,6 +52,7 @@ from tests.datasource.fluent._fake_cloud_api import (
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 if TYPE_CHECKING:
+    import responses
     from pytest import FixtureRequest
 
     from great_expectations.data_context import CloudDataContext
