@@ -622,4 +622,4 @@ A Data Asset requires the following information to be defined:
 
 ## Related documentation
 
-For more information about storing credentials for use with GX, see [How to configure credentials](/docs/docusaurus/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
+For more information about storing credentials for use with GX, see [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
