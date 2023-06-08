@@ -9,6 +9,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -980,7 +981,10 @@ def test_profiler_all_expectation_types_pandas(
 
     assert results["success"]
 
-
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="pyspark is not compatible with pandas 2.0.0",
+)
 @pytest.mark.skipif(
     not is_library_loadable(library_name="pyspark"),
     reason="requires pyspark to be installed",
