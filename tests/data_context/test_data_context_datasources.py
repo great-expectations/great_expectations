@@ -456,11 +456,11 @@ def test_list_datasources() -> None:
 
 
 @pytest.mark.integration
-def test_get_available_data_assets_names(test_df_pandas, empty_data_context) -> None:
+def test_get_available_data_assets_names(empty_data_context) -> None:
     datasource_name = "my_fluent_pandas_datasource"
     datasource = empty_data_context.sources.add_pandas(datasource_name)
     asset_name = "test_data_frame"
-    datasource.add_dataframe_asset(name=asset_name, dataframe=test_df_pandas)
+    datasource.add_dataframe_asset(name=asset_name)
 
     assert len(empty_data_context.get_available_data_asset_names()) == 1
 

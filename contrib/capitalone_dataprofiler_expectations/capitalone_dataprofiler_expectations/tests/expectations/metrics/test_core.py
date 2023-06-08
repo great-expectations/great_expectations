@@ -55,7 +55,7 @@ def test_data_profiler_column_profile_report_metric_pd():
     table_columns_metric: MetricConfiguration
     results: dict
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     data_profiler_profile_report_metric: MetricConfiguration = MetricConfiguration(
@@ -144,7 +144,7 @@ def test_data_profiler_column_list_metric_same_as_in_batch_table_pd():
     table_columns_metric: MetricConfiguration
     results: dict
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     data_profiler_profile_report_metric: MetricConfiguration = MetricConfiguration(
@@ -214,7 +214,7 @@ def test_data_profiler_column_list_metric_same_as_profile_report_pd(
     table_columns_metric: MetricConfiguration
     results: dict
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     with mock.patch(

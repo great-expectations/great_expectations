@@ -97,7 +97,7 @@ def assert_how_to_buttons(
     "ignore:String run_ids*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
 @pytest.mark.slow  # 3.60s
-def test_configuration_driven_site_builder(
+def test_configuration_driven_site_builder(  # noqa: PLR0915
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     context = site_builder_data_context_v013_with_html_store_titanic_random

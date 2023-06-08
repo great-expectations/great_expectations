@@ -55,7 +55,7 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0913, PLR0912
             self,
             column,
             mostly=None,
@@ -125,7 +125,7 @@ class MetaPandasDataset(Dataset):
                         parsed_unexpected_list.append(val)
                     else:
                         if isinstance(val, str):
-                            val = parse(val)
+                            val = parse(val)  # noqa: PLW2901
                         parsed_unexpected_list.append(
                             datetime.strftime(val, output_strftime_format)
                         )
@@ -176,7 +176,7 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0913
             self,
             column_A,
             column_B,
@@ -287,7 +287,7 @@ class MetaPandasDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0913
             self,
             column_list,
             mostly=None,
@@ -530,7 +530,7 @@ Notes:
         hist, bin_edges = np.histogram(self[column], bins, density=False)
         return list(hist)
 
-    def get_column_count_in_range(
+    def get_column_count_in_range(  # noqa: PLR0913
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         # TODO this logic could probably go in the non-underscore version if we want to cache
@@ -552,7 +552,7 @@ Notes:
                 result = result[result <= max_val]
         return len(result)
 
-    def get_crosstab(
+    def get_crosstab(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -633,7 +633,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_unique(
+    def expect_column_values_to_be_unique(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -648,7 +648,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(
+    def expect_column_values_to_not_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -664,7 +664,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_null(
+    def expect_column_values_to_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -792,7 +792,7 @@ Notes:
         return res
 
     @DataAsset.expectation(["column", "type_", "mostly"])
-    def _expect_column_values_to_be_of_type__aggregate(
+    def _expect_column_values_to_be_of_type__aggregate(  # noqa: PLR0913
         self,
         column,
         type_,
@@ -841,7 +841,7 @@ Notes:
         }
 
     @staticmethod
-    def _native_type_type_map(type_):
+    def _native_type_type_map(type_):  # noqa: PLR0911
         # We allow native python types in cases where the underlying type is "object":
         if type_.lower() == "none":
             return (type(None),)
@@ -865,7 +865,7 @@ Notes:
             return None
 
     @MetaPandasDataset.column_map_expectation
-    def _expect_column_values_to_be_of_type__map(
+    def _expect_column_values_to_be_of_type__map(  # noqa: PLR0913
         self,
         column,
         type_,
@@ -1016,7 +1016,7 @@ Notes:
         return res
 
     @MetaPandasDataset.expectation(["column", "type_list", "mostly"])
-    def _expect_column_values_to_be_in_type_list__aggregate(
+    def _expect_column_values_to_be_in_type_list__aggregate(  # noqa: PLR0913, PLR0912
         self,
         column,
         type_list,
@@ -1067,7 +1067,7 @@ Notes:
         }
 
     @MetaPandasDataset.column_map_expectation
-    def _expect_column_values_to_be_in_type_list__map(
+    def _expect_column_values_to_be_in_type_list__map(  # noqa: PLR0913
         self,
         column,
         type_list,
@@ -1109,7 +1109,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(
+    def expect_column_values_to_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -1135,7 +1135,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(
+    def expect_column_values_to_not_be_in_set(  # noqa: PLR0913
         self,
         column,
         value_set,
@@ -1157,7 +1157,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_between(
+    def expect_column_values_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -1232,7 +1232,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_increasing(
+    def expect_column_values_to_be_increasing(  # noqa: PLR0913
         self,
         column,
         strictly=None,
@@ -1271,7 +1271,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_decreasing(
+    def expect_column_values_to_be_decreasing(  # noqa: PLR0913
         self,
         column,
         strictly=None,
@@ -1310,7 +1310,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(
+    def expect_column_value_lengths_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -1353,7 +1353,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_value_lengths_to_equal(
+    def expect_column_value_lengths_to_equal(  # noqa: PLR0913
         self,
         column,
         value,
@@ -1369,7 +1369,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_regex(
+    def expect_column_values_to_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1385,7 +1385,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex(
+    def expect_column_values_to_not_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1401,7 +1401,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_regex_list(
+    def expect_column_values_to_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1428,7 +1428,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex_list(
+    def expect_column_values_to_not_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1449,7 +1449,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_strftime_format(
+    def expect_column_values_to_match_strftime_format(  # noqa: PLR0913
         self,
         column,
         strftime_format,
@@ -1464,15 +1464,16 @@ Notes:
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.strptime(  # noqa: DTZ007
+                datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError(f"Unable to use provided strftime_format. {str(e)}")
 
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -1485,7 +1486,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_dateutil_parseable(
+    def expect_column_values_to_be_dateutil_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1513,7 +1514,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_be_json_parseable(
+    def expect_column_values_to_be_json_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1535,7 +1536,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
-    def expect_column_values_to_match_json_schema(
+    def expect_column_values_to_match_json_schema(  # noqa: PLR0913
         self,
         column,
         json_schema,
@@ -1565,7 +1566,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(
+    def expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than(  # noqa: PLR0913
         self,
         column,
         distribution,
@@ -1613,7 +1614,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_aggregate_expectation
-    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(
+    def expect_column_bootstrapped_ks_test_p_value_to_be_greater_than(  # noqa: PLR0913
         self,
         column,
         partition_object=None,
@@ -1726,7 +1727,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_equal(
+    def expect_column_pair_values_to_be_equal(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1742,7 +1743,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_A_to_be_greater_than_B(
+    def expect_column_pair_values_A_to_be_greater_than_B(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1776,7 +1777,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_in_set(
+    def expect_column_pair_values_to_be_in_set(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1814,7 +1815,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_select_column_values_to_be_unique_within_record(
+    def expect_select_column_values_to_be_unique_within_record(  # noqa: PLR0913
         self,
         column_list,
         mostly=None,
@@ -1830,7 +1831,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_multicolumn_sum_to_equal(
+    def expect_multicolumn_sum_to_equal(  # noqa: PLR0913
         self,
         column_list,
         sum_total,
@@ -1854,7 +1855,7 @@ Notes:
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation
-    def expect_compound_columns_to_be_unique(
+    def expect_compound_columns_to_be_unique(  # noqa: PLR0913
         self,
         column_list,
         mostly=None,

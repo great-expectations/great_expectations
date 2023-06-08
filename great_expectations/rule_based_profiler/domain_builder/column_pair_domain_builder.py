@@ -90,7 +90,10 @@ class ColumnPairDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        if not (effective_column_names and (len(effective_column_names) == 2)):
+        if not (
+            effective_column_names
+            and (len(effective_column_names) == 2)  # noqa: PLR2004
+        ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: Columns specified for {self.__class__.__name__} in sorted order must correspond to \
 "column_A" and "column_B" (in this exact order).

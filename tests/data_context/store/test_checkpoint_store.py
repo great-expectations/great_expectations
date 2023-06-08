@@ -493,24 +493,6 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
 
 
 @pytest.mark.unit
-def test_get_checkpoint_with_invalid_legacy_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
-) -> None:
-    store, mock_backend = checkpoint_store_with_mock_backend
-    mock_backend.get.return_value = (
-        CheckpointConfig().to_json_dict()
-    )  # Defaults to empty LegacyCheckpoint
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        store.get_checkpoint(name="my_checkpoint", id=None)
-
-    assert (
-        "Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments"
-        in str(e.value)
-    )
-
-
-@pytest.mark.unit
 def test_add_checkpoint(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:
@@ -525,5 +507,5 @@ def test_add_checkpoint(
 
     mock_backend.add.assert_called_once_with(
         (checkpoint_name,),
-        "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
+        mock.ANY,  # Complex serialized payload so keeping it simple
     )

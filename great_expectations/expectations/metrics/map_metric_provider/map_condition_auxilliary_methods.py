@@ -11,7 +11,6 @@ from typing import (
 )
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -41,6 +40,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -329,32 +330,30 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         count_selectable = count_selectable.select_from(selectable)
 
     try:
-        if execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
-            temp_table_name: str = generate_temporary_table_name(
-                default_table_name_prefix="#ge_temp_"
-            )
-
-            with execution_engine.engine.begin():
-                metadata: sa.MetaData = sa.MetaData()
-                metadata.reflect(bind=execution_engine.engine)
-                temp_table_obj: sa.Table = sa.Table(
-                    temp_table_name,
-                    metadata,
-                    sa.Column(
-                        "condition", sa.Integer, primary_key=False, nullable=False
-                    ),
-                )
-                temp_table_obj.create(execution_engine.engine, checkfirst=True)
-
-                inner_case_query: sqlalchemy.Insert = (
-                    temp_table_obj.insert().from_select(
-                        [count_case_statement],
-                        count_selectable,
+        if execution_engine.dialect_name == GXSqlDialect.MSSQL:
+            with execution_engine.get_connection() as connection:
+                with connection.begin():
+                    temp_table_name: str = generate_temporary_table_name(
+                        default_table_name_prefix="#ge_temp_"
                     )
-                )
-                execution_engine.engine.execute(inner_case_query)
+                    metadata: sa.MetaData = sa.MetaData()
+                    metadata.reflect(bind=connection)
+                    temp_table_obj: sa.Table = sa.Table(
+                        temp_table_name,
+                        metadata,
+                        sa.Column(
+                            "condition", sa.Integer, primary_key=False, nullable=False
+                        ),
+                    )
+                    temp_table_obj.create(bind=connection, checkfirst=True)
 
-                count_selectable = temp_table_obj
+            inner_case_query: sqlalchemy.Insert = temp_table_obj.insert().from_select(
+                [count_case_statement],
+                count_selectable,
+            )
+            execution_engine.execute_query_in_transaction(inner_case_query)
+
+            count_selectable = temp_table_obj
 
         count_selectable = get_sqlalchemy_selectable(count_selectable)
         unexpected_count_query: sqlalchemy.Select = (
@@ -364,12 +363,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        if sqlalchemy.Engine and isinstance(execution_engine.engine, sqlalchemy.Engine):
-            connection = execution_engine.engine.connect()
-        else:
-            # execution_engine.engine is already a Connection. Use it directly
-            connection = execution_engine.engine
-        unexpected_count: Union[float, int] = connection.execute(
+        unexpected_count: Union[float, int] = execution_engine.execute_query(
             sa.select(
                 unexpected_count_query.c[
                     f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -425,7 +419,7 @@ def _sqlalchemy_map_condition_rows(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     try:
-        return execution_engine.engine.execute(query).fetchall()
+        return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -606,7 +600,9 @@ def _sqlalchemy_map_condition_index(
             domain_records_as_selectable
         ).limit(result_format["partial_unexpected_count"])
     )
-    query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
+    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
+        final_query
+    ).fetchall()
 
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 

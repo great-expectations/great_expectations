@@ -78,7 +78,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if azure.BlobServiceClient:
+            if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
@@ -103,6 +103,11 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 )
 
             self._azure_client = azure_client
+
+        if not azure_client:
+            raise PandasAzureBlobStorageDatasourceError(
+                "Failed to return `azure_client`"
+            )
 
         return azure_client
 

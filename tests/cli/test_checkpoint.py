@@ -15,8 +15,8 @@ from nbformat import NotebookNode
 
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import (
-    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
     CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
@@ -940,7 +940,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -954,7 +954,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
