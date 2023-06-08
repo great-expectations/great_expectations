@@ -1909,7 +1909,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 name=name,
             )
-        return result
+        return cast(Checkpoint, result)
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1934,7 +1934,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 name=result.name,
             )
-        return result
+        return cast(Checkpoint, result)
 
     @overload
     def add_or_update_checkpoint(  # noqa: PLR0913
@@ -2096,7 +2096,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 data_context=self,
                 name=name,
             )
-        return result
+        return cast(Checkpoint, result)
 
     def _resolve_add_checkpoint_args(  # noqa: PLR0913
         self,
