@@ -29,7 +29,7 @@ Prefect can be used with Great Expectations validations so that you can be confi
 Install the Great Expectations, Prefect, and [prefect-great-expectations](https://prefecthq.github.io/prefect-great-expectations/) libraries into the same Python virtual environment. 
 
 ```bash
-pip install great_expectations==0.16.12 prefect==2.10.10 prefect_great_expectations==0.1.0
+pip install great_expectations prefect prefect_great_expectations
 ```
 
 If you have any issues installing Prefect, check out the [Prefect installation docs](https://docs.prefect.io/latest/getting-started/installation/).
@@ -94,14 +94,11 @@ if __name__ == "__main__":
 Note that the second expectation will fail because the `passenger_count` column has some `6` values in the data. That's intentional so that we can see a failure example. Here's the output in our terminal window. 
 
 ```bash
-Calculating Metrics: 100%|███████████████████████████████████████████████████████| 6/6 [00:00<00:00, 756.05it/s]
-Calculating Metrics: 100%|███████████████████████████████████████████████████████| 8/8 [00:00<00:00, 696.31it/s]
 18:00:41.816 | INFO    | prefect.engine - Created flow run 'unyielding-husky' for flow 'validation-flow'
 18:00:43.847 | INFO    | Flow run 'unyielding-husky' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
 18:00:43.849 | INFO    | Flow run 'unyielding-husky' - Executing 'run_checkpoint_validation-0' immediately...
 18:00:44.786 | INFO    | Task run 'run_checkpoint_validation-0' - Running Great Expectations validation...
-Calculating Metrics: 100%|█████████████████████████████████████████████████████| 15/15 [00:00<00:00, 730.49it/s]
-18:00:45.057 | WARNING | Task run 'run_checkpoint_validation-0' - Great Expectations validation run  failed
+...
 18:00:45.057 | ERROR   | Task run 'run_checkpoint_validation-0' - Encountered exception during execution:
 ...
     raise GreatExpectationValidationError(result)
@@ -128,13 +125,11 @@ def validation_flow(checkpoint):
 Now when we run our script we don't get an exception. 
 
 ```bash
-Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 6/6 [00:00<00:00, 667.26it/s]
-Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 691.02it/s]
 18:06:03.007 | INFO    | prefect.engine - Created flow run 'affable-malamute' for flow 'validation-flow'
 18:06:03.624 | INFO    | Flow run 'affable-malamute' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
 18:06:03.626 | INFO    | Flow run 'affable-malamute' - Executing 'run_checkpoint_validation-0' immediately...
 18:06:03.880 | INFO    | Task run 'run_checkpoint_validation-0' - Running Great Expectations validation...
-Calculating Metrics: 100%|██████████████████████████████████████████████████████████████████████████████████████████| 15/15 [00:00<00:00, 729.08it/s]
+...
 18:06:04.138 | WARNING | Task run 'run_checkpoint_validation-0' - Great Expectations validation run  failed
 18:06:04.298 | INFO    | Task run 'run_checkpoint_validation-0' - Finished in state Completed()
 18:06:04.401 | INFO    | Flow run 'affable-malamute' - Finished in state Completed('All states completed.')
@@ -214,6 +209,7 @@ Your artifact displays validation results for human consumption.
 Alternatively, you could share a link to your [Great Expectations Data Docs](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3) in an artifact. 
 
 ## Wrap
+
 You've seen how to use Prefect with Great Expectations. 
 
 ### Where to go from here
