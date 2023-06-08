@@ -33,6 +33,7 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -1455,9 +1456,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
         # breakpoint()
-        # this is shouldn't have been closedj
+        # this is shouldn't have been closed
         with self.get_connection() as connection:
-            if not connection.closed:
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
                 result = connection.execute(query)
                 connection.commit()
             else:
