@@ -617,6 +617,7 @@ A Data Asset requires the following information to be defined:
 </Tabs>
 </TabItem>
 </Tabs>
+</Tabs>
 
 ## Related documentation
 
