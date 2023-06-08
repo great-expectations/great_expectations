@@ -18,13 +18,13 @@ def get_extras_require():
     sqla_keys = (
         "athena",
         "bigquery",
-        "dremio",
+        #"dremio",
         "mssql",
         "mysql",
         "postgresql",
         "redshift",
         "snowflake",
-        "teradata",
+        #"teradata",
         "trino",
         "vertica",
     )
@@ -65,6 +65,8 @@ def get_extras_require():
         results[new_key] = results[existing_key]
     for key in sqla_keys:
         results[key] += results["sqlalchemy"]
+
+    # add logic here to remove
 
     results.pop("boto")
     all_requirements_set = set()
