@@ -4,13 +4,11 @@ import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pandas as pd
 import pytest
-from _pytest.fixtures import FixtureRequest
-from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -35,6 +33,10 @@ from great_expectations.util import (
     filter_properties_dict,
     requires_lossy_conversion,
 )
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import FixtureRequest
+    from marshmallow import Schema
 
 
 @pytest.fixture

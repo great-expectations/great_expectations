@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import pathlib
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import pydantic
 import pytest
-from responses import RequestsMock
 
 import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -32,6 +32,9 @@ from tests.datasource.fluent.integration.integration_test_utils import (
     run_data_assistant_and_checkpoint,
     run_multibatch_data_assistant_and_checkpoint,
 )
+
+if TYPE_CHECKING:
+    from responses import RequestsMock
 
 
 @pytest.mark.integration
