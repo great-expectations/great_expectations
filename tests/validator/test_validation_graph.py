@@ -60,7 +60,9 @@ def expect_column_values_to_be_unique_expectation_config() -> ExpectationConfigu
 
 
 @pytest.fixture
-def expect_column_value_z_scores_to_be_less_than_expectation_config() -> ExpectationConfiguration:
+def expect_column_value_z_scores_to_be_less_than_expectation_config() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={

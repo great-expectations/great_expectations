@@ -80,7 +80,6 @@ def test_get_batch_with_split_on_year(
     basic_spark_df_execution_engine,
     simple_multi_year_spark_df: pyspark.DataFrame,
 ):
-
     split_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
@@ -115,7 +114,6 @@ def test_get_batch_with_split_on_date_parts_day(
     basic_spark_df_execution_engine,
     simple_multi_year_spark_df: pyspark.DataFrame,
 ):
-
     split_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,

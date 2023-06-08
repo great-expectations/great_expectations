@@ -32,7 +32,6 @@ def imsi_country_code(imsi_num: str, country_code) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesImsiBelongToCountryCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.imsi_belong_to_country_code"
     condition_value_keys = ("country_code",)

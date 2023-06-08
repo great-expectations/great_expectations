@@ -9,7 +9,6 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):
-
     MICROSOFT_TEAMS_SCHEMA_URL = "http://adaptivecards.io/schemas/adaptive-card.json"
 
     def __init__(self) -> None:

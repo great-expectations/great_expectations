@@ -73,7 +73,7 @@ You may also replace the default ``local_site`` if you would only like to mainta
 
 ### 7. Build the GCS Data Docs site
 
-Run the the following Python code to build and open your Data Docs:
+Run the following Python code to build and open your Data Docs:
 
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```

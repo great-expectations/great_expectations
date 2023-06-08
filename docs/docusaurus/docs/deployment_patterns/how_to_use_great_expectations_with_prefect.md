@@ -30,6 +30,7 @@ Install the Great Expectations, Prefect, and [prefect-great-expectations](https:
 
 ```bash
 pip install great_expectations prefect prefect_great_expectations
+pip install great_expectations prefect prefect_great_expectations
 ```
 
 If you have any issues installing Prefect, check out the [Prefect installation docs](https://docs.prefect.io/latest/getting-started/installation/).

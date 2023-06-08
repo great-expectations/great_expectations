@@ -33,6 +33,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
@@ -122,91 +123,14 @@ if sqlalchemy.sqlite:
 else:
     SQLITE_TYPES = {}
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
-try:
-    # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as BigQueryDialect
-    import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-    # noinspection PyTypeChecker
-    bigquery_types_tuple = None
-    BIGQUERY_TYPES = {
-        "INTEGER": sqla_bigquery.INTEGER,
-        "NUMERIC": sqla_bigquery.NUMERIC,
-        "STRING": sqla_bigquery.STRING,
-        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-        "BYTES": sqla_bigquery.BYTES,
-        "BOOL": sqla_bigquery.BOOL,
-        "BOOLEAN": sqla_bigquery.BOOLEAN,
-        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-        "TIME": sqla_bigquery.TIME,
-        "FLOAT": sqla_bigquery.FLOAT,
-        "DATE": sqla_bigquery.DATE,
-        "DATETIME": sqla_bigquery.DATETIME,
-    }
-    try:
-        # noinspection PyUnresolvedReferences
-        from sqlalchemy_bigquery import GEOGRAPHY
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    BIGQUERY_TYPES,
+    GEOGRAPHY,
+)
 
-        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
-    except ImportError:
-        # BigQuery GEOGRAPHY support is optional
-        pass
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.dialects.registry.register(
-            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-        )
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple: Dict = {}  # type: ignore[no-redef]
-            BIGQUERY_TYPES = {
-                "INTEGER": sqla_bigquery.INTEGER,
-                "NUMERIC": sqla_bigquery.NUMERIC,
-                "STRING": sqla_bigquery.STRING,
-                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
-                "BYTES": sqla_bigquery.BYTES,
-                "BOOL": sqla_bigquery.BOOL,
-                "BOOLEAN": sqla_bigquery.BOOLEAN,
-                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
-                "TIME": sqla_bigquery.TIME,
-                "FLOAT": sqla_bigquery.FLOAT,
-                "DATE": sqla_bigquery.DATE,
-                "DATETIME": sqla_bigquery.DATETIME,
-            }
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc]
-            # noinspection PyTypeChecker
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-            BIGQUERY_TYPES = {}
-
-    except (ImportError, AttributeError):
-        sqla_bigquery = None
-        # noinspection PyTypeChecker
-        bigquery_types_tuple = None
-        BigQueryDialect = None
-        pybigquery = None
-        BIGQUERY_TYPES = {}
-
+if GEOGRAPHY:
+    BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
@@ -517,7 +441,7 @@ def get_dataset(  # noqa: C901 - 110
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
             pandas_schema = {}
-            for (key, value) in schema.items():
+            for key, value in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
                 # Further, some changes in pandas internal about how datetimes are created means to support pandas
                 # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -543,7 +467,6 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-
         spark_types = {
             "StringType": pyspark.types.StringType,
             "IntegerType": pyspark.types.IntegerType,
@@ -714,7 +637,7 @@ def _get_test_validator_with_data_pandas(
         if pk_column:
             schema["pk_index"] = "int"
         pandas_schema = {}
-        for (key, value) in schema.items():
+        for key, value in schema.items():
             # Note, these are just names used in our internal schemas to build datasets *for internal tests*
             # Further, some changes in pandas internal about how datetimes are created means to support pandas
             # pre- 0.25, we need to explicitly specify when we want timezone.
@@ -795,7 +718,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-
     spark_types: Dict[str, Callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
@@ -980,7 +902,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     except AttributeError:
         pass
     try:
-        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_classes["bigquery"] = BigQueryDialect  # type: ignore[assignment]
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
@@ -1601,7 +1523,6 @@ def build_test_backends_list(  # noqa: C901 - 48
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
-
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
@@ -2171,7 +2092,6 @@ def should_we_generate_this_test(
     extra_debug_info: str = "",
     debug_logger: Optional[logging.Logger] = None,
 ):
-
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
@@ -2457,7 +2377,6 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
 def check_json_test_result(  # noqa: C901 - 52
     test, result, data_asset=None, pk_column=False
 ) -> None:
-
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
     if pk_column:

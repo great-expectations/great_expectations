@@ -36,6 +36,7 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         "column_B",
     )
     condition_value_keys = ()
+
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py _pandas">
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
