@@ -169,6 +169,7 @@ Run the following Python code:
 
 </TabItem>
 </Tabs>
+</TabItem>
 <TabItem value="azure">
 
 ## Microsoft Azure Blob Storage Source Data
@@ -291,6 +292,7 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 </TabItem>
 </Tabs>
+</TabItem>
 <TabItem value="gcs">
 
 ## GCS Source Data
@@ -427,6 +429,7 @@ For more information on Google Cloud and authentication, see the following:
 
 </TabItem>
 </Tabs>
+</TabItem>
 <TabItem value="filesystem">
 
 ## Filesystem Source Data
@@ -615,7 +618,7 @@ A Data Asset requires the following information to be defined:
 
 </TabItem>
 </Tabs>
-</Tabs>
+</TabItem>
 
 ## Related documentation
 
