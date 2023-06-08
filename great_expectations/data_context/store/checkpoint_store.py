@@ -176,7 +176,7 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config
 
-    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint | CheckpointConfig:
         """Persist a stand-alone Checkpoint object.
 
         Args:
@@ -198,7 +198,9 @@ class CheckpointStore(ConfigurationStore):
                 f"A Checkpoint named {checkpoint.name} already exists."
             )
 
-    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+    def update_checkpoint(
+        self, checkpoint: Checkpoint
+    ) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to update a persisted value.
 
         Args:
@@ -220,7 +222,9 @@ class CheckpointStore(ConfigurationStore):
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
 
-    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+    def add_or_update_checkpoint(
+        self, checkpoint: Checkpoint
+    ) -> Checkpoint | CheckpointConfig:
         """Use a stand-alone Checkpoint object to either add or update a persisted value.
 
         Args:
