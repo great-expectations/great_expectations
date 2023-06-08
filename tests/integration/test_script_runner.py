@@ -170,12 +170,6 @@ local_tests = [
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
     ),
     IntegrationTestFixture(
-        name="migration_guide_pandas_v2_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v2_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
     ),
@@ -385,6 +379,11 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="how_to_explicitly_instantiate_an_ephemeral_data_context",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTestFixture(
+        name="how_to_connect_to_in_memory_data_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
 ]

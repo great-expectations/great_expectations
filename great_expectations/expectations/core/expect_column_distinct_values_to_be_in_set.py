@@ -278,18 +278,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
             }
         )
 
-        if len(values) > 60:
+        if len(values) > 60:  # noqa: PLR2004
             return None
         else:
             chart_pixel_width = (len(values) / 60.0) * 500
-            if chart_pixel_width < 250:
+            if chart_pixel_width < 250:  # noqa: PLR2004
                 chart_pixel_width = 250
             chart_container_col_width = round((len(values) / 60.0) * 6)
-            if chart_container_col_width < 4:
+            if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
-            elif chart_container_col_width >= 5:
+            elif chart_container_col_width >= 5:  # noqa: PLR2004
                 chart_container_col_width = 6
-            elif chart_container_col_width >= 4:
+            elif chart_container_col_width >= 4:  # noqa: PLR2004
                 chart_container_col_width = 5
 
         mark_bar_args = {}

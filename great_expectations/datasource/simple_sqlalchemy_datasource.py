@@ -30,7 +30,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
 
     execution_engine: SqlAlchemyExecutionEngine
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         connection_string: Optional[str] = None,

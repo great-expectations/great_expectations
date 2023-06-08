@@ -68,7 +68,7 @@ class ValidationAction:
         return isinstance(self.data_context, CloudDataContext)
 
     @public_api
-    def run(
+    def run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -105,7 +105,7 @@ class ValidationAction:
         )
 
     @public_api
-    def _run(
+    def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -143,7 +143,7 @@ class NoOpAction(ValidationAction):
     ) -> None:
         super().__init__(data_context)
 
-    def _run(
+    def _run(  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -198,7 +198,7 @@ class SlackNotificationAction(ValidationAction):
         show_failed_expectations: Shows a list of failed expectation types.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
         renderer: dict,
@@ -236,7 +236,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -362,7 +362,7 @@ class PagerdutyAlertAction(ValidationAction):
         assert routing_key, "No Pagerduty routing_key found in action config."
         self.notify_on = notify_on
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -480,7 +480,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -562,7 +562,7 @@ class OpsgenieAlertAction(ValidationAction):
         tags: Tags to include in the alert
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
         renderer: dict,
@@ -594,7 +594,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.notify_on = notify_on
         self.tags = tags
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -702,7 +702,7 @@ class EmailAction(ValidationAction):
         notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context: AbstractDataContext,
         renderer: dict,
@@ -756,7 +756,7 @@ class EmailAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -857,7 +857,7 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -969,7 +969,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1056,7 +1056,7 @@ class StoreMetricsAction(ValidationAction):
                 "StoreMetricsAction must have a valid MetricsStore for its target store."
             )
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1132,7 +1132,7 @@ class UpdateDataDocsAction(ValidationAction):
         super().__init__(data_context)
         self._site_names = site_names
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1225,7 +1225,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1266,7 +1266,7 @@ class APINotificationAction(ValidationAction):
         super().__init__(data_context)
         self.url = url
 
-    def _run(  # type: ignore[override] # signature does not match parent
+    def _run(  # type: ignore[override] # signature does not match parent  # noqa: PLR0913
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,

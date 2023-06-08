@@ -34,8 +34,7 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 
 To access our in-memory data, we will create a Pandas Datasource:
 
-```python title="Python code"
-datasource = context.sources.add_pandas(name="my_pandas_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
 ### 3. Read your source data into a Pandas DataFrame
@@ -44,10 +43,7 @@ For this example, we will read a parquet file into a Pandas DataFrame, which we 
 
 The code to create the Pandas DataFrame we are using in this guide is defined with:
 
-```python title="Python code"
-import pandas as pd
-
-dataframe = pd.read_parquet("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-11.parquet")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
 ### 4. Add a Data Asset to the Datasource
@@ -58,14 +54,17 @@ A Pandas DataFrame Data Asset can be defined with two elements:
 
 We will use the `dataframe` from the previous step as the corresponding parameter's value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
 
-```python title="Python code"
-name = "taxi_dataframe"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py name"
 ```
 
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
-```python title="Python code"
-data_asset = datasource.add_dataframe_asset(name=name, dataframe=dataframe)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py data_asset"
+```
+
+For `dataframe` Data Assets, the `dataframe` is always specified as the argument of exactly one API method:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py build_batch_request_with_dataframe"
 ```
 
 ## Next steps

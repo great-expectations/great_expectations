@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import itertools
 import logging
 import os
 import random
@@ -19,7 +18,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.refs import (
-    GXCloudIDAwareRef,
     GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (  # noqa: TCH001
@@ -155,26 +153,6 @@ class CheckpointStore(ConfigurationStore):
                 message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
 
-        if checkpoint_config.config_version is None:
-            config_dict: dict = checkpoint_config.to_json_dict()
-            batches: Optional[dict] = config_dict.get("batches")
-            if not (
-                batches is not None
-                and (
-                    len(batches) == 0
-                    or {"batch_kwargs", "expectation_suite_names"}.issubset(
-                        set(
-                            itertools.chain.from_iterable(
-                                item.keys() for item in batches
-                            )
-                        )
-                    )
-                )
-            ):
-                raise gx_exceptions.CheckpointError(
-                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
-                )
-
         return checkpoint_config
 
     def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
@@ -251,9 +229,16 @@ class CheckpointStore(ConfigurationStore):
         persistence_fn: Callable,
     ) -> Checkpoint:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
+        if isinstance(checkpoint_ref, GXCloudResourceRef):
+            # update parts of config that may have been updated by cloud (ids, default actions, etc.)
             cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
+            checkpoint.config.validations = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("validations")
+            checkpoint.config.action_list = checkpoint_ref.response["data"][
+                "attributes"
+            ]["checkpoint_config"].get("action_list")
         return checkpoint
 
     @public_api

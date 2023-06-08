@@ -101,9 +101,9 @@ A list of Expectations you copied to Azure Blob Storage is returned. Expectation
 
 ## 6. Confirm that Expectations can be accessed from Azure Blob Storage
 
-Run the following command to confirm your Expectations were copied to Azure Blob Storage: 
+Run the following command to confirm your Expectations have been copied to Azure Blob Storage: 
 
 ```bash
 great_expectations suite list
 ```
-If your Expectations were not copied to Azure Blob Storage, a message indicating no Expectations were found is returned.
+If your Expectations have not been copied to Azure Blob Storage, the message "No Expectations were found" is returned.

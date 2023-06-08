@@ -1,6 +1,6 @@
 from typing import Dict
 
-import scipy.stats as stats
+from scipy import stats
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationConfiguration
