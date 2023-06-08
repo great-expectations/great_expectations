@@ -32,7 +32,6 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -142,6 +141,8 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -1127,7 +1128,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
     @public_api
-    def get_batch(
+    def get_batch(  # noqa: PLR0912
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1196,7 +1197,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_parameters=batch_parameters,
         )
 
-    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
+    def _get_data_context_version(  # noqa: PLR0912
+        self, arg1: Any, **kwargs
+    ) -> Optional[str]:
         """
         arg1: the first positional argument (can take on various types)
 
@@ -1319,7 +1322,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return validator.get_dataset()
 
-    def _get_batch_v3(
+    def _get_batch_v3(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1647,7 +1650,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
             if isinstance(datasource_config, dict):
-                datasource_config = DatasourceConfig(**datasource_config)
+                datasource_config = DatasourceConfig(  # noqa: PLW2901
+                    **datasource_config
+                )
             datasource_config.name = datasource_name
 
             masked_config: dict = (
@@ -1702,7 +1707,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._save_project_config()
 
     @overload
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str = ...,
         config_version: int | float = ...,
@@ -1717,9 +1722,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
@@ -1730,6 +1732,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1739,7 +1742,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: None = ...,
         config_version: int | float = ...,
@@ -1754,8 +1757,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
@@ -1765,6 +1766,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1774,8 +1776,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-    @deprecated_argument(argument_name="batches", version="0.14.0")
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -1791,7 +1791,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing checkpoint instead of individual constructor args",
     )
-    def add_checkpoint(
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
         config_version: int | float = 1.0,
@@ -1806,9 +1811,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -1819,6 +1821,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
@@ -1840,8 +1843,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
-            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
             site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
@@ -1851,6 +1852,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -1879,14 +1881,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
@@ -1918,7 +1919,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.checkpoint_store.update_checkpoint(checkpoint)
 
     @overload
-    def add_or_update_checkpoint(
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: str = ...,
         id: str | None = ...,
@@ -1940,6 +1941,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1949,7 +1951,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: None = ...,
         id: None = ...,
@@ -1971,6 +1973,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: None = ...,
         expectation_suite_id: None = ...,
         default_validation_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1981,7 +1984,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
+    def add_or_update_checkpoint(  # noqa: C901, PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
@@ -2004,6 +2012,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
@@ -2029,6 +2038,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -2055,12 +2065,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
         return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
-    def _resolve_add_checkpoint_args(
+    def _resolve_add_checkpoint_args(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
@@ -2076,14 +2087,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
         notify_on: str | None = None,
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2092,6 +2102,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError(
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
+
+        action_list = action_list or self._determine_default_action_list()
 
         if not checkpoint:
             assert (
@@ -2113,8 +2125,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                validation_operator_name=validation_operator_name,
-                batches=batches,
                 site_names=site_names,
                 slack_webhook=slack_webhook,
                 notify_on=notify_on,
@@ -2122,9 +2132,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
+                validator=validator,
             )
 
         return checkpoint
+
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.DEFAULT_ACTION_LIST
 
     @public_api
     @new_argument(
@@ -2214,7 +2230,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
-    def run_checkpoint(
+    def run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
         ge_cloud_id: str | None = None,
@@ -2290,7 +2306,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _run_checkpoint(
+    def _run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
         id: str | None = None,
@@ -2377,7 +2393,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return keys  # type: ignore[return-value]
 
     @public_api
-    def get_validator(
+    def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2636,7 +2652,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
     )
-    def get_batch_list(
+    def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2733,7 +2749,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _get_batch_list(
+    def _get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2853,7 +2869,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2871,7 +2887,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2890,7 +2906,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -2953,7 +2969,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=False,  # `add` does not resolve collisions
         )
 
-    def _add_expectation_suite(
+    def _add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -3056,7 +3072,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -3075,7 +3091,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -3101,7 +3117,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -3250,7 +3266,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @overload
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -3265,7 +3281,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3285,7 +3301,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing profiler instead of individual constructor args",
     )
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: str | None = None,
         config_version: float | None = None,
@@ -3420,7 +3436,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -3435,7 +3451,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3451,7 +3467,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
@@ -3487,7 +3503,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )
-    def run_profiler_with_dynamic_arguments(
+    def run_profiler_with_dynamic_arguments(  # noqa: PLR0913
         self,
         batch_list: list[Batch] | None = None,
         batch_request: BatchRequestBase | dict | None = None,
@@ -3528,7 +3544,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             rules=rules,
         )
 
-    def _run_profiler_with_dynamic_arguments(
+    def _run_profiler_with_dynamic_arguments(  # noqa: PLR0913
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -3551,7 +3567,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
     )
-    def run_profiler_on_data(
+    def run_profiler_on_data(  # noqa: PLR0913
         self,
         batch_list: list[Batch] | None = None,
         batch_request: BatchRequestBase | None = None,
@@ -3641,7 +3657,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
-    def run_validation_operator(
+    def run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
         assets_to_validate: List,
@@ -3682,7 +3698,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _run_validation_operator(
+    def _run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
         assets_to_validate: List,
@@ -3756,7 +3772,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return list(self.validation_operators.keys())
 
-    def profile_data_asset(  # noqa: C901 - complexity 16
+    def profile_data_asset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -3832,12 +3848,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiling_results = {"success": False, "results": []}
 
         total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()
+        total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
         name = data_asset_name
         # logger.info("\tProfiling '%s'..." % name)
 
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.now()  # noqa: DTZ005
 
         if expectation_suite_name is None:
             if batch_kwargs_generator_name is None and data_asset_name is None:
@@ -3913,13 +3929,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         total_expectations += new_expectation_count
 
         self.save_expectation_suite(expectation_suite)
-        duration = (datetime.datetime.now() - start_time).total_seconds()
+        duration = (
+            datetime.datetime.now() - start_time  # noqa: DTZ005
+        ).total_seconds()
         # noinspection PyUnboundLocalVariable
         logger.info(
             f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        total_duration = (
+            datetime.datetime.now() - total_start_time  # noqa: DTZ005
+        ).total_seconds()
         logger.info(
             f"""
 Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
@@ -3957,7 +3977,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     FluentDataAssetNames: TypeAlias = List[str]
 
     @public_api
-    def get_available_data_asset_names(
+    def get_available_data_asset_names(  # noqa: PLR0912
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
@@ -4122,7 +4142,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+                self._open_url_in_browser(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -4893,7 +4917,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         self._evaluation_parameter_dependencies_compiled = True
 
-    def get_validation_result(
+    def get_validation_result(  # noqa: PLR0913
         self,
         expectation_suite_name,
         run_id=None,
@@ -5113,7 +5137,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return True
 
     @public_api
-    def test_yaml_config(  # noqa: C901 - complexity 17
+    def test_yaml_config(  # noqa: C901, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -5174,7 +5198,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             shorten_tracebacks=shorten_tracebacks,
         )
 
-    def profile_datasource(  # noqa: C901 - complexity 25
+    def profile_datasource(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -5346,7 +5370,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 0,
                 0,
             )
-            total_start_time = datetime.datetime.now()
+            total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
             for name in data_asset_names_to_profiled:
                 logger.info(f"\tProfiling '{name}'...")
@@ -5381,7 +5405,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     skipped_data_assets += 1
 
             total_duration = (
-                datetime.datetime.now() - total_start_time
+                datetime.datetime.now() - total_start_time  # noqa: DTZ005
             ).total_seconds()
             logger.info(
                 f"""
@@ -5507,10 +5531,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    @public_api
+    @new_method_or_class(version="0.16.15")
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,
@@ -5529,7 +5569,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):
+        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
             return {  # type: ignore[return-value] # recursive call expects str
                 k: self.escape_all_config_variables(
                     value=v,

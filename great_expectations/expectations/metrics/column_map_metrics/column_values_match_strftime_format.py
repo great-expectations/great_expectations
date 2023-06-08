@@ -20,7 +20,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
     def _pandas(cls, column, strftime_format, **kwargs):
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -36,8 +36,9 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.strptime(  # noqa: DTZ007
+                datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError(f"Unable to use provided strftime_format: {str(e)}")
@@ -46,7 +47,7 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             if val is None:
                 return False
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(

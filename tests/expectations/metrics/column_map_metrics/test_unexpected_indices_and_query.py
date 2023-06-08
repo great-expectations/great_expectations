@@ -15,7 +15,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.self_check.util import (
     build_pandas_engine,
-    build_sa_engine,
+    build_sa_execution_engine,
     build_spark_engine,
 )
 from great_expectations.validator.computed_metric import MetricValue
@@ -90,7 +90,7 @@ def _build_table_columns_and_unexpected(
     # get table_columns_metric
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     # unexpected_condition metric
@@ -186,7 +186,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -226,7 +226,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
         },
     }
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -255,7 +255,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
     df: pd.DataFrame = animal_table_df
     metric_value_kwargs: dict = metric_value_kwargs_complete
 
-    engine = build_sa_engine(df=df, sa=sa)
+    engine = build_sa_execution_engine(df=df, sa=sa)
     (
         table_columns_metric,
         unexpected_columns_metric,
@@ -294,7 +294,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         },
     }
 
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df=df, sa=sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df=df, sa=sa)
 
     (
         table_columns_metric,

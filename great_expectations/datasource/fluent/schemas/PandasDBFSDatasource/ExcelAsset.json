@@ -74,17 +74,64 @@
         },
         "sheet_name": {
             "title": "Sheet Name",
-            "default": 0
+            "default": 0,
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }
+            ]
         },
         "header": {
             "title": "Header",
-            "default": 0
+            "default": 0,
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
         },
         "names": {
-            "title": "Names"
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "index_col": {
-            "title": "Index Col"
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
         },
         "usecols": {
             "title": "Usecols",
@@ -105,23 +152,35 @@
         },
         "squeeze": {
             "title": "Squeeze",
-            "default": false
+            "type": "boolean"
         },
         "dtype": {
             "title": "Dtype",
             "type": "object"
         },
         "engine": {
-            "title": "Engine"
-        },
-        "converters": {
-            "title": "Converters"
+            "title": "Engine",
+            "enum": [
+                "xlrd",
+                "openpyxl",
+                "odf",
+                "pyxlsb"
+            ],
+            "type": "string"
         },
         "true_values": {
-            "title": "True Values"
+            "title": "True Values",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "false_values": {
-            "title": "False Values"
+            "title": "False Values",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         },
         "skiprows": {
             "title": "Skiprows",
@@ -138,46 +197,69 @@
             ]
         },
         "nrows": {
-            "title": "Nrows"
+            "title": "Nrows",
+            "type": "integer"
         },
         "na_values": {
             "title": "Na Values"
         },
         "keep_default_na": {
             "title": "Keep Default Na",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "na_filter": {
             "title": "Na Filter",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "verbose": {
             "title": "Verbose",
-            "default": false
+            "default": false,
+            "type": "boolean"
         },
         "parse_dates": {
             "title": "Parse Dates",
-            "default": false
-        },
-        "date_parser": {
-            "title": "Date Parser"
+            "default": false,
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {}
+                },
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "boolean"
+                }
+            ]
         },
         "thousands": {
-            "title": "Thousands"
+            "title": "Thousands",
+            "type": "string"
+        },
+        "decimal": {
+            "title": "Decimal",
+            "default": ".",
+            "type": "string"
         },
         "comment": {
-            "title": "Comment"
+            "title": "Comment",
+            "type": "string"
         },
         "skipfooter": {
             "title": "Skipfooter",
-            "default": 0
+            "default": 0,
+            "type": "integer"
         },
         "convert_float": {
-            "title": "Convert Float"
+            "title": "Convert Float",
+            "type": "boolean"
         },
         "mangle_dupe_cols": {
             "title": "Mangle Dupe Cols",
-            "default": true
+            "default": true,
+            "type": "boolean"
         },
         "storage_options": {
             "title": "Storage Options",

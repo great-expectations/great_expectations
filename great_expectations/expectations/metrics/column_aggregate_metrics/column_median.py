@@ -1,7 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
-import pandas as pd
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
@@ -19,6 +18,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 
 class ColumnMedian(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
@@ -33,7 +35,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         return column_nonnull_elements.median()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -50,13 +52,12 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
 
-        element_values = sqlalchemy_engine.execute(
+        element_values = execution_engine.execute_query(
             sa.select(column)
             .order_by(column)
             .where(column != None)  # noqa: E711
@@ -80,7 +81,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            if len(column_values) == 1:
+            if len(column_values) == 1:  # noqa: PLR5501
                 column_median = column_values[0][0]  # The only value
             else:
                 column_median = column_values[1][0]  # True center value
@@ -88,7 +89,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         return column_median
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

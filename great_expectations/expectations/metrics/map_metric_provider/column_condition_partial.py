@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 
 @public_api
-def column_condition_partial(  # noqa: C901 - 23
+def column_condition_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -81,7 +81,7 @@ def column_condition_partial(  # noqa: C901 - 23
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -150,7 +150,7 @@ def column_condition_partial(  # noqa: C901 - 23
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -189,6 +189,7 @@ def column_condition_partial(  # noqa: C901 - 23
                     **metric_value_kwargs,
                     _dialect=dialect,
                     _table=selectable,
+                    _execution_engine=execution_engine,
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
                 )
@@ -236,7 +237,7 @@ def column_condition_partial(  # noqa: C901 - 23
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -283,7 +284,7 @@ def column_condition_partial(  # noqa: C901 - 23
                         )
                     unexpected_condition = ~expected_condition
                 else:
-                    if filter_column_isnull:
+                    if filter_column_isnull:  # noqa: PLR5501
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition

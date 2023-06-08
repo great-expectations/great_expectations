@@ -12,7 +12,7 @@ class SlackRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(  # noqa: C901 - 17
+    def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         validation_result=None,
         data_docs_pages=None,
@@ -76,7 +76,7 @@ class SlackRenderer(Renderer):
                 status = "Success :tada:"
 
             else:
-                if show_failed_expectations:
+                if show_failed_expectations:  # noqa: PLR5501
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )

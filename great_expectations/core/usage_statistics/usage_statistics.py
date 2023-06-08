@@ -120,8 +120,8 @@ class UsageStatisticsHandler:
                 logger.debug(
                     "Posted usage stats: message status " + str(res.status_code)
                 )
-                if res.status_code != 201:
-                    logger.debug(
+                if res.status_code != 201:  # noqa: PLR2004
+                    logger.debug(  # noqa: PLE1205
                         "Server rejected message: ", json.dumps(message, indent=2)
                     )
             except requests.exceptions.Timeout:

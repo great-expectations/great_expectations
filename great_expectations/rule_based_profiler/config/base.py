@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
@@ -25,6 +24,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
+
     from great_expectations.rule_based_profiler.rule.rule import Rule
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
@@ -278,7 +279,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         class_name: str,
@@ -485,7 +486,7 @@ class RuleConfigSchema(NotNullSchema):
 
 
 class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -696,7 +697,7 @@ class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     config_version = fields.Float(
         required=True,
         allow_none=False,
-        validate=lambda x: x == 1.0,
+        validate=lambda x: x == 1.0,  # noqa: PLR2004
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
