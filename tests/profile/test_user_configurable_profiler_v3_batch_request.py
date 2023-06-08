@@ -981,6 +981,7 @@ def test_profiler_all_expectation_types_pandas(
 
     assert results["success"]
 
+
 @pytest.mark.skipif(
     is_version_greater_or_equal(pd.__version__, "2.0.0"),
     reason="pyspark is not compatible with pandas 2.0.0",
