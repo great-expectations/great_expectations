@@ -1891,8 +1891,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
+        result: Checkpoint | CheckpointConfig
         try:
-            return self.checkpoint_store.add_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_checkpoint(checkpoint)
         except gx_exceptions.CheckpointError as e:
             # deprecated-v0.15.50
             warnings.warn(
@@ -1900,7 +1901,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
                 DeprecationWarning,
             )
-            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     @public_api
     @new_method_or_class(version="0.15.48")
