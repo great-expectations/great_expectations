@@ -81,7 +81,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
                     "column_a" in template_dict,
                     "column_b" in template_dict,
                 ]
-            ), "The following keys have to be in the template dict: column_a, column_b "
+            ), "The following keys must be in the template dict: column_a, column_b "
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
