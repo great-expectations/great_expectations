@@ -74,7 +74,7 @@ def test_usage_statistics_handler_build_envelope(
     ]
     assert sorted(envelope.keys()) == expected_keys
 
-    assert envelope["version"] == "1.1.0"
+    assert envelope["version"] == "2"
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"
 
 
