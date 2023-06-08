@@ -1722,9 +1722,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
@@ -1760,8 +1757,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
@@ -1781,8 +1776,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-    @deprecated_argument(argument_name="batches", version="0.14.0")
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -1818,9 +1811,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -1853,8 +1843,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
-            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
             site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
@@ -1893,8 +1881,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -2101,8 +2087,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
         notify_on: str | None = None,
@@ -2141,8 +2125,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                validation_operator_name=validation_operator_name,
-                batches=batches,
                 site_names=site_names,
                 slack_webhook=slack_webhook,
                 notify_on=notify_on,
