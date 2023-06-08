@@ -1929,7 +1929,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Checkpoint.
         """
-        return self.checkpoint_store.update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
+            checkpoint
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=Checkpoint.name,
+            )
+        return result
 
     @overload
     def add_or_update_checkpoint(  # noqa: PLR0913
