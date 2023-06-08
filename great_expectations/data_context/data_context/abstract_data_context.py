@@ -143,6 +143,7 @@ if not SQLAlchemyError:
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
