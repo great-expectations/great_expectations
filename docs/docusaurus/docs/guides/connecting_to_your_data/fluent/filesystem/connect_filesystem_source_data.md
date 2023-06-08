@@ -28,6 +28,17 @@ import Tabs from '@theme/Tabs';
 
 Use the information provided here to connect to Source Data stored on Amazon S3, Google Cloud Storage (GCS), Microsoft Azure Blob Storage, or local filesystems. Great Expectations (GX) uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data.
 
+<Tabs
+  groupId="connect-filesystem-source-data"
+  defaultValue='amazon'
+  values={[
+  {label: 'Amazon S3', value:'amazon'},
+  {label: 'Microsoft Azure Blob Storage', value:'azure'},
+  {label: 'Google Cloud Storage', value:'gcs'},
+  {label: 'Filesystem', value:'filesystem'},
+  ]}>
+<TabItem value="amazon">
+
 ## Amazon S3 Source Data
 
 Connect to Source Data on Amazon S3.
@@ -158,6 +169,8 @@ Run the following Python code:
 
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="azure">
 
 ## Microsoft Azure Blob Storage Source Data
 
@@ -279,6 +292,8 @@ The following information is required when you create a Microsoft Azure Blob Sto
 
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="gcs">
 
 ## GCS Source Data
 
@@ -414,6 +429,8 @@ For more information on Google Cloud and authentication, see the following:
 
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="filesystem">
 
 ## Filesystem Source Data
 
@@ -599,6 +616,8 @@ A Data Asset requires the following information to be defined:
 
 <AfterCreateNonSqlDatasource />
 
+</TabItem>
+</Tabs>
 </TabItem>
 </Tabs>
 
