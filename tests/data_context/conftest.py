@@ -647,6 +647,16 @@ def checkpoint_config() -> dict:
                 },
             },
         ],
+        "action_list": [
+            {
+                "action": {"class_name": "StoreValidationResultAction"},
+                "name": "store_validation_result",
+            },
+            {
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+                "name": "store_evaluation_params",
+            },
+        ],
     }
     return checkpoint_config
 
