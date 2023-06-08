@@ -1,0 +1,42 @@
+services:
+  db:
+    image: gx/postgres
+    build:
+      context: .
+      dockerfile: postgres.Dockerfile
+    restart: always
+    environment:
+      POSTGRES_USER: example_user
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: gx_example_db
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "example_user", "-d", "gx_example_db"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - dbnet
+    # ports section included to make sure the db is accessible outside the container.
+    # Accessible at postgresql://example_user@localhost/gx_example_db
+    ports:
+      - "5432:5432"
+
+  jupyter:
+    image: gx/postgres_example_jupyter
+    container_name: gx_postgres_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      CONNECTION_STRING: postgresql://example_user@db/gx_example_db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dbnet
+    ports:
+      - "8888:8888"
+
+networks:
+  dbnet:
+    driver: bridge
