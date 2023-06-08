@@ -32,7 +32,6 @@ import numpy as np
 import pandas as pd
 import pydantic
 from IPython import get_ipython
-from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark, sqlalchemy
@@ -51,6 +50,8 @@ from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import convert_decimal_to_float
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)

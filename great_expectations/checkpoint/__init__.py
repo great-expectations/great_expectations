@@ -13,7 +13,7 @@ from .actions import (
     UpdateDataDocsAction,
     ValidationAction,
 )
-from .checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from .checkpoint import Checkpoint, SimpleCheckpoint
 from .configurator import SimpleCheckpointConfigurator
 
 for module_name, package_name in [
