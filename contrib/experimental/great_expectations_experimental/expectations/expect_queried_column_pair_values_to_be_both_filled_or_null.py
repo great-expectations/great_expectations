@@ -81,7 +81,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
                     "column_a" in template_dict,
                     "column_b" in template_dict,
                 ]
-            ), "The following keys must be in the template dict: column_a, column_b "
+            ), "The following keys must be in the template dict: column_a, column_b"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -93,9 +93,10 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
-        num_of_inconsistent_rows = list(
-            metrics.get("query.template_values")[0].values()
-        )[0]
+        try:
+            num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
+        except IndexError:
+            raise IndexError('invalid index - query.template_values has no results')
 
         is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 
@@ -103,7 +104,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
             "success": is_success,
             "result": {
                 "info": f"Row count with inconsistent values: {num_of_inconsistent_rows}"
-            },
+            }
         }
 
     examples = [
