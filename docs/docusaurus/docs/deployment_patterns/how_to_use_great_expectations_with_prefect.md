@@ -29,7 +29,7 @@ Prefect can be used with Great Expectations validations so that you can be confi
 Install the Great Expectations, Prefect, and [prefect-great-expectations](https://prefecthq.github.io/prefect-great-expectations/) libraries into the same Python virtual environment. 
 
 ```bash
-pip install great_expectations==0.16.12 prefect==2.10.10 prefect_great_expectations==0.1.0
+pip install great_expectations prefect prefect_great_expectations
 ```
 
 If you have any issues installing Prefect, check out the [Prefect installation docs](https://docs.prefect.io/latest/getting-started/installation/).
