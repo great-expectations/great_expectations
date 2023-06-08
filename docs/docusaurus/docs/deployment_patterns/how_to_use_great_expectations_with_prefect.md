@@ -128,7 +128,6 @@ Now when we run our script we don't get an exception.
 
 ```bash
 Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 6/6 [00:00<00:00, 667.26it/s]
-Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:00<00:00, 691.02it/s]
 18:06:03.007 | INFO    | prefect.engine - Created flow run 'affable-malamute' for flow 'validation-flow'
 18:06:03.624 | INFO    | Flow run 'affable-malamute' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
 18:06:03.626 | INFO    | Flow run 'affable-malamute' - Executing 'run_checkpoint_validation-0' immediately...
