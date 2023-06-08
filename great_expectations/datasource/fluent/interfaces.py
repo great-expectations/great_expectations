@@ -47,6 +47,17 @@ from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
+from great_expectations.core.batch import (
+    BatchData,
+    BatchDefinition,
+    BatchMarkers,
+)
+from great_expectations.data_context import AbstractDataContext as GXDataContext
+from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent.data_asset.data_connector import (
+    DataConnector,
+)
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -56,19 +67,10 @@ if TYPE_CHECKING:
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
-    from great_expectations.core.batch import (
-        BatchData,
-        BatchDefinition,
-        BatchMarkers,
-    )
+
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,
-    )
-    from great_expectations.datasource.fluent.type_lookup import TypeLookup
+    from great_expectations.datasource.fluent import BatchRequestOptions
 
 
 class TestConnectionError(Exception):
