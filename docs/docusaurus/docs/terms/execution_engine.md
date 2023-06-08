@@ -18,7 +18,7 @@ Execution Engines are components of <TechnicalTag relative="../" tag="datasource
 
 ## Use cases
 
-An Execution Engine is defined in the configuration of a Datasource.  After this, you will not need to directly interact with an Execution Engine.  Instead, it will be employed under the hood by the Datasoruce it is configured for.
+An Execution Engine is defined in the configuration of a Datasource.  After this, you will not need to directly interact with an Execution Engine.  Instead, it will be employed under the hood by the Datasource it is configured for.
 
 If a <TechnicalTag relative="../" tag="profiler" text="Profiler" /> is used to create Expectations, or if you use the [interactive workflow for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), an Execution Engine will be involved as part of the Datasource used to provide data from a source data system for introspection.
 
@@ -32,7 +32,7 @@ Execution engines handle the interactions with the source data system that their
 
 SqlAlchemyExecutionEngine and SparkDFExecutionEngine provide an additional feature that allows deferred resolution of Metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
 
-The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics
+The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics.
 
 ## Access
 
