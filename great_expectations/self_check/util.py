@@ -947,11 +947,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        # This is the other place that we need to do the warning block?
-        with warnings.catch_warnings():
-            # Ignore warnings about Trino dialect not having implemented import_dbapi() method
-            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-            engine = sa.create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
         engine = sa.create_engine(connection_string)
@@ -1059,29 +1055,24 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     assert (
         context is not None
     ), 'Instance of any child of "AbstractDataContext" class is required.'
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        context.datasources["my_test_datasource"] = Datasource(
-            name="my_test_datasource",
-            # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
-            execution_engine={
-                "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": connection_string,
-            },
-            data_connectors={
-                "my_sql_data_connector": {
-                    "class_name": "ConfiguredAssetSqlDataConnector",
-                    "assets": {
-                        "my_asset": {
-                            "table_name": "animal_names",
-                        },
+    context.datasources["my_test_datasource"] = Datasource(
+        name="my_test_datasource",
+        # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "connection_string": connection_string,
+        },
+        data_connectors={
+            "my_sql_data_connector": {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    "my_asset": {
+                        "table_name": "animal_names",
                     },
                 },
             },
-        )
+        },
+    )
     # Updating "execution_engine" to insure peculiarities, incorporated herein, propagate to "ExecutionEngine" itself.
     context.datasources["my_test_datasource"]._execution_engine = execution_engine  # type: ignore[union-attr]
     my_data_connector: ConfiguredAssetSqlDataConnector = (
@@ -2758,12 +2749,9 @@ def _bigquery_dataset() -> str:
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
 ) -> sqlalchemy.Engine:
-    with warnings.catch_warnings():
-        # Ignore warnings about Trino dialect not having implemented import_dbapi() method
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        engine = sa.create_engine(
-            _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
-        )
+    engine = sa.create_engine(
+        _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
+    )
     from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:

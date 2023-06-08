@@ -66,8 +66,6 @@ def get_extras_require():
     for key in sqla_keys:
         results[key] += results["sqlalchemy"]
 
-    # add logic here to remove
-
     results.pop("boto")
     all_requirements_set = set()
     [all_requirements_set.update(vals) for vals in results.values()]

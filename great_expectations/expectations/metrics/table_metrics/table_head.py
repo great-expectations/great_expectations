@@ -66,7 +66,6 @@ class TableHead(TableMetricProvider):
         metrics: dict[str, Any],
         runtime_configuration: dict,
     ) -> pd.DataFrame:
-        # head()
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -77,8 +76,6 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        # breakpoint()
-        # do we make a new execution engine? is that the problem?
         if (table_name is None) or (
             sqlalchemy._anonymous_label
             and isinstance(table_name, sqlalchemy._anonymous_label)

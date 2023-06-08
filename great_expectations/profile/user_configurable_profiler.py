@@ -1027,7 +1027,6 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             len(column_list) > 1
             and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
-            # this is the failing method
             profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
             raise ValueError(

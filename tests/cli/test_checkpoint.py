@@ -41,10 +41,12 @@ yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
+# TODO: timebox whether this can be done in a better way
 # apply markers to entire test module
 pytestmark = [
     pytest.mark.skipif(
-        PANDAS_VERSION > 2.0, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
+        PANDAS_VERSION > 2.0,
+        reason=f"CLI checkpoints are not supported on {PANDAS_VERSION}",
     )
 ]
 
