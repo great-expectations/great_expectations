@@ -18,13 +18,13 @@ def get_extras_require():
     sqla_keys = (
         "athena",
         "bigquery",
-        # "dremio",
+        "dremio",
         "mssql",
         "mysql",
         "postgresql",
         "redshift",
         "snowflake",
-        # "teradata",
+        "teradata",
         "trino",
         "vertica",
     )
