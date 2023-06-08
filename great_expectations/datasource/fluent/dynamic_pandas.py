@@ -8,6 +8,7 @@ import warnings
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -34,12 +35,13 @@ from packaging.version import Version
 from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
-from typing_extensions import TypeAlias
-
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 try:
     # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
@@ -98,6 +100,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Sequence[str]",
     "Sequence[int]",
     "Sequence[tuple[int, int]]",  # noqa: PLW0130
+    # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
@@ -106,6 +109,9 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
     "Literal[('xlrd', 'openpyxl', 'odf', 'pyxlsb')]",
     "Literal[None, 'header', 'footer', 'body', 'all']",
+    "Literal[('high', 'legacy')]",
+    "Literal[(None, 'header', 'footer', 'body', 'all')]",
+    "Literal[('frame', 'series')]",
     "Iterable[object]",
     # other
     "Pattern",  # re
