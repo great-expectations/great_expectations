@@ -1922,7 +1922,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             result = Checkpoint.instantiate_from_config_with_runtime_args(
                 checkpoint_config=result,
                 data_context=self,
-                name=Checkpoint.name,
+                name=result.name,
             )
         return result
 
