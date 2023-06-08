@@ -94,7 +94,6 @@ if __name__ == "__main__":
 Note that the second expectation will fail because the `passenger_count` column has some `6` values in the data. That's intentional so that we can see a failure example. Here's the output in our terminal window. 
 
 ```bash
-Calculating Metrics: 100%|███████████████████████████████████████████████████████| 6/6 [00:00<00:00, 756.05it/s]
 Calculating Metrics: 100%|███████████████████████████████████████████████████████| 8/8 [00:00<00:00, 696.31it/s]
 18:00:41.816 | INFO    | prefect.engine - Created flow run 'unyielding-husky' for flow 'validation-flow'
 18:00:43.847 | INFO    | Flow run 'unyielding-husky' - Created task run 'run_checkpoint_validation-0' for task 'run_checkpoint_validation'
