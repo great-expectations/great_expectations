@@ -4,9 +4,6 @@ title: How to Use Great Expectations with Prefect
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
 
 This guide will help you run Great Expectations with [Prefect](https://prefect.io/)
 
@@ -29,7 +26,6 @@ Prefect can be used with Great Expectations validations so that you can be confi
 Install the Great Expectations, Prefect, and [prefect-great-expectations](https://prefecthq.github.io/prefect-great-expectations/) libraries into the same Python virtual environment. 
 
 ```bash
-pip install great_expectations prefect prefect_great_expectations
 pip install great_expectations prefect prefect_great_expectations
 ```
 
