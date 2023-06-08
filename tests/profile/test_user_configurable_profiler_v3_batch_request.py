@@ -84,9 +84,7 @@ def get_spark_runtime_validator(context, df):
             # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
         }
     )
-    # this is the problem
-    spark.createDataFrame(df)
-    # res = sdf.toPandas()
+    df = spark.createDataFrame(df)
     batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
@@ -984,7 +982,9 @@ def test_profiler_all_expectation_types_pandas(
 
 @pytest.mark.skipif(
     is_version_greater_or_equal(pd.__version__, "2.0.0"),
-    reason="pyspark is not compatible with pandas 2.0.0",
+    reason="pyspark 3.4.3 is not compatible with pandas 2.0.0. Strict",
+    run=True,
+    strict=True,
 )
 @pytest.mark.skipif(
     not is_library_loadable(library_name="pyspark"),

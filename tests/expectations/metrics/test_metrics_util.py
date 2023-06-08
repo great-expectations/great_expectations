@@ -103,14 +103,11 @@ def unexpected_index_list_two_index_columns():
 def test_sql_statement_conversion_to_string_for_backends(
     backend_name: str, connection_string: str, test_backends: List[str]
 ):
-    with warnings.catch_warnings():
-        # ignore warnings from Trino not having implemented import_dbapi() method
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        if backend_name in test_backends:
-            engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-            _compare_select_statement_with_converted_string(engine=engine)
-        else:
-            pytest.skip(f"skipping sql statement conversion test for : {backend_name}")
+    if backend_name in test_backends:
+        engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
+        _compare_select_statement_with_converted_string(engine=engine)
+    else:
+        pytest.skip(f"skipping sql statement conversion test for : {backend_name}")
 
 
 @pytest.mark.unit
