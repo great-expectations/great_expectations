@@ -778,7 +778,7 @@ class CloudDataContext(SerializableDataContext):
                 data_context=self,
                 name=name,
             )
-        return cast(Checkpoint, result)
+        return result
 
     def _determine_default_action_list(self) -> Sequence[ActionDict]:
         default_actions = super()._determine_default_action_list()
