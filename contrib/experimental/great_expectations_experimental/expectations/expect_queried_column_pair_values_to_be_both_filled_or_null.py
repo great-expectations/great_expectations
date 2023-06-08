@@ -82,6 +82,12 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
                     "column_b" in template_dict,
                 ]
             ), "The following keys must be in the template dict: column_a, column_b"
+            assert isinstance(
+                template_dict["column_a"], str
+            ), "column_a must be a string"
+            assert isinstance(
+                template_dict["column_b"], str
+            ), "column_b must be a string"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
@@ -94,9 +100,11 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
     ) -> Union[ExpectationValidationResult, dict]:
         metrics = convert_to_json_serializable(data=metrics)
         try:
-            num_of_inconsistent_rows = list(metrics.get("query.template_values")[0].values())[0]
+            num_of_inconsistent_rows = list(
+                metrics.get("query.template_values")[0].values()
+            )[0]
         except IndexError:
-            raise IndexError('invalid index - query.template_values has no results')
+            raise IndexError("Invalid index - query.template_values has no [0] index]")
 
         is_success = not num_of_inconsistent_rows or num_of_inconsistent_rows == 0
 
@@ -104,7 +112,7 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
             "success": is_success,
             "result": {
                 "info": f"Row count with inconsistent values: {num_of_inconsistent_rows}"
-            }
+            },
         }
 
     examples = [
@@ -113,14 +121,15 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
                 {
                     "data": {
                         "col1": [1, 2, 2, 3, 4],
-                        "col2": ["a", "b", "c", "d", "e"],
-                        "col3": [None, 6, 7, 9, 6],
+                        "col2": [5, 0, 3, 1, 4],
+                        "col3": ["a", "b", "c", "d", "e"],
+                        "col4": [None, 6, 7, 9, 6],
                     },
                 },
             ],
             "tests": [
                 {
-                    "title": "basic_positive_test",
+                    "title": "basic_positive_test_same_type",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"template_dict": {"column_a": "col1", "column_b": "col2"}},
@@ -128,10 +137,26 @@ class ExpectQueriedColumnPairValuesToBeBothFilledOrNull(QueryExpectation):
                     "only_for": ["sqlite"],
                 },
                 {
-                    "title": "basic_negative_test",
+                    "title": "basic_negative_test_same_type",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"template_dict": {"column_a": "col1", "column_b": "col3"}},
+                    "in": {"template_dict": {"column_a": "col1", "column_b": "col4"}},
+                    "out": {"success": False},
+                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "basic_positive_test_different_type",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"template_dict": {"column_a": "col2", "column_b": "col3"}},
+                    "out": {"success": True},
+                    "only_for": ["sqlite"],
+                },
+                {
+                    "title": "basic_negative_test_different_type",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"template_dict": {"column_a": "col3", "column_b": "col4"}},
                     "out": {"success": False},
                     "only_for": ["sqlite"],
                 },
