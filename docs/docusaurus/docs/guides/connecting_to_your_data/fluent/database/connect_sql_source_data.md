@@ -170,7 +170,7 @@ Although there isn't a maximum number of Data Assets you can define for a Dataso
 
 1. Run the following Python code to define a Query Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query"
     ```
 
 2. Run the following Python code to create the Data Asset:
