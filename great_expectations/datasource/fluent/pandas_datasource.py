@@ -405,9 +405,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     ) -> list[Batch]:
         self._validate_batch_request(batch_request)
 
-        print(
-            f"\n[ALEX_TEST] [DataFrameAsset.get_batch_list_from_batch_request()] SELF.DATAFRAME:\n{self.dataframe} ; TYPE: {str(type(self.dataframe))}"
-        )
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
         data, markers = execution_engine.get_batch_data_and_markers(

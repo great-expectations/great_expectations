@@ -145,9 +145,6 @@ def expectation_config_expect_column_pair_values_to_be_equal() -> (
 
 @pytest.fixture()
 def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfiguration:
-    print(
-        f"\n[ALEX_TEST] [WOUTPUT] expectation_config_expect_column_values_to_be_in_set-ASKED"
-    )
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
         kwargs={
@@ -378,14 +375,10 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-    print(
-        f"\n[ALEX_TEST] [WOUTPUT] expectation_config_expect_column_values_to_be_in_set-CALLED_FOR"
-    )
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
-    print(f"\n[ALEX_TEST] [WOUTPUT] RESULT:\n{result} ; TYPE: {str(type(result))}")
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
     index_column_names: List[str] = evrs[0]["results"][0]["result"][
         "unexpected_index_column_names"

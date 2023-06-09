@@ -201,9 +201,6 @@ class ParameterBuilder(ABC, Builder):
                 runtime_configuration=runtime_configuration,
             )
 
-            print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETER_COMPUTATION_RESULT:\n{parameter_computation_result} ; TYPE: {str(type(parameter_computation_result))}"
-            )
             parameter_values: Dict[str, Any] = {
                 self.raw_fully_qualified_parameter_name: parameter_computation_result,
                 self.json_serialized_fully_qualified_parameter_name: convert_to_json_serializable(
