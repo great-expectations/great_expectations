@@ -92,12 +92,8 @@ class TableHead(TableMetricProvider):
                 else:
                     # passing chunksize causes the Iterator to be returned
                     with execution_engine.get_connection() as con:
-                        # ???
-                        # if isinstance(selectable, sqlalchemy.Select.subquery):
                         if not selectable.supports_execution:
-                            # do things
-                            print("hi")
-                            # selectable = selectable.select()
+                            selectable = sa.select()
                         df_chunk_iterator = pandas_read_sql_query(
                             sql=selectable,
                             con=con,

@@ -87,45 +87,6 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]
     return return_value
 
 
-def sql_statement_with_post_compile_to_string(
-    engine, select_statement: sqlalchemy.Select
-) -> str:
-    """
-    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
-    from sqlalchemy documentation.
-
-    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
-
-    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
-    return unexpected_index_values.
-
-    Args:
-        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
-        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
-    Returns:
-        String representation of select_statement
-
-    """
-    sqlalchemy_connection: sqlalchemy.engine.base.Connection = engine.engine
-    compiled = select_statement.compile(
-        sqlalchemy_connection,
-        compile_kwargs={"render_postcompile": True},
-        dialect=engine.dialect,
-    )
-    dialect_name: str = engine.dialect_name
-
-    if dialect_name in ["sqlite", "trino", "mssql"]:
-        params = (repr(compiled.params[name]) for name in compiled.positiontup)
-        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
-
-    else:
-        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
-        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
-
-    query_as_string += ";"
-    return query_as_string
-
-
 def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     """Suppress deprecation warnings while executing the pandas read_sql_query function.
 
@@ -147,21 +108,14 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     Returns:
         dataframe
     """
-    if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
-            sqlalchemy.sqlalchemy.__version__, "2.0.0"
-        ):
-            warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
+    if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
+        sqlalchemy.sqlalchemy.__version__, "2.0.0"
+    ):
+        warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
-    else:
-        # our query is now a subquery. and a subquery is not executable(?)
-        # TODO : make this better. Converting to string feels gross
-        my_subquery = sql_statement_with_post_compile_to_string(execution_engine, sql)
-        return_value = pd.read_sql_query(sql=my_subquery, con=con, **kwargs)
-        # return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
     return return_value
