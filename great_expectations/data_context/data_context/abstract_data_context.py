@@ -4743,12 +4743,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         try:
             config.read(cls._ROOT_CONF_FILE)
         except OSError as e:
-            logger.info(f"Something went wrong when trying to read from the user's conf file: {e}")
+            logger.info(
+                f"Something went wrong when trying to read from the user's conf file: {e}"
+            )
             return None
 
-        oss_id = config.get(
-            "anonymous_usage_statistics", "oss_id", fallback=None
-        )
+        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
         if not oss_id:
             return cls._set_oss_id(config)
 
@@ -4773,7 +4773,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             with cls._ROOT_CONF_FILE.open("w") as f:
                 config.write(f)
         except OSError as e:
-            logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
             return None
 
         return oss_id
@@ -4790,7 +4792,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
             cls._ROOT_CONF_FILE.touch()
         except OSError as e:
-            logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
             return False
         return True
 
