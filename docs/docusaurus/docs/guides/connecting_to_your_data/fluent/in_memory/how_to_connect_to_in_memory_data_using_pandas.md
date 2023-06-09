@@ -24,18 +24,18 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 
 </Prerequisites> 
 
-### Import the Great Expectations module and instantiate a Data Context
+## Import the Great Expectations module and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-### Create a Datasource
+## Create a Datasource
 
 Run the following Python code to create a Pandas Datasource:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py datasource"
 ```
 
-### Read your source data into a Pandas DataFrame
+## Read your source data into a Pandas DataFrame
 
 In the following example, a parquet file is read into a Pandas DataFrame that will be used in subsequent code examples.
 
@@ -44,7 +44,7 @@ Run the following Python code to create the Pandas DataFrame:
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_in_memory_data_using_pandas.py dataframe"
 ```
 
-### Add a Data Asset to the Datasource
+## Add a Data Asset to the Datasource
 
 The following information is required when you create a Pandas DataFrame Data Asset:
 

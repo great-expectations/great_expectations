@@ -33,25 +33,7 @@ module.exports = {
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
         'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas',
-        {
-          type: 'category',
-          label: 'SQL Datasources',
-          items: [
-            {
-              type: 'html',
-              value: '<h4>General SQL Datasources</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data',
-            {
-              type: 'html',
-              value: '<h4>Specific SQL dialects</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data',
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data'
-          ]
-        },
+        'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
           label: 'Working with Data Assets',
