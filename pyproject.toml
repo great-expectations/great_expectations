@@ -265,8 +265,6 @@ ignore = [
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
-    # doesn't catch errors or help with circular imports and tedious to apply
-    "TCH002", # typing-only-third-party-import
     # minimal cost for standard lib imports; keep this disabled
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
@@ -274,6 +272,9 @@ ignore = [
     "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
+    # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
+    "PYI053", # string-or-bytes-too-long - causes mypy to fail on some of our type stubs
+    "PYI054",  # numeric-literal-too-long - causes mypy to fail on some of our type stubs
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     # TODO: enable these
     "B904", # raise-without-from-inside-except

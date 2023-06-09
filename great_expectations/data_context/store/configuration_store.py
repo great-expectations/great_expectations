@@ -1,8 +1,7 @@
 import logging
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -18,6 +17,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 yaml = YAML()
 

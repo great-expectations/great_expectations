@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List
 
-import pandas as pd
 import pytest
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -22,6 +21,8 @@ from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()

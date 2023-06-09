@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import pandas as pd
-
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
@@ -12,6 +10,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)

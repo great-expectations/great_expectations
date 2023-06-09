@@ -11,7 +11,6 @@ from typing import (
 )
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -41,6 +40,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,

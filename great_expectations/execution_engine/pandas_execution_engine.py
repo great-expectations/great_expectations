@@ -6,10 +6,20 @@ import logging
 import pickle
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import pandas as pd
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, azure, google
@@ -42,6 +52,9 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 logger = logging.getLogger(__name__)
 

@@ -337,15 +337,9 @@ class ActionListValidationOperator(ValidationOperator):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         ###
-        # NOTE: 20211010 - jdimatteo: This method is called by both Checkpoint.run and LegacyCheckpoint.run and below
+        # NOTE: 20211010 - jdimatteo: This method is called by Checkpoint.run and below
         # usage of AsyncExecutor may speed up I/O bound validations by running them in parallel with multithreading
         # (if concurrency is enabled in the data context configuration).
-        #
-        # When this method is called by LegacyCheckpoint.run, len(assets_to_validate) may be greater than 1. If
-        # concurrency is enabled in the configuration AND len(assets_to_validate) > 1, then execution is run in multiple
-        # threads with AsyncExecutor -- otherwise AsyncExecutor only uses the current single thread to execute the work.
-        # Please see the below arguments used to initialize AsyncExecutor and the corresponding AsyncExecutor docstring
-        # for more details on when multiple threads are used.
         #
         # When this method is called by Checkpoint.run, len(assets_to_validate) may be 1 even if there are multiple
         # validations, because Checkpoint.run calls this method in a loop for each validation. AsyncExecutor is also

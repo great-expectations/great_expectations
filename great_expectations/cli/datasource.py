@@ -7,7 +7,6 @@ import sys
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
-from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
@@ -30,6 +29,8 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context import FileDataContext
 
 

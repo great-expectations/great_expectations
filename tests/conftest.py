@@ -2306,7 +2306,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 @pytest.fixture(scope="module")
 def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     try:
-        from pyspark.sql import DataFrame
+        from pyspark.sql import DataFrame  # noqa: TCH002
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 

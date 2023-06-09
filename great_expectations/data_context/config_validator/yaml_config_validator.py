@@ -15,7 +15,6 @@ import traceback
 from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -38,6 +37,8 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
+
     from great_expectations.data_context import AbstractDataContext
 
 

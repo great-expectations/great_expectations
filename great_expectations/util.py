@@ -54,7 +54,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -78,6 +77,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from typing_extensions import TypeGuard
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import (

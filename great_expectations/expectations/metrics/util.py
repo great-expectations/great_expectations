@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
-import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
@@ -60,6 +59,9 @@ _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
 from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
 from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 try:
     import teradatasqlalchemy.dialect

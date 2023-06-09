@@ -27,7 +27,6 @@ from typing import (
     Union,
 )
 
-import pandas as pd
 import pydantic
 from pydantic import (
     Field,
@@ -37,7 +36,6 @@ from pydantic import (
     validate_arguments,
 )
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
@@ -51,6 +49,9 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import pandas as pd
+    from typing_extensions import TypeAlias, TypeGuard
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
