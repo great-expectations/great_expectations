@@ -128,7 +128,6 @@ def add_dataframe_to_db(  # noqa: PLR0913
         # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
         # but using the base class here since sqlalchemy is an optional dependency and this
         # warning type only exists in sqlalchemy < 2.0.
-        # while loop
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         df.to_sql(
             name=name,
