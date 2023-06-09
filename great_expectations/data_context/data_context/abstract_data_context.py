@@ -4726,27 +4726,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
     def _get_oss_id(self) -> uuid.UUID | None:
+        """
+        TODO
+        """
         config = configparser.ConfigParser()
+
         if not self._ROOT_CONF_FILE.exists():
-            try:
-                self._ROOT_CONF_FILE.touch()
-            except PermissionError as e:
-                logger.info(e)
+            if not self._scaffold_root_conf():
                 return None
             return self._set_oss_id(config)
 
         config.read(self._ROOT_CONF_FILE)
         oss_id = config.get(
-            "anonymous_usage_statistics", "oss_id", fallback=None
+            "anonymous_usage_statistics", "oss_id", fallback=self._set_oss_id(config)
         )
-        if not oss_id:
-            oss_id = self._set_oss_id(config)
-        
-        if oss_id:
-            return uuid.UUID(oss_id)
-        return None 
+        return uuid.UUID(oss_id) if oss_id else None
 
     def _set_oss_id(self, config: configparser.ConfigParser) -> uuid.UUID | None:
+        """
+        TODO
+        """
         oss_id = uuid.uuid4()
         config["anonymous_usage_statistics"]["oss_id"] = oss_id
 
@@ -4754,10 +4753,20 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             with self._ROOT_CONF_FILE.open("w") as f:
                 config.write(f)
         except PermissionError as e:
-            logger.info(e)
+            logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
             return None
 
         return oss_id
+
+    def _scaffold_root_conf(self) -> bool:
+        try:
+            self._ROOT_CONF_DIR.mkdir(exist_ok=True)
+            self._ROOT_CONF_FILE.touch()
+        except PermissionError as e:
+            logger.info(f"Something went wrong when trying to write a conf test to the user's root: {e}")
+            return False
+        return True
+
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
