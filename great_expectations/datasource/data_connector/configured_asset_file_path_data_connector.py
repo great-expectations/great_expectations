@@ -186,9 +186,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 regex_config["pattern"] = asset.pattern
                 if asset.group_names:
                     regex_config["group_names"] = asset.group_names
-                else:
-                    if not regex_config.get("group_names"):
-                        regex_config["group_names"] = []
+                elif not regex_config.get("group_names"):
+                    regex_config["group_names"] = []
 
         return regex_config
 
