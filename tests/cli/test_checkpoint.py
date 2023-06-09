@@ -12,7 +12,6 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import (

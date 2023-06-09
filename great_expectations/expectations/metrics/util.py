@@ -565,8 +565,12 @@ def column_reflection_fallback(
                 .alias("column_info")
             )
 
+            # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
+            if not col_info_query.supports_execution:
+                col_info_query = sa.select(col_info_query)
+
             col_info_tuples_list = connection.execute(
-                sa.select(col_info_query)
+                col_info_query
             ).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
