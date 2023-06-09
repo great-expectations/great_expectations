@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ErrorDetail(TypedDict):
     code: Optional[str]
     detail: Optional[str]
-    source: Optional[str]
+    source: Union[str, Dict[str, str], None]
 
 
 class ErrorPayload(TypedDict):
@@ -317,10 +317,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            logger.debug(str(e))
+            logger.debug(repr(e))
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def allowed_set_kwargs(self) -> Set[str]:
