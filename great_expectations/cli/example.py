@@ -84,3 +84,31 @@ def example_postgres(stop: bool, url: bool) -> None:
         )
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
+
+
+@example.command(name="airflow")
+@click.option(
+    "--stop",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+def example_airflow(stop: bool) -> None:
+    """Start an airflow example."""
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = (
+        repo_root / "examples" / "reference_environments" / "airflow_2_6_1"
+    )
+    assert example_directory.is_dir(), "Example directory not found"
+    if stop:
+        cli_message("<green>Stopping example containers...</green>")
+        stop_commands = ["docker", "compose", "down"]
+        subprocess.run(stop_commands, cwd=example_directory)
+        cli_message("<green>Done stopping containers.</green>")
+    else:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message("<green>Setting up airflow example using airflow v2.6.1...</green>")
+        example_setup_file = example_directory / "setup_airflow_2_6_1.sh"
+        subprocess.run(example_setup_file, cwd=example_directory)
