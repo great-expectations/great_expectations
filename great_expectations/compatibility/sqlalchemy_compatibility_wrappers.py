@@ -54,7 +54,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         schema = schema
         columns = columns
-        if dialect == GXSqlDialect.SQLITE:
+        if dialect in (GXSqlDialect.SQLITE, GXSqlDialect.OTHER):
             return pd.read_sql_query(
                 sql=f"""SELECT * FROM {table_name}""",
                 con=con,

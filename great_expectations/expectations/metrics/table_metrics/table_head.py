@@ -70,6 +70,8 @@ class TableHead(TableMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         dialect = execution_engine.engine.dialect.name.lower()
+        if dialect not in GXSqlDialect.get_all_dialect_names():
+            dialect = GXSqlDialect.OTHER
         table_name = getattr(selectable, "name", None)
         n_rows: int = (
             metric_value_kwargs.get("n_rows")
@@ -93,8 +95,9 @@ class TableHead(TableMetricProvider):
                 else:
                     # passing chunksize causes the Iterator to be returned
                     with execution_engine.get_connection() as con:
+                        # convert subquery into query using select_from()
                         if not selectable.supports_execution:
-                            selectable = sa.select(selectable)
+                            selectable = sa.select(sa.text("*")).select_from(selectable)
                         df_chunk_iterator = pandas_read_sql_query(
                             sql=selectable,
                             con=con,
