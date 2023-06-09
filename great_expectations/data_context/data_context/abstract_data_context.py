@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import uuid
 import warnings
@@ -243,7 +244,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
     _ETC_CONF_DIR = pathlib.Path("/etc")
     _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
-    GLOBAL_CONFIG_PATHS = [_ROOT_CONF, _ETC_CONF]
+    GLOBAL_CONFIG_PATHS = [_ROOT_CONF_FILE, _ETC_CONF_FILE]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
@@ -4734,13 +4735,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config = configparser.ConfigParser()
 
         if not cls._ROOT_CONF_FILE.exists():
-            if not cls._scaffold_root_conf():
+            success = cls._scaffold_root_conf()
+            if not success:
                 return None
             return cls._set_oss_id(config)
 
         try:
             config.read(cls._ROOT_CONF_FILE)
-        except OSError:
+        except OSError as e:
             logger.info(f"Something went wrong when trying to read from the user's conf file: {e}")
             return None
 
