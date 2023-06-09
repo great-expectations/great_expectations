@@ -4767,7 +4767,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         oss_id = uuid.uuid4()
         config["anonymous_usage_statistics"] = {}
-        config["anonymous_usage_statistics"]["oss_id"] = oss_id
+        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
 
         try:
             with cls._ROOT_CONF_FILE.open("w") as f:
