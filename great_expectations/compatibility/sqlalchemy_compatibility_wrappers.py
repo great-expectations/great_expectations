@@ -6,6 +6,8 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,7 +54,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         schema = schema
         columns = columns
-        if dialect == "sqlite":
+        if dialect == GXSqlDialect.SQLITE:
             return pd.read_sql_query(
                 sql=f"""SELECT * FROM {table_name}""",
                 con=con,
@@ -139,9 +141,3 @@ def add_dataframe_to_db(  # noqa: PLR0913
             dtype=dtype,
             method=method,
         )
-        # for i in range(5):
-        #     try:
-
-        #     except Exception as e:
-        #         print(f"Exception {e} occurred.")
-        #         time.sleep(1)

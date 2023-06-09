@@ -69,7 +69,7 @@ class TableHead(TableMetricProvider):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        dialect = execution_engine.engine.dialect
+        dialect = execution_engine.engine.dialect.name.lower()
         table_name = getattr(selectable, "name", None)
         n_rows: int = (
             metric_value_kwargs.get("n_rows")
