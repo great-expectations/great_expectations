@@ -85,7 +85,7 @@ class UsageStatisticsPayloadBuilder:
         message["data_context_instance_id"] = self._data_context_instance_id
 
         message["mac_address"] = self._determine_hashed_mac_address()
-        message["oss_id"] = self._oss_id
+        message["oss_id"] = str(self._oss_id) if self._oss_id else None
 
         message["event_time"] = (
             datetime.datetime.now(datetime.timezone.utc).strftime(
