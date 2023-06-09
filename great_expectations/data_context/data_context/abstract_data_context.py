@@ -4748,7 +4748,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         oss_id = config.get(
             "anonymous_usage_statistics", "oss_id", fallback=None
-        ) or cls._set_oss_id(config)
+        )
+        if not oss_id:
+            return cls._set_oss_id(config)
 
         return uuid.UUID(oss_id) if oss_id else None
 
