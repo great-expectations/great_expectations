@@ -19,6 +19,7 @@ def read_sql_table_as_df(  # noqa: PLR0913
     parse_dates=None,
     columns=None,
     chunksize: int | None = None,
+    dialect=None,
 ) -> pd.DataFrame | Iterator[pd.DataFrame]:
     """Read SQL table as DataFrame.
 
@@ -48,24 +49,31 @@ def read_sql_table_as_df(  # noqa: PLR0913
     """
     # does this need to be added to the connection thing?
     # breakpoint()
+    breakpoint()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        # is this where the pandas 2.0 is messing us up?
-        # this is where we are getting messed up
-        # this is where we are getting messed up. Lets do it.
-        # TODO: handle the schema somehow
-        # TODO: handle columns somehow
-        # TODO: Don - This might be a candidate for backend-specific handling, since sqlite is the only one that seems to be breaking
         schema = schema
         columns = columns
-        return pd.read_sql_query(
-            sql=f"""SELECT * FROM {table_name}""",
-            con=con,
-            index_col=index_col,
-            coerce_float=coerce_float,
-            parse_dates=parse_dates,
-            chunksize=chunksize,
-        )
+        if dialect == "sqlite":
+            return pd.read_sql_query(
+                sql=f"""SELECT * FROM {table_name}""",
+                con=con,
+                index_col=index_col,
+                coerce_float=coerce_float,
+                parse_dates=parse_dates,
+                chunksize=chunksize,
+            )
+        else:
+            return pd.read_sql_table(
+                table_name=table_name,
+                con=con,
+                schema=schema,
+                index_col=index_col,
+                coerce_float=coerce_float,
+                parse_dates=parse_dates,
+                columns=columns,
+                chunksize=chunksize,
+            )
 
 
 def add_dataframe_to_db(  # noqa: PLR0913
