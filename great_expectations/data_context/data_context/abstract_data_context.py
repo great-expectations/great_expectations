@@ -4722,11 +4722,42 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
+            oss_id=oss_id,
         )
 
-    def _get_oss_id(self) -> uuid.UUID:
+    def _get_oss_id(self) -> uuid.UUID | None:
+        config = configparser.ConfigParser()
         if not self._ROOT_CONF_FILE.exists():
-            self._ROOT_CONF_FILE.touch()
+            try:
+                self._ROOT_CONF_FILE.touch()
+            except PermissionError as e:
+                logger.info(e)
+                return None
+            return self._set_oss_id(config)
+
+        config.read(self._ROOT_CONF_FILE)
+        oss_id = config.get(
+            "anonymous_usage_statistics", "oss_id", fallback=None
+        )
+        if not oss_id:
+            oss_id = self._set_oss_id(config)
+        
+        if oss_id:
+            return uuid.UUID(oss_id)
+        return None 
+
+    def _set_oss_id(self, config: configparser.ConfigParser) -> uuid.UUID | None:
+        oss_id = uuid.uuid4()
+        config["anonymous_usage_statistics"]["oss_id"] = oss_id
+
+        try:
+            with self._ROOT_CONF_FILE.open("w") as f:
+                config.write(f)
+        except PermissionError as e:
+            logger.info(e)
+            return None
+
+        return oss_id
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
