@@ -1421,110 +1421,19 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
-    assert config == {
-        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
-        "batch_request": {},
-        "class_name": "Checkpoint",
-        "config_version": 1.0,
-        "evaluation_parameters": {},
-        "module_name": "great_expectations.checkpoint",
-        "name": "my_checkpoint",
-        "profilers": [],
-        "runtime_configuration": {},
-        "validations": [],
-    }
-
-
-def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": {"stuff": 33},
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
-    empty_data_context,
-):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {"foo": 33},
-            }
-        ],
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [{"expectation_suite_names": ["foo"]}],
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
+    assert sorted(config.keys()) == [
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "run_name_template",
+        "runtime_configuration",
+        "validations",
+    ]
 
 
 @pytest.mark.integration
@@ -2240,7 +2149,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_add_datasource_from_yaml_sql_datasource(
+def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     mock_emit,
     sa,
     test_backends,

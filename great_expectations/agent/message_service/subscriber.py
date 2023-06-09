@@ -146,7 +146,7 @@ class Subscriber:
             self._reconnect_delay = 0
         else:
             self._reconnect_delay += 1
-        if self._reconnect_delay > 30:
+        if self._reconnect_delay > 30:  # noqa: PLR2004
             self._reconnect_delay = 30
         return self._reconnect_delay
 

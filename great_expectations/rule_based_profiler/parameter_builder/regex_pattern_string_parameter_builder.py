@@ -62,7 +62,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,

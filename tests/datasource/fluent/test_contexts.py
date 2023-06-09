@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import re
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
@@ -15,14 +16,16 @@ from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from tests.datasource.fluent.conftest import (
-    _DEFAULT_HEADERS,
-    FAKE_DATASOURCE_ID,
+from tests.datasource.fluent._fake_cloud_api import (
+    DEFAULT_HEADERS,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    UUID_REGEX,
+    CallbackResult,
+    CloudResponseSchema,
+)
+from tests.datasource.fluent.conftest import (
     CloudDetails,
-    _CallbackResult,
-    _CloudResponseSchema,
 )
 
 if TYPE_CHECKING:
@@ -269,9 +272,9 @@ def test_cloud_context_delete_datasource(
 
 @pytest.fixture
 def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
-    def verify_asset_name_cb(request: PreparedRequest) -> _CallbackResult:
+    def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
         if request.body:
-            payload = _CloudResponseSchema.from_datasource_json(request.body)
+            payload = CloudResponseSchema.from_datasource_json(request.body)
             LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
             assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
             assert assets, "No assets found"
@@ -280,14 +283,16 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
                     raise ValueError(
                         f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
                     )
-            return _CallbackResult(
+            return CallbackResult(
                 200,
-                headers=_DEFAULT_HEADERS,
+                headers=DEFAULT_HEADERS,
                 body=payload.json(),
             )
-        return _CallbackResult(500, _DEFAULT_HEADERS, "No body found")
+        return CallbackResult(500, DEFAULT_HEADERS, "No body found")
 
-    cloud_url = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{FAKE_DATASOURCE_ID}"
+    cloud_url = re.compile(
+        f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{UUID_REGEX}"
+    )
 
     cloud_api_fake.remove("PUT", url=cloud_url)
     cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
@@ -304,15 +309,19 @@ class TestPandasDefaultWithCloud:
         verify_asset_names_mock: RequestsMock,
     ):
         context = empty_cloud_context_fluent
-        cloud_url = f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{FAKE_DATASOURCE_ID}"
-
         df = pd.DataFrame.from_dict(
             {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
         )
 
         context.sources.pandas_default.read_dataframe(df)
 
-        assert verify_asset_names_mock.assert_call_count(cloud_url, 1)
+        pandas_default_id = context.sources.pandas_default.id
+        assert pandas_default_id
+
+        assert verify_asset_names_mock.assert_call_count(
+            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+            1,
+        )
 
 
 def test_data_connectors_are_built_on_config_load(

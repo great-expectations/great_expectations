@@ -595,7 +595,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(
+def load_data_into_test_database(  # noqa: PLR0912
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,

@@ -6,7 +6,6 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING
 
-import pandas as pd
 import pydantic
 import pytest
 
@@ -17,6 +16,8 @@ from great_expectations.datasource.fluent.spark_datasource import (
 from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.data_context import AbstractDataContext
 
 
@@ -48,17 +49,19 @@ def test_dataframe_asset(
 
     dataframe_asset = datasource.add_dataframe_asset(
         name="my_dataframe_asset",
-        dataframe=spark_df,
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(datasource.assets) == 1
 
-    _ = datasource.add_dataframe_asset(
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
+
+    dataframe_asset = datasource.add_dataframe_asset(
         name="my_second_dataframe_asset",
-        dataframe=spark_df,
     )
     assert len(datasource.assets) == 2
+
+    _ = dataframe_asset.build_batch_request(dataframe=spark_df)
 
     assert all(
         asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
@@ -88,13 +91,12 @@ def test_spark_data_asset_batch_metadata(
 
     dataframe_asset = spark_datasource.add_dataframe_asset(
         name="my_dataframe_asset",
-        dataframe=spark_df,
         batch_metadata=batch_metadata,
     )
     assert dataframe_asset.batch_metadata == batch_metadata
 
     batch_list = dataframe_asset.get_batch_list_from_batch_request(
-        dataframe_asset.build_batch_request()
+        dataframe_asset.build_batch_request(dataframe=spark_df)
     )
     assert len(batch_list) == 1
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
@@ -134,19 +136,10 @@ def test_spark_config_passed_to_execution_engine(
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
     spark_session,
-    spark_df_from_pandas_df,
-    test_df_pandas,
 ):
-    pandas_df = test_df_pandas
-    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-
     dataframe_asset = empty_data_context.sources.add_spark(
         name="my_spark_datasource"
-    ).add_dataframe_asset(
-        name="my_dataframe_asset",
-        dataframe=spark_df,
-    )
-    dataframe_asset.dataframe = None
+    ).add_dataframe_asset(name="my_dataframe_asset")
 
     with pytest.raises(ValueError) as e:
         dataframe_asset.build_batch_request()

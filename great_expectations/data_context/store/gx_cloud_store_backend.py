@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ErrorDetail(TypedDict):
     code: Optional[str]
     detail: Optional[str]
-    source: Optional[str]
+    source: Union[str, Dict[str, str], None]
 
 
 class ErrorPayload(TypedDict):
@@ -159,7 +159,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         ge_cloud_credentials: Dict,
         ge_cloud_base_url: str = CLOUD_DEFAULT_BASE_URL,
@@ -227,7 +227,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         params: Optional[dict] = None
         try:
             # if name is included in the key, add as a param
-            if len(key) > 2 and key[2]:
+            if len(key) > 2 and key[2]:  # noqa: PLR2004
                 params = {"name": key[2]}
                 ge_cloud_url = ge_cloud_url.rstrip("/")
 
@@ -246,7 +246,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
-            logger.debug(
+            logger.debug(  # noqa: PLE1205
                 "Failed to parse GX Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
@@ -268,7 +268,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, id: str, value: Any) -> bool:
+    def _put(self, id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -298,7 +298,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             # for the ExpectationSuite endpoint. As such, this is a temporary fork to
             # ensure that legacy PATCH behavior is supported.
             if (
-                response_status_code == 405
+                response_status_code == 405  # noqa: PLR2004
                 and resource_type is GXCloudRESTResource.EXPECTATION_SUITE
             ):
                 response = self._session.patch(url, json=data)
@@ -317,10 +317,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            logger.debug(str(e))
+            logger.debug(repr(e))
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def allowed_set_kwargs(self) -> Set[str]:
@@ -343,20 +343,23 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self,
         key: Tuple[GXCloudRESTResource, ...],
         value: Any,
-        **kwargs: dict,
+        **kwargs,
     ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         resource = key[0]
         id: str = key[1]
 
-        # if key has an id, perform _update instead
+        # if key has an id, perform _put instead
 
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
-            # _update returns a bool
-            return self._update(id=id, value=value)
+            # _put returns a bool
+            return self._put(id=id, value=value)
 
+        return self._post(value=value, **kwargs)
+
+    def _post(self, value: Any, **kwargs) -> GXCloudResourceRef:
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
         organization_id = self.ge_cloud_credentials["organization_id"]
@@ -484,7 +487,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-        if len(key) == 3:
+        if len(key) == 3:  # noqa: PLR2004
             resource_object_name = key[2]
         else:
             resource_object_name = None
@@ -539,6 +542,25 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
 
+    def _update(self, key, value, **kwargs):
+        existing = self._get(key)
+        if key[1] is None:
+            key = (key[0], existing["data"]["id"], key[2])
+
+        return self.set(key=key, value=value, **kwargs)
+
+    def _add_or_update(self, key, value, **kwargs):
+        try:
+            existing = self._get(key)
+        except StoreBackendError as e:
+            logger.info(f"Could not find object associated with key {key}: {e}")
+            existing = None
+        if existing is not None:
+            id = key[1] if key[1] is not None else existing["data"]["id"]
+            key = (key[0], id, key[2])
+            return self.set(key=key, value=value, **kwargs)
+        return self.add(key=key, value=value, **kwargs)
+
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         try:
             _ = self._get(key)
@@ -566,7 +588,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         )
 
     def _validate_key(self, key) -> None:
-        if not isinstance(key, tuple) or len(key) != 3:
+        if not isinstance(key, tuple) or len(key) != 3:  # noqa: PLR2004
             raise TypeError(
                 "Key used for GXCloudStoreBackend must contain a resource_type, id, and resource_name; see GXCloudIdentifier for more information."
             )

@@ -60,7 +60,7 @@ def send_slack_notification(
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200 or not ok_status:
+        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -95,7 +95,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 202:
+        if response.status_code != 202:  # noqa: PLR2004
             logger.warning(
                 "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
@@ -115,7 +115,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 "Request to Microsoft Teams webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -136,7 +136,7 @@ def send_webhook_notifications(query, webhook, target_platform):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 f"Request to {target_platform} webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -146,7 +146,7 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 
 # noinspection SpellCheckingInspection
-def send_email(
+def send_email(  # noqa: PLR0913
     title,
     html,
     smtp_address,
@@ -254,8 +254,8 @@ def get_substituted_batch_request(
         batch_request=substituted_runtime_batch_request
     )
 
-    for key, value in validation_batch_request.items():  # type: ignore[union-attr] # get_batch_request_as_dict needs overloads
-        substituted_value = substituted_runtime_batch_request.get(key)  # type: ignore[union-attr] # get_batch_request_as_dict
+    for key, value in validation_batch_request.items():
+        substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None:
             raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
@@ -268,7 +268,9 @@ def get_substituted_batch_request(
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_template_config(source_config: dict, template_config: dict) -> dict:
+def substitute_template_config(  # noqa: PLR0912
+    source_config: dict, template_config: dict
+) -> dict:
     if not (template_config and any(template_config.values())):
         return source_config
 

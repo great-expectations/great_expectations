@@ -46,7 +46,7 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
         num_columns = len(column_list)
 
         # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
-        if num_columns > 100:
+        if num_columns > 100:  # noqa: PLR2004
             logger.warning(
                 f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
 metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
