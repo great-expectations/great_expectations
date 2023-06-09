@@ -93,7 +93,7 @@ class TableHead(TableMetricProvider):
                     # passing chunksize causes the Iterator to be returned
                     with execution_engine.get_connection() as con:
                         if not selectable.supports_execution:
-                            selectable = sa.select()
+                            selectable = sa.select(selectable)
                         df_chunk_iterator = pandas_read_sql_query(
                             sql=selectable,
                             con=con,
@@ -117,7 +117,6 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    # this is the part that is run
                     with execution_engine.get_connection() as con:
                         df = read_sql_table_as_df(
                             table_name=getattr(selectable, "name", None),

@@ -1055,6 +1055,7 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     assert (
         context is not None
     ), 'Instance of any child of "AbstractDataContext" class is required.'
+
     context.datasources["my_test_datasource"] = Datasource(
         name="my_test_datasource",
         # Configuration for "execution_engine" here is largely placeholder to comply with "Datasource" constructor.
