@@ -117,7 +117,6 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
-            # should be pandas > 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
     else:

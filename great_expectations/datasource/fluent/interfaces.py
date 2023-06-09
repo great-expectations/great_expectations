@@ -48,30 +48,34 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
-
 if TYPE_CHECKING:
     import pandas as pd
     from typing_extensions import TypeAlias, TypeGuard
-
-    from great_expectations.core.batch import (
-        BatchData,
-        BatchDefinition,
-        BatchMarkers,
-    )
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
-
+    from great_expectations.core.batch import (  # noqa: TCH004
+        BatchData,
+        BatchDefinition,
+        BatchMarkers,
+    )
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.data_context import (  # noqa: TCH004
+        AbstractDataContext as GXDataContext,
+    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
-    from great_expectations.datasource.fluent.data_asset.data_connector import (
+    from great_expectations.datasource.fluent import (  # noqa: TCH004
+        BatchRequest,
+        BatchRequestOptions,
+    )
+    from great_expectations.datasource.fluent.data_asset.data_connector import (  # noqa: TCH004
         DataConnector,
     )
-    from great_expectations.datasource.fluent.type_lookup import TypeLookup
+    from great_expectations.datasource.fluent.type_lookup import (  # noqa: TCH004
+        TypeLookup,
+    )
 
 
 class TestConnectionError(Exception):
