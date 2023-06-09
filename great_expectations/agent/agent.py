@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -182,6 +183,7 @@ class GXAgent:
             )
         else:
             status = JobCompleted(success=False, error_stack_trace=str(error))
+            print(traceback.format_exc())
             print(
                 f"Failed to complete job {event_context.event.type} ({event_context.correlation_id})"
             )
