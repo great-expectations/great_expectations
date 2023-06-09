@@ -4766,6 +4766,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         If there is an error when writing to disk, we default to a NoneType.
         """
         oss_id = uuid.uuid4()
+        config["anonymous_usage_statistics"] = {}
         config["anonymous_usage_statistics"]["oss_id"] = oss_id
 
         try:
