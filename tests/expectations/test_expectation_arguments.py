@@ -820,6 +820,7 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=context._data_context_id,
+        oss_id=None,
         usage_statistics_url="http://fakeendpoint.com",
     )
     context._usage_statistics_handler = handler
