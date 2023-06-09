@@ -67,7 +67,7 @@ class UsageStatisticsHandler:
         data_context: AbstractDataContext,
         data_context_id: str,
         usage_statistics_url: str,
-        oss_id: uuid.UUID,
+        oss_id: uuid.UUID | None,
     ) -> None:
         self._url = usage_statistics_url
 

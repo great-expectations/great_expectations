@@ -4716,18 +4716,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             self._usage_statistics_handler = None
             return
 
-        oss_id = self._get_oss_id()
-
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
-            oss_id=oss_id,
+            oss_id=self._get_oss_id(),
         )
 
     def _get_oss_id(self) -> uuid.UUID | None:
         """
-        TODO
+        Retrieves a user's `oss_id` from disk ($HOME/.great_expectations/great_expectations.conf).
+
+        If no such value is present, a new UUID is generated and written to disk for subsequent usage.
+        If there is an error when reading from / writing to disk, we default to a NoneType.
         """
         config = configparser.ConfigParser()
 
@@ -4738,13 +4739,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         config.read(self._ROOT_CONF_FILE)
         oss_id = config.get(
-            "anonymous_usage_statistics", "oss_id", fallback=self._set_oss_id(config)
+            "anonymous_usage_statistics", "oss_id", fallback=None
         )
+        if not oss_id:
+            oss_id = self._set_oss_id(config)
+
         return uuid.UUID(oss_id) if oss_id else None
 
     def _set_oss_id(self, config: configparser.ConfigParser) -> uuid.UUID | None:
         """
-        TODO
+        Generates a random UUID and writes it to disk for subsequent usage.
+
+        Args:
+            config: The parser used to read/write the oss_id.
+
+        If there is an error when writing to disk, we default to a NoneType.
         """
         oss_id = uuid.uuid4()
         config["anonymous_usage_statistics"]["oss_id"] = oss_id
@@ -4759,14 +4768,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return oss_id
 
     def _scaffold_root_conf(self) -> bool:
+        """
+        Set up an empty root conf file ($HOME/.great_expectations/great_expectations.conf)
+
+        Returns:
+            Whether or not directory/file creation was successful.
+        """
         try:
             self._ROOT_CONF_DIR.mkdir(exist_ok=True)
             self._ROOT_CONF_FILE.touch()
         except PermissionError as e:
-            logger.info(f"Something went wrong when trying to write a conf test to the user's root: {e}")
+            logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
             return False
         return True
-
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
