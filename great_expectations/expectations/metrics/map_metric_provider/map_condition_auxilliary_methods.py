@@ -338,7 +338,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                         metric_domain_kwargs=metric_domain_kwargs,
                         metric_value_kwargs=metric_value_kwargs,
                         metrics=metrics,
-                    ) 
+                    )
                 else:
                     with connection.begin():
                         temp_table_obj = _generate_temp_table_for_sql_map_condition(
@@ -831,6 +831,7 @@ def _spark_map_condition_query(
     ).replace(")'>", "")
     return f"df.filter(F.expr({unexpected_condition_filtered}))"
 
+
 def _generate_temp_table_for_sql_map_condition(
     connection: sa.engine.base.Connection,
     metric_domain_kwargs: Dict,
@@ -839,15 +840,14 @@ def _generate_temp_table_for_sql_map_condition(
     **kwargs,
 ) -> sa.Table:
     temp_table_name: str = generate_temporary_table_name(
-        default_table_name_prefix="#ge_temp_")
+        default_table_name_prefix="#ge_temp_"
+    )
     metadata: sa.MetaData = sa.MetaData()
     metadata.reflect(bind=connection)
     temp_table_obj: sa.Table = sa.Table(
-    temp_table_name,
+        temp_table_name,
         metadata,
-        sa.Column(
-        "condition", sa.Integer, primary_key=False, nullable=False
-        ),
+        sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
     )
     temp_table_obj.create(bind=connection, checkfirst=True)
     return temp_table_obj

@@ -51,12 +51,13 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import pandas as pd
-    from great_expectations.core.batch import (
-    BatchData,
-    BatchDefinition,
-    BatchMarkers,
-    )
     from typing_extensions import TypeAlias, TypeGuard
+
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDefinition,
+        BatchMarkers,
+    )
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -64,12 +65,11 @@ if TYPE_CHECKING:
     #  Batch.update_forward_refs() before instantiation.
 
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent import BatchRequestOptions
     from great_expectations.data_context import AbstractDataContext as GXDataContext
-    from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
-    DataConnector,
+        DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
