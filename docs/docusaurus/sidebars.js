@@ -36,19 +36,9 @@ module.exports = {
         'guides/connecting_to_your_data/fluent/database/connect_sql_source_data',
         {
           type: 'category',
-          label: 'Working with Data Assets',
+          label: 'Manage Data Assets',
           items: [
-            {
-              type: 'html',
-              value: '<h4>All Data Assets</h4>',
-              defaultStyle: true
-            },
             'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset',
-            {
-              type: 'html',
-              value: '<h4>Filesystem Data Assets</h4>',
-              defaultStyle: true
-            },
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
             {
               type: 'html',

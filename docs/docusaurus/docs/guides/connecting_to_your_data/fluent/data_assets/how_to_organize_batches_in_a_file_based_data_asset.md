@@ -1,5 +1,5 @@
 ---
-title: How to organize Batches in a file-based Data Asset
+title: Organize Batches in a file-based Data Asset
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to organize Batches of data in a file-based Data Asset.
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Storage, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
@@ -56,7 +56,7 @@ Please reference the appropriate one of these guides:
 
 </summary>
 
-Please reference the appropriate one of these guides:
+See one of the following guides:
 
 #### Local Filesystems
 - [How to connect to one or more files using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas)
@@ -84,13 +84,11 @@ If you are using a Datasource that was created with the advanced block-config me
 
 :::
 
-## Steps
-
-### 1. Import GX and instantiate a Data Context
+## Import GX and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Retrieve a file-based Datasource
+## Retrieve a file-based Datasource
 
 For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
 
@@ -99,7 +97,7 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
 ```
 
-### 3. Create a `batching_regex`
+## Create a `batching_regex`
 
 In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
 
@@ -140,7 +138,7 @@ If you choose to omit the `batching_regex` parameter, your Data Asset will autom
 
 :::
 
-### 5. (Optional) Add Batch Sorters to the Data Asset
+## Add Batch Sorters to the Data Asset (Optional)
 
 We will now add a Batch Sorter to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
 
@@ -153,7 +151,7 @@ In this example we have two named groups, `"year"` and `"month"`, so our list of
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py add_sorters"
 ```
 
-### 6. Use a Batch Request to verify the Data Asset works as desired
+## Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
