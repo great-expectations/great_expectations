@@ -121,7 +121,7 @@ The following code examples use a PostGreSQL connection string. A PostGreSQL con
 
 The following code is an example of a PostgreSQL connection string format:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py
 ```
 
 :::tip Is there a more secure way to store my credentials than plain text in a connection string?
@@ -134,7 +134,7 @@ The following code is an example of a PostgreSQL connection string format:
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py
     ```
 
 2. Run the following Python code to create a PostgreSQL Datasource:

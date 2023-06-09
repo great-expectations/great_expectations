@@ -34,7 +34,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 For this example we will use a connection string to connect to our PostgreSQL database.  In PostgreSQL, connection strings are formatted like:
 
-```pythonname="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string
+```pythonname="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py
 ```
 
 :::tip Is there a more secure way to store my credentials than plain text in a connection string?
@@ -47,7 +47,7 @@ For this example we will use a connection string to connect to our PostgreSQL da
 
 Creating a PostgreSQL Datasource is as simple as providing the `add_postgres(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py
 ```
 
 With these two values, we can create our Datasource:
