@@ -239,12 +239,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser(  # noqa: PTH111
-            "~/.great_expectations/great_expectations.conf"
-        ),
-        "/etc/great_expectations.conf",
-    ]
+    _ROOT_CONF_DIR = pathlib.Path.home() / ".great_expectations"
+    _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
+    _ETC_CONF_DIR = pathlib.Path("/etc")
+    _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
+    GLOBAL_CONFIG_PATHS = [_ROOT_CONF, _ETC_CONF]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
@@ -4717,11 +4716,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             self._usage_statistics_handler = None
             return
 
+        oss_id = self._get_oss_id()
+
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
+
+    def _get_oss_id(self):
+        if not self._ROOT_CONF_FILE.exists():
+            self._ROOT_CONF_FILE.touch()
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
