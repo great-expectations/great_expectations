@@ -4738,12 +4738,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 return None
             return cls._set_oss_id(config)
 
-        config.read(cls._ROOT_CONF_FILE)
+        try:
+            config.read(cls._ROOT_CONF_FILE)
+        except OSError:
+            logger.info(f"Something went wrong when trying to read from the user's conf file: {e}")
+            return None
+
         oss_id = config.get(
             "anonymous_usage_statistics", "oss_id", fallback=None
-        )
-        if not oss_id:
-            oss_id = cls._set_oss_id(config)
+        ) or cls._set_oss_id(config)
 
         return uuid.UUID(oss_id) if oss_id else None
 
@@ -4751,6 +4754,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
         """
         Generates a random UUID and writes it to disk for subsequent usage.
+        Assumes that the root conf file exists.
 
         Args:
             config: The parser used to read/write the oss_id.
@@ -4763,7 +4767,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         try:
             with cls._ROOT_CONF_FILE.open("w") as f:
                 config.write(f)
-        except PermissionError as e:
+        except OSError as e:
             logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
             return None
 
@@ -4780,7 +4784,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         try:
             cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
             cls._ROOT_CONF_FILE.touch()
-        except PermissionError as e:
+        except OSError as e:
             logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
             return False
         return True

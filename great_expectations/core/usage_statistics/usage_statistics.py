@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import uuid
 import atexit
 import copy
 import datetime
@@ -36,6 +35,8 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 if TYPE_CHECKING:
+    import uuid
+
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.core.usage_statistics.anonymizers.types.base import (
         CLISuiteInteractiveFlagCombinations,
