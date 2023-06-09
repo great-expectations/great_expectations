@@ -83,6 +83,7 @@ def test_determine_hashed_mac_address():
     builder = UsageStatisticsPayloadBuilder(
         data_context=mock.Mock(),
         data_context_id="00000000-0000-0000-0000-000000000001",
+        oss_id=None,
         gx_version=gx_version,
     )
 
