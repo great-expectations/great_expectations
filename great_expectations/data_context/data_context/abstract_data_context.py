@@ -4752,7 +4752,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if not oss_id:
             return cls._set_oss_id(config)
 
-        return uuid.UUID(oss_id) if oss_id else None
+        return uuid.UUID(oss_id)
 
     @classmethod
     def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
