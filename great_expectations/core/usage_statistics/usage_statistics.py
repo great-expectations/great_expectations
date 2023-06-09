@@ -76,6 +76,7 @@ class UsageStatisticsHandler:
         self._builder = UsageStatisticsPayloadBuilder(
             data_context=data_context,
             data_context_id=data_context_id,
+            oss_id=oss_id,
             gx_version=gx_version,
         )
 
