@@ -4723,7 +4723,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             oss_id=self._get_oss_id(),
         )
 
-    def _get_oss_id(self) -> uuid.UUID | None:
+    @classmethod
+    def _get_oss_id(cls) -> uuid.UUID | None:
         """
         Retrieves a user's `oss_id` from disk ($HOME/.great_expectations/great_expectations.conf).
 
@@ -4732,21 +4733,22 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         config = configparser.ConfigParser()
 
-        if not self._ROOT_CONF_FILE.exists():
-            if not self._scaffold_root_conf():
+        if not cls._ROOT_CONF_FILE.exists():
+            if not cls._scaffold_root_conf():
                 return None
-            return self._set_oss_id(config)
+            return cls._set_oss_id(config)
 
-        config.read(self._ROOT_CONF_FILE)
+        config.read(cls._ROOT_CONF_FILE)
         oss_id = config.get(
             "anonymous_usage_statistics", "oss_id", fallback=None
         )
         if not oss_id:
-            oss_id = self._set_oss_id(config)
+            oss_id = cls._set_oss_id(config)
 
         return uuid.UUID(oss_id) if oss_id else None
 
-    def _set_oss_id(self, config: configparser.ConfigParser) -> uuid.UUID | None:
+    @classmethod
+    def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
         """
         Generates a random UUID and writes it to disk for subsequent usage.
 
@@ -4759,7 +4761,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config["anonymous_usage_statistics"]["oss_id"] = oss_id
 
         try:
-            with self._ROOT_CONF_FILE.open("w") as f:
+            with cls._ROOT_CONF_FILE.open("w") as f:
                 config.write(f)
         except PermissionError as e:
             logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
@@ -4767,7 +4769,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         return oss_id
 
-    def _scaffold_root_conf(self) -> bool:
+    @classmethod
+    def _scaffold_root_conf(cls) -> bool:
         """
         Set up an empty root conf file ($HOME/.great_expectations/great_expectations.conf)
 
@@ -4775,8 +4778,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             Whether or not directory/file creation was successful.
         """
         try:
-            self._ROOT_CONF_DIR.mkdir(exist_ok=True)
-            self._ROOT_CONF_FILE.touch()
+            cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
+            cls._ROOT_CONF_FILE.touch()
         except PermissionError as e:
             logger.info(f"Something went wrong when trying to write the user's conf file to disk: {e}")
             return False
