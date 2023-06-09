@@ -380,5 +380,6 @@ data_context_init_with_dependencies: dict = {
     "event_time": "2022-03-29T14:22:53.921Z",
     "data_context_id": "2edf8eba-7de4-46fb-80b0-b8b7f7c7cd24",
     "data_context_instance_id": "cc57338c-44fc-4133-aed1-c7f5f8c577ac",
+    "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
     "ge_version": "0.14.12+27.g7774964f6.dirty",
 }
