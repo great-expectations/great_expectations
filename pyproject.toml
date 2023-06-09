@@ -72,7 +72,6 @@ exclude = [
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/base\.py', # 8
     'core/usage_statistics/anonymizers/batch_anonymizer\.py', # 10
     'core/usage_statistics/anonymizers/batch_request_anonymizer\.py', # 16
     'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py', # 16
