@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time
 import warnings
 from typing import Callable, Iterator, Sequence
 
@@ -63,17 +62,6 @@ def read_sql_table_as_df(  # noqa: PLR0913
                 parse_dates=parse_dates,
                 chunksize=chunksize,
             )
-        else:
-            return pd.read_sql_table(
-                table_name=table_name,
-                con=con,
-                schema=schema,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                parse_dates=parse_dates,
-                columns=columns,
-                chunksize=chunksize,
-            )
 
 
 def add_dataframe_to_db(  # noqa: PLR0913
@@ -130,20 +118,20 @@ def add_dataframe_to_db(  # noqa: PLR0913
         # warning type only exists in sqlalchemy < 2.0.
         # while loop
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        for i in range(5):
-            try:
-                df.to_sql(
-                    name=name,
-                    con=con,
-                    schema=schema,
-                    if_exists=if_exists,
-                    index=index,
-                    index_label=index_label,
-                    chunksize=chunksize,
-                    dtype=dtype,
-                    method=method,
-                )
-                return
-            except Exception as e:
-                print(f"Exception {e} occurred.")
-                time.sleep(1)
+        df.to_sql(
+            name=name,
+            con=con,
+            schema=schema,
+            if_exists=if_exists,
+            index=index,
+            index_label=index_label,
+            chunksize=chunksize,
+            dtype=dtype,
+            method=method,
+        )
+        # for i in range(5):
+        #     try:
+
+        #     except Exception as e:
+        #         print(f"Exception {e} occurred.")
+        #         time.sleep(1)
