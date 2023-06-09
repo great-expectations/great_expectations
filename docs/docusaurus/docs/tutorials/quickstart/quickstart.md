@@ -63,7 +63,10 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 - Run the following command to create two Expectations:
 
-    ```python name="tutorials/quickstart/quickstart.py create_expectation"
+    ```python 
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
     ```
 The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column.
 
