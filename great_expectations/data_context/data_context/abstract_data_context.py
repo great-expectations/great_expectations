@@ -4724,7 +4724,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
-    def _get_oss_id(self):
+    def _get_oss_id(self) -> uuid.UUID:
         if not self._ROOT_CONF_FILE.exists():
             self._ROOT_CONF_FILE.touch()
 

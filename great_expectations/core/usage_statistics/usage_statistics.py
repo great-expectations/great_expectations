@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 import atexit
 import copy
 import datetime
@@ -66,6 +67,7 @@ class UsageStatisticsHandler:
         data_context: AbstractDataContext,
         data_context_id: str,
         usage_statistics_url: str,
+        oss_id: uuid.UUID,
     ) -> None:
         self._url = usage_statistics_url
 
