@@ -410,6 +410,13 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
+    # TODO: <Alex>ALEX</Alex>
+    from great_expectations.validator.validation_graph import ValidationGraph
+
+    if isinstance(data, ValidationGraph):
+        return None
+    # TODO: <Alex>ALEX</Alex>
+
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
