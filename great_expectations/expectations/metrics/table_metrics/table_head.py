@@ -69,6 +69,7 @@ class TableHead(TableMetricProvider):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        dialect = execution_engine.engine.dialect
         table_name = getattr(selectable, "name", None)
         n_rows: int = (
             metric_value_kwargs.get("n_rows")
@@ -122,6 +123,7 @@ class TableHead(TableMetricProvider):
                             table_name=getattr(selectable, "name", None),
                             schema=getattr(selectable, "schema", None),
                             con=con,
+                            dialect=dialect,
                         )
                 else:
                     with execution_engine.get_connection() as con:
@@ -131,6 +133,7 @@ class TableHead(TableMetricProvider):
                             schema=getattr(selectable, "schema", None),
                             con=con,
                             chunksize=abs(n_rows),
+                            dialect=dialect,
                         )
                         df = TableHead._get_head_df_from_df_iterator(
                             df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
