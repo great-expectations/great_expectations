@@ -45,10 +45,9 @@ def read_sql_table_as_df(  # noqa: PLR0913
         columns: List of column names to select from SQL table.
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
+        dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
     # does this need to be added to the connection thing?
-    # breakpoint()
-    breakpoint()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         schema = schema
@@ -60,6 +59,17 @@ def read_sql_table_as_df(  # noqa: PLR0913
                 index_col=index_col,
                 coerce_float=coerce_float,
                 parse_dates=parse_dates,
+                chunksize=chunksize,
+            )
+        else:
+            return pd.read_sql_table(
+                table_name=table_name,
+                con=con,
+                schema=schema,
+                index_col=index_col,
+                coerce_float=coerce_float,
+                parse_dates=parse_dates,
+                columns=columns,
                 chunksize=chunksize,
             )
 
