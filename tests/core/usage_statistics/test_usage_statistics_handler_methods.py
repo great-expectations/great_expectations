@@ -30,6 +30,7 @@ def test_usage_statistics_handler_validate_message_failure(
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.data_context_id,
+        oss_id=None,
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
@@ -55,6 +56,7 @@ def usage_statistics_envelope():
         "event_time": "2023-06-07T13:10:16.260Z",
         "ge_version": "0.16.15+29.gcf5a3002a.dirty",
         "mac_address": "d510e8ebe029f3c526a5fa4b921f4589f7e78d28e7732a3559ecf6c84528f940",
+        "oss_id": None,
         "success": True,
         "version": "2",
         "x-forwarded-for": "00.000.00.000, 00.000.000.000",
@@ -77,6 +79,7 @@ def test_usage_statistics_handler_validate_message_success(
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.data_context_id,
+        oss_id=None,
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
@@ -98,8 +101,11 @@ def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
     mock_data_context: mock.MagicMock,
 ):
     # Ensure that real handler gets passed down by the context
-    handler: UsageStatisticsHandler = UsageStatisticsHandler(
-        mock_data_context, "my_id", "my_url"
+    handler = UsageStatisticsHandler(
+        data_context=mock_data_context,
+        data_context_id="my_id",
+        oss_id=None,
+        usage_statistics_url="my_url",
     )
     mock_data_context.usage_statistics_handler = handler
 
@@ -202,8 +208,11 @@ def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
     mock_data_context: mock.MagicMock,
 ):
     # Ensure that real handler gets passed down by the context
-    handler: UsageStatisticsHandler = UsageStatisticsHandler(
-        mock_data_context, "my_id", "my_url"
+    handler = UsageStatisticsHandler(
+        data_context=mock_data_context,
+        data_context_id="my_id",
+        oss_id=None,
+        usage_statistics_url="my_url",
     )
     mock_data_context.usage_statistics_handler = handler
 
