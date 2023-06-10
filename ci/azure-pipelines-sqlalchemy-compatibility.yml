@@ -135,6 +135,9 @@ stages:
               versionSpec: '3.8'
             displayName: 'Use Python 3.8'
 
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
@@ -187,6 +190,12 @@ stages:
             inputs:
               versionSpec: '3.8'
             displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
