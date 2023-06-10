@@ -133,6 +133,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
+)
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -164,9 +167,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
-    )
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
@@ -2419,7 +2419,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return keys  # type: ignore[return-value]
 
-    @public_api
+    # @public_api
     def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
@@ -2611,6 +2611,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite=expectation_suite,  # type: ignore[arg-type]
             batch_list=batch_list,
             include_rendered_content=include_rendered_content,
+            **kwargs,
         )
 
     # noinspection PyUnusedLocal
@@ -2800,7 +2801,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        result = get_batch_request_from_acceptable_arguments(
+        batch_request_updated = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2823,7 +2824,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = result.datasource_name
+        datasource_name = batch_request_updated.datasource_name
         if datasource_name not in self.datasources:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
@@ -2834,7 +2835,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self.datasources[
             datasource_name
         ]  # this can return one of three datasource types, including Fluent datasource types
-        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
+
+        dataframe = kwargs.get("dataframe")
+        if (
+            isinstance(batch_request_updated, FluentBatchRequest)
+            and dataframe is not None
+        ):
+            data_asset = datasource.get_asset(
+                asset_name=batch_request_updated.data_asset_name
+            )
+            batch_request_updated = data_asset.build_batch_request(dataframe=dataframe)
+
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request_updated)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
     @deprecated_method_or_class(
