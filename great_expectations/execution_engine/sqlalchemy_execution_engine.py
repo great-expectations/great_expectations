@@ -1393,14 +1393,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             Sqlalchemy connection
         """
-        try:
-            if not self._connection:
-                self._connection = self.engine.connect()
-            yield self._connection
-        finally:
-            # Temp tables only persist within a connection for some dialects,
-            # so we need to keep the connection alive.
-            pass
+        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
+            try:
+                if not self._connection:
+                    self._connection = self.engine.connect()
+                yield self._connection
+            finally:
+                # Temp tables only persist within a connection for some dialects,
+                # so we need to keep the connection alive.
+                pass
+        else:
+            with self.engine.connect() as connection:
+                yield connection
 
     @public_api
     @new_method_or_class(version="0.16.14")
