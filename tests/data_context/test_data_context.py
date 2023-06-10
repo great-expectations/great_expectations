@@ -9,6 +9,9 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
+)
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -1652,10 +1655,34 @@ def test_get_validator_with_batch(in_memory_runtime_context):
         )
     )[0]
 
-    context.get_validator(
+    my_validator = context.get_validator(
         batch=my_batch,
         create_expectation_suite_with_name="A_expectation_suite",
     )
+
+    assert len(my_validator.batches) == 1
+
+
+@pytest.mark.slow  # 1.35s
+def test_get_validator_with_dataframe(in_memory_runtime_context, test_df_pandas):
+    context = in_memory_runtime_context
+
+    datasource_name = "my_pandas_datasource"
+    data_asset_name = "my_data_asset"
+    datasource = context.sources.add_or_update_pandas(name=datasource_name)
+    datasource.add_dataframe_asset(name=data_asset_name)
+
+    batch_request = FluentBatchRequest(
+        datasource_name=datasource_name,
+        data_asset_name=data_asset_name,
+    )
+    my_validator = context.get_validator(
+        batch_request=batch_request,
+        create_expectation_suite_with_name="A_expectation_suite",
+        dataframe=test_df_pandas,
+    )
+
+    assert len(my_validator.batches) == 1
 
 
 def test_get_validator_with_batch_list(in_memory_runtime_context):
