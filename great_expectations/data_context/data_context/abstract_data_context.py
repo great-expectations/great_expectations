@@ -2841,7 +2841,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             isinstance(batch_request_updated, FluentBatchRequest)
             and dataframe is not None
         ):
-            data_asset = datasource.get_asset(
+            data_asset = datasource.get_asset(  # type: ignore[union-attr, return-value, arg-type]
                 asset_name=batch_request_updated.data_asset_name
             )
             batch_request_updated = data_asset.build_batch_request(dataframe=dataframe)
