@@ -31,6 +31,7 @@ from tests.integration.usage_statistics.usage_stats_event_examples import (
 TEST_DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000002"
 TEST_DATA_CONTEXT_INSTANCE_ID = "10000000-0000-0000-0000-000000000002"
 TEST_MAC_ADDRESS = "0000000000000000000000000000000000000000000000000000000000000000"
+TEST_OSS_ID = "00000000-0000-0000-0000-000000000000"
 
 
 def generate_messages_with_defaults(
@@ -62,6 +63,7 @@ def test_generate_messages_with_defaults():
         "data_context_id": TEST_DATA_CONTEXT_ID,
         "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
         "mac_address": TEST_MAC_ADDRESS,
+        "oss_id": TEST_OSS_ID,
     }
 
     message_stubs = [
@@ -106,6 +108,7 @@ def test_generate_messages_with_defaults():
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -117,6 +120,7 @@ def test_generate_messages_with_defaults():
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -128,6 +132,7 @@ def test_generate_messages_with_defaults():
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -139,6 +144,7 @@ def test_generate_messages_with_defaults():
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.18.manual_testing",
         },
         {
@@ -150,6 +156,7 @@ def test_generate_messages_with_defaults():
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.18.manual_testing",
         },
     ]
@@ -257,6 +264,7 @@ valid_usage_statistics_messages = {
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_test",
         },
         # "new-style" expectation type system
@@ -371,6 +379,7 @@ valid_usage_statistics_messages = {
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_test",
         },
         data_context_init_with_dependencies,
@@ -393,6 +402,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
     ],
@@ -409,6 +419,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -429,6 +440,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -450,6 +462,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -471,6 +484,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -496,6 +510,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -521,6 +536,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -547,6 +563,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -571,6 +588,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -595,6 +613,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -609,6 +628,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -623,6 +643,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -637,6 +658,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -650,6 +672,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -665,6 +688,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -730,6 +754,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -781,6 +806,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -833,6 +859,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -895,6 +922,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -957,6 +985,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1051,6 +1080,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1097,6 +1127,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1143,6 +1174,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1169,6 +1201,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1192,6 +1225,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1215,6 +1249,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1238,6 +1273,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1261,6 +1297,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1284,6 +1321,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1307,6 +1345,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1330,6 +1369,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1346,6 +1386,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1362,6 +1403,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1378,6 +1420,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1391,6 +1434,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1535,6 +1579,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.5.manual_testing",
         },
     ],
@@ -1551,6 +1596,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1564,6 +1610,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.47.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
@@ -1578,6 +1625,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.6.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1592,6 +1640,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.8.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
@@ -1607,6 +1656,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1619,6 +1669,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1631,6 +1682,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1646,6 +1698,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -1657,6 +1710,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -1668,6 +1722,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1679,6 +1734,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1708,6 +1764,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1752,6 +1809,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1795,6 +1853,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1838,6 +1897,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1888,6 +1948,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -1899,6 +1960,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -1910,6 +1972,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1924,6 +1987,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1936,6 +2000,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1948,6 +2013,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1961,6 +2027,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2004,6 +2071,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2047,6 +2115,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2116,6 +2185,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2185,6 +2255,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2235,6 +2306,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2246,6 +2318,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -2257,6 +2330,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2269,6 +2343,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2312,6 +2387,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2355,6 +2431,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2398,6 +2475,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2441,6 +2519,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2492,6 +2571,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2503,6 +2583,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2516,6 +2597,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2527,6 +2609,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2539,6 +2622,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2587,6 +2671,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2635,6 +2720,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2680,6 +2766,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2737,6 +2824,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2799,6 +2887,7 @@ valid_usage_statistics_messages = {
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
+            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },

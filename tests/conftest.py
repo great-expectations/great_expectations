@@ -4332,7 +4332,10 @@ def alice_columnar_table_single_batch_context(
     # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
     # (ie. adjusted to be context._usage_statistics_handler)
     context._usage_statistics_handler = UsageStatisticsHandler(
-        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+        data_context=context,
+        data_context_id="00000000-0000-0000-0000-00000000a004",
+        usage_statistics_url="N/A",
+        oss_id=None,
     )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
