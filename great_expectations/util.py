@@ -916,7 +916,7 @@ def build_in_memory_runtime_context(
         }
 
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources=datasources,
+        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",
         evaluation_parameter_store_name="evaluation_parameter_store",
