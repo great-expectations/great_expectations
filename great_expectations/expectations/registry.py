@@ -204,7 +204,7 @@ def _add_response_key(res, key, value):
 
 
 @public_api
-def register_metric(
+def register_metric(  # noqa: PLR0913
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],

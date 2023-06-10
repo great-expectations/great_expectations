@@ -9,7 +9,7 @@ from great_expectations.compatibility.not_imported import (
 )
 
 
-def execute_pandas_to_datetime(
+def execute_pandas_to_datetime(  # noqa: PLR0913
     arg,
     errors: Literal["raise", "coerce", "ignore"] = "raise",
     dayfirst: bool = False,
@@ -60,7 +60,7 @@ def execute_pandas_to_datetime(
         )
     else:
         # pandas is 2.0.0 or greater
-        if format is None:
+        if format is None:  # noqa: PLR5501
             format = "mixed"
             # format = `mixed` or `ISO8601` cannot be used in combination with `exact` parameter.
             # infer_datetime_format is deprecated as of 2.0.0

@@ -65,7 +65,7 @@ class CheckpointResult(SerializableDictDot):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
         run_results: dict[

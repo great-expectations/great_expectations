@@ -82,7 +82,7 @@ class _FilePathDataAsset(DataAsset):
         "batch_metadata",
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
-        "batch_metadata",
+        "batch_metadata",  # noqa: PLW0130
         "connect_options",
     }
 

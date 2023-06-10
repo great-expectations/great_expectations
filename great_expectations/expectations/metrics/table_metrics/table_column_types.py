@@ -24,7 +24,7 @@ class ColumnTypes(TableMetricProvider):
     default_kwarg_values = {"include_nested": True}
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -41,7 +41,7 @@ class ColumnTypes(TableMetricProvider):
         ]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -71,7 +71,7 @@ class ColumnTypes(TableMetricProvider):
         return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
@@ -109,7 +109,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     cols = []
-    if parent_name != "":
+    if parent_name != "":  # noqa: PLC1901
         parent_name = f"{parent_name}."
 
     if pyspark.types and isinstance(field, pyspark.types.StructType):

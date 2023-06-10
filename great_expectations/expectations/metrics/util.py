@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
-import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
@@ -61,6 +60,9 @@ _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
 from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
@@ -69,7 +71,7 @@ except ImportError:
     teradatatypes = None
 
 
-def get_dialect_regex_expression(  # noqa: C901 - 36
+def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     column, regex, dialect, positive=True
 ):
     try:
@@ -577,7 +579,7 @@ def column_reflection_fallback(
                 query: sqlalchemy.TextClause = selectable
             else:
                 # noinspection PyUnresolvedReferences
-                if dialect.name.lower() == GXSqlDialect.REDSHIFT:
+                if dialect.name.lower() == GXSqlDialect.REDSHIFT:  # noqa: PLR5501
                     # Redshift needs temp tables to be declared as text
                     query = (
                         sa.select(sa.text("*"))
@@ -720,7 +722,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
                 message=error_message_template.format(column_name=column_name)
             )
         else:
-            if not verify_only:
+            if not verify_only:  # noqa: PLR5501
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
     return None if verify_only else normalized_batch_columns_mappings
@@ -733,7 +735,7 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(  # noqa: C901 - 28
+def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     column, dialect, like_pattern, positive=True
 ):
     dialect_supported: bool = False
@@ -812,7 +814,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
     return None
 
 
-def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
+def validate_distribution_parameters(  # noqa: C901, PLR0912, PLR0915
+    distribution, params
+):
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -882,32 +886,32 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
-    elif isinstance(params, tuple) or isinstance(params, list):
+    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
         scale = None
 
         # `params` is a tuple or a list
         if distribution == "beta":
-            if len(params) < 2:
+            if len(params) < 2:  # noqa: PLR2004
                 raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
                 raise ValueError(f"Invalid parameters: {beta_msg}")
-            if len(params) == 4:
+            if len(params) == 4:  # noqa: PLR2004
                 scale = params[3]
-            elif len(params) > 4:
+            elif len(params) > 4:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {norm_msg}")
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {gamma_msg}")
-            if len(params) == 3:
+            if len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            if len(params) > 3:
+            if len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {gamma_msg}")
@@ -921,25 +925,25 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         #        raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         elif distribution == "uniform":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {chi2_msg}")
-            elif len(params) == 3:
+            elif len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            elif len(params) > 3:
+            elif len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
@@ -949,8 +953,6 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
         raise ValueError(
             "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
-
-    return
 
 
 def _scipy_distribution_positional_args_from_dict(distribution, params):
@@ -1005,7 +1007,7 @@ def is_valid_continuous_partition_object(partition_object):
         return False
 
     if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:
+        if len(partition_object["tail_weights"]) != 2:  # noqa: PLR2004
             return False
         comb_weights = partition_object["tail_weights"] + partition_object["weights"]
     else:
@@ -1245,7 +1247,7 @@ def compute_unexpected_pandas_indices(
                     index, domain_column_name
                 ]
                 for column_name in unexpected_index_column_names:
-                    column_name = get_dbms_compatible_column_names(
+                    column_name = get_dbms_compatible_column_names(  # noqa: PLW2901
                         column_names=column_name,
                         batch_columns_list=metrics["table.columns"],
                         error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',

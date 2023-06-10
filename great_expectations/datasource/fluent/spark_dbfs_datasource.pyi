@@ -32,7 +32,7 @@ logger: Logger
 class SparkDBFSDatasource(SparkFilesystemDatasource):
     type: Literal["spark_dbfs"]  # type: ignore[assignment]
 
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

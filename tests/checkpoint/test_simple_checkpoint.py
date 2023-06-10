@@ -10,7 +10,6 @@ from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointResult,
-    LegacyCheckpoint,
     SimpleCheckpoint,
 )
 from great_expectations.core import ExpectationValidationResult
@@ -723,9 +722,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
 
     del checkpoint_config
-    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-        checkpoint_name
-    )
+    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_name)
     assert isinstance(checkpoint, Checkpoint)
 
     result = checkpoint.run(run_name="bar", validations=[one_validation])
@@ -812,9 +809,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
     # reload from store
     del simple_checkpoint_defaults
-    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-        checkpoint_name
-    )
+    checkpoint: Checkpoint = context.get_checkpoint(checkpoint_name)
     result = checkpoint.run(run_name="bar", validations=two_validations)
     assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
@@ -2239,9 +2234,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-        name="my_checkpoint"
-    )
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     runtime_batch_request = RuntimeBatchRequest(
@@ -2305,9 +2298,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-        name="my_checkpoint"
-    )
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert result["success"] is False
@@ -2381,9 +2372,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-        name="my_checkpoint"
-    )
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     result = checkpoint.run()
     assert result["success"] is False

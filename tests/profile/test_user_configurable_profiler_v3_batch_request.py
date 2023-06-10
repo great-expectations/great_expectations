@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import string
 from typing import List
@@ -29,7 +28,6 @@ from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 from great_expectations.self_check.util import (
-    connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import is_library_loadable
@@ -107,15 +105,16 @@ def get_spark_runtime_validator(context, df):
 
 
 def get_sqlalchemy_runtime_validator_postgresql(
-    df, schemas=None, caching=True, table_name=None
+    df,
+    postgresql_engine,
+    schemas=None,
+    caching=True,
+    table_name=None,
 ):
     sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
-        engine = connection_manager.get_connection(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
+        engine = postgresql_engine
     except (sqlalchemy.OperationalError, ModuleNotFoundError):
         return None
 
@@ -223,7 +222,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api, postgresql_engine):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -235,7 +234,9 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
-    return get_sqlalchemy_runtime_validator_postgresql(df)
+    return get_sqlalchemy_runtime_validator_postgresql(
+        df, postgresql_engine=postgresql_engine
+    )
 
 
 @pytest.fixture()

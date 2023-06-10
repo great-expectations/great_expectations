@@ -20,7 +20,7 @@ When creating Expectations based on introspection of Data, it can be useful to r
 
 ```python title="Python code"
 eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
-downstream_batch.expect_table_row_count_to_equal(
+validator.expect_table_row_count_to_equal(
     value={
         '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
     }
@@ -33,7 +33,7 @@ If you do not have a previous Expectation Suite's Validation Results to referenc
 
 Say you are creating additional Expectations for the data that you used in the [Quickstart guide](tutorials/quickstart/quickstart.md).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
 
-To do so, you would first edit your existing (or create a new) Expectation Suite using the CLI.  This will open a Jupyter Notebook.  After running the first cell, you will have access to a Validator object named `validator` that you can use to add new Expectations to the Expectation Suite.
+To do so, you would first edit your existing (or create a new) Expectation Suite using a `Validator` object, as shown in our guide on [How to create Expectations interactively in Python](guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 
 The Expectation you will want to add to solve the above problem is the `expect_table_row_count_to_equal` Expectation, and this Expectation uses an evaluation parameter: `upstream_row_count`.  Therefore, when using the validator to add the `expect_table_row_count_to_equal` Expectation you will have to define the parameter in question (`upstream_row_count`) by assigning it to the `$PARAMETER` value in a dictionary.  Then, you would provide the temporary value for that parameter by setting it as the value of the `$PARAMETER.<parameter_in_question>` key in the same dictionary.  Or, in this case, the `$PARAMETER.upstream_row_count`.
 

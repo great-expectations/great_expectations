@@ -712,6 +712,18 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/run_onboarding_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/actions/agent_action.py"),
+    ),
+    IncludeExcludeDefinition(
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),

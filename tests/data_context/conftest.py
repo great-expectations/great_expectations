@@ -492,7 +492,6 @@ class MockResponse:
             raise requests.exceptions.HTTPError(
                 f"Mock {self.status_code} HTTPError", response=self
             )
-        return None
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
@@ -646,6 +645,16 @@ def checkpoint_config() -> dict:
                     "data_connector_name": "oss_test_data_connector",
                     "data_asset_name": "users",
                 },
+            },
+        ],
+        "action_list": [
+            {
+                "action": {"class_name": "StoreValidationResultAction"},
+                "name": "store_validation_result",
+            },
+            {
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+                "name": "store_evaluation_params",
             },
         ],
     }

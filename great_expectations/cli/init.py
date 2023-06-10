@@ -43,7 +43,7 @@ if not SQLAlchemyError:
     default=True,
 )
 @click.pass_context
-def init(ctx: click.Context, usage_stats: bool) -> None:
+def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
     """
     Initialize a new Great Expectations project.
 
@@ -74,10 +74,10 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
                 sys.exit(0)
             else:
                 # Prompt to modify the project to add missing files
-                if not ctx.obj.assume_yes:
+                if not ctx.obj.assume_yes:  # noqa: PLR5501
                     if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
                         cli_message(RUN_INIT_AGAIN)
-                        exit(0)
+                        sys.exit(0)
 
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message(f"<red>{e.message}</red>")
@@ -92,12 +92,12 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         except DataContextError as e:
             cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
-            exit(5)
+            sys.exit(5)
     else:
         if not ctx.obj.assume_yes:
             if not click.confirm(LETS_BEGIN_PROMPT, default=True):
                 cli_message(RUN_INIT_AGAIN)
-                exit(0)
+                sys.exit(0)
 
         try:
             context = FileDataContext.create(
