@@ -12,5 +12,6 @@ cloud_migrate: dict = {
     "event_time": "2022-09-26T14:22:53.921Z",
     "data_context_id": "bda195d7-5d83-410d-905c-d6a824debd78",
     "data_context_instance_id": "03b419d8-f8d1-4c2d-8944-f60e58e12d4a",
+    "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
     "ge_version": "0.15.25",
 }
