@@ -9,9 +9,6 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.datasource.fluent.batch_request import (
-    BatchRequest as FluentBatchRequest,
-)
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -42,6 +39,9 @@ from great_expectations.datasource import (
     Datasource,
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
+)
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.expectations.expectation import BatchExpectation
