@@ -8,6 +8,7 @@ import warnings
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -34,16 +35,17 @@ from packaging.version import Version
 from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
-from typing_extensions import TypeAlias
-
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
 try:
     # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
-    from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
+    from pandas._typing import CompressionOptions, CSVEngine, StorageOptions
 except ImportError:
     # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
     # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
@@ -54,7 +56,6 @@ except ImportError:
         ]
     ]
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
-    IndexLabel = Union[Hashable, Sequence[Hashable]]
     StorageOptions = Optional[Dict[str, Any]]
 
 try:
@@ -64,6 +65,10 @@ except ImportError:
     class _NoDefault(enum.Enum):  # type: ignore[no-redef]
         no_default = "NO_DEFAULT"
 
+
+# Replaced `Hashable` with `str`
+# Hashable causes `TypeError:issubclass() arg 1 must be a class`
+IndexLabel = Union[str, Sequence[str]]
 
 logger = logging.getLogger(__file__)
 
@@ -91,22 +96,23 @@ CAN_HANDLE: Final[Set[str]] = {
     "bool",
     "None",
     # typing
-    "Hashable",
-    "Sequence[Hashable]",
     "Sequence[tuple[int, int]]",
-    "Sequence[Hashable]",
     "Sequence[str]",
     "Sequence[int]",
-    "Sequence[tuple[int, int]]",
+    "Sequence[tuple[int, int]]",  # noqa: PLW0130
+    # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
     "Literal['high', 'legacy']",
     "Literal['frame', 'series']",
     "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
+    "Literal[('xlrd', 'openpyxl', 'odf', 'pyxlsb')]",
     "Literal[None, 'header', 'footer', 'body', 'all']",
+    "Literal[('high', 'legacy')]",
+    "Literal[(None, 'header', 'footer', 'body', 'all')]",
+    "Literal[('frame', 'series')]",
     "Iterable[object]",
-    "Iterable[Hashable]",
     # other
     "Pattern",  # re
     "Path",  # pathlib
@@ -118,6 +124,16 @@ CAN_HANDLE: Final[Set[str]] = {
     "IndexLabel",
     "CompressionOptions",
     "StorageOptions",
+}
+
+TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
+    # Hashable causes `TypeError:issubclass() arg 1 must be a class` on some versions of pydantic
+    "Hashable": "str",
+    "Sequence[Hashable]": "Sequence[str]",
+    "Iterable[Hashable]": "Iterable[str]",
+    # TypeVars
+    "IntStrT": "Union[int, str]",
+    "list[IntStrT]": "List[Union[int, str]]",
 }
 
 NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
@@ -137,7 +153,7 @@ class _SignatureTuple(NamedTuple):
 
 class _FieldSpec(NamedTuple):
     # mypy doesn't consider Optional[SOMETHING] or Union[SOMETHING] a type. So what is it?
-    type: Type
+    type: Type | str
     default_value: object  # ... for required value
 
 
@@ -198,8 +214,8 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "xml": "XMLAsset",
 }
 
-_TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
-    "Literal": Literal,  # type: ignore[dict-item]
+_TYPE_REF_LOCALS: Final[Dict[str, Type | Any]] = {
+    "Literal": Literal,
     "Sequence": Sequence,
     "Hashable": Hashable,
     "Iterable": Iterable,
@@ -273,7 +289,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
         logger.debug(f"{param.name} has non-string annotations")
         # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
         union_types = getattr(annotation, "__args__", None)
-        if union_types and PANDAS_VERSION < 1.2:
+        if union_types and PANDAS_VERSION < 1.2:  # noqa: PLR2004
             # we could examine these types and only kick out certain blacklisted types
             # but once we drop python 3.7 support our min pandas version will make this
             # unneeded
@@ -285,10 +301,12 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     union_parts = annotation.split("|")
     str_to_eval: str
     for type_str in union_parts:
-        type_str = type_str.strip()
+        type_str = type_str.strip()  # noqa: PLW2901
 
         if type_str in CAN_HANDLE:
             types.append(type_str)
+        elif subbed_type := TYPE_SUBSTITUTIONS.get(type_str):
+            types.append(subbed_type)
         else:
             NEED_SPECIAL_HANDLING[param.name].add(type_str)
             logger.debug(f"skipping {param.name} type - {type_str}")
@@ -337,7 +355,7 @@ def _to_pydantic_fields(
                     continue
 
             fields_dict[param_name] = _FieldSpec(
-                type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
+                type=_replace_builtins(type_), default_value=_get_default_value(param)
             )
 
     return fields_dict
@@ -346,7 +364,7 @@ def _to_pydantic_fields(
 M = TypeVar("M", bound=Type[DataAsset])
 
 
-def _create_pandas_asset_model(
+def _create_pandas_asset_model(  # noqa: PLR0913
     model_name: str,
     model_base: M,
     type_field: Tuple[Union[Type, str], str],

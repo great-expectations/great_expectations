@@ -115,7 +115,7 @@ def test_glob_reader_generator_relative_path(basic_pandas_datasource):
         }
 
 
-def test_glob_reader_generator_partitioning(basic_pandas_datasource):
+def test_glob_reader_generator_partitioning(basic_pandas_datasource):  # noqa: PLR0915
     glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
         datasource=basic_pandas_datasource,
@@ -269,7 +269,7 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):
 
 
 def test_glob_reader_generator_customize_partitioning(basic_pandas_datasource):
-    from dateutil.parser import parse as parse
+    from dateutil.parser import parse
 
     # We can subclass the generator to change the way that it builds partitions
     class DateutilPartitioningGlobReaderGenerator(GlobReaderBatchKwargsGenerator):

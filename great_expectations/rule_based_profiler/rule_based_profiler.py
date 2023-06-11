@@ -241,7 +241,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
     )
-    def run(
+    def run(  # noqa: PLR0913
         self,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
@@ -1021,7 +1021,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                         existing_property_value = getattr(
                             rule.domain_builder, property_key
                         )
-                        property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(
+                        property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(  # noqa: PLW2901
                             dest_property_value=property_value,
                             source_property_value=existing_property_value,
                         )
@@ -1055,7 +1055,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return dest_property_value
 
     @classmethod
-    def run_profiler(
+    def run_profiler(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
@@ -1086,7 +1086,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
     @classmethod
-    def run_profiler_on_data(
+    def run_profiler_on_data(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
@@ -1120,7 +1120,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
     @classmethod
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
@@ -1143,7 +1143,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
     @classmethod
-    def update_profiler(
+    def update_profiler(  # noqa: PLR0913
         cls,
         profiler_store: ProfilerStore,
         data_context: AbstractDataContext,
@@ -1166,7 +1166,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
     @classmethod
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
@@ -1189,7 +1189,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
     @classmethod
-    def _persist_profiler(
+    def _persist_profiler(  # noqa: PLR0913
         cls,
         data_context: AbstractDataContext,
         persistence_fn: Callable,
@@ -1254,7 +1254,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return new_profiler
 
     @staticmethod
-    def _resolve_profiler_config_for_store(
+    def _resolve_profiler_config_for_store(  # noqa: PLR0913
         name: str | None = None,
         id: str | None = None,
         config_version: float | None = None,
@@ -1576,7 +1576,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
     --ge-feature-maturity-info--
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,

@@ -83,7 +83,7 @@ class SimpleCheckpointConfigurator:
     Checkpoint.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         data_context,

@@ -196,7 +196,6 @@ stages:
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SQLALCHEMY_WARN_20=true "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}

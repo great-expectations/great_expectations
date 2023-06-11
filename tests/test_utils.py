@@ -14,6 +14,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Engine
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -151,36 +152,26 @@ def validate_uuid4(uuid_string: str) -> bool:
     return val.hex == uuid_string.replace("-", "")
 
 
-def get_sqlite_temp_table_names(execution_engine):
+def get_sqlite_temp_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if sqlalchemy.Connection and isinstance(
-        execution_engine.engine, sqlalchemy.Connection
-    ):
-        connection = execution_engine.engine
-        result = connection.execute(statement)
-    else:
-        with execution_engine.engine.connect() as connection:
-            result = connection.execute(statement)
-
-    rows = result.fetchall()
+    rows = execution_engine.execute_query(statement).fetchall()
     return {row[0] for row in rows}
 
 
-def get_sqlite_table_names(execution_engine):
+def get_sqlite_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if sqlalchemy.Connection and isinstance(
-        execution_engine.engine, sqlalchemy.Connection
-    ):
-        connection = execution_engine.engine
-        result = connection.execute(statement)
-    else:
-        with execution_engine.engine.connect() as connection:
-            result = connection.execute(statement)
+    rows = execution_engine.execute_query(statement).fetchall()
 
-    rows = result.fetchall()
+    return {row[0] for row in rows}
 
+
+def get_sqlite_temp_table_names_from_engine(engine: Engine):
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    with engine.connect() as connection:
+        rows = connection.execute(statement).fetchall()
     return {row[0] for row in rows}
 
 
@@ -604,7 +595,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(
+def load_data_into_test_database(  # noqa: PLR0912
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,
@@ -818,13 +809,9 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    if isinstance(execution_engine.engine, sqlalchemy.Connection):
-        connection = execution_engine.engine
-    else:
-        connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+        execution_engine.execute_query(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))

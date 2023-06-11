@@ -245,9 +245,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if self._persist:
             batch_data.dataframe.persist()
 
-        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
+        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)  # type: ignore[arg-type] # got SparkDFBatchData
 
-    def get_batch_data_and_markers(
+    def get_batch_data_and_markers(  # noqa: PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -468,7 +468,7 @@ illegal.  Please check your config."""
             )
 
     @public_api
-    def get_domain_records(  # noqa: C901 - 18
+    def get_domain_records(  # noqa: C901, PLR0912, PLR0915
         self,
         domain_kwargs: dict,
     ) -> "pyspark.DataFrame":  # noqa F821
@@ -503,7 +503,7 @@ illegal.  Please check your config."""
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_manager.batch_data_cache:
+            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
                 data = cast(
                     SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -558,7 +558,7 @@ illegal.  Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if != "neither":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -581,7 +581,7 @@ illegal.  Please check your config."""
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "never":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )

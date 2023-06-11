@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
-def batch_definition_matches_batch_request(
+def batch_definition_matches_batch_request(  # noqa: PLR0911
     batch_definition: BatchDefinition,
     batch_request: BatchRequestBase,
 ) -> bool:
@@ -85,7 +85,7 @@ def batch_definition_matches_batch_request(
     return True
 
 
-def map_data_reference_string_to_batch_definition_list_using_regex(
+def map_data_reference_string_to_batch_definition_list_using_regex(  # noqa: PLR0913
     datasource_name: str,
     data_connector_name: str,
     data_reference: str,

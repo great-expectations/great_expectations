@@ -86,7 +86,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):
+    def _get_content_block_fn(cls, expectation_type):  # noqa: PLR0915
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )

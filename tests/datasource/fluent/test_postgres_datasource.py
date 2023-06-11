@@ -17,7 +17,6 @@ from typing import (
 
 import pytest
 from pydantic import ValidationError
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -42,6 +41,8 @@ from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -242,7 +243,10 @@ def test_construct_table_asset_directly_with_splitter(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source,
             name="my_asset",
             table_name="my_table",
@@ -280,7 +284,10 @@ def test_datasource_gets_batch_list_no_splitter(empty_data_context, create_sourc
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         source.get_batch_list_from_batch_request(asset.build_batch_request())
@@ -329,7 +336,10 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -355,7 +365,10 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -389,7 +402,10 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
             {"year": year, "month": month} for month in list(range(1, 13))
         ],
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -441,7 +457,10 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         data_context=empty_data_context,
         splitter_query_response=[{"month": month, "year": year}],
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -549,7 +568,10 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -578,7 +600,10 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -596,7 +621,10 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -669,7 +697,10 @@ def test_sort_batch_list_by_metadata(
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -702,7 +733,10 @@ def test_sort_batch_list_by_unknown_key(
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -770,7 +804,10 @@ def test_postgres_slice_batch_count(
         dialect="postgresql",
         data_context=empty_data_context,
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -786,7 +823,10 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -795,7 +835,7 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         print(source_json)
         assert '"order_by": ' in source_json
         # type should be in dumped json even if not explicitly set
-        assert f'"type": "{asset.type}"'
+        assert f'"type": "{asset.type}"'  # noqa: PLW0129
 
 
 @pytest.mark.unit
@@ -803,7 +843,10 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
@@ -819,7 +862,10 @@ def test_datasource_dict_has_properties(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        source, asset = create_and_add_table_asset_without_testing_connection(
+        (
+            source,  # noqa: PLW2901
+            asset,
+        ) = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")

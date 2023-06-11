@@ -151,7 +151,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         ]
 
         # noinspection PyProtectedMember
-        row_wise_cond = compound_columns_count_query.c._num_rows < 2
+        row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
 
         return row_wise_cond
 

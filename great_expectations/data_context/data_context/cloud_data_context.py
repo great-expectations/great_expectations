@@ -19,6 +19,7 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
@@ -41,6 +42,7 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
+    CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -54,7 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
@@ -87,7 +88,7 @@ def _extract_fluent_datasources(config_dict: dict) -> dict:
 class CloudDataContext(SerializableDataContext):
     """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[PathStr] = None,
@@ -158,7 +159,7 @@ class CloudDataContext(SerializableDataContext):
         return self._apply_global_config_overrides(config=project_data_context_config)
 
     @staticmethod
-    def _resolve_cloud_args(
+    def _resolve_cloud_args(  # noqa: PLR0913
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
@@ -265,7 +266,7 @@ class CloudDataContext(SerializableDataContext):
         session = create_session(access_token=cloud_config.access_token)
 
         response = session.get(cloud_url)
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             raise gx_exceptions.GXCloudError(
                 f"Bad request made to GX Cloud; {response.text}", response=response
             )
@@ -695,7 +696,7 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
 
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
         config_version: int | float = 1.0,
@@ -710,9 +711,6 @@ class CloudDataContext(SerializableDataContext):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -752,8 +750,6 @@ class CloudDataContext(SerializableDataContext):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -764,15 +760,35 @@ class CloudDataContext(SerializableDataContext):
             checkpoint=checkpoint,
         )
 
-        checkpoint_config = self.checkpoint_store.create(
-            checkpoint_config=checkpoint.config
-        )
+        result: Checkpoint | CheckpointConfig
+        try:
+            result = self.checkpoint_store.add_checkpoint(checkpoint)
+        except gx_exceptions.CheckpointError as e:
+            # deprecated-v0.16.16
+            warnings.warn(
+                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 "
+                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
+                DeprecationWarning,
+            )
+            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
-        from great_expectations.checkpoint.checkpoint import Checkpoint
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
-        return Checkpoint.instantiate_from_config_with_runtime_args(
-            checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
-        )
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
+        default_actions = super()._determine_default_action_list()
+
+        # Data docs are not relevant to Cloud and should be excluded
+        return [
+            action
+            for action in default_actions
+            if action["action"]["class_name"] != "UpdateDataDocsAction"
+        ]
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)

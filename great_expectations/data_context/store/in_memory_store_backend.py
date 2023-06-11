@@ -14,7 +14,7 @@ class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend."""
 
     # noinspection PyUnusedLocal
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         runtime_environment=None,
         fixed_length_key=False,
