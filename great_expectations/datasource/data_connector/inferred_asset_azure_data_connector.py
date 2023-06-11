@@ -44,7 +44,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,

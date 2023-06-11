@@ -16,7 +16,7 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0912
         self,
         execution_engine,
         record_set_name: Optional[str] = None,
@@ -162,7 +162,7 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
         else:
-            if query:
+            if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
             else:
                 self._selectable = selectable.alias(self._record_set_name)
@@ -196,7 +196,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901 - 18
+    def _create_temporary_table(  # noqa: C901, PLR0912
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> str:
         """

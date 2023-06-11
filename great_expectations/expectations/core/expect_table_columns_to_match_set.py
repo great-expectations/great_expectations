@@ -328,7 +328,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 return return_failed
             else:
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
-                if len(missing_list) > 0:
+                if len(missing_list) > 0:  # noqa: PLR5501
                     return return_failed
                 # Passed if there are no items in the missing list
                 else:

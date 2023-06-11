@@ -324,7 +324,9 @@ class DataAssistantResult(SerializableDictDot):
                 if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
             }
 
-            verbose_from_env: str = str(os.getenv("GE_TROUBLESHOOTING", False)).lower()
+            verbose_from_env: str = str(
+                os.getenv("GE_TROUBLESHOOTING", False)  # noqa: PLW1508
+            ).lower()
             if verbose_from_env != "true":
                 verbose_from_env = "false"
 
@@ -352,7 +354,10 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
-            [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
+            [
+                isinstance(metric_names, str)  # noqa: PLR1701
+                or isinstance(metric_names, tuple)
+            ]
             for metric_names in self.metric_expectation_map.keys()
         ):
             raise gx_exceptions.DataAssistantResultExecutionError(
@@ -578,7 +583,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
-    def _plot(
+    def _plot(  # noqa: PLR0913
         self,
         plot_mode: PlotMode,
         sequential: bool,
@@ -935,7 +940,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _get_column_set_text(column_set: List[str]) -> tuple[str, int]:
         dy: int
-        if len(column_set) > 50:
+        if len(column_set) > 50:  # noqa: PLR2004
             text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
             dy = 0
         else:
@@ -1119,7 +1124,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
 
     @staticmethod
-    def _get_sequential_isotype_chart(
+    def _get_sequential_isotype_chart(  # noqa: PLR0913
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
@@ -1190,7 +1195,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return chart
 
     @staticmethod
-    def _get_nonsequential_isotype_chart(
+    def _get_nonsequential_isotype_chart(  # noqa: PLR0913
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
@@ -1261,7 +1266,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return chart
 
     @staticmethod
-    def _get_sequential_expect_domain_values_to_match_set_isotype_chart(
+    def _get_sequential_expect_domain_values_to_match_set_isotype_chart(  # noqa: PLR0913
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -1289,7 +1294,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return chart
 
     @staticmethod
-    def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(
+    def _get_nonsequential_expect_domain_values_to_match_set_isotype_chart(  # noqa: PLR0913
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -1373,7 +1378,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 domain_plot_component=domain_plot_component,
             )
         else:
-            if "column_quantile_values" in df.columns:
+            if "column_quantile_values" in df.columns:  # noqa: PLR5501
                 return DataAssistantResult._get_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1389,7 +1394,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_chart(
+    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
         expectation_type: str,
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
@@ -1543,7 +1548,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             )
         else:
-            if "column_quantile_values" in df.columns:
+            if "column_quantile_values" in df.columns:  # noqa: PLR5501
                 return DataAssistantResult._get_expect_domain_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
@@ -1634,7 +1639,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 domain_plot_component=domain_plot_component,
             )
         else:
-            if "column_quantile_values" in df.columns:
+            if "column_quantile_values" in df.columns:  # noqa: PLR5501
                 return DataAssistantResult._get_interactive_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1650,7 +1655,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
     @staticmethod  # noqa: C901 - complexity 16
-    def _get_interactive_expect_column_values_to_be_between_chart(
+    def _get_interactive_expect_column_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
         sanitized_metric_names: Set[str],
@@ -1852,7 +1857,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 predicates=predicates,
             )
         else:
-            if "column_quantile_values" in df.columns:
+            if "column_quantile_values" in df.columns:  # noqa: PLR5501
                 return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
@@ -2026,7 +2031,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return alt.layer(*lines_and_points_list)
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_line_chart(
+    def _get_expect_domain_values_to_be_between_line_chart(  # noqa: PLR0913
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
@@ -2157,7 +2162,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_lines)
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_bar_chart(
+    def _get_expect_domain_values_to_be_between_bar_chart(  # noqa: PLR0913
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
@@ -2289,7 +2294,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return alt.layer(band, lower_limit, upper_limit, *anomaly_coded_bars)
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_range_chart(
+    def _get_expect_domain_values_to_be_between_range_chart(  # noqa: PLR0913
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
         batch_plot_component: BatchPlotComponent,
@@ -2657,7 +2662,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
     @staticmethod
-    def _get_interactive_expect_column_values_to_be_between_line_chart(
+    def _get_interactive_expect_column_values_to_be_between_line_chart(  # noqa: PLR0913
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -2811,7 +2816,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         ).add_selection(selection)
 
     @staticmethod
-    def _get_interactive_expect_column_values_to_be_between_bar_chart(
+    def _get_interactive_expect_column_values_to_be_between_bar_chart(  # noqa: PLR0913
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -2949,7 +2954,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
     @staticmethod
-    def _get_interactive_expect_column_values_to_be_between_range_chart(
+    def _get_interactive_expect_column_values_to_be_between_range_chart(  # noqa: PLR0913
         expectation_type: str,
         df: pd.DataFrame,
         metric_plot_components: List[MetricPlotComponent],
@@ -3109,7 +3114,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             return default_theme
 
-    def _plot_table_domain_charts(
+    def _plot_table_domain_charts(  # noqa: PLR0913
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3215,7 +3220,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return sorted_charts
 
-    def _plot_column_domain_charts(
+    def _plot_column_domain_charts(  # noqa: PLR0913
         self,
         expectation_configurations: List[ExpectationConfiguration],
         include_column_names: Optional[List[str]],
@@ -3392,7 +3397,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return filtered_attributed_metrics
 
-    def _chart_domain_values(
+    def _chart_domain_values(  # noqa: PLR0913
         self,
         expectation_type: str,
         df: pd.DataFrame,
@@ -3505,7 +3510,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 subtitle=subtitle,
             )
 
-    def _create_display_chart_for_column_domain_expectation(
+    def _create_display_chart_for_column_domain_expectation(  # noqa: PLR0913
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
@@ -3534,7 +3539,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         else:
             return []
 
-    def _create_return_charts_for_column_domain_expectation(
+    def _create_return_charts_for_column_domain_expectation(  # noqa: PLR0913
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
@@ -3605,7 +3610,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return return_charts
 
-    def _chart_column_values(
+    def _chart_column_values(  # noqa: PLR0913
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
@@ -3721,7 +3726,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ]
 
-    def _create_df_for_charting(
+    def _create_df_for_charting(  # noqa: PLR0912
         self,
         metric_name: str,
         attributed_values: List[ParameterNode],
@@ -3778,7 +3783,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 batch_identifier_keys.add(batch_identifier_key)
                 # if dictionary type batch_identifier values are detected, format them as a string for tooltip display
                 if isinstance(batch_identifier_value, dict):
-                    batch_identifier_value = str(
+                    batch_identifier_value = str(  # noqa: PLW2901
                         {
                             str(key).title(): value
                             for key, value in batch_identifier_value.items()
@@ -3890,7 +3895,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         return column_dfs
 
-    def _create_chart_for_table_domain_expectation(
+    def _create_chart_for_table_domain_expectation(  # noqa: PLR0913
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],

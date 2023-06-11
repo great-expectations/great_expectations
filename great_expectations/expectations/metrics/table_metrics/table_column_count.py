@@ -18,7 +18,7 @@ class TableColumnCount(TableMetricProvider):
     metric_name = "table.column_count"
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
@@ -30,7 +30,7 @@ class TableColumnCount(TableMetricProvider):
         return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,
@@ -42,7 +42,7 @@ class TableColumnCount(TableMetricProvider):
         return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: dict,

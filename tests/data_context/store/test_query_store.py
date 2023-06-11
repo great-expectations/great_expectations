@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations.data_context.store.query_store import SqlAlchemyQueryStore
+from tests import test_utils
 
 
 @pytest.fixture()

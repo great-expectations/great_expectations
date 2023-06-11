@@ -425,7 +425,7 @@ def get_sqlite_connection_url(sqlite_db_path):
     return url
 
 
-def get_dataset(  # noqa: C901 - 110
+def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
     dataset_type,
     data,
     schemas=None,
@@ -454,7 +454,7 @@ def get_dataset(  # noqa: C901 - 110
                     continue
                 elif value.lower() in ["date"]:
                     df[key] = pd.to_datetime(df[key]).dt.date
-                    value = "object"
+                    value = "object"  # noqa: PLW2901
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
@@ -572,7 +572,7 @@ def get_dataset(  # noqa: C901 - 110
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901 - 31
+def get_test_validator_with_data(  # noqa: C901, PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -650,7 +650,7 @@ def _get_test_validator_with_data_pandas(
                 continue
             elif value.lower() in ["date"]:
                 df[key] = execute_pandas_to_datetime(df[key]).dt.date
-                value = "object"
+                value = "object"  # noqa: PLW2901
             try:
                 type_ = np.dtype(value)
             except TypeError:
@@ -677,7 +677,7 @@ def _get_test_validator_with_data_pandas(
     )
 
 
-def _get_test_validator_with_data_sqlalchemy(
+def _get_test_validator_with_data_sqlalchemy(  # noqa: PLR0913
     df: pd.DataFrame,
     execution_engine: str,
     schemas: dict | None,
@@ -711,7 +711,7 @@ def _get_test_validator_with_data_sqlalchemy(
     )
 
 
-def _get_test_validator_with_data_spark(  # noqa: C901 - 19
+def _get_test_validator_with_data_spark(  # noqa: C901, PLR0912, PLR0915
     data: dict,
     schemas: dict | None,
     context: AbstractDataContext | None,
@@ -861,7 +861,7 @@ def build_pandas_validator_with_data(
     )
 
 
-def build_sa_validator_with_data(  # noqa: C901 - 39
+def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     df,
     sa_engine_name,
     table_name,
@@ -1100,7 +1100,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
             )
         )[0]
 
-    batch = Batch(data=batch_data, batch_definition=batch_definition)
+    batch = Batch(data=batch_data, batch_definition=batch_definition)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     return Validator(
         execution_engine=execution_engine,
@@ -1147,7 +1147,7 @@ def build_spark_validator_with_data(
             df.columns.tolist(),
         )
 
-    batch = Batch(data=df, batch_definition=batch_definition)
+    batch = Batch(data=df, batch_definition=batch_definition)  # type: ignore[arg-type] # got DataFrame
     execution_engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark,
         df=df,
@@ -1174,7 +1174,7 @@ def build_pandas_engine(
     return execution_engine
 
 
-def build_sa_execution_engine(
+def build_sa_execution_engine(  # noqa: PLR0913
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
@@ -1203,7 +1203,7 @@ def build_sa_execution_engine(
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
     )
-    batch = Batch(data=batch_data)
+    batch = Batch(data=batch_data)  # type: ignore[arg-type] # got SqlAlchemyBatchData
 
     if batch_id is None:
         batch_id = batch.id
@@ -1483,7 +1483,7 @@ def candidate_test_is_on_temporary_notimplemented_list_v3_api(
     return False
 
 
-def build_test_backends_list(  # noqa: C901 - 48
+def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     include_pandas=True,
     include_spark=False,
     include_sqlalchemy=True,
@@ -1553,7 +1553,7 @@ def build_test_backends_list(  # noqa: C901 - 48
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
-                if raise_exceptions_for_backends is True:
+                if raise_exceptions_for_backends is True:  # noqa: PLR5501
                     raise ValueError(
                         f"backend-specific tests are requested, but unable to connect to the database at "
                         f"{connection_string}"
@@ -1741,7 +1741,7 @@ def build_test_backends_list(  # noqa: C901 - 48
     return test_backends
 
 
-def generate_expectation_tests(  # noqa: C901 - 43
+def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
@@ -1828,7 +1828,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
         _debug(f"test_data_case {i}/{num_test_data_cases}")
-        d = copy.deepcopy(d)
+        d = copy.deepcopy(d)  # noqa: PLW2901
         titles = []
         only_fors = []
         suppress_test_fors = []
@@ -1850,7 +1850,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                 for sup in suppress_test_fors
             ]
             only_fors_ok = []
-            for i, only_for in enumerate(only_fors):
+            for i, only_for in enumerate(only_fors):  # noqa: PLW2901
                 if not only_for:
                     only_fors_ok.append(True)
                     continue
@@ -2038,7 +2038,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
     return parametrized_tests
 
 
-def should_we_generate_this_test(
+def should_we_generate_this_test(  # noqa: PLR0911, PLR0913, PLR0912
     backend: str,
     expectation_test_case: ExpectationTestCase,
     ignore_suppress: bool = False,
@@ -2098,7 +2098,9 @@ def should_we_generate_this_test(
                     if major == "0" and minor in ["22", "23"]:
                         return True
                 elif "pandas>=024" in expectation_test_case.only_for:
-                    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
+                    if (major == "0" and int(minor) >= 24) or int(  # noqa: PLR2004
+                        major
+                    ) >= 1:
                         return True
 
             if ignore_only_for:
@@ -2200,7 +2202,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901 - 16
+def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2328,7 +2330,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(  # noqa: C901 - 52
+def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
     test, result, data_asset=None, pk_column=False
 ) -> None:
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
@@ -2445,7 +2447,7 @@ def check_json_test_result(  # noqa: C901 - 52
                             rtol=test["tolerance"],
                         )
                 else:
-                    if isinstance(value, dict) and "values" in value:
+                    if isinstance(value, dict) and "values" in value:  # noqa: PLR5501
                         try:
                             assert np.allclose(
                                 result["result"]["observed_value"]["values"],

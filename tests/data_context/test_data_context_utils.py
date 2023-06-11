@@ -47,7 +47,7 @@ def test_load_class_raises_error_when_module_name_is_not_string():
 @pytest.mark.filterwarnings(
     "ignore:SQLAlchemy is not installed*:UserWarning:great_expectations.data_context.util"
 )
-def test_password_masker_mask_db_url(monkeypatch, tmp_path):
+def test_password_masker_mask_db_url(monkeypatch, tmp_path):  # noqa: PLR0912, PLR0915
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.

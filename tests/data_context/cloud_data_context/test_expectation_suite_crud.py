@@ -660,7 +660,7 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
     ) as mock_put:
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
-    mock_get.assert_called_once()  # check if resource exists
+    assert mock_get.call_count == 2  # check if resource exists, get updated resource
     mock_put.assert_called_once()  # persist resource
 
 

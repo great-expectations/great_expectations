@@ -61,7 +61,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0911, PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -151,7 +151,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -175,8 +175,8 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
 
         if (
             not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0.0
-            or allow_relative_error > 1.0
+            or allow_relative_error < 0.0  # noqa: PLR2004
+            or allow_relative_error > 1.0  # noqa: PLR2004
         ):
             raise ValueError(
                 "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."
@@ -256,7 +256,7 @@ def _get_column_quantiles_mysql(
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
         if np.issubdtype(type(quantile), np.float_):
-            quantile = float(quantile)
+            quantile = float(quantile)  # noqa: PLW2901
         quantile_column: sqlalchemy.Label = (
             sa.func.first_value(column)
             .over(

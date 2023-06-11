@@ -530,7 +530,7 @@ def test_sqlite_split(
                 batch_identifiers={},
             )
         else:
-            if taxi_test_cases.test_column_name:
+            if taxi_test_cases.test_column_name:  # noqa: PLR5501
                 assert test_case.expected_column_values is not None
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
