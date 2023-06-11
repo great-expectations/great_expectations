@@ -103,7 +103,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 execution_engine=execution_engine,
             )
-        elif dialect.name.lower() == GXSqlDialect.CLICKHOUSE:
+        elif dialect_name.lower() == GXSqlDialect.CLICKHOUSE:
             return _get_column_quantiles_clickhouse(
                 column=column,
                 quantiles=quantiles,
