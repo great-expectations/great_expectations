@@ -108,7 +108,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
-                sqlalchemy_engine=sqlalchemy_engine,
+                execution_engine=execution_engine,
             )
         elif dialect_name == GXSqlDialect.TRINO:
             return _get_column_quantiles_trino(
@@ -324,7 +324,7 @@ def _get_column_quantiles_trino(
 
 
 def _get_column_quantiles_clickhouse(
-    column: str, quantiles: Iterable, selectable, sqlalchemy_engine
+    column: str, quantiles: Iterable, selectable, execution_engine
 ) -> list:
     quantiles_list = list(quantiles)
     sql_approx: str = (
@@ -335,7 +335,7 @@ def _get_column_quantiles_clickhouse(
         selectable
     )
     try:
-        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()[0]
+        quantiles_results = execution_engine.execute(quantiles_query).fetchone()[0]
         return quantiles_results
 
     except sqlalchemy.ProgrammingError as pe:
