@@ -30,7 +30,7 @@ def test_get_awsathena_connection_url(monkeypatch):
 )
 def test_get_clickhouse_sqlalchemy_potential_type():
     import clickhouse_sqlalchemy
-    import clickhouse_sqlalchemy.types as types
+    from clickhouse_sqlalchemy import types
 
     input_output = (
         ("Nullable(String)", types.String),
