@@ -17,15 +17,15 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 Auto-initializing Expectations automate parameter estimation for Expectations, but not all parameters require this kind of estimation.  If your expectation only takes in a Domain (such as the name of a column) then it will not benefit from being configured to work in the auto-initializing framework.  In general, the auto-initializing Expectation framework benefits those Expectations that have numeric ranges which are intended to be descriptive of the data found in a Batch or Batches.  Existing examples of these would be Expectations such as `ExpectColumnMeanToBeBetween`, `ExpectColumnMaxToBeBetween`, or `ExpectColumnSumToBeBetween`.
 
-### 2. Build a Rule Based Profiler for your Expectation
+### 2. Build a Custom Profiler for your Expectation
 
-In order to automate the estimation of parameters, auto-initializing Expectations utilize a Rule Based Profiler.  You will need to create an appropriate configuration for the Rule Based Profiler that your Expectation will use.  The easiest way to do this is to modify an existing Rule Based Profiler configuration.
+In order to automate the estimation of parameters, auto-initializing Expectations utilize a Custom Profiler.  You will need to create an appropriate configuration for the Profiler that your Expectation will use.  The easiest way to do this is to modify an existing Profiler configuration.
 
-You can find existing Rule Based Profiler configurations in the source code for any Expectation that works within the auto-initializing framework.  For this example, we will look at the existing configuration for the `ExpectColumnMeanToBeBetween` Expectation. You can [view the source code for this Expectation on our GitHub](https://github.com/great-expectations/great_expectations/blob/f53e27b068007471b819fc089f008d2a24864d20/great_expectations/expectations/core/expect_column_mean_to_be_between.py).
+You can find existing Profiler configurations in the source code for any Expectation that works within the auto-initializing framework.  For this example, we will look at the existing configuration for the `ExpectColumnMeanToBeBetween` Expectation. You can [view the source code for this Expectation on our GitHub](https://github.com/great-expectations/great_expectations/blob/f53e27b068007471b819fc089f008d2a24864d20/great_expectations/expectations/core/expect_column_mean_to_be_between.py).
 
 #### 2a. Modifying variables
 
-Key-value pairs defined in the `variables` portion of a Rule Based Profiler Configuration will be shared across all of its `Rules` and `Rule` components.  This helps you define and keep track of values without having to input them multiple times.  In our example, the `variables` are:
+Key-value pairs defined in the `variables` portion of a Profiler Configuration will be shared across all of its `Rules` and `Rule` components.  This helps you define and keep track of values without having to input them multiple times.  In our example, the `variables` are:
 
 * `strict_min`: Used by `expect_column_mean_to_be_between` Expectation. Recognized values are `True` or `False`.
 * `strict_max`: Used by `expect_column_mean_to_be_between` Expectation. Recognized values are `True` or `False`. 
@@ -100,8 +100,8 @@ Last is `meta` which contains `details` from our `parameter_builder`.
 
 ### 3. Assign your configuration to the `default_profiler_config` class attribute of your Expectation
 
-Once you have modified the necessary parts of the Rule Based Profiler configuration to suite your purposes you will need to assign it to the `default_profiler_config` class attribute of your Expectation.  If you initially copied the Rule Based Profiler configuration that you modified from another Expectation that was already set up to work with the auto-initializing framework then you can refer to that Expectation for an example of this.
+Once you have modified the necessary parts of the Profiler configuration to suit your purposes you will need to assign it to the `default_profiler_config` class attribute of your Expectation.  If you initially copied the Profiler configuration that you modified from another Expectation that was already set up to work with the auto-initializing framework then you can refer to that Expectation for an example of this.
 
 ### 4. Test your Expectation with `auto=True`
 
-After assigning your Rule Based Profiler configuration to the `default_profiler_config` attribute of your Expectation, your Expectation should be able to work in the auto-initializing framework.  [Test your expectation](./how_to_use_custom_expectations.md) with the parameter `auto=True`.
+After assigning your Profiler configuration to the `default_profiler_config` attribute of your Expectation, your Expectation should be able to work in the auto-initializing framework.  [Test your expectation](./how_to_use_custom_expectations.md) with the parameter `auto=True`.

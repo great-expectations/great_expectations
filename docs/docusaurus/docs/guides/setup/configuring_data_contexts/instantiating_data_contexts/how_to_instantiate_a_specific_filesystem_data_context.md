@@ -22,7 +22,7 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python), or [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
+- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python).
 
 </Prerequisites>
 

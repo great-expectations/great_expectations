@@ -22,7 +22,7 @@ class TableRowCount(TableMetricProvider):
     metric_name = "table.row_count"
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: "PandasExecutionEngine",
         metric_domain_kwargs: dict,
@@ -40,7 +40,7 @@ class TableRowCount(TableMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
         domain_type=MetricDomainTypes.TABLE,
     )
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: dict,
@@ -55,7 +55,7 @@ class TableRowCount(TableMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
         domain_type=MetricDomainTypes.TABLE,
     )
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: dict,

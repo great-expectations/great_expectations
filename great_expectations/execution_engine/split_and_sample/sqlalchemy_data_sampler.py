@@ -160,7 +160,7 @@ class SqlAlchemyDataSampler(DataSampler):
                 "the 'sampling_kwargs' configuration."
             ) from e
 
-        num_rows: int = execution_engine.engine.execute(
+        num_rows: int = execution_engine.execute_query(
             sa.select(sa.func.count())
             .select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))

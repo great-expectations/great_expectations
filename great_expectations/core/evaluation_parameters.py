@@ -164,7 +164,7 @@ class EvaluationParameterParser:
             self._parser = expr
         return self._parser
 
-    def evaluate_stack(self, s):
+    def evaluate_stack(self, s):  # noqa: PLR0911, PLR0912
         op, num_args, has_fn_kwargs = s.pop(), 0, False
         if isinstance(op, tuple):
             op, num_args, has_fn_kwargs = op
@@ -331,7 +331,7 @@ def find_evaluation_parameter_dependencies(parameter_expression):
     return dependencies
 
 
-def parse_evaluation_parameter(  # noqa: C901 - complexity 19
+def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
     parameter_expression: str,
     evaluation_parameters: Optional[Dict[str, Any]] = None,
     data_context: Optional[AbstractDataContext] = None,

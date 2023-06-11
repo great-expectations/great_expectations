@@ -192,7 +192,7 @@ stages:
 
     - job: test_docs_bigquery
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -264,7 +264,7 @@ stages:
 
     - job: test_docs_snowflake
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -293,7 +293,7 @@ stages:
 
     - job: test_docs_redshift
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -325,7 +325,7 @@ stages:
 
     - job: test_docs_aws
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -349,7 +349,7 @@ stages:
 
     - job: test_docs_aws_spark
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
         spark.version: '3.3.2'
@@ -387,7 +387,7 @@ stages:
 
     - job: test_docs_azure
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 

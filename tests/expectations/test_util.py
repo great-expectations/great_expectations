@@ -47,7 +47,9 @@ from great_expectations.compatibility import sqlalchemy
 logger = logging.getLogger(__name__)
 
 
-def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
+def get_table_columns_metric(
+    execution_engine: ExecutionEngine,
+) -> [MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
@@ -59,7 +61,9 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
             "include_nested": True,
         },
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
+    results = execution_engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types_metric,)
+    )
     resolved_metrics.update(results)
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
@@ -70,7 +74,7 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
     table_columns_metric.metric_dependencies = {
         "table.column_types": table_column_types_metric,
     }
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
     )
     resolved_metrics.update(results)
@@ -393,7 +397,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
     for table_name, validator in validators_config.items():
         table_columns_metric, results = get_table_columns_metric(
-            engine=validator.execution_engine
+            execution_engine=validator.execution_engine
         )
         metrics.update(results)
         assert set(metrics[table_columns_metric.id]) == {"name", "age", "pet"}

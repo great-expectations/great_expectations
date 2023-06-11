@@ -10,7 +10,7 @@ Data Assistants allow you to introspect multiple <TechnicalTag tag="batch" text=
 
 ## Relationships to other objects
 
-A Data Assistant implements a pre-configured <TechnicalTag tag="profiler" text="Rule Based Profiler" /> in order to gather Metrics and propose an Expectation Suite based on the introspection of the Batch or Batches contained in a provided <TechnicalTag tag="batch_request" text="Batch Request" />.
+A Data Assistant implements a pre-configured <TechnicalTag tag="profiler" text="Profiler" /> in order to gather Metrics and propose an Expectation Suite based on the introspection of the Batch or Batches contained in a provided <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 ## Use cases
 

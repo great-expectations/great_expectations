@@ -34,7 +34,8 @@
         },
         "sep": {
             "title": "Sep",
-            "default": "\\s+"
+            "default": "\\s+",
+            "type": "string"
         },
         "kwargs": {
             "title": "Kwargs",

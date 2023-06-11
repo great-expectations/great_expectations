@@ -36,7 +36,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     and metric_name as arguments.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: str,

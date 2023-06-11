@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -18,6 +20,7 @@ from great_expectations.core.batch import (
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.types import DictDot
 
 try:
@@ -57,7 +60,7 @@ def send_slack_notification(
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200 or not ok_status:
+        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -92,7 +95,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 202:
+        if response.status_code != 202:  # noqa: PLR2004
             logger.warning(
                 "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
@@ -112,7 +115,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 "Request to Microsoft Teams webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -133,7 +136,7 @@ def send_webhook_notifications(query, webhook, target_platform):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 f"Request to {target_platform} webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -143,7 +146,7 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 
 # noinspection SpellCheckingInspection
-def send_email(
+def send_email(  # noqa: PLR0913
     title,
     html,
     smtp_address,
@@ -251,8 +254,8 @@ def get_substituted_batch_request(
         batch_request=substituted_runtime_batch_request
     )
 
-    for key, value in validation_batch_request.items():  # type: ignore[union-attr] # get_batch_request_as_dict needs overloads
-        substituted_value = substituted_runtime_batch_request.get(key)  # type: ignore[union-attr] # get_batch_request_as_dict
+    for key, value in validation_batch_request.items():
+        substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None:
             raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
@@ -265,7 +268,9 @@ def get_substituted_batch_request(
     return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_template_config(source_config: dict, template_config: dict) -> dict:
+def substitute_template_config(  # noqa: PLR0912
+    source_config: dict, template_config: dict
+) -> dict:
     if not (template_config and any(template_config.values())):
         return source_config
 
@@ -466,14 +471,20 @@ def does_batch_request_in_validations_contain_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: Optional[list] = None,
-) -> Optional[list]:
-    if validations:
-        for value in validations:
-            if "batch_request" in value:
-                value["batch_request"] = get_batch_request_as_dict(
-                    batch_request=value["batch_request"]
-                )
+    validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+) -> list[dict] | None:
+    if not validations:
+        return None
+
+    validations = [
+        v.to_dict() if isinstance(v, CheckpointValidationConfig) else v
+        for v in validations
+    ]
+    for value in validations:
+        if "batch_request" in value:
+            value["batch_request"] = get_batch_request_as_dict(
+                batch_request=value["batch_request"]
+            )
 
     return validations
 

@@ -57,7 +57,7 @@ class S3DataConnector(FilePathDataConnector):
     )
     asset_options_type: ClassVar[Type[_S3Options]] = _S3Options
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
@@ -97,7 +97,7 @@ class S3DataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_data_connector(
+    def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
         data_asset_name: str,
@@ -150,7 +150,7 @@ class S3DataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_test_connection_error_message(
+    def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
         batching_regex: re.Pattern,

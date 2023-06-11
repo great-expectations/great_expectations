@@ -204,7 +204,7 @@ def _update_tag_references_for_correct_version_substitution(
     return contents
 
 
-def use_relative_imports_for_tag_references(
+def use_relative_path_for_imports(
     verbose: bool = False,
 ) -> None:
     """Use relative imports instead of @site
@@ -227,10 +227,10 @@ def use_relative_imports_for_tag_references(
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
-                contents = _use_relative_imports_for_tag_references_substitution(
+                contents = _use_relative_path_for_imports_substitution(
                     contents, path, file_path
                 )
-                contents = _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash(
+                contents = _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
                     contents, path, file_path
                 )
                 f.seek(0)
@@ -244,7 +244,7 @@ def use_relative_imports_for_tag_references(
     print(f"Processed {len(paths)} paths in {method_name_for_logging}")
 
 
-def _use_relative_imports_for_tag_references_substitution(
+def _use_relative_path_for_imports_substitution(
     contents: str, path_to_versioned_docs: pathlib.Path, path_to_document: pathlib.Path
 ) -> str:
     """Change import path to use relative instead of @site alias.
@@ -263,13 +263,13 @@ def _use_relative_imports_for_tag_references_substitution(
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
     pattern = re.compile(
-        r"(?P<import>import TechnicalTag from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
+        r"(?P<import>import .* from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
 
 
-def _use_relative_imports_for_tag_references_substitution_path_starting_with_forwardslash(
+def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     contents: str, path_to_versioned_docs: pathlib.Path, path_to_document: pathlib.Path
 ) -> str:
     """Change import path to use relative instead of starting from /docs/.
@@ -288,7 +288,7 @@ def _use_relative_imports_for_tag_references_substitution_path_starting_with_for
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
     pattern = re.compile(
-        r"(?P<import>import TechnicalTag from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
+        r"(?P<import>import .* from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
     return contents
@@ -301,4 +301,4 @@ if __name__ == "__main__":
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
-    use_relative_imports_for_tag_references()
+    use_relative_path_for_imports()

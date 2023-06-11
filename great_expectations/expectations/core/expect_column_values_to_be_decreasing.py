@@ -140,7 +140,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         else:
             template_str = "values must be less than or equal to previous values"
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -190,7 +190,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         else:
             template_str = "values must be less than or equal to previous values"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

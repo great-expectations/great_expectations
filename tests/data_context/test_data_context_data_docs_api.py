@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -393,3 +394,21 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
         }
     context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == ["site-0", "site-1", "site-2"]
+
+
+@pytest.mark.integration
+def test_view_validation_result(
+    checkpoint_result: CheckpointResult,
+):
+    context = get_context()
+
+    with mock.patch("webbrowser.open") as mock_open, mock.patch(
+        "great_expectations.data_context.store.StoreBackend.has_key", return_value=True
+    ):
+        context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
+
+    url_used = mock_open.call_args[0][0]
+    assert url_used.startswith("file:///")
+    assert url_used.endswith("default_pandas_datasource-%23ephemeral_pandas_asset.html")

@@ -637,7 +637,7 @@ def _get_parameter_node_attribute_names(
 
     attribute_name: str
     for attribute_name_as_list in attribute_names_as_lists:
-        attribute_name_as_list = (
+        attribute_name_as_list = (  # noqa: PLW2901
             _get_parameter_name_parts_up_to_including_reserved_literal(
                 attribute_name_as_list=attribute_name_as_list
             )

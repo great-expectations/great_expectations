@@ -664,7 +664,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
                             else f"{quantile:3.2f}",
                             "tooltip": {
                                 "content": "expect_column_quantile_values_to_be_between \n expect_column_median_to_be_between"
-                                if quantile == 0.50
+                                if quantile == 0.50  # noqa: PLR2004
                                 else "expect_column_quantile_values_to_be_between"
                             },
                         },

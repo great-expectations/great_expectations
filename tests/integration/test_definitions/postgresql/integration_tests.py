@@ -9,6 +9,7 @@ connecting_to_your_data = [
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
@@ -220,9 +221,19 @@ evaluation_parameters = [
     )
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_connect_to_postgresql_data",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
+    ),
+]
+
 postgresql_integration_tests += connecting_to_your_data
 postgresql_integration_tests += split_data
 postgresql_integration_tests += sample_data
 postgresql_integration_tests += migration_guide
 postgresql_integration_tests += creating_custom_expectations
 postgresql_integration_tests += evaluation_parameters
+postgresql_integration_tests += fluent_datasources

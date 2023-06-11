@@ -125,6 +125,13 @@ stages:
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+    - job: name_tag_snippet_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python ci/checks/check_only_name_tag_snippets.py
+          name: NameTagSnippetChecker
+
     - job: check_repo_root_size
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -189,7 +196,6 @@ stages:
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SQLALCHEMY_WARN_20=true "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}

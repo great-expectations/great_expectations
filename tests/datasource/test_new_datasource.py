@@ -1078,7 +1078,8 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
 @pytest.mark.unit
 class TestAttrAccess:
     @pytest.mark.parametrize(
-        "attr_name", ["get_data_asset", "read_csv", "add_table_asset", "add_json_asset"]
+        "attr_name",
+        ["get_asset", "read_csv", "add_table_asset", "add_json_asset", "read_sql"],
     )
     def test_fluent_attrs_raise_not_implemented_error(
         self, basic_pandas_datasource_v013: Datasource, attr_name: str
@@ -1091,6 +1092,9 @@ class TestAttrAccess:
     ):
         with pytest.raises(AttributeError):
             _ = basic_pandas_datasource_v013.foo_bar
+
+        with pytest.raises(AttributeError):
+            _ = basic_pandas_datasource_v013.add_not_a_real_asset_type
 
     def test_standard_attrs(self, basic_pandas_datasource_v013: Datasource):
         _ = basic_pandas_datasource_v013.name

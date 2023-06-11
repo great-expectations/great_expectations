@@ -6,10 +6,20 @@ import logging
 import pickle
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import pandas as pd
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import aws, azure, google
@@ -42,6 +52,9 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
 )
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +116,7 @@ class PandasExecutionEngine(ExecutionEngine):
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
         self._s3 = None
-        self._azure = None
+        self._azure: azure.BlobServiceClient | None = None
         self._gcs = None
 
         super().__init__(*args, **kwargs)
@@ -122,7 +135,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     def _instantiate_azure_client(self) -> None:
         self._azure = None
-        if azure.BlobServiceClient:
+        if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             azure_options = self.config.get("azure_options", {})
             try:
                 if "conn_str" in azure_options:
@@ -188,7 +201,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(  # noqa: C901 - 22
+    def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -383,7 +396,7 @@ not {batch_spec.__class__.__name__}"""
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path: str):
+    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
         """Helper method for deciding which reader to use to read in a certain path.
 
         Args:
@@ -479,7 +492,7 @@ not {batch_spec.__class__.__name__}"""
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
-    def get_domain_records(  # noqa: C901 - 17
+    def get_domain_records(  # noqa: C901, PLR0912
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
@@ -509,7 +522,7 @@ not {batch_spec.__class__.__name__}"""
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_manager.batch_data_cache:
+            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
                 data = cast(
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -560,7 +573,7 @@ not {batch_spec.__class__.__name__}"""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if != "neither":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -584,7 +597,7 @@ not {batch_spec.__class__.__name__}"""
                     subset=column_list,
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "never":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )

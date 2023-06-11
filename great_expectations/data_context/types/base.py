@@ -19,6 +19,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Sequence,
     Set,
     Type,
     TypeVar,
@@ -35,14 +36,12 @@ from marshmallow import (
     pre_dump,
     validates_schema,
 )
-from marshmallow.validate import OneOf
 from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
@@ -56,7 +55,13 @@ from great_expectations.util import deep_filter_properties_iterable
 if TYPE_CHECKING:
     from io import TextIOWrapper
 
+    from great_expectations.alias_types import JSONValues
     from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.configurator import ActionDict
+    from great_expectations.datasource.fluent.batch_request import (
+        BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -183,7 +188,7 @@ class BaseYamlConfig(SerializableDictDot):
 
 
 class SorterConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         class_name=None,
@@ -301,7 +306,7 @@ class SorterConfigSchema(Schema):
 
 
 class AssetConfig(SerializableDictDot):
-    def __init__(  # noqa: C901 - complexity 16
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
@@ -482,7 +487,7 @@ class AssetConfigSchema(Schema):
 
 
 class DataConnectorConfig(AbstractConfig):
-    def __init__(  # noqa: C901 - 20
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         class_name,
         name: Optional[str] = None,
@@ -726,7 +731,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
 
     # noinspection PyUnusedLocal
     @validates_schema  # noqa: C901
-    def validate_schema(self, data, **kwargs):  # noqa: C901 - complexity 16
+    def validate_schema(self, data, **kwargs):  # noqa: C901, PLR0912
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
             return
@@ -957,7 +962,7 @@ continue.
 
 
 class ExecutionEngineConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         class_name,
         module_name=None,
@@ -1080,7 +1085,7 @@ configuration to continue.
 
 
 class DatasourceConfig(AbstractConfig):
-    def __init__(  # noqa: C901 - 21
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         name: Optional[
             str
@@ -1405,7 +1410,7 @@ class NotebookTemplateConfigSchema(Schema):
 
 
 class NotebookConfig(DictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         class_name,
         module_name,
@@ -1626,7 +1631,7 @@ class GXCloudConfig(DictDot):
 
 class DataContextConfigSchema(Schema):
     config_version = fields.Number(
-        validate=lambda x: 0 < x < 100,
+        validate=lambda x: 0 < x < 100,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number."},
     )
     datasources = fields.Dict(
@@ -1819,23 +1824,24 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
+    DEFAULT_ACTION_LIST = [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction"},
+        },
+    ]
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
-            "action_list": [
-                {
-                    "name": "store_validation_result",
-                    "action": {"class_name": "StoreValidationResultAction"},
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {"class_name": "StoreEvaluationParametersAction"},
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {"class_name": "UpdateDataDocsAction"},
-                },
-            ],
+            "action_list": DEFAULT_ACTION_LIST,
         }
     }
     DEFAULT_STORES = {
@@ -1899,7 +1905,7 @@ class BaseStoreBackendDefaults(DictDot):
     For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults and you may be able to specify less parameters.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
@@ -1953,7 +1959,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         expectations_store_bucket_name: Optional[str] = None,
@@ -2166,7 +2172,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_bucket_name: Optional[str] = None,
         default_project_name: Optional[str] = None,
@@ -2296,7 +2302,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         profiler_store_name: Overrides default if supplied
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
@@ -2410,7 +2416,7 @@ class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
-    def __init__(  # noqa: C901 - 21
+    def __init__(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         config_version: Optional[float] = None,
         datasources: Optional[
@@ -2582,7 +2588,17 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(
+        self,
+        id: str | None = None,
+        expectation_suite_name: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        **kwargs,
+    ) -> None:
+        self.expectation_suite_name = expectation_suite_name
+        self.expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self.batch_request = batch_request
         super().__init__(id=id)
 
         for k, v in kwargs.items():
@@ -2645,9 +2661,6 @@ class CheckpointConfigSchema(Schema):
             "validations",
             "default_validation_id",
             "profilers",
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name",
-            "batches",
             # Next fields are used by configurators
             "site_names",
             "slack_webhook",
@@ -2664,15 +2677,13 @@ class CheckpointConfigSchema(Schema):
         "slack_webhook",
         "notify_on",
         "notify_with",
-        "validation_operator_name",
-        "batches",
         "default_validation_id",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
-        validate=lambda x: (0 < x < 100) or x is None,
+        validate=lambda x: (0 < x < 100) or x is None,  # noqa: PLR2004
         error_messages={"invalid": "config version must " "be a number or None."},
         required=False,
         allow_none=True,
@@ -2705,19 +2716,6 @@ class CheckpointConfigSchema(Schema):
 
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
-    )
-    # Next two fields are for LegacyCheckpoint configuration
-    validation_operator_name = fields.Str(required=False, allow_none=True)
-    batches = fields.List(
-        cls_or_instance=fields.Dict(
-            keys=fields.Str(
-                validate=OneOf(["batch_kwargs", "expectation_suite_names"]),
-                required=False,
-                allow_none=True,
-            )
-        ),
-        required=False,
-        allow_none=True,
     )
     # Next fields are used by configurators
     site_names = fields.Raw(required=False, allow_none=True)
@@ -2797,24 +2795,22 @@ class CheckpointConfig(BaseYamlConfig):
         expectation_suite_ge_cloud_id: Your expectation suite
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Optional[Union[int, float]] = None,
+        config_version: Union[int, float] = 1.0,
         template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
+        action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
         # the following four args are used by SimpleCheckpoint
@@ -2826,33 +2822,26 @@ class CheckpointConfig(BaseYamlConfig):
     ) -> None:
         self._name = name
         self._config_version = config_version
-        if self.config_version is None:
-            class_name = class_name or "LegacyCheckpoint"
-            self._validation_operator_name = validation_operator_name
-            if batches is not None and isinstance(batches, list):
-                self._batches = batches
-        else:
-            class_name = class_name or "Checkpoint"
-            self._template_name = template_name
-            self._run_name_template = run_name_template
-            self._expectation_suite_name = expectation_suite_name
-            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
-            self._batch_request = batch_request or {}
-            self._action_list = action_list or []
-            self._evaluation_parameters = evaluation_parameters or {}
-            self._runtime_configuration = runtime_configuration or {}
-            self._validations = validations or []
-            self._default_validation_id = default_validation_id
-            self._profilers = profilers or []
-            self._ge_cloud_id = ge_cloud_id
-            # the following attributes are used by SimpleCheckpoint
-            self._site_names = site_names
-            self._slack_webhook = slack_webhook
-            self._notify_on = notify_on
-            self._notify_with = notify_with
+        self._template_name = template_name
+        self._run_name_template = run_name_template
+        self._expectation_suite_name = expectation_suite_name
+        self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self._batch_request = batch_request or {}
+        self._action_list = action_list or []
+        self._evaluation_parameters = evaluation_parameters or {}
+        self._runtime_configuration = runtime_configuration or {}
+        self._validations = validations or []
+        self._default_validation_id = default_validation_id
+        self._profilers = profilers or []
+        self._ge_cloud_id = ge_cloud_id
+        # the following attributes are used by SimpleCheckpoint
+        self._site_names = site_names
+        self._slack_webhook = slack_webhook
+        self._notify_on = notify_on
+        self._notify_with = notify_with
 
         self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name
+        self._class_name = class_name or "Checkpoint"
 
         super().__init__(commented_map=commented_map)
 
@@ -2864,22 +2853,6 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
-
-    @property
-    def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[has-type]
-
-    @validation_operator_name.setter
-    def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value  # type: ignore[has-type]
-
-    @property
-    def batches(self) -> List[dict]:
-        return self._batches  # type: ignore[has-type]
-
-    @batches.setter
-    def batches(self, value: List[dict]) -> None:
-        self._batches = value  # type: ignore[has-type]
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
@@ -2914,8 +2887,8 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> float:
-        return self._config_version  # type: ignore[return-value]
+    def config_version(self) -> Union[int, float]:
+        return self._config_version
 
     @config_version.setter
     def config_version(self, value: float) -> None:
@@ -2986,11 +2959,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self) -> List[dict]:
+    def action_list(self) -> Sequence[ActionDict]:
         return self._action_list
 
     @action_list.setter
-    def action_list(self, value: List[dict]) -> None:
+    def action_list(self, value: Sequence[ActionDict]) -> None:
         self._action_list = value
 
     @property
@@ -3107,16 +3080,19 @@ class CheckpointConfig(BaseYamlConfig):
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
-    def resolve_config_using_acceptable_arguments(
+    def resolve_config_using_acceptable_arguments(  # noqa: PLR0913
         checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[
+            Union[List[dict], List[CheckpointValidationConfig]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
@@ -3149,9 +3125,6 @@ class CheckpointConfig(BaseYamlConfig):
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
 
-        if validations is None:
-            validations = []
-
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -3161,6 +3134,7 @@ class CheckpointConfig(BaseYamlConfig):
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
+            "validator": validator,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,

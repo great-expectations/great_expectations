@@ -61,11 +61,11 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() > 0.0
+                return series_diff.dt.total_seconds() > 0.0  # noqa: PLR2004
             return series_diff > 0
         else:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() >= 0.0
+                return series_diff.dt.total_seconds() >= 0.0  # noqa: PLR2004
             return series_diff >= 0
 
     @metric_partial(
@@ -73,7 +73,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

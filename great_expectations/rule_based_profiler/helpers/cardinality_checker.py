@@ -165,7 +165,7 @@ class CardinalityChecker:
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"
             )
 
-        if metric_value < 0.00:
+        if metric_value < 0.00:  # noqa: PLR2004
             raise ProfilerConfigurationError(
                 f"Value of cardinality (number of rows or percent unique) should be greater than 0.00, your value is {metric_value}"
             )
@@ -270,7 +270,7 @@ def validate_input_parameters(
                 f"Please specify a supported cardinality limit type, supported classes are {','.join(CardinalityChecker.SUPPORTED_LIMIT_MODE_CLASS_NAMES)} and supported strings are {','.join(CardinalityChecker.SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS)}"
             )
 
-        if required_num_supplied_params == 2:
+        if required_num_supplied_params == 2:  # noqa: PLR2004
             try:
                 assert isinstance(cardinality_limit_mode, str)
                 return CardinalityLimitMode[cardinality_limit_mode.upper()].value

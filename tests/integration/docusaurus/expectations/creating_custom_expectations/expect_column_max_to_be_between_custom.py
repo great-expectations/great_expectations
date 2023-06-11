@@ -71,11 +71,10 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         # </snippet>
         # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query">
         query = sa.select(sa.func.max(column)).select_from(selectable)
-        result = sqlalchemy_engine.execute(query).fetchone()
+        result = execution_engine.execute_query(query).fetchone()
 
         return result[0]
 

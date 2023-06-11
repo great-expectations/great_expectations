@@ -36,6 +36,7 @@ dataframe_asset = context.sources.add_pandas(
 ).add_dataframe_asset(
     name="taxi_frame", dataframe=df, batch_metadata={"year": "2019", "month": "01"}
 )
+context.add_or_update_expectation_suite("my_expectation_suite")
 
 batch_request = dataframe_asset.build_batch_request()
 

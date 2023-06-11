@@ -65,17 +65,6 @@ def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasour
     return pandas_filesystem_datasource
 
 
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
-
-
 class SpyInterrupt(RuntimeError):
     """
     Exception that may be raised to interrupt the control flow of the program

@@ -21,6 +21,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -272,6 +273,29 @@ def multi_batch_taxi_validator(
     )
 
     return validator_multi_batch
+
+
+@pytest.mark.integration
+def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_validator):
+    validator = multi_batch_taxi_validator
+
+    actual = validator.convert_to_checkpoint_validations_list()
+    expected_config = CheckpointValidationConfig(
+        expectation_suite_name="validating_taxi_data",
+        expectation_suite_ge_cloud_id=None,
+        batch_request={
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+            "data_connector_query": {"batch_filter_parameters": {"year": "2019"}},
+            "batch_spec_passthrough": None,
+            "limit": None,
+        },
+        id=None,
+        name=None,
+    )
+
+    assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
 @pytest.fixture()
@@ -1109,13 +1133,6 @@ def test_validator_include_rendered_content_diagnostic(
         expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
-
-
-@pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
-    validator = Validator(execution_engine=execution_engine)
-    return validator
 
 
 @pytest.mark.unit

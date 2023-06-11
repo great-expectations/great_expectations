@@ -13,7 +13,7 @@ This guide will help you create an <TechnicalTag tag="expectation" text="Expecta
 
 - [A working deployment of Great Expectations](/docs/guides/setup/setup_overview).
 - Credentials for a database to query for dynamic values.
-- A SQL query that to return values for your expectation configuration.
+- A SQL query to return values for your expectation configuration.
 
 </Prerequisites>
 

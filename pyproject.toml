@@ -73,7 +73,6 @@ exclude = [
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'core/batch\.py', # 29
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/base\.py', # 8
@@ -204,6 +203,16 @@ exclude = [
     'tests/datasource/fluent/tasks\.py',
 ]
 
+[[tool.mypy.overrides]]
+# need to use override because a mypy bug prevents ignoring an assignment warning inline
+# for `from azure import storage`
+module = [
+  "great_expectations.compatibility.azure",
+]
+disable_error_code = [
+    'assignment',  # cannot assign NotImported to a ModuleType
+    ]
+
 [tool.pydantic-mypy]
 # https://pydantic-docs.helpmanual.io/mypy_plugin/#plugin-settings
 init_typed = true
@@ -236,6 +245,10 @@ select = [
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "B", # bugbear - common python bugs & design issues
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
+    # https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PL", # pylint
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -255,8 +268,6 @@ ignore = [
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
-    # doesn't catch errors or help with circular imports and tedious to apply
-    "TCH002", # typing-only-third-party-import
     # minimal cost for standard lib imports; keep this disabled
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
@@ -264,6 +275,9 @@ ignore = [
     "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
+    # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
+    "PYI053", # string-or-bytes-too-long - causes mypy to fail on some of our type stubs
+    "PYI054",  # numeric-literal-too-long - causes mypy to fail on some of our type stubs
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     # TODO: enable these
     "B904", # raise-without-from-inside-except
@@ -292,6 +306,9 @@ extend-exclude = [
     "F401",  # unused import
     "F403",  # star imports
     ]
+"great_expectations/_version.py" = [
+    "PLR",  # pylint - versioneer code
+]
 "great_expectations/compatibility/sqlalchemy.py" = [
     "TID251",  # flake8-banned-api
 ]
@@ -394,6 +411,9 @@ filterwarnings = [
     # Example Actual Warning: (found in test_data_context)
     # UserWarning: Warning. An existing `config_variables.yml` was found here
     'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
+    # Example Actual Warning: DeprecationWarning: A Checkpoint named oss_test_checkpoint already exists.;
+    # using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 and will be removed in v0.18. Please use add_or_update_checkpoint instead.
+    'ignore: A Checkpoint named :DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------

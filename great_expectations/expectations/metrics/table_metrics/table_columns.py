@@ -18,7 +18,7 @@ class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
@@ -30,7 +30,7 @@ class TableColumns(TableMetricProvider):
         return [col["name"] for col in column_metadata]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -42,7 +42,7 @@ class TableColumns(TableMetricProvider):
         return [col["name"] for col in column_metadata]
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,

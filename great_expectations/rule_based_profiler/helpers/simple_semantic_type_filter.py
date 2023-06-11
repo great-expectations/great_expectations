@@ -12,8 +12,6 @@ from typing import (
     Union,
 )
 
-from typing_extensions import TypeGuard
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
@@ -26,6 +24,8 @@ from great_expectations.rule_based_profiler.semantic_type_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.validator.validator import Validator
 
 T = TypeVar("T")
@@ -67,28 +67,23 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         if semantic_types is None:
             return []
 
-        semantic_type: Union[str, SemanticDomainTypes]
-        if isinstance(semantic_types, str):
-            semantic_types = semantic_types.lower()
-            return [
-                SemanticDomainTypes(semantic_type) for semantic_type in [semantic_types]
-            ]
-
         if isinstance(semantic_types, SemanticDomainTypes):
-            return [semantic_type for semantic_type in [semantic_types]]
+            return [semantic_types]
+
+        if isinstance(semantic_types, str):
+            return [SemanticDomainTypes(semantic_types.lower())]
 
         if isinstance(semantic_types, list):
-            if _is_sequence_of(semantic_types, str):
-                semantic_types = [
-                    semantic_type.lower() for semantic_type in semantic_types
-                ]
-                return [
-                    SemanticDomainTypes(semantic_type)
-                    for semantic_type in semantic_types
-                ]
+            semantic_type: Union[str, SemanticDomainTypes]
 
             if _is_sequence_of(semantic_types, SemanticDomainTypes):
                 return [semantic_type for semantic_type in semantic_types]
+
+            if _is_sequence_of(semantic_types, str):
+                return [
+                    SemanticDomainTypes(semantic_type.lower())
+                    for semantic_type in semantic_types
+                ]
 
             raise ValueError(
                 "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
@@ -191,15 +186,13 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         else:
             semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-        inferred_semantic_column_type: InferredSemanticDomainType = (
-            InferredSemanticDomainType(
-                semantic_domain_type=semantic_column_type,
-                details={
-                    "algorithm_type": "deterministic",
-                    "mechanism": "lookup_table",
-                    "source": "great_expectations.profile.base.ProfilerTypeMapping",
-                },
-            )
+        inferred_semantic_column_type: InferredSemanticDomainType = InferredSemanticDomainType(
+            semantic_domain_type=semantic_column_type,
+            details={
+                "algorithm_type": "deterministic",
+                "mechanism": "lookup_table",
+                "source": "great_expectations.core.profiler_types_mapping.ProfilerTypeMapping",
+            },
         )
 
         return inferred_semantic_column_type
