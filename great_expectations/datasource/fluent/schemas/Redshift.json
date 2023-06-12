@@ -73,14 +73,42 @@
                 ]
             }
         },
-        "connect_args": {
-            "title": "Connect Args",
-            "description": "Connect args for redshift",
-            "allOf": [
-                {
-                    "$ref": "#/definitions/ConnectArgs"
-                }
-            ]
+        "iam": {
+            "title": "Iam",
+            "default": true,
+            "type": "boolean"
+        },
+        "credentials_provider": {
+            "title": "Credentials Provider",
+            "type": "string"
+        },
+        "idp_host": {
+            "title": "Idp Host",
+            "minLength": 1,
+            "maxLength": 65536,
+            "format": "uri",
+            "type": "string"
+        },
+        "app_id": {
+            "title": "App Id",
+            "type": "string"
+        },
+        "app_name": {
+            "title": "App Name",
+            "type": "string"
+        },
+        "region": {
+            "title": "Region",
+            "type": "string"
+        },
+        "cluster_identifier": {
+            "title": "Cluster Identifier",
+            "type": "string"
+        },
+        "ssl_insecure": {
+            "title": "Ssl Insecure",
+            "default": false,
+            "type": "boolean"
         }
     },
     "required": [
@@ -461,58 +489,6 @@
             "required": [
                 "name",
                 "query"
-            ],
-            "additionalProperties": false
-        },
-        "ConnectArgs": {
-            "title": "ConnectArgs",
-            "description": "Connect args for redshift",
-            "type": "object",
-            "properties": {
-                "iam": {
-                    "title": "Iam",
-                    "default": true,
-                    "type": "boolean"
-                },
-                "credentials_provider": {
-                    "title": "Credentials Provider",
-                    "type": "string"
-                },
-                "idp_host": {
-                    "title": "Idp Host",
-                    "minLength": 1,
-                    "maxLength": 65536,
-                    "format": "uri",
-                    "type": "string"
-                },
-                "app_id": {
-                    "title": "App Id",
-                    "type": "string"
-                },
-                "app_name": {
-                    "title": "App Name",
-                    "type": "string"
-                },
-                "region": {
-                    "title": "Region",
-                    "type": "string"
-                },
-                "cluster_identifier": {
-                    "title": "Cluster Identifier",
-                    "type": "string"
-                },
-                "ssl_insecure": {
-                    "title": "Ssl Insecure",
-                    "default": false,
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "idp_host",
-                "app_id",
-                "app_name",
-                "region",
-                "cluster_identifier"
             ],
             "additionalProperties": false
         }

@@ -3,23 +3,12 @@ from typing import Literal, Optional, Union
 import pydantic
 from pydantic import AnyUrl
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
-
-
-class ConnectArgs(FluentBaseModel):
-    """Connect args for redshift"""
-
-    iam: bool = True
-    credentials_provider: Optional[str] = None
-    idp_host: AnyUrl
-    app_id: str
-    app_name: str
-    region: str
-    cluster_identifier: str
-    ssl_insecure: bool = False
 
 
 class RedshiftDsn(pydantic.PostgresDsn):
@@ -46,6 +35,16 @@ class Redshift(SQLDatasource):
 
     type: Literal["redshift"] = "redshift"  # type: ignore[assignment]
     connection_string: Union[ConfigStr, RedshiftDsn]
-    connect_args: Optional[ConnectArgs] = pydantic.Field(
-        None, description="Connect args for redshift"
-    )
+    # connect_args
+    iam: bool = True
+    credentials_provider: Optional[str] = None
+    idp_host: Optional[AnyUrl] = None
+    app_id: Optional[str] = None
+    app_name: Optional[str] = None
+    region: Optional[str] = None
+    cluster_identifier: Optional[str] = None
+    ssl_insecure: bool = False
+
+    def get_engine(self) -> sa.engine.Engine:
+        # TODO: implement this
+        return super().get_engine()

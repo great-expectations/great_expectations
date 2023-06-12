@@ -72,14 +72,13 @@ fluent_datasources:
   my_redshift_ds_w_connect_args:
     type: redshift
     connection_string: "redshift://userName:@hostname/dbName"
-    connect_args:
-      iam: true
-      credentials_provider: OktaCredentialsProvider
-      idp_ost: greatexpectations.okta.com
-      app_id: 123456789
-      app_name: my_aws_app
-      region: us-east-1
-      cluster_identifier: my_cluster
+    iam: true
+    credentials_provider: OktaCredentialsProvider
+    idp_host: http://greatexpectations.okta.com
+    app_id: 123456789
+    app_name: my_aws_app
+    region: us-east-1
+    cluster_identifier: my_cluster
   my_pandas_fs_ds:
     type: pandas_filesystem
     base_directory: "."
