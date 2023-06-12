@@ -6,8 +6,6 @@ adding an exclude directive to docs/sphinx_api_docs_source/public_api_excludes.p
 
 ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/checkpoint/actions.py Name: _run",
-    "File: great_expectations/checkpoint/checkpoint.py Name: LegacyCheckpoint",
-    "File: great_expectations/checkpoint/checkpoint.py Name: run",
     "File: great_expectations/core/batch.py Name: head",
     "File: great_expectations/core/batch_spec.py Name: to_json_dict",
     "File: great_expectations/core/expectation_suite.py Name: show_expectations_by_expectation_type",
@@ -40,8 +38,6 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/data_connector/asset/asset.py Name: Asset",
     "File: great_expectations/datasource/fluent/config.py Name: get_datasource",
     "File: great_expectations/datasource/fluent/fluent_base_model.py Name: dict",
-    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: add_csv_asset",
-    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: add_table_asset",
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: dict",
     "File: great_expectations/datasource/fluent/sources.py Name: add_datasource",
     "File: great_expectations/datasource/fluent/sources.py Name: delete_datasource",
@@ -104,6 +100,5 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/datasource/fluent/sql_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/pandas_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/file_path_data_asset.py Name: get_batch_list_from_batch_request",
-    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: read_parquet",
     "File: great_expectations/util.py Name: read_parquet",
 ]

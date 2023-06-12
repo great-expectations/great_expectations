@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ErrorDetail(TypedDict):
     code: Optional[str]
     detail: Optional[str]
-    source: Optional[str]
+    source: Union[str, Dict[str, str], None]
 
 
 class ErrorPayload(TypedDict):
@@ -317,10 +317,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            logger.debug(str(e))
+            logger.debug(repr(e))
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def allowed_set_kwargs(self) -> Set[str]:
@@ -541,6 +541,25 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
+
+    def _update(self, key, value, **kwargs):
+        existing = self._get(key)
+        if key[1] is None:
+            key = (key[0], existing["data"]["id"], key[2])
+
+        return self.set(key=key, value=value, **kwargs)
+
+    def _add_or_update(self, key, value, **kwargs):
+        try:
+            existing = self._get(key)
+        except StoreBackendError as e:
+            logger.info(f"Could not find object associated with key {key}: {e}")
+            existing = None
+        if existing is not None:
+            id = key[1] if key[1] is not None else existing["data"]["id"]
+            key = (key[0], id, key[2])
+            return self.set(key=key, value=value, **kwargs)
+        return self.add(key=key, value=value, **kwargs)
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         try:

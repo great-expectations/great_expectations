@@ -20,8 +20,6 @@ from typing import (
     Union,
 )
 
-from typing_extensions import TypeAlias
-
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -32,6 +30,7 @@ from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pydantic
+    from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource import BaseDatasource, LegacyDatasource

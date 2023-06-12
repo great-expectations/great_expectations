@@ -7,7 +7,6 @@ import sys
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
-from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
@@ -30,6 +29,8 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context import FileDataContext
 
 
@@ -49,6 +50,7 @@ class SupportedDatabaseBackends(enum.Enum):
     BIGQUERY = "BigQuery"
     TRINO = "Trino"
     ATHENA = "Athena"
+    CLICKHOUSE = "Clickhouse"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -734,6 +736,26 @@ table_name = ""'''
         return "\n  connection_string: {connection_string}"
 
 
+class ClickhouseCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.CLICKHOUSE.value,
+                "api_version": "v3",
+            },
+            driver="clickhouse",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="clickhouse_sqlalchemy.drivers.base",
+            pip_library_name="clickhouse_sqlalchemy",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+
 class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
@@ -844,6 +866,7 @@ SQLYAMLHelpers: TypeAlias = Union[
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
+    ClickhouseCredentialYamlHelper,
     TrinoCredentialYamlHelper,
     AthenaCredentialYamlHelper,
 ]
@@ -860,6 +883,7 @@ def _get_sql_yaml_helper_class(
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
         SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
         SupportedDatabaseBackends.ATHENA: AthenaCredentialYamlHelper,
+        SupportedDatabaseBackends.CLICKHOUSE: ClickhouseCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]

@@ -1181,6 +1181,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             },
             CheckpointConfig(
                 **{
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,
@@ -1219,6 +1220,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             },
             CheckpointConfig(
                 **{
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,

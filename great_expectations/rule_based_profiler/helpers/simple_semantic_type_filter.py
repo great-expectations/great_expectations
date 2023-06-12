@@ -12,8 +12,6 @@ from typing import (
     Union,
 )
 
-from typing_extensions import TypeGuard
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
@@ -26,6 +24,8 @@ from great_expectations.rule_based_profiler.semantic_type_filter import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.validator.validator import Validator
 
 T = TypeVar("T")

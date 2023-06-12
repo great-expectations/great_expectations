@@ -24,7 +24,6 @@ from typing import (
 
 import numpy as np
 from scipy import stats
-from typing_extensions import TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
@@ -68,6 +67,8 @@ from great_expectations.validator.metric_configuration import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )

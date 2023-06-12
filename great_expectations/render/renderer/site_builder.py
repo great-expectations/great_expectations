@@ -1,6 +1,7 @@
 import logging
 import os
 import traceback
+import urllib
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
@@ -617,6 +618,8 @@ class DefaultSiteIndexBuilder:
                 + ".html"
             )
 
+        url_encoded_filepath = urllib.parse.quote(filepath)
+
         expectation_suite_filepath = os.path.join(  # noqa: PTH118
             "expectations", *expectation_suite_name.split(".")
         )
@@ -625,7 +628,7 @@ class DefaultSiteIndexBuilder:
         index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": filepath,
+                "filepath": url_encoded_filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
                 "validation_success": validation_success,

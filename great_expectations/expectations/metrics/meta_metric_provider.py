@@ -79,7 +79,7 @@ as of v0.13.12 and will be removed in v0.16.
 
     def __instancecheck__(cls, instance):
         return any(
-            cls.__subclasscheck__(c) for c in {type(instance), instance.__class__}
+            cls.__subclasscheck__(c) for c in (type(instance), instance.__class__)
         )
 
     def __subclasscheck__(cls, subclass):

@@ -15,7 +15,6 @@ from typing import (
 )
 
 import pandas as pd
-from typing_extensions import TypeAlias
 
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
@@ -26,7 +25,7 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.util import deep_filter_properties_iterable, load_class
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired
+    from typing_extensions import NotRequired, TypeAlias
 
     from great_expectations.alias_types import JSONValues
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
