@@ -265,13 +265,27 @@ class PasswordMasker:
 
         config_copy = safe_deep_copy(config)  # be immutable
 
+        # Define a regex to recognize azure storage connection strings
+        azure_conn_str_re = re.compile(
+            "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)([a-zA-Z0-9=\\+]+);(EndpointSuffix=([a-zA-Z\\.]+))"
+        )
+
         def recursive_cleaner_method(config: Any) -> None:
             if isinstance(config, dict):
                 for key, val in config.items():
                     if not isinstance(val, str):
                         recursive_cleaner_method(val)
                     elif key in cls.URL_KEYS:
-                        config[key] = cls.mask_db_url(val)
+                        # Special case if the connection string is for azure storage
+                        if key == "connection_string" and azure_conn_str_re.match(val):
+                            # Get the match parts
+                            m = azure_conn_str_re.match(val)
+                            # Update the connection_string while masking the password with ***
+                            config[
+                                key
+                            ] = f"DefaultEndpointsProtocol={m.group(2)};AccountName={m.group(4)};AccountKey=***;EndpointSuffix={m.group(7)}"
+                        else:
+                            config[key] = cls.mask_db_url(val)
                     elif key in cls.PASSWORD_KEYS:
                         config[key] = cls.MASKED_PASSWORD_STRING
                     else:
