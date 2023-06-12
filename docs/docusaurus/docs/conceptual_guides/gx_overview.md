@@ -7,7 +7,6 @@ import PythonVersion from '/docs/components/_python_version.mdx';
 Great Expectations (GX) is a framework for defining and running Expectations against your data. Similar to assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behaviours. Unlike traditional unit tests which describe the expected behaviour of code given a specific input, Expectations are applied to the input data itself. For example, you can define an Expectation that a column contains no null values. When GX runs that Expectation on your data it generates a report which indicates if a null value was found.
 
 
-
 ## Source Data
 
 GX uses the term Source Data when referring to data in its original format, and the term Source Data System when referring to the storage location for Source Data. No matter the format of your Source Data, or where your Source Data System is hosted, you can use GX to ensure the quality and consistency of your data.
@@ -95,9 +94,9 @@ For a list of available Expectations, see [the Expectation Gallery](https://grea
 
 ### Data Validation with GX
 
-A Checkpoint is the primary means for validating data in a production deployment of GX.  Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.  
+A Checkpoint is the primary means for validating data in a production deployment of GX.  Checkpoints provide an abstraction for bundling a Batch (or Batches) of data with an Expectation Suite (or several), and then running those Expectations against the paired data.
 
-One of the most powerful features of Checkpoints is that they can be configured to run Actions, which will do some process based on the Validation Results generated when a Checkpoint is run. Typical uses include sending email, slack, or custom notifications. Another common use case is updating Data Docs sites. However, Actions can be created to do anything you are capable of programing in Python. This gives you an incredibly versatile tool for integrating Checkpoints in your pipeline's workflow!
+One of the most powerful features of Checkpoints is that you can configure them to run Actions. The Validation Results generated when a Checkpoint runs determine what Actions are performed. Typical use cases include sending email, Slack, or custom notifications. Another common use case is updating Data Docs sites. Actions can be used to do anything you are capable of programming in Python. Actions are a versatile tool for integrating Checkpoints in your pipeline's workflow.
 
 <!-- To use Checkpoints to validate your data, see Validating data. -->
 <!-- To integrate GX with your processes, see Including GX in a data pipeline. -->
