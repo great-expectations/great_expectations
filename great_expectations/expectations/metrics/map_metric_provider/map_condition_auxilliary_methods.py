@@ -333,7 +333,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         if execution_engine.dialect_name == GXSqlDialect.MSSQL:
             with execution_engine.get_connection() as connection:
                 if not connection.closed:
-                    temp_table_obj = _generate_temp_table_for_sql_map_condition(
+                    temp_table_obj = _generate_temp_table(
                         connection=connection,
                         metric_domain_kwargs=metric_domain_kwargs,
                         metric_value_kwargs=metric_value_kwargs,
@@ -341,7 +341,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     )
                 else:
                     with connection.begin():
-                        temp_table_obj = _generate_temp_table_for_sql_map_condition(
+                        temp_table_obj = _generate_temp_table(
                             connection=connection,
                             metric_domain_kwargs=metric_domain_kwargs,
                             metric_value_kwargs=metric_value_kwargs,
@@ -832,7 +832,7 @@ def _spark_map_condition_query(
     return f"df.filter(F.expr({unexpected_condition_filtered}))"
 
 
-def _generate_temp_table_for_sql_map_condition(
+def _generate_temp_table(
     connection: sa.engine.base.Connection,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
