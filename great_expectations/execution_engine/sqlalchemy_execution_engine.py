@@ -359,6 +359,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self.dialect_name in [
             GXSqlDialect.TRINO,
             GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+            GXSqlDialect.CLICKHOUSE,
         ]:
             self._create_temp_table = False
 
@@ -401,6 +402,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="trino.sqlalchemy.dialect"
+            )
+        elif self.dialect_name == GXSqlDialect.CLICKHOUSE:
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="clickhouse_sqlalchemy.drivers.base"
             )
         else:
             self.dialect_module = None

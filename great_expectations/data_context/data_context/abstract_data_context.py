@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import uuid
 import warnings
@@ -239,12 +240,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser(  # noqa: PTH111
-            "~/.great_expectations/great_expectations.conf"
-        ),
-        "/etc/great_expectations.conf",
-    ]
+    _ROOT_CONF_DIR = pathlib.Path.home() / ".great_expectations"
+    _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
+    _ETC_CONF_DIR = pathlib.Path("/etc")
+    _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
+    GLOBAL_CONFIG_PATHS = [_ROOT_CONF_FILE, _ETC_CONF_FILE]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
@@ -4721,7 +4721,82 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
+            oss_id=self._get_oss_id(),
         )
+
+    @classmethod
+    def _get_oss_id(cls) -> uuid.UUID | None:
+        """
+        Retrieves a user's `oss_id` from disk ($HOME/.great_expectations/great_expectations.conf).
+
+        If no such value is present, a new UUID is generated and written to disk for subsequent usage.
+        If there is an error when reading from / writing to disk, we default to a NoneType.
+        """
+        config = configparser.ConfigParser()
+
+        if not cls._ROOT_CONF_FILE.exists():
+            success = cls._scaffold_root_conf()
+            if not success:
+                return None
+            return cls._set_oss_id(config)
+
+        try:
+            config.read(cls._ROOT_CONF_FILE)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to read from the user's conf file: {e}"
+            )
+            return None
+
+        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
+        if not oss_id:
+            return cls._set_oss_id(config)
+
+        return uuid.UUID(oss_id)
+
+    @classmethod
+    def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
+        """
+        Generates a random UUID and writes it to disk for subsequent usage.
+        Assumes that the root conf file exists.
+
+        Args:
+            config: The parser used to read/write the oss_id.
+
+        If there is an error when writing to disk, we default to a NoneType.
+        """
+        oss_id = uuid.uuid4()
+        config["anonymous_usage_statistics"] = {}
+        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
+
+        try:
+            with cls._ROOT_CONF_FILE.open("w") as f:
+                config.write(f)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return None
+
+        return oss_id
+
+    @classmethod
+    def _scaffold_root_conf(cls) -> bool:
+        """
+        Set up an empty root conf file ($HOME/.great_expectations/great_expectations.conf)
+
+        Returns:
+            Whether or not directory/file creation was successful.
+        """
+        try:
+            cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
+            cls._ROOT_CONF_FILE.touch()
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return False
+        return True
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""

@@ -27,11 +27,13 @@ class UsageStatisticsPayloadBuilder:
         self,
         data_context: AbstractDataContext,
         data_context_id: str,
+        oss_id: uuid.UUID | None,
         gx_version: str,
     ) -> None:
         self._data_context = data_context
         self._data_context_id = data_context_id
         self._data_context_instance_id = data_context.instance_id
+        self._oss_id = oss_id
         self._gx_version = gx_version
 
     def build_init_payload(self) -> dict:
@@ -83,6 +85,7 @@ class UsageStatisticsPayloadBuilder:
         message["data_context_instance_id"] = self._data_context_instance_id
 
         message["mac_address"] = self._determine_hashed_mac_address()
+        message["oss_id"] = str(self._oss_id) if self._oss_id else None
 
         message["event_time"] = (
             datetime.datetime.now(datetime.timezone.utc).strftime(
