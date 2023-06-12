@@ -7,7 +7,7 @@ module.exports = {
     {
       type: 'category',
       label: 'Set up your GX environment',
-      link: { type: 'doc', id: 'guides/setup/setup_overview_tiles' },
+      link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
         'guides/setup/installation/install_gx',
         'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
