@@ -1,0 +1,520 @@
+{
+    "title": "Redshift",
+    "description": "--Public API--Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"redshift+redshift_connector://redshift:@localhost/test_database\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "redshift",
+            "enum": [
+                "redshift"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": [],
+            "type": "array",
+            "items": {
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/TableAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/QueryAsset"
+                    }
+                ]
+            }
+        },
+        "connection_string": {
+            "title": "Connection String",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                }
+            ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
+        },
+        "connect_args": {
+            "title": "Connect Args",
+            "description": "Connect args for redshift",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/ConnectArgs"
+                }
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "connection_string"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "SplitterColumnValue": {
+            "title": "SplitterColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_column_value",
+                    "enum": [
+                        "split_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterMultiColumnValue": {
+            "title": "SplitterMultiColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_multi_column_values",
+                    "enum": [
+                        "split_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDividedInteger": {
+            "title": "SplitterDividedInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_divided_integer",
+                    "enum": [
+                        "split_on_divided_integer"
+                    ],
+                    "type": "string"
+                },
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "divisor"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterModInteger": {
+            "title": "SplitterModInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_mod_integer",
+                    "enum": [
+                        "split_on_mod_integer"
+                    ],
+                    "type": "string"
+                },
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "mod"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYear": {
+            "title": "SplitterYear",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year",
+                    "enum": [
+                        "split_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonth": {
+            "title": "SplitterYearAndMonth",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month",
+                    "enum": [
+                        "split_on_year_and_month"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonthAndDay": {
+            "title": "SplitterYearAndMonthAndDay",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month_and_day",
+                    "enum": [
+                        "split_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDatetimePart": {
+            "title": "SplitterDatetimePart",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_date_parts",
+                    "enum": [
+                        "split_on_date_parts"
+                    ],
+                    "type": "string"
+                },
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "column_name",
+                "datetime_parts"
+            ],
+            "additionalProperties": false
+        },
+        "TableAsset": {
+            "title": "TableAsset",
+            "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "table",
+                    "enum": [
+                        "table"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "table_name": {
+                    "title": "Table Name",
+                    "type": "string"
+                },
+                "schema_name": {
+                    "title": "Schema Name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "table_name"
+            ],
+            "additionalProperties": false
+        },
+        "QueryAsset": {
+            "title": "QueryAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "query",
+                    "enum": [
+                        "query"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "query": {
+                    "title": "Query",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "query"
+            ],
+            "additionalProperties": false
+        },
+        "ConnectArgs": {
+            "title": "ConnectArgs",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "iam": {
+                    "title": "Iam",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "credentials_provider": {
+                    "title": "Credentials Provider",
+                    "type": "string"
+                },
+                "idp_host": {
+                    "title": "Idp Host",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri",
+                    "type": "string"
+                },
+                "app_id": {
+                    "title": "App Id",
+                    "type": "string"
+                },
+                "app_name": {
+                    "title": "App Name",
+                    "type": "string"
+                },
+                "region": {
+                    "title": "Region",
+                    "type": "string"
+                },
+                "cluster_identifier": {
+                    "title": "Cluster Identifier",
+                    "type": "string"
+                },
+                "ssl_insecure": {
+                    "title": "Ssl Insecure",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "idp_host",
+                "app_id",
+                "app_name",
+                "region",
+                "cluster_identifier"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
