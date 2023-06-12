@@ -31,7 +31,7 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import (
         CheckpointResult,
     )
@@ -335,12 +335,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
     context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
+) -> Checkpoint:
     """Load a Checkpoint or raise helpful errors."""
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            name=checkpoint_name
-        )
+        checkpoint: Checkpoint = context.get_checkpoint(name=checkpoint_name)
         return checkpoint
     except (
         gx_exceptions.CheckpointNotFoundError,

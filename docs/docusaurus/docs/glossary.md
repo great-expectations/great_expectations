@@ -3,10 +3,6 @@ id: glossary
 title: "Glossary of Terms"
 ---
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
 [**Action:**](./terms/action.md) A Python class with a run method that takes a Validation Result and does something with it
 
 [**Batch:**](./terms/batch.md) A selection of records from a Data Asset.

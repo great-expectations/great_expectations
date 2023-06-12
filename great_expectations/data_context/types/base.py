@@ -36,7 +36,6 @@ from marshmallow import (
     pre_dump,
     validates_schema,
 )
-from marshmallow.validate import OneOf
 from marshmallow.warnings import RemovedInMarshmallow4Warning
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -2662,9 +2661,6 @@ class CheckpointConfigSchema(Schema):
             "validations",
             "default_validation_id",
             "profilers",
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name",
-            "batches",
             # Next fields are used by configurators
             "site_names",
             "slack_webhook",
@@ -2681,8 +2677,6 @@ class CheckpointConfigSchema(Schema):
         "slack_webhook",
         "notify_on",
         "notify_with",
-        "validation_operator_name",
-        "batches",
         "default_validation_id",
     ]
 
@@ -2722,19 +2716,6 @@ class CheckpointConfigSchema(Schema):
 
     profilers = fields.List(
         cls_or_instance=fields.Dict(), required=False, allow_none=True
-    )
-    # Next two fields are for LegacyCheckpoint configuration
-    validation_operator_name = fields.Str(required=False, allow_none=True)
-    batches = fields.List(
-        cls_or_instance=fields.Dict(
-            keys=fields.Str(
-                validate=OneOf(["batch_kwargs", "expectation_suite_names"]),
-                required=False,
-                allow_none=True,
-            )
-        ),
-        required=False,
-        allow_none=True,
     )
     # Next fields are used by configurators
     site_names = fields.Raw(required=False, allow_none=True)
@@ -2817,7 +2798,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
-        config_version: Union[int, float, None] = 1.0,
+        config_version: Union[int, float] = 1.0,
         template_name: Optional[str] = None,
         module_name: str = "great_expectations.checkpoint",
         class_name: str = "Checkpoint",
@@ -2830,8 +2811,6 @@ class CheckpointConfig(BaseYamlConfig):
         validations: Optional[List[dict]] = None,
         default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
         # the following four args are used by SimpleCheckpoint
@@ -2843,33 +2822,26 @@ class CheckpointConfig(BaseYamlConfig):
     ) -> None:
         self._name = name
         self._config_version = config_version
-        if self.config_version is None:
-            class_name = class_name or "LegacyCheckpoint"
-            self._validation_operator_name = validation_operator_name
-            if batches is not None and isinstance(batches, list):
-                self._batches = batches
-        else:
-            class_name = class_name or "Checkpoint"
-            self._template_name = template_name
-            self._run_name_template = run_name_template
-            self._expectation_suite_name = expectation_suite_name
-            self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
-            self._batch_request = batch_request or {}
-            self._action_list = action_list or []
-            self._evaluation_parameters = evaluation_parameters or {}
-            self._runtime_configuration = runtime_configuration or {}
-            self._validations = validations or []
-            self._default_validation_id = default_validation_id
-            self._profilers = profilers or []
-            self._ge_cloud_id = ge_cloud_id
-            # the following attributes are used by SimpleCheckpoint
-            self._site_names = site_names
-            self._slack_webhook = slack_webhook
-            self._notify_on = notify_on
-            self._notify_with = notify_with
+        self._template_name = template_name
+        self._run_name_template = run_name_template
+        self._expectation_suite_name = expectation_suite_name
+        self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
+        self._batch_request = batch_request or {}
+        self._action_list = action_list or []
+        self._evaluation_parameters = evaluation_parameters or {}
+        self._runtime_configuration = runtime_configuration or {}
+        self._validations = validations or []
+        self._default_validation_id = default_validation_id
+        self._profilers = profilers or []
+        self._ge_cloud_id = ge_cloud_id
+        # the following attributes are used by SimpleCheckpoint
+        self._site_names = site_names
+        self._slack_webhook = slack_webhook
+        self._notify_on = notify_on
+        self._notify_with = notify_with
 
         self._module_name = module_name or "great_expectations.checkpoint"
-        self._class_name = class_name
+        self._class_name = class_name or "Checkpoint"
 
         super().__init__(commented_map=commented_map)
 
@@ -2881,22 +2853,6 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
-
-    @property
-    def validation_operator_name(self) -> str:
-        return self._validation_operator_name  # type: ignore[return-value]
-
-    @validation_operator_name.setter
-    def validation_operator_name(self, value: str) -> None:
-        self._validation_operator_name = value
-
-    @property
-    def batches(self) -> List[dict]:
-        return self._batches
-
-    @batches.setter
-    def batches(self, value: List[dict]) -> None:
-        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
@@ -2931,7 +2887,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self) -> Union[int, float, None]:
+    def config_version(self) -> Union[int, float]:
         return self._config_version
 
     @config_version.setter

@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import uuid
 import warnings
@@ -132,6 +133,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
+from great_expectations.checkpoint import Checkpoint
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -143,7 +145,6 @@ if not SQLAlchemyError:
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
@@ -239,12 +240,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser(  # noqa: PTH111
-            "~/.great_expectations/great_expectations.conf"
-        ),
-        "/etc/great_expectations.conf",
-    ]
+    _ROOT_CONF_DIR = pathlib.Path.home() / ".great_expectations"
+    _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
+    _ETC_CONF_DIR = pathlib.Path("/etc")
+    _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
+    GLOBAL_CONFIG_PATHS = [_ROOT_CONF_FILE, _ETC_CONF_FILE]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
@@ -1722,9 +1722,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
@@ -1760,8 +1757,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
@@ -1781,8 +1776,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-    @deprecated_argument(argument_name="batches", version="0.14.0")
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -1818,9 +1811,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -1853,8 +1843,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
-            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
             site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
@@ -1893,8 +1881,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -1905,8 +1891,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
+        result: Checkpoint | CheckpointConfig
         try:
-            return self.checkpoint_store.add_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_checkpoint(checkpoint)
         except gx_exceptions.CheckpointError as e:
             # deprecated-v0.15.50
             warnings.warn(
@@ -1914,7 +1901,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
                 DeprecationWarning,
             )
-            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1930,7 +1925,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Checkpoint.
         """
-        return self.checkpoint_store.update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
+            checkpoint
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=result.name,
+            )
+        return result
 
     @overload
     def add_or_update_checkpoint(  # noqa: PLR0913
@@ -2083,7 +2087,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = (
+            self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     def _resolve_add_checkpoint_args(  # noqa: PLR0913
         self,
@@ -2101,8 +2114,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
         notify_on: str | None = None,
@@ -2141,8 +2152,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                validation_operator_name=validation_operator_name,
-                batches=batches,
                 site_names=site_names,
                 slack_webhook=slack_webhook,
                 notify_on=notify_on,
@@ -4712,7 +4721,82 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
+            oss_id=self._get_oss_id(),
         )
+
+    @classmethod
+    def _get_oss_id(cls) -> uuid.UUID | None:
+        """
+        Retrieves a user's `oss_id` from disk ($HOME/.great_expectations/great_expectations.conf).
+
+        If no such value is present, a new UUID is generated and written to disk for subsequent usage.
+        If there is an error when reading from / writing to disk, we default to a NoneType.
+        """
+        config = configparser.ConfigParser()
+
+        if not cls._ROOT_CONF_FILE.exists():
+            success = cls._scaffold_root_conf()
+            if not success:
+                return None
+            return cls._set_oss_id(config)
+
+        try:
+            config.read(cls._ROOT_CONF_FILE)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to read from the user's conf file: {e}"
+            )
+            return None
+
+        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
+        if not oss_id:
+            return cls._set_oss_id(config)
+
+        return uuid.UUID(oss_id)
+
+    @classmethod
+    def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
+        """
+        Generates a random UUID and writes it to disk for subsequent usage.
+        Assumes that the root conf file exists.
+
+        Args:
+            config: The parser used to read/write the oss_id.
+
+        If there is an error when writing to disk, we default to a NoneType.
+        """
+        oss_id = uuid.uuid4()
+        config["anonymous_usage_statistics"] = {}
+        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
+
+        try:
+            with cls._ROOT_CONF_FILE.open("w") as f:
+                config.write(f)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return None
+
+        return oss_id
+
+    @classmethod
+    def _scaffold_root_conf(cls) -> bool:
+        """
+        Set up an empty root conf file ($HOME/.great_expectations/great_expectations.conf)
+
+        Returns:
+            Whether or not directory/file creation was successful.
+        """
+        try:
+            cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
+            cls._ROOT_CONF_FILE.touch()
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return False
+        return True
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
