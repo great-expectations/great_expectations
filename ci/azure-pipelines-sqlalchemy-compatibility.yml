@@ -157,8 +157,8 @@ stages:
 
           - script: |
               # Run pytest
-              pytest --($backend) -m sqlalchemy_version_compatibility
-              pytest --($backend) -m unit
+              pytest --$(backend) -m sqlalchemy_version_compatibility
+              pytest --$(backend) -m unit
 
             displayName: 'pytest'
             env:
