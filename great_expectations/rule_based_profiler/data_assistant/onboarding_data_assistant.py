@@ -779,6 +779,10 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for text columns.
+        """
+
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
         text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(

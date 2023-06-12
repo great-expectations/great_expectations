@@ -776,6 +776,58 @@ configuration included.
     result.citation = rule_based_profiler_result.citation
 
 
+def build_map_metric_domain_builder_rule(  # noqa: PLR0913
+    rule_name: str,
+    map_metric_name: str,
+    include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+    include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+    semantic_type_filter_module_name: Optional[str] = None,
+    semantic_type_filter_class_name: Optional[str] = None,
+    include_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    exclude_semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None,
+    max_unexpected_values: Union[str, int] = 0,
+    max_unexpected_ratio: Optional[Union[str, float]] = None,
+    min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
+) -> Rule:
+    """
+    This method builds "Rule" object focused on building "Domain" objects for any "map" style metric.
+    """
+
+    map_metric_column_domain_builder: MapMetricColumnDomainBuilder = (
+        MapMetricColumnDomainBuilder(
+            map_metric_name=map_metric_name,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
+            max_unexpected_values=max_unexpected_values,
+            max_unexpected_ratio=max_unexpected_ratio,
+            min_max_unexpected_values_proportion=min_max_unexpected_values_proportion,
+            data_context=None,
+        )
+    )
+
+    rule = Rule(
+        name=rule_name,
+        variables=None,
+        domain_builder=map_metric_column_domain_builder,
+        parameter_builders=None,
+        expectation_configuration_builders=None,
+    )
+
+    return rule
+
+
 def build_map_metric_rule(  # noqa: PLR0913
     data_assistant_class_name: str,
     rule_name: str,
