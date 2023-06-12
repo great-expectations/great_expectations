@@ -156,7 +156,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integration guides',
+      label: 'Integrations',
       link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
         {
