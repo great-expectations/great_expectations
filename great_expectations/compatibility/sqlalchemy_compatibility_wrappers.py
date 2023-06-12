@@ -17,14 +17,12 @@ def read_sql_table_as_df(  # noqa: PLR0913
     schema=None,
     index_col: str | Sequence[str] | None = None,
     coerce_float: bool = True,
-    parse_dates=None,
-    columns=None,
+    parse_dates: list[str] | dict[str, str] | None = None,
+    columns: list[str] | None = None,
     chunksize: int | None = None,
-    dialect=None,
+    dialect: str = None,
 ) -> pd.DataFrame | Iterator[pd.DataFrame]:
-    """Read SQL table as DataFrame.
-
-    Wrapper for `read_sql_table()` method in Pandas. Created as part of the effort to allow GX to be compatible
+    """Wrapper for `read_sql_table()` method in Pandas. Created as part of the effort to allow GX to be compatible
     with SqlAlchemy 2, and is used to suppress warnings that arise from implicit auto-commits.
 
     Args:
