@@ -5,6 +5,7 @@ import cProfile
 import datetime
 import decimal
 import importlib
+import inspect
 import io
 import json
 import logging
@@ -2153,6 +2154,23 @@ def import_make_url():
         make_url = sqlalchemy.engine.make_url
 
     return make_url
+
+
+def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
+    ch_type = type_
+    if type(ch_type) is str:
+        if type_.lower() in ("decimal", "decimaltype()"):
+            ch_type = type_module.types.Decimal
+        elif type_.lower() in ("fixedstring"):
+            ch_type = type_module.types.String
+        else:
+            ch_type = type_module.ClickHouseDialect()._get_column_type("", ch_type)
+
+    if hasattr(ch_type, "nested_type"):
+        ch_type = type(ch_type.nested_type)
+    if not inspect.isclass(ch_type):
+        ch_type = type(ch_type)
+    return ch_type
 
 
 def get_pyathena_potential_type(type_module, type_) -> str:

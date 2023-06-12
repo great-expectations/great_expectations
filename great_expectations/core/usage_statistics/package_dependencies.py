@@ -72,6 +72,7 @@ class GXDependencies:
             "azure-storage-blob",
             "black",
             "boto3",
+            "clickhouse-sqlalchemy",
             "docstring-parser",
             "feather-format",
             "ruff",
@@ -151,6 +152,7 @@ class GXDependencies:
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
+        "clickhouse-sqlalchemy",
         "PyHive",
         "thrift",
         "thrift-sasl",
