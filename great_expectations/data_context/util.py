@@ -276,10 +276,10 @@ class PasswordMasker:
                     if not isinstance(val, str):
                         recursive_cleaner_method(val)
                     elif key in cls.URL_KEYS:
+                        # Get the match parts
+                        m = azure_conn_str_re.match(val)
                         # Special case if the connection string is for azure storage
-                        if key == "connection_string" and azure_conn_str_re.match(val):
-                            # Get the match parts
-                            m = azure_conn_str_re.match(val)
+                        if (key == "connection_string") and (m is not None):
                             # Update the connection_string while masking the password with ***
                             config[
                                 key
