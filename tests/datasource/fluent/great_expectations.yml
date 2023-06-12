@@ -35,11 +35,11 @@ fluent_datasources:
         type: table
         table_name: yellow_tripdata_sample_2019_01
         splitter:
-            column_name: pickup_datetime
-            method_name: split_on_year_and_month
+          column_name: pickup_datetime
+          method_name: split_on_year_and_month
         order_by:
-            - key: year
-            - key: month
+          - key: year
+          - key: month
   sqlite_taxi:
     type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
@@ -48,14 +48,38 @@ fluent_datasources:
         type: table
         table_name: yellow_tripdata_sample_2019_01
         splitter:
-            column_name: pickup_datetime
-            method_name: split_on_year_and_month
+          column_name: pickup_datetime
+          method_name: split_on_year_and_month
         order_by:
-            - key: year
-            - key: month
+          - key: year
+          - key: month
   my_sqlite_ds_w_subs:
     type: sqlite
     connection_string: "${MY_CONN_STR}"
+  my_redshift_ds:
+    type: redshift
+    connection_string: "redshift://userName:@hostname/dbName"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+          column_name: pickup_datetime
+          method_name: split_on_year_and_month
+        order_by:
+          - key: year
+          - key: month
+  my_redshift_ds_w_connect_args:
+    type: redshift
+    connection_string: "redshift://userName:@hostname/dbName"
+    connect_args:
+      iam: true
+      credentials_provider: OktaCredentialsProvider
+      idp_ost: greatexpectations.okta.com
+      app_id: 123456789
+      app_name: my_aws_app
+      region: us-east-1
+      cluster_identifier: my_cluster
   my_pandas_fs_ds:
     type: pandas_filesystem
     base_directory: "."
