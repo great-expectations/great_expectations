@@ -111,7 +111,7 @@ If your data fails to meet your Expectations, your data might have a quality iss
 
 Ensuring data quality is an ongoing process.  When new data comes in or existing data is updated, GX lets you reuse your existing Expectation Suites and Checkpoints to validate the new or updated Source Data.  This lets you maintain records of your data's adherence to Expectations and track trends in the quality of the validated data.  These records can help you determine if failed Expectations are due to outliers in new data, a more systemic problem, or the need to update your understanding of the data you are working with.
 
-We call this cycle of validating data the iterative GX workflow.
+This cycle of data validation is known as the iterative GX workflow.
 
  Validate Data -> Evaluate Validation Results (Accept data, improve data, or refine Expectations) -> Iterate (after you add new Datasources or update the data in existing ones)
 
