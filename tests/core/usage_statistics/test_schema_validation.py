@@ -160,6 +160,7 @@ def test_run_val_op_message():
         "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
         "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
     jsonschema.validators.Draft202012Validator(
@@ -372,6 +373,7 @@ def test_uuid_format_validation_success():
         "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
         "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
     try:
@@ -395,6 +397,7 @@ def test_uuid_format_validation_failure():
         "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5 other_invalid_text",
         "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
     with pytest.raises(jsonschema.ValidationError) as e:
