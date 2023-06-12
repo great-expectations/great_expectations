@@ -19,6 +19,7 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
@@ -41,6 +42,7 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
+    CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -54,7 +56,6 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-    from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
@@ -759,8 +760,9 @@ class CloudDataContext(SerializableDataContext):
             checkpoint=checkpoint,
         )
 
+        result: Checkpoint | CheckpointConfig
         try:
-            return self.checkpoint_store.add_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_checkpoint(checkpoint)
         except gx_exceptions.CheckpointError as e:
             # deprecated-v0.16.16
             warnings.warn(
@@ -768,7 +770,15 @@ class CloudDataContext(SerializableDataContext):
                 "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
                 DeprecationWarning,
             )
-            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     def _determine_default_action_list(self) -> Sequence[ActionDict]:
         default_actions = super()._determine_default_action_list()
