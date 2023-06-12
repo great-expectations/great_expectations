@@ -27,6 +27,8 @@ from __future__ import annotations
 import json
 from textwrap import dedent
 
+import great_expectations as gx
+import pandas as pd
 import pendulum
 
 # The DAG object; we'll need this to instantiate a DAG
@@ -63,6 +65,38 @@ with DAG(
         ti.xcom_push("order_data", data_string)
 
     # [END extract_function]
+
+    def validate_order_data_extract(**kwargs):
+        ti = kwargs["ti"]
+        extract_data_string = ti.xcom_pull(task_ids="extract", key="order_data")
+        order_data = json.loads(extract_data_string)
+
+        df = pd.DataFrame(order_data.items(), columns=["order_id", "order_value"])
+        df["order_value"] = df["order_value"].astype(float)
+
+        # Note: the following is a simple example of how to use Great Expectations in a DAG.
+        # In a production environment, you would likely want to use a different data source
+        # and/or a stored expectation suite rather than building it on each run.
+        context = gx.get_context()
+        datasource = context.sources.add_pandas(name="my_pandas_datasource")
+        data_asset = datasource.add_dataframe_asset(name="my_df")
+        my_batch_request = data_asset.build_batch_request(dataframe=df)
+        context.add_or_update_expectation_suite("my_expectation_suite")
+        validator = context.get_validator(
+            batch_request=my_batch_request,
+            expectation_suite_name="my_expectation_suite",
+        )
+        validator.expect_column_values_to_be_between(
+            column="order_value", min_value=0, max_value=1000
+        )
+        validator.save_expectation_suite(discard_failed_expectations=False)
+        checkpoint = context.add_or_update_checkpoint(
+            name="my_quickstart_checkpoint",
+            validator=validator,
+        )
+        checkpoint_result = checkpoint.run()
+        if not checkpoint_result.success:
+            raise Exception("Validation failed!")
 
     # [START transform_function]
     def transform(**kwargs):
