@@ -419,7 +419,7 @@ def test_pd_unexpected_index_query_metric_with_id_pk(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
     for val in results.values():
-        assert val == "df.loc[~df['animals'].isin(['cat', 'fish', 'dog'])]"
+        assert val == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -455,8 +455,10 @@ def test_pd_unexpected_index_query_metric_without_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
+    breakpoint()
     for val in results.values():
-        assert val == "df.loc[~df['animals'].isin(['cat', 'fish', 'dog'])]"
+        assert val == "df.filter(items=[3, 4, 5], axis=0)"
+
 
 
 @pytest.mark.integration
