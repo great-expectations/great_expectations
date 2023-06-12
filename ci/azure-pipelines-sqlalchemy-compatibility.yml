@@ -113,7 +113,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: compatibility_sql_alchemy_and_pandas
+      - job: compatibility_postgres
         timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
@@ -121,21 +121,13 @@ stages:
           # sqlalchemy and pandas minor versions that we support.
           # (versions as semver major.minor.patch)
           matrix:
-            mssql_less_than_2:
-              backend: 'mssql'
+            less_than_2:
               comparison: '<'
-            mssql_greater_than_2:
-              backend: 'mssql'
+            greater_than_2:
               comparison: '>='
-            postgres_less_than_2:
-              backend: 'postgres'
-              comparison: '<'
-            postgres_greater_than_2:
-              backend: 'postgres'
-              comparison: '>='
+
         services:
           postgres: postgres
-          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -148,17 +140,76 @@ stages:
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
-              echo "SQLAlchemy $(comparison) 2.0.0" >> constraints-dev-temp.txt
-              echo "pandas $(comparison) 2.0.0" >> constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
               
-              pip install --constraint constraints-dev.txt ".[test, $(backend)]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql]" pytest-azurepipelines
               pip install --constraint constraints-dev-temp.txt pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
           - script: |
               # Run pytest
-              pytest --($backend) -m sqlalchemy_version_compatibility
-              pytest --($backend) -m unit
+              pytest --postgresql -m sqlalchemy_version_compatibility
+              pytest --postgresql -m unit
+
+            displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: compatibility_mssql
+        timeoutInMinutes: 90
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        strategy:
+          # This matrix is intended to run against the latest patch versions of
+          # sqlalchemy and pandas minor versions that we support.
+          # (versions as semver major.minor.patch)
+          matrix:
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
+
+        services:
+          mssql: mssql 
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
+              cp constraints-dev.txt constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+              
+              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
+              pip install --constraint constraints-dev-temp.txt pytest-azurepipelines
+            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+
+          - script: |
+              # Run pytest
+              pytest --mssql -m sqlalchemy_version_compatibility
+              pytest --mssql -m unit
 
             displayName: 'pytest'
             env:
