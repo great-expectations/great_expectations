@@ -460,7 +460,6 @@ def test_pd_unexpected_index_query_metric_without_id_pk(
         assert val == "df.filter(items=[3, 4, 5], axis=0)"
 
 
-
 @pytest.mark.integration
 def test_spark_unexpected_index_query_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
