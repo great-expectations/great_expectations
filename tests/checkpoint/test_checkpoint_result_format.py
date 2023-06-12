@@ -3501,13 +3501,15 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         "unexpected_index_query"
     )
 
-    items_str = str([
-        (1, "one"),
-        (2, "two"),
-        (3, "three"),
-        (4, "four"),
-        (5, "five"),
-    ])
+    items_str = str(
+        [
+            (1, "one"),
+            (2, "two"),
+            (3, "three"),
+            (4, "four"),
+            (5, "five"),
+        ]
+    )
 
     assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
