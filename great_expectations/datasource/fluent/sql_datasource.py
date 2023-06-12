@@ -921,9 +921,12 @@ class SQLDatasource(Datasource):
                 model_dict = self.dict(
                     exclude=self._EXCLUDED_EXEC_ENG_ARGS,
                     config_provider=self._config_provider,
+                    exclude_none=True,
                 )
                 connection_string = model_dict.pop("connection_string")
                 kwargs = model_dict.pop("kwargs", {})
+                # overwrite kwargs with more specific values
+                kwargs.update(model_dict)
                 self._engine = sa.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
