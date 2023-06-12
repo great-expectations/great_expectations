@@ -189,7 +189,7 @@ Repeat the previous steps to add additional Data Assets.
 
 Connect GX to a SQLite database to access Source Data.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 

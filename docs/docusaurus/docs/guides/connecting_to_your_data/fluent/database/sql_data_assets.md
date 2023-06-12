@@ -29,6 +29,7 @@ If you're using a Datasource created with the block-config method, see [How to c
 
 :::
 
+
 <Tabs
   groupId="manage-sql-data-assets"
   defaultValue='table'
@@ -95,7 +96,7 @@ Connect GX to the data returned by a query in a SQL database.
 
 The following code examples use a previously defined Datasource named `"my_datasource"` to connect to a SQL database.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
@@ -142,7 +143,7 @@ Organize Batches in a SQL-based Data Asset. This includes using Splitters to div
 
 The following code examples use a previously defined Datasource named `"my_datasource"` to connect to a SQL database.
 
-## Prerequisites
+### Prerequisites
 
 <Prerequisites>
 
