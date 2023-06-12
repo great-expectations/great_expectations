@@ -14,6 +14,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
     Generic,
     List,
     Mapping,
@@ -371,25 +372,6 @@ class Datasource(
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Not all Datasources require a DataConnector
     data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
-    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
-        "name",
-        "type",
-        "id",
-        "execution_engine",
-        "assets",
-        "base_directory",  # filesystem argument
-        "glob_directive",  # filesystem argument
-        "data_context_root_directory",  # filesystem argument
-        "bucket",  # s3 argument
-        "boto3_options",  # s3 argument
-        "prefix",  # s3 argument and gcs argument
-        "delimiter",  # s3 argument and gcs argument
-        "max_keys",  # s3 argument
-        "bucket_or_name",  # gcs argument
-        "gcs_options",  # gcs argument
-        "max_results",  # gcs argument
-    }
     _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
         TypeLookup
     ]
@@ -447,7 +429,7 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
+            exclude=BASE_DATASOURCE_FIELD_NAMES, config_provider=self._config_provider
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -652,6 +634,12 @@ class Datasource(
         pass
 
     # End Abstract Methods
+
+
+# This is used to prevent passing things like `type`, `assets` etc. to the execution engine
+BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
+    name for name in Datasource.__fields__.keys()
+}
 
 
 @dataclasses.dataclass(frozen=True)
