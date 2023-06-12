@@ -364,4 +364,7 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
 /docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
 /docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 

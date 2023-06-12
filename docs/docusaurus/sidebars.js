@@ -40,17 +40,9 @@ module.exports = {
           items: [
             'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset',
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
-            {
-              type: 'html',
-              value: '<h4>SQL Data Assets</h4>',
-              defaultStyle: true
-            },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
-            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
+            'guides/connecting_to_your_data/fluent/database/sql_data_assets',
           ]
         },
-        { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
       ]
     },
     {
