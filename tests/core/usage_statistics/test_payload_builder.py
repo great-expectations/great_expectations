@@ -46,9 +46,13 @@ def test_usage_statistics_handler_build_envelope(
 
     context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
+    # Random UUID just for test purposes
+    oss_id = "2e0c1075-03bd-4ac7-a022-844ee614a93b"
+
     usage_statistics_handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.data_context_id,
+        oss_id=oss_id,
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
@@ -68,6 +72,7 @@ def test_usage_statistics_handler_build_envelope(
         "event_time",
         "ge_version",
         "mac_address",
+        "oss_id",
         "success",
         "version",
         "x-forwarded-for",
@@ -76,6 +81,7 @@ def test_usage_statistics_handler_build_envelope(
 
     assert envelope["version"] == "2"
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"
+    assert envelope["oss_id"] == oss_id
 
 
 @pytest.mark.unit
@@ -83,6 +89,7 @@ def test_determine_hashed_mac_address():
     builder = UsageStatisticsPayloadBuilder(
         data_context=mock.Mock(),
         data_context_id="00000000-0000-0000-0000-000000000001",
+        oss_id=None,
         gx_version=gx_version,
     )
 
