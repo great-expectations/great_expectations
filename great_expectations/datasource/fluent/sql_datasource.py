@@ -36,6 +36,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    BASE_DATASOURCE_FIELD_NAMES,
     Batch,
     DataAsset,
     Datasource,
@@ -919,7 +920,7 @@ class SQLDatasource(Datasource):
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
-                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    exclude=BASE_DATASOURCE_FIELD_NAMES,
                     config_provider=self._config_provider,
                 )
                 connection_string = model_dict.pop("connection_string")
