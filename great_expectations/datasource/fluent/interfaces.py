@@ -372,6 +372,8 @@ class Datasource(
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Not all Datasources require a DataConnector
     data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
+    # Datasource sublcasses should update this set if the field should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = set()
     _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
         TypeLookup
     ]
@@ -429,7 +431,8 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=BASE_DATASOURCE_FIELD_NAMES, config_provider=self._config_provider
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -633,11 +636,23 @@ class Datasource(
         """
         pass
 
+    @classmethod
+    def _get_exec_engine_excludes(cls) -> Set[str]:
+        """
+        Return a set of field names to exclude from the execution engine.
+
+        All datasource fields are passed to the execution engine by default unless they are in this set.
+
+        Default implementation is to return the combined set of field names from `_EXTRA_EXCLUDED_EXEC_ENG_ARGS`
+        and `_BASE_DATASOURCE_FIELD_NAMES`.
+        """
+        return cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS.union(_BASE_DATASOURCE_FIELD_NAMES)
+
     # End Abstract Methods
 
 
 # This is used to prevent passing things like `type`, `assets` etc. to the execution engine
-BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
     name for name in Datasource.__fields__.keys()
 }
 
