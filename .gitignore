@@ -41,7 +41,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-.vscode
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -128,6 +127,7 @@ gx_dev/
 *~
 
 # VS code
+.vscode
 
 .DS_Store
 **/.pytest_cache
