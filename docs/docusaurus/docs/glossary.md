@@ -51,8 +51,6 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 [**Plugin:**](./terms/plugin.md) Extends Great Expectations' components and/or functionality.
 
-[**Profile:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
-
 [**Profiler:**](./terms/profiler.md) Generates Metrics and candidate Expectations from data.
 
 [**Profiling:**](./terms/profiler.md) The act of generating Metrics and candidate Expectations from data.
@@ -62,8 +60,6 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 [**Store:**](./terms/store.md) A connector to store and retrieve information about metadata in Great Expectations.
 
 [**Supporting Resource:**](./terms/supporting_resource.md) A resource external to the Great Expectations code base which Great Expectations utilizes.
-
-[**Validate:**](./guides/validation/validate_data_overview.md) The act of applying an Expectation Suite to a Batch.
 
 [**Validation:**](./guides/validation/validate_data_overview.md) The act of applying an Expectation Suite to a Batch.
 
