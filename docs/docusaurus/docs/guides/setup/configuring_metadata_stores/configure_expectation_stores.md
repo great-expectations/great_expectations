@@ -3,6 +3,8 @@ sidebar_label: "Configure Expectation Stores"
 title: "Configure Expectation Stores"
 id: configure_expectation_stores
 description: Configure storage locations for Expectations.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import Preface from './components_how_to_configure_an_expectation_store_in_amazon_s3/_preface.mdx'

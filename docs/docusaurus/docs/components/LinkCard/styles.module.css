@@ -17,11 +17,11 @@
   }
   
   .linkCard[href]:hover {
-    background-color: var(--blue-100);
+    background-color: var(--orange-100);
   }
   
   html[data-theme="dark"] .linkCard[href]:hover {
-    background-color: var(--blue-900);
+    background-color: var(--orange-900);
   }
   
   .linkCard__icon {

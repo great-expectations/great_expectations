@@ -3,6 +3,8 @@ sidebar_label: "Instantiate a Data Context"
 title: "Instantiate a Data Context"
 id: instantiate_data_context
 description: Create and configure a Great Expectations Data Context.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
