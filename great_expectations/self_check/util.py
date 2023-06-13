@@ -619,7 +619,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901, PLR0913
+def get_test_validator_with_data(  # noqa: PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -1824,7 +1824,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[AbstractDataContext] = None,  # noqa: F821
+    context: Optional[AbstractDataContext] = None,
 ):
     """Determine tests to run
 
@@ -2326,7 +2326,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],

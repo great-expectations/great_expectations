@@ -7,9 +7,9 @@ except ImportError:
     boto3 = None
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
@@ -17,7 +17,7 @@ from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
     sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from logging import Logger
 from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type, Union
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    types as pyspark_types,
 )
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
