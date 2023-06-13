@@ -70,11 +70,19 @@ class TableColumns(TableMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        metric_value_kwargs = {
+            "include_nested": True,
+        }
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
+            # TODO: <Alex>ALEX</Alex>
+            # metric_value_kwargs={
+            #     "include_nested": True,
+            # },
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            metric_value_kwargs=metric.metric_value_kwargs or metric_value_kwargs,
+            # TODO: <Alex>ALEX</Alex>
         )
         return dependencies

@@ -33,6 +33,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        SparkDFExecutionEngine,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -217,6 +221,13 @@ class ColumnDomainBuilder(DomainBuilder):
         if validator is None:
             validator = self.get_validator(variables=variables)
 
+        execution_engine: ExecutionEngine = validator.execution_engine
+        metric_value_kwargs: dict | None = None
+        if isinstance(execution_engine, SparkDFExecutionEngine):
+            metric_value_kwargs = {
+                "include_nested": False,
+            }
+
         table_columns: List[str] = validator.get_metric(  # type: ignore[union-attr] # could be None
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -224,7 +235,7 @@ class ColumnDomainBuilder(DomainBuilder):
                     # active_batch_id
                     "batch_id": batch_ids[-1],  # type: ignore[index]
                 },
-                metric_value_kwargs=None,
+                metric_value_kwargs=metric_value_kwargs,
             )
         )
         print(
