@@ -1,19 +1,26 @@
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+
+if TYPE_CHECKING:
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 
 class DataConnectorAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(
+    def anonymize(  # type: ignore[override] # differs from parent class
         self, name: str, config: dict, obj: Optional[object] = None, **kwargs
     ) -> Any:
         anonymized_info_dict = {
@@ -45,6 +52,9 @@ class DataConnectorAnonymizer(BaseAnonymizer):
             DataConnector,
         )
 
-        return (obj is not None and isinstance(obj, DataConnector)) or (
-            "name" and kwargs and "config" in kwargs
-        )
+        is_data_connector = obj is not None and isinstance(obj, DataConnector)
+        if kwargs:
+            contains_data_connector = "name" in kwargs and "config" in kwargs
+        else:
+            contains_data_connector = False
+        return is_data_connector or contains_data_connector
