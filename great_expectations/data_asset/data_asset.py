@@ -141,7 +141,7 @@ class DataAsset:
             self
         )
 
-    @classmethod  # noqa: C901 - complexity 24
+    @classmethod  # - complexity 24
     def expectation(cls, method_arg_names):  # noqa: C901, PLR0915
         """Manages configuration and running of expectation objects.
 
@@ -1005,7 +1005,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(  # noqa: C901, PLR0912, PLR0913
+    def _format_map_output(  # noqa: PLR0912, PLR0913
         self,
         result_format,
         success,

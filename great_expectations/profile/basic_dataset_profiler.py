@@ -122,7 +122,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
     """
 
-    @classmethod  # noqa: C901
+    @classmethod
     def _profile(cls, dataset, configuration=None):  # noqa: C901, PLR0912, PLR0915
         df = dataset
 
