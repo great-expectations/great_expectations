@@ -112,8 +112,8 @@ def is_fully_qualified_parameter_name_literal_string_format(
     fully_qualified_parameter_name: str,
 ) -> bool:
     return fully_qualified_parameter_name.startswith(
-        f"{PARAMETER_KEY}"
-    ) or fully_qualified_parameter_name.startswith(f"{VARIABLES_KEY}")
+        f"{PARAMETER_PREFIX}"
+    ) or fully_qualified_parameter_name.startswith(f"{VARIABLES_PREFIX}")
 
 
 def validate_fully_qualified_parameter_name(
