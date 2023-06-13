@@ -484,22 +484,26 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     if fully_qualified_parameter_name.startswith(VARIABLES_PREFIX):
         parameter_container = variables  # type: ignore[assignment] # could be None
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
-    elif domain and fully_qualified_parameter_name.startswith(PARAMETER_PREFIX):
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_CONTAINER::get_parameter_value_by_fully_qualified_parameter_name()] FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [PARAMETER_CONTAINER::get_parameter_value_by_fully_qualified_parameter_name()] DOMAIN:\n{domain} ; TYPE: {str(type(domain))}"
-        )
-        parameter_container = parameters[domain.id]  # type: ignore[index,union-attr] # `parameters` & `domain` could be None
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
-    else:
-        raise gx_exceptions.ProfilerExecutionError(
-            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- \
+    elif fully_qualified_parameter_name.startswith(PARAMETER_PREFIX):
+        if domain:
+            print(
+                f"\n[ALEX_TEST] [PARAMETER_CONTAINER::get_parameter_value_by_fully_qualified_parameter_name()] FULLY_QUALIFIED_PARAMETER_NAME:\n{fully_qualified_parameter_name} ; TYPE: {str(type(fully_qualified_parameter_name))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [PARAMETER_CONTAINER::get_parameter_value_by_fully_qualified_parameter_name()] DOMAIN:\n{domain} ; TYPE: {str(type(domain))}"
+            )
+            parameter_container = parameters[domain.id]  # type: ignore[index,union-attr] # `parameters` & `domain` could be None
+            fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        else:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- \
 parameters, whose names start with "{PARAMETER_KEY}", require valid "Domain" object for value lookup; \
 variables, whose names start with "{VARIABLES_KEY}", do not require "Domain" object for value lookup.
 """
-        )
+            )
+    else:
+        # If not "$variables." or "$parameter.", then "$"-prefixed "fully_qualified_parameter_name" literal is passed through.
+        ...
 
     # TODO: <Alex>ALEX</Alex>
     # fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
