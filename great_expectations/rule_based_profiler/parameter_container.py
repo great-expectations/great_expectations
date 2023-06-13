@@ -431,7 +431,7 @@ def _build_parameter_node_tree_for_one_parameter(
     ] = deep_convert_properties_iterable_to_parameter_node(parameter_value)
 
 
-def get_parameter_value_by_fully_qualified_parameter_name(
+def get_parameter_value_by_fully_qualified_parameter_name(  # noqa: PLR0911
     fully_qualified_parameter_name: str,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
@@ -503,7 +503,7 @@ variables, whose names start with "{VARIABLES_KEY}", do not require "Domain" obj
             )
     else:
         # If not "$variables." or "$parameter.", then "$"-prefixed "fully_qualified_parameter_name" literal is passed through.
-        ...
+        return None
 
     # TODO: <Alex>ALEX</Alex>
     # fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
