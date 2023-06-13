@@ -358,7 +358,6 @@ def combine_backend_results(
                 examples=diagnostic_object.examples,
                 tests=diagnostic_object.tests,
                 backend_test_result_counts=backend_test_result_counts_object,
-                execution_engines=diagnostic_object.execution_engines,
             )
             expectations_info[expectation_name][
                 "maturity_checklist"
