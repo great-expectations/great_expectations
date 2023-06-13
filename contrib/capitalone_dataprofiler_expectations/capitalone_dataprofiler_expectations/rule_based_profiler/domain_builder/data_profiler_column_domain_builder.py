@@ -13,8 +13,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    VARIABLES_KEY,  # noqa: TCH001
-    ParameterContainer,  # noqa: TCH001
+    VARIABLES_KEY,
+    ParameterContainer,
 )
 from great_expectations.util import is_candidate_subset_of_target
 from great_expectations.validator.metric_configuration import MetricConfiguration

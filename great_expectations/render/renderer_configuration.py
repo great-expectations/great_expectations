@@ -409,7 +409,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             if _params:
                 renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
-                    renderer_param_type: Type[  # noqa: F841 # never used
+                    renderer_param_type: Type[
                         BaseModel
                     ] = RendererConfiguration._get_renderer_value_base_model_type(
                         name=name

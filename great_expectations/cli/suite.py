@@ -729,7 +729,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913, PLR0915
+def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,

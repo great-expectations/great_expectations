@@ -230,6 +230,52 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+
+try:
+    import clickhouse_sqlalchemy.types.common as clickhousetypes
+    from clickhouse_sqlalchemy.drivers.base import (
+        ClickHouseDialect as clickhouseDialect,
+    )
+
+    CLICKHOUSE_TYPES = {
+        "INT256": clickhousetypes.Int256,
+        "INT128": clickhousetypes.Int128,
+        "INT64": clickhousetypes.Int64,
+        "INT32": clickhousetypes.Int32,
+        "INT16": clickhousetypes.Int16,
+        "INT8": clickhousetypes.Int8,
+        "UINT256": clickhousetypes.UInt256,
+        "UINT128": clickhousetypes.UInt128,
+        "UINT64": clickhousetypes.UInt64,
+        "UINT32": clickhousetypes.UInt32,
+        "UINT16": clickhousetypes.UInt16,
+        "UINT8": clickhousetypes.UInt8,
+        "DATE": clickhousetypes.Date,
+        "DATETIME": clickhousetypes.DateTime,
+        "DATETIME64": clickhousetypes.DateTime64,
+        "FLOAT64": clickhousetypes.Float64,
+        "FLOAT32": clickhousetypes.Float32,
+        "DECIMAL": clickhousetypes.Decimal,
+        "STRING": clickhousetypes.String,
+        "BOOL": clickhousetypes.Boolean,
+        "BOOLEAN": clickhousetypes.Boolean,
+        "UUID": clickhousetypes.UUID,
+        "FIXEDSTRING": clickhousetypes.String,
+        "ENUM8": clickhousetypes.Enum8,
+        "ENUM16": clickhousetypes.Enum16,
+        "ARRAY": clickhousetypes.Array,
+        "NULLABLE": clickhousetypes.Nullable,
+        "LOWCARDINALITY": clickhousetypes.LowCardinality,
+        "TUPLE": clickhousetypes.Tuple,
+        "MAP": clickhousetypes.Map,
+    }
+except (ImportError, KeyError):
+    clickhouse = None
+    clickhousetypes = None
+    clickhouseDialect = None
+    CLICKHOUSE_TYPES = {}
+
+
 try:
     import trino
     import trino.sqlalchemy.datatype as trinotypes
@@ -403,6 +449,7 @@ SQL_DIALECT_NAMES = (
     "bigquery",
     "trino",
     "redshift",
+    "clickhouse"
     # "athena",
     "snowflake",
 )
@@ -572,7 +619,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901, PLR0913
+def get_test_validator_with_data(  # noqa: PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -906,6 +953,11 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     except AttributeError:
         pass
     try:
+        dialect_classes["clickhouse"] = clickhouseDialect
+        dialect_types["clickhouse"] = CLICKHOUSE_TYPES
+    except AttributeError:
+        pass
+    try:
         dialect_classes["trino"] = trinoDialect
         dialect_types["trino"] = TRINO_TYPES
     except AttributeError:
@@ -944,6 +996,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
+        engine = sa.create_engine(connection_string)
+    elif sa_engine_name == "clickhouse":
+        connection_string = _get_clickhouse_connection_string()
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
@@ -1493,6 +1548,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     include_mssql=False,
     include_bigquery=False,
     include_aws=False,
+    include_clickhouse=False,
     include_trino=False,
     include_azure=False,
     include_redshift=False,
@@ -1632,7 +1688,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if include_aws:
             # TODO need to come up with a better way to do this check.
-            # currently this checks the 3 default EVN variables that boto3 looks for
+            # currently this checks the 3 default ENV variables that boto3 looks for
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
@@ -1651,6 +1707,24 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     logger.warning(
                         "AWS tests are requested, but credentials were not set up"
                     )
+
+        if include_clickhouse:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_clickhouse_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "clickhouse tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"clickhouse tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["clickhouse"]
 
         if include_trino:
             # noinspection PyUnresolvedReferences
@@ -1750,7 +1824,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[AbstractDataContext] = None,  # noqa: F821
+    context: Optional[AbstractDataContext] = None,
 ):
     """Determine tests to run
 
@@ -1867,6 +1941,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
             include_mysql=dialects_to_include.get("mysql", False),
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
+            include_clickhouse=dialects_to_include.get("clickhouse", False),
             include_trino=dialects_to_include.get("trino", False),
             include_redshift=dialects_to_include.get("redshift", False),
             include_athena=dialects_to_include.get("athena", False),
@@ -2251,7 +2326,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2745,6 +2820,34 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def _get_clickhouse_connection_string(
+    hostname: str = "localhost", schema_name: str = "test"
+) -> str:
+    return f"clickhouse+native://{hostname}:9000/{schema_name}"
+
+
+def _create_clickhouse_engine(
+    hostname: str = "localhost", schema_name: str = "schema"
+) -> sqlalchemy.Engine:
+    engine = sa.create_engine(
+        _get_clickhouse_connection_string(hostname=hostname, schema_name=schema_name)
+    )
+    from clickhouse_sqlalchemy.exceptions import DatabaseException
+    from sqlalchemy import text  # noqa: TID251
+
+    with engine.begin() as conn:
+        try:
+            schemas = conn.execute(
+                text(f"show schemas from memory like {repr(schema_name)}")
+            ).fetchall()
+            if (schema_name,) not in schemas:
+                conn.execute(text(f"create schema {schema_name}"))
+        except DatabaseException:
+            pass
+
+    return engine
 
 
 def _create_trino_engine(
