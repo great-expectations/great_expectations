@@ -68,9 +68,10 @@ class Redshift(SQLDatasource):
         redshift_fields: set[str] = set(Redshift.__fields__.keys())
         return redshift_fields.difference(sql_datasource_fields)
 
-    def _get_connect_args(self) -> dict:
+    def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
-        return self.dict(exclude=excluded_fields, exclude_none=True)
+        # dump as json dict to force serialization of things like AnyUrl
+        return self._json_dict(exclude=excluded_fields, exclude_none=True)
 
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
@@ -78,7 +79,6 @@ class Redshift(SQLDatasource):
                 model_dict = self.dict(
                     exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
-                    exclude_none=True,
                 )
                 connection_string = model_dict.pop("connection_string")
                 kwargs = model_dict.pop("kwargs", {})
