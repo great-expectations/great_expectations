@@ -493,7 +493,8 @@ variables, whose names start with "{VARIABLES_KEY}", do not require "Domain" obj
 """
             )
     else:
-        return None
+        # If not "$variables." or "$parameter.", then "$"-prefixed "fully_qualified_parameter_name" literal is passed through.
+        parameter_container = ParameterContainer()
 
     fully_qualified_parameter_name_as_list: List[
         str
