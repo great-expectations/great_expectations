@@ -16,7 +16,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
@@ -34,7 +33,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.validator import Validator
 
 
@@ -62,6 +60,7 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
+        include_nested: Union[str, bool] = False,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -79,6 +78,7 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
+            include_nested: directive to process nested column fields (if supported, such as in Spark backend").
             data_context: AbstractDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
@@ -97,6 +97,8 @@ class ColumnDomainBuilder(DomainBuilder):
 
         self._include_semantic_types = include_semantic_types
         self._exclude_semantic_types = exclude_semantic_types
+
+        self._include_nested = include_nested
 
         self._semantic_type_filter = None
 
@@ -198,6 +200,19 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_semantic_types = value
 
     @property
+    def include_nested(
+        self,
+    ) -> Union[str, bool]:
+        return self._include_nested
+
+    @include_nested.setter
+    def include_nested(
+        self,
+        value: Union[str, bool],
+    ) -> None:
+        self._include_nested = value
+
+    @property
     def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
         return self._semantic_type_filter
 
@@ -219,12 +234,18 @@ class ColumnDomainBuilder(DomainBuilder):
         if validator is None:
             validator = self.get_validator(variables=variables)
 
-        execution_engine: ExecutionEngine = validator.execution_engine
-        metric_value_kwargs: dict | None = None
-        if isinstance(execution_engine, SparkDFExecutionEngine):
-            metric_value_kwargs = {
-                "include_nested": False,
-            }
+        # Obtain include_nested from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        include_nested = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.include_nested,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=None,
+        )
+
+        metric_value_kwargs = {
+            "include_nested": include_nested,
+        }
 
         print(
             f"\n[ALEX_TEST] [ColumnDomainBuilder.get_table_column_names()] METRIC_VALUE_KWARGS:\n{metric_value_kwargs} ; TYPE: {str(type(metric_value_kwargs))}"
