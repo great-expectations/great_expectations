@@ -255,6 +255,11 @@ class SqlAlchemyBatchData(BatchData):
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+        elif dialect == GXSqlDialect.CLICKHOUSE:
+            logger.warning(
+                f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.AWSATHENA:
             logger.warning(
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
