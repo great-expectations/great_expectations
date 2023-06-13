@@ -308,6 +308,9 @@ def build_parameter_container_for_variables(
     Returns:
         ParameterContainer containing all variables
     """
+    print(
+        f"\n[ALEX_TEST] [PARAMETER_CONTAINER::build_parameter_container_for_variables()] VARIABLES_CONFIGS:\n{variables_configs} ; TYPE: {str(type(variables_configs))}"
+    )
     parameter_node = ParameterNode()
     key: str
     value: Any
