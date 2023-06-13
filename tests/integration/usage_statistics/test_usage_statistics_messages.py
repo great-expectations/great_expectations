@@ -366,7 +366,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "ge_version": "0.13.0.manual_test",
         },
-        # v2 schema - persistent identifiers (mac_address & oss_id) 
+        # v2 schema - persistent identifiers (mac_address & oss_id)
         {
             "event_payload": {
                 "platform.system": "Darwin",
@@ -460,7 +460,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
-        # v2 schema - persistent identifiers (mac_address & oss_id) 
+        # v2 schema - persistent identifiers (mac_address & oss_id)
         {
             "event": "data_context.add_datasource",
             "event_payload": {
@@ -668,7 +668,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
-        # v2 schema - persistent identifiers (mac_address & oss_id) 
+        # v2 schema - persistent identifiers (mac_address & oss_id)
         {
             "event_payload": {},
             "event": "data_context.build_data_docs",
@@ -720,7 +720,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
-        # v2 schema - persistent identifiers (mac_address & oss_id) 
+        # v2 schema - persistent identifiers (mac_address & oss_id)
         {
             "event": "data_context.run_checkpoint",
             "event_payload": {},
