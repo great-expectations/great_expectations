@@ -337,6 +337,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     include_mssql: bool = "mssql" in test_backends
     include_bigquery: bool = "bigquery" in test_backends
     include_trino: bool = "trino" in test_backends
+    include_clickhouse: bool = "clickhouse" in test_backends
 
     if not sa.create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
@@ -350,6 +351,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         include_mssql=include_mssql,
         include_bigquery=include_bigquery,
         include_trino=include_trino,
+        include_clickhouse=include_clickhouse,
     )
 
     df: pd.DataFrame = pd.DataFrame(
