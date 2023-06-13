@@ -491,8 +491,8 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     else:
         raise gx_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- \
-parameters, whose names start with "{PARAMETER_PREFIX}", require valid "Domain" object for value lookup; \
-variables, whose names start with "{VARIABLES_PREFIX}", do not require "Domain" object for value lookup.
+parameters, whose names start with "{PARAMETER_KEY}", require valid "Domain" object for value lookup; \
+variables, whose names start with "{VARIABLES_KEY}", do not require "Domain" object for value lookup.
 """
         )
 
