@@ -67,9 +67,6 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
-    'checkpoint/actions\.py',  # 18
-    'checkpoint/types/checkpoint_result\.py',  # 34
-    'cli/checkpoint\.py',  # 9
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
@@ -180,8 +177,6 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 17
     'render/view/view\.py',  # 11
-    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 23
-    'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
