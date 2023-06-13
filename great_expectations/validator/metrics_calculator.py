@@ -94,7 +94,7 @@ class MetricsCalculator:
             domain_kwargs[
                 "batch_id"
             ] = self._execution_engine.batch_manager.active_batch_id
-        #breakpoint()
+        # breakpoint()
 
         df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
