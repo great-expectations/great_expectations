@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
         PostgresDatasource,
+        Redshift,
         SparkAzureBlobStorageDatasource,
         SparkDatasource,
         SparkDBFSDatasource,
@@ -49,6 +50,7 @@ if TYPE_CHECKING:
         DataAsset,
         Datasource,
     )
+    from great_expectations.datasource.fluent.redshift import RedshiftDsn
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
@@ -551,6 +553,53 @@ class _SourceFactories:
         create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def delete_sqlite(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_redshift(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, RedshiftDsn, str] = ...,
+        create_temp_table: bool = True,
+        iam: bool = True,
+        credentials_provider: Optional[str] = None,
+        idp_host: Optional[Union[pydantic.AnyUrl, str]] = None,
+        app_id: Optional[str] = None,
+        app_name: Optional[str] = None,
+        region: Optional[str] = None,
+        cluster_identifier: Optional[str] = None,
+        ssl_insecure: bool = False,
+    ) -> Redshift: ...
+    def update_redshift(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, RedshiftDsn, str] = ...,
+        create_temp_table: bool = True,
+        iam: bool = True,
+        credentials_provider: Optional[str] = None,
+        idp_host: Optional[Union[pydantic.AnyUrl, str]] = None,
+        app_id: Optional[str] = None,
+        app_name: Optional[str] = None,
+        region: Optional[str] = None,
+        cluster_identifier: Optional[str] = None,
+        ssl_insecure: bool = False,
+    ) -> Redshift: ...
+    def add_or_update_redshift(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, RedshiftDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> Redshift: ...
+    def delete_redshift(
         self,
         name: str,
     ) -> None: ...
