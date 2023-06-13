@@ -79,8 +79,6 @@ exclude = [
     'core/usage_statistics/anonymizers/data_docs_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/datasource_anonymizer\.py', # 9
     'core/usage_statistics/anonymizers/expectation_anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
@@ -437,7 +435,7 @@ filterwarnings = [
     # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
     # sqlalchemy.exc.SADeprecationWarning: The dbapi() classmethod on dialect classes has been renamed to import_dbapi().  Implement an import_dbapi() classmethod directly on class <class 'trino.sqlalchemy.dialect.TrinoDialect'> to remove this warning; the old .dbapi() classmethod may be maintained for backwards compatibility.
     'ignore: The dbapi\(\) classmethod on dialect classes has been renamed to import_dbapi\(\):DeprecationWarning',
-    
+
     # six
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()

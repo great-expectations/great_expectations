@@ -1,20 +1,27 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
 from great_expectations.data_context.store.store_backend import StoreBackend
+
+if TYPE_CHECKING:
+    from great_expectations.core.usage_statistics.anonymizers.anonymizer import (
+        Anonymizer,
+    )
 
 
 class StoreBackendAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",  # noqa: F821
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(
+    def anonymize(  # type: ignore[override] # different signature from parent class
         self,
         obj: Optional[object] = None,
         store_backend_obj: Optional[StoreBackend] = None,
@@ -23,13 +30,13 @@ class StoreBackendAnonymizer(BaseAnonymizer):
         assert (
             store_backend_obj or store_backend_object_config
         ), "Must pass store_backend_obj or store_backend_object_config."
-        anonymized_info_dict = {}
+        anonymized_info_dict: dict = {}
         if store_backend_obj is not None:
             self._anonymize_object_info(
                 object_=store_backend_obj,
                 anonymized_info_dict=anonymized_info_dict,
             )
-        else:
+        elif store_backend_object_config is not None:
             class_name = store_backend_object_config.get("class_name")
             module_name = store_backend_object_config.get("module_name")
             if module_name is None:
