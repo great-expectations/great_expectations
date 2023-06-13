@@ -5,14 +5,18 @@ from typing import TYPE_CHECKING, Literal, Optional, Union
 import pydantic
 from pydantic import AnyUrl
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent import SQLDatasource
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.sql_datasource import (
+    SQLDatasource,
+    SQLDatasourceError,
+)
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.sqlalchemy import (
-        sqlalchemy as sa,
-    )
+    from great_expectations.compatibility import sqlalchemy
+    from great_expectations.datasource.fluent.config_str import ConfigStr
 
 
 class RedshiftDsn(pydantic.PostgresDsn):
@@ -49,6 +53,39 @@ class Redshift(SQLDatasource):
     cluster_identifier: Optional[str] = None
     ssl_insecure: bool = False
 
-    def get_engine(self) -> sa.engine.Engine:
-        # TODO: implement this
-        return super().get_engine()
+    @classmethod
+    def _get_exec_engine_excludes(cls) -> set[str]:
+        sql_datasource_fields: set[str] = set(SQLDatasource.__fields__.keys())
+        redshift_fields: set[str] = set(Redshift.__fields__.keys())
+        return redshift_fields.difference(sql_datasource_fields)
+
+    def _get_connect_args(self) -> dict:
+        excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
+        return self.dict(exclude=excluded_fields, exclude_none=True)
+
+    def get_engine(self) -> sqlalchemy.Engine:
+        if self.connection_string != self._cached_connection_string or not self._engine:
+            try:
+                model_dict = self.dict(
+                    exclude=self._get_exec_engine_excludes(),
+                    config_provider=self._config_provider,
+                    exclude_none=True,
+                )
+                connection_string = model_dict.pop("connection_string")
+                kwargs = model_dict.pop("kwargs", {})
+
+                connect_args = self._get_connect_args()
+                if connect_args:
+                    kwargs["connect_args"] = connect_args
+
+                self._engine = sa.create_engine(connection_string, **kwargs)
+            except Exception as e:
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # one possible case is a missing plugin (e.g. psycopg2)
+                raise SQLDatasourceError(
+                    "Unable to create a SQLAlchemy engine from "
+                    f"connection_string: {self.connection_string} due to the "
+                    f"following exception: {str(e)}"
+                ) from e
+            self._cached_connection_string = self.connection_string
+        return self._engine
