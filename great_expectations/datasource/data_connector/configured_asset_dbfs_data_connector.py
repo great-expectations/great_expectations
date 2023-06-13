@@ -5,8 +5,8 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

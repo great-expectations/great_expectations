@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent import (
     _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime  # noqa: TCH001 # needed at runtime
+    ConfigStr,  # needed at runtime  # needed at runtime
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (

@@ -10,7 +10,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

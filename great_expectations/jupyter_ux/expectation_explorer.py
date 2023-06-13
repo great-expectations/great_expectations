@@ -566,7 +566,7 @@ class ExpectationExplorer:
     def generate_zero_or_positive_integer_widget(
         self,
         value,
-        max=int(9e300),  # noqa: B008 # function-call-in-default-argument
+        max=int(9e300),  # function-call-in-default-argument
         description="",
         continuous_update=False,
     ):

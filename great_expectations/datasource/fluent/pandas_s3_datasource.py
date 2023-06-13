@@ -9,7 +9,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,  # needed at runtime
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 BOTO3_IMPORTED = False
 try:
-    import boto3  # noqa: disable=E0602
+    import boto3  # : disable=E0602
 
     BOTO3_IMPORTED = True
 except ImportError:
