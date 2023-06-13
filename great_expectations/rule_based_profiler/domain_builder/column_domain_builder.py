@@ -264,9 +264,6 @@ with names beginning with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
             "include_nested": include_nested,
         }
 
-        print(
-            f"\n[ALEX_TEST] [ColumnDomainBuilder.get_table_column_names()] METRIC_VALUE_KWARGS:\n{metric_value_kwargs} ; TYPE: {str(type(metric_value_kwargs))}"
-        )
         table_columns: List[str] = validator.get_metric(  # type: ignore[union-attr] # could be None
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -276,9 +273,6 @@ with names beginning with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
                 },
                 metric_value_kwargs=metric_value_kwargs,
             )
-        )
-        print(
-            f"\n[ALEX_TEST] [ColumnDomainBuilder.get_table_column_names()] TABLE_COLUMNS:\n{table_columns} ; TYPE: {str(type(table_columns))}"
         )
         self._table_column_names = table_columns
 
