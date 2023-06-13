@@ -1136,6 +1136,48 @@ def test_validator_include_rendered_content_diagnostic(
 
 
 @pytest.mark.unit
+def test_rendered_content_bool_only_respected():
+
+    context = get_context(cloud_mode=False)
+
+    # csv_asset = context.sources.pandas_default.add_csv_asset(
+    #     name="my_csv_asset",
+    #     filepath_or_buffer="https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+    # )
+    pd.DataFrame(
+
+    )
+    csv_asset = context.sources.pandas_default.add_dataframe_asset("df")
+
+    batch_request = csv_asset.build_batch_request()
+
+    expectation_suite_name = "test_result_format_suite"
+
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    # result_format can look like this:
+    result_format = "BOOLEAN_ONLY"
+    # or like this
+    result_format = {"result_format": "BOOLEAN_ONLY"}
+
+    expectation_validation_result = validator.expect_column_max_to_be_between(
+        column="passenger_count",
+        min_value=4,
+        max_value=7,
+        result_format=result_format,
+    )
+    breakpoint()
+    assert not expectation_validation_result.result
+
+
+@pytest.mark.unit
 def test___dir___contains_expectation_impls(
     validator_with_mock_execution_engine: Validator,
 ) -> None:
