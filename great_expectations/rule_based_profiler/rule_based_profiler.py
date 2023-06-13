@@ -136,10 +136,16 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables = {}
 
         # Convert variables argument to ParameterContainer
+        print(
+            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::__INIT__()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
+        )
         _variables: ParameterContainer = build_parameter_container_for_variables(
             variables_configs=variables
         )
         self.variables = _variables
+        print(
+            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::__INIT__()] SELF.VARIABLES:\n{self.variables} ; TYPE: {str(type(self.variables))}"
+        )
 
         self._usage_statistics_handler = usage_statistics_handler
 

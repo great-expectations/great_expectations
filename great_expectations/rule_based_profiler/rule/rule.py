@@ -73,6 +73,9 @@ class Rule(SerializableDictDot):
         if isinstance(variables, ParameterContainer):
             _variables = variables
         else:
+            print(
+                f"\n[ALEX_TEST] [Rule::__INIT__()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
+            )
             _variables = build_parameter_container_for_variables(
                 variables_configs=variables
             )
@@ -115,6 +118,9 @@ class Rule(SerializableDictDot):
         if not reconciliation_directives:
             reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
 
+        print(
+            f"\n[ALEX_TEST] [Rule::run()] SELF.VARIABLES:\n{self.variables} ; TYPE: {str(type(self.variables))}"
+        )
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
                 variables=self.variables,
