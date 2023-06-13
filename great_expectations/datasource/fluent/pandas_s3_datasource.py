@@ -48,6 +48,11 @@ class PandasS3DatasourceError(PandasDatasourceError):
 class PandasS3Datasource(_PandasFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket",
+        "boto3_options",
+    }
 
     # instance attributes
     type: Literal["pandas_s3"] = "pandas_s3"

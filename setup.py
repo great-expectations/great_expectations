@@ -18,6 +18,7 @@ def get_extras_require():
     sqla_keys = (
         "athena",
         "bigquery",
+        "clickhouse",
         "dremio",
         "mssql",
         "mysql",

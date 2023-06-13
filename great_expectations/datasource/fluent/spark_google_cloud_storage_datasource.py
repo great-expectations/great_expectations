@@ -44,6 +44,12 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     data_connector_type: ClassVar[
         Type[GoogleCloudStorageDataConnector]
     ] = GoogleCloudStorageDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket_or_name",
+        "gcs_options",
+        "max_results",
+    }
 
     # instance attributes
     type: Literal["spark_gcs"] = "spark_gcs"

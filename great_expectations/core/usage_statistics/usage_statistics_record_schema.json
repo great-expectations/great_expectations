@@ -5215,6 +5215,13 @@
     "mac_address": {
       "type": "string"
     },
+    "oss_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
     "event_time": {
       "type": "string",
       "format": "date-time"
@@ -5525,6 +5532,7 @@
     "data_context_id",
     "data_context_instance_id",
     "mac_address",
+    "oss_id",
     "ge_version",
     "event",
     "success",

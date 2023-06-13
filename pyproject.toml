@@ -67,6 +67,9 @@ exclude = [
     # #################################################################################
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
+    'checkpoint/actions\.py',  # 18
+    'checkpoint/types/checkpoint_result\.py',  # 34
+    'cli/checkpoint\.py',  # 9
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
@@ -431,6 +434,11 @@ filterwarnings = [
     # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
     'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
 
+    # trino
+    # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
+    # sqlalchemy.exc.SADeprecationWarning: The dbapi() classmethod on dialect classes has been renamed to import_dbapi().  Implement an import_dbapi() classmethod directly on class <class 'trino.sqlalchemy.dialect.TrinoDialect'> to remove this warning; the old .dbapi() classmethod may be maintained for backwards compatibility.
+    'ignore: The dbapi\(\) classmethod on dialect classes has been renamed to import_dbapi\(\):DeprecationWarning',
+    
     # six
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
