@@ -246,7 +246,7 @@ def convert_to_json_serializable(
     ...
 
 
-@public_api  # noqa: C901 - complexity 32
+@public_api  # - complexity 32
 def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     data: JSONConvertable,
 ) -> JSONValues:

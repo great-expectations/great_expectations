@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Uni
 from makefun import create_function
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchRequestBase  # noqa: TCH001
+from great_expectations.core.batch import BatchRequestBase
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa: TCH001

@@ -14,7 +14,7 @@ from great_expectations_contrib.package import GreatExpectationsContribPackageMa
 URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecutter"
 PACKAGE_PATH = os.path.join(  # noqa: PTH118
     os.getcwd(), ".great_expectations_package.json"  # noqa: PTH109
-)  # noqa: PTH118, PTH109
+)
 
 
 @click.group()

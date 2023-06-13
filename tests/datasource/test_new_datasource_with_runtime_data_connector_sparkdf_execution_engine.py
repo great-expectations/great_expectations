@@ -113,7 +113,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
         spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
-    )  # noqa: F821
+    )
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
         # Test for an unknown datasource
@@ -402,9 +402,7 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
     )
 
     my_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
-        spark_session.createDataFrame(  # noqa: F821
-            pd.DataFrame({"x": range(10), "y": range(10)})
-        )
+        spark_session.createDataFrame(pd.DataFrame({"x": range(10), "y": range(10)}))
     )
     batch: Batch = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
