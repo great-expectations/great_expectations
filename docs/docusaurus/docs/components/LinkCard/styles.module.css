@@ -25,7 +25,7 @@
   }
   
   .linkCard__icon {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,7 +33,7 @@
   
   .linkCard__copy {
     color: var(--ifm-font-color-base);
-    flex: 0 0 75%;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
