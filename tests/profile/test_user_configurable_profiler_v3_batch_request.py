@@ -981,12 +981,6 @@ def test_profiler_all_expectation_types_pandas(
 
 
 @pytest.mark.skipif(
-    is_version_greater_or_equal(pd.__version__, "2.0.0"),
-    reason="pyspark 3.4.0 is not compatible with pandas 2.0.0.",
-    run=True,
-    strict=True,
-)
-@pytest.mark.skipif(
     not is_library_loadable(library_name="pyspark"),
     reason="requires pyspark to be installed",
 )
@@ -1115,12 +1109,6 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
-@pytest.mark.skipif(
-    is_version_greater_or_equal(pd.__version__, "2.0.0"),
-    reason="pyspark 3.4.0 is not compatible with pandas 2.0.0.",
-    run=True,
-    strict=True,
-)
 def test_expect_compound_columns_to_be_unique(
     taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
