@@ -23,7 +23,7 @@ echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 # TODO: Only initialize if not already initialized
 
 print_orange_header "Initializing airflow"
-docker compose up airflow-init
+docker compose up airflow-init --build
 
 print_orange_header "Starting airflow containers"
-docker compose up
+docker compose up --build
