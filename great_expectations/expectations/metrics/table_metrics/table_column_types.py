@@ -79,6 +79,9 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: dict,
     ):
+        print(
+            f"\n[ALEX_TEST] [ColumnTypes._spark()] INCLUDE_NESTED:\n{metric_value_kwargs['include_nested']} ; TYPE: {str(type(metric_value_kwargs['include_nested']))}"
+        )
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
