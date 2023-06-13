@@ -112,8 +112,8 @@ def is_fully_qualified_parameter_name_literal_string_format(
     fully_qualified_parameter_name: str,
 ) -> bool:
     return fully_qualified_parameter_name.startswith(
-        f"{PARAMETER_PREFIX}"
-    ) or fully_qualified_parameter_name.startswith(f"{VARIABLES_PREFIX}")
+        f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
+    )
 
 
 def validate_fully_qualified_parameter_name(
@@ -123,8 +123,8 @@ def validate_fully_qualified_parameter_name(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
         raise gx_exceptions.ProfilerExecutionError(
-            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- \
-parameter names must start with "{PARAMETER_KEY}", and variable names must start with "{VARIABLES_KEY}".
+            message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
+names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
 """
         )
 
