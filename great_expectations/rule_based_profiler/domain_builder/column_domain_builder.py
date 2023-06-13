@@ -246,19 +246,14 @@ class ColumnDomainBuilder(DomainBuilder):
             parameters=None,
         )
 
-        if isinstance(validator.execution_engine, SparkDFExecutionEngine):
-            if include_nested:
-                raise ValueError(
-                    f"""Current version of "{self.__class__.__name__}" does not support nested columns and columns \
-with names beginning with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}" character.
+        if (
+            isinstance(validator.execution_engine, SparkDFExecutionEngine)
+            and include_nested
+        ):
+            raise ValueError(
+                f"""Current version of "{self.__class__.__name__}" does not support nested columns for Spark backend.
 """
-                )
-            else:
-                warnings.warn(
-                    f"""Current version of "{self.__class__.__name__}" does not support nested columns and columns \
-with names beginning with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}" character; skipping those columns.
-"""
-                )
+            )
 
         metric_value_kwargs = {
             "include_nested": include_nested,
@@ -274,7 +269,22 @@ with names beginning with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}"
                 metric_value_kwargs=metric_value_kwargs,
             )
         )
-        self._table_column_names = table_columns
+
+        column_name: str
+        table_column_names: list[str] = list(
+            filter(
+                lambda column_name: FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER
+                not in column_name,
+                table_columns,
+            )
+        )
+        if len(table_column_names) < len(table_columns):
+            warnings.warn(
+                f"""Current version of "{self.__class__.__name__}" does not support columns whose names begin with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}" character; skipping those columns.
+"""
+            )
+
+        self._table_column_names = table_column_names
 
         return self._table_column_names
 
