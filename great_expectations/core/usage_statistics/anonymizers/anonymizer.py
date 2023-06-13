@@ -71,7 +71,7 @@ class Anonymizer(BaseAnonymizer):
 
         # noinspection PyArgumentList
         self._anonymizers: Dict[Type[BaseAnonymizer], BaseAnonymizer] = {
-            strategy: strategy(salt=self._salt, aggregate_anonymizer=self)
+            strategy: strategy(salt=self._salt, aggregate_anonymizer=self)  # type: ignore[call-arg] # BaseAnonymizer has kwarg `aggregate_anonymizer`
             for strategy in self._strategies
         }
 
@@ -128,7 +128,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for name, config in payload.items():
-            anonymize_value: dict = anonymizer._anonymize_datasource_info(
+            anonymize_value: dict = anonymizer._anonymize_datasource_info(  # type: ignore[attr-defined] # _anonymize_datasource_info not defined
                 name=name, config=config
             )
             anonymized_values.append(anonymize_value)
