@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
@@ -133,7 +135,7 @@ class Anonymizer(BaseAnonymizer):
 
         return anonymized_values
 
-    def _anonymize_stores_init_payload(self, payload: Dict[str, "Store"]) -> List[dict]:
+    def _anonymize_stores_init_payload(self, payload: Dict[str, Store]) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
@@ -151,7 +153,7 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_validation_operator_init_payload(
-        self, payload: Optional[Dict[str, "ValidationOperator"]] = None
+        self, payload: Optional[Dict[str, ValidationOperator]] = None
     ) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
@@ -191,7 +193,7 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_expectation_suite_init_payload(
-        self, payload: List["ExpectationSuite"]
+        self, payload: List[ExpectationSuite]
     ) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
             ExpectationSuiteAnonymizer,
