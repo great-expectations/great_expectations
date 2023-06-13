@@ -132,7 +132,7 @@ class SqlAlchemyBatchData(BatchData):
                     sa.MetaData(),
                     schema=schema_name,
                 )
-        elif query:  # noqa: PLR5501
+        elif query:
             self._selectable = sa.text(query)
         elif create_temp_table:
             generated_table_name = generate_temporary_table_name()
