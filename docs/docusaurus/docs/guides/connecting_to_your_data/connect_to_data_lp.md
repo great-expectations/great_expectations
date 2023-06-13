@@ -13,6 +13,6 @@ import LinkCard from '/docs/components/LinkCard';
 <LinkCardGrid>
   <LinkCard topIcon label="Connect to filesystem Source Data" description="Connect to filesystem Source Data" href="/docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data" icon="/img/connect_icon.svg" />
   <LinkCard topIcon label="Connect to in-memory Source Data using Pandas" description="Connect to in-memory Source Data using Pandas" href="/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas" icon="/img/connect_icon.svg" />
-  <LinkCard topIcon label="Connect to SQL database Source Data" description="Connect to Source Data stored on SQL databases" href="/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data" icon="/img/configure_icon.svg" />
-  <LinkCard topIcon label="Manage Data Assets" description="Request data from a Datasource and organize Batches in file-based and SQL Data Assets" href="/docs/guides/connecting_to_your_data/manage_data_assets_lp" icon="/img/configure_icon.svg" />
+  <LinkCard topIcon label="Connect to SQL database Source Data" description="Connect to Source Data stored on SQL databases" href="/docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data" icon="/img/connect_icon.svg" />
+  <LinkCard topIcon label="Manage Data Assets" description="Request data from a Datasource and organize Batches in file-based and SQL Data Assets" href="/docs/guides/connecting_to_your_data/manage_data_assets_lp" icon="/img/manage_icon.svg" />
 </LinkCardGrid>
