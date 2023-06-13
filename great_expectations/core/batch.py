@@ -16,7 +16,7 @@ from typing import (
 
 import pandas as pd
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import DataFrame as pyspark_DataFrame
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -690,9 +690,9 @@ class BatchData:
         return pd.DataFrame({})
 
 
-if pyspark:
+if pyspark_DataFrame:
     BatchDataType: TypeAlias = Union[
-        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
+        Type[BatchData], Type[pd.DataFrame], Type[pyspark_DataFrame]
     ]
 else:
     BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
