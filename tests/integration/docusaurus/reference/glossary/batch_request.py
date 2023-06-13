@@ -30,6 +30,10 @@ asset = datasource.add_csv_asset(
     order_by=["year", "month"],
 )
 
+# Use splitter function to indicate which column you will be splitting on
+asset.add_splitter_column_value(column_name = "year") 
+asset.add_splitter_column_value(column_name = "month") 
+
 batch_request = asset.build_batch_request(options={"year": "2019", "month": "02"})
 # </snippet>
 
