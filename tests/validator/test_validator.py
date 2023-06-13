@@ -1136,23 +1136,18 @@ def test_validator_include_rendered_content_diagnostic(
 
 
 @pytest.mark.unit
-def test_rendered_content_bool_only_respected():
-
-    context = get_context(cloud_mode=False)
-
-    # csv_asset = context.sources.pandas_default.add_csv_asset(
-    #     name="my_csv_asset",
-    #     filepath_or_buffer="https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
-    # )
-    pd.DataFrame(
-
-    )
-    csv_asset = context.sources.pandas_default.add_dataframe_asset("df")
-
+@pytest.mark.parametrize(
+    "result_format",
+    [ "BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(result_format: str | dict):
+    context = get_context()
+    csv_asset = context.sources.pandas_default.add_dataframe_asset("df", dataframe=pd.DataFrame(
+        data=[1, 2, 3],
+        columns=["numbers_i_can_count_to"],
+    ))
     batch_request = csv_asset.build_batch_request()
-
     expectation_suite_name = "test_result_format_suite"
-
     context.add_or_update_expectation_suite(
         expectation_suite_name=expectation_suite_name,
     )
@@ -1162,19 +1157,13 @@ def test_rendered_content_bool_only_respected():
         expectation_suite_name=expectation_suite_name,
     )
 
-    # result_format can look like this:
-    result_format = "BOOLEAN_ONLY"
-    # or like this
-    result_format = {"result_format": "BOOLEAN_ONLY"}
-
     expectation_validation_result = validator.expect_column_max_to_be_between(
-        column="passenger_count",
-        min_value=4,
-        max_value=7,
+        column="numbers_i_can_count_to",
+        min_value=1000,
+        max_value=10000,
         result_format=result_format,
     )
-    breakpoint()
-    assert not expectation_validation_result.result
+    assert expectation_validation_result.result == {}
 
 
 @pytest.mark.unit
