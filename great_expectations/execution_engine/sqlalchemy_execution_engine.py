@@ -736,6 +736,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
+            # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            if not isinstance(selectable, sa.Table):
+                selectable = selectable.subquery()
+
             selectable = (
                 sa.select(sa.text("*"))
                 .select_from(selectable)
