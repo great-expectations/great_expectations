@@ -144,7 +144,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for store_name, store_obj in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
+            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
                 store_name=store_name,
                 store_obj=store_obj,
             )
@@ -166,7 +166,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for validation_operator_name, validation_operator_obj in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
+            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
                 validation_operator_name=validation_operator_name,
                 validation_operator_obj=validation_operator_obj,
             )
@@ -185,7 +185,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for site_name, site_config in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(
+            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
                 site_name=site_name, site_config=site_config
             )
             anonymized_values.append(anonymize_value)
