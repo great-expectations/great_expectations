@@ -919,7 +919,7 @@ class SQLDatasource(Datasource):
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
-                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                     exclude_none=True,
                 )

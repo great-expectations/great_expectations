@@ -50,6 +50,11 @@ class SparkS3DatasourceError(SparkDatasourceError):
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket",
+        "boto3_options",
+    }
 
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"
