@@ -106,9 +106,9 @@ class UsageStatisticsHandler:
     def _teardown(self, signum: int, frame: FrameType | None) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
-            self._sigterm_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.signal() returns an int
+            self._sigterm_handler(signum, frame)  # type: ignore[operator] # mypy thinks signal.signal() returns an int
         if signum == signal.SIGINT and self._sigint_handler:
-            self._sigint_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.singal() returns an int
+            self._sigint_handler(signum, frame)  # type: ignore[operator] # mypy thinks signal.singal() returns an int
 
     def _close_worker(self) -> None:
         self._message_queue.put(STOP_SIGNAL)
@@ -239,7 +239,7 @@ def usage_statistics_enabled_method(
         ENABLED_METHODS[func.__qualname__] = event_name
     if callable(func):
         if event_name is None:
-            event_name = func.__name__ # type: ignore[assignment] # Generate a useful name but not part of UsageStatsEvents enum
+            event_name = func.__name__  # type: ignore[assignment] # Generate a useful name but not part of UsageStatsEvents enum
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
@@ -420,7 +420,9 @@ def add_datasource_usage_statistics(
     try:
         if not name and datasource:
             name = datasource.name
-        assert name, "Guaranteed to have name from either `name` or `datasource` input args"
+        assert (
+            name
+        ), "Guaranteed to have name from either `name` or `datasource` input args"
 
         payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
@@ -466,7 +468,9 @@ def get_checkpoint_run_usage_statistics(
     *args,
     **kwargs,
 ) -> dict:
-    usage_statistics_handler: UsageStatisticsHandler | None = checkpoint._usage_statistics_handler
+    usage_statistics_handler: UsageStatisticsHandler | None = (
+        checkpoint._usage_statistics_handler
+    )
 
     data_context_id: str | None = None
     try:
@@ -492,9 +496,7 @@ def get_checkpoint_run_usage_statistics(
                 )
             )
 
-            payload = anonymizer.anonymize(
-                *(checkpoint,), **resolved_runtime_kwargs
-            )
+            payload = anonymizer.anonymize(*(checkpoint,), **resolved_runtime_kwargs)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_checkpoint_run_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
@@ -511,7 +513,9 @@ def get_profiler_run_usage_statistics(
     *args: tuple,
     **kwargs: dict,
 ) -> dict:
-    usage_statistics_handler: UsageStatisticsHandler | None = profiler._usage_statistics_handler
+    usage_statistics_handler: UsageStatisticsHandler | None = (
+        profiler._usage_statistics_handler
+    )
 
     data_context_id: str | None = None
     if usage_statistics_handler:
