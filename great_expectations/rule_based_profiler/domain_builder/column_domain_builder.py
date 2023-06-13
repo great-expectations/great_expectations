@@ -16,6 +16,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
@@ -33,10 +34,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        SparkDFExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.validator import Validator
 
 
