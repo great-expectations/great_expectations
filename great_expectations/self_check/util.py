@@ -1688,7 +1688,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if include_aws:
             # TODO need to come up with a better way to do this check.
-            # currently this checks the 3 default EVN variables that boto3 looks for
+            # currently this checks the 3 default ENV variables that boto3 looks for
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
