@@ -27,3 +27,4 @@ docker compose up airflow-init --build
 
 print_orange_header "Starting airflow containers"
 docker compose up --build
+# TODO: pass ARG PYTHON_BASE_IMAGE="python:3.8-slim-bullseye" to docker compose via build arg
