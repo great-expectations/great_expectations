@@ -108,7 +108,7 @@ class UsageStatisticsHandler:
         if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)  # type: ignore[operator] # mypy thinks signal.signal() returns an int
         if signum == signal.SIGINT and self._sigint_handler:
-            self._sigint_handler(signum, frame)  # type: ignore[operator] # mypy thinks signal.singal() returns an int
+            self._sigint_handler(signum, frame)  # type: ignore[operator] # mypy thinks signal.signal() returns an int
 
     def _close_worker(self) -> None:
         self._message_queue.put(STOP_SIGNAL)
