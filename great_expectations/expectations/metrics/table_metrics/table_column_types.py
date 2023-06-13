@@ -108,20 +108,27 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
+    print(
+        f"\n[ALEX_TEST] [ColumnTypes._get_spark_column_metadata()] INCLUDE_NESTED:\n{include_nested} ; TYPE: {str(type(include_nested))}"
+    )
     cols = []
     if parent_name != "":  # noqa: PLC1901
         parent_name = f"{parent_name}."
 
     if pyspark.types and isinstance(field, pyspark.types.StructType):
         for child in field.fields:
-            cols += _get_spark_column_metadata(child, parent_name=parent_name)
+            cols += _get_spark_column_metadata(
+                child, parent_name=parent_name, include_nested=include_nested
+            )
     elif pyspark.types and isinstance(field, pyspark.types.StructField):
-        if "." in field.name:
+        if include_nested and "." in field.name:
             name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
+
         field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
+
         if (
             include_nested
             and pyspark.types
