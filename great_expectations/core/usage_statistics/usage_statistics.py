@@ -10,8 +10,7 @@ import threading
 import time
 from functools import wraps
 from queue import Queue
-from types import FrameType
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Callable
 
 import jsonschema
 import requests
@@ -32,6 +31,8 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 if TYPE_CHECKING:
     import uuid
 
+    from types import FrameType
+
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.core.usage_statistics.anonymizers.types.base import (
         CLISuiteInteractiveFlagCombinations,
@@ -49,7 +50,7 @@ STOP_SIGNAL = object()
 
 logger = logging.getLogger(__name__)
 
-_anonymizers = {}
+_anonymizers: dict[str | None, Anonymizer] = {}
 
 
 class UsageStatsExceptionPrefix(enum.Enum):
@@ -80,7 +81,7 @@ class UsageStatisticsHandler:
             gx_version=gx_version,
         )
 
-        self._message_queue = Queue()
+        self._message_queue: Queue = Queue()
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
 
@@ -103,12 +104,12 @@ class UsageStatisticsHandler:
     def anonymizer(self) -> Anonymizer:
         return self._anonymizer
 
-    def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
+    def _teardown(self, signum: int, frame: FrameType | None) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
-            self._sigterm_handler(signum, frame)
+            self._sigterm_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.signal() returns an int 
         if signum == signal.SIGINT and self._sigint_handler:
-            self._sigint_handler(signum, frame)
+            self._sigint_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.singal() returns an int
 
     def _close_worker(self) -> None:
         self._message_queue.put(STOP_SIGNAL)
@@ -155,8 +156,8 @@ class UsageStatisticsHandler:
     def send_usage_message(
         self,
         event: str,
-        event_payload: Optional[dict] = None,
-        success: Optional[bool] = None,
+        event_payload: dict | None = None,
+        success: bool | None = None,
     ) -> None:
         """send a usage statistics message."""
         # noinspection PyBroadException
@@ -195,7 +196,7 @@ class UsageStatisticsHandler:
             logger.debug(log_message)
 
 
-def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHandler]:
+def get_usage_statistics_handler(args_array: list) -> UsageStatisticsHandler | None:
     try:
         # If the object is usage_statistics-capable, then it will have a usage_statistics_handler
         handler = getattr(args_array[0], "_usage_statistics_handler", None)
@@ -222,15 +223,15 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
 
 
 # Mapping between method's qualified name and the event name it emits
-# Used to esnure proper usage stats coverage in tests
+# Used to ensure proper usage stats coverage in tests
 ENABLED_METHODS: dict[str, UsageStatsEvents] = {}
 
 
 def usage_statistics_enabled_method(
-    func: Optional[Callable] = None,
-    event_name: Optional[UsageStatsEvents] = None,
-    args_payload_fn: Optional[Callable] = None,
-    result_payload_fn: Optional[Callable] = None,
+    func: Callable | None = None,
+    event_name: UsageStatsEvents | None = None,
+    args_payload_fn: Callable | None = None,
+    result_payload_fn: Callable | None = None,
 ) -> Callable:
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
@@ -239,7 +240,7 @@ def usage_statistics_enabled_method(
         ENABLED_METHODS[func.__qualname__] = event_name
     if callable(func):
         if event_name is None:
-            event_name = func.__name__
+            event_name = func.__name__ # type: ignore[assignment] # Generate a useful name but not part of UsageStatsEvents enum
 
         @wraps(func)
         def usage_statistics_wrapped_method(*args, **kwargs):
@@ -305,10 +306,12 @@ def run_validation_operator_usage_statistics(
         data_context_id = data_context.data_context_id
     except AttributeError:
         data_context_id = None
+
     anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
+
     payload = {}
     try:
         payload["anonymized_operator_name"] = anonymizer.anonymize(
@@ -318,10 +321,10 @@ def run_validation_operator_usage_statistics(
         logger.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
-    if data_context._usage_statistics_handler:
+    if data_context.usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            anonymizer = data_context._usage_statistics_handler.anonymizer
+            anonymizer = data_context.usage_statistics_handler.anonymizer
             payload["anonymized_batches"] = [
                 anonymizer.anonymize(obj=batch) for batch in assets_to_validate
             ]
@@ -375,7 +378,7 @@ def get_expectation_suite_usage_statistics(
 def edit_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
     expectation_suite_name: str,
-    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    interactive_mode: CLISuiteInteractiveFlagCombinations | None = None,
     **kwargs: dict,
 ) -> dict:
     """
@@ -397,7 +400,7 @@ def add_datasource_usage_statistics(
     datasource: LegacyDatasource | BaseDatasource | None = None,
     **kwargs,
 ) -> dict:
-    if not data_context._usage_statistics_handler:
+    if not data_context.usage_statistics_handler:
         return {}
     try:
         data_context_id = data_context.data_context_id
@@ -416,10 +419,10 @@ def add_datasource_usage_statistics(
     payload = {}
     # noinspection PyBroadException
     try:
-        assert (
-            name or datasource
-        ), "Guaranteed to have either one of these values due to prior validation"
-        name = name or datasource.name
+        if not name and datasource:
+            name = datasource.name
+        assert name, "Guaranteed to have name from either `name` or `datasource` input args"
+
         payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
         logger.debug(
@@ -437,16 +440,18 @@ def get_batch_list_usage_statistics(
         data_context_id = data_context.data_context_id
     except AttributeError:
         data_context_id = None
+
     anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
+
     payload = {}
 
-    if data_context._usage_statistics_handler:
+    if data_context.usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            anonymizer: Anonymizer = data_context._usage_statistics_handler.anonymizer
+            anonymizer = data_context.usage_statistics_handler.anonymizer
             payload = anonymizer.anonymize(*args, **kwargs)
         except Exception as e:
             logger.debug(
@@ -462,22 +467,20 @@ def get_checkpoint_run_usage_statistics(
     *args,
     **kwargs,
 ) -> dict:
-    usage_statistics_handler: Optional[
-        UsageStatisticsHandler
-    ] = checkpoint._usage_statistics_handler
+    usage_statistics_handler: UsageStatisticsHandler | None = checkpoint._usage_statistics_handler
 
-    data_context_id: Optional[str] = None
+    data_context_id: str | None = None
     try:
         data_context_id = checkpoint.data_context.data_context_id
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
 
-    payload: dict = {}
+    payload = {}
 
     if usage_statistics_handler:
         # noinspection PyBroadException
@@ -490,7 +493,7 @@ def get_checkpoint_run_usage_statistics(
                 )
             )
 
-            payload: dict = anonymizer.anonymize(
+            payload = anonymizer.anonymize(
                 *(checkpoint,), **resolved_runtime_kwargs
             )
         except Exception as e:
@@ -504,25 +507,23 @@ def get_checkpoint_run_usage_statistics(
 # noinspection PyUnusedLocal
 def get_profiler_run_usage_statistics(
     profiler: RuleBasedProfiler,
-    variables: Optional[dict] = None,
-    rules: Optional[dict] = None,
+    variables: dict | None = None,
+    rules: dict | None = None,
     *args: tuple,
     **kwargs: dict,
 ) -> dict:
-    usage_statistics_handler: Optional[
-        UsageStatisticsHandler
-    ] = profiler._usage_statistics_handler
+    usage_statistics_handler: UsageStatisticsHandler | None = profiler._usage_statistics_handler
 
-    data_context_id: Optional[str] = None
+    data_context_id: str | None = None
     if usage_statistics_handler:
         data_context_id = usage_statistics_handler._data_context_id
 
-    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
+    anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
 
-    payload: dict = {}
+    payload = {}
 
     if usage_statistics_handler:
         # noinspection PyBroadException
@@ -537,7 +538,7 @@ def get_profiler_run_usage_statistics(
                 )
             )
 
-            payload: dict = anonymizer.anonymize(obj=resolved_runtime_config)
+            payload = anonymizer.anonymize(obj=resolved_runtime_config)
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"
@@ -549,15 +550,13 @@ def get_profiler_run_usage_statistics(
 def send_usage_message(
     data_context: AbstractDataContext,
     event: str,
-    event_payload: Optional[dict] = None,
-    success: Optional[bool] = None,
+    event_payload: dict | None = None,
+    success: bool | None = None,
 ) -> None:
     """send a usage statistics message."""
     # noinspection PyBroadException
     try:
-        handler: UsageStatisticsHandler = getattr(
-            data_context, "_usage_statistics_handler", None
-        )
+        handler = data_context.usage_statistics_handler
         if handler is not None:
             message: dict = {
                 "event": event,
@@ -571,9 +570,9 @@ def send_usage_message(
 
 def send_usage_message_from_handler(
     event: str,
-    handler: Optional[UsageStatisticsHandler] = None,
-    event_payload: Optional[dict] = None,
-    success: Optional[bool] = None,
+    handler: UsageStatisticsHandler | None = None,
+    event_payload: dict | None = None,
+    success: bool | None = None,
 ) -> None:
     """Send a usage statistics message using an already instantiated handler."""
     # noinspection PyBroadException
@@ -604,13 +603,13 @@ def _handle_expectation_suite_usage_statistics(
     """
     This method anonymizes "expectation_suite_name" for events that utilize this property.
     """
-    data_context_id: Optional[str]
+    data_context_id: str | None
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
