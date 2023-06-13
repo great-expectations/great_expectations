@@ -33,7 +33,7 @@
   
   .linkCard__copy {
     color: var(--ifm-font-color-base);
-    flex: 1 1 75%;
+    flex: 0 0 75%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
