@@ -227,6 +227,9 @@ class ColumnDomainBuilder(DomainBuilder):
                 metric_value_kwargs=None,
             )
         )
+        print(
+            f"\n[ALEX_TEST] [ColumnDomainBuilder.get_table_column_names()] TABLE_COLUMNS:\n{table_columns} ; TYPE: {str(type(table_columns))}"
+        )
         self._table_column_names = table_columns
 
         return self._table_column_names
