@@ -87,7 +87,6 @@ exclude = [
     'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
-    'core/usage_statistics/usage_statistics\.py', # 19
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
