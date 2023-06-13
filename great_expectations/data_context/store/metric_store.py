@@ -1,6 +1,6 @@
 import json
 
-from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )

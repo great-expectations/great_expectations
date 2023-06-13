@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
@@ -86,7 +86,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             content_block.styling = styling
 
     @classmethod
-    def _get_content_block_fn(cls, expectation_type):  # noqa: PLR0915
+    def _get_content_block_fn(cls, expectation_type):
         expectation_string_fn = get_renderer_impl(
             object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )

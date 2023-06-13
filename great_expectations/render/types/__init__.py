@@ -54,7 +54,7 @@ from great_expectations.render import RenderedTabsContent as RenderedTabsContent
 from great_expectations.render import TextContent as TextContentRender
 from great_expectations.render import ValueListContent as ValueListContentRender
 from great_expectations.render.renderer_configuration import (
-    RendererTableValue as RendererTableValueRender,  # noqa: TCH001
+    RendererTableValue as RendererTableValueRender,
 )
 
 

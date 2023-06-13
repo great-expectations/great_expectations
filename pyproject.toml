@@ -241,6 +241,8 @@ select = [
     "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
     # https://beta.ruff.rs/docs/rules/#pylint-pl
     "PL", # pylint
+    # https://beta.ruff.rs/docs/rules/unused-noqa/
+    "RUF100", # unused-noqa
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -320,8 +322,11 @@ extend-exclude = [
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
 runtime-evaluated-base-classes = [
+    # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
+    "great_expectations.datasource.fluent.Datasource",
+    "great_expectations.datasource.fluent.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",

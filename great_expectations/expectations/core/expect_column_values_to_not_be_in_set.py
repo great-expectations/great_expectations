@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (

@@ -797,7 +797,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def run(  # noqa: PLR0912, PLR0913
         self,
         assets_to_validate,
         run_id=None,
