@@ -101,7 +101,7 @@ if sa:
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401, TID251
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 

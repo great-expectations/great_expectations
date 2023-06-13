@@ -619,7 +619,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901, PLR0913
+def get_test_validator_with_data(  # noqa: PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -1688,7 +1688,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if include_aws:
             # TODO need to come up with a better way to do this check.
-            # currently this checks the 3 default EVN variables that boto3 looks for
+            # currently this checks the 3 default ENV variables that boto3 looks for
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
@@ -1824,7 +1824,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[AbstractDataContext] = None,  # noqa: F821
+    context: Optional[AbstractDataContext] = None,
 ):
     """Determine tests to run
 
@@ -2291,7 +2291,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],

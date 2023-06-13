@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent import (
     _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -44,6 +44,12 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     data_connector_type: ClassVar[
         Type[GoogleCloudStorageDataConnector]
     ] = GoogleCloudStorageDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket_or_name",
+        "gcs_options",
+        "max_results",
+    }
 
     # instance attributes
     type: Literal["spark_gcs"] = "spark_gcs"
