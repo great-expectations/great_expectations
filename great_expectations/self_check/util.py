@@ -1847,15 +1847,30 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
     dialects_to_include = {}
     engines_to_include = {}
+    engines_implemented = []
+
+    if execution_engine_diagnostics.PandasExecutionEngine:
+        engines_implemented.append("pandas")
+    if execution_engine_diagnostics.SparkDFExecutionEngine:
+        engines_implemented.append("spark")
+    if execution_engine_diagnostics.SqlAlchemyExecutionEngine:
+        engines_implemented.append("sqlalchemy")
+    _debug(
+        f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
+    )
 
     if only_consider_these_backends:
         _debug(f"only_consider_these_backends -> {only_consider_these_backends}")
         for backend in only_consider_these_backends:
             if backend in BACKEND_TO_ENGINE_NAME_DICT:
                 _engine = BACKEND_TO_ENGINE_NAME_DICT[backend]
-                engines_to_include[_engine] = True
-                if _engine == "sqlalchemy":
+                if _engine == "sqlalchemy" and "sqlalchemy" in engines_implemented:
+                    engines_to_include[_engine] = True
                     dialects_to_include[backend] = True
+                elif _engine == "pandas" and "pandas" in engines_implemented:
+                    engines_to_include[_engine] = True
+                elif _engine == "spark" and "spark" in engines_implemented:
+                    engines_to_include[_engine] = True
     else:
         engines_to_include[
             "pandas"
