@@ -9,6 +9,7 @@ from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
@@ -16,7 +17,6 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent.config_str import ConfigStr
 
 
 class RedshiftDsn(pydantic.PostgresDsn):
