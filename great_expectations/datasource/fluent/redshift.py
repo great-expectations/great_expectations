@@ -35,7 +35,7 @@ class Redshift(SQLDatasource):
             are TableAsset or QueryAsset objects.
     """
 
-    type: Literal["redshift"] = "redshift"  # type: ignore[assignment]
+    type: Literal["redshift"] = "redshift"  # type: ignore[assignment] # base class is expecting 'sql'
     connection_string: Union[ConfigStr, RedshiftDsn]
     # connect_args
     iam: bool = True
