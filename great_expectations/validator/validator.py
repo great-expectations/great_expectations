@@ -405,7 +405,6 @@ class Validator:
         Returns:
             A Pandas DataFrame containing the records' data.
         """
-        # here is the place where we are breaking
         return self._metrics_calculator.head(
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
         )
