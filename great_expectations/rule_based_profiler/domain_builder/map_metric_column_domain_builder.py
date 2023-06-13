@@ -46,6 +46,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
+        include_nested: Union[str, bool] = False,
         max_unexpected_values: Union[str, int] = 0,
         max_unexpected_ratio: Optional[Union[str, float]] = None,
         min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
@@ -68,6 +69,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
+            include_nested: directive to process nested column fields (if supported, such as in Spark backend").
             max_unexpected_values: maximum "unexpected_count" value of "map_metric_name" (intra-Batch)
             max_unexpected_ratio: maximum "unexpected_count" value of "map_metric_name" divided by number of records
             (intra-Batch); if both "max_unexpected_values" and "max_unexpected_ratio" are specified, then
@@ -108,6 +110,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
+            include_nested=include_nested,
             data_context=data_context,
         )
 
