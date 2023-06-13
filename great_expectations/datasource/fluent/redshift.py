@@ -1,14 +1,16 @@
-from typing import Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 import pydantic
 from pydantic import AnyUrl
 
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.config_str import ConfigStr
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import (
+        sqlalchemy as sa,
+    )
 
 
 class RedshiftDsn(pydantic.PostgresDsn):
