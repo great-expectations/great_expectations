@@ -73,9 +73,6 @@ class Rule(SerializableDictDot):
         if isinstance(variables, ParameterContainer):
             _variables = variables
         else:
-            print(
-                f"\n[ALEX_TEST] [Rule::__INIT__()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
-            )
             _variables = build_parameter_container_for_variables(
                 variables_configs=variables
             )
@@ -118,9 +115,6 @@ class Rule(SerializableDictDot):
         if not reconciliation_directives:
             reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
 
-        print(
-            f"\n[ALEX_TEST] [Rule::run()] SELF.VARIABLES:\n{self.variables} ; TYPE: {str(type(self.variables))}"
-        )
         variables = build_parameter_container_for_variables(
             variables_configs=reconcile_rule_variables(
                 variables=self.variables,
@@ -269,23 +263,11 @@ class Rule(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         dict_obj: dict = self.to_dict()
-        print(
-            f"\n[ALEX_TEST] [Rule::to_json_dict()] SELF.VARIABLES:\n{self.variables} ; TYPE: {str(type(self.variables))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [Rule::to_json_dict()] DICT_OBJ:\n{dict_obj} ; TYPE: {str(type(dict_obj))}"
-        )
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
         )
-        print(
-            f"\n[ALEX_TEST] [Rule::to_json_dict()] VARIABLES_DICT:\n{variables_dict} ; TYPE: {str(type(variables_dict))}"
-        )
         dict_obj["variables"] = variables_dict
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
-        print(
-            f"\n[ALEX_TEST] [Rule::to_json_dict()] SERIALIZEABLE_DICT:\n{serializeable_dict} ; TYPE: {str(type(serializeable_dict))}"
-        )
         return serializeable_dict
 
     def __repr__(self) -> str:

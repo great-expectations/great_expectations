@@ -509,12 +509,6 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         rule: Rule
         for rule in rules:
-            print(
-                f"\n[ALEX_TEST] [DataAssistant::__INIT__()] RULE.NAME:\n{rule.name} ; TYPE: {str(type(rule.name))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [DataAssistant::__INIT__()] RULE.VARIABLES:\n{rule.variables} ; TYPE: {str(type(rule.variables))}"
-            )
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
                 Domain(

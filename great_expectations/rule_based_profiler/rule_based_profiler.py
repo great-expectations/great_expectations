@@ -136,16 +136,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables = {}
 
         # Convert variables argument to ParameterContainer
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::__INIT__()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
-        )
         _variables: ParameterContainer = build_parameter_container_for_variables(
             variables_configs=variables
         )
         self.variables = _variables
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::__INIT__()] SELF.VARIABLES:\n{self.variables} ; TYPE: {str(type(self.variables))}"
-        )
 
         self._usage_statistics_handler = usage_statistics_handler
 
@@ -468,18 +462,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         """
         Add Rule object to existing profiler object by reconciling profiler rules and updating _profiler_config.
         """
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::add_rule()] RULE.VARIABLES:\n{rule.variables} ; TYPE: {str(type(rule.variables))}"
-        )
         rules_dict: Dict[str, Dict[str, Any]] = {
             rule.name: rule.to_json_dict(),
         }
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::add_rule()] RULES_DICT_FROM_RULE[RULE.NAME]['VARIABLES']:\n{rules_dict[rule.name]['variables']} ; TYPE: {str(type(rules_dict[rule.name]['variables']))}"
-        )
-        # print(
-        #     f"\n[ALEX_TEST] [BaseRuleBasedProfiler::add_rule()] RULES_DICT_FROM_RULE:\n{rules_dict} ; TYPE: {str(type(rules_dict))}"
-        # )
         effective_rules: List[Rule] = self.reconcile_profiler_rules(
             rules=rules_dict,
             reconciliation_directives=ReconciliationDirectives(
@@ -488,16 +473,10 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 expectation_configuration_builder=ReconciliationStrategy.UPDATE,
             ),
         )
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::add_rule()] EFFECTIVE_RULES:\n{effective_rules} ; TYPE: {str(type(effective_rules))}"
-        )
         self.rules = effective_rules
         updated_rules: Optional[Dict[str, Dict[str, Any]]] = {
             rule.name: rule.to_json_dict() for rule in effective_rules
         }
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::add_rule()] UPDATED_RULES:\n{updated_rules} ; TYPE: {str(type(updated_rules))}"
-        )
         self._profiler_config.rules = updated_rules
 
     def reconcile_profiler_variables(
@@ -516,9 +495,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :param reconciliation_strategy: one of update, nested_update, or overwrite ways of reconciling overwrites
         :return: reconciled variables in their canonical ParameterContainer object form
         """
-        print(
-            f"\n[ALEX_TEST] [BaseRuleBasedProfiler::reconcile_profiler_variables()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
-        )
         effective_variables: ParameterContainer
         if variables and isinstance(variables, dict):
             variables_configs: dict = self._reconcile_profiler_variables_as_dict(

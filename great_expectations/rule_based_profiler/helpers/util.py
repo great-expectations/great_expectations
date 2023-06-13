@@ -240,9 +240,6 @@ def build_metric_domain_kwargs(
         metric_domain_kwargs = {}
 
     metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-    print(
-        f"\n[ALEX_TEST] [HELPERS.UTIL.py::build_metric_domain_kwargs()] METRIC_DOMAIN_KWARGS:\n{metric_domain_kwargs} ; TYPE: {str(type(metric_domain_kwargs))}"
-    )
 
     if batch_id:
         metric_domain_kwargs["batch_id"] = batch_id
