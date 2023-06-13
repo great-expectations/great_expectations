@@ -245,13 +245,11 @@ class Store:
 
     def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.has_key(key)  # noqa: W601
+            return self._store_backend.has_key(key)
         else:
             if self._use_fixed_length_key:
-                return self._store_backend.has_key(  # noqa: W601
-                    key.to_fixed_length_tuple()
-                )
-            return self._store_backend.has_key(key.to_tuple())  # noqa: W601
+                return self._store_backend.has_key(key.to_fixed_length_tuple())
+            return self._store_backend.has_key(key.to_tuple())
 
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(

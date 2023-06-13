@@ -17,7 +17,7 @@ from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
