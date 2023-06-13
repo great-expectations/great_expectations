@@ -111,9 +111,9 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
-    print(
-        f"\n[ALEX_TEST] [ColumnTypes._get_spark_column_metadata()] INCLUDE_NESTED:\n{include_nested} ; TYPE: {str(type(include_nested))}"
-    )
+    # print(
+    #     f"\n[ALEX_TEST] [ColumnTypes._get_spark_column_metadata()] INCLUDE_NESTED:\n{include_nested} ; TYPE: {str(type(include_nested))}"
+    # )
     cols = []
     if parent_name != "":  # noqa: PLC1901
         parent_name = f"{parent_name}."
