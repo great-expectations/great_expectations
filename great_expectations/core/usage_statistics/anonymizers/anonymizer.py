@@ -124,11 +124,11 @@ class Anonymizer(BaseAnonymizer):
             DatasourceAnonymizer,
         )
 
-        anonymizer = self._anonymizers[DatasourceAnonymizer]
+        anonymizer: DatasourceAnonymizer = self._anonymizers[DatasourceAnonymizer]  # type: ignore[assignment] # Type is more concrete subclass
 
         anonymized_values: List[dict] = []
         for name, config in payload.items():
-            anonymize_value: dict = anonymizer._anonymize_datasource_info(  # type: ignore[attr-defined] # _anonymize_datasource_info not defined
+            anonymize_value: dict = anonymizer._anonymize_datasource_info(
                 name=name, config=config
             )
             anonymized_values.append(anonymize_value)
@@ -140,11 +140,11 @@ class Anonymizer(BaseAnonymizer):
             StoreAnonymizer,
         )
 
-        anonymizer = self._anonymizers[StoreAnonymizer]
+        anonymizer: StoreAnonymizer = self._anonymizers[StoreAnonymizer]  # type: ignore[assignment] # Type is more concrete subclass
 
         anonymized_values: List[dict] = []
         for store_name, store_obj in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
+            anonymize_value: dict = anonymizer.anonymize(
                 store_name=store_name,
                 store_obj=store_obj,
             )
@@ -162,11 +162,13 @@ class Anonymizer(BaseAnonymizer):
         if payload is None:
             return []
 
-        anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
+        anonymizer: ValidationOperatorAnonymizer = self._anonymizers[  # type: ignore[assignment] # Type is more concrete subclass
+            ValidationOperatorAnonymizer
+        ]
 
         anonymized_values: List[dict] = []
         for validation_operator_name, validation_operator_obj in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
+            anonymize_value: dict = anonymizer.anonymize(
                 validation_operator_name=validation_operator_name,
                 validation_operator_obj=validation_operator_obj,
             )
@@ -181,11 +183,11 @@ class Anonymizer(BaseAnonymizer):
             DataDocsAnonymizer,
         )
 
-        anonymizer = self._anonymizers[DataDocsAnonymizer]
+        anonymizer: DataDocsAnonymizer = self._anonymizers[DataDocsAnonymizer]  # type: ignore[assignment] # Type is more concrete subclass
 
         anonymized_values: List[dict] = []
         for site_name, site_config in payload.items():
-            anonymize_value: dict = anonymizer.anonymize(  # type: ignore[call-arg] # missing positional argument. This will fail at runtime.
+            anonymize_value: dict = anonymizer.anonymize(
                 site_name=site_name, site_config=site_config
             )
             anonymized_values.append(anonymize_value)
