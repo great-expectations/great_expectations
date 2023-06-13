@@ -21,6 +21,15 @@ if TYPE_CHECKING:
 
 class RedshiftDsn(pydantic.PostgresDsn):
     allowed_schemes = {
+        "postgres",
+        "postgresql",
+        "postgresql+asyncpg",
+        "postgresql+pg8000",
+        "postgresql+psycopg",
+        "postgresql+psycopg2",
+        "postgresql+psycopg2cffi",
+        "postgresql+py-postgresql",
+        "postgresql+pygresql",
         "redshift",
         "redshift+redshift_connector",
         "redshift+psycopg2",
