@@ -70,6 +70,9 @@ class TableColumns(TableMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        print(
+            f"\n[ALEX_TEST] [TableColumns._get_evaluation_dependencies()] METRIC.METRIC_VALUE_KWARGS:\n{metric.metric_value_kwargs} ; TYPE: {str(type(metric.metric_value_kwargs))}"
+        )
         metric_value_kwargs = {
             "include_nested": True,
         }
