@@ -1137,15 +1137,17 @@ def test_validator_include_rendered_content_diagnostic(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "result_format",
-    [ "BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
 )
 def test_rendered_content_bool_only_respected(result_format: str | dict):
     context = get_context()
-    csv_asset = context.sources.pandas_default.add_dataframe_asset("df", dataframe=pd.DataFrame(
-        data=[1, 2, 3],
-        columns=["numbers_i_can_count_to"],
-    ))
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pd.DataFrame(
+            data=[1, 2, 3],
+            columns=["numbers_i_can_count_to"],
+        ),
+    )
     batch_request = csv_asset.build_batch_request()
     expectation_suite_name = "test_result_format_suite"
     context.add_or_update_expectation_suite(

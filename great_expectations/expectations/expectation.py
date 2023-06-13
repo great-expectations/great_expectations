@@ -1069,7 +1069,9 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine=execution_engine,
         )
 
-        result_format = parse_result_format(runtime_configuration.get("result_format", {}))
+        result_format = parse_result_format(
+            runtime_configuration.get("result_format", {})
+        )
         if result_format.get("result_format") == "BOOLEAN_ONLY":
             if isinstance(expectation_validation_result, ExpectationValidationResult):
                 expectation_validation_result.result = {}
