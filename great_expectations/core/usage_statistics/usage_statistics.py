@@ -30,7 +30,6 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     import uuid
-
     from types import FrameType
 
     from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -107,7 +106,7 @@ class UsageStatisticsHandler:
     def _teardown(self, signum: int, frame: FrameType | None) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
-            self._sigterm_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.signal() returns an int 
+            self._sigterm_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.signal() returns an int
         if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame) # type: ignore[operator] # mypy thinks signal.singal() returns an int
 
