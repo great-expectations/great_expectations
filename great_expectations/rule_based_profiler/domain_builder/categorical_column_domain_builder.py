@@ -224,6 +224,11 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
         validator: Optional[Validator] = self.get_validator(variables=variables)
 
+        if validator is None:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."
+            )
+
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
             validator=validator,
@@ -309,11 +314,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = self._generate_metric_configurations_to_check_cardinality(
             column_names=effective_column_names, batch_ids=batch_ids
         )
-
-        if validator is None:
-            raise gx_exceptions.ProfilerExecutionError(
-                message=f"Error: Failed to obtain Validator {self.__class__.__name__} (Validator is required for cardinality checks)."
-            )
 
         candidate_column_names: List[
             str
