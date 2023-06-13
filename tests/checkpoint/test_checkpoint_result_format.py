@@ -1109,7 +1109,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1159,7 +1159,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1302,7 +1302,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1426,7 +1426,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     first_result_unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]
-    assert first_result_unexpected_index_query == [3, 4, 5]
+    assert first_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
@@ -1437,7 +1437,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     second_result_unexpected_index_query: str = evrs[0]["results"][1]["result"][
         "unexpected_index_query"
     ]
-    assert second_result_unexpected_index_query == [3, 4, 5]
+    assert second_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1523,7 +1523,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_query"
     ]
     # result_format is SUMMARY
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1633,7 +1633,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     first_result_unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]
-    assert first_result_unexpected_index_query == [3, 4, 5]
+    assert first_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
     second_result_partial_list = evrs[0]["results"][1]["result"][
@@ -1644,7 +1644,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert second_result_unexpected_index_query == [3, 4, 5]
+    assert second_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -3138,10 +3138,10 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_1": 4, "received_item": "desk"},
         {"ordered_item": "eraser", "pk_1": 5, "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -3209,10 +3209,12 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_2": "four", "received_item": "desk"},
         {"ordered_item": "eraser", "pk_2": "five", "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == ["three", "four", "five"]
+
+    items_str = str(["three", "four", "five"])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3281,10 +3283,11 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_1": 4, "pk_2": "four", "received_item": "desk"},
         {"ordered_item": "eraser", "pk_1": 5, "pk_2": "five", "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [(3, "three"), (4, "four"), (5, "five")]
+    items_str = str([(3, "three"), (4, "four"), (5, "five")])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3340,10 +3343,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "b": 60, "c": 60, "pk_1": 5},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
-    )
-    assert unexpected_index_query == [1, 2, 3, 4, 5]
+    ]
+    items_str = str([1, 2, 3, 4, 5])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3416,10 +3420,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "b": 60, "c": 60, "pk_2": "five"},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == ["one", "two", "three", "four", "five"]
+    items_str = str(["one", "two", "three", "four", "five"])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3492,16 +3497,21 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "pk_1": 5, "pk_2": "five", "b": 60, "c": 60},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [
-        (1, "one"),
-        (2, "two"),
-        (3, "three"),
-        (4, "four"),
-        (5, "five"),
-    ]
+
+    items_str = str(
+        [
+            (1, "one"),
+            (2, "two"),
+            (3, "three"),
+            (4, "four"),
+            (5, "five"),
+        ]
+    )
+
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
