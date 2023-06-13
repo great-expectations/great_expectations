@@ -47,12 +47,10 @@ def read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        schema = schema
-        columns = columns
-        if dialect in (GXSqlDialect.SQLITE, GXSqlDialect.OTHER):
-            return pd.read_sql_query(
+    schema = schema
+    columns = columns
+    if dialect in (GXSqlDialect.SQLITE, GXSqlDialect.OTHER):
+        return pd.read_sql_query(
                 sql=f"""SELECT * FROM {table_name}""",
                 con=con,
                 index_col=index_col,
@@ -60,8 +58,8 @@ def read_sql_table_as_df(  # noqa: PLR0913
                 parse_dates=parse_dates,
                 chunksize=chunksize,
             )
-        else:
-            return pd.read_sql_table(
+    else:
+        return pd.read_sql_table(
                 table_name=table_name,
                 con=con,
                 schema=schema,
