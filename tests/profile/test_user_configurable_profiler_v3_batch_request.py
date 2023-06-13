@@ -9,7 +9,6 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
