@@ -94,6 +94,7 @@ class MetricsCalculator:
             domain_kwargs[
                 "batch_id"
             ] = self._execution_engine.batch_manager.active_batch_id
+        #breakpoint()
 
         df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
@@ -105,7 +106,7 @@ class MetricsCalculator:
                 },
             )
         )
-
+        print("hello")
         return df.reset_index(drop=True, inplace=False)
 
     def get_metric(
