@@ -18,8 +18,7 @@ data_connectors:
         class_name: ConfiguredAssetGCSDataConnector
         bucket_or_name: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
-        gcs_options:
-            delimiter: /
+        delimiter: /
         default_regex:
             pattern: data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:

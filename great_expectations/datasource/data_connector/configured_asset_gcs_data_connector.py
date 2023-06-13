@@ -75,9 +75,6 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         if gcs_options is None:
             gcs_options = {}
 
-        if "delimiter" in gcs_options:
-            delimiter = gcs_options.pop("delimiter")
-
         self._bucket_or_name = bucket_or_name
         self._prefix = prefix
         self._delimiter = delimiter
