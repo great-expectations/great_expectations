@@ -205,12 +205,12 @@ class ParameterBuilder(ABC, Builder):
             print(
                 f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] DOMAIN:\n{domain} ; TYPE: {str(type(domain))}"
             )
-            print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETERS:\n{parameters} ; TYPE: {str(type(parameters))}"
-            )
+            # print(
+            #     f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] VARIABLES:\n{variables} ; TYPE: {str(type(variables))}"
+            # )
+            # print(
+            #     f"\n[ALEX_TEST] [PARAMETER_BUILDER.build_parameters()] PARAMETERS:\n{parameters} ; TYPE: {str(type(parameters))}"
+            # )
             build_parameter_container(
                 parameter_container=parameters[domain.id],
                 parameter_values=parameter_values,
