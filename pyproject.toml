@@ -87,7 +87,6 @@ exclude = [
     'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
-    'core/usage_statistics/usage_statistics\.py', # 19
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
@@ -249,6 +248,8 @@ select = [
     "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
     # https://beta.ruff.rs/docs/rules/#pylint-pl
     "PL", # pylint
+    # https://beta.ruff.rs/docs/rules/unused-noqa/
+    "RUF100", # unused-noqa
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -328,8 +329,11 @@ extend-exclude = [
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
 runtime-evaluated-base-classes = [
+    # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
+    "great_expectations.datasource.fluent.Datasource",
+    "great_expectations.datasource.fluent.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",
@@ -443,7 +447,7 @@ filterwarnings = [
     # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
     # sqlalchemy.exc.SADeprecationWarning: The dbapi() classmethod on dialect classes has been renamed to import_dbapi().  Implement an import_dbapi() classmethod directly on class <class 'trino.sqlalchemy.dialect.TrinoDialect'> to remove this warning; the old .dbapi() classmethod may be maintained for backwards compatibility.
     'ignore: The dbapi\(\) classmethod on dialect classes has been renamed to import_dbapi\(\):DeprecationWarning',
-    
+
     # six
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()

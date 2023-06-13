@@ -20,7 +20,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import (
     GXCloudResourceRef,
 )
-from great_expectations.data_context.types.resource_identifiers import (  # noqa: TCH001
+from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
