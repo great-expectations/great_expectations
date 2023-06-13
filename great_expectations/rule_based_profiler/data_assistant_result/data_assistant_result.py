@@ -1394,7 +1394,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
 
     @staticmethod
-    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
+    def _get_expect_domain_values_to_be_between_chart(  # noqa: PLR0912
         expectation_type: str,
         df: pd.DataFrame,
         sanitized_metric_names: Set[str],
@@ -1654,7 +1654,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     domain_plot_component=domain_plot_component,
                 )
 
-    @staticmethod  # noqa: C901 - complexity 16
+    @staticmethod  # - complexity 16
     def _get_interactive_expect_column_values_to_be_between_chart(  # noqa: PLR0912, PLR0915
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],

@@ -2,7 +2,7 @@ import logging
 import traceback
 from typing import Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.alias_types import JSONValues
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
