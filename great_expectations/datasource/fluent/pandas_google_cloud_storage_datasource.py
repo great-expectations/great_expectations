@@ -10,7 +10,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # needed at runtime
+    ConfigStr
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
