@@ -394,6 +394,72 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
 
 
 @pytest.mark.integration
+def test_pd_unexpected_index_query_metric_with_id_pk(
+    animal_table_df, metric_value_kwargs_complete
+):
+    df: pd.DataFrame = animal_table_df
+    metric_value_kwargs: dict = metric_value_kwargs_complete
+    engine: PandasExecutionEngine = build_pandas_engine(df=df)
+
+    (
+        table_columns_metric,
+        unexpected_columns_metric,
+        metrics,
+    ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs_complete)
+    unexpected_index_query: MetricConfiguration = MetricConfiguration(
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+        metric_domain_kwargs={"column": "animals"},
+        metric_value_kwargs=metric_value_kwargs,
+    )
+    unexpected_index_query.metric_dependencies = {
+        "unexpected_condition": unexpected_columns_metric,
+        "table.columns": table_columns_metric,
+    }
+    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_index_query,), metrics=metrics
+    )
+    for val in results.values():
+        assert val == "df.filter(items=[3, 4, 5], axis=0)"
+
+
+@pytest.mark.integration
+def test_pd_unexpected_index_query_metric_without_id_pk(
+    animal_table_df,
+):
+    df: pd.DataFrame = animal_table_df
+    metric_value_kwargs: dict = {
+        "value_set": ["cat", "fish", "dog"],
+        "parse_strings_as_datetimes": False,
+        "result_format": {
+            "result_format": "COMPLETE",
+            "partial_unexpected_count": 20,
+            "include_unexpected_rows": False,
+        },
+    }
+    engine: PandasExecutionEngine = build_pandas_engine(df=df)
+
+    (
+        table_columns_metric,
+        unexpected_columns_metric,
+        metrics,
+    ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs)
+    unexpected_index_query: MetricConfiguration = MetricConfiguration(
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+        metric_domain_kwargs={"column": "animals"},
+        metric_value_kwargs=metric_value_kwargs,
+    )
+    unexpected_index_query.metric_dependencies = {
+        "unexpected_condition": unexpected_columns_metric,
+        "table.columns": table_columns_metric,
+    }
+    results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_index_query,), metrics=metrics
+    )
+    for val in results.values():
+        assert val == "df.filter(items=[3, 4, 5], axis=0)"
+
+
+@pytest.mark.integration
 def test_spark_unexpected_index_query_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
