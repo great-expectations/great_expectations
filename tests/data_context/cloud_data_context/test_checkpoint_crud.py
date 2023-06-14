@@ -416,6 +416,64 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
 
 @pytest.mark.cloud
 @pytest.mark.integration
+def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config: dict,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    When saving, it should use the id from the response to create the checkpoint.
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_0_results,
+    ) as _:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(**checkpoint_config)
+        )
+
+        mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                },
+            },
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
