@@ -174,7 +174,8 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         widths: Union[Sequence[int], None] = ...,
         infer_nrows: int = ...,
         kwargs: Optional[dict] = ...,
-    ) -> FWFAsset: ...
+    ) -> FWFAsset:
+        """Add a fixed-width-file asset to the catalog."""  # noqa: PYI021
     def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,
