@@ -224,7 +224,7 @@ assert validation_result.result == {
         {"my_var": "D", "pk_column": "six"},
         {"my_var": "D", "pk_column": "seven"},
     ],
-    "unexpected_index_query": [3, 4, 5, 6, 7],
+    "unexpected_index_query": 'df.filter(items=[3, 4, 5, 6, 7], axis=0)',
 }
 # </snippet>
 
@@ -337,7 +337,7 @@ assert result_index_list == [
 result_index_query: List[int] = evrs[0]["results"][0]["result"][
     "unexpected_index_query"
 ]
-assert result_index_query == [3, 4, 5, 6, 7]
+assert result_index_query == 'df.filter(items=[3, 4, 5, 6, 7], axis=0)'
 partial_unexpected_counts: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
     "partial_unexpected_counts"
 ]
