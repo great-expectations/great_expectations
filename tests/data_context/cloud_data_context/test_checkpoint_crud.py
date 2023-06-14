@@ -137,7 +137,7 @@ def mocked_get_response(
 
 
 @pytest.fixture
-def mocked_get_by_name_response(
+def mocked_get_by_name_response_1_result(
     mock_response_factory: Callable,
     checkpoint_config_with_ids: dict,
     checkpoint_id: str,
@@ -180,7 +180,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
-    mocked_get_by_name_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -193,7 +193,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response_1_result
     ) as mock_get:
         checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
 
