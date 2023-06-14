@@ -22,13 +22,6 @@ import invoke
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
-try:
-    from tests.integration.usage_statistics import usage_stats_utils
-
-    is_ge_installed: bool = True
-except ModuleNotFoundError:
-    is_ge_installed = False
-
 if TYPE_CHECKING:
     from invoke.context import Context
 
@@ -310,7 +303,9 @@ def get_usage_stats_json(ctx: Context):
     """
     Dump usage stats event examples to json file
     """
-    if not is_ge_installed:
+    try:
+        from tests.integration.usage_statistics import usage_stats_utils
+    except ModuleNotFoundError:
         raise invoke.Exit(
             message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
             code=1,
@@ -331,6 +326,14 @@ def mv_usage_stats_json(ctx: Context):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
+    try:
+        from tests.integration.usage_statistics import usage_stats_utils
+    except ModuleNotFoundError:
+        raise invoke.Exit(
+            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
+            code=1,
+        )
+
     version = usage_stats_utils.get_gx_version()
     outfile = f"v{version}_example_events.json"
     cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
