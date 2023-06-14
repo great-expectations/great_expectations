@@ -176,6 +176,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
+        print(
+            f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] METRIC_VALUES:\n{metric_values} ; TYPE: {str(type(metric_values))}"
+        )
         nonnull_count: int = sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
