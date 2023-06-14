@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
@@ -1039,7 +1040,7 @@ def test_validator_include_rendered_content_diagnostic(
             value=RenderedAtomicValue(
                 schema={"type": "com.superconductive.rendered.string"},
                 params={},
-                template="6",
+                template="--",
             ),
             value_type="StringValueType",
         )
