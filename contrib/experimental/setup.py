@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 with open(
     os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")  # noqa: PTH118, PTH120
-) as versionfile:  # noqa: PTH118, PTH120
+) as versionfile:
     version = versionfile.read().strip()
 
 long_description = "Great Expectations community contributions package. (See https://github.com/great-expectations/great_expectations for full description)."
