@@ -27,6 +27,7 @@ class _GCSOptions(pydantic.BaseModel):
     gcs_prefix: str = ""
     gcs_delimiter: str = "/"
     gcs_max_results: int = 1000
+    gcs_recursive_file_discovery: bool = False
 
 
 class GoogleCloudStorageDataConnector(FilePathDataConnector):
@@ -41,6 +42,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix (str): GCS prefix
         delimiter (str): GCS delimiter
         max_results (int): max blob filepaths to return
+        recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -52,6 +54,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         "gcs_prefix",
         "gcs_delimiter",
         "gcs_max_results",
+        "gcs_recursive_file_discovery",
     )
     asset_options_type: ClassVar[Type[_GCSOptions]] = _GCSOptions
 
@@ -66,6 +69,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_results: Optional[int] = None,
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -81,6 +85,8 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
 
         self._delimiter = delimiter
         self._max_results = max_results
+
+        self._recursive_file_discovery = recursive_file_discovery
 
         super().__init__(
             datasource_name=datasource_name,
@@ -106,6 +112,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_results: Optional[int] = None,
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -122,6 +129,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
             delimiter: GCS delimiter
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
             max_results: max blob filepaths to return
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
@@ -141,6 +149,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
+            recursive_file_discovery=recursive_file_discovery,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -156,6 +165,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
+        recursive_file_discovery: bool = False,
     ) -> str:
         """Builds helpful error message for reporting issues when linking named DataAsset to Google Cloud Storage.
 
@@ -165,11 +175,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             bucket_or_name: bucket name for Google Cloud Storage
             prefix: GCS prefix
             delimiter: GCS delimiter
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
 
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
@@ -177,6 +188,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
                 "bucket_or_name": bucket_or_name,
                 "prefix": prefix,
                 "delimiter": delimiter,
+                "recursive_file_discovery": recursive_file_discovery,
             }
         )
 
@@ -206,7 +218,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         path_list: List[str] = list_gcs_keys(
             gcs_client=self._gcs_client,
             query_options=query_options,
-            recursive=False,
+            recursive=self._recursive_file_discovery,
         )
         return path_list
 
