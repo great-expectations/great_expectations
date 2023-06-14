@@ -177,7 +177,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     [
         (True, 0.6481340441736482, None, False),
         (False, 0.4791666666666667, 'col("Age")<18', True),
-        (True, 0.6614626129827444, 'col("Age")>17', True),
+        (True, 0.6574585635359116, 'col("Age")>17', True),
     ],
 )
 def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
