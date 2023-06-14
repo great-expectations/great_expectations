@@ -686,15 +686,16 @@ def load_data_into_test_database(  # noqa: PLR0912
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
 
-            add_dataframe_to_db(
-                df=all_dfs_concatenated,
-                name=table_name,
-                con=engine,
-                schema=schema_name,
-                index=False,
-                if_exists="append",
-                method=to_sql_method,
-            )
+            with engine.connect() as connection:
+                add_dataframe_to_db(
+                    df=all_dfs_concatenated,
+                    name=table_name,
+                    con=connection,
+                    schema=schema_name,
+                    index=False,
+                    if_exists="append",
+                    method=to_sql_method,
+                )
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
