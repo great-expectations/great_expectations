@@ -893,6 +893,57 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     @public_api
+    def add_fwf_asset(
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
+    ) -> FeatherAsset:  # type: ignore[valid-type]
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            path: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            The FeatherAsset that has been added to this datasource.
+        """
+        asset = FeatherAsset(
+            name=name,
+            path=path,
+            **kwargs,
+        )
+        return self._add_asset(asset=asset)
+
+    @public_api
+    def read_fwf(
+        self,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            path: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            A Validator using an ephemeral FWFAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: FWFAsset = self.add_fwf_asset(  # type: ignore[valid-type]
+            name=name,
+            path=path,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    @public_api
     def add_gbq_asset(
         self,
         name: str,
