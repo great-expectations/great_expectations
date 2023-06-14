@@ -1,4 +1,5 @@
 from .data_assistant_result import DataAssistantResult
 from .domain_builder_data_assistant_result import DomainBuilderDataAssistantResult
+from .numeric_data_assistant_result import NumericDataAssistantResult
 from .onboarding_data_assistant_result import OnboardingDataAssistantResult
 from .volume_data_assistant_result import VolumeDataAssistantResult
