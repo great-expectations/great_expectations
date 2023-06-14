@@ -198,6 +198,15 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
             ),
         )
     },
+    "kwds": {
+        "kwargs": _FieldSpec(
+            Optional[dict],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="Extra keyword arguments that will be passed to the reader method",
+            ),
+        )
+    },
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
