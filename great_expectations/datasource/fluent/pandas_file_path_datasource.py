@@ -33,7 +33,7 @@ _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
     "read_clipboard",  # not path based
     # "read_feather",
     # "read_fwf",
-    # "read_gbq",
+    "read_gbq", # not path based
     # "read_hdf",
     # "read_html",
     # "read_orc",
