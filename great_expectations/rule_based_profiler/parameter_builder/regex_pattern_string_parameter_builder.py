@@ -179,7 +179,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_values = metric_values[:, 0]
 
         nonnull_count: int
-        if pd.isnull(metric_values):
+        if pd.isnull(metric_values).any():
             nonnull_count = 0
         else:
             nonnull_count = sum(metric_values)
@@ -240,7 +240,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_regex_unexpected_count: int
-            if pd.isnull(metric_values):
+            if pd.isnull(metric_values).any():
                 match_regex_unexpected_count = 0
             else:
                 match_regex_unexpected_count = sum(metric_values)
