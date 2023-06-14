@@ -96,10 +96,8 @@ CAN_HANDLE: Final[Set[str]] = {
     "bool",
     "None",
     # typing
-    "Sequence[tuple[int, int]]",
     "Sequence[str]",
     "Sequence[int]",
-    "Sequence[tuple[int, int]]",  # noqa: PLW0130
     # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
@@ -131,6 +129,8 @@ TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
     "Hashable": "str",
     "Sequence[Hashable]": "Sequence[str]",
     "Iterable[Hashable]": "Iterable[str]",
+    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8
+    "Sequence[tuple[int, int]]": "Sequence[Tuple[int, int]]",
     # TypeVars
     "IntStrT": "Union[int, str]",
     "list[IntStrT]": "List[Union[int, str]]",
