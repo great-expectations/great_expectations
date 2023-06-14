@@ -285,7 +285,7 @@ class PandasDatasource(_PandasDatasource):
     def add_fwf_asset(  # noqa: PLR0913
         self,
         name: str,
-        path: pydantic.FilePath | pydantic.AnyUrl,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
@@ -666,7 +666,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_fwf(  # noqa: PLR0913
         self,
-        path: pydantic.FilePath | pydantic.AnyUrl,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
