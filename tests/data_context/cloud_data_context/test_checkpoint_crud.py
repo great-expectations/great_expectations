@@ -19,7 +19,7 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import CheckpointNotFoundError, StoreBackendError
 from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
