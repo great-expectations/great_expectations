@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Sequence, Set, Union
 
 import altair as alt
 
@@ -7,7 +9,7 @@ import altair as alt
 @dataclass(frozen=True)
 class PlotComponent:
     alt_type: alt.StandardType
-    name: Optional[str] = None
+    name: str = ""
     axis_title: Optional[str] = None
 
     @property
@@ -124,7 +126,7 @@ class DomainPlotComponent(PlotComponent):
 
 @dataclass(frozen=True)
 class BatchPlotComponent(PlotComponent):
-    batch_identifiers: Optional[List[str]] = None
+    batch_identifiers: Sequence[str] = ()
 
     @property
     def titles(self) -> List[str]:
@@ -224,17 +226,18 @@ def determine_plot_title(
     """
     metric_plot_component_titles: Set[str] = set()
     for metric_plot_component in metric_plot_components:
-        metric_plot_component_titles.add(metric_plot_component.title)
+        if metric_plot_component.title:
+            metric_plot_component_titles.add(metric_plot_component.title)
 
     contents: str
     if expectation_type:
         contents = expectation_type
     elif len(metric_plot_component_titles) == 1:
-        contents: str = (
+        contents = (
             f"{list(metric_plot_component_titles)[0]} per {batch_plot_component.title}"
         )
     else:
-        contents: str = f"Column Values per {batch_plot_component.title}"
+        contents = f"Column Values per {batch_plot_component.title}"
 
     subtitle: Optional[str] = domain_plot_component.subtitle
     domain_selector: Optional[str] = domain_plot_component.name
