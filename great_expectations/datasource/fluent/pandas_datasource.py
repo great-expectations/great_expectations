@@ -908,9 +908,9 @@ class PandasDatasource(_PandasDatasource):
             **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
 
         Returns:
-            The FeatherAsset that has been added to this datasource.
+            The FWFAsset that has been added to this datasource.
         """
-        asset = FeatherAsset(
+        asset = FWFAsset(
             name=name,
             path=path,
             **kwargs,
