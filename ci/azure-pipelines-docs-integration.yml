@@ -308,9 +308,6 @@ stages:
           displayName: 'Install dependencies'
 
         - script: |
-            pip install "sqlalchemy<2.0.0"
-          displayName: 'Redshift is not compatible with sqlalchemy 2.0.0. Pin to lower version'
-        - script: |
             pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
@@ -380,9 +377,6 @@ stages:
         - script: |
             pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
-        - script: |
-            pip install "pandas<2.0.0"
-          displayName: 'Pyspark is not compatible with pandas 2.0.0. Pin to lower version'
         - script: |
             pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
           displayName: 'pytest'
