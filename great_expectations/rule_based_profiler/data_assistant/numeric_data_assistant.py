@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from great_expectations.core.domain import SemanticDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -106,18 +105,11 @@ class NumericDataAssistant(DataAssistant):
             include_column_names=None,
             exclude_column_names=None,
             include_column_name_suffixes=None,
-            exclude_column_name_suffixes=[
-                "_id",
-                "_ID",
-            ],
+            exclude_column_name_suffixes=None,
             semantic_type_filter_module_name=None,
             semantic_type_filter_class_name=None,
-            include_semantic_types=[
-                SemanticDomainTypes.NUMERIC,
-            ],
-            exclude_semantic_types=[
-                SemanticDomainTypes.IDENTIFIER,
-            ],
+            include_semantic_types=None,
+            exclude_semantic_types=None,
             data_context=None,
         )
 

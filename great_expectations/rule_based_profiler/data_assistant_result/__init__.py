@@ -1,5 +1,7 @@
+from .categorical_data_assistant_result import CategoricalDataAssistantResult
 from .data_assistant_result import DataAssistantResult
 from .domain_builder_data_assistant_result import DomainBuilderDataAssistantResult
 from .numeric_data_assistant_result import NumericDataAssistantResult
 from .onboarding_data_assistant_result import OnboardingDataAssistantResult
+from .text_data_assistant_result import TextDataAssistantResult
 from .volume_data_assistant_result import VolumeDataAssistantResult
