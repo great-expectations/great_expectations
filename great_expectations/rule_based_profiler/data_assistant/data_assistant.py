@@ -134,7 +134,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         def get_table_columns_metric_multi_batch_parameter_builder(
-            self,
+            self, include_nested: bool = False
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -143,7 +143,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
+                metric_value_kwargs={
+                    "include_nested": include_nested,
+                },
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
