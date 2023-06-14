@@ -1,18 +1,6 @@
 .linkCardGrid {
-  .flex-grid {
-    display: flex;
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    padding: 20px;
-  }
-  .flex-grid { 
-    margin: 0 0 20px 0;
-  }
-  .col {
-    background: rgb(253, 252, 251);
-    padding: 20px;
-  }
+  display: flex;
 }
+.col {
+  flex: 1;
 }
