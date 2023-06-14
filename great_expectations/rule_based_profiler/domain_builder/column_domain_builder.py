@@ -279,6 +279,7 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
         if len(table_column_names) < len(table_columns):
+            print("\n[ALEX_TEST] [WOUTPUT] WOUTPUT:RRRRRRRRRRRRRRRRRRRRRRRRRRR")
             warnings.warn(
                 f"""Current version of "{self.__class__.__name__}" does not support columns whose names begin with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}" character; skipping those columns.
 """
