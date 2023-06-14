@@ -137,7 +137,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     df: pd.DataFrame = titanic_df
 
     context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context()
+        DataContext, build_in_memory_runtime_context(include_pandas=False)
     )
     validator = get_test_validator_with_data(
         execution_engine="spark",
@@ -184,7 +184,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     df: pd.DataFrame = titanic_df
 
     context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context()
+        DataContext, build_in_memory_runtime_context(include_pandas=False)
     )
     validator = get_test_validator_with_data(
         execution_engine="spark",
