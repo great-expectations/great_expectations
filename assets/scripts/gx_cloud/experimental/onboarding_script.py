@@ -46,7 +46,9 @@ assert (
 try:
     asset: CSVAsset = datasource.get_asset(asset_name=asset_name)
 except LookupError:
-    asset: CSVAsset = datasource.add_csv_asset(asset_name, filepath_or_buffer=path_to_data)
+    asset: CSVAsset = datasource.add_csv_asset(
+        asset_name, filepath_or_buffer=path_to_data
+    )
 
 # Build BatchRequest
 batch_request: BatchRequest = asset.build_batch_request()
@@ -73,18 +75,15 @@ column_name = None
 assert column_name is not None, "Please set column_name."
 
 # Look up all expectations types here - https://greatexpectations.io/expectations/
-expectation_configuration = gx.core.ExpectationConfiguration(**{
-  "expectation_type": "expect_column_min_to_be_between",
-  "kwargs": {
-    "column": column_name,
-    "min_value": 0.1
-  },
-  "meta":{},
-})
-
-expectation_suite.add_expectation(
-    expectation_configuration=expectation_configuration
+expectation_configuration = gx.core.ExpectationConfiguration(
+    **{
+        "expectation_type": "expect_column_min_to_be_between",
+        "kwargs": {"column": column_name, "min_value": 0.1},
+        "meta": {},
+    }
 )
+
+expectation_suite.add_expectation(expectation_configuration=expectation_configuration)
 
 # Save the Expectation Suite
 context.update_expectation_suite(expectation_suite=expectation_suite)
@@ -97,17 +96,19 @@ checkpoint_name = None
 assert checkpoint_name, "Please set checkpoint_name."
 
 checkpoint_config = {
-  "name": checkpoint_name,
-  "validations": [{
-      "expectation_suite_name": expectation_suite_name,
-      "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
-      "batch_request": {
-          "datasource_name": datasource.name,
-          "data_asset_name": asset.name,
-      },
-  }],
-  "config_version": 1,
-  "class_name": "Checkpoint"
+    "name": checkpoint_name,
+    "validations": [
+        {
+            "expectation_suite_name": expectation_suite_name,
+            "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
+            "batch_request": {
+                "datasource_name": datasource.name,
+                "data_asset_name": asset.name,
+            },
+        }
+    ],
+    "config_version": 1,
+    "class_name": "Checkpoint",
 }
 
 checkpoint: Checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
