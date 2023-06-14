@@ -320,10 +320,10 @@ table.borderless tr:nth-child(2n) {
 
 div[role="tabpanel"]{
    --ifm-code-background: var(--ifm-alert-background-color-highlight);
-    border-radius: var(--ifm-alert-border-radius);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px 0px;
+    border-radius: 0;
+    box-shadow:none;
     border-top: 0;
-    padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
+    padding: 0;
 }
 
 .tooltip {
