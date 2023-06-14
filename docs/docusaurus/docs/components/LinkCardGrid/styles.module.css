@@ -1,5 +1,5 @@
 .linkCardGrid {
-  display: grid;
+  display: block;
   gap: 1rem;
   flex-wrap: wrap;
   flex-direction: row;
