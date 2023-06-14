@@ -205,7 +205,7 @@ stages:
             cp constraints-dev.txt constraints-dev-temp.txt
             echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
             echo "pandas<2.0.0" >> constraints-dev-temp.txt
-            
+
             pip install --constraint constraints-dev-temp.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
           displayName: 'Install dependencies'
 
@@ -311,7 +311,7 @@ stages:
             cp constraints-dev.txt constraints-dev-temp.txt
             echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
             echo "pandas<2.0.0" >> constraints-dev-temp.txt
-            
+
             pip install --constraint constraints-dev-temp.txt ".[test, redshift]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
@@ -386,8 +386,7 @@ stages:
             pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
         - script: |
-            # Note databricks_deployment_patterns_dataframe_yaml_configs is skipped because pandas 2.0 dataframes are not fully compatible with spark.
-            pytest -v --docs-tests -m integration --aws --spark -k "not test_docs[databricks_deployment_patterns_dataframe_yaml_configs]" tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
@@ -435,7 +434,7 @@ stages:
             cp constraints-dev.txt constraints-dev-temp.txt
             echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
             echo "pandas<2.0.0" >> constraints-dev-temp.txt
-            
+
             pip install --constraint constraints-dev-temp.txt ".[test, trino]" pytest-azurepipelines
           displayName: 'Install dependencies'
 

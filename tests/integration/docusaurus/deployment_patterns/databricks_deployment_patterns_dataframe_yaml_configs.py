@@ -61,7 +61,8 @@ assert os.listdir(uncommitted_directory) == ["validations"]
 filename = "yellow_tripdata_sample_2019-01.csv"
 data_dir = os.path.join(os.path.dirname(root_directory), "data")
 pandas_df = pd.read_csv(os.path.join(data_dir, filename))
-df = spark.createDataFrame(data=pandas_df)
+data_file_path = os.path.join(data_dir, filename)
+df = spark.read.option("header", True).csv(data_file_path)
 # CODE ^^^^^ ^^^^^
 
 # ASSERTIONS vvvvv vvvvv
@@ -142,7 +143,7 @@ print(validator.head())
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0, max_value=1000
+    column="total_amount", min_value=0, max_value=1000
 )
 # </snippet>
 
