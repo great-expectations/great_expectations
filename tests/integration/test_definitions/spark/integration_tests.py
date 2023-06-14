@@ -108,4 +108,3 @@ fluent_datasources = [
 spark_integration_tests += connecting_to_your_data
 spark_integration_tests += databricks_deployment_patterns
 spark_integration_tests += fluent_datasources
-spark_integration_tests += migration_guide
