@@ -17,14 +17,13 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER,  # noqa: TCH001
+    FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER,
     ParameterContainer,
 )
 from great_expectations.rule_based_profiler.semantic_type_filter import (
@@ -81,7 +80,7 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            include_nested: directive to process nested column fields (if supported, such as in Spark backend").
+            include_nested: directive to process nested column fields
             data_context: AbstractDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
@@ -246,13 +245,9 @@ class ColumnDomainBuilder(DomainBuilder):
             parameters=None,
         )
 
-        if (
-            isinstance(validator.execution_engine, SparkDFExecutionEngine)
-            and include_nested
-        ):
+        if include_nested:
             raise ValueError(
-                f"""Current version of "{self.__class__.__name__}" does not support nested columns for Spark backend.
-"""
+                f"""Current version of "{self.__class__.__name__}" does not support nested columns."""
             )
 
         metric_value_kwargs = {
