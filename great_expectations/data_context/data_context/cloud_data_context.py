@@ -682,7 +682,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> None:
         ge_cloud_id = key.id
         if ge_cloud_id:
-            if self.expectations_store.has_key(key):  # noqa: W601
+            if self.expectations_store.has_key(key):
                 raise gx_exceptions.DataContextError(
                     f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."

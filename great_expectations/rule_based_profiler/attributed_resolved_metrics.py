@@ -8,12 +8,12 @@ import pandas as pd
 from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,  # noqa: TCH001
+    MetricValues,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.attributes import Attributes  # noqa: TCH001
+from great_expectations.types.attributes import Attributes
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.computed_metric import MetricValue
 
 logger = logging.getLogger(__name__)
 
