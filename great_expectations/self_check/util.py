@@ -897,7 +897,7 @@ def build_pandas_validator_with_data(
     batch = Batch(data=df, batch_definition=batch_definition)
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context(include_spark=False)
 
     return Validator(
         execution_engine=PandasExecutionEngine(),
@@ -1210,7 +1210,7 @@ def build_spark_validator_with_data(
     )
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context(include_pandas=False)
 
     return Validator(
         execution_engine=execution_engine,
