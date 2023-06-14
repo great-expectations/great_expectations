@@ -68,7 +68,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        include_nested: Union[str, bool] = False,
         allowed_semantic_types_passthrough: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -100,7 +99,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            include_nested: directive to process nested column fields (if supported, such as in Spark backend").
             allowed_semantic_types_passthrough: single/multiple type specifications using SemanticDomainTypes
             (or str equivalents) to be allowed without processing, if encountered among available column_names
             cardinality_limit_mode: CardinalityLimitMode or string name of the mode
@@ -152,7 +150,6 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=semantic_type_filter_class_name,
             include_semantic_types=include_semantic_types,
             exclude_semantic_types=exclude_semantic_types,
-            include_nested=include_nested,
             data_context=data_context,
         )
 

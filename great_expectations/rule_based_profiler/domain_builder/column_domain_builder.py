@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -23,8 +22,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER,
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,  # noqa: TCH001
@@ -62,7 +60,6 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        include_nested: Union[str, bool] = False,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
@@ -80,7 +77,6 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            include_nested: directive to process nested column fields
             data_context: AbstractDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
@@ -99,8 +95,6 @@ class ColumnDomainBuilder(DomainBuilder):
 
         self._include_semantic_types = include_semantic_types
         self._exclude_semantic_types = exclude_semantic_types
-
-        self._include_nested = include_nested
 
         self._semantic_type_filter = None
 
@@ -202,19 +196,6 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_semantic_types = value
 
     @property
-    def include_nested(
-        self,
-    ) -> Union[str, bool]:
-        return self._include_nested
-
-    @include_nested.setter
-    def include_nested(
-        self,
-        value: Union[str, bool],
-    ) -> None:
-        self._include_nested = value
-
-    @property
     def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
         return self._semantic_type_filter
 
@@ -236,24 +217,6 @@ class ColumnDomainBuilder(DomainBuilder):
         if validator is None:
             validator = self.get_validator(variables=variables)
 
-        # Obtain include_nested from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        include_nested = get_parameter_value_and_validate_return_type(
-            domain=None,
-            parameter_reference=self.include_nested,
-            expected_return_type=bool,
-            variables=variables,
-            parameters=None,
-        )
-
-        if include_nested:
-            raise ValueError(
-                f"""Current version of "{self.__class__.__name__}" does not support nested columns."""
-            )
-
-        metric_value_kwargs = {
-            "include_nested": include_nested,
-        }
-
         table_columns: List[str] = validator.get_metric(  # type: ignore[union-attr] # could be None
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -261,25 +224,12 @@ class ColumnDomainBuilder(DomainBuilder):
                     # active_batch_id
                     "batch_id": batch_ids[-1],  # type: ignore[index]
                 },
-                metric_value_kwargs=metric_value_kwargs,
+                metric_value_kwargs={
+                    "include_nested": False,
+                },
             )
         )
-
-        column_name: str
-        table_column_names: list[str] = list(
-            filter(
-                lambda column_name: FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER
-                not in column_name,
-                table_columns,
-            )
-        )
-        if len(table_column_names) < len(table_columns):
-            warnings.warn(
-                f"""Current version of "{self.__class__.__name__}" does not support columns whose names begin with "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}" character; skipping those columns.
-"""
-            )
-
-        self._table_column_names = table_column_names
+        self._table_column_names = table_columns
 
         return self._table_column_names
 

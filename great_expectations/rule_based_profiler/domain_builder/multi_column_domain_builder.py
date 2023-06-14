@@ -36,7 +36,6 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         "semantic_type_filter_class_name",
         "include_semantic_types",
         "exclude_semantic_types",
-        "include_nested",
     }
 
     def __init__(
@@ -58,7 +57,6 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
             semantic_type_filter_class_name=None,
             include_semantic_types=None,
             exclude_semantic_types=None,
-            include_nested=False,
             data_context=data_context,
         )
 
