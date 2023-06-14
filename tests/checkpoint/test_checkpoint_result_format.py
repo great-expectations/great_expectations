@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 import pytest
 
+from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -3596,3 +3597,58 @@ runtime_configuration:
         "success_percent": 100.0,
         "unsuccessful_expectations": 0,
     }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(
+    empty_data_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+    result_format: str | dict,
+):
+    context = empty_data_context
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    )
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "test_result_format_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    expectation_validation_result = (
+        validator.expect_column_distinct_values_to_contain_set(
+            column="animals",
+            value_set={"anglerfish"},
+        )
+    )
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+            }
+        ],
+        runtime_configuration={
+            "result_format": result_format,
+        },
+    )
+
+    checkpoint_result = checkpoint.run()
+    validation_result_identifier = (
+        checkpoint_result.list_validation_result_identifiers()[0]
+    )
+    expectation_validation_result = checkpoint_result.run_results[
+        validation_result_identifier
+    ]["validation_result"]["results"][0]
+    assert expectation_validation_result.result == {}
