@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
+import pandas as pd
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
@@ -179,7 +181,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         print(
             f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] METRIC_VALUES:\n{metric_values} ; TYPE: {str(type(metric_values))}"
         )
-        nonnull_count: int = sum(metric_values)
+        nonnull_count: int
+        if pd.isnull(metric_values):
+            nonnull_count = 0
+        else:
+            nonnull_count = sum(metric_values)
+        print(
+            f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] NONNULL_COUNT:\n{nonnull_count} ; TYPE: {str(type(nonnull_count))}"
+        )
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
