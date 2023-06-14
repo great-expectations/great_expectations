@@ -208,7 +208,9 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response_1_result
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_1_result,
     ) as mock_get:
         checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
 
