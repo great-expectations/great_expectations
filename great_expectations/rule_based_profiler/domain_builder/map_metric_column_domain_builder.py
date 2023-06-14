@@ -321,7 +321,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
-                metric_value / mean_table_row_count_as_float
+                (metric_value or 0.0) / mean_table_row_count_as_float
                 for metric_value in resolved_metrics.values()
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()

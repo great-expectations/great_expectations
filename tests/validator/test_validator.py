@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
@@ -1039,7 +1041,7 @@ def test_validator_include_rendered_content_diagnostic(
             value=RenderedAtomicValue(
                 schema={"type": "com.superconductive.rendered.string"},
                 params={},
-                template="6",
+                template="--",
             ),
             value_type="StringValueType",
         )
@@ -1133,6 +1135,39 @@ def test_validator_include_rendered_content_diagnostic(
         expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(result_format: str | dict):
+    context = get_context()
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pd.DataFrame(
+            data=[1, 2, 3],
+            columns=["numbers_i_can_count_to"],
+        ),
+    )
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "test_result_format_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    expectation_validation_result = validator.expect_column_max_to_be_between(
+        column="numbers_i_can_count_to",
+        min_value=1000,
+        max_value=10000,
+        result_format=result_format,
+    )
+    assert expectation_validation_result.result == {}
 
 
 @pytest.mark.unit
