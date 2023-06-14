@@ -1,18 +1,9 @@
 .linkCardGrid {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-  align-items: center;
-  border: 1px solid black;
-  height: 200px;
-}
-
-.container > div {
-  height: 100px;
-  width: 100px;
-  background-color: rgb(254, 254, 254);
-  color: white;
-  font-size: 5rem;
-  text-align: center;
-  border-radius: 5px;
-}
+  display: grid;
+  gap: 1rem;
+  flex-wrap: wrap;
+  flex-direction: row;
+  flex-grow: 1;
+  width: 200px;
+  margin: 2rem 0;
+  }
