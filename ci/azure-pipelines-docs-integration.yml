@@ -189,7 +189,6 @@ stages:
             pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'
 
-
     - job: test_docs_bigquery
       timeoutInMinutes: 30
       condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
@@ -203,7 +202,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
+            cp constraints-dev.txt constraints-dev-temp.txt
+            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
+            echo "pandas<2.0.0" >> constraints-dev-temp.txt
+            
+            pip install --constraint constraints-dev-temp.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
           displayName: 'Install dependencies'
 
         - task: DownloadSecureFile@1
@@ -305,7 +308,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[test, redshift]" pytest-azurepipelines
+            cp constraints-dev.txt constraints-dev-temp.txt
+            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
+            echo "pandas<2.0.0" >> constraints-dev-temp.txt
+            
+            pip install --constraint constraints-dev-temp.txt ".[test, redshift]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -425,7 +432,11 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
+            cp constraints-dev.txt constraints-dev-temp.txt
+            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
+            echo "pandas<2.0.0" >> constraints-dev-temp.txt
+            
+            pip install --constraint constraints-dev-temp.txt ".[test, trino]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
