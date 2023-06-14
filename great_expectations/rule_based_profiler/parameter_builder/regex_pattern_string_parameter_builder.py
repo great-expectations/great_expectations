@@ -178,17 +178,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
-        print(
-            f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] METRIC_VALUES-0:\n{metric_values} ; TYPE: {str(type(metric_values))}"
-        )
         nonnull_count: int
         if pd.isnull(metric_values):
             nonnull_count = 0
         else:
             nonnull_count = sum(metric_values)
-        print(
-            f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] NONNULL_COUNT-0:\n{nonnull_count} ; TYPE: {str(type(nonnull_count))}"
-        )
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
@@ -245,17 +239,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
-            print(
-                f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] METRIC_VALUES-1:\n{metric_values} ; TYPE: {str(type(metric_values))}"
-            )
             match_regex_unexpected_count: int
             if pd.isnull(metric_values):
                 match_regex_unexpected_count = 0
             else:
                 match_regex_unexpected_count = sum(metric_values)
-            print(
-                f"\n[ALEX_TEST] [RegexPatternStringParameterBuilder._build_parameters()] MATCH_REGEX_UNEXPECTED_COUNT-1:\n{match_regex_unexpected_count} ; TYPE: {str(type(match_regex_unexpected_count))}"
-            )
 
             success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
                 nonnull_count + NP_EPSILON

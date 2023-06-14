@@ -210,18 +210,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
             runtime_configuration=runtime_configuration,
         )
-        print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_domains()] BATCH_IDS:\n{batch_ids} ; TYPE: {str(type(batch_ids))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_domains()] NUM_BATCH_IDS:\n{num_batch_ids} ; TYPE: {str(type(num_batch_ids))}"
-        )
         mean_table_row_count_as_float: float = (
             1.0 * sum(table_row_counts.values()) / num_batch_ids
         ) + NP_EPSILON
-        print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_domains()] MEAN_TABLE_ROW_COUNT_AS_FLOAT:\n{mean_table_row_count_as_float} ; TYPE: {str(type(mean_table_row_count_as_float))}"
-        )
 
         # If no "max_unexpected_ratio" is given, compute it based on average number of records across all Batch objects.
         if max_unexpected_ratio is None:
@@ -330,12 +321,6 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             runtime_configuration=runtime_configuration,
         )
 
-        print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_column_names_satisfying_tolerance_limits()] RESOLVED_METRICS_BY_COLUMN_NAME:\n{resolved_metrics_by_column_name} ; TYPE: {str(type(resolved_metrics_by_column_name))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_column_names_satisfying_tolerance_limits()] MEAN_TABLE_ROW_COUNT_AS_FLOAT:\n{mean_table_row_count_as_float} ; TYPE: {str(type(mean_table_row_count_as_float))}"
-        )
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
