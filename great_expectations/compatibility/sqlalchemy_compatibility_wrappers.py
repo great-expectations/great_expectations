@@ -51,24 +51,24 @@ def read_sql_table_as_df(  # noqa: PLR0913
     columns = columns
     if dialect in (GXSqlDialect.SQLITE, GXSqlDialect.OTHER):
         return pd.read_sql_query(
-                sql=f"""SELECT * FROM {table_name}""",
-                con=con,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                parse_dates=parse_dates,
-                chunksize=chunksize,
-            )
+            sql=f"""SELECT * FROM {table_name}""",
+            con=con,
+            index_col=index_col,
+            coerce_float=coerce_float,
+            parse_dates=parse_dates,
+            chunksize=chunksize,
+        )
     else:
         return pd.read_sql_table(
-                table_name=table_name,
-                con=con,
-                schema=schema,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                parse_dates=parse_dates,
-                columns=columns,
-                chunksize=chunksize,
-            )
+            table_name=table_name,
+            con=con,
+            schema=schema,
+            index_col=index_col,
+            coerce_float=coerce_float,
+            parse_dates=parse_dates,
+            columns=columns,
+            chunksize=chunksize,
+        )
 
 
 def add_dataframe_to_db(  # noqa: PLR0913
