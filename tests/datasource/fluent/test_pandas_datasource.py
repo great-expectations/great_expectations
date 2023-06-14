@@ -101,9 +101,7 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param(
-                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
-            ),
+            param("read_fwf"),
             param("read_gbq"),
             param("read_hdf"),
             param("read_html"),
