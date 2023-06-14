@@ -690,7 +690,7 @@ class BatchData:
         return pd.DataFrame({})
 
 
-if pyspark_DataFrame:  # type: ignore[truthy-function]
+if pyspark_DataFrame:  # type: ignore[truthy-function] # False if NotImported
     BatchDataType: TypeAlias = Union[
         Type[BatchData], Type[pd.DataFrame], Type[pyspark_DataFrame]
     ]
