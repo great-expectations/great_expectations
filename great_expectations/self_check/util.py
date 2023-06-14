@@ -1845,16 +1845,10 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
         _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
 
-    parametrized_tests = []
-
-    if only_consider_these_backends:
-        only_consider_these_backends = [
-            backend
-            for backend in only_consider_these_backends
-            if backend in BACKEND_TO_ENGINE_NAME_DICT
-        ]
-
+    dialects_to_include = {}
+    engines_to_include = {}
     engines_implemented = []
+
     if execution_engine_diagnostics.PandasExecutionEngine:
         engines_implemented.append("pandas")
     if execution_engine_diagnostics.SparkDFExecutionEngine:
@@ -1865,89 +1859,65 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
     )
 
+    if only_consider_these_backends:
+        _debug(f"only_consider_these_backends -> {only_consider_these_backends}")
+        for backend in only_consider_these_backends:
+            if backend in BACKEND_TO_ENGINE_NAME_DICT:
+                _engine = BACKEND_TO_ENGINE_NAME_DICT[backend]
+                if _engine == "sqlalchemy" and "sqlalchemy" in engines_implemented:
+                    engines_to_include[_engine] = True
+                    dialects_to_include[backend] = True
+                elif _engine == "pandas" and "pandas" in engines_implemented:
+                    engines_to_include[_engine] = True
+                elif _engine == "spark" and "spark" in engines_implemented:
+                    engines_to_include[_engine] = True
+    else:
+        engines_to_include[
+            "pandas"
+        ] = execution_engine_diagnostics.PandasExecutionEngine
+        engines_to_include[
+            "spark"
+        ] = execution_engine_diagnostics.SparkDFExecutionEngine
+        engines_to_include[
+            "sqlalchemy"
+        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        if (
+            engines_to_include.get("sqlalchemy") is True
+            and raise_exceptions_for_backends is False
+        ):
+            dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
+
+    _debug(
+        f"Attempting engines ({engines_to_include}) and dialects ({dialects_to_include})"
+    )
+
+    backends = build_test_backends_list(
+        include_pandas=engines_to_include.get("pandas", False),
+        include_spark=engines_to_include.get("spark", False),
+        include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
+        include_sqlite=dialects_to_include.get("sqlite", False),
+        include_postgresql=dialects_to_include.get("postgresql", False),
+        include_mysql=dialects_to_include.get("mysql", False),
+        include_mssql=dialects_to_include.get("mssql", False),
+        include_bigquery=dialects_to_include.get("bigquery", False),
+        include_trino=dialects_to_include.get("trino", False),
+        include_redshift=dialects_to_include.get("redshift", False),
+        include_athena=dialects_to_include.get("athena", False),
+        include_snowflake=dialects_to_include.get("snowflake", False),
+        raise_exceptions_for_backends=raise_exceptions_for_backends,
+    )
+
+    _debug(f"Successfully connecting backends -> {backends}")
+
+    if not backends:
+        _debug("No suitable backends to connect to")
+        return []
+
+    parametrized_tests = []
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
         _debug(f"test_data_case {i}/{num_test_data_cases}")
         d = copy.deepcopy(d)  # noqa: PLW2901
-        dialects_to_include = {}
-        engines_to_include = {}
-
-        # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
-        if d.test_backends:
-            for tb in d.test_backends:
-                engines_to_include[tb.backend] = True
-                if tb.backend == "sqlalchemy":
-                    for dialect in tb.dialects:
-                        dialects_to_include[dialect] = True
-            _debug(
-                f"Tests specify specific backends only: engines_to_include -> {engines_to_include}  dialects_to_include -> {dialects_to_include}"
-            )
-            if only_consider_these_backends:
-                test_backends = list(engines_to_include.keys()) + list(
-                    dialects_to_include.keys()
-                )
-                if "sqlalchemy" in test_backends:
-                    test_backends.extend(list(SQL_DIALECT_NAMES))
-                engines_to_include = {}
-                dialects_to_include = {}
-                for backend in set(test_backends) & set(only_consider_these_backends):
-                    dialects_to_include[backend] = True
-                    if backend in SQL_DIALECT_NAMES:
-                        engines_to_include["sqlalchemy"] = True
-                    else:
-                        engines_to_include[BACKEND_TO_ENGINE_NAME_DICT[backend]] = True
-        else:
-            engines_to_include[
-                "pandas"
-            ] = execution_engine_diagnostics.PandasExecutionEngine
-            engines_to_include[
-                "spark"
-            ] = execution_engine_diagnostics.SparkDFExecutionEngine
-            engines_to_include[
-                "sqlalchemy"
-            ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
-            if (
-                engines_to_include.get("sqlalchemy") is True
-                and raise_exceptions_for_backends is False
-            ):
-                dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
-
-            if only_consider_these_backends:
-                engines_to_include = {}
-                dialects_to_include = {}
-                for backend in only_consider_these_backends:
-                    if backend in SQL_DIALECT_NAMES:
-                        if "sqlalchemy" in engines_implemented:
-                            dialects_to_include[backend] = True
-                            engines_to_include["sqlalchemy"] = True
-                    else:
-                        if (  # noqa: PLR5501
-                            backend == "pandas" and "pandas" in engines_implemented
-                        ):
-                            engines_to_include["pandas"] = True
-                        elif backend == "spark" and "spark" in engines_implemented:
-                            engines_to_include["spark"] = True
-
-        # # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        # if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
-        #     dialects_to_include["sqlite"] = True
-
-        backends = build_test_backends_list(
-            include_pandas=engines_to_include.get("pandas", False),
-            include_spark=engines_to_include.get("spark", False),
-            include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
-            include_sqlite=dialects_to_include.get("sqlite", False),
-            include_postgresql=dialects_to_include.get("postgresql", False),
-            include_mysql=dialects_to_include.get("mysql", False),
-            include_mssql=dialects_to_include.get("mssql", False),
-            include_bigquery=dialects_to_include.get("bigquery", False),
-            include_clickhouse=dialects_to_include.get("clickhouse", False),
-            include_trino=dialects_to_include.get("trino", False),
-            include_redshift=dialects_to_include.get("redshift", False),
-            include_athena=dialects_to_include.get("athena", False),
-            include_snowflake=dialects_to_include.get("snowflake", False),
-            raise_exceptions_for_backends=raise_exceptions_for_backends,
-        )
         titles = []
         only_fors = []
         suppress_test_fors = []
@@ -1959,11 +1929,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         _debug(
             f"only_fors -> {only_fors}  suppress_test_fors -> {suppress_test_fors}  only_consider_these_backends -> {only_consider_these_backends}"
         )
-        _debug(f"backends -> {backends}")
-        if not backends:
-            _debug("No suitable backends for this test_data_case")
-            continue
-
         for c in backends:
             _debug(f"Getting validators with data: {c}")
 
