@@ -16,7 +16,6 @@ def get_extras_require():
         "s3": "boto",
     }
     sqla_keys = (
-        "arrow",
         "athena",
         "bigquery",
         "clickhouse",
