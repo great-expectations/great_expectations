@@ -264,14 +264,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
 
-_PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
+_PANDAS_READER_METHOD_UNSUPPORTED_LIST: tuple[str, ...] = (
     # "read_csv",
     # "read_json",
     # "read_excel",
     # "read_parquet",
     # "read_clipboard",
     # "read_feather",
-    "read_fwf",  # unhandled type
+    # "read_fwf",
     # "read_gbq",
     # "read_hdf",
     # "read_html",
