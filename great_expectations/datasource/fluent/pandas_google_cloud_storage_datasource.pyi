@@ -10,6 +10,7 @@ from typing import (
     Literal,
     Optional,
     Sequence,
+    Tuple,
     Union,
 )
 
@@ -46,6 +47,7 @@ if TYPE_CHECKING:
         CSVAsset,
         ExcelAsset,
         FeatherAsset,
+        FWFAsset,
         HDFAsset,
         HTMLAsset,
         JSONAsset,
@@ -180,6 +182,20 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> FeatherAsset: ...
+    def add_fwf_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        *,
+        batching_regex: typing.Pattern = ...,
+        glob_directive: str = ...,
+        order_by: typing.List[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        connect_options: typing.Mapping = ...,
+        colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
+        widths: Union[Sequence[int], None] = ...,
+        infer_nrows: int = ...,
+        kwargs: Optional[dict] = ...,
+    ) -> FWFAsset: ...
     def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,
