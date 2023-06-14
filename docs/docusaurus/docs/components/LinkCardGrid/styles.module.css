@@ -1,10 +1,8 @@
 .linkCardGrid {
-  display: block;
+  --auto-grid-min-size: 266px;
+  display: grid;
   gap: 1rem;
-  flex-wrap: wrap;
-  flex-direction: row;
-  flex-flow: row wrap;
-  flex-grow: 1;
-  width: 200px;
+  grid-template-columns: repeat(3, minmax(var(--auto-grid-min-size), 1fr));
+  grid-auto-columns: minmax(100px, 200px);
   margin: 2rem 0;
-  }
+}
