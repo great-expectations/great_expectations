@@ -202,11 +202,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            cp constraints-dev.txt constraints-dev-temp.txt
-            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
-            echo "pandas<2.0.0" >> constraints-dev-temp.txt
-
-            pip install --constraint constraints-dev-temp.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
           displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with BigQuery'
           # 202306 Note: BigQuery PyPi says library is only compatible with SqlAlchemy < 2.0.0
         - task: DownloadSecureFile@1
@@ -308,11 +304,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            cp constraints-dev.txt constraints-dev-temp.txt
-            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
-            echo "pandas<2.0.0" >> constraints-dev-temp.txt
-
-            pip install --constraint constraints-dev-temp.txt ".[test, redshift]" pytest-azurepipelines
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, redshift]" pytest-azurepipelines
           displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Redshift'
           # 202306 Note: Redshift Repo constrains sqlalchemy in setup.py. https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/a077110366a3c451f1c41b2fa56f6e3cd5c438dd/setup.py#L24
         - script: |
@@ -431,11 +423,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            cp constraints-dev.txt constraints-dev-temp.txt
-            echo "SQLAlchemy<2.0.0" >> constraints-dev-temp.txt
-            echo "pandas<2.0.0" >> constraints-dev-temp.txt
-
-            pip install --constraint constraints-dev-temp.txt ".[test, trino]" pytest-azurepipelines
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, trino]" pytest-azurepipelines
           displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Trino'
           # 202306 Note: there isn’t explicit statement about not being compatible with 2.0, but only that it is compatible up to 1.4
         - script: |
