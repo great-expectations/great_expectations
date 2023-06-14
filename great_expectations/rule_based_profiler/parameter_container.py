@@ -132,9 +132,13 @@ def is_fully_qualified_parameter_name_delimiter_in_literal(
 def is_fully_qualified_parameter_name_prefix_in_literal(
     fully_qualified_parameter_name: str,
 ) -> bool:
-    return fully_qualified_parameter_name.startswith(
-        f"{VARIABLES_PREFIX}"
-    ) or fully_qualified_parameter_name.startswith(f"{PARAMETER_PREFIX}")
+    return (
+        fully_qualified_parameter_name.startswith(f"{VARIABLES_PREFIX}")
+        or fully_qualified_parameter_name.startswith(f"{PARAMETER_PREFIX}")
+        or fully_qualified_parameter_name.startswith(
+            f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}"
+        )
+    )
 
 
 class ParameterNode(SerializableDotDict):
