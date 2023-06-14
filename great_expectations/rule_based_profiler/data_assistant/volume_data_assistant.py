@@ -31,7 +31,7 @@ from great_expectations.rule_based_profiler.rule import Rule
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-    from great_expectations.validator.validator import Validator  # noqa: TCH001
+    from great_expectations.validator.validator import Validator
 
 
 class VolumeDataAssistant(DataAssistant):
@@ -44,7 +44,7 @@ class VolumeDataAssistant(DataAssistant):
     def __init__(
         self,
         name: str,
-        validator: "Validator",  # noqa: F821
+        validator: Validator,
     ) -> None:
         super().__init__(
             name=name,

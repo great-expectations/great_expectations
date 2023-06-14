@@ -19,7 +19,7 @@ from great_expectations.data_context.store import (
     ValidationsStore,
 )
 from great_expectations.data_context.store.store_backend import (
-    StoreBackend,  # noqa: TCH001
+    StoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,

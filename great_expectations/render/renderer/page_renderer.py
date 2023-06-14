@@ -7,7 +7,7 @@ from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
+    ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -27,7 +27,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,  # noqa: TCH001
+    ValidationOperatorResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -932,7 +932,7 @@ class ProfilingResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
 
-    def render(self, validation_results):  # noqa: C901, PLR0912
+    def render(self, validation_results):  # noqa: PLR0912
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
