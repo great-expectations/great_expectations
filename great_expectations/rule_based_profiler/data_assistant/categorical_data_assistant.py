@@ -78,10 +78,10 @@ class CategoricalDataAssistant(DataAssistant):
         Returns:
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
         """
-        categorical_columns_rule_two: Rule = self._build_categorical_columns_rule_two()
+        categorical_columns_rule: Rule = self._build_categorical_columns_rule()
 
         return [
-            categorical_columns_rule_two,
+            categorical_columns_rule,
         ]
 
     def _build_data_assistant_result(
@@ -100,7 +100,7 @@ class CategoricalDataAssistant(DataAssistant):
         )
 
     @staticmethod
-    def _build_categorical_columns_rule_two() -> Rule:
+    def _build_categorical_columns_rule() -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for categorical columns.
         """
