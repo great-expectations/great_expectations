@@ -259,7 +259,8 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mssql tests/integration/test_script_runner.py
+            # Note expect_column_values_to_only_contain_vowels is skipped because metrics are not implemented for MSSQL.
+            pytest -v --docs-tests -m integration --mssql -k "not test_docs[expect_column_values_to_only_contain_vowels]" tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_snowflake
