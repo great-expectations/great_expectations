@@ -313,7 +313,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         connection_string: Optional[str] = None,
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
-        create_temp_table: bool = False,
+        create_temp_table: bool = True,
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ) -> None:
