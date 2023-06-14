@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 def read_sql_table_as_df(  # noqa: PLR0913
     table_name,
     con,
+    dialect: str,
     schema=None,
     index_col: str | Sequence[str] | None = None,
     coerce_float: bool = True,
     parse_dates: list[str] | dict[str, str] | None = None,
     columns: list[str] | None = None,
     chunksize: int | None = None,
-    dialect: str | None = None,
 ) -> pd.DataFrame | Iterator[pd.DataFrame]:
     """Wrapper for `read_sql_table()` method in Pandas. Created as part of the effort to allow GX to be compatible
     with SqlAlchemy 2, and is used to suppress warnings that arise from implicit auto-commits.
