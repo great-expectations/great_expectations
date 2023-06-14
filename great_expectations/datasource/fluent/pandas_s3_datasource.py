@@ -9,7 +9,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 BOTO3_IMPORTED = False
 try:
-    import boto3  # noqa: disable=E0602
+    import boto3  # : disable=E0602
 
     BOTO3_IMPORTED = True
 except ImportError:
@@ -48,6 +48,11 @@ class PandasS3DatasourceError(PandasDatasourceError):
 class PandasS3Datasource(_PandasFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket",
+        "boto3_options",
+    }
 
     # instance attributes
     type: Literal["pandas_s3"] = "pandas_s3"

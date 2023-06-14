@@ -419,7 +419,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
         __file__,
         os.path.join(  # noqa: PTH118
             "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-        ),  # noqa: PTH118
+        ),
     )
 
     datasource_config: dict = {

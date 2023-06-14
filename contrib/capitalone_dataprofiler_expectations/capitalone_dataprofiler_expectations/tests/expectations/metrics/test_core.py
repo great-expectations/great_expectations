@@ -6,7 +6,7 @@ from unittest import mock
 
 import dataprofiler as dp
 import pandas as pd
-from capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
+from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
 
 from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
