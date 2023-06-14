@@ -70,6 +70,10 @@ except ImportError:
 # Hashable causes `TypeError:issubclass() arg 1 must be a class`
 IndexLabel = Union[str, Sequence[str]]
 
+# added in pandas 2.0
+# https://github.com/pandas-dev/pandas/blob/965ceca9fd796940050d6fc817707bba1c4f9bff/pandas/_typing.py#LL373C1-L373C52
+DtypeBackend = Literal["pyarrow", "numpy_nullable"]
+
 logger = logging.getLogger(__file__)
 
 PANDAS_VERSION: float = float(
@@ -122,6 +126,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "IndexLabel",
     "CompressionOptions",
     "StorageOptions",
+    "DtypeBackend",
 }
 
 TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
@@ -236,6 +241,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type | Any]] = {
     "IndexLabel": IndexLabel,
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
+    "DtypeBackend": DtypeBackend,
 }
 
 # TODO: make these functions a generator pipeline
