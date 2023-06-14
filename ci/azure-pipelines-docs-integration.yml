@@ -86,7 +86,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -111,7 +111,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -142,7 +142,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -182,7 +182,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -203,7 +203,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+            pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
           displayName: 'Install dependencies'
 
         - task: DownloadSecureFile@1
@@ -251,7 +251,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -275,7 +275,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -304,7 +304,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, redshift]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -336,7 +336,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
 
         - script: |
@@ -375,7 +375,7 @@ stages:
 
           displayName: download the AWS JARs and move to pyspark's JAR directory.
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
         - script: |
             pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
@@ -398,7 +398,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, azure]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -423,7 +423,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -443,7 +443,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -484,7 +484,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
