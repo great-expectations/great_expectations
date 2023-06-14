@@ -662,6 +662,38 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
 @pytest.mark.cloud
 @pytest.mark.integration
+def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_config_with_ids: dict,
+    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should raise StoreBackendError when calling `update_checkpoint` and the
+    referenced Checkpoint does not exist.
+    """
+    context = empty_cloud_data_context
+
+    with mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_0_results,
+    ) as _:
+        checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
+        checkpoint_config.pop("id")
+        with pytest.raises(CheckpointNotFoundError):
+            context.update_checkpoint(
+                Checkpoint.instantiate_from_config_with_runtime_args(
+                    checkpoint_config=CheckpointConfig(**checkpoint_config),
+                    data_context=context,
+                    name=checkpoint_config["name"],
+                )
+            )
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
