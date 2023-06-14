@@ -1,6 +1,18 @@
 .linkCardGrid {
-  display: flex;
+  background: #f6faff;
 }
-.col {
-  flex: 1;
+
+.container {
+  display: grid;
+  grid-auto-columns: minmax(15rem, auto);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-gap: 1rem;
+}
+.item {
+  background: #f1e9f7;
+  border: 3px solid #a579cc;
+  color: #a579cc;
+  padding: 2rem;
+  font-size: 2rem;
+  text-align: center;
 }
