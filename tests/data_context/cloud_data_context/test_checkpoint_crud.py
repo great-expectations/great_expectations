@@ -541,7 +541,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     validation_ids: Tuple[str, str],
     checkpoint_config_with_ids: dict,
     mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -558,7 +558,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     ) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=mocked_get_response,
+        side_effect=mocked_get_by_name_response_1_result,
     ) as _:
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
@@ -668,7 +668,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     validation_ids: Tuple[str, str],
     checkpoint_config_with_ids: dict,
     mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -684,7 +684,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     ) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=mocked_get_response,
+        side_effect=mocked_get_by_name_response_1_result,
     ) as _:
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
