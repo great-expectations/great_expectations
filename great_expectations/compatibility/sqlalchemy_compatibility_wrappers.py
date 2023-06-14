@@ -5,6 +5,9 @@ import warnings
 from typing import Callable, Iterator, Sequence
 
 import pandas as pd
+
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_less_than
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
@@ -125,11 +128,27 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+    if sqlalchemy.sqlalchemy and is_version_less_than(
+        sqlalchemy.sqlalchemy.__version__, "2.0.0"
+    ):
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            breakpoint()
+            df.to_sql(
+                name=name,
+                con=con,
+                schema=schema,
+                if_exists=if_exists,
+                index=index,
+                index_label=index_label,
+                chunksize=chunksize,
+                dtype=dtype,
+                method=method,
+            )
+    else:
         df.to_sql(
             name=name,
             con=con,
