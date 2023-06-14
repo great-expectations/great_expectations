@@ -132,8 +132,6 @@ class SqlAlchemyBatchData(BatchData):
                     sa.MetaData(),
                     schema=schema_name,
                 )
-        elif query:
-            self._selectable = sa.text(query)
         elif create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
@@ -164,7 +162,10 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
         else:
-            self._selectable = selectable.alias(self._record_set_name)
+            if query:  # noqa: PLR5501
+                self._selectable = sa.text(query)
+            else:
+                self._selectable = selectable.alias(self._record_set_name)
 
     @property
     def dialect(self) -> GXSqlDialect:
