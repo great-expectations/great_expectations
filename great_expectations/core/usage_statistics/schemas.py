@@ -1212,8 +1212,6 @@ anonymized_usage_statistics_record_schema = {
         "event_time",
         "data_context_id",
         "data_context_instance_id",
-        "mac_address",
-        "oss_id",
         "ge_version",
         "event",
         "success",
