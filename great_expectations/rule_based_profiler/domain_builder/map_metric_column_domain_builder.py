@@ -321,6 +321,9 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
             runtime_configuration=runtime_configuration,
         )
 
+        print(
+            f"\n[ALEX_TEST] [MapMetricColumnDomainBuilder._get_column_names_satisfying_tolerance_limits()] RESOLVED_METRICS_BY_COLUMN_NAME:\n{resolved_metrics_by_column_name} ; TYPE: {str(type(resolved_metrics_by_column_name))}"
+        )
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
