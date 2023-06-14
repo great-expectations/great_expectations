@@ -304,6 +304,7 @@ ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDa
 FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
     "feather", _PandasDataAsset
 )
+FWFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("fwf", _PandasDataAsset)
 GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
 HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
 HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)

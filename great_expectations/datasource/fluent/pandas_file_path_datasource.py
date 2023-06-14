@@ -60,7 +60,7 @@ CSVAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
 ExcelAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
     "excel", _FilePathDataAsset
 )
-FixedWidthFileAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
+FWFAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(
     "fwf", _FilePathDataAsset
 )
 JSONAsset: Type[_FilePathDataAsset] = _FILE_PATH_ASSET_MODELS.get(

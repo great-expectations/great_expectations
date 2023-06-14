@@ -211,7 +211,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "csv": "CSVAsset",
-    "fwf": "FixedWidthFileAsset",
+    "fwf": "FWFAsset",
     "gbq": "GBQAsset",
     "hdf": "HDFAsset",
     "html": "HTMLAsset",
