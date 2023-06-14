@@ -173,6 +173,21 @@ def mocked_get_by_name_response_1_result(
     return _mocked_get_by_name_response
 
 
+@pytest.fixture
+def mocked_get_by_name_response_0_results(
+    mock_response_factory: Callable,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_by_name_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": [],
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_get_checkpoint_by_name(
