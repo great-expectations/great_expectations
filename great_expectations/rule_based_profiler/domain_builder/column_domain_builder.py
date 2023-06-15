@@ -224,7 +224,9 @@ class ColumnDomainBuilder(DomainBuilder):
                     # active_batch_id
                     "batch_id": batch_ids[-1],  # type: ignore[index]
                 },
-                metric_value_kwargs=None,
+                metric_value_kwargs={
+                    "include_nested": False,
+                },
             )
         )
         self._table_column_names = table_columns
