@@ -296,18 +296,12 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
 
-    if not dotted_relative_path:
-        dotted_relative_path = "."
-        pattern = re.compile(r"(?P<import>import .* from ')(?P<rest>.*)")
-        contents = re.sub(
-            pattern,
-            rf"\g<import>{dotted_relative_path}\g<rest>",
-            contents,
-        )
+    contents = contents.replace(
+        "'/components/warnings/_cli_removal.md'",
+        "'./components/warnings/_cli_removal.md'",
+    )
 
     return contents
-
-    pass
 
 
 if __name__ == "__main__":
