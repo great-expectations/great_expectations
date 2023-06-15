@@ -10,15 +10,11 @@ CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 # git pull to get the latest tags
 git pull
 
-print_orange_header "Copying previous versioned docs from https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
-curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip" -o "oss_docs_versions.zip"
+S3_URL="https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip"
+print_orange_header "Copying previous versioned docs from $S3_URL"
+curl $S3_URL -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 rm oss_docs_versions.zip
-
-print_orange_header "Debug"
-pwd
-ls -la
-print_orange_header "End Debug"
 
 VERSIONS=$(cat versions.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(" ".join(obj))')
 mkdir versioned_code
