@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataAssistantComposer:
-    ANALYSIS_TYPE_TO_ANALYSIS_CATEGORY_MAP: Final[Dict[str, str]] = {
+    TASK_NAME_TO_JOB_CATEGORY_MAP: Final[Dict[str, str]] = {
         "uniqueness": "column_value_uniqueness",
         "nullity": "column_value_nullity",
         "nonnullity": "column_value_nonnullity",
@@ -48,7 +48,7 @@ class DataAssistantComposer:
         self._batch_request: BatchRequest = batch_request
         self._data_context: AbstractDataContext = data_context
 
-        self._analysis_type_to_domain_list_map: Mapping[str, List[Domain]] | None = None
+        self._task_name_to_domain_list_map: Mapping[str, List[Domain]] | None = None
 
     def build_domains_for_data_assistant_runners(self) -> None:
         data_assistant = self._data_context.assistants.domains._build_data_assistant()
@@ -221,7 +221,7 @@ class DataAssistantComposer:
             Domain
         ] = raw_column_value_nonnullity_domains
 
-        self._analysis_type_to_domain_list_map = {
+        self._task_name_to_domain_list_map = {
             "uniqueness": column_value_uniqueness_domains,
             "nullity": column_value_nullity_domains,
             "nonnullity": column_value_nonnullity_domains,
@@ -233,18 +233,18 @@ class DataAssistantComposer:
 
     def execute_data_assistant(
         self,
-        analysis_type: str,
+        task_name: str,
     ) -> DataAssistantResult:
-        domains: list[Domain] = self._analysis_type_to_domain_list_map[analysis_type]
+        domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
 
         domains: Domain
         include_column_names = [domain.domain_kwargs["column"] for domain in domains]
 
-        analysis_category: str = (
-            DataAssistantComposer.ANALYSIS_TYPE_TO_ANALYSIS_CATEGORY_MAP[analysis_type]
-        )
+        job_category: str = DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP[
+            task_name
+        ]
         data_assistant_runner: DataAssistantRunner = getattr(
-            self._data_context.assistants, analysis_category
+            self._data_context.assistants, job_category
         )
 
         data_assistant_result: DataAssistantResult = data_assistant_runner.run(
