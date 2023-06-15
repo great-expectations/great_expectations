@@ -8,7 +8,7 @@ description: Add validation data, create and configure Checkpoints, and pass in-
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">This is where you'll find information about managing your Checkpoints including adding validation data, creating and configuring Checkpoints, and passing in-mameory DataFrames.</p>
+<p class="DocItem__header-description">This is where you'll find information about managing your Checkpoints including adding validation data, creating and configuring Checkpoints, and passing in-memory DataFrames.</p>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Create a new Checkpoint" description="Create a new Checkpoint" href="/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint" icon="/img/checkpoint_icon.svg" />
