@@ -264,14 +264,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
 
-_PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
+_PANDAS_READER_METHOD_UNSUPPORTED_LIST: tuple[str, ...] = (
     # "read_csv",
     # "read_json",
     # "read_excel",
     # "read_parquet",
     # "read_clipboard",
     # "read_feather",
-    "read_fwf",  # unhandled type
+    # "read_fwf",
     # "read_gbq",
     # "read_hdf",
     # "read_html",
@@ -304,6 +304,7 @@ ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDa
 FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
     "feather", _PandasDataAsset
 )
+FWFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("fwf", _PandasDataAsset)
 GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
 HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
 HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
@@ -887,6 +888,57 @@ class PandasDatasource(_PandasDatasource):
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
             name=name,
             path=path,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    @public_api
+    def add_fwf_asset(
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
+    ) -> FeatherAsset:  # type: ignore[valid-type]
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            The FWFAsset that has been added to this datasource.
+        """
+        asset = FWFAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._add_asset(asset=asset)
+
+    @public_api
+    def read_fwf(
+        self,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        Read a Fixed Width File and return a Validator associated with it.
+
+        Args:
+            filepath_or_buffer: The path to the file or a URL pointing to the Feather file.
+            asset_name: The name of the asset, should you wish to use it again.
+            **kwargs: Additional keyword arguments to pass to pandas.read_fwf().
+
+        Returns:
+            A Validator using an ephemeral FWFAsset and the "default" Expectation Suite.
+        """
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: FWFAsset = self.add_fwf_asset(  # type: ignore[valid-type]
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -1684,6 +1736,8 @@ class PandasDatasource(_PandasDatasource):
     read_excel.__signature__ = _merge_signatures(read_excel, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
     read_feather.__signature__ = _merge_signatures(read_feather, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_fwf_asset.__signature__ = _merge_signatures(add_fwf_asset, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_fwf.__signature__ = _merge_signatures(read_fwf, FWFAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     read_gbq.__signature__ = _merge_signatures(read_gbq, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_hdf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]

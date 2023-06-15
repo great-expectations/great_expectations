@@ -4,14 +4,6 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 abs_integration_tests = []
 
 connecting_to_your_data = [
-    # Uncomment after resolving
-    # E               ValueError: No data reference for data asset name "taxi_data" matches the given
-    # E               batch identifiers {} from batch definition {
-    # E                 "datasource_name": "my_azure_datasource",
-    # E                 "data_connector_name": "configured_data_connector_name",
-    # E                 "data_asset_name": "taxi_data",
-    # E                 "batch_identifiers": {}
-    # E               }.
     # IntegrationTestFixture(
     #     name="azure_pandas_configured_yaml",
     #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",

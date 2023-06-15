@@ -17,7 +17,7 @@ batch_request = data_asset.build_batch_request()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py create_expectation_suite">
-context.create_expectation_suite("my_expectation_suite")
+context.add_or_update_expectation_suite("my_expectation_suite")
 # Optional. Run assert "my_expectation_suite" in context.list_expectation_suite_names() to veriify the Expectation Suite was created.
 # </snippet>
 

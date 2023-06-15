@@ -55,6 +55,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
     examples = [
         {
             "data": {"foo": range(100)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -70,15 +71,10 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
                     },
                 }
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         },
         {
             "data": {"foo": range(50)},
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "negative_test",
@@ -93,12 +89,6 @@ class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
                         "observed_value": 50,
                     },
                 }
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
             ],
         },
     ]
