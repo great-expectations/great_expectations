@@ -541,6 +541,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
+
     def _get_one_or_none_from_response_data(self, response_data, key):
         """
         GET requests to cloud can either return response data that is a single object (get by id) or a
@@ -562,7 +563,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         response_data = self._get(key)["data"]
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
-        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
+        existing = self._get_one_or_none_from_response_data(
+            response_data=response_data, key=key
+        )
 
         if existing is None:
             raise StoreBackendError(
@@ -583,7 +586,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
-        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
+        existing = self._get_one_or_none_from_response_data(
+            response_data=response_data, key=key
+        )
 
         if existing is not None:
             id = key[1] if key[1] is not None else existing["id"]
