@@ -11,7 +11,7 @@ CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 git pull
 
 print_orange_header "Copying previous versioned docs"
-curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
+curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230615.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 rm oss_docs_versions.zip
 
@@ -29,19 +29,8 @@ for version in $VERSIONS; do
 done
 
 
-print_orange_header "Updating versioned code and docs..."
+print_orange_header "Updating versioned code and docs via prepare_prior_versions.py..."
 
-print_orange_header "Updating filepath in versioned docs"
-# This is done in prepare_prior_versions.py
-# Update filepath in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
-# by adding the correct versioned_code filepath e.g. versioned_code/version-0.14.13/<filepath>
-
-print_orange_header "Updating snippet names in versioned docs and code"
-# This is done in prepare_prior_versions.py
-# Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
-# by prepending the version e.g. name="version-0.15.50 <original_snippet_name>"
-# This is done in the docs and code so that the snippet processing tool can match up the correct snippet
-# based on the version of the code file that existed when the document was released.
 cd ../
 python prepare_prior_versions.py
 cd docusaurus
