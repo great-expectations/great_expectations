@@ -300,6 +300,11 @@ extend-exclude = [
 "assets/benchmark/benchmark.py" = [
     "DTZ",  # flake8-datetimez-dtz - doesn't matter for benchmark tests
 ]
+"assets/scripts/build_gallery.py" = [
+    "PLR0912",  # Too many branches  - scripts are not part of the main codebase
+    "PLR0913", # Too many arguments - scripts are not part of the main codebase
+    "PLR0915", # Too many statements - scripts are not part of the main codebase
+]
 "__init__.py" = [
     "F401",  # unused import
     "F403",  # star imports
