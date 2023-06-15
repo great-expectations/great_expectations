@@ -297,6 +297,9 @@ extend-exclude = [
 ]
 
 [tool.ruff.per-file-ignores]
+"assets/benchmark/benchmark.py" = [
+    "DTZ",  # flake8-datetimez-dtz - doesn't matter for benchmark tests
+]
 "__init__.py" = [
     "F401",  # unused import
     "F403",  # star imports
