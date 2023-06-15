@@ -660,7 +660,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     """Return context_dir and context that was created"""
     context_dir = os.path.join(  # noqa: PTH118
         os.path.sep, "tmp", f"gx-context-{os.getpid()}"
-    )  # ,
+    )
     os.makedirs(context_dir)  # noqa: PTH103
     context = DataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
