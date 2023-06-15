@@ -7,7 +7,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import BaseDatasource
-from great_expectations.datasource.fluent import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
 
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
@@ -28,7 +28,7 @@ datasource_name = None
 assert datasource_name, "Please set datasource_name."
 
 # Get or add Datasource
-datasource: BaseDatasource = context.sources.add_or_update_pandas(datasource_name)
+datasource: Datasource = context.sources.add_or_update_pandas(datasource_name)
 
 # Provide an Asset name
 asset_name = None
@@ -54,7 +54,7 @@ except LookupError:
 batch_request: BatchRequest = asset.build_batch_request()
 
 print(f"\n{20*'='}\nDatasource Config\n{20*'='}\n")
-pprint.pprint(datasource.json())
+pprint.pprint(datasource.dict())
 
 # Provide an Expectation Suite name
 expectation_suite_name = None
