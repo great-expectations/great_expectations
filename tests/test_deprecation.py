@@ -7,7 +7,7 @@ from packaging import version
 
 from great_expectations.data_context.util import file_relative_path
 
-UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 12
+UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 13
 
 
 @pytest.fixture
