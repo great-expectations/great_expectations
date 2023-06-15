@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import random
 import re
 from collections import defaultdict
 from pprint import pformat as pf
@@ -32,6 +33,8 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from requests import PreparedRequest
     from responses import RequestsMock
+
+    from great_expectations.datasource.fluent import Datasource
 
 
 # apply markers to entire test module
@@ -230,6 +233,27 @@ def test_update_non_existant_datasource(
         context.sources.update_pandas_filesystem(
             name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
         )
+
+
+class TestDeletingDatasources:
+    def test_file_context(self, seeded_file_context: FileDataContext):
+        context = seeded_file_context
+
+        gx_yml_path = pathlib.Path(context.root_directory, context.GX_YML).resolve(
+            strict=True
+        )
+
+        datasource: Datasource = random.choice(
+            list(context.fluent_datasources.values())
+        )
+
+        print(f"Deleting '{datasource.name}'")
+        context.delete_datasource(datasource.name)
+
+        fds_after_delete: dict = yaml.load(gx_yml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+        print(f"\nYAML Datasources\n{pf(fds_after_delete, depth=1)}")
+
+        assert datasource.name not in fds_after_delete
 
 
 @pytest.mark.cloud
