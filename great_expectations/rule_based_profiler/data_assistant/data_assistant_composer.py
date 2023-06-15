@@ -200,7 +200,27 @@ class DataAssistantComposer:
             )
         )
 
+        column_value_uniqueness_domains: List[Domain] = list(
+            filter(
+                lambda domain: domain.domain_kwargs["column"]
+                not in [
+                    domain_key.domain_kwargs["column"]
+                    for domain_key in (raw_column_value_nullity_domains)
+                ],
+                raw_column_value_uniqueness_domains,
+            )
+        )
+
+        column_value_nullity_domains: List[Domain] = raw_column_value_nullity_domains
+
+        column_value_nonnullity_domains: List[
+            Domain
+        ] = raw_column_value_nonnullity_domains
+
         self._analysis_type_to_domain_list_map = {
+            "uniqueness": column_value_uniqueness_domains,
+            "nullity": column_value_nullity_domains,
+            "nonnullity": column_value_nonnullity_domains,
             "categorical_two": categorical_columns_domains_two,
             "numeric": numeric_columns_domains,
             "text": text_columns_domains,
