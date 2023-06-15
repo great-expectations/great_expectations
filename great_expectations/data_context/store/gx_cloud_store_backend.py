@@ -542,7 +542,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
 
-    def _get_one_or_none_from_response_data(self, response_data, key):
+    def _get_one_or_none_from_response_data(self, response_data: list[PayloadDataField] | PayloadDataField , key: tuple[GXCloudRESTResource, str | None, str | None]) -> PayloadDataField:
         """
         GET requests to cloud can either return response data that is a single object (get by id) or a
         list of objects with length >= 0 (get by name). This method takes this response data and returns a single
@@ -559,7 +559,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"to more than one object."
             )
 
-    def _update(self, key, value, **kwargs):
+    def _update(self, key: tuple[GXCloudRESTResource, str | None, str | None], value: dict, **kwargs):
         response_data = self._get(key)["data"]
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
