@@ -756,6 +756,11 @@ def show_automerges(ctx: Context):
         },
     )
     LOGGER.debug(f"{response.request.method} {response.request.url} - {response}")
+
+    if response.status_code != requests.codes.ok:
+        print(f"Error: {response.reason}\n{pf(response.json(), depth=2)}")
+        response.raise_for_status()
+
     pr_details = response.json()
     LOGGER.debug(pf(pr_details, depth=2))
 
