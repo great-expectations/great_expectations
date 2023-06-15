@@ -21,18 +21,25 @@ connecting_to_your_data = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
-    # IntegrationTestFixture(
-    #     name="filesystem_spark_yaml",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.SPARK],
-    # ),
-    # IntegrationTestFixture(
-    #     name="filesystem_spark_python",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.SPARK],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_configure_a_spark_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
+        backend_dependencies=[BackendDependencies.SPARK],
+    ),
+    #   IntegrationTestFixture(
+    #       name="filesystem_spark_yaml",
+    #       user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
+    #       data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #       backend_dependencies=[BackendDependencies.SPARK],
+    #   ),
+    #   IntegrationTestFixture(
+    #       name="filesystem_spark_python",
+    #       user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
+    #       data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #       backend_dependencies=[BackendDependencies.SPARK],
+    #   ),
 ]
 
 databricks_deployment_patterns = [
@@ -71,16 +78,6 @@ emr_deployment_patterns = [
     ),
 ]
 
-migration_guide = [
-    IntegrationTestFixture(
-        name="migration_guide_spark_v3_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-]
-
 creating_custom_expectations = [
     IntegrationTestFixture(
         name="expect_queried_column_value_frequency_to_meet_threshold",
@@ -107,4 +104,3 @@ fluent_datasources = [
 spark_integration_tests += connecting_to_your_data
 spark_integration_tests += databricks_deployment_patterns
 spark_integration_tests += fluent_datasources
-spark_integration_tests += migration_guide
