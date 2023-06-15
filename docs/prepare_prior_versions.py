@@ -262,8 +262,6 @@ def _use_relative_path_for_imports_substitution(
     """
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
-    if not dotted_relative_path:
-        dotted_relative_path = "."
     pattern = re.compile(
         r"(?P<import>import .* from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
@@ -279,6 +277,10 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     e.g. `import TechnicalTag from '../../term_tags/_tag.mdx';`
     instead of `import TechnicalTag from '/docs/term_tags/_tag.mdx';`
 
+    Also if the path starts with / and the relative path is the same directory, then we will
+    replace the path with a dot. E.g.  `import CLIRemoval from '/components/warnings/_cli_removal.md'` ->
+    `import CLIRemoval from './components/warnings/_cli_removal.md'`
+
     Args:
         contents: String to perform substitution.
         path_to_versioned_docs: e.g. "docs/docusaurus/versioned_docs/version-0.14.13/"
@@ -293,6 +295,16 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
         r"(?P<import>import .* from ')(?P<slash_docs>/docs/)(?P<rest>.*)"
     )
     contents = re.sub(pattern, rf"\g<import>{dotted_relative_path}/\g<rest>", contents)
+
+    if not dotted_relative_path:
+        dotted_relative_path = "."
+        pattern = re.compile(r"(?P<import>import .* from ')(?P<rest>.*)")
+        contents = re.sub(
+            pattern,
+            rf"\g<import>{dotted_relative_path}\g<rest>",
+            contents,
+        )
+
     return contents
 
     pass
