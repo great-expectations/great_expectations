@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.validator.validator import Validator  # noqa: TCH001
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
