@@ -465,7 +465,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name: str) -> Callable:  # noqa: C901, PLR0915
+    def validate_expectation(self, name: str) -> Callable:  # noqa: PLR0915
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration

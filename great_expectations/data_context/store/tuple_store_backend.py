@@ -392,7 +392,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             while (
                 not os.listdir(curpath)
                 and os.path.exists(curpath)  # noqa: PTH110
-                and mroot != curpath  # noqa: PTH110
+                and mroot != curpath
             ):
                 f2 = os.path.dirname(curpath)  # noqa: PTH120
                 os.rmdir(curpath)  # noqa: PTH106
@@ -691,7 +691,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3_object_key = self._build_s3_object_key(key)
 
         # Check if the object exists
-        if self.has_key(key):  # noqa: W601
+        if self.has_key(key):
             # This implementation deletes the object if non-versioned or adds a delete marker if versioned
             s3.Object(self.bucket, s3_object_key).delete()
             return True
@@ -852,7 +852,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
             )
         else:
-            return gcs_response_object.download_as_string().decode("utf-8")
+            return gcs_response_object.download_as_bytes().decode("utf-8")
 
     def _set(
         self,

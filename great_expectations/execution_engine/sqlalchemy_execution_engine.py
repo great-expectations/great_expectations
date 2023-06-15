@@ -101,7 +101,7 @@ if sa:
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401, TID251
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -735,6 +735,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert (
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
+
+            # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            if not isinstance(selectable, sa.Table):
+                selectable = selectable.subquery()
 
             selectable = (
                 sa.select(sa.text("*"))

@@ -3,7 +3,7 @@ import logging
 from typing import Any, List, Union, ValuesView
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
 
