@@ -84,20 +84,12 @@ class DataAssistantComposer:
         raw_column_value_uniqueness_domains: List[Domain] = domains_by_rule_name[
             "column_value_uniqueness_domain_rule"
         ]
-        if raw_column_value_uniqueness_domains:
-            logger.info(
-                f"""Raw "{MetricDomainTypes.COLUMN}" type "column_value_uniqueness" "Domain" objects:\n{raw_column_value_uniqueness_domains}"""
-            )
         raw_column_value_nullity_domains: List[Domain] = domains_by_rule_name[
             "column_value_nullity_domain_rule"
         ]
         raw_column_value_nonnullity_domains: List[Domain] = domains_by_rule_name[
             "column_value_nonnullity_domain_rule"
         ]
-        if raw_column_value_nonnullity_domains:
-            logger.info(
-                f"""Raw "{MetricDomainTypes.COLUMN}" type "column_value_nonnullity" "Domain" objects:\n{raw_column_value_nonnullity_domains}"""
-            )
         raw_numeric_columns_domains: List[Domain] = domains_by_rule_name[
             "numeric_columns_domain_rule"
         ]
