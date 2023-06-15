@@ -284,7 +284,6 @@ ignore = [
 extend-exclude = [
     "docs/*",
     "build/*",
-    "assets/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
