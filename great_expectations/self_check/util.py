@@ -230,6 +230,52 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+
+try:
+    import clickhouse_sqlalchemy.types.common as clickhousetypes
+    from clickhouse_sqlalchemy.drivers.base import (
+        ClickHouseDialect as clickhouseDialect,
+    )
+
+    CLICKHOUSE_TYPES = {
+        "INT256": clickhousetypes.Int256,
+        "INT128": clickhousetypes.Int128,
+        "INT64": clickhousetypes.Int64,
+        "INT32": clickhousetypes.Int32,
+        "INT16": clickhousetypes.Int16,
+        "INT8": clickhousetypes.Int8,
+        "UINT256": clickhousetypes.UInt256,
+        "UINT128": clickhousetypes.UInt128,
+        "UINT64": clickhousetypes.UInt64,
+        "UINT32": clickhousetypes.UInt32,
+        "UINT16": clickhousetypes.UInt16,
+        "UINT8": clickhousetypes.UInt8,
+        "DATE": clickhousetypes.Date,
+        "DATETIME": clickhousetypes.DateTime,
+        "DATETIME64": clickhousetypes.DateTime64,
+        "FLOAT64": clickhousetypes.Float64,
+        "FLOAT32": clickhousetypes.Float32,
+        "DECIMAL": clickhousetypes.Decimal,
+        "STRING": clickhousetypes.String,
+        "BOOL": clickhousetypes.Boolean,
+        "BOOLEAN": clickhousetypes.Boolean,
+        "UUID": clickhousetypes.UUID,
+        "FIXEDSTRING": clickhousetypes.String,
+        "ENUM8": clickhousetypes.Enum8,
+        "ENUM16": clickhousetypes.Enum16,
+        "ARRAY": clickhousetypes.Array,
+        "NULLABLE": clickhousetypes.Nullable,
+        "LOWCARDINALITY": clickhousetypes.LowCardinality,
+        "TUPLE": clickhousetypes.Tuple,
+        "MAP": clickhousetypes.Map,
+    }
+except (ImportError, KeyError):
+    clickhouse = None
+    clickhousetypes = None
+    clickhouseDialect = None
+    CLICKHOUSE_TYPES = {}
+
+
 try:
     import trino
     import trino.sqlalchemy.datatype as trinotypes
@@ -403,6 +449,7 @@ SQL_DIALECT_NAMES = (
     "bigquery",
     "trino",
     "redshift",
+    "clickhouse"
     # "athena",
     "snowflake",
 )
@@ -572,7 +619,7 @@ def get_dataset(  # noqa: C901, PLR0912, PLR0913, PLR0915
         warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
-def get_test_validator_with_data(  # noqa: C901, PLR0913
+def get_test_validator_with_data(  # noqa: PLR0913
     execution_engine: str,
     data: dict,
     table_name: str | None = None,
@@ -850,7 +897,7 @@ def build_pandas_validator_with_data(
     batch = Batch(data=df, batch_definition=batch_definition)
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context(include_spark=False)
 
     return Validator(
         execution_engine=PandasExecutionEngine(),
@@ -906,6 +953,11 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     except AttributeError:
         pass
     try:
+        dialect_classes["clickhouse"] = clickhouseDialect
+        dialect_types["clickhouse"] = CLICKHOUSE_TYPES
+    except AttributeError:
+        pass
+    try:
         dialect_classes["trino"] = trinoDialect
         dialect_types["trino"] = TRINO_TYPES
     except AttributeError:
@@ -944,6 +996,9 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
+        engine = sa.create_engine(connection_string)
+    elif sa_engine_name == "clickhouse":
+        connection_string = _get_clickhouse_connection_string()
         engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
@@ -1155,7 +1210,7 @@ def build_spark_validator_with_data(
     )
 
     if context is None:
-        context = build_in_memory_runtime_context()
+        context = build_in_memory_runtime_context(include_pandas=False)
 
     return Validator(
         execution_engine=execution_engine,
@@ -1493,6 +1548,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
     include_mssql=False,
     include_bigquery=False,
     include_aws=False,
+    include_clickhouse=False,
     include_trino=False,
     include_azure=False,
     include_redshift=False,
@@ -1632,7 +1688,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
 
         if include_aws:
             # TODO need to come up with a better way to do this check.
-            # currently this checks the 3 default EVN variables that boto3 looks for
+            # currently this checks the 3 default ENV variables that boto3 looks for
             aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
             aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
             aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
@@ -1651,6 +1707,24 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
                     logger.warning(
                         "AWS tests are requested, but credentials were not set up"
                     )
+
+        if include_clickhouse:
+            # noinspection PyUnresolvedReferences
+            try:
+                engine = _create_clickhouse_engine(db_hostname)
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "clickhouse tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"clickhouse tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["clickhouse"]
 
         if include_trino:
             # noinspection PyUnresolvedReferences
@@ -1750,7 +1824,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
     ignore_only_for: bool = False,
     debug_logger: Optional[logging.Logger] = None,
     only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[AbstractDataContext] = None,  # noqa: F821
+    context: Optional[AbstractDataContext] = None,
 ):
     """Determine tests to run
 
@@ -1771,16 +1845,10 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
         _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
 
-    parametrized_tests = []
-
-    if only_consider_these_backends:
-        only_consider_these_backends = [
-            backend
-            for backend in only_consider_these_backends
-            if backend in BACKEND_TO_ENGINE_NAME_DICT
-        ]
-
+    dialects_to_include = {}
+    engines_to_include = {}
     engines_implemented = []
+
     if execution_engine_diagnostics.PandasExecutionEngine:
         engines_implemented.append("pandas")
     if execution_engine_diagnostics.SparkDFExecutionEngine:
@@ -1791,88 +1859,65 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         f"Implemented engines for {expectation_type}: {', '.join(engines_implemented)}"
     )
 
+    if only_consider_these_backends:
+        _debug(f"only_consider_these_backends -> {only_consider_these_backends}")
+        for backend in only_consider_these_backends:
+            if backend in BACKEND_TO_ENGINE_NAME_DICT:
+                _engine = BACKEND_TO_ENGINE_NAME_DICT[backend]
+                if _engine == "sqlalchemy" and "sqlalchemy" in engines_implemented:
+                    engines_to_include[_engine] = True
+                    dialects_to_include[backend] = True
+                elif _engine == "pandas" and "pandas" in engines_implemented:
+                    engines_to_include[_engine] = True
+                elif _engine == "spark" and "spark" in engines_implemented:
+                    engines_to_include[_engine] = True
+    else:
+        engines_to_include[
+            "pandas"
+        ] = execution_engine_diagnostics.PandasExecutionEngine
+        engines_to_include[
+            "spark"
+        ] = execution_engine_diagnostics.SparkDFExecutionEngine
+        engines_to_include[
+            "sqlalchemy"
+        ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+        if (
+            engines_to_include.get("sqlalchemy") is True
+            and raise_exceptions_for_backends is False
+        ):
+            dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
+
+    _debug(
+        f"Attempting engines ({engines_to_include}) and dialects ({dialects_to_include})"
+    )
+
+    backends = build_test_backends_list(
+        include_pandas=engines_to_include.get("pandas", False),
+        include_spark=engines_to_include.get("spark", False),
+        include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
+        include_sqlite=dialects_to_include.get("sqlite", False),
+        include_postgresql=dialects_to_include.get("postgresql", False),
+        include_mysql=dialects_to_include.get("mysql", False),
+        include_mssql=dialects_to_include.get("mssql", False),
+        include_bigquery=dialects_to_include.get("bigquery", False),
+        include_trino=dialects_to_include.get("trino", False),
+        include_redshift=dialects_to_include.get("redshift", False),
+        include_athena=dialects_to_include.get("athena", False),
+        include_snowflake=dialects_to_include.get("snowflake", False),
+        raise_exceptions_for_backends=raise_exceptions_for_backends,
+    )
+
+    _debug(f"Successfully connecting backends -> {backends}")
+
+    if not backends:
+        _debug("No suitable backends to connect to")
+        return []
+
+    parametrized_tests = []
     num_test_data_cases = len(test_data_cases)
     for i, d in enumerate(test_data_cases, 1):
         _debug(f"test_data_case {i}/{num_test_data_cases}")
         d = copy.deepcopy(d)  # noqa: PLW2901
-        dialects_to_include = {}
-        engines_to_include = {}
-
-        # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
-        if d.test_backends:
-            for tb in d.test_backends:
-                engines_to_include[tb.backend] = True
-                if tb.backend == "sqlalchemy":
-                    for dialect in tb.dialects:
-                        dialects_to_include[dialect] = True
-            _debug(
-                f"Tests specify specific backends only: engines_to_include -> {engines_to_include}  dialects_to_include -> {dialects_to_include}"
-            )
-            if only_consider_these_backends:
-                test_backends = list(engines_to_include.keys()) + list(
-                    dialects_to_include.keys()
-                )
-                if "sqlalchemy" in test_backends:
-                    test_backends.extend(list(SQL_DIALECT_NAMES))
-                engines_to_include = {}
-                dialects_to_include = {}
-                for backend in set(test_backends) & set(only_consider_these_backends):
-                    dialects_to_include[backend] = True
-                    if backend in SQL_DIALECT_NAMES:
-                        engines_to_include["sqlalchemy"] = True
-                    else:
-                        engines_to_include[BACKEND_TO_ENGINE_NAME_DICT[backend]] = True
-        else:
-            engines_to_include[
-                "pandas"
-            ] = execution_engine_diagnostics.PandasExecutionEngine
-            engines_to_include[
-                "spark"
-            ] = execution_engine_diagnostics.SparkDFExecutionEngine
-            engines_to_include[
-                "sqlalchemy"
-            ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
-            if (
-                engines_to_include.get("sqlalchemy") is True
-                and raise_exceptions_for_backends is False
-            ):
-                dialects_to_include = {dialect: True for dialect in SQL_DIALECT_NAMES}
-
-            if only_consider_these_backends:
-                engines_to_include = {}
-                dialects_to_include = {}
-                for backend in only_consider_these_backends:
-                    if backend in SQL_DIALECT_NAMES:
-                        if "sqlalchemy" in engines_implemented:
-                            dialects_to_include[backend] = True
-                            engines_to_include["sqlalchemy"] = True
-                    else:
-                        if (  # noqa: PLR5501
-                            backend == "pandas" and "pandas" in engines_implemented
-                        ):
-                            engines_to_include["pandas"] = True
-                        elif backend == "spark" and "spark" in engines_implemented:
-                            engines_to_include["spark"] = True
-
-        # # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        # if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
-        #     dialects_to_include["sqlite"] = True
-
-        backends = build_test_backends_list(
-            include_pandas=engines_to_include.get("pandas", False),
-            include_spark=engines_to_include.get("spark", False),
-            include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
-            include_sqlite=dialects_to_include.get("sqlite", False),
-            include_postgresql=dialects_to_include.get("postgresql", False),
-            include_mysql=dialects_to_include.get("mysql", False),
-            include_mssql=dialects_to_include.get("mssql", False),
-            include_bigquery=dialects_to_include.get("bigquery", False),
-            include_trino=dialects_to_include.get("trino", False),
-            include_redshift=dialects_to_include.get("redshift", False),
-            include_athena=dialects_to_include.get("athena", False),
-            include_snowflake=dialects_to_include.get("snowflake", False),
-            raise_exceptions_for_backends=raise_exceptions_for_backends,
-        )
         titles = []
         only_fors = []
         suppress_test_fors = []
@@ -1884,11 +1929,6 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         _debug(
             f"only_fors -> {only_fors}  suppress_test_fors -> {suppress_test_fors}  only_consider_these_backends -> {only_consider_these_backends}"
         )
-        _debug(f"backends -> {backends}")
-        if not backends:
-            _debug("No suitable backends for this test_data_case")
-            continue
-
         for c in backends:
             _debug(f"Getting validators with data: {c}")
 
@@ -2251,7 +2291,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(  # noqa: C901, PLR0912, PLR0913
+def evaluate_json_test_v3_api(  # noqa: PLR0912, PLR0913
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2745,6 +2785,34 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def _get_clickhouse_connection_string(
+    hostname: str = "localhost", schema_name: str = "test"
+) -> str:
+    return f"clickhouse+native://{hostname}:9000/{schema_name}"
+
+
+def _create_clickhouse_engine(
+    hostname: str = "localhost", schema_name: str = "schema"
+) -> sqlalchemy.Engine:
+    engine = sa.create_engine(
+        _get_clickhouse_connection_string(hostname=hostname, schema_name=schema_name)
+    )
+    from clickhouse_sqlalchemy.exceptions import DatabaseException
+    from sqlalchemy import text  # noqa: TID251
+
+    with engine.begin() as conn:
+        try:
+            schemas = conn.execute(
+                text(f"show schemas from memory like {repr(schema_name)}")
+            ).fetchall()
+            if (schema_name,) not in schemas:
+                conn.execute(text(f"create schema {schema_name}"))
+        except DatabaseException:
+            pass
+
+    return engine
 
 
 def _create_trino_engine(

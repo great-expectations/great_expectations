@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import traceback
 import warnings
@@ -1067,6 +1068,16 @@ class Expectation(metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
+
+        result_format = parse_result_format(
+            runtime_configuration.get("result_format", {})
+        )
+        if result_format.get("result_format") == "BOOLEAN_ONLY":
+            if isinstance(expectation_validation_result, ExpectationValidationResult):
+                expectation_validation_result.result = {}
+            else:
+                expectation_validation_result["result"] = {}
+
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
             configuration=configuration,
@@ -1371,6 +1382,14 @@ class Expectation(metaclass=MetaExpectation):
                 registered_metrics=_registered_metrics,
             )
         )
+        engines_implemented = [
+            e.replace("ExecutionEngine", "")
+            for e, i in introspected_execution_engines.items()
+            if i is True
+        ]
+        _debug(
+            f"Implemented engines for {self.expectation_type}: {', '.join(engines_implemented)}"
+        )
 
         _debug("Getting test results")
         test_results: List[ExpectationTestDiagnostics] = self._get_test_results(
@@ -1404,7 +1423,6 @@ class Expectation(metaclass=MetaExpectation):
                 examples=examples,
                 tests=test_results,
                 backend_test_result_counts=backend_test_result_counts,
-                execution_engines=introspected_execution_engines,
             )
         )
 
@@ -1482,6 +1500,8 @@ class Expectation(metaclass=MetaExpectation):
         self,
         diagnostics: Optional[ExpectationDiagnostics] = None,
         show_failed_tests: bool = False,
+        backends: Optional[List[str]] = None,
+        show_debug_messages: bool = False,
     ) -> str:
         """Runs self.run_diagnostics and generates a diagnostic checklist.
 
@@ -1491,10 +1511,27 @@ class Expectation(metaclass=MetaExpectation):
         Args:
             diagnostics (optional[ExpectationDiagnostics]): If diagnostics are not provided, diagnostics will be ran on self.
             show_failed_tests (bool): If true, failing tests will be printed.
+            backends: list of backends to pass to run_diagnostics
+            show_debug_messages (bool): If true, create a logger and pass to run_diagnostics
         """
 
         if diagnostics is None:
-            diagnostics = self.run_diagnostics()
+            debug_logger = None
+            if show_debug_messages:
+                debug_logger = logging.getLogger()
+                chandler = logging.StreamHandler(stream=sys.stdout)
+                chandler.setLevel(logging.DEBUG)
+                chandler.setFormatter(
+                    logging.Formatter(
+                        "%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"
+                    )
+                )
+                debug_logger.addHandler(chandler)
+                debug_logger.setLevel(logging.DEBUG)
+
+            diagnostics = self.run_diagnostics(
+                debug_logger=debug_logger, only_consider_these_backends=backends
+            )
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
@@ -2181,7 +2218,6 @@ class Expectation(metaclass=MetaExpectation):
         examples: List[ExpectationTestDataCases],
         tests: List[ExpectationTestDiagnostics],
         backend_test_result_counts: List[ExpectationBackendTestResultCounts],
-        execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
         experimental_checks = []

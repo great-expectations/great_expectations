@@ -152,7 +152,7 @@ class Profiler(metaclass=abc.ABCMeta):
         self.configuration = configuration
 
     @public_api  # noqa: B027
-    def validate(  # noqa: B027 # empty-method-without-abstract-decorator
+    def validate(  # empty-method-without-abstract-decorator
         self, item_to_validate: Any
     ) -> None:
         """Raise an exception if `item_to_validate` cannot be profiled.

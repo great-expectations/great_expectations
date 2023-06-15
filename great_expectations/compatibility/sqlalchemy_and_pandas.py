@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import Callable
+from typing import Callable, Iterator
 
 import pandas as pd
 
@@ -49,7 +49,7 @@ def execute_pandas_reader_fn(
     return reader_fn_result
 
 
-def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
+def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]:
     """Suppress deprecation warnings while executing the pandas read_sql function.
 
     Note this only passes params straight to pandas read_sql method, please
@@ -86,7 +86,7 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
     return return_value
 
 
-def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
+def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
     """Suppress deprecation warnings while executing the pandas read_sql_query function.
 
     Note this only passes params straight to pandas read_sql_query method, please
@@ -107,11 +107,12 @@ def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
     Returns:
         dataframe
     """
-    if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
-            sqlalchemy.sqlalchemy.__version__, "2.0.0"
-        ):
-            warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
+    if (
+        sqlalchemy.sqlalchemy
+        and is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+        and is_version_less_than(pd.__version__, "2.0.0")
+    ):
+        warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
             # but using the base class here since sqlalchemy is an optional dependency and this

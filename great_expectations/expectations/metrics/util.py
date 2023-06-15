@@ -54,6 +54,10 @@ try:
     import trino
 except ImportError:
     trino = None
+try:
+    import clickhouse_sqlalchemy
+except ImportError:
+    clickhouse_sqlalchemy = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
@@ -180,6 +184,21 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
+    try:
+        # Clickhouse
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickHouseDialect") or isinstance(
+            dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
+        ):
+            if positive:
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
     try:
         # Dremio
         if hasattr(dialect, "DremioDialect"):
@@ -564,6 +583,11 @@ def column_reflection_fallback(
                 )
                 .alias("column_info")
             )
+
+            # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
+            if not col_info_query.supports_execution:
+                col_info_query = sa.select(col_info_query)
+
             col_info_tuples_list = connection.execute(col_info_query).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
@@ -784,6 +808,14 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     except (AttributeError, TypeError):
         pass
 
+    try:
+        # noinspection PyUnresolvedReferences
+        if isinstance(dialect, trino.drivers.base.ClickhouseDialect) or hasattr(
+            dialect, "ClickhouseDialect"
+        ):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
     try:
         if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True

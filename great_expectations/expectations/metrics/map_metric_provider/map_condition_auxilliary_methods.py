@@ -155,7 +155,7 @@ def _pandas_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Optional[List[Any]]:
+) -> Optional[str]:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
@@ -166,7 +166,7 @@ def _pandas_map_condition_query(
     result_format: dict = metric_value_kwargs["result_format"]
 
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: bool = result_format.get(
+    return_unexpected_index_query: Optional[bool] = result_format.get(
         "return_unexpected_index_query"
     )
     if return_unexpected_index_query is False:
@@ -176,7 +176,7 @@ def _pandas_map_condition_query(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
@@ -205,8 +205,10 @@ def _pandas_map_condition_query(
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
+
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
-    return domain_values_df_filtered.index.to_list()
+    index_list = domain_values_df_filtered.index.to_list()
+    return f"df.filter(items={index_list}, axis=0)"
 
 
 def _pandas_map_condition_rows(
@@ -332,21 +334,21 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     try:
         if execution_engine.dialect_name == GXSqlDialect.MSSQL:
             with execution_engine.get_connection() as connection:
-                with connection.begin():
-                    temp_table_name: str = generate_temporary_table_name(
-                        default_table_name_prefix="#ge_temp_"
+                if not connection.closed:
+                    temp_table_obj = _generate_temp_table(
+                        connection=connection,
+                        metric_domain_kwargs=metric_domain_kwargs,
+                        metric_value_kwargs=metric_value_kwargs,
+                        metrics=metrics,
                     )
-                    metadata: sa.MetaData = sa.MetaData()
-                    metadata.reflect(bind=connection)
-                    temp_table_obj: sa.Table = sa.Table(
-                        temp_table_name,
-                        metadata,
-                        sa.Column(
-                            "condition", sa.Integer, primary_key=False, nullable=False
-                        ),
-                    )
-                    temp_table_obj.create(bind=connection, checkfirst=True)
-
+                else:
+                    with connection.begin():
+                        temp_table_obj = _generate_temp_table(
+                            connection=connection,
+                            metric_domain_kwargs=metric_domain_kwargs,
+                            metric_value_kwargs=metric_value_kwargs,
+                            metrics=metrics,
+                        )
             inner_case_query: sqlalchemy.Insert = temp_table_obj.insert().from_select(
                 [count_case_statement],
                 count_selectable,
@@ -830,3 +832,24 @@ def _spark_map_condition_query(
         "Column<'(", ""
     ).replace(")'>", "")
     return f"df.filter(F.expr({unexpected_condition_filtered}))"
+
+
+def _generate_temp_table(
+    connection: sa.engine.base.Connection,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> sa.Table:
+    temp_table_name: str = generate_temporary_table_name(
+        default_table_name_prefix="#ge_temp_"
+    )
+    metadata: sa.MetaData = sa.MetaData()
+    metadata.reflect(bind=connection)
+    temp_table_obj: sa.Table = sa.Table(
+        temp_table_name,
+        metadata,
+        sa.Column("condition", sa.Integer, primary_key=False, nullable=False),
+    )
+    temp_table_obj.create(bind=connection, checkfirst=True)
+    return temp_table_obj
