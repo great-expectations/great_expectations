@@ -1,17 +1,14 @@
 from .data_assistant import DataAssistant  # isort:skip
 from .domain_builder_data_assistant import DomainBuilderDataAssistant  # isort:skip
 
-# isort:skip
-from .column_value_nonnullity_data_assistant import (
-    ColumnValueNonNullityDataAssistant,
+from .column_value_uniqueness_data_assistant import (  # isort:skip
+    ColumnValueUniquenessDataAssistant,
 )
-
-# isort:skip
-from .column_value_nullity_data_assistant import (
+from .column_value_nullity_data_assistant import (  # isort:skip
     ColumnValueNullityDataAssistant,
 )
-from .column_value_uniqueness_data_assistant import (
-    ColumnValueUniquenessDataAssistant,
+from .column_value_nonnullity_data_assistant import (  # isort:skip
+    ColumnValueNonNullityDataAssistant,
 )
 
 from .categorical_data_assistant import CategoricalDataAssistant  # isort:skip
