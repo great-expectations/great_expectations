@@ -1,5 +1,5 @@
 ---
-title: How to add validations data or suites to a Checkpoint
+title: How to add validation data or suites to a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';

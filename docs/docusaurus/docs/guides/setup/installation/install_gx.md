@@ -33,7 +33,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Local
 
-install Great Expectations (GX) locally
+Install Great Expectations (GX) locally.
 
 <Preface />
 

@@ -114,18 +114,15 @@ module.exports = {
     {
       type: 'category',
       label: 'Validate data',
-      link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
+      link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
-        {
-          type: 'category',
-          label: 'Core skills',
-          items: [
-            'guides/validation/how_to_validate_data_by_running_a_checkpoint'
-          ]
-        },
+        'guides/validation/how_to_validate_data_by_running_a_checkpoint',
+        'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
+        'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
         {
           type: 'category',
           label: 'Checkpoints',
+          link: { type: 'doc', id: 'guides/validation/checkpoints/checkpoint_lp' },
           items: [
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
@@ -136,6 +133,7 @@ module.exports = {
         {
           type: 'category',
           label: 'Actions',
+          link: { type: 'doc', id: 'guides/validation/validation_actions/actions_lp' },
           items: [
             'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
@@ -144,16 +142,6 @@ module.exports = {
             'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
           ]
         },
-        {
-          type: 'category',
-          label: 'Advanced',
-          items: [
-            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-            'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
-            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
-          ]
-        },
-        { type: 'doc', id: 'guides/validation/index', label: 'Index' }
       ]
     },
     {

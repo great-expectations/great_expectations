@@ -1,7 +1,6 @@
 ---
-title: "Validate Data: Overview"
+title: "Data Validation Workflow"
 ---
-# [![Create Expectations Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Overview
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
