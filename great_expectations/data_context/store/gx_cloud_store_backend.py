@@ -44,7 +44,7 @@ class PayloadDataField(TypedDict):
 
 
 class ResponsePayload(TypedDict):
-    data: PayloadDataField
+    data: PayloadDataField | list[PayloadDataField]
 
 
 AnyPayload = Union[ResponsePayload, ErrorPayload]
