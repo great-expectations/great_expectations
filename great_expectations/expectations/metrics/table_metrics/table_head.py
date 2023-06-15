@@ -58,7 +58,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913, PLR0915
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -69,6 +69,9 @@ class TableHead(TableMetricProvider):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        dialect = execution_engine.engine.dialect.name.lower()
+        if dialect not in GXSqlDialect.get_all_dialect_names():
+            dialect = GXSqlDialect.OTHER
         table_name = getattr(selectable, "name", None)
         n_rows: int = (
             metric_value_kwargs.get("n_rows")
@@ -83,20 +86,27 @@ class TableHead(TableMetricProvider):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pandas_read_sql_query(
-                        sql=selectable,
-                        con=execution_engine.engine,
-                    )
+                    with execution_engine.get_connection() as con:
+                        df = pandas_read_sql_query(
+                            sql=selectable,
+                            con=con,
+                            execution_engine=execution_engine,
+                        )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pandas_read_sql_query(
-                        sql=selectable,
-                        con=execution_engine.engine,
-                        chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
+                    with execution_engine.get_connection() as con:
+                        # convert subquery into query using select_from()
+                        if not selectable.supports_execution:
+                            selectable = sa.select(sa.text("*")).select_from(selectable)
+                        df_chunk_iterator = pandas_read_sql_query(
+                            sql=selectable,
+                            con=con,
+                            execution_engine=execution_engine,
+                            chunksize=abs(n_rows),
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -111,22 +121,26 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = read_sql_table_as_df(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
-                    )
+                    with execution_engine.get_connection() as con:
+                        df = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            dialect=dialect,
+                        )
                 else:
-                    # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = read_sql_table_as_df(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
-                        chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
+                    with execution_engine.get_connection() as con:
+                        # passing chunksize causes the Iterator to be returned
+                        df_chunk_iterator = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            chunksize=abs(n_rows),
+                            dialect=dialect,
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -169,14 +183,18 @@ class TableHead(TableMetricProvider):
 
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             if n_rows <= 0 and not fetch_all:
-                df_chunk_iterator = pandas_read_sql(
-                    sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
-                )
-                df = TableHead._get_head_df_from_df_iterator(
-                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                )
+                with execution_engine.get_connection() as con:
+                    df_chunk_iterator = pandas_read_sql(
+                        sql=sql, con=con, chunksize=abs(n_rows)
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
             else:
-                df = pandas_read_sql_query(sql=sql, con=execution_engine.engine)
+                with execution_engine.get_connection() as con:
+                    df = pandas_read_sql_query(
+                        sql=sql, con=con, execution_engine=execution_engine
+                    )
 
         return df
 
@@ -212,7 +230,7 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark.Row] | pyspark.Row | list[dict]
+        rows: list[pyspark.Row] | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:

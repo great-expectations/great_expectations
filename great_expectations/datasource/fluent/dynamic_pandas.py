@@ -70,6 +70,10 @@ except ImportError:
 # Hashable causes `TypeError:issubclass() arg 1 must be a class`
 IndexLabel = Union[str, Sequence[str]]
 
+# added in pandas 2.0
+# https://github.com/pandas-dev/pandas/blob/965ceca9fd796940050d6fc817707bba1c4f9bff/pandas/_typing.py#LL373C1-L373C52
+DtypeBackend = Literal["pyarrow", "numpy_nullable"]
+
 logger = logging.getLogger(__file__)
 
 PANDAS_VERSION: float = float(
@@ -96,10 +100,8 @@ CAN_HANDLE: Final[Set[str]] = {
     "bool",
     "None",
     # typing
-    "Sequence[tuple[int, int]]",
     "Sequence[str]",
     "Sequence[int]",
-    "Sequence[tuple[int, int]]",  # noqa: PLW0130
     # TODO: need a better way to handle the Literals in particular
     "Literal['infer']",
     "Literal[False]",
@@ -124,6 +126,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "IndexLabel",
     "CompressionOptions",
     "StorageOptions",
+    "DtypeBackend",
 }
 
 TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
@@ -131,6 +134,8 @@ TYPE_SUBSTITUTIONS: Final[Dict[str, str]] = {
     "Hashable": "str",
     "Sequence[Hashable]": "Sequence[str]",
     "Iterable[Hashable]": "Iterable[str]",
+    # using builtin types as generics may causes TypeError: 'type' object is not subscriptable in python 3.8
+    "Sequence[tuple[int, int]]": "Sequence[Tuple[int, int]]",
     # TypeVars
     "IntStrT": "Union[int, str]",
     "list[IntStrT]": "List[Union[int, str]]",
@@ -198,10 +203,20 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
             ),
         )
     },
+    "kwds": {
+        "kwargs": _FieldSpec(
+            Optional[dict],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="Extra keyword arguments that will be passed to the reader method",
+            ),
+        )
+    },
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "csv": "CSVAsset",
+    "fwf": "FWFAsset",
     "gbq": "GBQAsset",
     "hdf": "HDFAsset",
     "html": "HTMLAsset",
@@ -226,6 +241,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type | Any]] = {
     "IndexLabel": IndexLabel,
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
+    "DtypeBackend": DtypeBackend,
 }
 
 # TODO: make these functions a generator pipeline

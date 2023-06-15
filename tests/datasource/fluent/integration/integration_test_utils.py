@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def run_checkpoint_and_data_doc(  # noqa: PLR0915
+def run_checkpoint_and_data_doc(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],

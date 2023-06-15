@@ -126,7 +126,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
     df = pd.DataFrame({"col": pd.Series([1, 2, None], dtype=pd.Int32Dtype())})
 
     context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context()
+        DataContext, build_in_memory_runtime_context(include_spark=False)
     )
     validator = get_test_validator_with_data(
         execution_engine="pandas",

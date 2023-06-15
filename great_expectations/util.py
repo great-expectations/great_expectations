@@ -5,6 +5,7 @@ import cProfile
 import datetime
 import decimal
 import importlib
+import inspect
 import io
 import json
 import logging
@@ -861,52 +862,62 @@ def read_sas(  # noqa: PLR0913
         )
 
 
-def build_in_memory_runtime_context() -> AbstractDataContext:
+def build_in_memory_runtime_context(
+    include_pandas: bool = True,
+    include_spark: bool = True,
+) -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+
+    Args:
+        include_pandas (bool): If True, include pandas datasource
+        include_spark (bool): If True, include spark datasource
     """
     from great_expectations.data_context.types.base import (
         DataContextConfig,
         InMemoryStoreBackendDefaults,
     )
 
+    datasources = {}
+    if include_pandas:
+        datasources["pandas_datasource"] = {
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+    if include_spark:
+        datasources["spark_datasource"] = {
+            "execution_engine": {
+                "class_name": "SparkDFExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources={  # type: ignore[arg-type]
-            "pandas_datasource": {
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-            "spark_datasource": {
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-        },
+        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",
         evaluation_parameter_store_name="evaluation_parameter_store",
@@ -2153,6 +2164,23 @@ def import_make_url():
         make_url = sqlalchemy.engine.make_url
 
     return make_url
+
+
+def get_clickhouse_sqlalchemy_potential_type(type_module, type_) -> Any:
+    ch_type = type_
+    if type(ch_type) is str:
+        if type_.lower() in ("decimal", "decimaltype()"):
+            ch_type = type_module.types.Decimal
+        elif type_.lower() in ("fixedstring"):
+            ch_type = type_module.types.String
+        else:
+            ch_type = type_module.ClickHouseDialect()._get_column_type("", ch_type)
+
+    if hasattr(ch_type, "nested_type"):
+        ch_type = type(ch_type.nested_type)
+    if not inspect.isclass(ch_type):
+        ch_type = type(ch_type)
+    return ch_type
 
 
 def get_pyathena_potential_type(type_module, type_) -> str:

@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,

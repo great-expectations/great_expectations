@@ -15,7 +15,7 @@ from great_expectations.core.usage_statistics.execution_environment import (
 )
 
 SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
-ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1"]
+ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1", "2"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,
@@ -965,6 +965,8 @@ anonymized_usage_statistics_record_schema = {
         "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
+        "mac_address": {"type": "string"},
+        "oss_id": {"type": ["string", "null"], "format": "uuid"},
         "event_time": {"type": "string", "format": "date-time"},
         "event_duration": {"type": "number"},
         "x-forwarded-for": {"type": "string"},
