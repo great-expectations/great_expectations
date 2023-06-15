@@ -541,23 +541,33 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
-
-    def _update(self, key, value, **kwargs):
-        existing = self._get(key)["data"]
-
-        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
-        # by name, with length >= 0, instead of a single object (or error if not found)
-        if isinstance(existing, list) and len(existing) > 1:
+    def _get_one_or_none_from_response_data(self, response_data, key):
+        """
+        GET requests to cloud can either return response data that is a single object (get by id) or a
+        list of objects with length >= 0 (get by name). This method takes this response data and returns a single
+        object or None.
+        """
+        if isinstance(response_data, list) and len(response_data) > 1:
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: the provided key ({key}) maps "
                 f"to more than one object."
             )
-        if isinstance(existing, list) and len(existing) == 0:
+        if isinstance(response_data, list) and len(response_data) == 0:
+            return None
+        if isinstance(response_data, list) and len(response_data) == 1:
+            return response_data[0]
+        return response_data
+
+    def _update(self, key, value, **kwargs):
+        response_data = self._get(key)["data"]
+        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
+        # by name, with length >= 0, instead of a single object (or error if not found)
+        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
+
+        if existing is None:
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: could not find object associated with key {key}."
             )
-        if isinstance(existing, list) and len(existing) == 1:
-            existing = existing[0]
 
         if key[1] is None:
             key = (key[0], existing["id"], key[2])
@@ -566,22 +576,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def _add_or_update(self, key, value, **kwargs):
         try:
-            existing = self._get(key)["data"]
+            response_data = self._get(key)["data"]
         except StoreBackendError as e:
             logger.info(f"Could not find object associated with key {key}: {e}")
-            existing = None
+            response_data = None
 
         # if the provided key does not contain id (only name), cloud will return a list of resources filtered
         # by name, with length >= 0, instead of a single object (or error if not found)
-        if isinstance(existing, list) and len(existing) > 1:
-            raise StoreBackendError(
-                f"Unable to update object in GX Cloud Store Backend: the provided key ({key}) maps "
-                f"to more than one object."
-            )
-        if isinstance(existing, list) and len(existing) == 0:
-            existing = None
-        if isinstance(existing, list) and len(existing) == 1:
-            existing = existing[0]
+        existing = self._get_one_or_none_from_response_data(response_data=response_data, key=key)
 
         if existing is not None:
             id = key[1] if key[1] is not None else existing["id"]
