@@ -64,7 +64,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -132,9 +132,9 @@ def get_expectations_info_dict(
     rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
     result = {}
     files_found = []
-    oldpwd = os.getcwd()
+    oldpwd = os.getcwd()  # noqa: PTH109
     os.chdir(f"..{os.path.sep}..")
-    repo_path = os.getcwd()
+    repo_path = os.getcwd()  # noqa: PTH109
     logger.debug("Finding requested Expectation files in the repo")
 
     if only_these_expectations:
@@ -144,7 +144,7 @@ def get_expectations_info_dict(
     if include_core:
         files_found.extend(
             glob(
-                os.path.join(
+                os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
                     "expectations",
@@ -157,7 +157,7 @@ def get_expectations_info_dict(
     if include_contrib:
         files_found.extend(
             glob(
-                os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+                os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
         )
@@ -166,7 +166,9 @@ def get_expectations_info_dict(
         file_path = (  # noqa: PLW2901 # `for` loop variable overwritten
             file_path.replace(f"{repo_path}{os.path.sep}", "")
         )
-        expectation_name = os.path.basename(file_path).replace(".py", "")
+        expectation_name = os.path.basename(file_path).replace(  # noqa: PTH119
+            ".py", ""
+        )
         if only_these_expectations and expectation_name not in only_these_expectations:
             continue
         if (
@@ -175,7 +177,9 @@ def get_expectations_info_dict(
         ):
             continue
 
-        package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
+        package_name = os.path.basename(  # noqa: PTH119
+            os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+        )  # ,
         if package_name == "expectations":
             package_name = "core"
 
@@ -184,18 +188,22 @@ def get_expectations_info_dict(
         sys_path = ""
         if package_name != "core":
             requirements = get_contrib_requirements(file_path)["requirements"]
-            parent_dir = os.path.dirname(os.path.dirname(file_path))
-            grandparent_dir = os.path.dirname(parent_dir)
+            parent_dir = os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+            grandparent_dir = os.path.dirname(parent_dir)  # noqa: PTH120
 
             if package_name == "great_expectations_experimental":
                 import_module_args = (
                     f"expectations.{expectation_name}",
                     "great_expectations_experimental",
                 )
-                sys_path = os.path.join(f"..{os.path.sep}..", parent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", parent_dir
+                )
             else:
                 import_module_args = (f"{package_name}.expectations",)
-                sys_path = os.path.join(f"..{os.path.sep}..", grandparent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", grandparent_dir
+                )
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
         created_at_cmd = (
@@ -650,8 +658,10 @@ def format_docstring_to_markdown(docstr: str) -> str:
 
 def _disable_progress_bars() -> Tuple[str, DataContext]:
     """Return context_dir and context that was created"""
-    context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
-    os.makedirs(context_dir)
+    context_dir = os.path.join(  # noqa: PTH118
+        os.path.sep, "tmp", f"gx-context-{os.getpid()}"
+    )  # ,
+    os.makedirs(context_dir)  # noqa: PTH103
     context = DataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
