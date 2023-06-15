@@ -35,6 +35,7 @@ class DataAssistantComposer:
         "nullity": "column_value_nullity",
         "nonnullity": "column_value_nonnullity",
         "categorical_two": "categorical",
+        "categorical_very_few": "categorical",
         "numeric": "numeric",
         "text": "text",
     }
@@ -192,6 +193,17 @@ class DataAssistantComposer:
             )
         )
 
+        categorical_columns_domains_very_few: List[Domain] = list(
+            filter(
+                lambda domain: domain.domain_kwargs["column"]
+                not in [
+                    domain_key.domain_kwargs["column"]
+                    for domain_key in (raw_column_value_nullity_domains)
+                ],
+                raw_categorical_columns_domains_very_few,
+            )
+        )
+
         column_value_uniqueness_domains: List[Domain] = list(
             filter(
                 lambda domain: domain.domain_kwargs["column"]
@@ -214,6 +226,7 @@ class DataAssistantComposer:
             "nullity": column_value_nullity_domains,
             "nonnullity": column_value_nonnullity_domains,
             "categorical_two": categorical_columns_domains_two,
+            "categorical_very_few": categorical_columns_domains_very_few,
             "numeric": numeric_columns_domains,
             "text": text_columns_domains,
         }
