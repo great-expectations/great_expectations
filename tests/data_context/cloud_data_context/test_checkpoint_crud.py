@@ -267,7 +267,7 @@ def test_cloud_backed_data_context_add_checkpoint(
         "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
         autospec=True,
         return_value=False,
-    ) as _:
+    ):
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -382,7 +382,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
         "great_expectations.data_context.store.GXCloudStoreBackend._get",
         autospec=True,
         side_effect=StoreBackendError("Does not exist."),
-    ) as _:
+    ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -440,7 +440,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_0_results,
-    ) as _:
+    ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -498,7 +498,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
-    ) as _:
+    ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -559,7 +559,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
-    ) as _:
+    ):
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
@@ -616,7 +616,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
-    ) as _:
+    ):
         ge_cloud_id = checkpoint_config_with_ids.pop("id")
         checkpoint = context.update_checkpoint(
             Checkpoint.instantiate_from_config_with_runtime_args(
@@ -679,7 +679,7 @@ def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_pr
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_0_results,
-    ) as _:
+    ):
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
         with pytest.raises(CheckpointNotFoundError):
@@ -717,7 +717,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_by_name_response_1_result,
-    ) as _:
+    ):
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
 
