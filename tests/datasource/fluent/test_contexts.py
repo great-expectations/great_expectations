@@ -238,22 +238,29 @@ def test_update_non_existant_datasource(
 class TestDeletingDatasources:
     def test_file_context(self, seeded_file_context: FileDataContext):
         context = seeded_file_context
-
         gx_yml_path = pathlib.Path(context.root_directory, context.GX_YML).resolve(
             strict=True
         )
 
-        datasource: Datasource = random.choice(
+        old_datasource: Datasource = random.choice(
             list(context.fluent_datasources.values())
         )
+        print(f"Deleting '{old_datasource.name}'")
+        context.delete_datasource(old_datasource.name)
 
-        print(f"Deleting '{datasource.name}'")
-        context.delete_datasource(datasource.name)
+        fds_after_delete1: dict = yaml.load(gx_yml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+        print(f"\nYAML Datasources\n{pf(fds_after_delete1, depth=1)}")
 
-        fds_after_delete: dict = yaml.load(gx_yml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
-        print(f"\nYAML Datasources\n{pf(fds_after_delete, depth=1)}")
+        assert old_datasource.name not in fds_after_delete1
 
-        assert datasource.name not in fds_after_delete
+        new_datasource = context.sources.add_pandas("test_delete_datasource")
+        print(f"Deleting '{new_datasource.name}'")
+        context.delete_datasource(new_datasource.name)
+
+        fds_after_delete2: dict = yaml.load(gx_yml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+        print(f"\nYAML Datasources\n{pf(fds_after_delete2, depth=1)}")
+
+        assert new_datasource.name not in fds_after_delete2
 
 
 @pytest.mark.cloud
