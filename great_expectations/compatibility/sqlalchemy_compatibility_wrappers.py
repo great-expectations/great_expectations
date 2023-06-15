@@ -6,6 +6,8 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_less_than
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
@@ -14,13 +16,13 @@ logger = logging.getLogger(__name__)
 def read_sql_table_as_df(  # noqa: PLR0913
     table_name,
     con,
+    dialect: str,
     schema=None,
     index_col: str | Sequence[str] | None = None,
     coerce_float: bool = True,
     parse_dates: list[str] | dict[str, str] | None = None,
     columns: list[str] | None = None,
     chunksize: int | None = None,
-    dialect: str | None = None,
 ) -> pd.DataFrame | Iterator[pd.DataFrame]:
     """Wrapper for `read_sql_table()` method in Pandas. Created as part of the effort to allow GX to be compatible
     with SqlAlchemy 2, and is used to suppress warnings that arise from implicit auto-commits.
@@ -47,30 +49,33 @@ def read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        schema = schema
-        columns = columns
-        if dialect in (GXSqlDialect.SQLITE, GXSqlDialect.OTHER):
-            return pd.read_sql_query(
-                sql=f"""SELECT * FROM {table_name}""",
-                con=con,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                parse_dates=parse_dates,
-                chunksize=chunksize,
-            )
+    schema = schema
+    columns = columns
+    if dialect == GXSqlDialect.TRINO:
+        return pd.read_sql_table(
+            table_name=table_name,
+            con=con,
+            schema=schema,
+            index_col=index_col,
+            coerce_float=coerce_float,
+            parse_dates=parse_dates,
+            columns=columns,
+            chunksize=chunksize,
+        )
+    else:
+        sql_str: str
+        if schema:
+            sql_str = f"""SELECT * FROM {schema}.{table_name}"""
         else:
-            return pd.read_sql_table(
-                table_name=table_name,
-                con=con,
-                schema=schema,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                parse_dates=parse_dates,
-                columns=columns,
-                chunksize=chunksize,
-            )
+            sql_str = f"""SELECT * FROM {table_name}"""
+        return pd.read_sql_query(
+            sql=sql_str,
+            con=con,
+            index_col=index_col,
+            coerce_float=coerce_float,
+            parse_dates=parse_dates,
+            chunksize=chunksize,
+        )
 
 
 def add_dataframe_to_db(  # noqa: PLR0913
@@ -121,11 +126,26 @@ def add_dataframe_to_db(  # noqa: PLR0913
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+    if sqlalchemy.sqlalchemy and is_version_less_than(
+        sqlalchemy.sqlalchemy.__version__, "2.0.0"
+    ):
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            df.to_sql(
+                name=name,
+                con=con,
+                schema=schema,
+                if_exists=if_exists,
+                index=index,
+                index_label=index_label,
+                chunksize=chunksize,
+                dtype=dtype,
+                method=method,
+            )
+    else:
         df.to_sql(
             name=name,
             con=con,

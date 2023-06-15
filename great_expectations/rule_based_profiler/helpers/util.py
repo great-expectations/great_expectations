@@ -53,7 +53,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
-    is_fully_qualified_parameter_name_literal_string_format,
+    is_fully_qualified_parameter_name_prefix_in_literal,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import (
@@ -314,7 +314,7 @@ def get_parameter_value(
         )
     elif isinstance(
         parameter_reference, str
-    ) and is_fully_qualified_parameter_name_literal_string_format(
+    ) and is_fully_qualified_parameter_name_prefix_in_literal(
         fully_qualified_parameter_name=parameter_reference
     ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(

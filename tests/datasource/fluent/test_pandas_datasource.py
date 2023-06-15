@@ -101,9 +101,7 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param(
-                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
-            ),
+            param("read_fwf"),
             param("read_gbq"),
             param("read_hdf"),
             param("read_html"),
@@ -300,11 +298,7 @@ class TestDynamicPandasAssets:
             param("read_csv", {"filepath_or_buffer": "valid_file_path"}),
             param("read_excel", {"io": "valid_file_path"}),
             param("read_feather", {"path": "valid_file_path"}),
-            param(
-                "read_fwf",
-                {"filepath_or_buffer": "valid_file_path"},
-                marks=pytest.mark.xfail(reason="unhandled type annotation"),
-            ),
+            param("read_fwf", {"filepath_or_buffer": "valid_file_path"}),
             param("read_gbq", {"query": "SELECT * FROM my_table"}),
             param("read_hdf", {"path_or_buf": "valid_file_path"}),
             param("read_html", {"io": "valid_file_path"}),
