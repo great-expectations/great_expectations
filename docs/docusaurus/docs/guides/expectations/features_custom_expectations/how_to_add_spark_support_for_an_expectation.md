@@ -29,15 +29,15 @@ and [how to create Custom Column Map Expectations](../creating_custom_expectatio
 
 To avoid surprises and help clearly define your Custom Expectation, it can be helpful to determine beforehand what backends you plan to support, and test them along the way.
 
-Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
+Within the `examples` defined inside your Expectation class, the optional `only_for` and `suppress_test_for` keys specify which backends to use for testing. If a backend is not specified, Great Expectations attempts testing on all supported backends. Run the following command to add entries corresponding to the functionality you want to add: 
     
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
-You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+The optional `only_for` and `suppress_test_for` keys may be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, etc).
 
-If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
 ### 2. Implement the Spark logic for your Custom Expectation
