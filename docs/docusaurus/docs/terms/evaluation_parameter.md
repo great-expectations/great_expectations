@@ -154,3 +154,18 @@ This Expectation will fail (the NYC taxi data allows for four types of payments)
 - You cannot currently combine complex values with arithmetic expressions.
 :::
 
+The complete list of expressions usable in Evaluation Parameters and their corresponding functions is below:
+
+| **Evaluation Parameter Expression** | **Python Function Call**                                      |
+|-------------------------------------|---------------------------------------------------------------|
+| `sin`                               | `math.sin`                                                    | 
+| `cos`                               | `math.cos`                                                    |
+| `tan`                               | `math.tan`                                                    |
+| `exp`                               | `math.exp`                                                    | 
+| `abs`                               | `abs`                                                         |
+| `trunc`                             | `lambda a: int(a)`                                            |
+| `round`                             | `round`                                                       |
+| `sgn`                               | `lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0` |
+| `now`                               | `datetime.datetime.now`                                       |
+| `datetime`                          | `datetime.datetime`                                           |
+| `timedelta`                         | `datetime.timedelta`                                          |
