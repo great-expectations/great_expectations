@@ -334,8 +334,8 @@ runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
-    "great_expectations.datasource.fluent.Datasource",
-    "great_expectations.datasource.fluent.SQLDatasource",
+    "great_expectations.datasource.fluent.interfaces.Datasource",
+    "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",
