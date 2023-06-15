@@ -102,6 +102,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     examples = [
         {
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -128,20 +129,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
                         "strict_max": True,
                     },
                     "out": {"success": False},
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }
