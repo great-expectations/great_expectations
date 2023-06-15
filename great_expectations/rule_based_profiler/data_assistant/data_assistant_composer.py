@@ -50,7 +50,7 @@ class DataAssistantComposer:
 
         self._task_name_to_domain_list_map: Mapping[str, List[Domain]] | None = None
 
-    def build_domains_for_data_assistant_runners(self) -> None:
+    def build_domains(self) -> None:
         data_assistant = self._data_context.assistants.domains._build_data_assistant()
         rules: List[Rule] = data_assistant.get_rules()
 
