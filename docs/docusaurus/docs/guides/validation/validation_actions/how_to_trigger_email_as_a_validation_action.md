@@ -1,5 +1,5 @@
 ---
-title: How to trigger Email as an Action
+title: Trigger Email as an Action
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

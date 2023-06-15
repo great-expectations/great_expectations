@@ -1,5 +1,5 @@
 ---
-title: How to create a new Checkpoint
+title: Create a new Checkpoint
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

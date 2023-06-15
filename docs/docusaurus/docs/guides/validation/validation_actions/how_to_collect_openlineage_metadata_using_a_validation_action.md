@@ -1,5 +1,5 @@
 ---
-title: How to collect OpenLineage metadata using an Action
+title: Collect OpenLineage metadata using an Action
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';

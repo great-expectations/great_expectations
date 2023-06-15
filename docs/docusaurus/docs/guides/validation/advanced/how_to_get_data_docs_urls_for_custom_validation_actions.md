@@ -1,5 +1,5 @@
 ---
-title: How to get Data Docs URLs for use in custom Validation Actions
+title: Use Data Docs URLs in custom Validation Actions
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

@@ -121,18 +121,18 @@ module.exports = {
         'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
         {
           type: 'category',
-          label: 'Checkpoints',
+          label: 'Manage Checkpoints',
           link: { type: 'doc', id: 'guides/validation/checkpoints/checkpoint_lp' },
           items: [
-            'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
+            'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
             'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
           ]
         },
         {
           type: 'category',
-          label: 'Actions',
+          label: 'Configure Actions',
           link: { type: 'doc', id: 'guides/validation/validation_actions/actions_lp' },
           items: [
             'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',

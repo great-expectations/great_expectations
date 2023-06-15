@@ -1,5 +1,5 @@
 ---
-title: How to deploy a scheduled Checkpoint with cron
+title: Deploy a scheduled Checkpoint with cron
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

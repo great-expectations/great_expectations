@@ -1,5 +1,5 @@
 ---
-title: How to update Data Docs after Validating a Checkpoint
+title: Update Data Docs after Validating a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';

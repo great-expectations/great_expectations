@@ -1,5 +1,5 @@
 ---
-title: How to configure a new Checkpoint using test_yaml_config
+title: Configure a new Checkpoint using test_yaml_config
 ---
 import Prerequsities from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

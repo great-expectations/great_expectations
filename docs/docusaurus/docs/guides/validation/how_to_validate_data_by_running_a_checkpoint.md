@@ -1,5 +1,5 @@
 ---
-title: Runn a Checkpoint to validate data 
+title: Run a Checkpoint to validate data 
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';

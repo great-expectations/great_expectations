@@ -1,5 +1,5 @@
 ---
-title: How to trigger Opsgenie notifications as an Action
+title: Trigger Opsgenie notifications as an Action
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
