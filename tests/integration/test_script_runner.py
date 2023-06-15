@@ -173,37 +173,17 @@ local_tests = [
         name="how_to_configure_result_format_parameter",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/result_format.py",
     ),
-    # Uncomment after resolving
-    #           self = <great_expectations.datasource.data_connector.configured_asset_filesystem_data_connector.ConfiguredAssetFilesystemDataConnector object at 0x7f36e90d4670>
-    #           data_reference = 'yellow_tripdata_sample_2019-01.csv'
-    #           data_asset_name = 'my_data_asset'
-    #
-    #               def _map_data_reference_to_batch_definition_list(
-    #                   self, data_reference: str, data_asset_name: Optional[str] = None
-    #               ) -> Optional[List[BatchDefinition]]:
-    #                   regex_config: dict = self._get_regex_config(data_asset_name=data_asset_name)
-    #                   pattern: str = regex_config["pattern"]
-    #           >       group_names: List[str] = regex_config["group_names"]
-    #           E       KeyError: 'group_names'
-    #
-    #           great_expectations/datasource/data_connector/file_path_data_connector.py:309: KeyError
-    #
-    # IntegrationTestFixture(
-    #     name="how_to_create_and_edit_expectations_with_instant_feedback_block_config",
-    #     user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    # ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_expectations_with_instant_feedback_block_config",
+        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
     # Fluent Datasources
-    # Uncomment after resolving
-    #       E           great_expectations.exceptions.exceptions.DataContextError: expectation_suite my_expectation_suite not found
-    #
-    #       great_expectations/data_context/data_context/abstract_data_context.py:3191: DataContextError
-    # Note: putting `context.add_or_update_expectation_suite(expectation_suite_name="my_expectation_suite")` works, but you shouldn't need to do this
-    # IntegrationTestFixture(
-    #     name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
-    #     user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    # ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
+        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
     IntegrationTestFixture(
         name="how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
         user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
