@@ -262,6 +262,8 @@ def _use_relative_path_for_imports_substitution(
     """
     relative_path = path_to_document.relative_to(path_to_versioned_docs)
     dotted_relative_path = "/".join(".." for _ in range(len(relative_path.parts) - 1))
+    if not dotted_relative_path:
+        dotted_relative_path = "."
     pattern = re.compile(
         r"(?P<import>import .* from ')(?P<at_site>@site/docs/)(?P<rest>.*)"
     )
