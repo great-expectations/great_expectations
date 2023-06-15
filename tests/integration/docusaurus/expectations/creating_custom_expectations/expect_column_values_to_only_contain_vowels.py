@@ -33,6 +33,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                     "*",
                 ],
             },
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -89,20 +90,6 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                         "success": False,
                     },
                     "include_in_gallery": True,
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }
