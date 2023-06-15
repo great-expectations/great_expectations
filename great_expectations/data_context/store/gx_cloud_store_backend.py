@@ -548,16 +548,16 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         list of objects with length >= 0 (get by name). This method takes this response data and returns a single
         object or None.
         """
-        if isinstance(response_data, list) and len(response_data) > 1:
-            raise StoreBackendError(
+        if not isinstance(response_data, list):
+            return response_data
+        if len(response_data) == 0:
+            return None
+        if len(response_data) == 1:
+            return response_data[0]
+       raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: the provided key ({key}) maps "
                 f"to more than one object."
             )
-        if isinstance(response_data, list) and len(response_data) == 0:
-            return None
-        if isinstance(response_data, list) and len(response_data) == 1:
-            return response_data[0]
-        return response_data
 
     def _update(self, key, value, **kwargs):
         response_data = self._get(key)["data"]
