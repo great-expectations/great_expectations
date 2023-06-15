@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 class DataAssistantComposer:
     ANALYSIS_TYPE_TO_ANALYSIS_CATEGORY_MAP: Final[Dict[str, str]] = {
+        "uniqueness": "column_value_uniqueness",
+        "nullity": "column_value_nullity",
+        "nonnullity": "column_value_nonnullity",
         "categorical_two": "categorical",
         "numeric": "numeric",
         "text": "text",
