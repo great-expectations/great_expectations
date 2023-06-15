@@ -86,7 +86,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -111,7 +111,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -142,7 +142,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -182,13 +182,12 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
             pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'
-
 
     - job: test_docs_bigquery
       timeoutInMinutes: 30
@@ -203,9 +202,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with BigQuery'
+          # 202306 Note: BigQuery PyPi says library is only compatible with SqlAlchemy < 2.0.0
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
@@ -251,7 +250,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -259,7 +258,8 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mssql tests/integration/test_script_runner.py
+            # Note expect_column_values_to_only_contain_vowels is skipped because metrics are not implemented for MSSQL.
+            pytest -v --docs-tests -m integration --mssql -k "not test_docs[expect_column_values_to_only_contain_vowels]" tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_snowflake
@@ -275,7 +275,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -304,9 +304,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, redshift]" pytest-azurepipelines
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Redshift'
+          # 202306 Note: Redshift Repo constrains sqlalchemy in setup.py. https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/a077110366a3c451f1c41b2fa56f6e3cd5c438dd/setup.py#L24
         - script: |
             pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
           displayName: 'pytest'
@@ -336,7 +336,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
 
         - script: |
@@ -375,7 +375,7 @@ stages:
 
           displayName: download the AWS JARs and move to pyspark's JAR directory.
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
         - script: |
             pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
@@ -398,7 +398,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, azure]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -423,9 +423,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, trino]" pytest-azurepipelines
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Trino'
+          # 202306 Note: there isn’t explicit statement about not being compatible with 2.0, but only that it is compatible up to 1.4
         - script: |
             pytest -v --docs-tests -m integration --trino tests/integration/test_script_runner.py
           displayName: 'pytest'
@@ -443,7 +443,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -484,7 +484,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |

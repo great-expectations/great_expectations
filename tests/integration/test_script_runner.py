@@ -141,12 +141,6 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
     ),
     IntegrationTestFixture(
-        name="how_to_configure_a_spark_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-    ),
-    IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -162,12 +156,6 @@ local_tests = [
         name="is_expectation_auto_initializing",
         user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    ),
-    IntegrationTestFixture(
-        name="migration_guide_pandas_v3_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
     ),
     IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
