@@ -3448,6 +3448,7 @@ def ge_cloud_config_e2e() -> GXCloudConfig:
     """
     Uses live credentials stored in the Great Expectations Cloud backend.
     """
+    # TODO: skip this test/fixture if e2e flag is not set (or something like that)
     env_vars = os.environ
 
     base_url = env_vars.get(
