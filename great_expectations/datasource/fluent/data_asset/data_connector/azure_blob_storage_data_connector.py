@@ -42,6 +42,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         container (str): container name for Microsoft Azure Blob Storage
         name_starts_with (str): Microsoft Azure Blob Storage prefix
         delimiter (str): Microsoft Azure Blob Storage delimiter
+        recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references

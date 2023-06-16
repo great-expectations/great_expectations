@@ -42,7 +42,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix (str): GCS prefix
         delimiter (str): GCS delimiter
         max_results (int): max blob filepaths to return
-        recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
+        recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
