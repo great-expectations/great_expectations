@@ -2,12 +2,9 @@
 title: "Expectation creation workflow"
 ---
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 ## Prerequisites
 
