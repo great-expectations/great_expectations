@@ -92,20 +92,20 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
-            'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            {
-              type: 'category',
-              label: 'Adding Features to Custom Expectations',
-              items: [
-                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
-              ]
-            }
           ]
         },
+        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
+        {
+          type: 'category',
+          label: 'Add Features to Custom Expectations',
+          items: [
+            'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
+            'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+            'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
+          ]
+        }
       ]
     },
     {

@@ -1,5 +1,5 @@
 ---
-title: How to add support for the auto-initializing framework to a custom Expectation
+title: Add support for the auto-initializing framework to a custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 

@@ -1,5 +1,5 @@
 ---
-title: How to add comments to Expectations and display them in Data Docs
+title: Add comments to Expectations and display them in Data Docs
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

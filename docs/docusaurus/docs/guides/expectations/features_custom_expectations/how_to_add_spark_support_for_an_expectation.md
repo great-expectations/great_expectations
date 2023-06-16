@@ -1,5 +1,5 @@
 ---
-title: How to add Spark support for Custom Expectations
+title: Add Spark support for Custom Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';

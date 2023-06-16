@@ -1,5 +1,5 @@
 ---
-title: How to create example cases for a Custom Expectation
+title: Create example cases for a Custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

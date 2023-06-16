@@ -1,5 +1,5 @@
 ---
-title: How to add input validation and type checking for a Custom Expectation 
+title: Add input validation and type checking for a Custom Expectation 
 ---
 
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
