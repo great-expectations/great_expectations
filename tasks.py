@@ -11,13 +11,16 @@ To show task help page `invoke <NAME> --help`
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
 import shutil
 import sys
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Union
 
 import invoke
+import requests
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -25,6 +28,8 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 if TYPE_CHECKING:
     from invoke.context import Context
 
+
+LOGGER = logging.getLogger(__name__)
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
@@ -733,3 +738,35 @@ def link_checker(ctx: Context, skip_external: bool = True):
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)
+
+
+@invoke.task(
+    aliases=("automerge",),
+)
+def show_automerges(ctx: Context):
+    """Show github pull requests currently in automerge state."""
+    url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
+    response = requests.get(
+        url,
+        params={
+            "state": "open",
+            "sort": "updated",
+            "direction": "desc",
+            "per_page": 50,
+        },
+    )
+    LOGGER.debug(f"{response.request.method} {response.request.url} - {response}")
+
+    if response.status_code != requests.codes.ok:
+        print(f"Error: {response.reason}\n{pf(response.json(), depth=2)}")
+        response.raise_for_status()
+
+    pr_details = response.json()
+    LOGGER.debug(pf(pr_details, depth=2))
+
+    if automerge_prs := tuple(x for x in pr_details if x["auto_merge"]):
+        print(f"\tAutomerge PRs: {len(automerge_prs)}")
+        for i, pr in enumerate(automerge_prs, start=1):
+            print(f"{i}. @{pr['user']['login']} {pr['title']} {pr['html_url']}")
+    else:
+        print("\tNo PRs set to automerge")
