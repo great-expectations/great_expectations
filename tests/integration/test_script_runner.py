@@ -526,7 +526,9 @@ def _execute_integration_test(  # noqa: PLR0912, PLR0915
             shutil.copyfile(script_source, util_script_path)
 
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
-        loader = importlib.machinery.SourceFileLoader("test_script_module", script_path)
+        loader = importlib.machinery.SourceFileLoader(
+            "test_script_module", str(script_path)
+        )
         spec = importlib.util.spec_from_loader("test_script_module", loader)
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
