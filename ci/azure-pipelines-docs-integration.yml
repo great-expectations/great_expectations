@@ -120,16 +120,12 @@ stages:
 
     - job: test_docs_mysql
       timeoutInMinutes: 30
-      condition: false
-#
-#     pymysql.err.Warning: (1051, "Unknown table 'test_ci.taxi_data'"), etc
-#
-#     condition: or(
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-#         eq(variables.isDevelop, true),
-#         eq(variables.isManual, true)
-#       )
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
+          eq(variables.isManual, true)
+        )
       variables:
         python.version: '3.8'
       services:
@@ -461,16 +457,12 @@ stages:
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
-      condition: false
-#
-#     pymysql.err.Warning: (1051, "Unknown table 'test_ci.taxi_data'"), etc
-#
-#     condition: or(
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-#         eq(variables.isDevelop, true),
-#         eq(variables.isManual, true)
-#       )
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
+          eq(variables.isManual, true)
+        )
       variables:
         python.version: '3.8'
       services:
@@ -486,6 +478,19 @@ stages:
         - script: |
             pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
+
+        - script: |
+            printf 'Waiting for MySQL database to accept connections'
+            until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+              printf '.'
+              sleep 1;
+            done;
+          displayName: Wait for database to initialise
+
+        - script: |
+            echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+            mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+          displayName: 'Configure mysql'
 
         - script: |
             pytest -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py

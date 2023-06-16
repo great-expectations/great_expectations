@@ -49,6 +49,70 @@ def read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
+    if is_version_less_than(pd.__version__, "2.0.0"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            return _read_sql_table_as_df(
+                table_name=table_name,
+                con=con,
+                dialect=dialect,
+                schema=schema,
+                index_col=index_col,
+                coerce_float=coerce_float,
+                parse_dates=parse_dates,
+                columns=columns,
+                chunksize=chunksize,
+            )
+    else:
+        return _read_sql_table_as_df(
+            table_name=table_name,
+            con=con,
+            dialect=dialect,
+            schema=schema,
+            index_col=index_col,
+            coerce_float=coerce_float,
+            parse_dates=parse_dates,
+            columns=columns,
+            chunksize=chunksize,
+        )
+
+
+def _read_sql_table_as_df(  # noqa: PLR0913
+    table_name,
+    con,
+    dialect: str,
+    schema=None,
+    index_col: str | Sequence[str] | None = None,
+    coerce_float: bool = True,
+    parse_dates: list[str] | dict[str, str] | None = None,
+    columns: list[str] | None = None,
+    chunksize: int | None = None,
+) -> pd.DataFrame | Iterator[pd.DataFrame]:
+    """Wrapper for `read_sql_table()` method in Pandas. Created as part of the effort to allow GX to be compatible
+    with SqlAlchemy 2, and is used to suppress warnings that arise from implicit auto-commits.
+
+    Args:
+        table_name (str): name of SQL Table.
+        con (sqlalchemy engine or connection): sqlalchemy.engine or sqlite3.Connection
+        schema (str | None): Specify the schema (if database flavor supports this). If None, use
+            default schema. Defaults to None.
+        index_col (str | Sequence[str] | None): Column(s) to set as index(MultiIndex).
+        coerce_float (bool): If True, method to convert values of non-string, non-numeric objects (like
+            decimal.Decimal) to floating point. Can result in loss of Precision.
+        parse_dates (List or Dict): list or dict, default None
+            - List of column names to parse as dates.
+            - Dict of ``{column_name: format string}`` where format string is
+                strftime compatible in case of parsing string times or is one of
+                (D, s, ns, ms, us) in case of parsing integer timestamps.
+            - Dict of ``{column_name: arg dict}``, where the arg dict corresponds
+                to the keyword arguments of :func:`pandas.to_datetime`
+                Especially useful with databases without native Datetime support,
+                such as SQLite.
+        columns: List of column names to select from SQL table.
+        chunksize: If specified, returns an iterator where `chunksize` is the number of
+            rows to include in each chunk.
+        dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
+    """
     schema = schema
     columns = columns
     if dialect == GXSqlDialect.TRINO:

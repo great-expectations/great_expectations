@@ -19,7 +19,7 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import CheckpointNotFoundError, StoreBackendError
 from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
@@ -137,7 +137,7 @@ def mocked_get_response(
 
 
 @pytest.fixture
-def mocked_get_by_name_response(
+def mocked_get_by_name_response_1_result(
     mock_response_factory: Callable,
     checkpoint_config_with_ids: dict,
     checkpoint_id: str,
@@ -173,6 +173,21 @@ def mocked_get_by_name_response(
     return _mocked_get_by_name_response
 
 
+@pytest.fixture
+def mocked_get_by_name_response_0_results(
+    mock_response_factory: Callable,
+) -> Callable[[], MockResponse]:
+    def _mocked_get_by_name_response(*args, **kwargs):
+        return mock_response_factory(
+            {
+                "data": [],
+            },
+            200,
+        )
+
+    return _mocked_get_by_name_response
+
+
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_get_checkpoint_by_name(
@@ -180,7 +195,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config: dict,
-    mocked_get_by_name_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -193,7 +208,9 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     validation_id_1, validation_id_2 = validation_ids
 
     with mock.patch(
-        "requests.Session.get", autospec=True, side_effect=mocked_get_by_name_response
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_1_result,
     ) as mock_get:
         checkpoint = context.get_checkpoint(name=checkpoint_config["name"])
 
@@ -250,7 +267,7 @@ def test_cloud_backed_data_context_add_checkpoint(
         "great_expectations.data_context.store.GXCloudStoreBackend._has_key",
         autospec=True,
         return_value=False,
-    ) as _:
+    ):
         checkpoint = context.add_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -365,7 +382,65 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
         "great_expectations.data_context.store.GXCloudStoreBackend._get",
         autospec=True,
         side_effect=StoreBackendError("Does not exist."),
-    ) as _:
+    ):
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+        # Round trip through schema to mimic updates made during store serialization process
+        expected_checkpoint_config = checkpointConfigSchema.dump(
+            CheckpointConfig(**checkpoint_config)
+        )
+
+        mock_post.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/checkpoints",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "attributes": {
+                        "checkpoint_config": expected_checkpoint_config,
+                        "organization_id": ge_cloud_organization_id,
+                    },
+                },
+            },
+        )
+
+    assert checkpoint.ge_cloud_id == checkpoint_id
+    assert checkpoint.config.ge_cloud_id == checkpoint_id
+
+    assert checkpoint.config.validations[0]["id"] == validation_id_1
+    assert checkpoint.validations[0]["id"] == validation_id_1
+
+    assert checkpoint.config.validations[1]["id"] == validation_id_2
+    assert checkpoint.validations[1]["id"] == validation_id_2
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
+def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_id: str,
+    validation_ids: Tuple[str, str],
+    checkpoint_config: dict,
+    mocked_post_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should save to a Cloud-backed CheckpointStore when calling `add_checkpoint`.
+    When saving, it should use the id from the response to create the checkpoint.
+    """
+    context = empty_cloud_data_context
+
+    validation_id_1, validation_id_2 = validation_ids
+
+    with mock.patch(
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
+    ) as mock_post, mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_0_results,
+    ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -423,7 +498,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
-    ) as _:
+    ):
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config_with_ids)
 
         # Round trip through schema to mimic updates made during store serialization process
@@ -466,7 +541,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     validation_ids: Tuple[str, str],
     checkpoint_config_with_ids: dict,
     mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -483,8 +558,8 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     ) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=mocked_get_response,
-    ) as _:
+        side_effect=mocked_get_by_name_response_1_result,
+    ):
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
         checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
@@ -541,7 +616,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_get_response,
-    ) as _:
+    ):
         ge_cloud_id = checkpoint_config_with_ids.pop("id")
         checkpoint = context.update_checkpoint(
             Checkpoint.instantiate_from_config_with_runtime_args(
@@ -587,13 +662,45 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
 @pytest.mark.cloud
 @pytest.mark.integration
+def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_present(
+    empty_cloud_data_context: CloudDataContext,
+    checkpoint_config_with_ids: dict,
+    mocked_get_by_name_response_0_results: Callable[[], MockResponse],
+    ge_cloud_base_url: str,
+    ge_cloud_organization_id: str,
+) -> None:
+    """
+    A Cloud-backed context should raise StoreBackendError when calling `update_checkpoint` and the
+    referenced Checkpoint does not exist.
+    """
+    context = empty_cloud_data_context
+
+    with mock.patch(
+        "requests.Session.get",
+        autospec=True,
+        side_effect=mocked_get_by_name_response_0_results,
+    ):
+        checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
+        checkpoint_config.pop("id")
+        with pytest.raises(CheckpointNotFoundError):
+            context.update_checkpoint(
+                Checkpoint.instantiate_from_config_with_runtime_args(
+                    checkpoint_config=CheckpointConfig(**checkpoint_config),
+                    data_context=context,
+                    name=checkpoint_config["name"],
+                )
+            )
+
+
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
     validation_ids: Tuple[str, str],
     checkpoint_config_with_ids: dict,
     mocked_put_response: Callable[[], MockResponse],
-    mocked_get_response: Callable[[], MockResponse],
+    mocked_get_by_name_response_1_result: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
 ) -> None:
@@ -609,8 +716,8 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     ) as mock_put, mock.patch(
         "requests.Session.get",
         autospec=True,
-        side_effect=mocked_get_response,
-    ) as _:
+        side_effect=mocked_get_by_name_response_1_result,
+    ):
         checkpoint_config = copy.deepcopy(checkpoint_config_with_ids)
         checkpoint_config.pop("id")
 
