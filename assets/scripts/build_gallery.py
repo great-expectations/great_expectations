@@ -64,7 +64,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -84,9 +84,8 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
+            text=True,
             env=env,
-            universal_newlines=True,
         )
         sh_out: str = res.stdout.strip()
         logger.info(sh_out)
@@ -133,9 +132,9 @@ def get_expectations_info_dict(
     rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
     result = {}
     files_found = []
-    oldpwd = os.getcwd()
+    oldpwd = os.getcwd()  # noqa: PTH109
     os.chdir(f"..{os.path.sep}..")
-    repo_path = os.getcwd()
+    repo_path = os.getcwd()  # noqa: PTH109
     logger.debug("Finding requested Expectation files in the repo")
 
     if only_these_expectations:
@@ -145,7 +144,7 @@ def get_expectations_info_dict(
     if include_core:
         files_found.extend(
             glob(
-                os.path.join(
+                os.path.join(  # noqa: PTH118
                     repo_path,
                     "great_expectations",
                     "expectations",
@@ -158,14 +157,18 @@ def get_expectations_info_dict(
     if include_contrib:
         files_found.extend(
             glob(
-                os.path.join(repo_path, "contrib", "**", "expect_*.py"),
+                os.path.join(repo_path, "contrib", "**", "expect_*.py"),  # noqa: PTH118
                 recursive=True,
             )
         )
 
     for file_path in sorted(files_found):
-        file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
-        expectation_name = os.path.basename(file_path).replace(".py", "")
+        file_path = (  # noqa: PLW2901 # `for` loop variable overwritten
+            file_path.replace(f"{repo_path}{os.path.sep}", "")
+        )
+        expectation_name = os.path.basename(file_path).replace(  # noqa: PTH119
+            ".py", ""
+        )
         if only_these_expectations and expectation_name not in only_these_expectations:
             continue
         if (
@@ -174,7 +177,9 @@ def get_expectations_info_dict(
         ):
             continue
 
-        package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
+        package_name = os.path.basename(  # noqa: PTH119
+            os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+        )  # ,
         if package_name == "expectations":
             package_name = "core"
 
@@ -183,18 +188,22 @@ def get_expectations_info_dict(
         sys_path = ""
         if package_name != "core":
             requirements = get_contrib_requirements(file_path)["requirements"]
-            parent_dir = os.path.dirname(os.path.dirname(file_path))
-            grandparent_dir = os.path.dirname(parent_dir)
+            parent_dir = os.path.dirname(os.path.dirname(file_path))  # noqa: PTH120
+            grandparent_dir = os.path.dirname(parent_dir)  # noqa: PTH120
 
             if package_name == "great_expectations_experimental":
                 import_module_args = (
                     f"expectations.{expectation_name}",
                     "great_expectations_experimental",
                 )
-                sys_path = os.path.join(f"..{os.path.sep}..", parent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", parent_dir
+                )
             else:
                 import_module_args = (f"{package_name}.expectations",)
-                sys_path = os.path.join(f"..{os.path.sep}..", grandparent_dir)
+                sys_path = os.path.join(  # noqa: PTH118
+                    f"..{os.path.sep}..", grandparent_dir
+                )
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
         created_at_cmd = (
@@ -247,9 +256,7 @@ def install_necessary_requirements(requirements) -> list:
     parsed_requirements = pkg_resources.parse_requirements(requirements)
     installed = []
     for req in parsed_requirements:
-        is_satisfied = any(
-            [installed_pkg in req for installed_pkg in installed_packages]
-        )
+        is_satisfied = any(installed_pkg in req for installed_pkg in installed_packages)
         if not is_satisfied:
             logger.debug(f"Executing command: 'pip install \"{req}\"'")
             status_code = execute_shell_command(f'pip install "{req}"')
@@ -263,7 +270,7 @@ def uninstall_requirements(requirements):
     """Uninstall any requirements that were added to the venv"""
     print("\n\n\n=== (Uninstalling) ===")
     logger.info(
-        f"Uninstalling packages that were installed while running this script..."
+        "Uninstalling packages that were installed while running this script..."
     )
     for req in requirements:
         logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
@@ -286,7 +293,7 @@ def get_expectation_instances(expectations_info):
         if import_module_args:
             try:
                 importlib.import_module(*import_module_args)
-            except (ModuleNotFoundError, ImportError, Exception) as e:
+            except (ModuleNotFoundError, ImportError, Exception):
                 logger.error(f"Failed to load expectation_name: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
@@ -318,7 +325,7 @@ def combine_backend_results(
 
         bad_key_names = []
         for fname in found_full_backend_files:
-            with open(fname, "r") as fp:
+            with open(fname) as fp:
                 text = fp.read()
             data = json.loads(text)
 
@@ -423,15 +430,15 @@ def get_contrib_requirements(filepath: str) -> Dict:
     return requirements_info
 
 
-def build_gallery(
+def build_gallery(  # noqa: C901 - 17
     only_combine: bool = False,
     include_core: bool = True,
     include_contrib: bool = True,
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
     outfile_name: str = "",
-    only_these_expectations: List[str] = [],
-    only_consider_these_backends: List[str] = [],
+    only_these_expectations: List[str] | None = None,
+    only_consider_these_backends: List[str] | None = None,
     context: Optional[DataContext] = None,
 ) -> None:
     """
@@ -448,7 +455,11 @@ def build_gallery(
         None
 
     """
-    requirements_dict = {}
+    if only_these_expectations is None:
+        only_these_expectations = []
+    if only_consider_these_backends is None:
+        only_consider_these_backends = []
+
     if only_combine:
         include_core = True
         include_contrib = True
@@ -483,7 +494,7 @@ def build_gallery(
     contrib_requirements_set = set()
     for _info in expectations_info.values():
         contrib_requirements_set.update(_info["requirements"])
-    installed = install_necessary_requirements(list(contrib_requirements_set))
+    _ = install_necessary_requirements(list(contrib_requirements_set))
 
     # Get Expectation instances and run diagnostics
     expectation_instances = get_expectation_instances(expectations_info)
@@ -520,7 +531,7 @@ def build_gallery(
                 expectation_docstrings.write(
                     f"{diagnostics['description']['docstring']}\n"
                 )
-        except:
+        except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation_name}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
@@ -554,7 +565,7 @@ def build_gallery(
                         "backend_test_result_counts": [test_result_counts],
                     }
 
-            except TypeError as e:
+            except TypeError:
                 logger.error(f"Failed to create JSON for: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
@@ -606,11 +617,11 @@ def format_docstring_to_markdown(docstr: str) -> str:
         elif line.strip().endswith(":"):
             in_param = True
             # This adds a blank line before the header if one doesn't already exist.
-            if prev_line != "":
+            if prev_line:
                 clean_docstr_list.append("")
             # Turn the line into an H4 header
             clean_docstr_list.append(f"#### {line.strip()}")
-        elif line.strip() == "" and prev_line != "::":
+        elif line.strip() and prev_line != "::":
             # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
             # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
             # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
@@ -621,26 +632,25 @@ def format_docstring_to_markdown(docstr: str) -> str:
             in_code_block = False
             first_code_indentation = None
             clean_docstr_list.append(line)
-        else:
-            if in_code_block:
-                # Determine the number of spaces indenting the first line of code so they can be removed from all lines
-                # in the code block without wrecking the hierarchical indentation levels of future lines.
-                if first_code_indentation == None and line.strip() != "":
-                    first_code_indentation = len(
-                        re.match(r"\s*", original_line, re.UNICODE).group(0)
-                    )
-                if line.strip() == "" and prev_line == "::":
-                    # If the first line of the code block is a blank one, just skip it.
-                    pass
-                else:
-                    # Append the line of code, minus the extra indentation from being written in an indented docstring.
-                    clean_docstr_list.append(original_line[first_code_indentation:])
-            elif ":" in line.replace(":ref:", "") and in_param:
-                # This indicates a parameter. arg. or other definition.
-                clean_docstr_list.append(f"- {line.strip()}")
+        elif in_code_block:
+            # Determine the number of spaces indenting the first line of code so they can be removed from all lines
+            # in the code block without wrecking the hierarchical indentation levels of future lines.
+            if first_code_indentation is None and line.strip():
+                first_code_indentation = len(
+                    re.match(r"\s*", original_line, re.UNICODE).group(0)
+                )
+            if not line.strip() and prev_line == "::":
+                # If the first line of the code block is a blank one, just skip it.
+                pass
             else:
-                # This indicates a regular line of text.
-                clean_docstr_list.append(f"{line.strip()}")
+                # Append the line of code, minus the extra indentation from being written in an indented docstring.
+                clean_docstr_list.append(original_line[first_code_indentation:])
+        elif ":" in line.replace(":ref:", "") and in_param:
+            # This indicates a parameter. arg. or other definition.
+            clean_docstr_list.append(f"- {line.strip()}")
+        else:
+            # This indicates a regular line of text.
+            clean_docstr_list.append(f"{line.strip()}")
         prev_line = line.strip()
     clean_docstr = "\n".join(clean_docstr_list)
     return clean_docstr
@@ -648,8 +658,10 @@ def format_docstring_to_markdown(docstr: str) -> str:
 
 def _disable_progress_bars() -> Tuple[str, DataContext]:
     """Return context_dir and context that was created"""
-    context_dir = os.path.join(os.path.sep, "tmp", f"gx-context-{os.getpid()}")
-    os.makedirs(context_dir)
+    context_dir = os.path.join(  # noqa: PTH118
+        os.path.sep, "tmp", f"gx-context-{os.getpid()}"
+    )
+    os.makedirs(context_dir)  # noqa: PTH103
     context = DataContext.create(context_dir, usage_statistics_enabled=False)
     context.variables.progress_bars = {
         "globally": False,
@@ -741,13 +753,13 @@ def main(**kwargs):
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
     docstrings = expectation_docstrings.getvalue()
-    if tracebacks != "":
+    if tracebacks:
         with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
-    if checklists != "":
+    if checklists:
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    if docstrings != "":
+    if docstrings:
         with open("./docstrings.txt", "w") as outfile:
             outfile.write(docstrings)
 

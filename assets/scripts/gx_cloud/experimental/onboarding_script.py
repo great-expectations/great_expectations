@@ -1,5 +1,7 @@
 import pprint
 
+import pandas as pd
+
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -8,9 +10,6 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import BaseDatasource
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.validator.validator import Validator
-
-import pandas as pd
-
 
 # Create a GX Data Context
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
