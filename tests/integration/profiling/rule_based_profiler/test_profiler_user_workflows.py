@@ -2,7 +2,6 @@ import contextlib
 import copy
 import datetime
 from numbers import Number
-
 from typing import (
     TYPE_CHECKING,
     Any,
