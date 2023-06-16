@@ -1900,6 +1900,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         include_mysql=dialects_to_include.get("mysql", False),
         include_mssql=dialects_to_include.get("mssql", False),
         include_bigquery=dialects_to_include.get("bigquery", False),
+        include_clickhouse=dialects_to_include.get("clickhouse", False),
         include_trino=dialects_to_include.get("trino", False),
         include_redshift=dialects_to_include.get("redshift", False),
         include_athena=dialects_to_include.get("athena", False),

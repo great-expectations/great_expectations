@@ -230,7 +230,7 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark.Row] | pyspark.Row | list[dict]
+        rows: list[pyspark.Row] | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:
