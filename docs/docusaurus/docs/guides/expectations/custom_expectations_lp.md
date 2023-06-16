@@ -11,7 +11,7 @@ import LinkCard from '/docs/components/LinkCard';
 <p class="DocItem__header-description">Create Custom Expectations to extend the functionality of GX and satisfy your unique business requirements.</p>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Custom Expectations overview" description="Extend the functionality of GX with Custom Expectations" href="/docs/guides/expectations/creating_custom_expectations/overview" icon="/img/custom_expectation_icon.svg" />
+  <LinkCard topIcon label="Custom Expectations overview" description="Extend the functionality of GX with Custom Expectations" href="/docs/guides/expectations/creating_custom_expectations/overview" icon="/img/overview_icon.svg" />
   <LinkCard topIcon label="Create a Custom Column Aggregate Expectation" description="Create a Custom Column Aggregate Expectation that evaluates a single column and produces an aggregate Metric" href="/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations" icon="/img/custom_expectation_icon.svg" />
   <LinkCard topIcon label="Create a Custom Column Map Expectation" description="Create a Custom Column Map Expectation that evaluates a single column and performs a yes or no query on every row in the column" href="/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations" icon="/img/custom_expectation_icon.svg" />
   <LinkCard topIcon label="Create a Custom Batch Expectation" description="Create a Custom Batch Expectation that evaluates an entire Batch, and answers a semantic question about the Batch" href="/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations" icon="/img/custom_expectation_icon.svg" />
