@@ -52,6 +52,7 @@ module.exports = {
       label: 'Create Expectations',
       link: { type: 'doc', id: 'guides/expectations/expectations_lp' },
       items: [
+        'guides/expectations/create_expectations_overview',
         {
           type: 'category',
           label: 'Manage Expectations and Expectation Suites',

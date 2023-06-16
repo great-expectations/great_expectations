@@ -1,5 +1,8 @@
 ---
-title: "Expectation creation workflow"
+sidebar_label: 'Expectation creation workflow'
+title: 'Expectation creation workflow'
+id: create_expectations_overview
+description: An overview of the process for creating and managing Expectations and Expectation Suites.
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
