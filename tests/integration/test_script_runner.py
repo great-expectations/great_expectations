@@ -15,10 +15,11 @@ from typing import List
 
 import pkg_resources
 import pytest
-
 from assets.scripts.build_gallery import execute_shell_command
+
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.abs.integration_tests import (
     abs_integration_tests,
 )
@@ -46,7 +47,6 @@ from tests.integration.test_definitions.mysql.integration_tests import (
 from tests.integration.test_definitions.postgresql.integration_tests import (
     postgresql_integration_tests,
 )
-from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.redshift.integration_tests import (
     redshift_integration_tests,
 )
@@ -448,7 +448,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(
+def _execute_integration_test(  # noqa: PLR0912, PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """
@@ -543,7 +543,10 @@ def _execute_integration_test(
         os.chdir(workdir)
 
 
-def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
+def _check_for_skipped_tests(  # noqa: PLR0912
+    pytest_args,
+    integration_test_fixture,
+) -> None:
     """Enable scripts to be skipped based on pytest invocation flags."""
     dependencies = integration_test_fixture.backend_dependencies
     if not dependencies:
