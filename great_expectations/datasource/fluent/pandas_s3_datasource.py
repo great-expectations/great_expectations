@@ -119,7 +119,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         s3_prefix: str = "",
         s3_delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
         s3_max_keys: int = 1000,
-        recursive_file_discovery: bool = False,
+        s3_recursive_file_discovery: bool = False,
         **kwargs,
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
@@ -138,7 +138,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix=s3_prefix,
             delimiter=s3_delimiter,
             max_keys=s3_max_keys,
-            recursive_file_discovery=recursive_file_discovery,
+            recursive_file_discovery=s3_recursive_file_discovery,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -150,7 +150,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 bucket=self.bucket,
                 prefix=s3_prefix,
                 delimiter=s3_delimiter,
-                recursive_file_discovery=recursive_file_discovery,
+                recursive_file_discovery=s3_recursive_file_discovery,
             )
         )
 
