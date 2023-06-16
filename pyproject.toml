@@ -30,6 +30,7 @@ plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     "tests/datasource/fluent",
+    "tests/agent",
     # "contrib" # ignore entire `contrib` package
     ]
 warn_unused_configs = true
@@ -291,7 +292,7 @@ extend-exclude = [
     "tests/data_asset", # 10 warnings
     "tests/dataset", # 10 warnings
     "tests/expectations", # 56 warnings
-    "tests/integration", # 114 warnings
+    "tests/integration/docusaurus", # 208 warnings, 144 auto-fixable
     "tests/rule_based_profiler", # 28 warnings
     "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
 ]
