@@ -1,5 +1,5 @@
 ---
-title: How to use auto-initializing Expectations
+title: Use auto-initializing Expectations
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'

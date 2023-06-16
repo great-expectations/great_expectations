@@ -1,5 +1,5 @@
 ---
-title: How to dynamically load evaluation parameters from a database
+title: Dynamically load evaluation parameters from a database
 ---
 
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'

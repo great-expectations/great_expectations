@@ -1,5 +1,5 @@
 ---
-title: How to Edit an Expectation Suite 
+title: Edit an Expectation Suite 
 tag: [how-to, getting started]
 description: Create an Expectation Suite using a Validator. Then, examine and modify specific Expectations in the Suite.
 keywords: [Expectations, ExpectationsSuite]

@@ -1,5 +1,5 @@
 ---
-title: How to compare two tables with the OnboardingDataAssistant
+title: Compare two tables with the OnboardingDataAssistant
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
