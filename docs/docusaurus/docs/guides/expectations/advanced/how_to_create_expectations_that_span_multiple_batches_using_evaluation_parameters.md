@@ -1,5 +1,5 @@
 ---
-title: How to create Expectations that span multiple Batches using Evaluation Parameters
+title: Create Expectations that span multiple Batches using Evaluation Parameters
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';

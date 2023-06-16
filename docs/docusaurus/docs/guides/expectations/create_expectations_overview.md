@@ -7,14 +7,6 @@ description: An overview of the process for creating and managing Expectations a
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-<!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-## Prerequisites
-
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
-
-## Workflows
-
 The following image shows the four workflows you can follow to create <TechnicalTag tag="expectation" text="Expectations" />:
 
 ![Where do Expectations come from?](../../images/universal_map/overviews/where_expectations_come_from.png)
