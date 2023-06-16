@@ -457,9 +457,9 @@ def _execute_integration_test(
     Note that the only required parameter for a test in the matrix is
     `user_flow_script` and that all other parameters are optional.
     """
-    workdir = os.getcwd()
+    workdir = pathlib.Path.cwd()
     try:
-        base_dir = file_relative_path(__file__, "../../")
+        base_dir = pathlib.Path(file_relative_path(__file__, "../../"))
         os.chdir(base_dir)
         # Ensure GX is installed in our environment
         installed_packages = [pkg.key for pkg in pkg_resources.working_set]
@@ -472,8 +472,8 @@ def _execute_integration_test(
         # DataContext
         data_context_dir = integration_test_fixture.data_context_dir
         if data_context_dir:
-            context_source_dir = os.path.join(base_dir, data_context_dir)
-            test_context_dir = os.path.join(tmp_path, "great_expectations")
+            context_source_dir = base_dir / data_context_dir
+            test_context_dir = tmp_path / "great_expectations"
             shutil.copytree(
                 context_source_dir,
                 test_context_dir,
@@ -482,8 +482,8 @@ def _execute_integration_test(
         # Test Data
         data_dir = integration_test_fixture.data_dir
         if data_dir:
-            source_data_dir = os.path.join(base_dir, data_dir)
-            target_data_dir = os.path.join(tmp_path, "data")
+            source_data_dir = base_dir / data_dir
+            target_data_dir = tmp_path / "data"
             shutil.copytree(
                 source_data_dir,
                 target_data_dir,

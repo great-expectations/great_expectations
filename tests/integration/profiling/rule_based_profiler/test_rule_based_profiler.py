@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import os
+import pathlib
 from typing import TYPE_CHECKING
 from unittest import mock
 
@@ -33,7 +33,8 @@ def test_batches_are_accessible(
 
     context: AbstractDataContext = multibatch_generic_csv_generator_context
     data_relative_path = "../data"
-    data_path = os.path.join(context.root_directory, data_relative_path)
+    assert context.root_directory
+    data_path = pathlib.Path(context.root_directory, data_relative_path)
     datasource_name = "generic_csv_generator"
     data_connector_name = "daily_data_connector"
     asset_name = "daily_data_asset"
