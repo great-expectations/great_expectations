@@ -1,5 +1,5 @@
 ---
-title: "Create Expectations: Overview"
+title: "Expectation creation workflow"
 ---
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';

@@ -50,21 +50,26 @@ module.exports = {
     {
       type: 'category',
       label: 'Create Expectations',
-      link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
+      link: { type: 'doc', id: 'guides/expectations/expectations_lp' },
       items: [
         {
           type: 'category',
-          label: 'Core skills',
+          label: 'Manage Expectations and Expectation Suites',
+          link: { type: 'doc', id: 'guides/expectations/create_manage_expectations_lp' },
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
-            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
+            'guides/expectations/how_to_use_auto_initializing_expectations',
+            'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
           ]
         },
         {
           type: 'category',
           label: 'Profilers and Data Assistants',
+          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
@@ -72,16 +77,8 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Advanced skills',
-          items: [
-            'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-            'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant'
-          ]
-        },
-        {
-          type: 'category',
           label: 'Create Custom Expectations',
+          link: { type: 'doc', id: 'guides/expectations/custom_expectations_lp' },
           items: [
             'guides/expectations/creating_custom_expectations/overview',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
@@ -108,7 +105,6 @@ module.exports = {
             }
           ]
         },
-        { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
       ]
     },
     {
@@ -147,7 +143,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integrations',
+      label: 'Integrate',
       link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
         {
