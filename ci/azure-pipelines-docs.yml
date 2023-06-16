@@ -87,4 +87,6 @@ stages:
             displayName: 'Use Python 3.8'
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
-            name: TestBuildDocs
+            displayName: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096

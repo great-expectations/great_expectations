@@ -862,52 +862,62 @@ def read_sas(  # noqa: PLR0913
         )
 
 
-def build_in_memory_runtime_context() -> AbstractDataContext:
+def build_in_memory_runtime_context(
+    include_pandas: bool = True,
+    include_spark: bool = True,
+) -> AbstractDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+
+    Args:
+        include_pandas (bool): If True, include pandas datasource
+        include_spark (bool): If True, include spark datasource
     """
     from great_expectations.data_context.types.base import (
         DataContextConfig,
         InMemoryStoreBackendDefaults,
     )
 
+    datasources = {}
+    if include_pandas:
+        datasources["pandas_datasource"] = {
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+    if include_spark:
+        datasources["spark_datasource"] = {
+            "execution_engine": {
+                "class_name": "SparkDFExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "data_connectors": {
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": [
+                        "id_key_0",
+                        "id_key_1",
+                    ],
+                }
+            },
+        }
+
     data_context_config: DataContextConfig = DataContextConfig(
-        datasources={  # type: ignore[arg-type]
-            "pandas_datasource": {
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-            "spark_datasource": {
-                "execution_engine": {
-                    "class_name": "SparkDFExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "class_name": "Datasource",
-                "module_name": "great_expectations.datasource",
-                "data_connectors": {
-                    "runtime_data_connector": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": [
-                            "id_key_0",
-                            "id_key_1",
-                        ],
-                    }
-                },
-            },
-        },
+        datasources=datasources,  # type: ignore[arg-type]
         expectations_store_name="expectations_store",
         validations_store_name="validations_store",
         evaluation_parameter_store_name="evaluation_parameter_store",

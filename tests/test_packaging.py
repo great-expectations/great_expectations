@@ -72,7 +72,8 @@ def test_requirements_files():
     assert req_set_dict["requirements.txt"] <= req_set_dict["requirements-dev.txt"]
 
     assert (
-        req_set_dict["requirements-dev-contrib.txt"]
+        req_set_dict["requirements-dev-arrow.txt"]
+        | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
         | req_set_dict["requirements-dev-cloud.txt"]
