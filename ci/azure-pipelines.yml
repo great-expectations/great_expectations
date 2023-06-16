@@ -241,7 +241,7 @@ stages:
               PYTEST+="--network=host --mount type=bind,source=${PWD}/coverage,target=/coverage "
               # We don't run e2e because we don't want to test connections to external dependencies here.
               PYTEST+="greatexpectations/test:${DOCKER_TAG} /bin/bash -c \"pytest -m 'not e2e' "
-              PYTEST+="--random-order --postgresql --cloud "
+              PYTEST+="--random-order --postgresql"
               # We should be able to specify --cov-report=xml:path but this doesn't work so we write to the default
               # path and then mv it.
               PYTEST+="--junitxml=/coverage/junit/test-results.xml --cov=. --cov-report=xml --cov-report=html:/coverage/htmlcov "
@@ -506,7 +506,7 @@ stages:
               PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
               PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GE_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
               PYTEST+="greatexpectations/test:${DOCKER_TAG} "
-              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
+              PYTEST+="pytest --random-order -m \"cloud and e2e\""
               echo ${PYTEST}
               eval ${PYTEST}
             env:

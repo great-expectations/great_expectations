@@ -371,7 +371,6 @@ def tests(  # noqa: PLR0913
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
-    cloud: bool = True,
     slowest: int = 5,
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
@@ -411,8 +410,6 @@ def tests(  # noqa: PLR0913
         except ImportError:
             print("`pytest-timeout` is not installed, cannot use --timeout")
 
-    if cloud:
-        cmds += ["--cloud"]
     if ci:
         cmds += ["--cov-report", "xml"]
     if html:

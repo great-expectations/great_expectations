@@ -485,7 +485,6 @@ if __name__ == "__main__":
             __file__,
             f"-m {test_type}",
             "--durations=5",
-            "--cloud",
             "--spark",
             "--cov=great_expectations/validator",
             "--cov-report=term",

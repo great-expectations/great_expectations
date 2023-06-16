@@ -132,7 +132,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              invoke tests --cloud --unit --timeout=3.0
+              invoke tests --unit --timeout=3.0
             displayName: 'Unit Tests'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
