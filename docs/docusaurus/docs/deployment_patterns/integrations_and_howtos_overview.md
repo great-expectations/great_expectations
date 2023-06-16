@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Integrations'
-title: 'Integrations'
+sidebar_label: 'Integrate'
+title: 'Integrate'
 id: integrations_and_howtos_overview
 description: Integrate third party products and services with Great Expectations (GX).
 ---

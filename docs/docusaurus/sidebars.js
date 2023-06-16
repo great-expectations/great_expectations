@@ -116,6 +116,7 @@ module.exports = {
       label: 'Validate data',
       link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
+        'guides/validation/validate_data_overview',
         'guides/validation/how_to_validate_data_by_running_a_checkpoint',
         'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
         'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
