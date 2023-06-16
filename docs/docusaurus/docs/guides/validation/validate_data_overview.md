@@ -1,5 +1,5 @@
 ---
-title: "Data Validation Workflow"
+title: "Data Validation workflow"
 ---
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

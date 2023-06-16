@@ -13,5 +13,5 @@ import LinkCard from '/docs/components/LinkCard';
 <LinkCardGrid>
   <LinkCard topIcon label="Instantiate a Data Context" description="Instantiate a Data Context so that you can continue working with previously defined GX configurations" href="/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context" icon="/img/instantiate_icon.svg" />
   <LinkCard topIcon label="Convert a Data Context" description="Convert an Ephemeral Data Context to a Filesystem Data Context" href="/docs/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context" icon="/img/convert_icon.svg" />
-  <LinkCard topIcon label="Configure credentials" description="Populate credentials with an environment variable, a YAML file, or a secret manager" href="docs/guides/setup/configuring_data_contexts/how_to_configure_credentials" icon="/img/configure_icon.svg" />
+  <LinkCard topIcon label="Configure credentials" description="Populate credentials with an environment variable, a YAML file, or a secret manager" href="/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials" icon="/img/configure_icon.svg" />
 </LinkCardGrid>

@@ -111,7 +111,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Validate data',
+      label: 'Validate Data',
       link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
         'guides/validation/validate_data_overview',
