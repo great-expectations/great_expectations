@@ -92,16 +92,9 @@ checkpoint_result = checkpoint.run(
     action_list=[
         {
             "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction"
-                }
-            },
-        {
-            "name": "update_data_docs",
-            "action": {
-                "class_name": "UpdateDataDocsAction"
-                }
-            }
-        ]
-    )
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
+    ],
+)
 # </snippet>
