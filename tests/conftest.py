@@ -366,6 +366,20 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
+@pytest.fixture
+def seed_gx_cloud_env_vars(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    gx_cloud_env_vars: dict[str, str] = {
+        "GX_CLOUD_ORGANIZATION_ID": "FAKE_ORG_ID",
+        "GX_CLOUD_ACCESS_TOKEN": "test-token",
+    }
+
+    for env_name, env_value in gx_cloud_env_vars.items():
+        logger.debug(f"Setting {env_name} to {env_value}")
+        monkeypatch.setenv(env_name, env_value)
+
+    return gx_cloud_env_vars
+
+
 @pytest.fixture(scope="session", autouse=True)
 def preload_latest_gx_cache():
     """
