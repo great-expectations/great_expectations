@@ -87,3 +87,43 @@ import TechnicalTag from '../../term_tags/_tag.mdx';
 """
 
     assert updated_contents == expected_contents
+
+
+@pytest.mark.unit
+def test__use_relative_path_for_imports_substitution_path_starting_with_forwardslash_same_directory():
+    """Tests for relative path where the imported file is in the same directory as the file being updated."""
+
+    contents = """---
+id: glossary
+title: "Glossary of Terms"
+---
+
+import CLIRemoval from '/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+"""
+
+    path_to_versioned_docs = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.16.16/"
+    )
+    file_path = pathlib.Path(
+        "docs/docusaurus/versioned_docs/version-0.16.16/glossary.md"
+    )
+
+    updated_contents = (
+        _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
+            contents, path_to_versioned_docs, file_path
+        )
+    )
+
+    expected_contents = """---
+id: glossary
+title: "Glossary of Terms"
+---
+
+import CLIRemoval from './components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+"""
+
+    assert updated_contents == expected_contents
