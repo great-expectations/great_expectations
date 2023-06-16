@@ -11,7 +11,7 @@ To use code to create a Data Context, see [How to instantiate an Ephemeral Data 
 To configure a Data Context for a specific environment, see one of the following resources:
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](./how_to_use_great_expectations_in_databricks.md)
+- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Create Expectation Suites and add Expectations
 
