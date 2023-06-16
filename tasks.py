@@ -20,7 +20,6 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Union
 
 import invoke
-import requests
 
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
@@ -745,6 +744,8 @@ def link_checker(ctx: Context, skip_external: bool = True):
 )
 def show_automerges(ctx: Context):
     """Show github pull requests currently in automerge state."""
+    import requests
+
     url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
     response = requests.get(
         url,
