@@ -3,7 +3,6 @@ import copy
 import datetime
 from numbers import Number
 
-# To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing import (
     TYPE_CHECKING,
     Any,
