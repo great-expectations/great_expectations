@@ -3148,10 +3148,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             Domain, Dict[str, List[ParameterNode]]
         ] = self._determine_attributed_metrics_by_domain_type(MetricDomainTypes.TABLE)
 
-        # TODO: <Alex>ALEX</Alex>
         if not attributed_metrics_by_table_domain:
             return []
-        # TODO: <Alex>ALEX</Alex>
 
         table_domain = Domain(
             domain_type=MetricDomainTypes.TABLE, rule_name="table_rule"
@@ -3260,10 +3258,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             exclude_column_names,
         )
 
-        # TODO: <Alex>ALEX</Alex>
         if not attributed_metrics_by_column_domain:
             return [], []
-        # TODO: <Alex>ALEX</Alex>
 
         column_based_metric_names: Set[tuple[str, ...]] = set()
         for metrics in metric_expectation_map.keys():
