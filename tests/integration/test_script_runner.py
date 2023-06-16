@@ -495,37 +495,34 @@ def _execute_integration_test(
         other_files = integration_test_fixture.other_files
         if other_files:
             for file_paths in other_files:
-                source_file = os.path.join(base_dir, file_paths[0])
-                dest_file = os.path.join(tmp_path, file_paths[1])
-                dest_dir = os.path.dirname(dest_file)
-                if not os.path.exists(dest_dir):
-                    os.makedirs(dest_dir)
+                source_file = base_dir / file_paths[0]
+                dest_file = tmp_path / file_paths[1]
+                dest_dir = dest_file.parent
+                if not dest_dir.exists():
+                    dest_dir.mkdir()
 
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
         user_flow_script = integration_test_fixture.user_flow_script
-        script_source = os.path.join(
-            base_dir,
-            user_flow_script,
-        )
-        script_path = os.path.join(tmp_path, "test_script.py")
+        script_source = base_dir / user_flow_script
+
+        script_path = tmp_path / "test_script.py"
         shutil.copyfile(script_source, script_path)
         logger.debug(
             f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}"
         )
-        if not script_source.endswith(".py"):
+        if script_source.suffix != ".py":
             logger.error(f"{script_source} is not a python script!")
-            with open(script_path) as fp:
-                text = fp.read()
+            text = script_source.read_text()
             print(f"contents of script_path:\n\n{text}\n\n")
             return
 
         util_script = integration_test_fixture.util_script
         if util_script:
-            script_source = os.path.join(base_dir, util_script)
-            os.makedirs(os.path.join(tmp_path, "tests/"))
-            util_script_path = os.path.join(tmp_path, "tests/test_utils.py")
+            script_source = base_dir / util_script
+            tmp_path.joinpath("tests/").mkdir()
+            util_script_path = tmp_path / "tests/test_utils.py"
             shutil.copyfile(script_source, util_script_path)
 
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
