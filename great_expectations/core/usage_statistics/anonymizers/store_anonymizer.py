@@ -53,7 +53,11 @@ class StoreAnonymizer(BaseAnonymizer):
                 object_=store_backend_obj,
                 anonymized_info_dict=anonymized_info_dict,
             )
-        elif store_backend_object_config is not None:
+        elif store_backend_object_config is None:
+            raise ValueError(
+                "Must pass `store_backend_obj` or `store_backend_object_config`."
+            )
+        else:
             class_name = store_backend_object_config.get("class_name")
             module_name = store_backend_object_config.get("module_name")
             if module_name is None:
