@@ -1,15 +1,22 @@
 ---
-title: Reference Documents
+sidebar_label: 'Reference'
+title: 'Reference'
+id: reference_overview
+description: Supplemental information that will help you get the most out of Great Expectations.
 ---
 
-This is where you'll find supplemental information that will help you get the most out of Great Expectations.
+import LinkCardGrid from '/docs/components/LinkCardGrid';
+import LinkCard from '/docs/components/LinkCard';
 
-## [API Reference](./api_reference.md)
+<p class="DocItem__header-description">This is where you'll find supplemental information that will help you get the most out of Great Expectations.</p>
 
-This section is the home of our automatically generated API documentation.  These documents are built off of the docstrings of Python classes and methods which are a part of Great Expectation's public API.  This section is still in progress, as we are incrementally updating docstrings to support the generation of these docs.  
-
-## [Glossary of Terms](../glossary.md)
-
-The glossary contains both a quick overview of the definitions for all the various Technical Terms you will find in our documentation which link to a page for each that discusses it in depth.  This is an excellent resource both for clarifying your understanding of other documents and digging in deep to find out how Great Expectations works under the hood!
+<LinkCardGrid>
+  <LinkCard topIcon label="Feature and code readiness" description="The readiness levels for GX features and code" href="/docs/contributing/contributing_maturity" icon="/img/code_readiness_icon.svg" />
+  <LinkCard topIcon label="Customize your deployment" description="Customize your GX deployment to meet your unique business requirements" href="/docs/reference/customize_your_deployment" icon="/img/configure_icon.svg" />
+  <LinkCard topIcon label="Usage statistics" description="Learn what usage statistics are collected and how they are used" href="/docs/reference/usage_statistics" icon="/img/statistics_icon.svg" />
+  <LinkCard topIcon label="Expectation classes" description="An overview of the available Expectation classes, why they are helpful, and when they should be used" href="/docs/conceptual_guides/expectation_classes" icon="/img/overview_icon.svg" />
+  <LinkCard topIcon label="API Documentation" description="The GX API reference" href="/docs/reference/api_reference" icon="/img/api_icon.svg" />
+  <LinkCard topIcon label="Glossary" description="An alphabetical list of GX terms and words with definitions" href="/docs/glossary" icon="/img/glossary_icon.svg" />
+</LinkCardGrid>
 
 
