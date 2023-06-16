@@ -436,10 +436,10 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     specified with the abs_name_starts_with-parameter
     """
     mock_list_keys.return_value = object_keys
-    asset = pandas_gcs_datasource.add_csv_asset(
+    pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r".*",
         gcs_recursive_file_discovery=True,
     )
     assert "recursive" in mock_list_keys.call_args.kwargs.keys()
-    assert mock_list_keys.call_args.kwargs["recursive"] == True
+    assert mock_list_keys.call_args.kwargs["recursive"] is True

@@ -421,7 +421,7 @@ def test_test_connection_failures(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_add_csv_asset_to_datasource(
+def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -437,11 +437,11 @@ def test_add_csv_asset_to_datasource(
     """
     mock_list_keys.return_value = object_keys
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
-    asset = spark_gcs_datasource.add_csv_asset(
+    spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r".*",
         batch_metadata=asset_specified_metadata,
         gcs_recursive_file_discovery=True,
     )
     assert "recursive" in mock_list_keys.call_args.kwargs.keys()
-    assert mock_list_keys.call_args.kwargs["recursive"] == True
+    assert mock_list_keys.call_args.kwargs["recursive"] is True
