@@ -1,6 +1,8 @@
 import os
 import pprint
 
+import pandas as pd
+
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest

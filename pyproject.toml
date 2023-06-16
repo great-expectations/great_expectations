@@ -284,7 +284,6 @@ ignore = [
 extend-exclude = [
     "docs/*",
     "build/*",
-    "assets/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
@@ -298,6 +297,14 @@ extend-exclude = [
 ]
 
 [tool.ruff.per-file-ignores]
+"assets/benchmark/benchmark.py" = [
+    "DTZ",  # flake8-datetimez-dtz - doesn't matter for benchmark tests
+]
+"assets/scripts/build_gallery.py" = [
+    "PLR0912",  # Too many branches  - scripts are not part of the main codebase
+    "PLR0913", # Too many arguments - scripts are not part of the main codebase
+    "PLR0915", # Too many statements - scripts are not part of the main codebase
+]
 "__init__.py" = [
     "F401",  # unused import
     "F403",  # star imports
@@ -327,8 +334,8 @@ runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
-    "great_expectations.datasource.fluent.Datasource",
-    "great_expectations.datasource.fluent.SQLDatasource",
+    "great_expectations.datasource.fluent.interfaces.Datasource",
+    "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",

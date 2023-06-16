@@ -41,18 +41,25 @@ dataset_dt = PandasDataset(
 )
 
 
-benchmark_int = lambda: dataset_int.expect_column_values_to_be_between(
-    column=COL_NAME, min_value=INT_MIN, max_value=INT_MAX
-)
-benchmark_float = lambda: dataset_float.expect_column_values_to_be_between(
-    column=COL_NAME, min_value=FLOAT_MIN, max_value=FLOAT_MAX
-)
-benchmark_dt = lambda: dataset_dt.expect_column_values_to_be_between(
-    column=COL_NAME,
-    min_value=DT_MIN.isoformat(),
-    max_value=DT_MAX.isoformat(),
-    parse_strings_as_datetimes=True,
-)
+def benchmark_int():
+    return dataset_int.expect_column_values_to_be_between(
+        column=COL_NAME, min_value=INT_MIN, max_value=INT_MAX
+    )
+
+
+def benchmark_float():
+    return dataset_float.expect_column_values_to_be_between(
+        column=COL_NAME, min_value=FLOAT_MIN, max_value=FLOAT_MAX
+    )
+
+
+def benchmark_dt():
+    return dataset_dt.expect_column_values_to_be_between(
+        column=COL_NAME,
+        min_value=DT_MIN.isoformat(),
+        max_value=DT_MAX.isoformat(),
+        parse_strings_as_datetimes=True,
+    )
 
 
 def _time(func):

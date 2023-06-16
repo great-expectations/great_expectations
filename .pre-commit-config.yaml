@@ -20,7 +20,7 @@ repos:
     rev: 'v0.0.271'
     hooks:
       - id: ruff
-        files: ^(great_expectations|contrib|scripts|tasks\.py) # TODO: add tests/  docs/ etc.
+        files: ^(great_expectations|assets|contrib|scripts|tasks\.py) # TODO: add tests/  docs/ etc.
         args: ["--fix"]
 # https://pre-commit.ci/
 ci:
