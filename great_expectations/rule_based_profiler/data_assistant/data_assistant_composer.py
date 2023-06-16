@@ -77,54 +77,56 @@ class DataAssistantComposer:
             for rule_name in rule_names
         }
 
-        raw_table_domains: List[Domain] = domains_by_rule_name["table_domain_rule"]
-        if raw_table_domains:
+        candidate_table_domains: List[Domain] = domains_by_rule_name[
+            "table_domain_rule"
+        ]
+        if candidate_table_domains:
             logger.info(
-                f"""Raw "{MetricDomainTypes.TABLE}" type "Domain" objects:\n{raw_table_domains}"""
+                f"""Candidate "{MetricDomainTypes.TABLE}" type "Domain" objects:\n{candidate_table_domains}"""
             )
-        raw_column_value_uniqueness_domains: List[Domain] = domains_by_rule_name[
+        candidate_column_value_uniqueness_domains: List[Domain] = domains_by_rule_name[
             "column_value_uniqueness_domain_rule"
         ]
-        raw_column_value_nullity_domains: List[Domain] = domains_by_rule_name[
+        candidate_column_value_nullity_domains: List[Domain] = domains_by_rule_name[
             "column_value_nullity_domain_rule"
         ]
-        raw_column_value_nonnullity_domains: List[Domain] = domains_by_rule_name[
+        candidate_column_value_nonnullity_domains: List[Domain] = domains_by_rule_name[
             "column_value_nonnullity_domain_rule"
         ]
-        raw_numeric_columns_domains: List[Domain] = domains_by_rule_name[
+        candidate_numeric_columns_domains: List[Domain] = domains_by_rule_name[
             "numeric_columns_domain_rule"
         ]
-        raw_datetime_columns_domains: List[Domain] = domains_by_rule_name[
+        candidate_datetime_columns_domains: List[Domain] = domains_by_rule_name[
             "datetime_columns_domain_rule"
         ]
-        raw_text_columns_domains: List[Domain] = domains_by_rule_name[
+        candidate_text_columns_domains: List[Domain] = domains_by_rule_name[
             "text_columns_domain_rule"
         ]
-        raw_categorical_columns_domains_zero: List[Domain] = domains_by_rule_name[
+        candidate_categorical_columns_domains_zero: List[Domain] = domains_by_rule_name[
             "categorical_columns_domain_rule_zero"
         ]
-        raw_categorical_columns_domains_one: List[Domain] = domains_by_rule_name[
+        candidate_categorical_columns_domains_one: List[Domain] = domains_by_rule_name[
             "categorical_columns_domain_rule_one"
         ]
-        raw_categorical_columns_domains_two: List[Domain] = domains_by_rule_name[
+        candidate_categorical_columns_domains_two: List[Domain] = domains_by_rule_name[
             "categorical_columns_domain_rule_two"
         ]
-        raw_categorical_columns_domains_very_few: List[Domain] = domains_by_rule_name[
-            "categorical_columns_domain_rule_very_few"
-        ]
-        raw_categorical_columns_domains_few: List[Domain] = domains_by_rule_name[
+        candidate_categorical_columns_domains_very_few: List[
+            Domain
+        ] = domains_by_rule_name["categorical_columns_domain_rule_very_few"]
+        candidate_categorical_columns_domains_few: List[Domain] = domains_by_rule_name[
             "categorical_columns_domain_rule_few"
         ]
-        if raw_categorical_columns_domains_few:
+        if candidate_categorical_columns_domains_few:
             logger.info(
-                f"""Raw "{MetricDomainTypes.COLUMN}" type "categorical_values_few" "Domain" objects:\n{raw_categorical_columns_domains_few}"""
+                f"""Candidate "{MetricDomainTypes.COLUMN}" type "categorical_values_few" "Domain" objects:\n{candidate_categorical_columns_domains_few}"""
             )
-        raw_categorical_columns_domains_some: List[Domain] = domains_by_rule_name[
+        candidate_categorical_columns_domains_some: List[Domain] = domains_by_rule_name[
             "categorical_columns_domain_rule_some"
         ]
-        if raw_categorical_columns_domains_some:
+        if candidate_categorical_columns_domains_some:
             logger.info(
-                f"""Raw "{MetricDomainTypes.COLUMN}" type "categorical_values_some" "Domain" objects:\n{raw_categorical_columns_domains_some}"""
+                f"""Candidate "{MetricDomainTypes.COLUMN}" type "categorical_values_some" "Domain" objects:\n{candidate_categorical_columns_domains_some}"""
             )
 
         numeric_columns_domains: List[Domain] = list(
@@ -133,14 +135,14 @@ class DataAssistantComposer:
                 not in [
                     domain_key.domain_kwargs["column"]
                     for domain_key in (
-                        raw_column_value_nullity_domains
-                        + raw_categorical_columns_domains_zero
-                        + raw_categorical_columns_domains_one
-                        + raw_categorical_columns_domains_two
-                        + raw_categorical_columns_domains_very_few
+                        candidate_column_value_nullity_domains
+                        + candidate_categorical_columns_domains_zero
+                        + candidate_categorical_columns_domains_one
+                        + candidate_categorical_columns_domains_two
+                        + candidate_categorical_columns_domains_very_few
                     )
                 ],
-                raw_numeric_columns_domains,
+                candidate_numeric_columns_domains,
             )
         )
 
@@ -150,14 +152,14 @@ class DataAssistantComposer:
                 not in [
                     domain_key.domain_kwargs["column"]
                     for domain_key in (
-                        raw_column_value_nullity_domains
-                        + raw_categorical_columns_domains_zero
-                        + raw_categorical_columns_domains_one
-                        + raw_categorical_columns_domains_two
-                        + raw_categorical_columns_domains_very_few
+                        candidate_column_value_nullity_domains
+                        + candidate_categorical_columns_domains_zero
+                        + candidate_categorical_columns_domains_one
+                        + candidate_categorical_columns_domains_two
+                        + candidate_categorical_columns_domains_very_few
                     )
                 ],
-                raw_datetime_columns_domains,
+                candidate_datetime_columns_domains,
             )
         )
         if datetime_columns_domains:
@@ -171,14 +173,14 @@ class DataAssistantComposer:
                 not in [
                     domain_key.domain_kwargs["column"]
                     for domain_key in (
-                        raw_column_value_nullity_domains
-                        + raw_categorical_columns_domains_zero
-                        + raw_categorical_columns_domains_one
-                        + raw_categorical_columns_domains_two
-                        + raw_categorical_columns_domains_very_few
+                        candidate_column_value_nullity_domains
+                        + candidate_categorical_columns_domains_zero
+                        + candidate_categorical_columns_domains_one
+                        + candidate_categorical_columns_domains_two
+                        + candidate_categorical_columns_domains_very_few
                     )
                 ],
-                raw_text_columns_domains,
+                candidate_text_columns_domains,
             )
         )
 
@@ -187,9 +189,9 @@ class DataAssistantComposer:
                 lambda domain: domain.domain_kwargs["column"]
                 not in [
                     domain_key.domain_kwargs["column"]
-                    for domain_key in (raw_column_value_nullity_domains)
+                    for domain_key in (candidate_column_value_nullity_domains)
                 ],
-                raw_categorical_columns_domains_two,
+                candidate_categorical_columns_domains_two,
             )
         )
 
@@ -198,9 +200,9 @@ class DataAssistantComposer:
                 lambda domain: domain.domain_kwargs["column"]
                 not in [
                     domain_key.domain_kwargs["column"]
-                    for domain_key in (raw_column_value_nullity_domains)
+                    for domain_key in (candidate_column_value_nullity_domains)
                 ],
-                raw_categorical_columns_domains_very_few,
+                candidate_categorical_columns_domains_very_few,
             )
         )
 
@@ -209,17 +211,19 @@ class DataAssistantComposer:
                 lambda domain: domain.domain_kwargs["column"]
                 not in [
                     domain_key.domain_kwargs["column"]
-                    for domain_key in (raw_column_value_nullity_domains)
+                    for domain_key in (candidate_column_value_nullity_domains)
                 ],
-                raw_column_value_uniqueness_domains,
+                candidate_column_value_uniqueness_domains,
             )
         )
 
-        column_value_nullity_domains: List[Domain] = raw_column_value_nullity_domains
+        column_value_nullity_domains: List[
+            Domain
+        ] = candidate_column_value_nullity_domains
 
         column_value_nonnullity_domains: List[
             Domain
-        ] = raw_column_value_nonnullity_domains
+        ] = candidate_column_value_nonnullity_domains
 
         self._task_name_to_domain_list_map = {
             "uniqueness": column_value_uniqueness_domains,
