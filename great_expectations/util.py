@@ -374,7 +374,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str) -> Any:
+def load_class(class_name: str, module_name: str) -> type:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
