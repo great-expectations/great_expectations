@@ -17,6 +17,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -94,6 +95,7 @@ class ClipboardAsset(_PandasDataAsset): ...
 class CSVAsset(_PandasDataAsset): ...
 class ExcelAsset(_PandasDataAsset): ...
 class FeatherAsset(_PandasDataAsset): ...
+class FWFAsset(_PandasDataAsset): ...
 class GBQAsset(_PandasDataAsset): ...
 class HDFAsset(_PandasDataAsset): ...
 class HTMLAsset(_PandasDataAsset): ...
@@ -280,6 +282,17 @@ class PandasDatasource(_PandasDatasource):
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> FeatherAsset: ...
+    def add_fwf_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
+        widths: Union[Sequence[int], None] = ...,
+        infer_nrows: int = ...,
+        kwargs: Optional[dict] = ...,
+    ) -> FWFAsset: ...
     def add_gbq_asset(  # noqa: PLR0913
         self,
         name: str,
@@ -650,6 +663,16 @@ class PandasDatasource(_PandasDatasource):
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
+    ) -> Validator: ...
+    def read_fwf(  # noqa: PLR0913
+        self,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
+        widths: Union[Sequence[int], None] = ...,
+        infer_nrows: int = ...,
+        kwargs: Optional[dict] = ...,
     ) -> Validator: ...
     def read_gbq(  # noqa: PLR0913
         self,
