@@ -11,7 +11,7 @@ import LinkCard from '/docs/components/LinkCard';
 <p class="DocItem__header-description">Create, edit, and implement Expectations and Expectation Suites. An Expectation is a verifiable assertion about your data, and an  Expectation Suite is a collection of verifiable assertions about your data.</p>
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Create and edit Expectations based on domain knowledge" description="Create an Expectation Suite without a sample Batch" href="docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly" icon="/img/expectation_icon.svg" />
+  <LinkCard topIcon label="Create and edit Expectations based on domain knowledge" description="Create an Expectation Suite without a sample Batch" href="/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly" icon="/img/expectation_icon.svg" />
   <LinkCard topIcon label="Create Expectations interactively with Python" description="Create and manage Expectations and Expectation Suites" href="/docs/guides/expectations/create_manage_expectations_lp" icon="/img/expectation_icon.svg" />
   <LinkCard topIcon label="Edit an Expectation Suite" description="Create Expectations and interactively edit the resulting Expectation Suite" href="/docs/guides/expectations/how_to_edit_an_existing_expectationsuite" icon="/img/edit_icon.svg" />
   <LinkCard topIcon label="Use auto-initializing Expectations" description="Use auto-initializing Expectations to automate parameter estimation" href="/docs/guides/expectations/how_to_use_auto_initializing_expectations" icon="/img/auto_initializing_icon.svg" />
