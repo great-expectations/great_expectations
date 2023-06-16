@@ -98,7 +98,7 @@ class SparkDFDatasource(LegacyDatasource):
 
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         data_context=None,

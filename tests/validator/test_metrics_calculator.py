@@ -1,8 +1,7 @@
 import datetime
-from typing import Any, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 from unittest import mock
 
-import pandas as pd
 import pytest
 
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -11,6 +10,9 @@ from great_expectations.util import isclose
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import Validator
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @pytest.fixture

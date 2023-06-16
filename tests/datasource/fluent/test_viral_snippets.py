@@ -11,14 +11,13 @@ import pytest
 
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import (
-    Datasource,
-)
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
+    from pytest_mock import MockerFixture
+
     from great_expectations.datasource.fluent import SqliteDatasource
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -217,6 +216,97 @@ def test_ctx_delete_removes_datasource_from_yaml(
     print(f"{pf(yaml_contents, depth=2)}")
 
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+def test_checkpoint_with_validator_workflow(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    context = seeded_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    datasource_name = "sqlite_taxi"
+    asset_name = "my_asset"
+    month = 1
+    year = 2019
+
+    datasource = context.get_datasource(datasource_name)
+    assert isinstance(datasource, Datasource)
+
+    batch_request = datasource.get_asset(asset_name).build_batch_request(
+        {"year": year, "month": month}
+    )
+
+    validator = context.get_validator(batch_request=batch_request)
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
+
+    _: str | None = checkpoint.validations[0].pop("expectation_suite_ge_cloud_id", None)  # type: ignore[union-attr]
+
+    assert checkpoint.validations == [
+        {
+            "batch_request": {
+                "data_asset_name": asset_name,
+                "datasource_name": datasource_name,
+                "options": {
+                    "month": month,
+                    "year": year,
+                },
+            },
+            "expectation_suite_name": "default",
+        },
+    ]
+
+    result = checkpoint.run()
+
+    assert result.success
+
+
+def test_quickstart_workflow(
+    empty_contexts: CloudDataContext | FileDataContext,
+    csv_path: pathlib.Path,
+    mocker: MockerFixture,
+):
+    """
+    What does this test do and why?
+
+    Tests the Quickstart workflow noted in our docs: https://docs.greatexpectations.io/docs/tutorials/quickstart/
+
+    In particular, this test covers the file-backend and cloud-backed usecases with this script.
+    The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
+    """
+    # Slight deviation from the Quickstart here:
+    #   1. Using existing contexts instead of `get_context`
+    #   2. Using `read_csv` on a local file instead of making a network request
+    #
+    # These changes should be functionally equivalent to the real workflow but be better for testing
+    context = empty_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
+
+    validator = context.sources.pandas_default.read_csv(filepath)
+
+    # Create Expectations
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
+
+    # Validate data
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+    checkpoint_result = checkpoint.run()
+
+    # View results
+    mock_open = mocker.patch("webbrowser.open")
+    context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
 
 
 if __name__ == "__main__":

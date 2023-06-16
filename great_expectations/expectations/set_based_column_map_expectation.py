@@ -3,8 +3,8 @@ from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
@@ -189,7 +189,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 return f'Are all values in column "{column}" in the set {str(set_)}?'
         else:
-            if set_semantic_name is not None:
+            if set_semantic_name is not None:  # noqa: PLR5501
                 return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {str(set_)}?'
             else:
                 return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
@@ -213,12 +213,12 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                         f'All values in column "{column}" are in the set {str(set_)}.'
                     )
             else:
-                if set_semantic_name is not None:
+                if set_semantic_name is not None:  # noqa: PLR5501
                     return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" are in the set {str(set)}.'
         else:
-            if set_semantic_name is not None:
+            if set_semantic_name is not None:  # noqa: PLR5501
                 return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'
@@ -247,7 +247,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 template_str = "values must match this set: $set_"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )

@@ -14,6 +14,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Final,
     Generic,
     List,
     Mapping,
@@ -27,7 +28,6 @@ from typing import (
     Union,
 )
 
-import pandas as pd
 import pydantic
 from pydantic import (
     Field,
@@ -37,7 +37,6 @@ from pydantic import (
     validate_arguments,
 )
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
@@ -51,6 +50,9 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import pandas as pd
+    from typing_extensions import TypeAlias, TypeGuard
+
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
@@ -61,13 +63,20 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.data_context import (
+        AbstractDataContext as GXDataContext,
+    )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
+    from great_expectations.datasource.fluent import (
+        BatchRequest,
+        BatchRequestOptions,
+    )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
-    from great_expectations.datasource.fluent.type_lookup import TypeLookup
+    from great_expectations.datasource.fluent.type_lookup import (
+        TypeLookup,
+    )
 
 
 class TestConnectionError(Exception):
@@ -370,25 +379,8 @@ class Datasource(
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Not all Datasources require a DataConnector
     data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
-    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
-        "name",
-        "type",
-        "id",
-        "execution_engine",
-        "assets",
-        "base_directory",  # filesystem argument
-        "glob_directive",  # filesystem argument
-        "data_context_root_directory",  # filesystem argument
-        "bucket",  # s3 argument
-        "boto3_options",  # s3 argument
-        "prefix",  # s3 argument and gcs argument
-        "delimiter",  # s3 argument and gcs argument
-        "max_keys",  # s3 argument
-        "bucket_or_name",  # gcs argument
-        "gcs_options",  # gcs argument
-        "max_results",  # gcs argument
-    }
+    # Datasource sublcasses should update this set if the field should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = set()
     _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
         TypeLookup
     ]
@@ -446,7 +438,8 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -650,7 +643,25 @@ class Datasource(
         """
         pass
 
+    @classmethod
+    def _get_exec_engine_excludes(cls) -> Set[str]:
+        """
+        Return a set of field names to exclude from the execution engine.
+
+        All datasource fields are passed to the execution engine by default unless they are in this set.
+
+        Default implementation is to return the combined set of field names from `_EXTRA_EXCLUDED_EXEC_ENG_ARGS`
+        and `_BASE_DATASOURCE_FIELD_NAMES`.
+        """
+        return cls._EXTRA_EXCLUDED_EXEC_ENG_ARGS.union(_BASE_DATASOURCE_FIELD_NAMES)
+
     # End Abstract Methods
+
+
+# This is used to prevent passing things like `type`, `assets` etc. to the execution engine
+_BASE_DATASOURCE_FIELD_NAMES: Final[Set[str]] = {
+    name for name in Datasource.__fields__.keys()
+}
 
 
 @dataclasses.dataclass(frozen=True)

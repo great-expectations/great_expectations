@@ -1,7 +1,7 @@
 import os
 import shutil
+from typing import TYPE_CHECKING
 
-import nbformat
 import pytest
 
 import great_expectations as gx
@@ -11,6 +11,9 @@ from great_expectations.render.renderer.checkpoint_new_notebook_renderer import 
     CheckpointNewNotebookRenderer,
 )
 from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    import nbformat
 
 
 @pytest.fixture

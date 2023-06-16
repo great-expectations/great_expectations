@@ -16,7 +16,7 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0912
         self,
         execution_engine,
         record_set_name: Optional[str] = None,
@@ -162,7 +162,7 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
         else:
-            if query:
+            if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
             else:
                 self._selectable = selectable.alias(self._record_set_name)
@@ -196,7 +196,7 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901 - 18
+    def _create_temporary_table(  # noqa: C901, PLR0912
         self, temp_table_name, query, temp_table_schema_name=None
     ) -> str:
         """
@@ -255,6 +255,11 @@ class SqlAlchemyBatchData(BatchData):
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+        elif dialect == GXSqlDialect.CLICKHOUSE:
+            logger.warning(
+                f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.AWSATHENA:
             logger.warning(
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
@@ -280,22 +285,10 @@ class SqlAlchemyBatchData(BatchData):
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GXSqlDialect.ORACLE:
-            with self._engine.connect() as connection:
-                with connection.begin():
-                    try:
-                        connection.execute(sa.text(stmt_1))
-                    except sqlalchemy.DatabaseError:
-                        connection.execute(sa.text(stmt_2))
+            try:
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_1))
+            except sqlalchemy.DatabaseError:
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_2))
         else:
-            # Since currently self._engine can also be a connection we need to
-            # check first that it is an engine before creating a connection from it.
-            # Otherwise, we use the connection.
-            if isinstance(self._engine, sqlalchemy.Engine):
-                with self._engine.connect() as connection:
-                    with connection.begin():
-                        connection.execute(sa.text(stmt))
-            else:
-                # self._engine is already a connection
-                with self._engine.begin():
-                    self._engine.execute(sa.text(stmt))
+            self.execution_engine.execute_query_in_transaction(sa.text(stmt))
         return stmt

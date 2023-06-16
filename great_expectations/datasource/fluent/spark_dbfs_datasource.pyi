@@ -5,7 +5,7 @@ from logging import Logger
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    types as pyspark_types,
 )
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
@@ -32,7 +32,7 @@ logger: Logger
 class SparkDBFSDatasource(SparkFilesystemDatasource):
     type: Literal["spark_dbfs"]  # type: ignore[assignment]
 
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

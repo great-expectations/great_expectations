@@ -139,7 +139,7 @@ class AsyncRabbitMQClient:
             )
             loop.call_soon_threadsafe(callback=nack)
 
-    def _callback_handler(
+    def _callback_handler(  # noqa: PLR0913
         self,
         channel: Channel,
         method_frame: Basic.Deliver,

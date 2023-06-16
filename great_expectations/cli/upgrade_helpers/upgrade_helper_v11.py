@@ -19,7 +19,7 @@ from great_expectations.data_context.store import (
     ValidationsStore,
 )
 from great_expectations.data_context.store.store_backend import (
-    StoreBackend,  # noqa: TCH001
+    StoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -283,7 +283,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     exception_message=exception_message,
                 )
 
-    def _update_upgrade_log(
+    def _update_upgrade_log(  # noqa: PLR0913
         self,
         store_backend: Type[StoreBackend],
         source_key: Optional[tuple] = None,
@@ -328,7 +328,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     "validations_updated"
                 ].append(log_dict)
         else:
-            if exception_message:
+            if exception_message:  # noqa: PLR5501
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
                     "exceptions"
                 ] = True
@@ -367,7 +367,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 store_backend._convert_key_to_filepath(source_key),
             )
             path_mod_timestamp = os.path.getmtime(source_path)
-            path_mod_iso_str = datetime.datetime.fromtimestamp(
+            path_mod_iso_str = datetime.datetime.fromtimestamp(  # noqa: DTZ006
                 path_mod_timestamp
             ).strftime("%Y%m%dT%H%M%S.%fZ")
             self.validation_run_times[run_name] = path_mod_iso_str
@@ -659,7 +659,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if exceptions:
+            if exceptions:  # noqa: PLR5501
                 exception_occurred = True
                 upgrade_report += f"""
 <red>\

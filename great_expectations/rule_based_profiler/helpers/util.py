@@ -23,8 +23,7 @@ from typing import (
 )
 
 import numpy as np
-import scipy.stats as stats
-from typing_extensions import TypeGuard
+from scipy import stats
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
@@ -54,7 +53,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
-    is_fully_qualified_parameter_name_literal_string_format,
+    is_fully_qualified_parameter_name_prefix_in_literal,
 )
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import (
@@ -68,6 +67,8 @@ from great_expectations.validator.metric_configuration import (
 )
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeGuard
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -91,7 +92,7 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 }
 
 
-def get_validator(
+def get_validator(  # noqa: PLR0913
     purpose: str,
     *,
     data_context: Optional[AbstractDataContext] = None,
@@ -148,7 +149,7 @@ def get_validator(
     return validator
 
 
-def get_batch_ids(
+def get_batch_ids(  # noqa: PLR0913
     data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
@@ -313,7 +314,7 @@ def get_parameter_value(
         )
     elif isinstance(
         parameter_reference, str
-    ) and is_fully_qualified_parameter_name_literal_string_format(
+    ) and is_fully_qualified_parameter_name_prefix_in_literal(
         fully_qualified_parameter_name=parameter_reference
     ):
         parameter_reference = get_parameter_value_by_fully_qualified_parameter_name(
@@ -567,7 +568,7 @@ def get_false_positive_rate_from_rule_state(
         variables=variables,
         parameters=parameters,
     )
-    if not (0.0 <= false_positive_rate <= 1.0):
+    if not (0.0 <= false_positive_rate <= 1.0):  # noqa: PLR2004
         raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
@@ -655,7 +656,7 @@ def compute_quantiles(
     )
 
 
-def compute_kde_quantiles_point_estimate(
+def compute_kde_quantiles_point_estimate(  # noqa: PLR0913
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -727,7 +728,7 @@ def compute_kde_quantiles_point_estimate(
     )
 
 
-def compute_bootstrap_quantiles_point_estimate(
+def compute_bootstrap_quantiles_point_estimate(  # noqa: PLR0913
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -894,7 +895,7 @@ def build_numeric_range_estimation_result(
     )
 
 
-def _determine_quantile_bias_corrected_point_estimate(
+def _determine_quantile_bias_corrected_point_estimate(  # noqa: PLR0913
     bootstraps: np.ndarray,
     quantile_pct: float,
     quantile_statistic_interpolation_method: str,
@@ -920,7 +921,7 @@ def _determine_quantile_bias_corrected_point_estimate(
 
     if (
         not quantile_bias_correction
-        and bootstrap_quantile_standard_error > 0.0
+        and bootstrap_quantile_standard_error > 0.0  # noqa: PLR2004
         and bootstrap_quantile_bias / bootstrap_quantile_standard_error
         <= quantile_bias_std_error_ratio_threshold
     ):
@@ -971,7 +972,7 @@ def convert_metric_values_to_float_dtype_best_effort(
     return ndarray_is_datetime_type, metric_values_converted
 
 
-def get_validator_with_expectation_suite(
+def get_validator_with_expectation_suite(  # noqa: PLR0913
     data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,

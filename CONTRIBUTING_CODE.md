@@ -99,11 +99,23 @@ Python dependencies are required to modify Great Expectations code, submit a new
     ```sh
      brew install unixodbc
     ```
-    If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
+
+    If your Mac computer has an Apple Silicon chip, you might need to 
+    
+    1. specify additional compiler or linker options. For example:
 
     `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
 
     `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+
+    2. reinstall pyodbc:
+
+    ```
+    python -m pip install --force-reinstall --no-binary :all: pyodbc
+    python -c "import pyodbc; print(pyodbc.version)"
+    ```
+
+    3. install the ODSBC 17 driver: https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15
 
 5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
 
@@ -228,8 +240,6 @@ Errors similar to the following are returned when you try to start the PostgreSQ
 To resolve these errors, configure Docker to run on another port and confirm the server details are correct.
 
 ### MySQL
-
-The `mysql` Docker image can't be used with Mac computers with Apple M1 chips.
 
 If another service is using port 3306, Docker might start the container but silently fail to set up the port.
 

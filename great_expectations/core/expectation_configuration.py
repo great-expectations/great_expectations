@@ -18,7 +18,6 @@ from typing import (
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
-from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
@@ -48,6 +47,8 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
+
     from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
@@ -1001,7 +1002,7 @@ class ExpectationConfiguration(SerializableDictDot):
         "catch_exceptions",
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         kwargs: dict,

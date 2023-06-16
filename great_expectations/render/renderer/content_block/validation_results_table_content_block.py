@@ -4,7 +4,7 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (

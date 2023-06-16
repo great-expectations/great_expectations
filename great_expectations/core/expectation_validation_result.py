@@ -86,7 +86,7 @@ class ExpectationValidationResult(SerializableDictDot):
         InvalidCacheValueError: Raised if the result does not pass validation.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         expectation_config: Optional[ExpectationConfiguration] = None,
@@ -290,16 +290,18 @@ class ExpectationValidationResult(SerializableDictDot):
         if result.get("unexpected_count") and result["unexpected_count"] < 0:
             return False
         if result.get("unexpected_percent") and (
-            result["unexpected_percent"] < 0 or result["unexpected_percent"] > 100
+            result["unexpected_percent"] < 0
+            or result["unexpected_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_percent") and (
-            result["missing_percent"] < 0 or result["missing_percent"] > 100
+            result["missing_percent"] < 0
+            or result["missing_percent"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("unexpected_percent_nonmissing") and (
             result["unexpected_percent_nonmissing"] < 0
-            or result["unexpected_percent_nonmissing"] > 100
+            or result["unexpected_percent_nonmissing"] > 100  # noqa: PLR2004
         ):
             return False
         if result.get("missing_count") and result["missing_count"] < 0:
@@ -355,11 +357,11 @@ class ExpectationValidationResult(SerializableDictDot):
                         metric_kwargs_id or "None", curr_metric_kwargs or "None"
                     )
                 )
-            if len(metric_name_parts) < 2:
+            if len(metric_name_parts) < 2:  # noqa: PLR2004
                 raise gx_exceptions.UnavailableMetricError(
                     "Expectation-defined metrics must include a requested metric."
                 )
-            elif len(metric_name_parts) == 2:
+            elif len(metric_name_parts) == 2:  # noqa: PLR2004
                 if metric_name_parts[1] == "success":
                     return self.success
                 else:
@@ -369,7 +371,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     )
             elif metric_name_parts[1] == "result":
                 try:
-                    if len(metric_name_parts) == 3:
+                    if len(metric_name_parts) == 3:  # noqa: PLR2004
                         return self.result.get(metric_name_parts[2])
                     elif metric_name_parts[2] == "details":
                         return self.result["details"].get(metric_name_parts[3])
@@ -497,7 +499,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         success: Optional[bool] = None,
         results: Optional[list] = None,
@@ -570,7 +572,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         metric_value = None
         # Expose overall statistics
         if metric_name_parts[0] == "statistics":
-            if len(metric_name_parts) == 2:
+            if len(metric_name_parts) == 2:  # noqa: PLR2004
                 return self.statistics.get(metric_name_parts[1])
             else:
                 raise gx_exceptions.UnavailableMetricError(

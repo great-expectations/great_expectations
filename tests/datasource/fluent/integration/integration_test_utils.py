@@ -238,7 +238,7 @@ def run_multibatch_data_assistant_and_checkpoint(
     )
 
 
-def run_batch_head(
+def run_batch_head(  # noqa: PLR0915
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
@@ -267,7 +267,7 @@ def run_batch_head(
         results: Dict[Tuple[str, str, str], MetricValue]
 
         table_columns_metric, results = get_table_columns_metric(
-            engine=execution_engine
+            execution_engine=execution_engine
         )
         metrics.update(results)
 

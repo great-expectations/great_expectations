@@ -70,7 +70,6 @@ exclude = [
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'core/batch\.py', # 29
     'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
     'core/usage_statistics/anonymizers/anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/base\.py', # 8
@@ -85,7 +84,6 @@ exclude = [
     'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
     'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
-    'core/usage_statistics/usage_statistics\.py', # 19
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
     'datasource/data_connector/configured_asset_sql_data_connector\.py',  # 47
@@ -179,8 +177,6 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 17
     'render/view/view\.py',  # 11
-    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 23
-    'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
@@ -243,6 +239,12 @@ select = [
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "B", # bugbear - common python bugs & design issues
+    # https://beta.ruff.rs/docs/rules/#flake8-datetimez-dtz
+    "DTZ", # flake8-datetimez-dtz - prevent use of tz naive datetimes
+    # https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PL", # pylint
+    # https://beta.ruff.rs/docs/rules/unused-noqa/
+    "RUF100", # unused-noqa
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -262,8 +264,6 @@ ignore = [
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
-    # doesn't catch errors or help with circular imports and tedious to apply
-    "TCH002", # typing-only-third-party-import
     # minimal cost for standard lib imports; keep this disabled
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
@@ -271,6 +271,9 @@ ignore = [
     "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
+    # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
+    "PYI053", # string-or-bytes-too-long - causes mypy to fail on some of our type stubs
+    "PYI054",  # numeric-literal-too-long - causes mypy to fail on some of our type stubs
     # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     # TODO: enable these
     "B904", # raise-without-from-inside-except
@@ -281,7 +284,6 @@ ignore = [
 extend-exclude = [
     "docs/*",
     "build/*",
-    "assets/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
@@ -295,10 +297,21 @@ extend-exclude = [
 ]
 
 [tool.ruff.per-file-ignores]
+"assets/benchmark/benchmark.py" = [
+    "DTZ",  # flake8-datetimez-dtz - doesn't matter for benchmark tests
+]
+"assets/scripts/build_gallery.py" = [
+    "PLR0912",  # Too many branches  - scripts are not part of the main codebase
+    "PLR0913", # Too many arguments - scripts are not part of the main codebase
+    "PLR0915", # Too many statements - scripts are not part of the main codebase
+]
 "__init__.py" = [
     "F401",  # unused import
     "F403",  # star imports
     ]
+"great_expectations/_version.py" = [
+    "PLR",  # pylint - versioneer code
+]
 "great_expectations/compatibility/sqlalchemy.py" = [
     "TID251",  # flake8-banned-api
 ]
@@ -318,8 +331,11 @@ extend-exclude = [
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
 runtime-evaluated-base-classes = [
+    # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
+    "great_expectations.datasource.fluent.interfaces.Datasource",
+    "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",
@@ -401,15 +417,14 @@ filterwarnings = [
     # Example Actual Warning: (found in test_data_context)
     # UserWarning: Warning. An existing `config_variables.yml` was found here
     'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
+    # Example Actual Warning: DeprecationWarning: A Checkpoint named oss_test_checkpoint already exists.;
+    # using add_checkpoint to overwrite an existing value is deprecated as of v0.16.16 and will be removed in v0.18. Please use add_or_update_checkpoint instead.
+    'ignore: A Checkpoint named :DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
-
-    # Warnings related to GCS Data Connectors
-    "ignore:In order to access blobs with a ConfiguredAssetGCSDataConnector:UserWarning",
-    "ignore:In order to access blobs with an InferredAssetGCSDataConnector:UserWarning",
 
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
@@ -425,6 +440,11 @@ filterwarnings = [
     # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
     # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
     'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
+    # trino
+    # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
+    # sqlalchemy.exc.SADeprecationWarning: The dbapi() classmethod on dialect classes has been renamed to import_dbapi().  Implement an import_dbapi() classmethod directly on class <class 'trino.sqlalchemy.dialect.TrinoDialect'> to remove this warning; the old .dbapi() classmethod may be maintained for backwards compatibility.
+    'ignore: The dbapi\(\) classmethod on dialect classes has been renamed to import_dbapi\(\):DeprecationWarning',
 
     # six
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
@@ -501,24 +521,6 @@ filterwarnings = [
     # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
     "ignore: Exception ignored in:UserWarning",
 
-    # SQLAlchemy
-    # SQLAlchemy warnings. These warnings should be addressed.
-    'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:DeprecationWarning',
-    # Example Actual Warning: (from test_table_column_reflection_fallback)
-    # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
-    'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.:DeprecationWarning',
-    # Example Actual Warning: (from mssql tests, tests/test_definitions/test_expectations_v2_api.py)
-    # sqlalchemy.exc.SAWarning: SELECT statement has a cartesian product between FROM element(s) "UnexpectedCountSubquery" and FROM element "ElementAndNullCountsSubquery".  Apply join condition(s) between each element to resolve.
-    'ignore: SELECT statement has a cartesian product between FROM element\(s\):RuntimeWarning',
-    # Example Actual Warning: (from trino tests, test_table_column_reflection_fallback)
-    # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
-    'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.:DeprecationWarning',
-    # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
-    # sqlalchemy.exc.SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
-    'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release:DeprecationWarning',
-    # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
-    # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
-    'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):DeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"

@@ -28,7 +28,7 @@ In this workflow, you work in a Python interpreter or Jupyter Notebook.  You use
 
 ### Create Expectations with Data Assistants
 
-In this workflow, you use a <TechnicalTag tag="data_assistant" text="Data Assistant" /> to generate Expectations based on the input data you provide.  You can preview the Metrics that these Expectations are based on, and you save can the generated Expectations as an Expectation Suite in an Expectation Store. 
+In this workflow, you use a <TechnicalTag tag="data_assistant" text="Data Assistant" /> to generate Expectations based on the input data you provide.  You can preview the Metrics that these Expectations are based on, and you can save the generated Expectations as an Expectation Suite in an Expectation Store. 
 
 As with creating Expectations interactively, you start with your Data Context.  However, you work in a Python environment, so you need to load or create your Data Context as an instantiated object.  Next, you create a Batch Request to specify the data you would like to <TechnicalTag tag="profiling" text="Profile" /> with your Data Assistant.  Once you have a <TechnicalTag tag="batch_request" text="Batch Request" /> configured you will use it as the input for the run method of your Data Assistant, which can be accessed from your Data Context object.  Once the Data Assistant has run, you will be able to review the results and save the generated Expectations to an empty Expectation Suite.
 

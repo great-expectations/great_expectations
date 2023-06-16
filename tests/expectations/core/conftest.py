@@ -13,9 +13,7 @@ def titanic_df() -> pd.DataFrame:
         os.path.join(
             "..",
             "..",
-            "test_fixtures",
-            "configuration_for_testing_v2_v3_migration",
-            "data",
+            "test_sets",
             "Titanic.csv",
         ),
     )

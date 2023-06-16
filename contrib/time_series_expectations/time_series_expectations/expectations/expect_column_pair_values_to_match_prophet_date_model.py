@@ -134,6 +134,7 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     examples = [
         {
             "data": example_data,
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -176,20 +177,6 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

@@ -72,7 +72,6 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
 
         # get counts for dates
         query = (
@@ -82,7 +81,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             .order_by(sa.func.Date(column).desc())
             .limit(METRIC_SAMPLE_LIMIT)
         )
-        results = sqlalchemy_engine.execute(query).fetchall()
+        results = execution_engine.execute_query(query).fetchall()
         return results
 
 
@@ -144,6 +143,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                     }
                 ),
             },
+            "only_for": ["sqlite"],
             "tests": [
                 {
                     "title": "positive test",
@@ -208,12 +208,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         }
     ]

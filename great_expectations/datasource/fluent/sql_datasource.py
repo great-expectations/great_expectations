@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed for pydantic
-)
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -919,7 +917,7 @@ class SQLDatasource(Datasource):
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
-                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                 )
                 connection_string = model_dict.pop("connection_string")
@@ -959,7 +957,7 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str,
