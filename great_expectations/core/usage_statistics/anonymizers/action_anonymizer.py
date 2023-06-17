@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
@@ -11,14 +13,14 @@ if TYPE_CHECKING:
 class ActionAnonymizer(BaseAnonymizer):
     def __init__(
         self,
-        aggregate_anonymizer: "Anonymizer",
+        aggregate_anonymizer: Anonymizer,
         salt: Optional[str] = None,
     ) -> None:
         super().__init__(salt=salt)
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(
+    def anonymize(  # type: ignore[override] # differs from parent class
         self,
         action_name: str,
         action_obj: Optional[object] = None,
