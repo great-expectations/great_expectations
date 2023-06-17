@@ -4,9 +4,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -41,7 +42,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
+class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation):
     """Expect the proportion of unique values to be between a minimum value and a maximum value.
 
     For example, in a column containing [1, 2, 2, 3, 3, 3, 4, 4, 4, 4], there are 4 unique values and 10 total \
@@ -202,18 +203,19 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -258,7 +260,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
             else:
-                if params.min_value.value != params.max_value.value:
+                if params.min_value.value != params.max_value.value:  # noqa: PLR5501
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
                     template_str = (
@@ -313,7 +315,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
             else:
-                if params["min_value"] != params["max_value"]:
+                if params["min_value"] != params["max_value"]:  # noqa: PLR5501
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
                     template_str = (

@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Union
 
-from pyparsing import Combine
-from pyparsing import Optional as ppOptional
 from pyparsing import (
+    Combine,
     ParseException,
     ParseResults,
     Suppress,
@@ -16,11 +15,14 @@ from pyparsing import (
     oneOf,
     opAssoc,
 )
+from pyparsing import Optional as ppOptional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -28,7 +30,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -73,7 +75,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         "kwargs",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
@@ -272,9 +274,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(substituted_term_list):
-            if (not any([isinstance(t, ParseResults) for t in token])) and len(
-                token
-            ) > 1:
+            if (not any(isinstance(t, ParseResults) for t in token)) and len(token) > 1:
                 substituted_term_list[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
                 self._build_binary_list(substituted_term_list=token)
@@ -311,7 +311,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         for idx, token in enumerate(binary_list):
             if (
                 (not isinstance(token, bool))
-                and (not any([isinstance(t, ParseResults) for t in token]))
+                and (not any(isinstance(t, ParseResults) for t in token))
                 and (len(token) > 1)
             ):
                 binary_list[idx] = eval("".join([str(t) for t in token]))

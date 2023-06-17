@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_distinct_values_to_contain_set",
   "datasets": [{
+    "dataset_name": "expect_column_distinct_values_to_contain_set_1",
     "data": {
             "dist1" : [1,2,3,4,5,6,7,8],
             "dist2" : [1,2,3,4,5,null,null,null],
@@ -146,6 +147,7 @@
     ]
   },
   {
+    "dataset_name": "expect_column_distinct_values_to_contain_set_2",
     "data" : {
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-03", "2018-01-03", "2018-01-02"],
       "datetimes" : ["2018-01-01 00:34:01", "2018-01-02 00:34:01", "2018-01-03 00:34:01", "2018-01-03 00:34:01", "2018-01-02 00:34:01"]

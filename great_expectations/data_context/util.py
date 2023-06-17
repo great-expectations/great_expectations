@@ -1,31 +1,34 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
-import os
+import pathlib
+import re
 import warnings
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 import pyparsing as pp
 
-import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import PathStr  # noqa: TCH001
+from great_expectations.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
-
-if TYPE_CHECKING:
-    from great_expectations.data_context.store import Store
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
-def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
+def instantiate_class_from_config(  # noqa: PLR0912
+    config, runtime_environment, config_defaults=None
+):
     """Build a GX class from configuration dictionaries."""
 
     if config_defaults is None:
@@ -104,46 +107,17 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
     return class_instance
 
 
-def build_store_from_config(
-    store_name: Optional[str] = None,
-    store_config: Optional[dict] = None,
-    module_name: str = "great_expectations.data_context.store",
-    runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:
-    if store_config is None or module_name is None:
-        return None
-
-    try:
-        config_defaults: dict = {
-            "store_name": store_name,
-            "module_name": module_name,
-        }
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment=runtime_environment,
-            config_defaults=config_defaults,
-        )
-    except gx_exceptions.DataContextError as e:
-        new_store = None
-        logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
-    if not new_store:
-        class_name: str = store_config["class_name"]
-        module_name = store_config["module_name"]
-        raise gx_exceptions.ClassInstantiationError(
-            module_name=module_name,
-            package_name=None,
-            class_name=class_name,
-        )
-    return new_store
-
-
 def format_dict_for_error_message(dict_):
     # TODO : Tidy this up a bit. Indentation isn't fully consistent.
 
     return "\n\t".join("\t\t".join((str(key), str(dict_[key]))) for key in dict_)
 
 
-def file_relative_path(dunderfile, relative_path):
+def file_relative_path(
+    source_path: PathStr,
+    relative_path: PathStr,
+    strict: bool = True,
+) -> str:
     """
     This function is useful when one needs to load a file that is
     relative to the position of the current file. (Such as when
@@ -153,9 +127,12 @@ def file_relative_path(dunderfile, relative_path):
     It is meant to be used like the following:
     file_relative_path(__file__, 'path/relative/to/file')
 
+    This has been modified from Dagster's utils:
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
-    return os.path.join(os.path.dirname(dunderfile), relative_path)
+    dir_path = pathlib.Path(source_path).parent
+    abs_path = dir_path.joinpath(relative_path).resolve(strict=strict)
+    return str(abs_path)
 
 
 def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
@@ -212,7 +189,9 @@ class PasswordMasker:
         Returns:
             url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
         """
-        if sa is not None and use_urlparse is False:
+        if url.startswith("DefaultEndpointsProtocol"):
+            return cls._obfuscate_azure_blobstore_connection_string(url)
+        elif sa is not None and use_urlparse is False:
             try:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
@@ -226,6 +205,25 @@ class PasswordMasker:
                 "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
             )
         return cls._mask_db_url_no_sa(url=url)
+
+    @classmethod
+    def _obfuscate_azure_blobstore_connection_string(cls, url: str) -> str:
+        # Parse Azure Connection Strings
+        azure_conn_str_re = re.compile(
+            "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)(.+);(EndpointSuffix=([a-zA-Z\\.]+))"
+        )
+        try:
+            matched: re.Match[str] | None = azure_conn_str_re.match(url)
+            if not matched:
+                raise StoreConfigurationError(
+                    f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "
+                )
+            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
+            return res
+        except Exception as e:
+            raise StoreConfigurationError(
+                f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+            )
 
     @classmethod
     def _mask_db_url_no_sa(cls, url: str) -> str:

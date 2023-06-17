@@ -38,7 +38,7 @@ class PandasDatasource(LegacyDatasource):
     }
 
     @classmethod
-    def build_configuration(
+    def build_configuration(  # noqa: PLR0913
         cls,
         data_asset_type=None,
         batch_kwargs_generators=None,
@@ -105,7 +105,7 @@ class PandasDatasource(LegacyDatasource):
 
         return configuration
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="pandas",
         data_context=None,
@@ -267,7 +267,8 @@ class PandasDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
@@ -291,7 +292,8 @@ class PandasDatasource(LegacyDatasource):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:

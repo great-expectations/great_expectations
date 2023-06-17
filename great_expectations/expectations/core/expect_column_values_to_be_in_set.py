@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
@@ -39,7 +40,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
@@ -219,7 +220,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -275,7 +276,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -334,7 +335,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         classes = ["col-3", "mt-1", "pl-1", "pr-1"]
 
-        if any(len(value) > 80 for value in values):
+        if any(len(value) > 80 for value in values):  # noqa: PLR2004
             content_block_type = "bullet_list"
             content_block_class = RenderedBulletListContent
         else:
@@ -380,13 +381,36 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates that a value_set has been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_in_set` it is required that:
+
+        - `value_set` has been provided.
+
+        - `value_set` is one of the following types: `list`, `set`, or `dict`
+
+        - If `value_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class
+        # default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"
         ) or self.default_kwarg_values.get("value_set")

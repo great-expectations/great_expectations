@@ -4,9 +4,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
+class ExpectColumnDistinctValuesToEqualSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to equal a given set.
 
     expect_column_distinct_values_to_equal_set is a \
@@ -98,10 +99,26 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         "value_set",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_equal_set` we require that the `configuraton.kwargs` contain
+        a `value_set` key that is either a `list`, `set`, or `dict`.
+
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: The configuration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -167,7 +184,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )

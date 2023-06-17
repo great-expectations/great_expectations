@@ -74,218 +74,12 @@ def datetime_dataset(test_backend):
 @pytest.mark.filterwarnings(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
-def test__find_next_low_card_column(
-    non_numeric_low_card_dataset, non_numeric_high_card_dataset
-):
-    columns = non_numeric_low_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-
-    column = BasicSuiteBuilderProfiler._find_next_low_card_column(
-        non_numeric_low_card_dataset, columns, profiled_columns, column_cache
-    )
-    assert column == "lowcardnonnum"
-    profiled_columns["low_card"].append(column)
-    assert (
-        BasicSuiteBuilderProfiler._find_next_low_card_column(
-            non_numeric_low_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-    columns = non_numeric_high_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-    assert (
-        BasicSuiteBuilderProfiler._find_next_low_card_column(
-            non_numeric_high_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
-def test__create_expectations_for_low_card_column(non_numeric_low_card_dataset):
-    column = "lowcardnonnum"
-    column_cache = {}
-
-    expectation_suite = non_numeric_low_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    assert len(expectation_suite.expectations) == 1
-
-    BasicSuiteBuilderProfiler._create_expectations_for_low_card_column(
-        non_numeric_low_card_dataset, column, column_cache
-    )
-    expectation_suite = non_numeric_low_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    assert {
-        expectation.expectation_type
-        for expectation in expectation_suite.expectations
-        if expectation.kwargs.get("column") == column
-    } == {
-        "expect_column_to_exist",
-        "expect_column_distinct_values_to_be_in_set",
-        "expect_column_kl_divergence_to_be_less_than",
-        "expect_column_values_to_not_be_null",
-    }
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
-def test__find_next_numeric_column(
-    numeric_high_card_dataset, non_numeric_low_card_dataset
-):
-    columns = numeric_high_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-
-    column = BasicSuiteBuilderProfiler._find_next_numeric_column(
-        numeric_high_card_dataset, columns, profiled_columns, column_cache
-    )
-    assert column == "norm_0_1"
-    profiled_columns["numeric"].append(column)
-    assert (
-        BasicSuiteBuilderProfiler._find_next_numeric_column(
-            numeric_high_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-    columns = non_numeric_low_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-    assert (
-        BasicSuiteBuilderProfiler._find_next_numeric_column(
-            non_numeric_low_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-
-def test__create_expectations_for_numeric_column(
-    numeric_high_card_dataset, test_backend
-):
-    column = "norm_0_1"
-
-    expectation_suite = numeric_high_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    assert len(expectation_suite.expectations) == 1
-
-    BasicSuiteBuilderProfiler._create_expectations_for_numeric_column(
-        numeric_high_card_dataset, column
-    )
-    expectation_suite = numeric_high_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    if test_backend in [
-        "PandasDataset",
-        "SparkDFDataset",
-        "sqlite",
-        "postgresql",
-        "mysql",
-        "mssql",
-    ]:
-        assert {
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        } == {
-            "expect_column_to_exist",
-            "expect_column_min_to_be_between",
-            "expect_column_max_to_be_between",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
-            "expect_column_quantile_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-        }
-    else:
-        assert {
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        } == {
-            "expect_column_to_exist",
-            "expect_column_min_to_be_between",
-            "expect_column_max_to_be_between",
-            "expect_column_mean_to_be_between",
-            "expect_column_median_to_be_between",
-            "expect_column_quantile_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-        }
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
-def test__find_next_string_column(
-    non_numeric_high_card_dataset, non_numeric_low_card_dataset
-):
-    columns = non_numeric_high_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-
-    column = BasicSuiteBuilderProfiler._find_next_string_column(
-        non_numeric_high_card_dataset, columns, profiled_columns, column_cache
-    )
-    expected_columns = ["highcardnonnum", "medcardnonnum"]
-    assert column in expected_columns
-    profiled_columns["string"].append(column)
-    expected_columns.remove(column)
-    assert (
-        BasicSuiteBuilderProfiler._find_next_string_column(
-            non_numeric_high_card_dataset, columns, profiled_columns, column_cache
-        )
-        in expected_columns
-    )
-
-    columns = non_numeric_low_card_dataset.get_table_columns()
-    column_cache = {}
-    profiled_columns = {"numeric": [], "low_card": [], "string": [], "datetime": []}
-    assert (
-        BasicSuiteBuilderProfiler._find_next_string_column(
-            non_numeric_low_card_dataset, columns, profiled_columns, column_cache
-        )
-        is None
-    )
-
-
-def test__create_expectations_for_string_column(non_numeric_high_card_dataset):
-    column = "highcardnonnum"
-
-    expectation_suite = non_numeric_high_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    assert len(expectation_suite.expectations) == 2
-
-    BasicSuiteBuilderProfiler._create_expectations_for_string_column(
-        non_numeric_high_card_dataset, column
-    )
-    expectation_suite = non_numeric_high_card_dataset.get_expectation_suite(
-        suppress_warnings=True
-    )
-    assert {
-        expectation.expectation_type
-        for expectation in expectation_suite.expectations
-        if expectation.kwargs.get("column") == column
-    } == {
-        "expect_column_to_exist",
-        "expect_column_values_to_not_be_null",
-        "expect_column_value_lengths_to_be_between",
-    }
-
-
-@pytest.mark.filterwarnings(
-    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
-)
 @pytest.mark.skipif(
     is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
+)
+@pytest.mark.xfail(
+    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
 )
 def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
     columns = datetime_dataset.get_table_columns()
@@ -321,6 +115,9 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
 @pytest.mark.skipif(
     is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
+)
+@pytest.mark.xfail(
+    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
 )
 def test__create_expectations_for_datetime_column(datetime_dataset):
     column = "datetime"
@@ -395,14 +192,14 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas
 def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
-    context.create_expectation_suite("default")
+    context.add_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
     base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
         "base_directory"
     ]
     batch_kwargs = {
         "datasource": "rad_datasource",
-        "path": os.path.join(base_dir, "f1.csv"),
+        "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
     batch = context.get_batch(batch_kwargs, "default")
     expectation_suite, validation_results = BasicSuiteBuilderProfiler.profile(
@@ -441,7 +238,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
             """#### This is an _example_ suite
 
 - This suite was made by quickly glancing at 1000 rows of your data.
-- This is **not a production suite**. It is meant to show examples of expectations.
+- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.
 - Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
 """
         ],
@@ -503,7 +300,7 @@ def test_context_profiler(filesystem_csv_data_context):
             """#### This is an _example_ suite
 
 - This suite was made by quickly glancing at 1000 rows of your data.
-- This is **not a production suite**. It is meant to show examples of expectations.
+- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.
 - Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
 """
         ],

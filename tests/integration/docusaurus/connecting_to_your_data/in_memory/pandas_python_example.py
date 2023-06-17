@@ -1,11 +1,13 @@
 import pandas as pd
-from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config">
 datasource_config = {
     "name": "example_datasource",
     "class_name": "Datasource",
@@ -22,10 +24,15 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py add_datasource">
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # creating our example Pandas dataframe
 df = pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]], columns=["a", "b", "c"])
@@ -39,9 +46,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

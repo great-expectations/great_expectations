@@ -79,13 +79,6 @@ but the package `{pip_library_name}` containing this library is not installed.
         f"pip install {pip_library_name}"
     )
 
-    # project_distribution: Distribution = get_project_distribution()
-    # if project_distribution:
-    #     project_name: str = project_distribution.metadata['Name']
-    #     version: str = project_distribution.metadata['Version']
-    #
-    # pkg_resources.working_set = pkg_resources.WorkingSet._build_master()
-
     working_set: WorkingSet = pkg_resources.working_set
     # noinspection SpellCheckingInspection
     distr: Distribution = pkg_resources.get_distribution(dist=pip_library_name)

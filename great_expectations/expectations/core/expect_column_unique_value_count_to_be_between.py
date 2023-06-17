@@ -4,9 +4,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -42,7 +43,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
+class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
     """Expect the number of unique values to be between a minimum value and a maximum value.
 
     expect_column_unique_value_count_to_be_between is a \
@@ -192,24 +193,25 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
 
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -240,7 +242,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -251,7 +253,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
             else:
-                if not params.min_value:
+                if not params.min_value:  # noqa: PLR5501
                     template_str = f"must have {at_most_str} $max_value unique values."
                 elif not params.max_value:
                     template_str = f"must have {at_least_str} $min_value unique values."
@@ -299,7 +301,9 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
         else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if (  # noqa: PLR5501
+                params["mostly"] is not None and params["mostly"] < 1.0  # noqa: PLR2004
+            ):
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -311,7 +315,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is None:
+                if params["min_value"] is None:  # noqa: PLR5501
                     template_str = f"must have {at_most_str} $max_value unique values."
                 elif params["max_value"] is None:
                     template_str = f"must have {at_least_str} $min_value unique values."

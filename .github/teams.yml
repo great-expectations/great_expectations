@@ -2,44 +2,51 @@
 # To add an additional team, simply add a top-level key with a list of users.
 # NOTE - this should be kept in sync with the GX org's teams
 
-platform:
-  - '@NathanFarmer'    # Nathan Farmer
-  - '@alexsherstinsky' # Alex Sherstinsky
-  - '@cdkini'          # Chetan Kini
-  - '@billdirks'       # Bill Dirks
-  - '@Kilo59'          # Gabriel Gore
-
 dx:
   - '@Shinnnyshinshin' # Will Shin
+  - '@alexsherstinsky' # Alex Sherstinsky
   - '@anthonyburdi'    # Anthony Burdi
   - '@kenwade4'        # Ken Wade
 
 devrel:
   - '@Rachel-Reverie'  # Rachel Reverie
   - '@austiezr'        # Austin Robinson
+  - '@kwcanuck'        # Rob Gray
   - '@kyleaton'        # Kyle Eaton
   - '@rdodev'          # Ruben Orduz
   - '@talagluck'       # Tal Gluck
+  - '@tjholsman'       # TJ Holsman
 
-cloud:
+core:
+  - '@DrewHoo'         # Drew Hoover
+  - '@HaebichanGX'     # Haebichan Jung
+  - '@Kilo59'          # Gabriel Gore
+  - '@NathanFarmer'    # Nathan Farmer
+  - '@Shinnnyshinshin' # Will Shin
+  - '@Super-Tanner'    # Tanner Beam
+  - '@TrangPham'       # Thu Pham
+  - '@abegong'         # Abe Gong
+  - '@alexsherstinsky' # Alex Sherstinsky
+  - '@allensallinger'  # Allen Sallinger
+  - '@anthonyburdi'    # Anthony Burdi
+  - '@billdirks'       # Bill Dirks
+  - '@cdkini'          # Chetan Kini
+  - '@dctalbot'        # David Talbot
+  - '@donaldheppner'   # Don Heppner
+  - '@elenajdanova'    # Elena Jdanova
+  - '@jcampbell'       # James Campbell
+  - '@josectobar'      # José Tobar
+  - '@joshua-stauffer' # Josh Stauffer
+  - '@joshzzheng'      # Josh Zheng
+  - '@jshaikGX'        # Javed Shaik
+  - '@kenwade4'        # Ken Wade
+  - '@lockettks'       # Kim Mathieu
   - '@roblim'          # Rob Lim
   - '@rreinoldsc'      # Robby Reinold
-  - '@joshua-stauffer' # Josh Stauffer
-  - '@dctalbot'        # David Talbot
+  - '@sujensen'        # Susan Jensen
+  - '@tyler-hoffman'   # Tyler Hoffman
+  - '@wookasz'         # Łukasz Lempart
 
-# Aggregates a few different teams
-core-team:
-  # Mario
-  - '@NathanFarmer'    # Nathan Farmer
-  - '@alexsherstinsky' # Alex Sherstinsky
-  - '@cdkini'          # Chetan Kini
-  - '@billdirks'       # Bill Dirks
-  - '@Kilo59'          # Gabriel Gore
-  # Luigi
-  - '@Shinnnyshinshin' # Will Shin
-  - '@anthonyburdi'    # Anthony Burdi
-  - '@kenwade4'        # Ken Wade
-  # Misc
-  - '@jcampbell'       # James Campbell
-  - '@donaldheppner'   # Don Heppner
-  - '@Super-Tanner'    # Tanner Beam
+bot:
+  - '@dependabot'
+  - '@dependabot[bot]'

@@ -1,31 +1,35 @@
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
-TODAY: datetime = datetime(year=2022, month=8, day=10)
-TODAY_STR: str = datetime.strftime(TODAY, "%Y-%m-%d")
+TODAY_EXAMPLE: datetime = datetime(year=2022, month=8, day=10)
+TODAY_EXAMPLE_STR: str = datetime.strftime(TODAY_EXAMPLE, "%Y-%m-%d")
 date_format = "%Y-%m-%d"
 
-DAYS_AGO = {
-    3: TODAY - timedelta(days=3),
-    7: TODAY - timedelta(days=7),
-    14: TODAY - timedelta(days=14),
-    21: TODAY - timedelta(days=21),
-    28: TODAY - timedelta(days=28),
-}
+METRIC_SAMPLE_LIMIT = 60
 
-DAYS_IN_WEEK = 7
+FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
+
+
+def get_days_ago_dict(current_date):
+    return {
+        3: current_date - timedelta(days=3),
+        FOUR_PREVIOUS_WEEKS[0]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[0]),
+        FOUR_PREVIOUS_WEEKS[1]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[1]),
+        FOUR_PREVIOUS_WEEKS[2]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[2]),
+        FOUR_PREVIOUS_WEEKS[3]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[3]),
+    }
+
 
 def generate_data_sample(n_appearances: dict):
     data = []
@@ -49,11 +53,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -72,77 +72,78 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
 
         # get counts for dates
         query = (
             sa.select([sa.func.Date(column), sa.func.count()])
-            .group_by(column)
+            .group_by(sa.func.Date(column))
             .select_from(selectable)
-            .order_by(column.desc())
-            .limit(30)
+            .order_by(sa.func.Date(column).desc())
+            .limit(METRIC_SAMPLE_LIMIT)
         )
-        results = sqlalchemy_engine.execute(query).fetchall()
+        results = execution_engine.execute_query(query).fetchall()
         return results
 
 
-class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
-    """Expect No missing days in date column
-
-
-    Keyword Args:
-        - threshold (float between 0-1, default is 0.25): expectation fails if the difference in percentage is more than the threshold.
-        - weeks_back (int): how many weeks back the comparison goes
-
-    See Also:
-        [expect_day_sum_to_be_close_to_equivalent_week_day_mean](https://greatexpectations.io/expectations/expect_day_sum_to_be_close_to_equivalent_week_day_mean)
-    """
+class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation):
+    """Expect No missing days in date column"""
 
     # Default values
-    default_kwarg_values = {"threshold": 0.25, "weeks_back": 4}
-
+    default_kwarg_values = {"threshold": 0.25}
+    example_days_ago_dict = get_days_ago_dict(TODAY_EXAMPLE)
     examples = [
         {
             # column a - good counts - 3 rows for every day
             "data": {
                 "column_a": generate_data_sample(
                     {
-                        TODAY: 3,
-                        DAYS_AGO[7]: 3,
-                        DAYS_AGO[14]: 3,
-                        DAYS_AGO[21]: 3,
-                        DAYS_AGO[28]: 3,
+                        TODAY_EXAMPLE: 3,
+                        example_days_ago_dict[7]: 3,
+                        example_days_ago_dict[14]: 3,
+                        example_days_ago_dict[21]: 3,
+                        example_days_ago_dict[28]: 3,
                     }
                 ),
                 "column_b": generate_data_sample(
                     {
-                        TODAY: 2,
-                        DAYS_AGO[7]: 4,
-                        DAYS_AGO[14]: 3,
-                        DAYS_AGO[21]: 3,
-                        DAYS_AGO[28]: 3,
+                        TODAY_EXAMPLE: 2,
+                        example_days_ago_dict[7]: 4,
+                        example_days_ago_dict[14]: 3,
+                        example_days_ago_dict[21]: 3,
+                        example_days_ago_dict[28]: 3,
+                    }
+                ),
+                "column_datetime": generate_data_sample(
+                    {
+                        TODAY_EXAMPLE: 3,
+                        example_days_ago_dict[7]: 2,
+                        example_days_ago_dict[7].replace(hour=11): 1,
+                        example_days_ago_dict[14]: 2,
+                        example_days_ago_dict[14].replace(hour=10, minute=40): 1,
+                        example_days_ago_dict[21]: 3,
+                        example_days_ago_dict[28]: 3,
                     }
                 ),
                 "column_current_zero": generate_data_sample(
                     {
-                        TODAY: 0,
-                        DAYS_AGO[7]: 4,
-                        DAYS_AGO[14]: 4,
-                        DAYS_AGO[21]: 4,
-                        DAYS_AGO[28]: 3,
+                        TODAY_EXAMPLE: 0,
+                        example_days_ago_dict[7]: 4,
+                        example_days_ago_dict[14]: 4,
+                        example_days_ago_dict[21]: 4,
+                        example_days_ago_dict[28]: 3,
                     }
                 ),
                 "column_past_mean_zero": generate_data_sample(
                     {
-                        TODAY: 15,
-                        DAYS_AGO[7]: 0,
-                        DAYS_AGO[14]: 0,
-                        DAYS_AGO[21]: 0,
-                        DAYS_AGO[28]: 0,
+                        TODAY_EXAMPLE: 15,
+                        example_days_ago_dict[7]: 0,
+                        example_days_ago_dict[14]: 0,
+                        example_days_ago_dict[21]: 0,
+                        example_days_ago_dict[28]: 0,
                     }
                 ),
             },
-            # "column_b": [today, yesterday, yesterday, two_days_ago]},
+            "only_for": ["sqlite"],
             "tests": [
                 {
                     "title": "positive test",
@@ -150,7 +151,29 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_a",
-                        "run_date": TODAY_STR,
+                        "run_date": TODAY_EXAMPLE_STR,
+                        "threshold": default_kwarg_values["threshold"],
+                    },
+                    "out": {"success": True},
+                },
+                {
+                    "title": "positive test",
+                    "exact_match_out": False,
+                    "include_in_gallery": False,
+                    "in": {
+                        "column": "column_datetime",
+                        "run_date": TODAY_EXAMPLE_STR,
+                        "threshold": default_kwarg_values["threshold"],
+                    },
+                    "out": {"success": True},
+                },
+                {
+                    "title": "positive test",
+                    "exact_match_out": False,
+                    "include_in_gallery": False,
+                    "in": {
+                        "column": "column_datetime",
+                        "run_date": TODAY_EXAMPLE_STR,
                         "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": True},
@@ -161,7 +184,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_b",
-                        "run_date": TODAY_STR,
+                        "run_date": TODAY_EXAMPLE_STR,
                     },
                     "out": {"success": False},
                 },
@@ -171,7 +194,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_current_zero",
-                        "run_date": TODAY_STR,
+                        "run_date": TODAY_EXAMPLE_STR,
                     },
                     "out": {"success": False},
                 },
@@ -181,7 +204,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_past_mean_zero",
-                        "run_date": TODAY_STR,
+                        "run_date": TODAY_EXAMPLE_STR,
                     },
                     "out": {"success": False},
                 },
@@ -193,7 +216,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
     success_keys = (
         "run_date",
         "threshold",
-        "week_back"
     )
 
     def validate_configuration(
@@ -209,18 +231,32 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        run_date_str = self.get_success_kwargs(configuration).get("run_date")
 
-        success_kwargs = self.get_success_kwargs(configuration)
-        run_date: str = success_kwargs.get("run_date")
-        threshold: float = float(success_kwargs.get("threshold"))
-        weeks_back: int = success_kwargs.get("weeks_back")
+        run_date = datetime.strptime(run_date_str, date_format)
 
-        days_back_list = [DAYS_IN_WEEK*week_index for week_index in range(1, weeks_back+1)]
+        threshold = float(self.get_success_kwargs(configuration).get("threshold"))
 
-        day_counts_dict = get_counts_per_day_as_dict(metrics, run_date, days_back_list)
-        run_date_count: int = day_counts_dict[run_date]
+        days_ago_dict = get_days_ago_dict(run_date)
 
-        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, days_back_list)
+        equivalent_previous_days: List[datetime] = [
+            days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
+        ]
+
+        assert min(equivalent_previous_days) > (
+            datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)
+        ), (
+            f"Data includes only up to {METRIC_SAMPLE_LIMIT} days prior to today ({datetime.today()}), "
+            f"but 4 weeks before the given run_date is {min(equivalent_previous_days)}",
+        )
+
+        day_counts_dict = get_counts_per_day_as_dict(
+            metrics, run_date_str, equivalent_previous_days
+        )
+        run_date_count: int = day_counts_dict[run_date_str]
+        diff_fraction = get_diff_fraction(
+            run_date_count, day_counts_dict, equivalent_previous_days
+        )
 
         if diff_fraction > threshold:
             msg = (
@@ -238,10 +274,9 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
         return {"success": success, "result": {"details": msg}}
 
 
-def get_counts_per_day_as_dict(metrics: dict, run_date: str, days_back_list: List[int]) -> dict:
-    equivalent_previous_days: List[datetime] = [
-        DAYS_AGO[i] for i in days_back_list
-    ]
+def get_counts_per_day_as_dict(
+    metrics: dict, run_date: str, equivalent_previous_days: list
+) -> dict:
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
     ]
@@ -257,15 +292,15 @@ def get_counts_per_day_as_dict(metrics: dict, run_date: str, days_back_list: Lis
     return day_counts_dict
 
 
-def get_diff_fraction(run_date_count: int, day_counts_dict: dict, days_back_list: List[int]) -> float:
+def get_diff_fraction(
+    run_date_count: int, day_counts_dict: dict, equivalent_previous_days: list
+) -> float:
     """
     Calculates the fractional difference between current and past average row counts (how much is the
     difference relative to the average).
     Added +1 to both nuemrator and denominator, to account for cases when previous average is 0.
     """
-    equivalent_previous_days: List[datetime] = [
-        DAYS_AGO[i] for i in days_back_list
-    ]
+
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
     ]

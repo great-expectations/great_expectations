@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
@@ -36,19 +37,19 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
 
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMaxToBeBetween(ColumnExpectation):
+class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     """Expect the column maximum to be between a minimum value and a maximum value.
 
     expect_column_max_to_be_between is a \
@@ -58,13 +59,13 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         column (str): \
             The column name
         min_value (comparable type or None): \
-            The minimum number of unique values allowed.
+            The minimum value of the acceptable range for the column maximum.
         max_value (comparable type or None): \
-            The maximum number of unique values allowed.
+            The maximum value of the acceptable range for the column maximum.
         strict_min (boolean): \
-            If True, the minimal column minimum must be strictly larger than min_value, default=False
+            If True, the lower bound of the column maximum acceptable range must be strictly larger than min_value, default=False
         strict_max (boolean): \
-            If True, the maximal column minimum must be strictly smaller than max_value, default=False
+            If True, the upper bound of the column maximum acceptable range must be strictly smaller than max_value, default=False
 
     Keyword Args:
         parse_strings_as_datetimes (Boolean or None): \
@@ -206,20 +207,21 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
-    """ A Column Map MetricProvider Decorator for the Maximum"""
-
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
+        a number or date.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+
+        Raises:
+            InvalidExpectationConfigurationError: if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -257,7 +259,10 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                if params.min_value == params.max_value:
+                    template_str = "maximum value must be $min_value"
+                else:
+                    template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
                 template_str = f"maximum value must be {at_most_str} $max_value."
             else:
@@ -283,7 +288,6 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True

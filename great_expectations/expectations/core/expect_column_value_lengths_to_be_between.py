@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -41,7 +42,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
@@ -236,10 +237,27 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "max_value",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures that min_value and max_value are both set."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
+        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
+        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
+
+         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+         superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
 
         configuration = configuration or self.configuration
@@ -272,7 +290,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -303,7 +321,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -314,7 +332,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if params.min_value and params.max_value:
+                if params.min_value and params.max_value:  # noqa: PLR5501
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
                 elif not params.min_value:
                     template_str = f"values must always be {at_most_str} $max_value characters long."
@@ -372,7 +390,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -386,7 +404,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if (  # noqa: PLR5501
+                    params["min_value"] is not None and params["max_value"] is not None
+                ):
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:

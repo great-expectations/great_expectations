@@ -7,10 +7,17 @@ import sys
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
-from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.cli.cli_messages import (
+    DATASOURCE_NEW_WARNING,
+    FLUENT_DATASOURCE_DELETE_ERROR,
+    FLUENT_DATASOURCE_LIST_WARNING,
+)
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_dict,
+)
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -22,18 +29,13 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.data_context import FileDataContext
 
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
 
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -47,6 +49,8 @@ class SupportedDatabaseBackends(enum.Enum):
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
     TRINO = "Trino"
+    ATHENA = "Athena"
+    CLICKHOUSE = "Clickhouse"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -88,6 +92,10 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
+        if not ctx.obj.assume_yes:
+            if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
+                sys.exit(0)
+
         _datasource_new_flow(
             context,
             usage_event_end=usage_event_end,
@@ -110,6 +118,14 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if datasource in context.fluent_datasources:
+        toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{FLUENT_DATASOURCE_DELETE_ERROR}</red>",
+        )
+        return
 
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
@@ -148,8 +164,17 @@ def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if len(context.fluent_datasources) > 0:
+        cli_message(f"<yellow>{FLUENT_DATASOURCE_LIST_WARNING}</yellow>")
+
     try:
         datasources = context.list_datasources()
+        # The CLI does not support fluent Datasources. Omit them from the list.
+        datasources = [
+            d for d in datasources if d["name"] not in context.fluent_datasources
+        ]
+
         cli_message(_build_datasource_intro_string(datasources))
         for datasource in datasources:
             cli_message("")
@@ -179,8 +204,8 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
     if datasource_count == 0:
         return "No Datasources found"
     elif datasource_count == 1:
-        return "1 Datasource found:"
-    return f"{datasource_count} Datasources found:"
+        return "1 block config Datasource found:"
+    return f"{datasource_count} block config Datasources found:"
 
 
 def _datasource_new_flow(
@@ -203,7 +228,7 @@ What data would you like Great Expectations to connect to?
         selected_files_backend = _prompt_for_execution_engine()
         helper = _get_files_helper(
             selected_files_backend,
-            context_root_dir=context.root_directory,  # type: ignore[arg-type] # could be None
+            context_root_dir=context.root_directory,
             datasource_name=datasource_name,
         )
     elif files_or_sql_selection == "2":
@@ -269,8 +294,8 @@ class BaseDatasourceNewYamlHelper:
     def create_notebook(self, context: FileDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
-        notebook_path = os.path.join(
-            context.root_directory,  # type: ignore[arg-type] # could be None
+        notebook_path = os.path.join(  # noqa: PTH118
+            context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",
         )
@@ -306,7 +331,7 @@ class BaseDatasourceNewYamlHelper:
 class FilesYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for pandas/spark helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
@@ -412,7 +437,7 @@ class SparkYamlHelper(FilesYamlHelper):
 class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for SQL helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
@@ -711,6 +736,26 @@ table_name = ""'''
         return "\n  connection_string: {connection_string}"
 
 
+class ClickhouseCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.CLICKHOUSE.value,
+                "api_version": "v3",
+            },
+            driver="clickhouse",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="clickhouse_sqlalchemy.drivers.base",
+            pip_library_name="clickhouse_sqlalchemy",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+
 class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
@@ -744,6 +789,43 @@ schema_name = "{self.schema_name}"
 
 # A table that you would like to add initially as a Data Asset
 table_name = "{self.table_name}"'''
+
+
+class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.ATHENA.value,
+                "api_version": "v3",
+            },
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        # noinspection SpellCheckingInspection
+        pyathena_success: bool = verify_library_dependent_modules(
+            python_import_name="pyathena",
+            pip_library_name="pyathena[SQLAlchemy]",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pyathena_success
+
+    def credentials_snippet(self) -> str:
+        return '''\
+# The SQLAlchemy url/connection string for the Athena connection
+# (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+
+schema_name = "YOUR_SCHEMA"  # or database name. It is optional
+table_name = "YOUR_TABLE_NAME"
+region = "YOUR_REGION"
+s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+            '''
+
+    def _yaml_innards(self) -> str:
+        return "\n  connection_string: {connection_string}"
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
@@ -784,7 +866,9 @@ SQLYAMLHelpers: TypeAlias = Union[
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
+    ClickhouseCredentialYamlHelper,
     TrinoCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
 ]
 
 
@@ -798,6 +882,8 @@ def _get_sql_yaml_helper_class(
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
         SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
+        SupportedDatabaseBackends.ATHENA: AthenaCredentialYamlHelper,
+        SupportedDatabaseBackends.CLICKHOUSE: ClickhouseCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]

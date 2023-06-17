@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_values_to_not_match_regex",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_not_match_regex_1",
     "data" : {
       "a" : ["aaa", "abb", "acc", "add", "bee"],
       "b" : ["aaa", "abb", "acc", "bdd", null],
@@ -26,7 +27,7 @@
       },
       "out": {
         "success":false,
-        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
       "suppress_test_for": ["sqlite", "mssql"]
@@ -42,7 +43,7 @@
       },
       "out": {
         "success":true,
-        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
       "suppress_test_for": ["sqlite", "mssql"]
@@ -57,7 +58,7 @@
       },
       "out": {
         "success":true,
-        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_index_list": [{"a": "aaa", "pk_index": 0}, {"a": "abb", "pk_index": 1}, {"a": "acc", "pk_index": 2}, {"a": "add", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
       "suppress_test_for": ["sqlite", "mssql"]
@@ -72,7 +73,7 @@
       },
       "out": {
         "success":false,
-        "unexpected_index_list": [0, 1, 2],
+        "unexpected_index_list": [{"b": "aaa", "pk_index": 0}, {"b": "abb", "pk_index": 1}, {"b": "acc", "pk_index": 2}],
         "unexpected_list": ["aaa", "abb", "acc"]
       },
       "suppress_test_for": ["sqlite", "mssql"]
@@ -129,7 +130,7 @@
       },
       "out": {
         "success": false,
-        "unexpected_index_list": [0, 1, 2, 3],
+        "unexpected_index_list": [{"b": "aaa", "pk_index": 0}, {"b": "abb", "pk_index": 1}, {"b": "acc", "pk_index": 2}, {"b": "bdd", "pk_index": 3}],
         "unexpected_list": ["aaa", "abb", "acc", "bdd"]
       },
       "suppress_test_for": ["sqlite", "mysql", "mssql"]
@@ -144,7 +145,7 @@
       },
       "out": {
         "success": true,
-        "unexpected_index_list": [1, 4],
+        "unexpected_index_list": [{"a": "abb", "pk_index": 1}, {"a": "bee", "pk_index": 4}],
         "unexpected_list": ["abb", "bee"]
       },
       "suppress_test_for": ["sqlite", "mssql"]

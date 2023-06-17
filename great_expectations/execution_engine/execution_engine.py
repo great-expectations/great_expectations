@@ -18,15 +18,10 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import (
-    AzureUrl,
-    DBFSPath,
-    GCSUrl,
-    S3Url,
-    convert_to_json_serializable,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -34,14 +29,14 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    import sqlalchemy as sa
-
+    from great_expectations.compatibility.pyspark import functions as F
+    from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
     from great_expectations.core.batch import (
         BatchData,
         BatchDataType,
@@ -49,18 +44,9 @@ if TYPE_CHECKING:
         BatchSpec,
     )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class NoOpDict:
@@ -82,99 +68,28 @@ class MetricComputationConfiguration(DictDot):
     """
 
     metric_configuration: MetricConfiguration
-    metric_fn: sa.func | F
+    metric_fn: sa.func | F  # type: ignore[valid-type]
     metric_provider_kwargs: dict
     compute_domain_kwargs: Optional[dict] = None
     accessor_domain_kwargs: Optional[dict] = None
 
+    @public_api
     def to_dict(self) -> dict:
-        """Returns: this MetricComputationConfiguration as a dictionary"""
+        """Returns: this MetricComputationConfiguration as a Python dictionary
+
+        Returns:
+            (dict) representation of present object
+        """
         return asdict(self)
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """Returns: this MetricComputationConfiguration as a JSON dictionary"""
+        """Returns: this MetricComputationConfiguration as a JSON dictionary
+
+        Returns:
+            (dict) representation of present object as JSON-compatible Python dictionary
+        """
         return convert_to_json_serializable(data=self.to_dict())
-
-
-class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
-        "InferredAssetS3DataConnector": "S3",
-        "ConfiguredAssetS3DataConnector": "S3",
-        "InferredAssetGCSDataConnector": "GCS",
-        "ConfiguredAssetGCSDataConnector": "GCS",
-        "InferredAssetAzureDataConnector": "ABS",
-        "ConfiguredAssetAzureDataConnector": "ABS",
-        "InferredAssetDBFSDataConnector": "DBFS",
-        "ConfiguredAssetDBFSDataConnector": "DBFS",
-    }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
-        Tuple[str, str], Callable
-    ] = {
-        (
-            "S3",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "S3",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
-            **template_arguments
-        ),
-    }
-
-    @staticmethod
-    def resolve_data_reference(
-        data_connector_name: str,
-        execution_engine_name: str,
-        template_arguments: dict,
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
 
 
 @dataclass
@@ -188,16 +103,47 @@ class SplitDomainKwargs:
     accessor: dict
 
 
+@public_api
 class ExecutionEngine(ABC):
+    """ExecutionEngine defines interfaces and provides common methods for loading Batch of data and compute metrics.
+
+    ExecutionEngine is the parent class of every backend-specific computational class, tasked with loading Batch of
+    data and computing metrics.  Each subclass (corresponding to Pandas, Spark, SQLAlchemy, and any other computational
+    components) utilizes generally-applicable methods defined herein, while implementing required backend-specific
+    interfaces.  ExecutionEngine base class also performs the important task of translating cloud storage resource URLs
+    to format and protocol compatible with given computational mechanism (e.g, Pandas, Spark).  Then ExecutionEngine
+    subclasses access the referenced data according to their paritcular compatible protocol and return Batch of data.
+
+    In order to obtain Batch of data, ExecutionEngine (through implementation of key interface methods by subclasses)
+    gets data records and also provides access references so that different aspects of data can be loaded at once.
+    ExecutionEngine uses BatchManager for Batch caching in order to reduce load on computational backends.
+
+    Crucially, ExecutionEngine serves as focal point for resolving (i.e., computing) metrics.  Wherever opportunities
+    arize to bundle multiple metric computations (e.g., SQLAlchemy, Spark), ExecutionEngine utilizes subclasses in order
+    to provide specific functionality (bundling of computation is available only for "deferred execution" computational
+    systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
+
+    Finally, ExecutionEngine defines interfaces for Batch data sampling and splitting Batch of data along defined axes.
+
+    Constructor builds an ExecutionEngine, using provided configuration options (instatiation is done by child classes).
+
+    Args:
+        name: (str) name of this ExecutionEngine
+        caching: (Boolean) if True (default), then resolved (computed) metrics are added to local in-memory cache.
+        batch_spec_defaults: dictionary of BatchSpec overrides (useful for amending configuration at runtime).
+        batch_data_dict: dictionary of Batch objects with corresponding IDs as keys supplied at initialization time
+        validator: Validator object (optional) -- not utilized in V3 and later versions
+    """
+
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
-        name=None,
-        caching=True,
-        batch_spec_defaults=None,
-        batch_data_dict=None,
-        validator=None,
+        name: Optional[str] = None,
+        caching: bool = True,
+        batch_spec_defaults: Optional[dict] = None,
+        batch_data_dict: Optional[dict] = None,
+        validator: Optional[Validator] = None,
     ) -> None:
         self.name = name
         self._validator = validator
@@ -248,7 +194,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -337,16 +285,18 @@ class ExecutionEngine(ABC):
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], MetricValue]:
-        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
+    @public_api
     def get_domain_records(
         self,
         domain_kwargs: dict,
     ) -> Any:
-        """
-        get_domain_records computes the full-access data (dataframe or selectable) for computing metrics based on the
-        given domain_kwargs and specific engine semantics.
+        """get_domain_records() is an interface method, which computes the full-access data (dataframe or selectable) for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
             data corresponding to the compute domain
@@ -354,20 +304,30 @@ class ExecutionEngine(ABC):
 
         raise NotImplementedError
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Any, dict, dict]:
-        """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
-        and specific engine semantics.
+        """get_compute_domain() is an interface method, which computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "column", \
+            "column_pair", "table", and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple consisting of three elements:
 
             1. data corresponding to the compute domain;
-            2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
-            3. a dictionary describing the access instructions for data elements included in the compute domain
+            2. a modified copy of domain_kwargs describing the Domain of the data returned in (1);
+            3. a dictionary describing the access instructions for data elements included in the compute domain \
                 (e.g. specific column name).
 
             In general, the union of the compute_domain_kwargs and accessor_domain_kwargs will be the same as the
@@ -384,7 +344,7 @@ class ExecutionEngine(ABC):
         Add a row condition for handling null filter.
 
         Args:
-            domain_kwargs: the domain kwargs to use as the base and to which to add the condition
+            domain_kwargs: the Domain kwargs to use as the base and to which to add the condition
             column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
                 table_domain_kwargs
             filter_null: if true, add a filter for null values
@@ -416,16 +376,6 @@ class ExecutionEngine(ABC):
         )
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
-
-    def resolve_data_reference(
-        self, data_connector_name: str, template_arguments: dict
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
-            data_connector_name=data_connector_name,
-            execution_engine_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
 
     def _build_direct_and_bundled_metric_computation_configurations(
         self,
@@ -468,7 +418,7 @@ class ExecutionEngine(ABC):
         ]
         metric_class: MetricProvider
         metric_fn: Union[Callable, None]
-        metric_aggregate_fn: sa.func | F
+        metric_aggregate_fn: sa.func | F  # type: ignore[valid-type]
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
@@ -592,7 +542,7 @@ class ExecutionEngine(ABC):
             try:
                 resolved_metrics[
                     metric_computation_configuration.metric_configuration.id
-                ] = metric_computation_configuration.metric_fn(
+                ] = metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
                     **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:
@@ -631,16 +581,16 @@ class ExecutionEngine(ABC):
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for all Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -649,7 +599,7 @@ class ExecutionEngine(ABC):
         # Extracting value from enum if it is given for future computation
         domain_type = MetricDomainTypes(domain_type)
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        # Warning user if accessor keys are in any Domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
@@ -697,14 +647,14 @@ class ExecutionEngine(ABC):
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for table Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -735,7 +685,7 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for Domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
@@ -745,11 +695,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -777,11 +727,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -810,11 +760,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -835,7 +785,7 @@ class ExecutionEngine(ABC):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )

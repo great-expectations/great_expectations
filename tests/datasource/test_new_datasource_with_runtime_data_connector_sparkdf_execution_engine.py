@@ -113,12 +113,12 @@ def test_batch_data_sparkdf_execution_engine_unknown_datasource(
         spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
-    )  # noqa: F821
+    )
     # raised by _validate_batch_request() in Datasource
     with pytest.raises(ValueError):
         # Test for an unknown datasource
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -143,7 +143,7 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
     with pytest.raises(ValueError):
         # Test for an unknown data_connector
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -152,45 +152,6 @@ def test_batch_data_sparkdf_execution_engine_unknown_data_connector(
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df},
                 batch_identifiers={"default_identifier_name": "identifier_name"},
-            )
-        )
-
-
-def test_batch_data_sparkdf_execution_engine_no_batch_identifiers(
-    datasource_with_runtime_data_connector_and_sparkdf_execution_engine, spark_session
-):
-    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
-    )
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing (set to None)
-        batch_list: List[
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"batch_data": test_df},
-                batch_identifiers=None,
-            )
-        )
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing
-        batch_list: List[
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"batch_data": test_df},
             )
         )
 
@@ -206,7 +167,7 @@ def test_batch_data_sparkdf_execution_engine_incorrect_batch_identifiers(
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
     with pytest.raises(gx_exceptions.DataConnectorError):
         # runtime_parameters are not configured in the DataConnector
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -282,7 +243,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_mostly_lega
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -314,7 +275,7 @@ def test_batch_data_sparkdf_execution_engine_batch_identifiers_error_one_illegal
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -440,10 +401,8 @@ def test_batch_data_sparkdf_execution_engine_get_batch_definitions_and_get_batch
         == 1
     )
 
-    my_df: "pyspark.sql.dataframe.DataFrame" = (
-        spark_session.createDataFrame(  # noqa: F821
-            pd.DataFrame({"x": range(10), "y": range(10)})
-        )
+    my_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+        spark_session.createDataFrame(pd.DataFrame({"x": range(10), "y": range(10)}))
     )
     batch: Batch = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_from_batch_definition(
         batch_definition=BatchDefinition(
@@ -624,7 +583,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_d
 
     # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -657,7 +616,7 @@ def test_file_path_sparkdf_execution_engine_batch_definition_list_from_batch_req
 
     # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -690,7 +649,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_fail_f
 
     # raised by guess_reader_method_from_path() in SparkDFExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -767,6 +726,40 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_endswith_upcase_no_headers(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file_upcase,
+    spark_session,
+):
+    batch_identifiers: Dict[str, int] = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: Dict[str, Any] = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file_upcase,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert (
+        my_batch_1.data.dataframe.count() == 10001
+    )  # headers are not read-in by default
+    assert len(my_batch_1.data.dataframe.columns) == 18
+
+
 def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_directory_no_headers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
@@ -821,7 +814,7 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_failed
 
     # raised by guess_reader_method_from_path() in ExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request

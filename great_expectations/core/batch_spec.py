@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta
-from typing import List
+from typing import TYPE_CHECKING, Any, List
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
+from great_expectations.types.base import SerializableDotDict
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues, PathStr
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +35,42 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
+class PandasBatchSpec(SerializableDotDict, BatchSpec, metaclass=ABCMeta):
+    @property
+    def reader_method(self) -> str:
+        return self["reader_method"]
+
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options", {})
+
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        from great_expectations.datasource.fluent.pandas_datasource import (
+            _EXCLUDE_TYPES_FROM_JSON,
+        )
+
+        json_dict: dict[str, JSONValues] = dict()
+        json_dict["reader_method"] = self.reader_method
+        json_dict["reader_options"] = {
+            reader_option_name: reader_option
+            for reader_option_name, reader_option in self.reader_options.items()
+            if not isinstance(reader_option, tuple(_EXCLUDE_TYPES_FROM_JSON))
+        }
+        return json_dict
+
+
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        path: PathStr = None,  # type: ignore[assignment] # error raised if not provided
+        reader_options: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        if path:
+            kwargs["path"] = str(path)
+        if reader_options:
+            kwargs["reader_options"] = reader_options
         super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchSpecError("PathBatchSpec requires a path element")

@@ -119,6 +119,7 @@ def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
             "partial_unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_count": 3,
             "unexpected_index_list": [3, 4, 5],
+            "unexpected_index_query": [3, 4, 5],
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -133,7 +134,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render(
         [evr_failed_with_exception]
     ).to_json_dict()
-    print(result)
     expected_result = {
         "content_block_type": "table",
         "styling": {
@@ -1236,7 +1236,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_p
     }
 
 
-def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas(
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_and_query(
     evr_id_pk_basic_pandas,
 ):
     rendered_value = get_renderer_impl(
@@ -1248,6 +1248,17 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
         "header_row": ["Unexpected Value", "Count", "Index"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
         "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+    }
+    assert rendered_value[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {"tag": "code", "template": "[3, 4, 5]"},
+            }
+        ],
+        "collapse_toggle_link": "To retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
     }
 
 
@@ -1288,7 +1299,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
         "table": [
             ["giraffe", 1, "3"],
             ["lion", 1, "4"],
-            ["zebra", 1, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
         ],
     }
 
@@ -1381,6 +1392,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id
         "table": [
             ["giraffe", 1, "3"],
             ["lion", 1, "4"],
-            ["zebra", 1, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
         ],
     }

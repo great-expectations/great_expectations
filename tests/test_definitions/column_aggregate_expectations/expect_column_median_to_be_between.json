@@ -2,6 +2,7 @@
   "expectation_type" : "expect_column_median_to_be_between",
   "datasets" : [
     {
+      "dataset_name": "expect_column_median_to_be_between_1",
       "data": {
         "a": [
           1,
@@ -158,6 +159,7 @@
         }
       ]},
     {
+      "dataset_name": "expect_column_median_to_be_between_2",
       "data": {
         "empty_column": []
       },

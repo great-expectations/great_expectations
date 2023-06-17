@@ -4,17 +4,11 @@ import logging
 import re
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Final, Optional
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure, google
 from great_expectations.data_context.types.base import BaseYamlConfig
-
-try:
-    from azure.identity import DefaultAzureCredential
-    from azure.keyvault.secrets import SecretClient
-except ImportError:
-    SecretClient = None
-    DefaultAzureCredential = None
 
 try:
     import boto3
@@ -23,12 +17,12 @@ except ImportError:
     boto3 = None
     ClientError = None
 
-try:
-    from google.cloud import secretmanager
-except ImportError:
-    secretmanager = None
 
 logger = logging.getLogger(__name__)
+
+TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(
+    r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)"
+)
 
 
 class _ConfigurationSubstitutor:
@@ -41,6 +35,8 @@ class _ConfigurationSubstitutor:
     """
 
     AWS_PATTERN = r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
+    AWS_SSM_PATTERN = r"^secret\|arn:aws:ssm:([a-z\-0-9]+):([0-9]{12}):parameter\/([a-zA-Z0-9\/_\+=\.@\-]+)"
+
     GCP_PATTERN = (
         r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
     )
@@ -73,7 +69,7 @@ class _ConfigurationSubstitutor:
         if isinstance(data, BaseYamlConfig):
             data = (data.__class__.get_schema_class())().dump(data)
 
-        if isinstance(data, dict) or isinstance(data, OrderedDict):
+        if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
             return {
                 k: self.substitute_all_config_variables(v, replace_variables_dict)
                 for k, v in data.items()
@@ -125,9 +121,7 @@ class _ConfigurationSubstitutor:
 
         # 1. Make substitutions for non-escaped patterns
         try:
-            match = re.finditer(
-                r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str
-            )
+            match = re.finditer(TEMPLATE_STR_REGEX, template_str)
         except TypeError:
             # If the value is not a string (e.g., a boolean), we should return it as is
             return template_str
@@ -181,6 +175,8 @@ class _ConfigurationSubstitutor:
         if isinstance(value, str):
             if re.match(self.AWS_PATTERN, value):
                 return self._substitute_value_from_aws_secrets_manager(value)
+            elif re.match(self.AWS_SSM_PATTERN, value):
+                return self._substitute_value_from_aws_ssm(value)
             elif re.match(self.GCP_PATTERN, value):
                 return self._substitute_value_from_gcp_secret_manager(value)
             elif re.match(self.AZURE_PATTERN, value):
@@ -252,6 +248,73 @@ class _ConfigurationSubstitutor:
             secret = json.loads(secret)[secret_key]
         return secret
 
+    def _substitute_value_from_aws_ssm(self, value: str) -> str:
+        """
+        This methods uses a boto3 client and the systemmanager service to try to retrieve the secret value
+        from the elements it is able to parse from the input value.
+
+        - value: string with pattern ``secret|arn:aws:ssm:${region_name}:${account_id}:parameter:${secret_name}``
+
+            optional : after the value above, a secret version can be added ``:${secret_version}``
+
+            optional : after the value above, a secret key can be added ``|${secret_key}``
+
+        - region_name: `AWS region used by the System Manager Parameter Store <https://docs.aws.amazon.com/general/latest/gr/rande.html>`_
+        - account_id: `Account ID for the AWS account used by the parameter store <https://docs.aws.amazon.com/en_us/IAM/latest/UserGuide/console_account-alias.html>`_
+
+                This value is currently not used.
+        - secret_name: Name of the secret
+        - secret_version: UUID of the version of the secret
+        - secret_key: Only if the secret's data is a JSON string, which key of the dict should be retrieve
+
+        :param value: a string that starts with ``secret|arn:aws:ssm``
+
+        :return: a string with the value substituted by the secret from the AWS Secrets Manager store
+
+        :raises: ImportError, ValueError
+        """
+        regex = re.compile(
+            rf"{self.AWS_SSM_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
+        )
+        if not boto3:
+            logger.error(
+                "boto3 is not installed, please install great_expectations with aws_secrets extra > "
+                "pip install great_expectations[aws_secrets]"
+            )
+            raise ImportError("Could not import boto3")
+
+        matches = regex.match(value)
+
+        if not matches:
+            raise ValueError(f"Could not match the value with regex {regex}")
+
+        region_name = matches.group(1)
+        secret_name = matches.group(3)
+        secret_version = matches.group(4)
+        secret_key = matches.group(5)
+
+        # Create a Secrets Manager client
+        session = boto3.session.Session()
+
+        client = session.client(service_name="ssm", region_name=region_name)
+
+        if secret_version:
+            secret_response = client.get_parameter(
+                Name=secret_name, WithDecryption=True, Version=secret_version
+            )
+        else:
+            secret_response = client.get_parameter(
+                Name=secret_name, WithDecryption=True
+            )
+        # Decrypts secret using the associated KMS CMK.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        secret = secret_response["Parameter"]["Value"]
+
+        if secret_key:
+            secret = json.loads(secret_response["Parameter"]["Value"])[secret_key]
+
+        return secret
+
     def _substitute_value_from_gcp_secret_manager(self, value: str) -> str:
         """
         This methods uses a google.cloud.secretmanager.SecretManagerServiceClient to try to retrieve the secret value
@@ -276,14 +339,14 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
-        if not secretmanager:
+        if not google.secretmanager:
             logger.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
                 "pip install great_expectations[gcp]"
             )
             raise ImportError("Could not import secretmanager from google.cloud")
 
-        client = secretmanager.SecretManagerServiceClient()
+        client = google.secretmanager.SecretManagerServiceClient()
         matches = regex.match(value)
 
         if not matches:
@@ -333,7 +396,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
-        if not SecretClient:
+        if not azure.SecretClient:  # type: ignore[truthy-function] # False if NotImported
             logger.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
@@ -350,9 +413,9 @@ class _ConfigurationSubstitutor:
         secret_name = matches.group(2)
         secret_version = matches.group(3)
         secret_key = matches.group(4)
-        credential = DefaultAzureCredential()
-        client = SecretClient(vault_url=keyvault_uri, credential=credential)
+        credential = azure.DefaultAzureCredential()
+        client = azure.SecretClient(vault_url=keyvault_uri, credential=credential)
         secret = client.get_secret(name=secret_name, version=secret_version).value
         if secret_key:
-            secret = json.loads(secret)[secret_key]
-        return secret
+            secret = json.loads(secret)[secret_key]  # type: ignore[arg-type] # secret could be None
+        return secret  # type: ignore[return-value] # secret could be None

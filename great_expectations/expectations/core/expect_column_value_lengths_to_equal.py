@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
@@ -93,10 +94,27 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         "value",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensure value is set."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_value_lengths_to_equal` it is required that the `configuration.kwargs` contain a `value` key
+        that is either numerical (the length parameter) or a `dict`.  If a `dict`, then that must in turn contain a
+        `$PARAMETER` key.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -133,7 +151,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -172,7 +190,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
             template_str = "values may have any length."
         else:
             template_str = "values must be $value characters long"
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

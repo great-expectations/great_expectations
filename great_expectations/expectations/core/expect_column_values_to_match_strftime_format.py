@@ -155,6 +155,19 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_values_to_match_strftime_format`
+        we require that the `configuraton.kwargs` contain a `strftime_format` key that is either a `str` or `dict`
+        containing `$PARAMETER` key and `str` value.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            ValueError: The provided `strftime_format` cannot be used or parsed
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
@@ -168,8 +181,8 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                     "$PARAMETER" in strftime_format
                 ), 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
             else:
-                datetime.strptime(
-                    datetime.strftime(datetime.now(), strftime_format),
+                datetime.strptime(  # noqa: DTZ007
+                    datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
                     strftime_format,
                 )
         except ValueError as e:
@@ -198,7 +211,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             template_str = (
                 "values must match the following strftime format: $strftime_format"
             )
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -245,7 +258,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
             template_str = (
                 "values must match the following strftime format: $strftime_format"
             )
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

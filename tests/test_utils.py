@@ -13,43 +13,33 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import Engine, inspect
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
     ProfilerStore,
+    Store,
     StoreBackend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import (
-    build_store_from_config,
-    instantiate_class_from_config,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
-
-
-logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
+
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 
 # Taken from the following stackoverflow:
@@ -76,12 +66,22 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
             assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(v1, v2, __trace=repr(index), *args, **kwargs)
+                assertDeepAlmostEqual(
+                    v1,
+                    v2,
+                    __trace=repr(index),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
+                )
         elif isinstance(expected, dict):
             assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(
-                    expected[key], actual[key], __trace=repr(key), *args, **kwargs
+                    expected[key],
+                    actual[key],
+                    __trace=repr(key),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
                 )
         else:
             assert expected == actual
@@ -96,7 +96,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 def safe_remove(path):
     if path is not None:
         try:
-            os.remove(path)
+            os.remove(path)  # noqa: PTH107
         except OSError as e:
             print(e)
 
@@ -108,14 +108,16 @@ def create_files_in_directory(
     for file_name in file_name_list:
         splits = file_name.split("/")
         for i in range(1, len(splits)):
-            subdirectories.append(os.path.join(*splits[:i]))
+            subdirectories.append(os.path.join(*splits[:i]))  # noqa: PTH118
     subdirectories = set(subdirectories)
 
     for subdirectory in subdirectories:
-        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
+        os.makedirs(  # noqa: PTH103
+            os.path.join(directory, subdirectory), exist_ok=True  # noqa: PTH118
+        )
 
     for file_name in file_name_list:
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join(directory, file_name)  # noqa: PTH118
         with open(file_path, "w") as f_:
             f_.write(file_content_fn())
 
@@ -150,29 +152,26 @@ def validate_uuid4(uuid_string: str) -> bool:
     return val.hex == uuid_string.replace("-", "")
 
 
-def get_sqlite_temp_table_names(engine):
-    result = engine.execute(
-        """
-SELECT
-    name
-FROM
-    sqlite_temp_master
-"""
-    )
-    rows = result.fetchall()
+def get_sqlite_temp_table_names(execution_engine: SqlAlchemyExecutionEngine):
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    rows = execution_engine.execute_query(statement).fetchall()
     return {row[0] for row in rows}
 
 
-def get_sqlite_table_names(engine):
-    result = engine.execute(
-        """
-SELECT
-    name
-FROM
-    sqlite_master
-"""
-    )
-    rows = result.fetchall()
+def get_sqlite_table_names(execution_engine: SqlAlchemyExecutionEngine):
+    statement = sa.text("SELECT name FROM sqlite_master")
+
+    rows = execution_engine.execute_query(statement).fetchall()
+
+    return {row[0] for row in rows}
+
+
+def get_sqlite_temp_table_names_from_engine(engine: Engine):
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    with engine.connect() as connection:
+        rows = connection.execute(statement).fetchall()
     return {row[0] for row in rows}
 
 
@@ -193,7 +192,7 @@ def build_tuple_filesystem_store_backend(
         "base_directory": base_directory,
     }
     store_backend_config.update(**kwargs)
-    return build_store_from_config(
+    return Store.build_store_from_config(
         store_config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
@@ -321,7 +320,7 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    configuration_store: ConfigurationStore = build_store_from_config(  # type: ignore[assignment]
+    configuration_store: ConfigurationStore = Store.build_store_from_config(  # type: ignore[assignment]
         store_config=store_config,
         module_name=module_name,
         runtime_environment=None,
@@ -596,7 +595,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
-def load_data_into_test_database(
+def load_data_into_test_database(  # noqa: PLR0912, PLR0915
     table_name: str,
     connection_string: str,
     schema_name: Optional[str] = None,
@@ -651,6 +650,14 @@ def load_data_into_test_database(
             "install optional sqlalchemy dependency for support."
         )
         return return_value
+
+    if engine.dialect.name.lower().startswith("mysql"):
+        # Don't attempt to DROP TABLE IF EXISTS on a table that doesn't exist in mysql because it will error
+        inspector = inspect(engine)
+        db_name = connection_string.split("/")[-1]
+        table_names = [name for name in inspector.get_table_names(schema=db_name)]
+        drop_existing_table = table_name in table_names
+
     if engine.dialect.name.lower() == "bigquery":
         # bigquery is handled in a special way
         load_data_into_test_bigquery_database_with_bigquery_client(
@@ -677,24 +684,26 @@ def load_data_into_test_database(
             engine.dispose()
     else:
         try:
-            connection = engine.connect()
             if drop_existing_table:
                 print(f"Dropping table {table_name}")
-                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                with engine.begin() as connection:
+                    connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
                 print(
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
 
-            all_dfs_concatenated.to_sql(
-                name=table_name,
-                con=engine,
-                schema=schema_name,
-                index=False,
-                if_exists="append",
-                method=to_sql_method,
-            )
+            with engine.connect() as connection:
+                add_dataframe_to_db(
+                    df=all_dfs_concatenated,
+                    name=table_name,
+                    con=connection,
+                    schema=schema_name,
+                    index=False,
+                    if_exists="append",
+                    method=to_sql_method,
+                )
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
@@ -703,8 +712,10 @@ def load_data_into_test_database(
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
-            connection.close()
-            engine.dispose()
+            if connection:
+                connection.close()
+            if engine:
+                engine.dispose()
 
 
 def load_data_into_test_bigquery_database_with_bigquery_client(
@@ -807,10 +818,9 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        execution_engine.execute_query(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
@@ -962,7 +972,6 @@ def get_awsathena_connection_url(db_name_env_var: str = "ATHENA_DB_NAME") -> str
 def get_connection_string_and_dialect(
     athena_db_name_env_var: str = "ATHENA_DB_NAME",
 ) -> Tuple[str, str]:
-
     with open("./connection_string.yml") as f:
         db_config: dict = yaml_handler.load(f)
 
@@ -1030,7 +1039,7 @@ def working_directory(directory: PathStr):
     Reference:
     https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
     """
-    owd = os.getcwd()
+    owd = os.getcwd()  # noqa: PTH109
     try:
         os.chdir(directory)
         yield directory

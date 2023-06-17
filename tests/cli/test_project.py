@@ -93,7 +93,6 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
 def test_project_check_on_valid_project_says_so(
     mock_emit, caplog, monkeypatch, titanic_data_context_clean_usage_stats_enabled
 ):
-
     context = titanic_data_context_clean_usage_stats_enabled
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -142,7 +141,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output

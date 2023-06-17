@@ -1,5 +1,5 @@
 import re
-from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
@@ -18,6 +18,7 @@ def get_extras_require():
     sqla_keys = (
         "athena",
         "bigquery",
+        "clickhouse",
         "dremio",
         "mssql",
         "mysql",
@@ -34,26 +35,33 @@ def get_extras_require():
         "tools",
         "all-contrib-expectations",
     )
+
     requirements_dir = "reqs"
-    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
-    for fname in glob(f"{requirements_dir}/*.txt"):
-        match = rx_fname_part.match(fname)
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
+
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
+    # Loop through each requirement file and verify they are named
+    # correctly and are in the right location.
+    for file_path in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(file_path.name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(fname) as f:
+        with open(file_path) as f:
             parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
             results[key] = parsed
 
     lite = results.pop("lite")
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
+    cloud = results.pop("cloud")
+    arrow = results.pop("arrow")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test
+    results["test"] = lite + contrib + docs_test + cloud + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -76,7 +84,8 @@ long_description = "Always know what to expect from your data. (See https://gith
 config = {
     "description": "Always know what to expect from your data.",
     "author": "The Great Expectations Team",
-    "url": "https://github.com/great-expectations/great_expectations",
+    "url": "https://greatexpectations.io",
+    "download_url": "https://github.com/great-expectations/great_expectations",
     "author_email": "team@greatexpectations.io",
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
@@ -86,13 +95,18 @@ config = {
         exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
     ),
     "entry_points": {
-        "console_scripts": ["great_expectations=great_expectations.cli:main"]
+        "console_scripts": [
+            "great_expectations=great_expectations.cli:main",
+            "gx-agent=great_expectations.agent:run_agent",
+        ]
     },
+    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
     "keywords": "data science testing pipeline data quality dataquality validation datavalidation",
     "include_package_data": True,
+    "python_requires": ">=3.8",
     "classifiers": [
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -103,7 +117,6 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",

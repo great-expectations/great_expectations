@@ -10,16 +10,19 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
+import packaging
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -36,10 +39,19 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import (
+    AbstractDataContext,
+    BaseDataContext,
+    CloudDataContext,
+)
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
+)
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
 )
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -54,6 +66,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -65,7 +78,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
@@ -92,15 +104,17 @@ from great_expectations.util import (
     is_library_loadable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
 )
 
 if TYPE_CHECKING:
-    from pyspark.sql import SparkSession
+    from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
-yaml = YAML()
+yaml = YAMLHandler()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
@@ -116,10 +130,10 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")  # noqa: F841
+    pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -219,6 +233,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against snowflake",
     )
     parser.addoption(
+        "--clickhouse",
+        action="store_true",
+        help="If set, execute tests against clickhouse",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -283,6 +302,7 @@ def build_test_backends_list_v3_api(metafunc):
     include_redshift: bool = metafunc.config.getoption("--redshift")
     include_athena: bool = metafunc.config.getoption("--athena")
     include_snowflake: bool = metafunc.config.getoption("--snowflake")
+    include_clickhouse: bool = metafunc.config.getoption("--clickhouse")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -297,6 +317,7 @@ def build_test_backends_list_v3_api(metafunc):
         include_redshift=include_redshift,
         include_athena=include_athena,
         include_snowflake=include_snowflake,
+        include_clickhouse=include_clickhouse,
     )
     return test_backend_names
 
@@ -349,28 +370,46 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def preload_latest_gx_cache():
+    """
+    Pre-load the _VersionChecker version cache so that we don't attempt to call pypi
+    when creating contexts as part of normal testing.
+    """
+    # setup
+    import great_expectations as gx
+
+    current_version = packaging.version.Version(gx.__version__)
+    logger.info(
+        f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}"
+    )
+    _VersionChecker._LATEST_GX_VERSION_CACHE = current_version
+    yield current_version
+    # teardown
+    logger.info("Clearing _VersionChecker._LATEST_GX_VERSION_CACHE ")
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None
+
+
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [
-            dbms in test_backends
-            for dbms in [
-                "postgresql",
-                "sqlite",
-                "mysql",
-                "mssql",
-                "bigquery",
-                "trino",
-                "redshift",
-                "athena",
-                "snowflake",
-            ]
+        dbms in test_backends
+        for dbms in [
+            "postgresql",
+            "sqlite",
+            "mysql",
+            "mssql",
+            "bigquery",
+            "trino",
+            "redshift",
+            "athena",
+            "snowflake",
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -379,14 +418,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> SparkSession:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    try:
-        import pyspark  # noqa: F401
-        from pyspark.sql import SparkSession  # noqa: F401
+    from great_expectations.compatibility import pyspark
 
+    if pyspark.SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -394,8 +432,8 @@ def spark_session(test_backends) -> SparkSession:
                 # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
-    except ImportError:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -403,7 +441,7 @@ def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
@@ -418,35 +456,62 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+    from great_expectations.compatibility import pyspark
 
-    schema = StructType(
+    schema = pyspark.types.StructType(
         [
-            StructField("vendor_id", IntegerType(), True, None),
-            StructField("pickup_datetime", TimestampType(), True, None),
-            StructField("dropoff_datetime", TimestampType(), True, None),
-            StructField("passenger_count", IntegerType(), True, None),
-            StructField("trip_distance", DoubleType(), True, None),
-            StructField("rate_code_id", IntegerType(), True, None),
-            StructField("store_and_fwd_flag", StringType(), True, None),
-            StructField("pickup_location_id", IntegerType(), True, None),
-            StructField("dropoff_location_id", IntegerType(), True, None),
-            StructField("payment_type", IntegerType(), True, None),
-            StructField("fare_amount", DoubleType(), True, None),
-            StructField("extra", DoubleType(), True, None),
-            StructField("mta_tax", DoubleType(), True, None),
-            StructField("tip_amount", DoubleType(), True, None),
-            StructField("tolls_amount", DoubleType(), True, None),
-            StructField("improvement_surcharge", DoubleType(), True, None),
-            StructField("total_amount", DoubleType(), True, None),
-            StructField("congestion_surcharge", DoubleType(), True, None),
+            pyspark.types.StructField(
+                "vendor_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "passenger_count", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "trip_distance", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "rate_code_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "store_and_fwd_flag", pyspark.types.StringType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "payment_type", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "fare_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField(
+                "mta_tax", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tip_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tolls_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "improvement_surcharge", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "total_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "congestion_surcharge", pyspark.types.DoubleType(), True, None
+            ),
         ]
     )
     return schema
@@ -743,11 +808,9 @@ def postgresql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"postgresql://postgres@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -761,11 +824,9 @@ def mysql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"mysql+pymysql://root@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -780,15 +841,15 @@ def empty_data_context(
     project_path.mkdir()
     project_path = str(project_path)
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
+    os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
     return context
 
 
 @pytest.fixture(scope="function")
-def data_context_with_connection_to_animal_names_db(
+def data_context_with_connection_to_metrics_db(
     tmp_path,
 ) -> FileDataContext:
     """
@@ -814,9 +875,9 @@ def data_context_with_connection_to_animal_names_db(
     project_path.mkdir()
     project_path = str(project_path)
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
+    os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     assert context.list_datasources() == []
     sqlite_path = file_relative_path(__file__, "test_sets/metrics_test.db")
     datasource_config: str = f"""
@@ -830,11 +891,16 @@ def data_context_with_connection_to_animal_names_db(
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetSqlDataConnector
                 assets:
-                    my_asset:
+                    animals_names_asset:
                         table_name: animal_names
                         class_name: Asset
+                    column_pair_asset:
+                        table_name: column_pairs
+                        class_name: Asset
+                    multi_column_sum_asset:
+                        table_name: multi_column_sums
+                        class_name: Asset
     """
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -851,42 +917,81 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
             )
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
         str(
-            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
     )
 
     context = get_context(context_root_dir=context_path)
@@ -945,7 +1050,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -964,7 +1068,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     project_dir: str = context.root_directory
-    data_path: str = os.path.join(project_dir, "..", "data", "titanic")
+    data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     datasource_config: str = f"""
         class_name: Datasource
@@ -982,7 +1086,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
                         - data_asset_name
     """
 
-    # noinspection PyUnusedLocal
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
@@ -1001,23 +1104,20 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
     project_dir: str = context.root_directory
-    data_path: str = os.path.join(project_dir, "..", "data", "titanic")
+    data_path: str = os.path.join(project_dir, "..", "data", "titanic")  # noqa: PTH118
 
     if (
         any(
-            [
-                dbms in test_backends
-                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-            ]
+            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
         )
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
     ):
         db_fixture_file_path: str = file_relative_path(
             __file__,
-            os.path.join("test_sets", "titanic_sql_test_cases.db"),
+            os.path.join("test_sets", "titanic_sql_test_cases.db"),  # noqa: PTH118
         )
-        db_file_path: str = os.path.join(
+        db_file_path: str = os.path.join(  # noqa: PTH118
             data_path,
             "titanic_sql_test_cases.db",
         )
@@ -1041,7 +1141,6 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             name: whole_table
         """
 
-        # noinspection PyUnusedLocal
         _: BaseDatasource = context.add_datasource(
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -1059,73 +1158,6 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    return context
-
-
-@pytest.fixture
-def deterministic_asset_dataconnector_context(
-    tmp_path_factory,
-    monkeypatch,
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(
-                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
-    )
-    context = get_context(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
-    context._save_project_config()
     return context
 
 
@@ -1410,6 +1442,675 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def deterministic_asset_data_connector_context(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+        """
+
+    context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_no_block_no_fluent_datasources_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
+            ),
+        ),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    path_to_folder_containing_csv_files = pathlib.Path(data_path)
+
+    datasource_name = "my_pandas_filesystem_datasource"
+    datasource = context.sources.add_pandas_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_pandas_dataframes_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    df = pd.read_csv(filepath_or_buffer=csv_source_path)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # add simple template config
+    simple_checkpoint_template_config = CheckpointConfig(
+        name="my_simple_template_checkpoint",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            }
+        },
+    )
+    simple_checkpoint_template_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_template_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_template_config_key,
+        value=simple_checkpoint_template_config,
+    )
+
+    # add nested template configs
+    nested_checkpoint_template_config_1 = CheckpointConfig(
+        name="my_nested_checkpoint_template_1",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        expectation_suite_name="suite_from_template_1",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "FOO",
+            "tolerance": "FOOBOO",
+            "aux_param_0": "FOOBARBOO",
+            "aux_param_1": "FOOBARBOO",
+            "template_1_key": 456,
+        },
+        runtime_configuration={
+            "result_format": "FOOBARBOO",
+            "partial_unexpected_count": "FOOBARBOO",
+            "template_1_key": 123,
+        },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "data_connector_query": {"partition_index": -999},
+                }
+            }
+        ],
+    )
+    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_1.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_1_key,
+        value=nested_checkpoint_template_config_1,
+    )
+
+    nested_checkpoint_template_config_2 = CheckpointConfig(
+        name="my_nested_checkpoint_template_2",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_1",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_2",
+                "action": {"class_name": "Template2SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        },
+    )
+    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_2.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_2_key,
+        value=nested_checkpoint_template_config_2,
+    )
+
+    nested_checkpoint_template_config_3 = CheckpointConfig(
+        name="my_nested_checkpoint_template_3",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_2",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_3",
+                "action": {"class_name": "Template3SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+            "template_3_key": 123,
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+            "template_3_key": "bloopy!",
+        },
+    )
+    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_3.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_3_key,
+        value=nested_checkpoint_template_config_3,
+    )
+
+    # add minimal SimpleCheckpoint
+    simple_checkpoint_config = CheckpointConfig(
+        name="my_minimal_simple_checkpoint",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_config_key,
+        value=simple_checkpoint_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+    )
+    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_slack_webhook_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_config_key,
+        value=simple_checkpoint_with_slack_webhook_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook and notify_with
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack_and_notify_with_all",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+        notify_with="all",
+    )
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
+        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
+    )
+
+    # add SimpleCheckpoint with site_names
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_site_names",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        site_names=["local_site"],
+    )
+    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_site_names_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_site_names_config_key,
+        value=simple_checkpoint_with_site_names_config,
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
     return context
 
 
@@ -1421,9 +2122,11 @@ def empty_context_with_checkpoint(empty_data_context):
     fixture_path = file_relative_path(
         __file__, f"./data_context/fixtures/contexts/{fixture_name}"
     )
-    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    checkpoints_file = os.path.join(  # noqa: PTH118
+        root_dir, "checkpoints", fixture_name
+    )
     shutil.copy(fixture_path, checkpoints_file)
-    assert os.path.isfile(checkpoints_file)
+    assert os.path.isfile(checkpoints_file)  # noqa: PTH113
     return context
 
 
@@ -1433,29 +2136,35 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = gx.data_context.FileDataContext.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
+    os.makedirs(asset_config_path, exist_ok=True)  # noqa: PTH103
     return context
 
 
 @pytest.fixture
 def titanic_data_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1463,20 +2172,26 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
 @pytest.fixture
 def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_titanic_pre_v013_no_data_docs.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1484,20 +2199,26 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
 @pytest.fixture
 def titanic_data_context_no_data_docs(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_titanic_no_data_docs.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1507,20 +2228,26 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1530,20 +2257,26 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1553,20 +2286,26 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_upgraded_titanic.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "..", "data", "Titanic.csv")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -1574,14 +2313,16 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 @pytest.fixture(scope="module")
 def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     try:
-        from pyspark.sql import DataFrame
+        from pyspark.sql import DataFrame  # noqa: TCH002
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
     titanic_database_name: str = "db_test"
     titanic_csv_path: str = file_relative_path(__file__, "./test_sets/Titanic.csv")
     project_path: str = str(tmp_path_factory.mktemp("data"))
-    project_dataset_path: str = str(os.path.join(project_path, "Titanic.csv"))
+    project_dataset_path: str = str(
+        os.path.join(project_path, "Titanic.csv")  # noqa: PTH118
+    )
 
     shutil.copy(titanic_csv_path, project_dataset_path)
     titanic_df: DataFrame = spark_warehouse_session.read.csv(
@@ -1613,13 +2354,16 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
 @pytest.fixture
 def titanic_sqlite_db(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-        return engine
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
+            return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -1627,12 +2371,15 @@ def titanic_sqlite_db(sa):
 @pytest.fixture
 def titanic_sqlite_db_connection_string(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1666,11 +2413,12 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        assert engine.execute("select 1").fetchall()[0] == (1,)
+        with engine.begin() as connection:
+            assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1682,34 +2430,40 @@ def site_builder_data_context_with_html_store_titanic_random(
     tmp_path_factory, filesystem_csv_3
 ):
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
-    os.mkdir(project_dir)
+    project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
+    os.mkdir(project_dir)  # noqa: PTH102
 
-    os.makedirs(os.path.join(project_dir, "data"))
-    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH118, PTH103
+    os.makedirs(os.path.join(project_dir, "data/titanic"))  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(os.path.join(project_dir, "data", "titanic", "Titanic.csv")),
+        str(
+            os.path.join(project_dir, "data", "titanic", "Titanic.csv")  # noqa: PTH118
+        ),
     )
 
-    os.makedirs(os.path.join(project_dir, "data", "random"))
+    os.makedirs(os.path.join(project_dir, "data", "random"))  # noqa: PTH118, PTH103
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),
-        str(os.path.join(project_dir, "data", "random", "f1.csv")),
+        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data", "random", "f1.csv")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),
-        str(os.path.join(project_dir, "data", "random", "f2.csv")),
+        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data", "random", "f2.csv")),  # noqa: PTH118
     )
     gx.data_context.FileDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_site_builder.yml"
         ),
-        str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
+        str(
+            os.path.join(  # noqa: PTH118
+                project_dir, "great_expectations", "great_expectations.yml"
+            )
+        ),
     )
     context = get_context(
-        context_root_dir=os.path.join(project_dir, "great_expectations")
+        context_root_dir=os.path.join(project_dir, "great_expectations")  # noqa: PTH118
     )
 
     context.add_datasource(
@@ -1718,7 +2472,9 @@ def site_builder_data_context_with_html_store_titanic_random(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data", "titanic"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data", "titanic"
+                ),
             }
         },
     )
@@ -1728,7 +2484,9 @@ def site_builder_data_context_with_html_store_titanic_random(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data", "random"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data", "random"
+                ),
             }
         },
     )
@@ -1753,34 +2511,40 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
     base_dir = tmp_path / "project_dir"
     base_dir.mkdir()
     base_dir = str(base_dir)
-    project_dir = os.path.join(base_dir, "project_path")
-    os.mkdir(project_dir)
+    project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
+    os.mkdir(project_dir)  # noqa: PTH102
 
-    os.makedirs(os.path.join(project_dir, "data"))
-    os.makedirs(os.path.join(project_dir, "data", "titanic"))
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH118, PTH103
+    os.makedirs(os.path.join(project_dir, "data", "titanic"))  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(os.path.join(project_dir, "data", "titanic", "Titanic.csv")),
+        str(
+            os.path.join(project_dir, "data", "titanic", "Titanic.csv")  # noqa: PTH118
+        ),
     )
 
-    os.makedirs(os.path.join(project_dir, "data", "random"))
+    os.makedirs(os.path.join(project_dir, "data", "random"))  # noqa: PTH118, PTH103
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),
-        str(os.path.join(project_dir, "data", "random", "f1.csv")),
+        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data", "random", "f1.csv")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),
-        str(os.path.join(project_dir, "data", "random", "f2.csv")),
+        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data", "random", "f2.csv")),  # noqa: PTH118
     )
     gx.data_context.FileDataContext.create(project_dir)
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"
         ),
-        str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
+        str(
+            os.path.join(  # noqa: PTH118
+                project_dir, "great_expectations", "great_expectations.yml"
+            )
+        ),
     )
     context = get_context(
-        context_root_dir=os.path.join(project_dir, "great_expectations")
+        context_root_dir=os.path.join(project_dir, "great_expectations")  # noqa: PTH118
     )
 
     context.add_datasource(
@@ -1789,7 +2553,9 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data", "titanic"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data", "titanic"
+                ),
             }
         },
     )
@@ -1799,7 +2565,9 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data", "random"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data", "random"
+                ),
             }
         },
     )
@@ -1822,7 +2590,7 @@ def v20_project_directory(tmp_path_factory):
     GX config_version: 2 project for testing upgrade helper
     """
     project_path = str(tmp_path_factory.mktemp("v20_project"))
-    context_root_dir = os.path.join(project_path, "great_expectations")
+    context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     shutil.copytree(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
@@ -1833,7 +2601,7 @@ def v20_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, "great_expectations.yml"),  # noqa: PTH118
     )
     return context_root_dir
 
@@ -1845,36 +2613,42 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),  # noqa: PTH118
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
@@ -1886,36 +2660,42 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_v013_basic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(fixture_dir, "great_expectations_v013_basic.yml"),  # noqa: PTH118
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
@@ -1927,36 +2707,42 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),  # noqa: PTH118
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "rendering_fixtures/expectations_suite_1.json",
         ),
-        os.path.join(asset_config_path, "default.json"),
+        os.path.join(asset_config_path, "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
@@ -1998,20 +2784,78 @@ def filesystem_csv_data_context(
     return empty_data_context
 
 
+@pytest.fixture()
+def data_context_with_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    # noinspection PyProtectedMember
+    empty_data_context._save_project_config()
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource_and_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_fluent_datasource", base_directory=filesystem_csv_2
+    )
+    empty_data_context.add_datasource(
+        name="my_block_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
     base_dir = str(base_dir)
     # Put a few files in the directory
-    with open(os.path.join(base_dir, "f1.csv"), "w") as outfile:
+    with open(os.path.join(base_dir, "f1.csv"), "w") as outfile:  # noqa: PTH118
         outfile.writelines(["a,b,c\n"])
-    with open(os.path.join(base_dir, "f2.csv"), "w") as outfile:
+    with open(os.path.join(base_dir, "f2.csv"), "w") as outfile:  # noqa: PTH118
         outfile.writelines(["a,b,c\n"])
 
-    os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)
-    with open(os.path.join(base_dir, "f3", "f3_20190101.csv"), "w") as outfile:
+    os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)  # noqa: PTH118, PTH103
+    with open(
+        os.path.join(base_dir, "f3", "f3_20190101.csv"), "w"  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
-    with open(os.path.join(base_dir, "f3", "f3_20190102.csv"), "w") as outfile:
+    with open(
+        os.path.join(base_dir, "f3", "f3_20190102.csv"), "w"  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
 
     return base_dir
@@ -2025,9 +2869,9 @@ def filesystem_csv_2(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
-    assert os.path.isabs(base_dir)
-    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
+    assert os.path.isabs(base_dir)  # noqa: PTH117
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))  # noqa: PTH118, PTH113
 
     return base_dir
 
@@ -2040,10 +2884,10 @@ def filesystem_csv_3(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)  # noqa: PTH118
 
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
-    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)  # noqa: PTH118
 
     return base_dir
 
@@ -2061,7 +2905,7 @@ def filesystem_csv_4(tmp_path):
             "y": [1, 2, 3],
         }
     )
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)  # noqa: PTH118
 
     return base_dir
 
@@ -2134,7 +2978,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
@@ -2142,13 +2986,23 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql(name="test_table", con=sqlite_engine, index=True)
-            sqlite_engine.execute(
-                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            add_dataframe_to_db(
+                df=df,
+                name="test_table",
+                con=sqlite_engine,
+                index=True,
             )
-            sqlite_engine.execute(
-                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-            )
+            with sqlite_engine.begin() as connection:
+                connection.execute(
+                    sa.text(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                    )
+                )
+                connection.execute(
+                    sa.text(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                    )
+                )
             return sqlite_engine
         except ImportError:
             sa = None
@@ -2162,15 +3016,10 @@ def expectation_suite_identifier():
 
 
 @pytest.fixture
-def basic_sqlalchemy_datasource(sqlitedb_engine):
-    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
-
-
-@pytest.fixture
 def test_folder_connection_path_csv(tmp_path_factory):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)
+    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)  # noqa: PTH118
     return str(path)
 
 
@@ -2185,10 +3034,12 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         import sqlalchemy as sa
 
         basepath = str(tmp_path_factory.mktemp("db_context"))
-        path = os.path.join(basepath, "test.db")
+        path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql(name="table_1", con=engine, index=True)
-        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
+        add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
+        add_dataframe_to_db(
+            df=df2, name="table_2", con=engine, index=True, schema="main"
+        )
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)
@@ -2260,7 +3111,9 @@ def data_context_with_simple_sql_datasource_for_testing_get_batch(
 
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     datasource_config: str = f"""
@@ -2332,7 +3185,9 @@ execution_engine:
 def db_file():
     return file_relative_path(
         __file__,
-        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
 
@@ -2617,7 +3472,7 @@ def empty_base_data_context_in_cloud_mode(
     ge_cloud_config: GXCloudConfig,
 ) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
     context = gx.data_context.BaseDataContext(
@@ -2638,7 +3493,7 @@ def empty_data_context_in_cloud_mode(
 ):
     """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path_name: str = str(project_path)
 
     def mocked_config(*args, **kwargs) -> DataContextConfig:
@@ -2886,7 +3741,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     """
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_fixtures",
             "rule_based_profiler",
             "alice_user_workflow_verbose_profiler_config.yml",
@@ -2921,16 +3776,6 @@ def alice_columnar_table_single_batch(empty_data_context):
                 "column": "user_id",
             },
             meta={},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_less_than",
-            meta={},
-            kwargs={"value": 9488404, "column": "user_id"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_greater_than",
-            meta={},
-            kwargs={"value": 397433, "column": "user_id"},
         ),
     ]
 
@@ -3210,26 +4055,6 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "expectation_type": "expect_column_values_to_not_be_null",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_less_than",
-                        "condition": "$parameter.my_max_user_id.value < $variables.very_large_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_max_user_id.value",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_greater_than",
-                        "condition": "$parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_min_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -3514,24 +4339,29 @@ def alice_columnar_table_single_batch_context(
     # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
     # (ie. adjusted to be context._usage_statistics_handler)
     context._usage_statistics_handler = UsageStatisticsHandler(
-        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+        data_context=context,
+        data_context_id="00000000-0000-0000-0000-00000000a004",
+        usage_statistics_url="N/A",
+        oss_id=None,
     )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
-    data_path: str = os.path.join(context.root_directory, data_relative_path)
-    os.makedirs(data_path, exist_ok=True)
+    data_path: str = os.path.join(  # noqa: PTH118
+        context.root_directory, data_relative_path
+    )
+    os.makedirs(data_path, exist_ok=True)  # noqa: PTH103
 
     # Copy data
     filename: str = alice_columnar_table_single_batch["sample_data_relative_path"]
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 f"{filename}",
             ),
         ),
-        str(os.path.join(data_path, filename)),
+        str(os.path.join(data_path, filename)),  # noqa: PTH118
     )
 
     data_connector_base_directory: str = "./"
@@ -3618,7 +4448,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     """
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_fixtures",
             "rule_based_profiler",
             "bobby_user_workflow_verbose_profiler_config.yml",
@@ -6497,14 +7327,16 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
@@ -6512,12 +7344,12 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6525,7 +7357,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
@@ -6533,7 +7365,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6541,7 +7373,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
@@ -6549,7 +7381,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6557,7 +7389,7 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
@@ -6574,14 +7406,16 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
     tmp_path_factory,
 ) -> FileDataContext:
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
@@ -6589,12 +7423,12 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6602,7 +7436,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
@@ -6610,7 +7444,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6618,7 +7452,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
@@ -6626,7 +7460,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "random_subsamples",
@@ -6634,7 +7468,7 @@ def bobby_columnar_table_multi_batch_probabilistic_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
@@ -6671,7 +7505,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     """
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_fixtures",
             "rule_based_profiler",
             "bobster_user_workflow_verbose_profiler_config.yml",
@@ -6741,14 +7575,16 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
@@ -6756,11 +7592,11 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     base_directory: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
         ),
@@ -6791,14 +7627,17 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     csv_source_path: str
     df: pd.DataFrame
     for file_name in file_name_list:
-        csv_source_path = os.path.join(base_directory, file_name)
+        csv_source_path = os.path.join(base_directory, file_name)  # noqa: PTH118
         df = pd.read_csv(filepath_or_buffer=csv_source_path)
         df = df.sample(
             n=output_file_name_length_map[file_name], replace=False, random_state=1
         )
         # noinspection PyTypeChecker
         df.to_csv(
-            path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
+            path_or_buf=os.path.join(  # noqa: PTH118
+                context_path, "..", "data", file_name
+            ),
+            index=False,
         )
 
     context = get_context(context_root_dir=context_path)
@@ -6824,7 +7663,7 @@ def quentin_columnar_table_multi_batch():
     """
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_fixtures",
             "rule_based_profiler",
             "quentin_user_workflow_verbose_profiler_config.yml",
@@ -6922,14 +7761,16 @@ def quentin_columnar_table_multi_batch_data_context(
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "integration",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
@@ -6937,11 +7778,11 @@ def quentin_columnar_table_multi_batch_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     base_directory: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
         ),
@@ -6954,10 +7795,10 @@ def quentin_columnar_table_multi_batch_data_context(
     file_name: str
     csv_source_path: str
     for file_name in file_name_list:
-        csv_source_path = os.path.join(base_directory, file_name)
+        csv_source_path = os.path.join(base_directory, file_name)  # noqa: PTH118
         shutil.copy(
             csv_source_path,
-            os.path.join(context_path, "..", "data", file_name),
+            os.path.join(context_path, "..", "data", file_name),  # noqa: PTH118
         )
 
     context = get_context(context_root_dir=context_path)
@@ -6975,12 +7816,12 @@ def multibatch_generic_csv_generator():
     """
 
     def _multibatch_generic_csv_generator(
-        data_path: str,
+        data_path: str | pathlib.Path,
         start_date: Optional[datetime.datetime] = None,
         num_event_batches: Optional[int] = 20,
         num_events_per_batch: Optional[int] = 5,
     ) -> List[str]:
-
+        data_path = pathlib.Path(data_path)
         if start_date is None:
             start_date = datetime.datetime(2000, 1, 1)
 
@@ -7018,7 +7859,7 @@ def multibatch_generic_csv_generator():
             file_list.append(filename)
             # noinspection PyTypeChecker
             df.to_csv(
-                os.path.join(data_path, filename),
+                data_path / filename,
                 index_label="intra_batch_index",
             )
 
@@ -7032,8 +7873,8 @@ def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
     context = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path = "../data"
-    data_path = os.path.join(context.root_directory, data_relative_path)
-    os.makedirs(data_path, exist_ok=True)
+    data_path = os.path.join(context.root_directory, data_relative_path)  # noqa: PTH118
+    os.makedirs(data_path, exist_ok=True)  # noqa: PTH103
 
     data_connector_base_directory = "./"
     monkeypatch.setenv("base_directory", data_connector_base_directory)
@@ -7102,7 +7943,7 @@ data_connectors:
 
 
 @pytest.fixture
-def in_memory_runtime_context():
+def in_memory_runtime_context() -> AbstractDataContext:
     return build_in_memory_runtime_context()
 
 
@@ -7155,7 +7996,7 @@ def column_histogram_metric_config() -> MetricConfiguration:
 def taxi_test_file():
     return file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "yellow_tripdata_sample_2019-01.csv",
@@ -7164,10 +8005,24 @@ def taxi_test_file():
 
 
 @pytest.fixture
+def taxi_test_file_upcase():
+    return file_relative_path(
+        __file__,
+        os.path.join(  # noqa: PTH118
+            "test_sets",
+            "taxi_yellow_tripdata_samples_upcase",
+            "yellow_tripdata_sample_2019-01.CSV",
+        ),
+    )
+
+
+@pytest.fixture
 def taxi_test_file_directory():
     return file_relative_path(
         __file__,
-        os.path.join("test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"),
+        os.path.join(  # noqa: PTH118
+            "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
+        ),
     )
 
 
@@ -7175,6 +8030,34 @@ def taxi_test_file_directory():
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     return test_df
+
+
+@pytest.fixture
+def spark_df_from_pandas_df():
+    """
+    Construct a spark dataframe from pandas dataframe.
+    Returns:
+        Function that can be used in your test e.g.:
+        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    """
+
+    def _construct_spark_df_from_pandas(
+        spark_session,
+        pandas_df,
+    ):
+        spark_df = spark_session.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in pandas_df.to_records(index=False)
+            ],
+            pandas_df.columns.tolist(),
+        )
+        return spark_df
+
+    return _construct_spark_df_from_pandas
 
 
 @pytest.fixture
@@ -7244,9 +8127,95 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
+def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+
+
+@pytest.fixture
+def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+
+
+@pytest.fixture
+def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> pyspark.DataFrame:
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
+def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> pyspark.DataFrame:
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7265,3 +8234,27 @@ def spark_dataframe_for_unexpected_rows_with_index(
         data=df,
     )
     return test_df
+
+
+@pytest.fixture
+def ephemeral_context_with_defaults() -> EphemeralDataContext:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
+    )
+    return EphemeralDataContext(project_config=project_config)
+
+
+@pytest.fixture
+def validator_with_mock_execution_engine() -> Validator:
+    execution_engine = mock.MagicMock()
+    validator = Validator(execution_engine=execution_engine)
+    return validator
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path("test_sets", "taxi_yellow_tripdata_samples")
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path

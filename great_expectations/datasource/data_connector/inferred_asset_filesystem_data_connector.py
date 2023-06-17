@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -14,20 +15,24 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
+    """A base class for Inferred Asset Data Connectors designed to operate on data stored in filesystems.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        base_directory: The directory from which the Data Connector should read files.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
+            a list of `group_names` for capture groups.
+        glob_directive: A glob pattern for selecting files in directory.
+        sorters: A list of sorters for sorting data references.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
-    Extension of InferredAssetFilePathDataConnector used to connect to data on a filesystem.
 
-    The InferredAssetFilesystemDataConnector is one of two classes (ConfiguredAssetFilesystemDataConnector being the
-    other one) designed for connecting to data on a filesystem. It connects to assets
-    inferred from directory and file name by default_regex and glob_directive.
-
-    InferredAssetFilesystemDataConnector that operates on file paths and determines
-    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
-
-    """
-
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -39,20 +44,6 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references.
-
-        Args:
-            name (str): name of InferredAssetFilesystemDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            base_directory(str): base_directory for DataConnector to begin reading files
-            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            glob_directive (str): glob for selecting files in directory (defaults to *) or nested directories (e.g. */*.csv)
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
@@ -89,12 +80,14 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         return str(Path(self.base_directory).joinpath(path))
 
     @property
-    def base_directory(self):
+    def base_directory(self) -> str:
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
         """
-        return normalize_directory_path(
-            dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory,
+        return str(
+            normalize_directory_path(
+                dir_path=self._base_directory,
+                root_directory_path=self.data_context_root_directory,
+            )
         )

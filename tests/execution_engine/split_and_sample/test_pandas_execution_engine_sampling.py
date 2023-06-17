@@ -39,7 +39,6 @@ from great_expectations.execution_engine import PandasExecutionEngine
 def test_limit_sampler_get_batch_data(
     sampling_kwargs, num_sampled_rows, underscore_prefix
 ):
-
     sampled_df = (
         PandasExecutionEngine()
         .get_batch_data(

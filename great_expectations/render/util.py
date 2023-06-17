@@ -1,16 +1,19 @@
 """Rendering utility"""
+from __future__ import annotations
+
 import copy
 import decimal
 import locale
 import re
-import warnings
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.exceptions import RenderingError
 
 DEFAULT_PRECISION = 4
 # create a new context for this task
@@ -19,24 +22,29 @@ ctx = decimal.Context()
 ctx.prec = DEFAULT_PRECISION
 
 
-def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=False):
-    """Convert the given float to a string, centralizing standards for precision and decisions about scientific
+@public_api
+def num_to_str(
+    f: float,
+    precision: int = DEFAULT_PRECISION,
+    use_locale: bool = False,
+    no_scientific: bool = False,
+) -> str:
+    """Convert the given float to a string, centralizing standards for precision and decisions about scientific \
     notation. Adds an approximately equal sign in the event precision loss (e.g. rounding) has occurred.
 
-    There's a good discussion of related issues here:
+    For more context, please review the following:
         https://stackoverflow.com/questions/38847690/convert-float-to-string-in-positional-format-without-scientific-notation-and-fa
 
     Args:
-        f: the number to format
-        precision: the number of digits of precision to display
-        use_locale: if True, use locale-specific formatting (e.g. adding thousands separators)
-        no_scientific: if True, print all available digits of precision without scientific notation. This may insert
-            leading zeros before very small numbers, causing the resulting string to be longer than `precision`
-            characters
+        f: The number to format.
+        precision: The number of digits of precision to display (defaults to 4).
+        use_locale: If True, use locale-specific formatting (e.g. adding thousands separators).
+        no_scientific: If True, print all available digits of precision without scientific notation. This may insert
+                       leading zeros before very small numbers, causing the resulting string to be longer than `precision`
+                       characters.
 
     Returns:
-        A string representation of the float, according to the desired parameters
-
+        A string representation of the input float `f`, according to the desired parameters.
     """
     assert not (use_locale and no_scientific)
     if precision != DEFAULT_PRECISION:
@@ -73,7 +81,7 @@ def ordinal(num):
     """Convert a number to ordinal"""
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
-    if 10 <= num % 100 <= 20:
+    if 10 <= num % 100 <= 20:  # noqa: PLR2004
         suffix = "th"
     else:
         # the second parameter is a default.
@@ -101,31 +109,29 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         regex = run_name_filter.get("matches_regex")
         regex_match = re.search(regex, run_name)
         return False if regex_match is None else True
-    elif run_name_filter.get("eq"):
-        # deprecated-v0.11.9
-        warnings.warn(
-            "The 'eq' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'equals' key.",
-            DeprecationWarning,
-        )
-        return run_name_filter.get("eq") == run_name
-    elif run_name_filter.get("ne"):
-        # deprecated-v0.11.9
-        warnings.warn(
-            "The 'ne' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'not_equals' key.",
-            DeprecationWarning,
-        )
-        return run_name_filter.get("ne") != run_name
 
 
-def substitute_none_for_missing(kwargs, kwarg_list):
+@public_api
+def substitute_none_for_missing(
+    kwargs: dict[str, Any], kwarg_list: Sequence[str]
+) -> dict[str, Any]:
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
-    Example:
-        Input:
-            kwargs={"a":1, "b":2},
-            kwarg_list=["c", "d"]
+    Args:
+        kwargs: A dictionary of keyword arguments.
+        kwargs_list: A list or sequence of strings representing all possible keyword parameters to a function.
 
-        Output: {"a":1, "b":2, "c": None, "d": None}
+    Returns:
+        A copy of the original `kwargs` with missing keys from `kwarg_list` defaulted to `None`.
+
+    ```python
+    >>> result = substitute_none_for_missing(
+    ...    kwargs={"a":1, "b":2},
+    ...    kwarg_list=["c", "d"]
+    ... )
+    ... print(result)
+    {"a":1, "b":2, "c": None, "d": None}
+    ```
 
     This is helpful for standardizing the input objects for rendering functions.
     The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
@@ -139,9 +145,28 @@ def substitute_none_for_missing(kwargs, kwarg_list):
 
 
 # NOTE: the method is pretty dirty
+@public_api
 def parse_row_condition_string_pandas_engine(
     condition_string: str, with_schema: bool = False
-) -> tuple:
+) -> tuple[str, dict]:
+    """Parses the row condition string into a pandas engine compatible format.
+
+    Args:
+        condition_string: A pandas row condition string.
+        with_schema: Return results in json schema format. Defaults to False.
+
+    Returns:
+        A tuple containing the template string and a `dict` of parameters.
+
+    ```python
+    >>> template_str, params = parse_row_condition_string_pandas_engine("Age in [0, 42]")
+    >>> print(template_str)
+    "if $row_condition__0"
+    >>> params
+    {"row_condition__0": "Age in [0, 42]"}
+    ```
+
+    """
     if len(condition_string) == 0:
         condition_string = "True"
 
@@ -169,7 +194,7 @@ def parse_row_condition_string_pandas_engine(
     conditions_list = [
         condition.strip()
         for condition in conditions_list
-        if condition != "" and condition != " "
+        if condition != "" and condition != " "  # noqa: PLC1901
     ]
 
     for i, condition in enumerate(conditions_list):
@@ -191,17 +216,16 @@ def parse_row_condition_string_pandas_engine(
     return template_str, params
 
 
-def handle_strict_min_max(params: dict) -> (str, str):
-    """
-    Utility function for the at least and at most conditions based on strictness.
+@public_api
+def handle_strict_min_max(params: dict) -> tuple[str, str]:
+    """Utility function for the at least and at most conditions based on strictness.
 
     Args:
-        params: dictionary containing "strict_min" and "strict_max" booleans.
+        params: Dictionary containing "strict_min" and "strict_max" booleans.
 
     Returns:
-        tuple of strings to use for the at least condition and the at most condition
+        Tuple of strings to use for the at least condition and the at most condition.
     """
-
     at_least_str = (
         "greater than"
         if params.get("strict_min") is True
@@ -237,9 +261,9 @@ def build_count_table(
         count: Optional[int] = unexpected_count_dict.get("count")
         if count:
             total_count += count
-        if value is not None and value != "":
+        if value is not None and value != "":  # noqa: PLC1901
             table_rows.append([value, count])
-        elif value == "":
+        elif value == "":  # noqa: PLC1901
             table_rows.append(["EMPTY", count])
         else:
             table_rows.append(["null", count])
@@ -261,16 +285,16 @@ def build_count_and_index_table(
     unexpected_index_column_names: Optional[List[str]] = None,
 ) -> Tuple[List[str], List[List[Any]]]:
     """
-    Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
-    Unexpected Counts and Indices table for ID/PK.
-
+        Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
+        Unexpected Counts and Indices table for ID/PK.
     Args:
-         partial_unexpected_counts: list of dictionaries containing unexpected values and counts
-         unexpected_index_list: list of dictionaries containing unexpected indices and their values
-         unexpected_count: how many total unexpected values are there?
-         unexpected_list: optional list of all unexpected values. Used default Pandas unexpected
-             indices (without define id/pk columns)
-         unexpected_count: total number of unexpected values. Used to build the header.
+        partial_unexpected_counts: list of dictionaries containing unexpected values and counts
+        unexpected_index_list: list of dictionaries containing unexpected indices and their values
+        unexpected_count: how many total unexpected values are there?
+        unexpected_list: optional list of all unexpected values. Used with default Pandas unexpected
+             indices (without defined id/pk columns)
+        unexpected_index_column_names: list of unexpected_index_column_names
+
     Returns:
         List of strings that will be rendered into DataDocs
 
@@ -278,37 +302,42 @@ def build_count_and_index_table(
     table_rows: List[List[str]] = []
     total_count: int = 0
 
-    unexpected_index_df = _convert_unexpected_indices_to_df(
+    unexpected_index_df: pd.DataFrame = _convert_unexpected_indices_to_df(
         unexpected_index_list=unexpected_index_list,
         unexpected_index_column_names=unexpected_index_column_names,
         unexpected_list=unexpected_list,
         partial_unexpected_counts=partial_unexpected_counts,
     )
-    # if we are using pandas default unexpected_indices
-    if unexpected_index_df is not None and unexpected_index_column_names is None:
+    if unexpected_index_df.empty:
+        raise RenderingError(
+            "GX ran into an issue while building count and index table for rendering. Please check your configuration."
+        )
+
+    # using default indices for Pandas
+    if unexpected_index_column_names is None:
         unexpected_index_column_names = ["Index"]
 
-    for unexpected_count_dict in partial_unexpected_counts:
-        value: Optional[Any] = unexpected_count_dict.get("value")
-        count: Optional[int] = unexpected_count_dict.get("count")
-        if count:
-            total_count += count
-
+    for index, row in unexpected_index_df.iterrows():
         row_list: List[Union[str, int]] = []
-        if value is not None and value != "":
-            row_list.append(value)
+
+        unexpected_value = index
+        count = int(row.Count)
+
+        total_count += count
+
+        if unexpected_value is not None and unexpected_value != "":  # noqa: PLC1901
+            row_list.append(unexpected_value)
             row_list.append(count)
-        elif value == "":
+        elif unexpected_value == "":  # noqa: PLC1901
             row_list.append("EMPTY")
             row_list.append(count)
         else:
-            # this value has already been replaced in the unexpected_index_df
-            value = "null"
+            unexpected_value = "null"
             row_list.append("null")
             row_list.append(count)
-        if unexpected_index_column_names:
-            for column_name in unexpected_index_column_names:
-                row_list.append(unexpected_index_df[[column_name]].loc[value].item())
+        for column_name in unexpected_index_column_names:
+            row_list.append(str(row[column_name]))
+
         if len(row_list) > 0:
             table_rows.append(row_list)
 
@@ -330,10 +359,10 @@ def _convert_unexpected_indices_to_df(
     partial_unexpected_counts: List[dict],
     unexpected_index_column_names: Optional[List[str]] = None,
     unexpected_list: Optional[List[Any]] = None,
-) -> Optional[pd.DataFrame]:
+) -> pd.DataFrame:
     """
     Helper method to convert the list of unexpected indices into a DataFrame that can be used to
-    display unexpected indices. domain_column (the column the Expectation is run on) is used
+    display unexpected indices. domain_column_list (the list of column the Expectation is run on) is used
     as the index for the DataFrame, and the columns are the unexpected_index_column_names, or a default
     value in the case of Pandas, which provides default indices.
 
@@ -346,68 +375,61 @@ def _convert_unexpected_indices_to_df(
     zebra       5 6 8 ...
 
     Args:
-
         unexpected_index_list : all unexpected values and indices
         partial_unexpected_counts : counts for unexpected values (max 20 by default)
         unexpected_index_column_names:  in the case of defining ID/PK columns
         unexpected_list: if we are using default Pandas output.
-
     Returns:
         pd.DataFrame that contains indices for unexpected values
     """
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
-        unexpected_index_list_as_string: pd.DataFrame = pd.DataFrame(
+        unexpected_index_df: pd.DataFrame = pd.DataFrame(
             unexpected_index_list, dtype="string"
         )
-        unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
-            value="null"
-        )
-        domain_column_name: str = (
-            set(unexpected_index_list[0].keys())
-            .difference(set(unexpected_index_column_names))
-            .pop()
+        unexpected_index_df = unexpected_index_df.fillna(value="null")
+        domain_column_name_list: List[str] = list(
+            set(unexpected_index_list[0].keys()).difference(
+                set(unexpected_index_column_names)
+            )
         )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
-        unexpected_index_list_as_string = pd.DataFrame(
+        unexpected_index_df = pd.DataFrame(
             list(zip(unexpected_list, unexpected_index_list)),
             columns=["Value", "Index"],
             dtype="string",
         )
-        unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
-            value="null"
-        )
-        domain_column_name: str = "Value"
+        unexpected_index_df = unexpected_index_df.fillna(value="null")
+        domain_column_name_list: List[str] = ["Value"]
         unexpected_index_column_names: List[str] = ["Index"]
     else:
-        return None
+        return pd.DataFrame()
 
-    # unexpected indices are joined as list
-    all_unexpected_indices: pd.DataFrame = unexpected_index_list_as_string.groupby(
-        domain_column_name
+    # 1. groupby on domain columns, and turn id/pk into list
+    all_unexpected_indices: pd.DataFrame = unexpected_index_df.groupby(
+        domain_column_name_list
     ).agg(lambda y: list(y))
 
-    # filter all_unexpected_indices according to partial_unexpected_counts, since it has a maximum of 20 values by default
-    values_we_have_counts_for: List[str] = list(
-        pd.DataFrame(partial_unexpected_counts)["value"]
+    # 2. add count
+    col_to_count: str = unexpected_index_column_names[0]
+    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(
+        lambda x: len(x)
     )
-    # list comprehension to replace None with 'null'
-    values_we_have_counts_for = [
-        "null" if val is None else val for val in values_we_have_counts_for
-    ]
 
-    filtered_unexpected_indices = all_unexpected_indices[
-        all_unexpected_indices.index.isin(values_we_have_counts_for)
-    ]
+    # 3. ensure index is a string
+    all_unexpected_indices.index = all_unexpected_indices.index.map(str)
 
-    # applying function to every row in Pandas
-    # https://www.geeksforgeeks.org/apply-function-to-every-row-in-a-pandas-dataframe/
+    # 4. truncate indices and replace with `...` if necessary
     for column in unexpected_index_column_names:
-        filtered_unexpected_indices[column] = filtered_unexpected_indices[column].apply(
+        all_unexpected_indices[column] = all_unexpected_indices[column].apply(
             lambda row: truncate_list_of_indices(row)
         )
 
+    # 5. only keep the rows we are rendering
+    filtered_unexpected_indices = all_unexpected_indices.head(
+        len(partial_unexpected_counts)
+    )
     return filtered_unexpected_indices
 
 

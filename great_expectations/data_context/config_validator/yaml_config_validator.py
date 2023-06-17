@@ -12,12 +12,11 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal
 
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
@@ -26,18 +25,20 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message_from_handler,
 )
-from great_expectations.data_context.store import Store
+from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import DataConnector, Datasource
-from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
+
     from great_expectations.data_context import AbstractDataContext
 
 
@@ -121,7 +122,7 @@ class _YamlConfigValidator:
     def config_variables(self):
         return self._data_context.config_variables
 
-    def test_yaml_config(  # noqa: C901 - complexity 17
+    def test_yaml_config(  # noqa: C901, PLR0912, PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -196,7 +197,7 @@ class _YamlConfigValidator:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
-        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
+        usage_stats_event_payload: dict[str, Union[str, List[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -381,12 +382,9 @@ class _YamlConfigValidator:
         """
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
         store_name: str = name or config.get("name") or "my_temp_store"
-        instantiated_class = cast(
-            Store,
-            self._data_context._build_store_from_config(
-                store_name=store_name,
-                store_config=config,
-            ),
+        instantiated_class = self._data_context._build_store_from_config(
+            store_name=store_name,
+            store_config=config,
         )
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
@@ -449,11 +447,11 @@ class _YamlConfigValidator:
         checkpoint_config: Union[CheckpointConfig, dict]
 
         checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
-        checkpoint_config = checkpoint_config.to_json_dict()
-        checkpoint_config.update({"name": checkpoint_name})
+        checkpoint_config_dict: dict[str, JSONValues] = checkpoint_config.to_json_dict()
+        checkpoint_config_dict.update({"name": checkpoint_name})
 
         checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
-            properties=checkpoint_config,
+            properties=checkpoint_config_dict,
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
@@ -472,7 +470,7 @@ class _YamlConfigValidator:
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config_dict  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
@@ -620,10 +618,12 @@ class _YamlConfigValidator:
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()
-            checkpoint_config.update({"name": checkpoint_name})
+            checkpoint_config_dict: dict[
+                str, JSONValues
+            ] = checkpoint_config.to_json_dict()
+            checkpoint_config_dict.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
-                obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+                obj=checkpoint_config_dict, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
             )
 
         elif parent_class_from_config is not None and parent_class_from_config.endswith(

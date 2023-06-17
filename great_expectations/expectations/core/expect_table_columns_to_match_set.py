@@ -4,10 +4,11 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableColumnsToMatchSet(TableExpectation):
+class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
@@ -143,20 +144,30 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         "exact_match",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        For this expectation it is required that:
+
+        - `column_set` has been provided.
+        - `column_set` is one of the following types: `list`, `set`, or `None`
+        - If `column_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
 
@@ -317,7 +328,7 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
                 return return_failed
             else:
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
-                if len(missing_list) > 0:
+                if len(missing_list) > 0:  # noqa: PLR5501
                     return return_failed
                 # Passed if there are no items in the missing list
                 else:

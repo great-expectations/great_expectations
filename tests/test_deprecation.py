@@ -7,6 +7,8 @@ from packaging import version
 
 from great_expectations.data_context.util import file_relative_path
 
+UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 13
+
 
 @pytest.fixture
 def regex_for_deprecation_comments() -> Pattern:
@@ -17,6 +19,13 @@ def regex_for_deprecation_comments() -> Pattern:
 @pytest.fixture
 def files_with_deprecation_warnings() -> List[str]:
     files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    files_to_exclude = [
+        "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
+        "great_expectations/compatibility/sqlalchemy_and_pandas.py",
+    ]
+    for file_to_exclude in files_to_exclude:
+        if file_to_exclude in files:
+            files.remove(file_to_exclude)
     return files
 
 
@@ -27,7 +36,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
     """
     What does this test do and why?
 
-    For every invokation of 'DeprecationWarning', there must be a corresponding
+    For every invocation of 'DeprecationWarning', there must be a corresponding
     comment with the following format: 'deprecated-v<MAJOR>.<MINOR>.<PATCH>'.
 
     This test is meant to capture instances where one or the other is missing.
@@ -87,6 +96,8 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
         for file, version_ in unneeded_deprecation_warnings:
             print(f"{file} - v{version_}")
 
-    # Chetan - 20220316 - Note that this will break as soon as v0.16.0 lands;
-    # this should be cleaned up and made 0 at that point.
-    assert len(unneeded_deprecation_warnings) <= 35
+    # Chetan - 20220316 - Once v0.16.0 lands, this should be cleaned up and made 0.
+    if len(unneeded_deprecation_warnings) != UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD:
+        raise ValueError(
+            f"Found {len(unneeded_deprecation_warnings)} warnings but threshold is {UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD}; please adjust accordingly"
+        )

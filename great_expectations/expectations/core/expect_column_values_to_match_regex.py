@@ -168,6 +168,18 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_values_to_match_regex`
+        we require that the `configuraton.kwargs` contain a `regex` key that is either a `str` or `dict`
+        containing `$PARAMETER` key and `str` value.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
@@ -229,7 +241,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         else:
             template_str = "values must match this regular expression: $regex"
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -270,7 +282,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             )
         else:
             template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

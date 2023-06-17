@@ -4,10 +4,11 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnToExist(TableExpectation):
+class ExpectColumnToExist(BatchExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a \
@@ -79,20 +80,27 @@ class ExpectColumnToExist(TableExpectation):
     }
     args_keys = ("column", "column_index")
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_to_exist` it is required that the `configuration.kwargs` contain a `column` key that is a
+        string (the name of the column). Also, if `configuration.kwargs` contains `column_index`, then `column_index`
+        must be an `int` or `dict`; if a `dict`, then `column_index` must contain the `$PARAMETER` key.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
@@ -106,7 +114,7 @@ class ExpectColumnToExist(TableExpectation):
             assert (
                 isinstance(configuration.kwargs.get("column_index"), (int, dict))
                 or configuration.kwargs.get("column_index") is None
-            ), "column_index must be an integer or None"
+            ), "column_index must be an integer, dict, or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
                     "column_index"

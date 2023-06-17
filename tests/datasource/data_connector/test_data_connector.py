@@ -1,6 +1,5 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -8,6 +7,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
@@ -19,7 +19,7 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -60,7 +60,7 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
     # noinspection PyUnusedLocal
-    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(  # noqa: F841
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE",
         execution_engine=PandasExecutionEngine(),
@@ -114,14 +114,14 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         assets={"stuff": {}},
     )
 
-    assert my_data_connector.get_data_reference_list_count() == 0
+    assert my_data_connector.get_data_reference_count() == 0
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
     assert len(my_data_connector.get_unmatched_data_references()) == 0
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
 
 
 def test_get_batch_definition_list_from_batch_request():

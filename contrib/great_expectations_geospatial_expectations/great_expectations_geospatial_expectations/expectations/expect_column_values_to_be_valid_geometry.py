@@ -1,16 +1,10 @@
-import json
 from typing import Optional
 
 import geopandas
 from shapely.geometry import LineString, Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -21,14 +15,13 @@ from great_expectations.expectations.metrics import (
 def is_valid_geometry(geo):
     try:
         return geo.is_valid
-    except:
+    except Exception:
         return False
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidGeometry(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.check_valid_geometry"
 

@@ -5,11 +5,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -20,19 +16,23 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 # This class defines a Metric to support your Expectation
 # The main business logic for calculation lives here.
 
 
 class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference the metric.
     condition_metric_name = "column_values.not_contain_special_character"
 
     # condition_value_keys are arguments used to determine the value of the metric.
     condition_value_keys = ("",)
+
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -88,7 +88,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
-                    "exact_match_out": False,
                 }
             ],
         }
@@ -126,7 +125,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True

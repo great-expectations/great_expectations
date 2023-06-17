@@ -5,9 +5,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -21,11 +22,15 @@ from great_expectations.render.renderer_configuration import (
     RendererValueType,
 )
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
+from great_expectations.validator.validator import (
+    ValidationDependencies,
+)
 
 
-class ExpectTableRowCountToEqualOtherTable(TableExpectation):
+class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 
     expect_table_row_count_to_equal_other_table is a \
@@ -186,9 +191,11 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         )
         return validation_dependencies
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        """Validates the configuration of an Expectation. This expectation has no configuration."""
         super().validate_configuration(configuration)
 
     def _validate(

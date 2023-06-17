@@ -1,12 +1,14 @@
 import copy
 from typing import Optional
 
+from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+    DataProfilerProfileMetricProvider,
+)
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
 
 
 class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
@@ -52,7 +54,7 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
             dr_stats = dr_col["statistics"]
             percent_delta_col = copy.deepcopy(dr_col)
             percent_delta_stats = {}
-            for (dr_stat, dr_val) in dr_stats.items():
+            for dr_stat, dr_val in dr_stats.items():
                 if dr_stat not in numerical_diff_stats:
                     percent_delta_stats[dr_stat] = dr_val
                     continue

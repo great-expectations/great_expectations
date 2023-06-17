@@ -8,9 +8,6 @@ import pytest
 import great_expectations as gx
 
 # noinspection PyUnresolvedReferences
-from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (
-    StatisticsDataAssistant,
-)
 from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant_result import (
     StatisticsDataAssistantResult,
 )
@@ -39,15 +36,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # noinspection PyUnresolvedReferences
-from tests.conftest import (
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-    empty_data_context,
-    no_usage_stats,
-    sa,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-    spark_df_taxi_data_schema,
-    spark_session,
-)
 
 yaml: YAMLHandler = YAMLHandler()
 
@@ -245,7 +233,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "..",
@@ -386,13 +374,13 @@ def test_spark_happy_path_statistics_data_assistant(
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "..",

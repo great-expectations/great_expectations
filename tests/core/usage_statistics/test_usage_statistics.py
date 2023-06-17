@@ -102,7 +102,7 @@ def test_global_override_from_config_file_in_etc(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -111,7 +111,7 @@ def test_global_override_from_config_file_in_etc(
         disabled_config["anonymous_usage_statistics"] = {"enabled": false_string}
 
         with open(
-            os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+            os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
         ) as configfile:
             disabled_config.write(configfile)
 
@@ -142,7 +142,7 @@ def test_global_override_from_config_file_in_home_folder(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -154,7 +154,8 @@ def test_global_override_from_config_file_in_home_folder(
         disabled_config["anonymous_usage_statistics"] = {"enabled": false_string}
 
         with open(
-            os.path.join(home_config_dir, "great_expectations.conf"), "w"
+            os.path.join(home_config_dir, "great_expectations.conf"),  # noqa: PTH118
+            "w",
         ) as configfile:
             disabled_config.write(configfile)
 
@@ -178,15 +179,15 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
 
     assert (
@@ -224,7 +225,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -232,20 +233,20 @@ def test_global_override_conf_overrides_yml_and_env_variable(
     disabled_config["anonymous_usage_statistics"] = {"enabled": "False"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
 
     assert (
@@ -289,7 +290,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -297,20 +298,20 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
     disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
 
     assert (
@@ -354,7 +355,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     etc_config_dir = str(etc_config_dir)
     config_dirs = [home_config_dir, etc_config_dir]
     config_dirs = [
-        os.path.join(config_dir, "great_expectations.conf")
+        os.path.join(config_dir, "great_expectations.conf")  # noqa: PTH118
         for config_dir in config_dirs
     ]
 
@@ -362,20 +363,20 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
     disabled_config["anonymous_usage_statistics"] = {"enabled": "True"}
 
     with open(
-        os.path.join(etc_config_dir, "great_expectations.conf"), "w"
+        os.path.join(etc_config_dir, "great_expectations.conf"), "w"  # noqa: PTH118
     ) as configfile:
         disabled_config.write(configfile)
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
 
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
 
     assert (

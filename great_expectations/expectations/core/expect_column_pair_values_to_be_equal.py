@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     InvalidExpectationConfigurationError,
@@ -91,10 +92,26 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_B",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures both column_A and column_B have been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_pair_values_to_be_equal` it is required that the `configuration.kwargs` contain both
+        `column_A` and `column_B` keys.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -125,7 +142,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         if not params.column_A or not params.column_B:
             template_str += "Unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column. "
 
-        if not params.mostly or params.mostly.value == 1.0:
+        if not params.mostly or params.mostly.value == 1.0:  # noqa: PLR2004
             template_str += "Values in $column_A and $column_B must always be equal."
         else:
             renderer_configuration = cls._add_mostly_pct_param(
@@ -168,7 +185,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
             template_str = " unrecognized kwargs for expect_column_pair_values_to_be_equal: missing column."
             params["row_condition"] = None
 
-        if params["mostly"] is None or params["mostly"] == 1.0:
+        if params["mostly"] is None or params["mostly"] == 1.0:  # noqa: PLR2004
             template_str = "Values in $column_A and $column_B must always be equal."
         else:
             params["mostly_pct"] = num_to_str(

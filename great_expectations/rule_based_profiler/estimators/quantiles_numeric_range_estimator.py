@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Final, Optional
 
-import numpy as np
-from typing_extensions import Final
-
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
+    NumericRangeEstimationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
@@ -20,12 +17,13 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_quantile_statistic_interpolation_method_from_rule_state,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
-from great_expectations.types.attributes import Attributes
+from great_expectations.types.attributes import Attributes  # noqa: TCH001
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 if TYPE_CHECKING:
+    import numpy as np
     import numpy.typing as npt
 
 logger = logging.getLogger(__name__)

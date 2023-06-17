@@ -4,19 +4,11 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
 """
 
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
-# <snippet>
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
@@ -45,6 +37,5 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToMatchSomeRegex().print_diagnostic_checklist()

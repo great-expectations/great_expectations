@@ -7,11 +7,11 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -27,7 +27,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):
@@ -45,7 +45,9 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
         "subdir_reader": {"names": [("test", "file")], "is_complete_list": True}
     }
     manual_batch_kwargs = PathBatchKwargs(
-        path=os.path.join(str(test_folder_connection_path_csv), "test.csv")
+        path=os.path.join(  # noqa: PTH118
+            str(test_folder_connection_path_csv), "test.csv"
+        )
     )
 
     generator = datasource.get_batch_kwargs_generator("subdir_reader")
@@ -95,7 +97,7 @@ def test_create_pandas_datasource(
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -148,7 +150,7 @@ def test_pandas_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -165,16 +167,17 @@ def test_pandas_datasource_custom_data_asset(
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            expectation_suite_name="test",
-            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-            ),
-        )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        expectation_suite_name="test",
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+            datasource=name,
+            batch_kwargs_generator="subdir_reader",
+            data_asset_name="test",
+        ),
+    )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
@@ -198,7 +201,7 @@ def test_pandas_source_read_csv(
         },
     )
 
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="unicode"
     )
     batch = data_context_parameterized_expectation_suite.get_batch(
@@ -324,7 +327,7 @@ def test_s3_pandas_source_read_parquet(
         },
     )
 
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test_parquet"
     )
     with pytest.deprecated_call():  # "Direct GX Support for the s3 BatchKwarg will be removed in v0.16.
@@ -353,14 +356,19 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     )
 
     with open(
-        os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w"
+        os.path.join(  # noqa: PTH118
+            basepath, "idonotlooklikeacsvbutiam.notrecognized"
+        ),
+        "w",
     ) as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+                "path": os.path.join(  # noqa: PTH118
+                    basepath, "idonotlooklikeacsvbutiam.notrecognized"
+                )
             }
         )
         assert "Unable to determine reader for path" in exc.value.message
@@ -368,7 +376,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(
+                "path": os.path.join(  # noqa: PTH118
                     basepath, "idonotlooklikeacsvbutiam.notrecognized"
                 ),
                 "reader_method": "blarg",
@@ -378,7 +386,9 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "path": os.path.join(  # noqa: PTH118
+                basepath, "idonotlooklikeacsvbutiam.notrecognized"
+            ),
             "reader_method": "read_csv",
             "reader_options": {"header": 0},
         }
@@ -399,7 +409,9 @@ def test_read_limit(test_folder_connection_path_csv):
 
     batch_kwargs = PathBatchKwargs(
         {
-            "path": os.path.join(str(test_folder_connection_path_csv), "test.csv"),
+            "path": os.path.join(  # noqa: PTH118
+                str(test_folder_connection_path_csv), "test.csv"
+            ),
             # "reader_options": {"sep": ",", "header": 0, "index_col": 0},
             "reader_options": {"sep": ","},
         }
@@ -430,7 +442,7 @@ def test_process_batch_parameters():
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context  # noqa: F821
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={

@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -21,12 +22,27 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+@public_api
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric value function.
+
+    Metric value functions are used by MetricProviders to immediately return
+    the value of the requested metric.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        metric_fn_type: the type of metric function. Usually the default value should be maintained.
+
+    Returns:
+        Decorated function
+    """
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -41,13 +57,32 @@ def metric_value(
     return wrapper
 
 
+@public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric partial.
+
+    Metric partial functions are used by MetricProviders to support batching of
+    requests for multiple metrics in an ExecutionEngine. Instead of returning
+    the metric value immediately, they return a different function that the
+    ExecutionEngine can execute locally on your data to obtain the metric value.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        partial_fn_type: the type of partial function
+        domain_type: the type of domain this metric function processes
+
+    Returns:
+        Decorated function
+    """
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -65,15 +100,16 @@ def metric_partial(
     return wrapper
 
 
+@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 
     MetricProvider classes *must* have the following attributes set:
         1. `metric_name`: the name to use. Metric Name must be globally unique in
            a great_expectations installation.
-        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+        2. `domain_keys`: a tuple of the *keys* used to determine the domain of the
            metric
-        2. `value_keys`: a tuple of the *keys* used to determine the value of
+        3. `value_keys`: a tuple of the *keys* used to determine the value of
            the metric.
 
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
@@ -153,7 +189,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 To instruct "ExecutionEngine" accordingly, original metric is registered with its "declared" name, but
                 with "metric_provider" function omitted (set to "None"), and additional "AGGREGATE_FN" metric, with its
                 "metric_provider" set to (decorated) implementation function, defined in metric class, is registered.
-                Then "AGGREGATE_FN" metric can specified with key "metric_partial_fn" as evaluation metric dependency.
+                Then "AGGREGATE_FN" metric is specified with key "metric_partial_fn" as evaluation metric dependency.
                 By convention, aggregate partial metric implementation functions return three-valued tuple, containing
                 deferred execution metric implementation function of corresponding "ExecutionEngine" backend (called
                 "metric_aggregate") as well as "compute_domain_kwargs" and "accessor_domain_kwargs", which are relevant
@@ -169,7 +205,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 ]:
                     raise ValueError(
                         f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
-support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE_FN}" for "metric_value" \
+support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
 "metric_fn_type" property."""
                     )
 

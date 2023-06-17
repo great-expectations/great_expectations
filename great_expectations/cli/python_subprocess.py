@@ -20,7 +20,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -40,9 +40,8 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
             env=env,
-            universal_newlines=True,
+            text=True,
         )
         sh_out: str = res.stdout.strip()
         logger.info(sh_out)
@@ -67,7 +66,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -112,11 +111,11 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     progress = float(gathered) / max_work_amount
                     excess: float = progress - 1.0
                     if excess > 0:
-                        if 0.0 < excess <= 1.0:
+                        if 0.0 < excess <= 1.0:  # noqa: PLR2004
                             max_work_amount += 2.0 * excess * max_work_amount
-                        elif 1.0 < excess <= 2.0:
+                        elif 1.0 < excess <= 2.0:  # noqa: PLR2004
                             max_work_amount += 5.0 * excess * max_work_amount
-                        elif 2.0 < excess <= 1.0e1:
+                        elif 2.0 < excess <= 1.0e1:  # noqa: PLR2004
                             max_work_amount += 1.0e1 * excess * max_work_amount
                         else:
                             max_work_amount += 1.0e2 * excess * max_work_amount

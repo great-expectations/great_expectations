@@ -219,7 +219,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 **{
                     "content_block_type": "bullet_list",
                     "header": RenderedStringTemplateContent(
-                        **{
+                        **{  # type: ignore[arg-type]
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": 'Expectation types <span class="mr-3 triangle"></span>',
@@ -498,7 +498,6 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
         return expectations, new_block
 
     def _render_bullet_list(self, expectations):
-
         new_block = self._bullet_list_renderer.render(
             expectations,
             include_column_name=False,

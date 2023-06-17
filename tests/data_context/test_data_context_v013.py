@@ -3,12 +3,12 @@ import os
 import re
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
@@ -26,7 +26,7 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 )
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -80,7 +80,9 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     context: DataContext = empty_data_context
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     datasource_config: str = f"""
@@ -168,13 +170,16 @@ def test_load_config_variables_file(
 ):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+    )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
-        os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
     basic_data_context_v013_config[
@@ -224,6 +229,7 @@ def test_get_config(empty_data_context):
         "plugins_directory",
         "stores",
         "expectations_store_name",
+        "fluent_datasources",
         "validations_store_name",
         "evaluation_parameter_store_name",
         "checkpoint_store_name",
@@ -237,49 +243,6 @@ def test_config_variables(empty_data_context):
     context = empty_data_context
     assert type(context.config_variables) == dict
     assert set(context.config_variables.keys()) == {"instance_id"}
-
-
-@pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
-)
-def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
-    context = empty_data_context
-
-    yaml_config = """
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-          my_runtime_data_connector:
-            module_name: great_expectations.datasource.data_connector
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-            - airflow_run_id
-    """
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_pipeline_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
-
-    my_batch = context.get_batch(
-        datasource_name="my_pipeline_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="IN_MEMORY_DATA_ASSET",
-        batch_data=test_df,
-        batch_identifiers={
-            "airflow_run_id": 1234567890,
-        },
-        limit=None,
-    )
-    assert my_batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
-
-    assert my_batch.data.dataframe.equals(test_df)
 
 
 @pytest.mark.filterwarnings(
@@ -324,7 +287,7 @@ data_connectors:
             A:
 """
     # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
+    context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
         return_mode="report_object",
@@ -479,7 +442,7 @@ data_connectors:
       - airflow_run_id
 """
     # noinspection PyUnusedLocal
-    my_datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name="some_datasource_name",
         yaml_config=yaml_config,
     )
@@ -587,12 +550,15 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
 
     selectable_table_name = batch.data.selectable.name
     selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
-    sa_engine = batch.data.execution_engine.engine
+    execution_engine = batch.data.execution_engine
 
-    assert sa_engine.execute(selectable_count_sql_str).scalar() == 123
+    assert (
+        execution_engine.execute_query(sa.text(selectable_count_sql_str)).scalar()
+        == 123
+    )
     assert batch.batch_markers.get("ge_load_time") is not None
     # since create_temp_table defaults to True, there should be 1 temp table
-    assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1
+    assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
     # if create_temp_table in batch_spec_passthrough is set to False, no new temp tables should be created
     batch = context.get_batch(
@@ -610,7 +576,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
             batch_spec_passthrough={"create_temp_table": False},
         ),
     )
-    assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1
+    assert len(get_sqlite_temp_table_names(batch.data.execution_engine)) == 1
 
 
 def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
@@ -620,7 +586,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     context: DataContext = (
         data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 
@@ -653,7 +619,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(
+    data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
 
@@ -679,7 +645,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     assert batch.batch_markers.get("ge_load_time") is not None
 
     # using path with no extension
-    data_asset_path_no_extension = os.path.join(
+    data_asset_path_no_extension = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
     )
 
@@ -725,10 +691,10 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(
+    data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 
@@ -751,7 +717,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     assert len(validator.batches) == 1
 
     # using path with no extension
-    data_asset_path_no_extension = os.path.join(
+    data_asset_path_no_extension = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
     )
 

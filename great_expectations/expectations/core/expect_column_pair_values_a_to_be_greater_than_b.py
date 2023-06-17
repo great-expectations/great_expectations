@@ -103,6 +103,17 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_pair_values_a_to_be_greater_than_b`
+        we require that the `configuraton.kwargs` contain both `column_A` and `column_B` keys.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -135,7 +146,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         if not params.column_A or not params.column_B:
             template_str += "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation. "
 
-        if not params.mostly or params.mostly.value == 1.0:
+        if not params.mostly or params.mostly.value == 1.0:  # noqa: PLR2004
             if not params.or_equal:
                 template_str += "Values in $column_A must always be greater than those in $column_B."
             else:
@@ -187,7 +198,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
             template_str = "$column has a bogus `expect_column_pair_values_A_to_be_greater_than_B` expectation."
             params["row_condition"] = None
 
-        if params["mostly"] is None or params["mostly"] == 1.0:
+        if params["mostly"] is None or params["mostly"] == 1.0:  # noqa: PLR2004
             if params["or_equal"] in [None, False]:
                 template_str = "Values in $column_A must always be greater than those in $column_B."
             else:

@@ -1,0 +1,132 @@
+{
+    "title": "SQLTableAsset",
+    "description": "Read SQL database table into a DataFrame.\n\nGiven a table name and a SQLAlchemy connectable, returns a DataFrame.\nThis function does not support DBAPI connections.\n\nParameters\n----------\ntable_name : str\n    Name of SQL table in database.\ncon : SQLAlchemy connectable or str\n    A database URI could be provided as str.\n    SQLite DBAPI connection mode not supported.\nschema : str, default None\n    Name of SQL schema in database to query (if database flavor\n    supports this). Uses default schema if None (default).\nindex_col : str or list of str, optional, default: None\n    Column(s) to set as index(MultiIndex).\ncoerce_float : bool, default True\n    Attempts to convert values of non-string, non-numeric objects (like\n    decimal.Decimal) to floating point. Can result in loss of Precision.\nparse_dates : list or dict, default None\n    - List of column names to parse as dates.\n    - Dict of ``{column_name: format string}`` where format string is\n      strftime compatible in case of parsing string times or is one of\n      (D, s, ns, ms, us) in case of parsing integer timestamps.\n    - Dict of ``{column_name: arg dict}``, where the arg dict corresponds\n      to the keyword arguments of :func:`pandas.to_datetime`\n      Especially useful with databases without native Datetime support,\n      such as SQLite.\ncolumns : list, default None\n    List of column names to select from SQL table.\nchunksize : int, default None\n    If specified, returns an iterator where `chunksize` is the number of\n    rows to include in each chunk.\n\nReturns\n-------\nDataFrame or Iterator[DataFrame]\n    A SQL table is returned as two-dimensional data structure with labeled\n    axes.\n\nSee Also\n--------\nread_sql_query : Read SQL query into a DataFrame.\nread_sql : Read SQL query or database table into a DataFrame.\n\nNotes\n-----\nAny datetime values with time zone information will be converted to UTC.\n\nExamples\n--------\n>>> pd.read_sql_table('table_name', 'postgres:///db_name')  # doctest:+SKIP",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "sql_table",
+            "enum": [
+                "sql_table"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "table_name": {
+            "title": "Table Name",
+            "type": "string"
+        },
+        "con": {
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
+        },
+        "schema": {
+            "title": "Schema",
+            "description": "'schema_name' on the instance model. Will be passed to pandas reader method as 'schema'",
+            "type": "string"
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "coerce_float": {
+            "title": "Coerce Float",
+            "default": true,
+            "type": "boolean"
+        },
+        "parse_dates": {
+            "title": "Parse Dates",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        }
+    },
+    "required": [
+        "name",
+        "table_name",
+        "con"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

@@ -1,3 +1,4 @@
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full">
 from datetime import timedelta
 
 import airflow
@@ -21,8 +22,9 @@ dag = DAG(
 # priority_weight has type int in Airflow DB, uses the maximum.
 t1 = BashOperator(
     task_id="checkpoint_run",
-    bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run bigquery_checkpoint ) ",
+    bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations checkpoint run bigquery_checkpoint ) ",
     dag=dag,
     depends_on_past=False,
     priority_weight=2**31 - 1,
 )
+# </snippet>

@@ -5,6 +5,9 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -90,14 +93,18 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                                                           Expectation."
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -116,7 +123,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -153,7 +160,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             ["column", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -165,7 +172,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "values must not be null, at least $mostly_pct % of the time."
                 )
         else:
-            if include_column_name:
+            if include_column_name:  # noqa: PLR5501
                 template_str = "$column values must never be null."
             else:
                 template_str = "values must never be null."
@@ -284,7 +291,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_count = metrics.get(
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        )
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -300,9 +309,16 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(f"{self.map_metric}.unexpected_count"),
-            unexpected_list=metrics.get(f"{self.map_metric}.unexpected_values"),
+            unexpected_count=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ),
+            unexpected_list=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+            ),
             unexpected_index_list=metrics.get(
-                f"{self.map_metric}.unexpected_index_list"
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+            ),
+            unexpected_index_query=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
             ),
         )

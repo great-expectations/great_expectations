@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -13,7 +14,7 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
 from great_expectations.execution_engine import ExecutionEngine
@@ -23,19 +24,24 @@ logger = logging.getLogger(__name__)
 DEFAULT_DELIMITER: str = "-"
 
 
+@public_api
 class RuntimeDataConnector(DataConnector):
-    """
-    A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
-    either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
+    """A Data Connector that allows users to specify a Batch's data directly using a Runtime Batch Request.
+
+    A Runtime Batch Request contains either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path,
+    or an arbitrary SQL query.
+
     Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_identifiers: A list of keys that must be defined in the batch identifiers dict of the Runtime Batch
+            Request.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -87,7 +93,7 @@ class RuntimeDataConnector(DataConnector):
 
         for name, asset_config in config.items():
             if asset_config is None:
-                asset_config = {}
+                asset_config = {}  # noqa: PLW2901
 
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
@@ -156,7 +162,7 @@ class RuntimeDataConnector(DataConnector):
             ]
             return data_reference_list  # type: ignore[return-value] # could be list of lists
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Get number of data_references corresponding to all data_asset_names in cache. In cases where the
         RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
@@ -182,6 +188,7 @@ class RuntimeDataConnector(DataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())
@@ -204,7 +211,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)  # type: ignore[arg-type] # got ExecutionEngine
         return (
             batch_data,  # type: ignore[return-value]
             batch_spec,
@@ -368,9 +375,7 @@ class RuntimeDataConnector(DataConnector):
         ):
             raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
-                present and non-empty or
-                both absent in the batch_request parameter.
-                """
+                present and non-empty or both absent in the batch_request parameter."""
             )
 
         if runtime_parameters:

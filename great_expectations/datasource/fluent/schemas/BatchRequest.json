@@ -1,0 +1,64 @@
+{
+    "title": "BatchRequest",
+    "description": "--Public API--A BatchRequest is the way to specify which data Great Expectations will validate.\n\nA Batch Request is provided to a Data Asset in order to create one or more Batches.\n\nArgs:\n    datasource_name: The name of the Datasource used to connect to the data.\n    data_asset_name: The name of the Data Asset used to connect to the data.\n    options: A dict that can be used to filter the batch groups associated with the Data Asset.\n        The dict structure depends on the asset type. The available keys for dict can be obtained by\n        calling DataAsset.batch_request_options.\n    batch_slice: A python slice that can be used to filter the sorted batches by index.\n        e.g. `batch_slice = \"[-5:]\"` will request only the last 5 batches after the options filter is applied.\n\nReturns:\n    BatchRequest",
+    "type": "object",
+    "properties": {
+        "datasource_name": {
+            "title": "Datasource Name",
+            "description": "The name of the Datasource used to connect to the data.",
+            "type": "string"
+        },
+        "data_asset_name": {
+            "title": "Data Asset Name",
+            "description": "The name of the Data Asset used to connect to the data.",
+            "type": "string"
+        },
+        "options": {
+            "title": "Options",
+            "description": "A map that can be used to filter the batch groups associated with the Data Asset. The structure and types depends on the asset type.",
+            "type": "object"
+        },
+        "batch_slice": {
+            "title": "Batch Slice",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "slice": {
+                        "description": "A slice object representing the set of indices specified by range(start, stop, step).",
+                        "type": "object",
+                        "properties": {
+                            "start": {
+                                "description": "The starting index of the slice.",
+                                "type": "integer"
+                            },
+                            "stop": {
+                                "description": "The stopping index of the slice.",
+                                "type": "integer"
+                            },
+                            "step": {
+                                "description": "The number of steps between indices.",
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "datasource_name",
+        "data_asset_name"
+    ],
+    "additionalProperties": false
+}

@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_values_to_be_in_type_list",
   "datasets": [
     {
+      "dataset_name": "expect_column_values_to_be_in_type_list_1",
       "data": {
         "x": [
           1,
@@ -479,7 +480,7 @@
           "out": {
             "success": false,
             "unexpected_list": ["hello", "jello", "1"],
-            "unexpected_index_list": [0, 1, 2]
+            "unexpected_index_list": [{"s": "hello", "pk_index": 0}, {"s": "jello", "pk_index": 1}, {"s": "1", "pk_index": 2}]
           },
           "only_for": [
             "pandas"
@@ -498,7 +499,7 @@
           "out": {
             "success": false,
             "unexpected_list": ["hello", "jello", "1"],
-            "unexpected_index_list": [0, 1, 2]
+            "unexpected_index_list": [{"s": "hello", "pk_index": 0}, {"s": "jello", "pk_index": 1}, {"s": "1", "pk_index": 2}]
           },
           "only_for": [
             "pandas"

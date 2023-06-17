@@ -35,7 +35,6 @@ def _load_data(
     table_name: str = TAXI_DATA_TABLE_NAME,
     random_table_suffix: bool = True,
 ) -> LoadedTable:
-
     dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
         "redshift"
     ]
@@ -49,7 +48,7 @@ def _load_data(
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
@@ -65,7 +64,6 @@ def _is_dialect_athena(dialect: str) -> bool:
 
 
 if __name__ == "test_script_module":
-
     dialect, connection_string = get_connection_string_and_dialect(
         athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
     )
@@ -78,7 +76,7 @@ if __name__ == "test_script_module":
         table_name: str = "ten_trips_from_each_month"
         test_df: pd.DataFrame = load_and_concatenate_csvs(
             csv_paths=[
-                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+                "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
             ],
             convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
             load_full_dataset=True,
@@ -104,7 +102,6 @@ if __name__ == "test_script_module":
     test_cases: List[TaxiSamplingTestCase] = test_cases.test_cases()
 
     for test_case in test_cases:
-
         print("Testing sampler method:", test_case.sampling_method_name)
 
         # 1. Setup
@@ -167,8 +164,8 @@ if __name__ == "test_script_module":
             datasource_name
         ].execution_engine.get_batch_data(batch_spec=batch_spec)
 
-        num_rows: int = batch_data.execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        num_rows: int = batch_data.execution_engine.execute_query(
+            sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 

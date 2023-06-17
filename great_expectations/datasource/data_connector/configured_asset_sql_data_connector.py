@@ -2,6 +2,8 @@ from copy import deepcopy
 from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -34,20 +36,27 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
 
-try:
-    from sqlalchemy.sql import Selectable
-except ImportError:
-    Selectable = None
-
-
+@public_api
 class ConfiguredAssetSqlDataConnector(DataConnector):
-    """
-    A DataConnector that requires explicit listing of SQL tables you want to connect to.
+    """A DataConnector that requires explicit listing of SQL assets you want to connect to.
+
+    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
+    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
+    it requires more setup.
+
+    Args:
+        name (str): The name of this DataConnector
+        datasource_name (str): The name of the Datasource that contains it
+        execution_engine (ExecutionEngine): An ExecutionEngine
+        include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
+        splitter_method (str): A method to split the target table into multiple Batches
+        splitter_kwargs (dict): Keyword arguments to pass to splitter_method
+        sorters (list): List if you want to override the default sort for the data_references
+        sampling_method (str): A method to downsample within a target Batch
+        sampling_kwargs (dict): Keyword arguments to pass to sampling_method
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+
     """
 
     SPLITTER_METHOD_TO_SORTER_METHOD_MAPPING: Dict[str, Optional[Sorter]] = {
@@ -64,7 +73,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         SplitterMethod.SPLIT_ON_HASHED_COLUMN: LexicographicSorter,
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -79,21 +88,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        ConfiguredAssetDataConnector for connecting to data on a SQL database
-
-        Args:
-            name (str): The name of this DataConnector
-            datasource_name (str): The name of the Datasource that contains it
-            execution_engine (ExecutionEngine): An ExecutionEngine
-            include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
-            splitter_method (str): A method to split the target table into multiple Batches
-            splitter_kwargs (dict): Keyword arguments to pass to splitter_method
-            sorters (list): List if you want to override the default sort for the data_references
-            sampling_method (str): A method to downsample within a target Batch
-            sampling_kwargs (dict): Keyword arguments to pass to sampling_method
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         if execution_engine:
             execution_engine = cast(SqlAlchemyExecutionEngine, execution_engine)
 
@@ -250,9 +244,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return batch_definition_list
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        """Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names
@@ -389,10 +383,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                     splitter_group_names = [splitter_kwargs["column_name"]]
 
                 if any(
-                    [
-                        sorter_name not in splitter_group_names
-                        for sorter_name in sorters.keys()
-                    ]
+                    sorter_name not in splitter_group_names
+                    for sorter_name in sorters.keys()
                 ):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
@@ -604,7 +596,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             splitter_kwargs: Optional[dict] = data_asset_config.get("splitter_kwargs")
             batch_identifiers_list = (
                 self.execution_engine.get_data_for_batch_identifiers(
-                    table_name=table_name,
+                    selectable=sa.text(table_name),
                     splitter_method_name=splitter_method_name,
                     splitter_kwargs=splitter_kwargs,
                 )

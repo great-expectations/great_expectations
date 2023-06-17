@@ -99,5 +99,5 @@ class BatchAnonymizer(BaseAnonymizer):
             return False
 
         return isinstance(obj, (Validator, DataAsset)) or (
-            isinstance(obj, tuple) and len(obj) == 2
+            isinstance(obj, tuple) and len(obj) == 2  # noqa: PLR2004
         )

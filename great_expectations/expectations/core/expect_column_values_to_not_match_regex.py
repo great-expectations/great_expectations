@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
@@ -176,13 +176,28 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """
+        Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_not_match_regex` it is required that:
+            - 'regex' kwarg is of type str or dict
+            - if dict, assert a key "$PARAMETER" is present
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                  Expectation."
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
             assert "regex" in configuration.kwargs, "regex is required"
             assert isinstance(
                 configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string"
+            ), "regex must be a string or dict"
             if isinstance(configuration.kwargs["regex"], dict):
                 assert (
                     "$PARAMETER" in configuration.kwargs["regex"]
@@ -217,7 +232,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             else:
                 template_str = "values must not match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -254,7 +269,9 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 "values must not match a regular expression but none was specified."
             )
         else:
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if (  # noqa: PLR5501
+                params["mostly"] is not None and params["mostly"] < 1.0  # noqa: PLR2004
+            ):
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -264,7 +281,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                 else:
                     template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
             else:
-                if include_column_name:
+                if include_column_name:  # noqa: PLR5501
                     template_str = (
                         "$column values must not match this regular expression: $regex."
                     )

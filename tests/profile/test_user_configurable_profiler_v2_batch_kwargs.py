@@ -495,7 +495,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(suite)
+    context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
     )

@@ -4,7 +4,6 @@ from typing import List
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -14,6 +13,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
@@ -22,7 +22,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_basic_instantiation(tmp_path_factory):
@@ -72,7 +72,7 @@ def test_basic_instantiation(tmp_path_factory):
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -909,18 +909,16 @@ def test_foxtrot(tmp_path_factory):
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list: List[
+        BatchDefinition
+    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
 
@@ -999,18 +997,16 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         # "example_data_reference": {},
     }
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list: List[
+        BatchDefinition
+    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
@@ -1163,7 +1159,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -1224,7 +1220,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -1338,9 +1334,9 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories")
     )
-    os.makedirs(os.path.join(base_directory, "foo"))
+    os.makedirs(os.path.join(base_directory, "foo"))  # noqa: PTH118, PTH103
     create_files_in_directory(
-        directory=os.path.join(base_directory, "foo"),
+        directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
         file_name_list=[
             "alpha-1.csv",
             "alpha-2.csv",
@@ -1356,7 +1352,7 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        base_directory=os.path.join(base_directory, "foo"),
+        base_directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
         assets={"alpha": {}},
     )
 

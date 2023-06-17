@@ -6,7 +6,6 @@ from great_expectations.render.renderer import OpsgenieRenderer
 
 
 def test_OpsgenieRenderer_validation_results_success():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -68,7 +67,6 @@ def test_OpsgenieRenderer_checkpoint_validation_results_success():
 
 
 def test_OpsgenieRenderer_validation_results_failure():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=False,

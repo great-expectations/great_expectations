@@ -9,6 +9,7 @@ access to features of new package versions.
         dependencies: List[PackageInfo] = ge_execution_environment.dependencies
 
 """
+from __future__ import annotations
 
 import enum
 import sys
@@ -100,11 +101,14 @@ class GXExecutionEnvironment:
         """
         if not self._all_installed_packages:
             # Only retrieve once
-            self._all_installed_packages = [
-                item.metadata.get("Name")
-                for item in metadata.distributions()
-                if item.metadata.get("Name") is not None
-            ]
+            package_names: list[str] = []
+            for package in metadata.distributions():
+                package_name = package.metadata.get("Name")
+                if package_name:
+                    package_names.append(package_name)
+            package_names = [pn.lower() for pn in package_names]
+            self._all_installed_packages = package_names
+
         return self._all_installed_packages
 
     def _build_dependencies_info(
@@ -124,7 +128,6 @@ class GXExecutionEnvironment:
         """
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
-
             package_version: Optional[version.Version]
             installed: bool
             if dependency_name in self._get_all_installed_packages():

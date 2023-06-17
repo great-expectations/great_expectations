@@ -1,6 +1,9 @@
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     InvalidExpectationConfigurationError,
@@ -112,10 +115,26 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "value_pairs_set",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures that both column_A and column_B have been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_pair_values_to_be_in_set` it is required that the `configuration.kwargs` contain `column_A`,
+        `column_B`, and `value_pairs_set` keys.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

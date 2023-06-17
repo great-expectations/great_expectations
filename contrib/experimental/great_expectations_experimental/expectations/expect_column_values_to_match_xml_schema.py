@@ -2,6 +2,8 @@ from typing import Optional
 
 from lxml import etree
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -14,7 +16,6 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -26,11 +27,6 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
 
 
 class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
@@ -75,7 +71,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
             except:
                 raise
 
-        matches_xml_schema_udf = F.udf(matches_xml_schema, sparktypes.BooleanType())
+        matches_xml_schema_udf = F.udf(matches_xml_schema, pyspark.types.BooleanType())
 
         return matches_xml_schema_udf(column)
 
@@ -159,13 +155,13 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "mostly", "xml_schema", "row_condition", "condition_parser"],

@@ -107,7 +107,6 @@ def _func_no_docstring_deprecated(some_arg, other_arg):
 class TestDeprecatedMethod:
     @pytest.mark.unit
     def test_deprecated_decorator_full_docstring(self):
-
         assert _func_full_docstring_deprecated.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -128,7 +127,6 @@ class TestDeprecatedMethod:
 
     @pytest.mark.unit
     def test_deprecated_decorator_full_docstring_no_message(self):
-
         assert _func_full_docstring_deprecated_no_message.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -145,7 +143,6 @@ class TestDeprecatedMethod:
 
     @pytest.mark.unit
     def test_deprecated_decorator_only_summary(self):
-
         assert _func_only_summary_deprecated.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -155,7 +152,6 @@ class TestDeprecatedMethod:
 
     @pytest.mark.unit
     def test_deprecated_decorator_no_docstring(self):
-
         assert _func_no_docstring_deprecated.__doc__ == (
             "\n" "\n" ".. deprecated:: 1.2.3\n" "    This is deprecated!!\n"
         )
@@ -204,7 +200,6 @@ def _func_no_docstring_new_method(some_arg, other_arg):
 class TestNewMethod:
     @pytest.mark.unit
     def test_new_method_decorator_full_docstring(self):
-
         assert _func_full_docstring_new_method.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -221,7 +216,6 @@ class TestNewMethod:
 
     @pytest.mark.unit
     def test_new_method_decorator_full_docstring_no_message(self):
-
         assert _func_full_docstring_new_method_no_message.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -238,7 +232,6 @@ class TestNewMethod:
 
     @pytest.mark.unit
     def test_new_method_decorator_only_summary(self):
-
         assert _func_only_summary_new_method.__doc__ == (
             "My docstring.\n"
             "\n"
@@ -248,7 +241,6 @@ class TestNewMethod:
 
     @pytest.mark.unit
     def test_new_method_decorator_no_docstring(self):
-
         assert _func_no_docstring_new_method.__doc__ == (
             "\n" "\n" ".. versionadded:: 1.2.3\n" "    Added in version 1.2.3\n"
         )
@@ -274,7 +266,6 @@ def _func_full_docstring_all_method_decorators(some_arg, other_arg):
 
 @pytest.mark.unit
 def test_all_method_decorators_full_docstring():
-
     assert _func_full_docstring_all_method_decorators.__doc__ == (
         "--Public API--My docstring.\n"
         "\n"
@@ -544,7 +535,6 @@ def _func_full_docstring_all_decorators(some_arg, other_arg):
 
 @pytest.mark.unit
 def test_all_decorators_full_docstring():
-
     assert _func_full_docstring_all_decorators.__doc__ == (
         "--Public API--My docstring.\n"
         "\n"

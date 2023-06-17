@@ -49,7 +49,7 @@ def mocked_glob_kwargs(basic_pandas_datasource):
 
 def test_glob_reader_generator_returns_typed_kwargs(mocked_glob_kwargs):
     # Returned Kwargs should be PathKwargs.
-    assert all([isinstance(kwargs, PathBatchKwargs) for kwargs in mocked_glob_kwargs])
+    assert all(isinstance(kwargs, PathBatchKwargs) for kwargs in mocked_glob_kwargs)
     # Path Kwargs should be usable by PandasDatasource and SparkDFDatasource
     assert issubclass(PathBatchKwargs, PandasDatasourceBatchKwargs)
     assert issubclass(PathBatchKwargs, SparkDFDatasourceBatchKwargs)
@@ -115,7 +115,7 @@ def test_glob_reader_generator_relative_path(basic_pandas_datasource):
         }
 
 
-def test_glob_reader_generator_partitioning(basic_pandas_datasource):
+def test_glob_reader_generator_partitioning(basic_pandas_datasource):  # noqa: PLR0915
     glob_generator = GlobReaderBatchKwargsGenerator(
         "test_generator",
         datasource=basic_pandas_datasource,
@@ -269,7 +269,7 @@ def test_glob_reader_generator_partitioning(basic_pandas_datasource):
 
 
 def test_glob_reader_generator_customize_partitioning(basic_pandas_datasource):
-    from dateutil.parser import parse as parse
+    from dateutil.parser import parse
 
     # We can subclass the generator to change the way that it builds partitions
     class DateutilPartitioningGlobReaderGenerator(GlobReaderBatchKwargsGenerator):

@@ -1,7 +1,12 @@
 import logging
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -14,18 +19,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class ColumnStandardDeviation(ColumnAggregateMetricProvider):
@@ -45,7 +41,9 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
             standard_deviation = sa.func.stdev(column)
         elif _dialect.name.lower() == GXSqlDialect.SQLITE:
             mean = _metrics["column.mean"]
-            nonnull_row_count = _metrics["column_values.null.unexpected_count"]
+            nonnull_row_count = _metrics[
+                f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ]
             standard_deviation = sa.func.sqrt(
                 sa.func.sum((1.0 * column - mean) * (1.0 * column - mean))
                 / ((1.0 * nonnull_row_count) - 1.0)
@@ -83,8 +81,10 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
             )
-            dependencies["column_values.null.unexpected_count"] = MetricConfiguration(
-                metric_name="column_values.null.unexpected_count",
+            dependencies[
+                f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
             )

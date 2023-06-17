@@ -977,7 +977,8 @@
         "version": {
           "enum": [
             "1.0.0",
-            "1.0.1"
+            "1.0.1",
+            "2"
           ]
         },
         "platform.system": {
@@ -5195,7 +5196,8 @@
     "version": {
       "enum": [
         "1.0.0",
-        "1.0.1"
+        "1.0.1",
+        "2"
       ]
     },
     "ge_version": {
@@ -5208,6 +5210,16 @@
     },
     "data_context_instance_id": {
       "type": "string",
+      "format": "uuid"
+    },
+    "mac_address": {
+      "type": "string"
+    },
+    "oss_id": {
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "uuid"
     },
     "event_time": {

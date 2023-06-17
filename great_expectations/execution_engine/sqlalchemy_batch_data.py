@@ -1,20 +1,13 @@
 import logging
 from typing import Optional
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import DatabaseError
-    from sqlalchemy.sql.elements import quoted_name
-except ImportError:
-    sa = None
-    quoted_name = None
-    DefaultDialect = None
-    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +16,7 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0912
         self,
         execution_engine,
         record_set_name: Optional[str] = None,
@@ -121,7 +114,7 @@ class SqlAlchemyBatchData(BatchData):
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
-                table_name = quoted_name(table_name, quote=True)
+                table_name = sqlalchemy.quoted_name(table_name, quote=True)
             if dialect == GXSqlDialect.BIGQUERY:
                 if schema_name is not None:
                     logger.warning(
@@ -169,7 +162,7 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
         else:
-            if query:
+            if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
             else:
                 self._selectable = selectable.alias(self._record_set_name)
@@ -179,7 +172,7 @@ class SqlAlchemyBatchData(BatchData):
         return self._dialect
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> sqlalchemy.DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
 
@@ -203,16 +196,16 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901 - 18
+    def _create_temporary_table(  # noqa: C901, PLR0912
         self, temp_table_name, query, temp_table_schema_name=None
-    ) -> None:
+    ) -> str:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
 
         dialect: GXSqlDialect = self.dialect
-
+        stmt: str = ""
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
@@ -262,6 +255,11 @@ class SqlAlchemyBatchData(BatchData):
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+        elif dialect == GXSqlDialect.CLICKHOUSE:
+            logger.warning(
+                f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
+            stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.AWSATHENA:
             logger.warning(
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
@@ -288,8 +286,9 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GXSqlDialect.ORACLE:
             try:
-                self._engine.execute(stmt_1)
-            except DatabaseError:
-                self._engine.execute(stmt_2)
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_1))
+            except sqlalchemy.DatabaseError:
+                self.execution_engine.execute_query_in_transaction(sa.text(stmt_2))
         else:
-            self._engine.execute(stmt)
+            self.execution_engine.execute_query_in_transaction(sa.text(stmt))
+        return stmt

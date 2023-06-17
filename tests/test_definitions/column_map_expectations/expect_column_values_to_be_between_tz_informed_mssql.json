@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_between",
   "datasets": [{
+    "dataset_name": "expect_column_values_to_be_between_tz_informed_mssql_1",
     "data": {
       "ts": [
         "1975-01-01T12:00:01.0000000",
@@ -35,7 +36,7 @@
         "only_for": ["mssql"],
         "exact_match_out": false,
         "out": {
-          "unexpected_index_list": [0,1],
+          "unexpected_index_list": [{"pk_index": 0, "ts": "1975-01-01T12:00:01"}, {"pk_index": 1, "ts": "1985-12-31T12:00:01.013000"}],
           "success": false
         },
         "in": {

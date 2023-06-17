@@ -18,9 +18,10 @@ from typing import (
 
 import jsonpatch
 from marshmallow import Schema, ValidationError, fields, post_dump, post_load
-from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -46,13 +47,15 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
+
+    from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
     from great_expectations.validator.validator import Validator
-
 logger = logging.getLogger(__name__)
 
 
@@ -111,8 +114,39 @@ class KWargDetailsDict(TypedDict):
     default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
+@public_api
+@new_argument(
+    argument_name="rendered_content",
+    version="0.15.14",
+    message="Used to include rendered content dictionary in expectation configuration.",
+)
+@new_argument(
+    argument_name="ge_cloud_id",
+    version="0.13.36",
+    message="Used in GX Cloud deployments.",
+)
+@new_argument(
+    argument_name="expectation_context",
+    version="0.13.44",
+    message="Used to support column descriptions in GX Cloud.",
+)
 class ExpectationConfiguration(SerializableDictDot):
-    """ExpectationConfiguration defines the parameters and name of a specific expectation."""
+    """Denies the parameters and name of a specific expectation.
+
+    Args:
+        expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
+        kwargs: The keyword arguments to pass to the expectation class.
+        meta: A dictionary of metadata to attach to the expectation.
+        success_on_last_run: Whether the expectation succeeded on the last run.
+        ge_cloud_id: The corresponding GX Cloud ID for the expectation.
+        expectation_context: The context for the expectation.
+        rendered_content: Rendered content for the expectation.
+    Raises:
+        InvalidExpectationConfigurationError: If `expectation_type` arg is not a str.
+        InvalidExpectationConfigurationError: If `kwargs` arg is not a dict.
+        InvalidExpectationKwargsError: If domain kwargs are missing.
+        ValueError: If a `domain_type` cannot be determined.
+    """
 
     kwarg_lookup_dict: ClassVar[Mapping[str, KWargDetailsDict]] = {
         "expect_column_to_exist": {
@@ -972,7 +1006,7 @@ class ExpectationConfiguration(SerializableDictDot):
         "catch_exceptions",
     )
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         kwargs: dict,
@@ -1175,7 +1209,16 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return domain_kwargs
 
+    @public_api
     def get_success_kwargs(self) -> dict:
+        """Gets the success and domain kwargs for this ExpectationConfiguration.
+
+        Raises:
+            ExpectationNotFoundError: If the expectation implementation is not found.
+
+        Returns:
+            A dictionary with the success and domain kwargs of an expectation.
+        """
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1333,7 +1376,13 @@ class ExpectationConfiguration(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ExpectationConfiguration.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationConfiguration.
+        """
         myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -1404,11 +1453,24 @@ class ExpectationConfiguration(SerializableDictDot):
     def _get_expectation_impl(self) -> Type[Expectation]:
         return get_expectation_impl(self.expectation_type)
 
+    @public_api
     def validate(
         self,
         validator: Validator,
-        runtime_configuration=None,
-    ):
+        runtime_configuration: Optional[dict] = None,
+    ) -> ExpectationValidationResult:
+        """Runs the expectation against a `Validator`.
+
+        Args:
+            validator: Object responsible for running an Expectation against data.
+            runtime_configuration: A dictionary of configuration arguments to be used by the expectation.
+
+        Raises:
+            ExpectationNotFoundError: If the expectation implementation is not found.
+
+        Returns:
+            ExpectationValidationResult: The validation result generated by running the expectation against the data.
+        """
         expectation_impl: Type[Expectation] = self._get_expectation_impl()
         # noinspection PyCallingNonCallable
         return expectation_impl(self).validate(
@@ -1511,9 +1573,20 @@ class ExpectationConfigurationSchema(Schema):
                 data.pop(key)
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_configuration(self, data: dict, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationConfiguration(**data)
 
 

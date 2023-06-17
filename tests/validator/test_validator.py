@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -22,6 +23,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -50,14 +52,16 @@ def yellow_trip_pandas_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "integration",
                 "fixtures",
@@ -66,12 +70,12 @@ def yellow_trip_pandas_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -79,7 +83,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
@@ -87,7 +91,7 @@ def yellow_trip_pandas_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -95,7 +99,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
@@ -103,7 +107,7 @@ def yellow_trip_pandas_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -111,7 +115,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
@@ -257,7 +261,7 @@ def multi_batch_taxi_validator(
 ) -> Validator:
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -271,6 +275,29 @@ def multi_batch_taxi_validator(
     )
 
     return validator_multi_batch
+
+
+@pytest.mark.integration
+def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_validator):
+    validator = multi_batch_taxi_validator
+
+    actual = validator.convert_to_checkpoint_validations_list()
+    expected_config = CheckpointValidationConfig(
+        expectation_suite_name="validating_taxi_data",
+        expectation_suite_ge_cloud_id=None,
+        batch_request={
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+            "data_connector_query": {"batch_filter_parameters": {"year": "2019"}},
+            "batch_spec_passthrough": None,
+            "limit": None,
+        },
+        id=None,
+        name=None,
+    )
+
+    assert all(config.to_dict() == expected_config.to_dict() for config in actual)
 
 
 @pytest.fixture()
@@ -292,7 +319,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         data_context=context,
@@ -322,11 +349,13 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
+    mock_expectation_store_update,
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -407,7 +436,7 @@ def test_validator_with_bad_batchrequest(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -570,7 +599,7 @@ def test_validator_load_additional_batch_to_validator(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -618,7 +647,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -941,7 +970,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
 
 
 @pytest.mark.integration
-def test_validator_include_rendered_content(
+def test_validator_include_rendered_content_diagnostic(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
@@ -950,7 +979,7 @@ def test_validator_include_rendered_content(
         data_connector_name="monthly",
         data_asset_name="my_reports",
     )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     column: str = "fare_amount"
     partition_object: Dict[str, List[float]] = {
@@ -1006,45 +1035,53 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="6",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="--",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
             params={
                 "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {"schema": {"type": "number"}, "value": 1},
-                "max_value": {"schema": {"type": "number"}, "value": 8},
-                "eval_param__0": {
-                    "schema": {"type": "string"},
-                    "value": "min_value: upstream_column_min",
+                "min_value": {
+                    "schema": {"type": "number"},
+                    "value": 1,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_min"},
+                    },
                 },
-                "eval_param__1": {
-                    "schema": {"type": "string"},
-                    "value": "max_value: upstream_column_max",
+                "max_value": {
+                    "schema": {"type": "number"},
+                    "value": 8,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_max"},
+                    },
                 },
             },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.   $eval_param__0, $eval_param__1",
+            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
@@ -1059,22 +1096,24 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="0",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="0",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
@@ -1087,22 +1126,48 @@ def test_validator_include_rendered_content(
                     "value": "passenger_count>0",
                 },
             },
-            template="if $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
 
-@pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
-    validator = Validator(execution_engine=execution_engine)
-    return validator
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(result_format: str | dict):
+    context = get_context()
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pd.DataFrame(
+            data=[1, 2, 3],
+            columns=["numbers_i_can_count_to"],
+        ),
+    )
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "test_result_format_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    expectation_validation_result = validator.expect_column_max_to_be_between(
+        column="numbers_i_can_count_to",
+        min_value=1000,
+        max_value=10000,
+        result_format=result_format,
+    )
+    assert expectation_validation_result.result == {}
 
 
 @pytest.mark.unit
@@ -1146,7 +1211,7 @@ def test___get_attr___retrieves_existing_expectation(
 
     # Does not raise error if properly registered
     # Avoiding invocation to only test registration (and not actual expectation)
-    validator.expect_column_max_to_be_between
+    _ = validator.expect_column_max_to_be_between
 
 
 @pytest.mark.unit
@@ -1156,7 +1221,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
     validator = validator_with_mock_execution_engine
 
     with pytest.raises(AttributeError) as e:
-        validator.my_fake_attr
+        _ = validator.my_fake_attr
 
     assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
 
@@ -1195,11 +1260,9 @@ def _context_to_validator_and_expectation_sql(
     batch_request = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_sql_data_connector",
-        data_asset_name="my_asset",  # this is the name of the table you want to retrieve
+        data_asset_name="animals_names_asset",  # this is the name of the table you want to retrieve
     )
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
@@ -1208,14 +1271,14 @@ def _context_to_validator_and_expectation_sql(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_validator(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     result_format_config: dict = {
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
     (validator, _) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
 
     with pytest.warns(UserWarning) as config_warning:
@@ -1233,7 +1296,7 @@ def test_validator_result_format_config_from_validator(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_expectation(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     runtime_configuration: dict = {
         "result_format": {
@@ -1242,7 +1305,7 @@ def test_validator_result_format_config_from_expectation(
         }
     }
     (validator, expectation) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
         _: ExpectationValidationResult = expectation.validate(

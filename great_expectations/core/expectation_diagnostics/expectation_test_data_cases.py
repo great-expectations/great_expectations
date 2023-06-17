@@ -78,9 +78,11 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         title,
         exact_match_out,
         out,
-        suppress_test_for=[],
+        suppress_test_for=None,
         **kwargs,
     ) -> None:
+        if not suppress_test_for:
+            suppress_test_for = []
         super().__init__(
             title=title,
             input=kwargs["in"],
@@ -97,6 +99,7 @@ class ExpectationTestDataCases(SerializableDictDot):
     """Pairs a test dataset and a list of test cases to execute against that data."""
 
     data: TestData
+    dataset_name: str
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None

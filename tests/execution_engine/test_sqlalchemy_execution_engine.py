@@ -6,6 +6,10 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import Connection
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
@@ -14,6 +18,7 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -22,6 +27,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
+    _dialect_requires_persisted_connection,
 )
 
 # Function to test for spark dataframe equality
@@ -29,18 +35,24 @@ from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
 )
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import get_sqlalchemy_domain_data
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
-from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
+from tests.test_utils import (
+    get_sqlite_table_names,
+    get_sqlite_temp_table_names,
+    get_sqlite_temp_table_names_from_engine,
+)
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
@@ -48,8 +60,8 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
         connection_string=test_db_connection_string
     )
     assert my_execution_engine.connection_string == test_db_connection_string
-    assert my_execution_engine.credentials == None
-    assert my_execution_engine.url == None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url is None
 
     my_execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -64,7 +76,9 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
 def test_instantiation_via_url(sa):
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None
@@ -87,7 +101,9 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     # 1. Create engine with sqlite db
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None
@@ -160,7 +176,7 @@ def test_instantiation_error_states(sa, test_db_connection_string):
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -169,7 +185,9 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
     aggregate_fn_metric_1 = MetricConfiguration(
@@ -204,7 +222,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     aggregate_fn_metric_4.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(
             aggregate_fn_metric_1,
             aggregate_fn_metric_2,
@@ -254,7 +272,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     start = datetime.datetime.now()
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
             desired_metric_2,
@@ -287,21 +305,25 @@ def test_get_domain_records_with_column_domain(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
             "condition_parser": "great_expectations__experimental__",
         }
     )
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     expected_column_df = df.iloc[:3]
-    engine = build_sa_engine(expected_column_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -314,27 +336,31 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b")<5',
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
         }
     )
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     expected_column_df = df.iloc[:3]
-    engine = build_sa_engine(expected_column_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -347,27 +373,31 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("a")<2',
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
         }
     )
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     expected_column_df = df.iloc[:1]
-    engine = build_sa_engine(expected_column_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -382,20 +412,20 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
     df = pd.DataFrame(
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
-    engine = build_sa_engine(df, sa)
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
-        data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
+        execution_engine.get_domain_records(
             domain_kwargs={
                 "column": "a",
                 "row_condition": 'col("a")<2',
                 "condition_parser": "great_expectations__experimental__",
                 "filter_conditions": [
                     RowCondition(
-                        condition=f'col("b").notnull()',
+                        condition='col("b").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                     RowCondition(
-                        condition=f'col("c").notnull()',
+                        condition='col("c").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                 ],
@@ -411,8 +441,8 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -421,15 +451,19 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "both_values_are_missing",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
     )
-    engine = build_sa_engine(expected_column_pair_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -437,8 +471,8 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "b",
             "column_B": "c",
@@ -447,15 +481,19 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "either_value_is_missing",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
     )
-    engine = build_sa_engine(expected_column_pair_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -463,8 +501,8 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_data == expected_data
     ), "Data does not match after getting full access compute domain"
 
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_A": "b",
             "column_B": "c",
@@ -473,7 +511,9 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "neither",
         }
     )
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
         {
@@ -482,10 +522,12 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "c": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     )
-    engine = build_sa_engine(expected_column_pair_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -502,8 +544,8 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["a", "c"],
             "row_condition": 'col("b")>2',
@@ -511,15 +553,19 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "ignore_row_if": "all_values_are_missing",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     expected_multicolumn_df = pd.DataFrame(
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
     )
-    engine = build_sa_engine(expected_multicolumn_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -534,8 +580,8 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, 5, None],
         }
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
             "row_condition": 'col("a")<5',
@@ -543,15 +589,19 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "ignore_row_if": "any_value_is_missing",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     expected_multicolumn_df = pd.DataFrame(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
     )
-    engine = build_sa_engine(expected_multicolumn_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -566,14 +616,16 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "c": [1, 2, 3, 4, None, 6],
         }
     )
-    engine = build_sa_engine(df, sa)
-    data = engine.get_domain_records(
+    execution_engine = build_sa_execution_engine(df, sa)
+    data = execution_engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
             "ignore_row_if": "never",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     expected_multicolumn_df = pd.DataFrame(
         {
@@ -583,10 +635,12 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         },
         index=[0, 1, 2, 3, 4, 5],
     )
-    engine = build_sa_engine(expected_multicolumn_df, sa)
-    expected_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
+    expected_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
 
@@ -597,21 +651,25 @@ def test_get_domain_records_with_multicolumn_domain(sa):
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
 def test_get_compute_domain_with_no_domain_kwargs(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={}, domain_type="table"
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -621,22 +679,26 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
 
 # Testing for only untested use case - column_pair
 def test_get_compute_domain_with_column_pair(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
     # Fetching data, compute_domain_kwargs, accessor_kwargs
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="column_pair"
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -652,23 +714,27 @@ def test_get_compute_domain_with_column_pair(sa):
 
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_multicolumn(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
         sa,
     )
 
     # Obtaining compute domain
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -680,22 +746,26 @@ def test_get_compute_domain_with_multicolumn(sa):
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
 def test_get_compute_domain_with_column_domain(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
     # Loading batch data
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={"column": "a"}, domain_type=MetricDomainTypes.COLUMN
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"]).select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        sa.select(sa.text("*")).select_from(data)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -705,11 +775,11 @@ def test_get_compute_domain_with_column_domain(sa):
 
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={
             "column": "a",
             "row_condition": 'col("b") > 24',
@@ -719,14 +789,18 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"])
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*"))
         .select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
         .where(sa.column("b") > 24)
     ).fetchall()
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -739,12 +813,12 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
     # Obtaining data from computation
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
         domain_kwargs={
             "column": "b",
             "row_condition": 'col("b") == 2',
@@ -754,14 +828,18 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = engine.engine.execute(
-        sa.select(["*"])
+    raw_data = execution_engine.execute_query(
+        sa.select(sa.text("*"))
         .select_from(
-            cast(SqlAlchemyBatchData, engine.batch_manager.active_batch_data).selectable
+            cast(
+                SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
+            ).selectable
         )
         .where(sa.column("b") == 2)
     ).fetchall()
-    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+    domain_data = execution_engine.execute_query(
+        get_sqlalchemy_domain_data(data)
+    ).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -774,13 +852,13 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
 
 
 def test_get_compute_domain_with_nonexistent_condition_parser(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
+        data, compute_kwargs, accessor_kwargs = execution_engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
@@ -791,7 +869,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric(sa):
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -819,7 +897,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
-        res = engine.resolve_metrics(
+        execution_engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
                 desired_metric_2,
@@ -834,7 +912,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     """
     Insures that even when "compute_domain_kwargs" has multiple keys, it will be JSON-serialized for "IDDict.to_id()".
     """
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame(
             {
                 "names": [
@@ -858,7 +936,9 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
@@ -874,7 +954,9 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     }
 
     try:
-        results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+        results = execution_engine.resolve_metrics(
+            metrics_to_resolve=(aggregate_fn_metric,)
+        )
     except gx_exceptions.MetricProviderError as e:
         assert False, str(e)
 
@@ -890,7 +972,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(sa)
     }
 
     try:
-        results = engine.resolve_metrics(
+        results = execution_engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=results
         )
         assert results == {desired_metric.id: 16}
@@ -902,7 +984,7 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
-    test_df.to_sql("test_table_0", con=my_execution_engine.engine)
+    add_dataframe_to_db(df=test_df, name="test_table_0", con=my_execution_engine.engine)
 
     query: str = "SELECT * FROM test_table_0"
     batch_spec = RuntimeQueryBatchSpec(
@@ -913,26 +995,26 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     )
 
     assert batch_spec.query == query
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2
     assert batch_markers.get("ge_load_time") is not None
 
 
 def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
-    def validate_tmp_tables():
+    def validate_tmp_tables(execution_engine):
         temp_tables = [
             name
-            for name in get_sqlite_temp_table_names(engine.engine)
+            for name in get_sqlite_temp_table_names(execution_engine)
             if name.startswith("ge_temp_")
         ]
         tables = [
             name
-            for name in get_sqlite_table_names(engine.engine)
+            for name in get_sqlite_table_names(execution_engine)
             if name.startswith("ge_temp_")
         ]
         assert len(temp_tables) == 0
         assert len(tables) == 0
 
-    engine = build_sa_engine(
+    execution_engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -941,10 +1023,12 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(
+        execution_engine=execution_engine
+    )
     metrics.update(results)
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)
 
     condition_metric = MetricConfiguration(
         metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
@@ -954,15 +1038,15 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
     metrics.update(results)
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -970,8 +1054,198 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         "unexpected_condition": condition_metric,
     }
     # noinspection PyUnusedLocal
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)
+
+
+@pytest.fixture
+def pd_dataframe() -> pd.DataFrame:
+    return pd.DataFrame({"a": [1, 2], "b": [4, 4]})
+
+
+@pytest.mark.unit
+class TestExecuteQuery:
+    """What does this test and why?
+
+    The `SQLAlchemyExecutionEngine.execute_query()` method exists to encapsulate
+    the creation and management of connections. Here we check that it works
+    as intended.
+    """
+
+    def test_execute_query(self, sa, pd_dataframe: pd.DataFrame):
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+            pd_dataframe, sa
+        )
+
+        select_all = "SELECT * FROM test;"
+        result = execution_engine.execute_query(sa.text(select_all)).fetchall()
+
+        expected = [(1, 4), (2, 4)]
+        assert [r for r in result] == expected
+
+    def test_execute_query_in_transaction(self, sa, pd_dataframe: pd.DataFrame):
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+            pd_dataframe, sa
+        )
+
+        select_all = "SELECT * FROM test;"
+        result = execution_engine.execute_query_in_transaction(
+            sa.text(select_all)
+        ).fetchall()
+
+        expected = [(1, 4), (2, 4)]
+        assert [r for r in result] == expected
+
+
+@pytest.mark.unit
+class TestConnectionPersistence:
+    """What does this test and why?
+
+    sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
+    These tests ensure that we use the existing connection if one is available.
+    """
+
+    def test_same_connection_used_from_static_pool_sqlite(
+        self, sa, pd_dataframe: pd.DataFrame
+    ):
+        """What does this test and why?
+
+        We want to make sure that the same connection is used for subsequent queries for databases that need it e.g.
+        sqlite.
+        Here we test that by creating a temp table and then querying it multiple times (each time pulling a connection
+        from the pool). The same connection should be pulled from the pool, if the connection wasn't the same the
+        temporary table wouldn't be accessible.
+        """
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as con:
+            add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
+
+        assert (
+            execution_engine.dialect_name == GXSqlDialect.SQLITE
+        ), "Error here means test setup failed."
+
+        create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
+        execution_engine.execute_query_in_transaction(sa.text(create_temp_table))
+
+        select_temp_table = "SELECT * FROM temp_table;"
+
+        res = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        res2 = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+
+        # This assert is here just to make sure when we assert res == res2 we are not comparing None == None
+        expected = [(1, 4), (2, 4)]
+        assert [r for r in res] == expected
+
+        assert res == res2
+
+    def test_same_connection_accessible_from_execution_engine_sqlite(
+        self, sa, pd_dataframe: pd.DataFrame
+    ):
+        """What does this test and why?
+
+        We want to make sure that the same connection is used for subsequent queries for databases that need it e.g.
+        sqlite and that connection is accessible from the execution engine.
+        Here we test that by creating a temp table and then querying it multiple times (each time pulling a connection
+        from the pool). The same connection should be accessible from the execution engine after each query.
+        """
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as con:
+            add_dataframe_to_db(df=pd_dataframe, name="test", con=con, index=False)
+            connection = con
+        assert (
+            execution_engine.dialect_name == GXSqlDialect.SQLITE
+        ), "Error here means test setup failed."
+
+        create_temp_table = "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM test;"
+        execution_engine.execute_query_in_transaction(sa.text(create_temp_table))
+
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
+        select_temp_table = "SELECT * FROM temp_table;"
+
+        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
+        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        with execution_engine.get_connection() as test_con:
+            assert connection == test_con
+
+    def test_get_connection_doesnt_close_on_exit_sqlite(self, sa):
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as connection:
+            pass
+        assert not connection.closed
+
+
+@pytest.mark.unit
+class TestGetConnection:
+    def test_get_connection(self, sa):
+        execution_engine = SqlAlchemyExecutionEngine(connection_string="sqlite://")
+        with execution_engine.get_connection() as connection:
+            assert isinstance(connection, Connection)
+
+
+@pytest.mark.unit
+class TestDialectRequiresPersistedConnection:
+    def test__dialect_requires_persisted_connection_mssql(self):
+        connection_string = "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@db_hostname:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
+        assert _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_sqlite(self):
+        connection_string = "sqlite://"
+        assert _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_postgres(self):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        assert not _dialect_requires_persisted_connection(
+            connection_string=connection_string
+        )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_empty_url_raises_exception(
+        self, sa
+    ):
+        url = ""
+        with pytest.raises(sa.exc.ArgumentError):
+            _dialect_requires_persisted_connection(
+                url=url,
+            )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params(self):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = "postgresql://postgres@db_hostname/test_ci?client_encoding=utf8&application_name=test_ci"
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )
+
+    @pytest.mark.unit
+    def test__dialect_requires_persisted_connection_error_on_multiple_params_empty_url(
+        self,
+    ):
+        connection_string = "postgresql://postgres@db_hostname/test_ci"
+        url = ""
+        with pytest.raises(
+            ValueError,
+            match="Exactly one of connection_string, credentials, url must be specified",
+        ):
+            _dialect_requires_persisted_connection(
+                connection_string=connection_string,
+                url=url,
+            )

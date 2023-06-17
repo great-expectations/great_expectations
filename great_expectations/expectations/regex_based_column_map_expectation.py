@@ -6,6 +6,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -42,7 +43,36 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
+    """Base class for all RegexColumnMapMetrics.
+
+    RegexColumnMapMetric classes inheriting from RegexColumnMapMetricProvider are ephemeral,
+    defined by their `regex` attribute, and registered during the execution of their associated RegexColumnMapExpectation.
+
+    Metric Registration Example:
+
+    ```python
+    map_metric = RegexBasedColumnMapExpectation.register_metric(
+        regex_camel_name='Vowel',
+        regex_='^[aeiouyAEIOUY]*$',
+    )
+    ```
+
+    In some cases, subclasses of MetricProvider, such as RegexColumnMapMetricProvider, will already
+    have correct values that may simply be inherited by Metric classes.
+
+    Args:
+        regex (str): A valid regex pattern.
+        metric_name (str): The name of the registered metric. Must be globally unique in a great_expectations installation.
+            Constructed by the `register_metric(...)` function during Expectation execution.
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the metric.
+        condition_value_keys (tuple): A tuple of the keys used to determine the value of the metric.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
+    """
+
     condition_value_keys = ()
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -66,14 +96,48 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.rlike(cls.regex)
 
 
+@public_api
 class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
+    """Base class for RegexBasedColumnMapExpectations.
+
+    RegexBasedColumnMapExpectations facilitate regex parsing as the core logic for a Map Expectation.
+
+    Example Definition:
+
+    ```python
+    ExpectColumnValuesToOnlyContainVowels(SetBasedColumnMapExpectation):
+        regex_camel_name = 'Vowel'
+        regex = '^[aeiouyAEIOUY]*$'
+        semantic_type_name_plural = 'vowels'
+        map_metric = RegexBasedColumnMapExpectation.register_metric(
+            regex_camel_name=regex_camel_name,
+            regex=regex
+    )
+    ```
+
+    Args:
+        regex_camel_name (str): A name describing a regex pattern, in camel case.
+        regex_ (str): A valid regex pattern.
+        semantic_type_name_plural (optional[str]): The plural form of a semantic type being validated by a regex pattern.
+        map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
+    """
+
     @staticmethod
     def register_metric(
         regex_camel_name: str,
         regex_: str,
-    ):
-        regex_snake_name = camel_to_snake(regex_camel_name)
-        map_metric = "column_values.match_" + regex_snake_name + "_regex"
+    ) -> str:
+        """Register an ephemeral metric using a constructed name with the logic provided by RegexColumnMapMetricProvider.
+
+        Args:
+            regex_camel_name: A name describing a regex pattern, in camel case.
+            regex_: A valid regex pattern.
+
+        Returns:
+            map_metric: The constructed name of the ephemeral metric.
+        """
+        regex_snake_name: str = camel_to_snake(regex_camel_name)
+        map_metric: str = "column_values.match_" + regex_snake_name + "_regex"
 
         # Define the class using `type`. This allows us to name it dynamically.
         new_column_regex_metric_provider = type(  # noqa: F841 # never used
@@ -87,9 +151,19 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         return map_metric
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
-    ):
+    ) -> None:
+        """Raise an exception if the configuration is not viable for an expectation.
+
+        Args:
+            configuration: An ExpectationConfiguration
+
+        Raises:
+            InvalidExpectationConfigurationError: If no `regex` or `column` specified, or if `mostly` parameter
+                incorrectly defined.
+        """
         super().validate_configuration(configuration)
         try:
             assert (
@@ -106,7 +180,6 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     # question, descriptive, prescriptive, diagnostic
     @classmethod
@@ -123,7 +196,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 return f'Do all values in column "{column}" match the regular expression {regex}?'
         else:
-            if semantic_type_name_plural is not None:
+            if semantic_type_name_plural is not None:  # noqa: PLR5501
                 return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
                 return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
@@ -147,12 +220,12 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 else:
                     return f'All values in column "{column}" match the regular expression {regex}.'
             else:
-                if semantic_type_name_plural is not None:
+                if semantic_type_name_plural is not None:  # noqa: PLR5501
                     return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
         else:
-            if semantic_type_name_plural is not None:
+            if semantic_type_name_plural is not None:  # noqa: PLR5501
                 return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
@@ -179,7 +252,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         else:
             template_str = "values must match this regular expression: $regex"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )

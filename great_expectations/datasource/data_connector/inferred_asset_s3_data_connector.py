@@ -4,17 +4,20 @@ from typing import List, Optional
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 
 try:
     import boto3
 except ImportError:
     boto3 = None
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_s3_keys
+from great_expectations.datasource.data_connector.util import (
+    list_s3_keys,
+    sanitize_prefix_for_gcs_and_s3,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -22,20 +25,34 @@ logger = logging.getLogger(__name__)
 INVALID_S3_CHARS = ["*"]
 
 
+@public_api
 class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
+    """An Inferred Asset Data Connector used to connect to AWS Simple Storage Service (S3).
+
+    This Data Connector uses regular expressions to traverse through S3 buckets and implicitly
+    determine Data Asset name.
+
+    Much of the interaction is performed using the `boto3` S3 client. Please refer to
+    the `official AWS documentation <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html>`_ for
+    more information.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        bucket: The S3 bucket name.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
+            a list of `group_names` for capture groups.
+        sorters: A list of sorters for sorting data references.
+        prefix: Infer as Data Assets only blobs that begin with this prefix.
+        delimiter: When included, will remove any prefix up to the delimiter from the inferred Data Asset names.
+        max_keys: Max blob filepaths to return.
+        boto3_options: Options passed to the S3 client.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
-    Extension of InferredAssetFilePathDataConnector used to connect to S3
 
-    The InferredAssetS3DataConnector is one of two classes (ConfiguredAssetS3DataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on S3. It connects to assets
-    inferred from bucket, prefix, and file name by default_regex.
-
-    InferredAssetS3DataConnector that operates on S3 buckets and determines
-    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
-
-    """
-
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -50,22 +67,6 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        InferredAssetS3DataConnector for connecting to S3.
-
-        Args:
-            name (str): required name for data_connector
-            datasource_name (str): required name for datasource
-            bucket (str): bucket for S3
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-            default_regex (dict): optional regex configuration for filtering data_references
-            sorters (list): optional list of sorters for sorting data_references
-            prefix (str): S3 prefix
-            delimiter (str): S3 delimiter
-            max_keys (int): S3 max_keys (default is 1000)
-            boto3_options (dict): optional boto3 options
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
         super().__init__(
@@ -79,7 +80,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_gcs_and_s3(text=prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -146,10 +147,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             "bucket": self._bucket,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)
 
 
 def _check_valid_s3_path(

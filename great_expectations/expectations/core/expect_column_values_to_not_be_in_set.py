@@ -122,7 +122,20 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates that a value_set has been provided."""
+        """
+        Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+            Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -169,7 +182,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must not belong to this set: {value_set_str}"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -197,7 +210,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
@@ -225,7 +238,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
 
         template_str = f"values must not belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -265,7 +278,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
             )
         ]
 
-    def _pandas_column_values_not_in_set(
+    def _pandas_column_values_not_in_set(  # noqa: PLR0913
         self,
         series: pd.Series,
         metrics: Dict,

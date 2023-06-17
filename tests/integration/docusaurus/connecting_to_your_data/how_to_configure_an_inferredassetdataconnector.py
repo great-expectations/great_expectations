@@ -1,7 +1,13 @@
-from ruamel import yaml
-
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+
+# </snippet>
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
+# </snippet>
 
 context = gx.get_context()
 
@@ -74,6 +80,7 @@ assert "yellow_tripdata_2019-01" in set(
 )
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml each file own data asset">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -92,6 +99,7 @@ data_connectors:
         - month
       pattern: (.*)_(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -102,6 +110,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -121,6 +130,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -144,6 +154,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml add an InferredAssetDataConnector to a Datasource configuration">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -164,6 +175,7 @@ data_connectors:
         - month
       pattern: (.*)/(.*)_sample_(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -177,6 +189,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -197,6 +210,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -223,6 +237,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml basic configuration with more than one Data Asset">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -241,6 +256,7 @@ data_connectors:
         - month
       pattern: (.*)_(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -251,6 +267,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -270,6 +287,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -292,6 +310,7 @@ assert "yellow_tripdata" in set(
     ]
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py get_validator">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -302,10 +321,12 @@ validator = context.get_validator(
     batch_request=batch_request,
     create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
 )
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -317,6 +338,7 @@ validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name="<MY EXPECTATION SUITE NAME>",
 )
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
@@ -326,6 +348,7 @@ assert validator.active_batch_definition.batch_identifiers == {
 }
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the inside">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -345,6 +368,7 @@ data_connectors:
         - data_asset_name
       pattern: (\d{4})/(\d{2})/(.*)\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -355,6 +379,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the inside">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -375,6 +400,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -404,6 +430,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the outside">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -424,6 +451,7 @@ data_connectors:
         - month
       pattern: (.*)/(.*)(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -434,6 +462,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the outside">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -459,6 +488,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -488,6 +518,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml redundant information in the naming convention">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -507,6 +538,7 @@ data_connectors:
         - month
       pattern: (.*)/.*(\d{4})-(\d{2})\.csv
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -517,6 +549,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py python datasource_config redundant information in the naming convention">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -541,6 +574,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.

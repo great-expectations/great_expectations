@@ -125,7 +125,6 @@ def test_pandas_column_map_decorator_partial_exception_counts():
 
 
 def test_column_map_expectation_decorator():
-
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
     # (2) Test expectation business logic without dependencies on any other functions.

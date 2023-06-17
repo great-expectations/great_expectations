@@ -1,9 +1,11 @@
 from typing import TYPE_CHECKING, List, Optional
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -235,20 +237,32 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "strict_max",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_between` it is required that:
+
+        - One of `min_value` or `max_value` is not `None`.
+
+        - `min_value` and `max_value` are one of the following types: `datetime`, `float`, `int`, or `dict`
+
+        - If `min_value` or `max_value` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
@@ -259,9 +273,12 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             min_val = configuration.kwargs["min_value"]
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-        assert (
-            min_val is not None or max_val is not None
-        ), "min_value and max_value cannot both be None"
+        try:
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
+        except AssertionError as e:
+            raise gx_exceptions.InvalidExpectationConfigurationError(str(e))
 
         self.validate_metric_value_between_configuration(configuration=configuration)
 
@@ -305,7 +322,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             else:
                 template_str += f"values must be {at_least_str} $min_value"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -357,7 +374,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             at_least_str, at_most_str = handle_strict_min_max(params)
 
             mostly_str = ""
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )

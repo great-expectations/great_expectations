@@ -8,7 +8,6 @@ from typing import Dict, List, Union
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -18,6 +17,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -33,7 +33,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import PasswordMasker, file_relative_path
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
@@ -41,7 +41,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
@@ -53,7 +53,6 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
     get_context,
-    is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -62,7 +61,7 @@ try:
 except ImportError:
     from unittest import mock
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
 
@@ -78,21 +77,31 @@ def titanic_multibatch_data_context(
     project_path = tmp_path / "titanic_data_context"
     project_path.mkdir()
     project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
@@ -109,115 +118,36 @@ def data_context_with_bad_datasource(tmp_path_factory):
     It is used by test_get_batch_multiple_datasources_do_not_scan_all()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(  # noqa: PTH118
+            fixture_dir, "great_expectations_bad_datasource.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.create_expectation_suite(
+        titanic_data_context.add_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
-        overwrite_existing=True,
     )
-
-
-def test_get_available_data_asset_names_with_one_datasource_including_a_single_generator(
-    empty_data_context, filesystem_csv
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv),
-            }
-        },
-    )
-
-    available_asset_names = empty_data_context.get_available_data_asset_names()
-
-    assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {
-        ("f3", "directory"),
-        ("f2", "file"),
-        ("f1", "file"),
-    }
-
-
-def test_get_available_data_asset_names_with_one_datasource_without_a_generator_returns_empty_dict(
-    empty_data_context,
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    obs = empty_data_context.get_available_data_asset_names()
-    assert obs == {"my_datasource": {}}
-
-
-def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context, sa
-):
-    """Test datasources with and without generators."""
-    # requires sqlalchemy because it instantiates sqlalchemydatasource
-    context = empty_data_context
-    connection_kwargs = {"credentials": {"drivername": "sqlite"}}
-
-    context.add_datasource(
-        "first",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "foo": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-    context.add_datasource(
-        "second", class_name="SqlAlchemyDatasource", **connection_kwargs
-    )
-    context.add_datasource(
-        "third",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "bar": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-
-    obs = context.get_available_data_asset_names()
-
-    assert isinstance(obs, dict)
-    assert set(obs.keys()) == {"first", "second", "third"}
-    assert obs == {
-        "first": {"foo": {"is_complete_list": True, "names": []}},
-        "second": {},
-        "third": {"bar": {"is_complete_list": True, "names": []}},
-    }
 
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
@@ -242,7 +172,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_does_not_exist.default"
         )
     )
@@ -255,7 +185,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -280,7 +210,7 @@ def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -313,7 +243,7 @@ def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -327,7 +257,7 @@ def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite.save_expectation_suite(
         expectation_suite,
     )
-    expectation_suite_saved: ExpectationSuite = (
+    (
         data_context_parameterized_expectation_suite.get_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
@@ -377,144 +307,6 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-@pytest.mark.v2_api
-def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        }
-    ]
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "second_pandas_source",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        },
-        {
-            "name": "second_pandas_source",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        },
-    ]
-
-    if is_library_loadable(library_name="psycopg2"):
-
-        # Make sure passwords are masked in password or url fields
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "drivername": "postgresql",
-                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                "port": "65432",
-                "username": "username_str",
-                "password": "password_str",
-                "database": "database_str",
-            },
-        )
-
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password_in_url",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "url": "postgresql+psycopg2://username:password@host:65432/database",
-            },
-        )
-
-        datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-        assert datasources == [
-            {
-                "name": "mydatasource",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {"class_name": "PandasDataset"},
-                "batch_kwargs_generators": {
-                    "mygenerator": {
-                        "base_directory": "../data",
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "reader_options": {"engine": "python", "sep": None},
-                    }
-                },
-            },
-            {
-                "name": "second_pandas_source",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-            },
-            {
-                "name": "postgres_source_with_password",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                    "port": "65432",
-                    "username": "username_str",
-                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
-                    "database": "database_str",
-                },
-            },
-            {
-                "name": "postgres_source_with_password_in_url",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
-                },
-            },
-        ]
-
-
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
@@ -535,9 +327,7 @@ def test_data_context_get_validation_result(titanic_data_context):
     Test that validation results can be correctly fetched from the configured results store
     """
     run_id = RunIdentifier(run_name="profiling")
-    profiling_results = titanic_data_context.profile_datasource(
-        "mydatasource", run_id=run_id
-    )
+    titanic_data_context.profile_datasource("mydatasource", run_id=run_id)
 
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler", run_id=run_id
@@ -576,7 +366,7 @@ def test_data_context_get_datasource(titanic_data_context):
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -589,11 +379,11 @@ def test_data_context_expectation_suite_delete(empty_data_context):
 
 
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.a.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -623,28 +413,27 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 @pytest.mark.rendered_output
 @pytest.mark.slow  # 1.02s
 def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
-
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    project_dir = os.path.join(tmp_path, "project_path")
-    os.mkdir(project_dir)
+    project_dir = os.path.join(tmp_path, "project_path")  # noqa: PTH118
+    os.mkdir(project_dir)  # noqa: PTH102
 
-    os.makedirs(os.path.join(project_dir, "data"))
-    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    os.makedirs(os.path.join(project_dir, "data"))  # noqa: PTH103, PTH118
+    os.makedirs(os.path.join(project_dir, "data/titanic"))  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
-        str(os.path.join(project_dir, "data/titanic/Titanic.csv")),
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv")),  # noqa: PTH118
     )
 
-    os.makedirs(os.path.join(project_dir, "data/random"))
+    os.makedirs(os.path.join(project_dir, "data/random"))  # noqa: PTH103, PTH118
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f1.csv"),
-        str(os.path.join(project_dir, "data/random/f1.csv")),
+        os.path.join(filesystem_csv_3, "f1.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data/random/f1.csv")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(filesystem_csv_3, "f2.csv"),
-        str(os.path.join(project_dir, "data/random/f2.csv")),
+        os.path.join(filesystem_csv_3, "f2.csv"),  # noqa: PTH118
+        str(os.path.join(project_dir, "data/random/f2.csv")),  # noqa: PTH118
     )
 
     assert (
@@ -668,7 +457,9 @@ project_path/
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data/titanic/"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data/titanic/"
+                ),
             }
         },
     )
@@ -680,7 +471,9 @@ project_path/
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(project_dir, "data/random/"),
+                "base_directory": os.path.join(  # noqa: PTH118
+                    project_dir, "data/random/"
+                ),
             }
         },
     )
@@ -691,7 +484,9 @@ project_path/
     # validation result
     titanic_profiled_batch_id = PathBatchKwargs(
         {
-            "path": os.path.join(project_dir, "data/titanic/Titanic.csv"),
+            "path": os.path.join(  # noqa: PTH118
+                project_dir, "data/titanic/Titanic.csv"
+            ),
             "datasource": "titanic",
             "data_asset_name": "Titanic",
         }
@@ -746,7 +541,7 @@ project_path/
 
     f1_profiled_batch_id = PathBatchKwargs(
         {
-            "path": os.path.join(project_dir, "data/random/f1.csv"),
+            "path": os.path.join(project_dir, "data/random/f1.csv"),  # noqa: PTH118
             "datasource": "random",
             "data_asset_name": "f1",
         }
@@ -754,13 +549,13 @@ project_path/
 
     f2_profiled_batch_id = PathBatchKwargs(
         {
-            "path": os.path.join(project_dir, "data/random/f2.csv"),
+            "path": os.path.join(project_dir, "data/random/f2.csv"),  # noqa: PTH118
             "datasource": "random",
             "data_asset_name": "f2",
         }
     ).to_id()
 
-    data_docs_dir = os.path.join(
+    data_docs_dir = os.path.join(  # noqa: PTH118
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
@@ -898,7 +693,7 @@ def test__normalize_absolute_or_relative_path(
     )
 
     assert context._normalize_absolute_or_relative_path("yikes").endswith(
-        os.path.join(test_dir, "yikes")
+        os.path.join(test_dir, "yikes")  # noqa: PTH118
     )
 
     assert test_dir not in context._normalize_absolute_or_relative_path("/yikes")
@@ -906,26 +701,30 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
-    project_path = tmp_path / "data_context"
-    project_path.mkdir()
-    project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(context_path, exist_ok=True)
-    assert os.path.isdir(context_path)
-    monkeypatch.chdir(context_path)
-    with pytest.raises(gx_exceptions.DataContextError) as err:
+    # `find_context_root_dir` iterates up the file tree to find a great_expectations.yml
+    # By deeply nesting our project path, we ensure we don't collide with any existing
+    # fixtures or side effects from other tests
+    project_path = tmp_path / "a" / "b" / "c" / "d" / "data_context"
+    project_path.mkdir(parents=True)
+
+    context_path = project_path / "great_expectations"
+    context_path.mkdir()
+    monkeypatch.chdir(str(context_path))
+
+    with pytest.raises(gx_exceptions.ConfigNotFoundError):
         FileDataContext.find_context_root_dir()
-    assert isinstance(err.value, gx_exceptions.ConfigNotFoundError)
 
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join("..", "test_fixtures", "great_expectations_basic.yml"),
+            os.path.join(  # noqa: PTH118
+                "..", "test_fixtures", "great_expectations_basic.yml"
+            ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
-    monkeypatch.setenv("GX_HOME", context_path)
-    assert FileDataContext.find_context_root_dir() == context_path
+    monkeypatch.setenv("GX_HOME", str(context_path))
+    assert FileDataContext.find_context_root_dir() == str(context_path)
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -992,7 +791,7 @@ def test_data_context_updates_expectation_suite_names(
 
     # Check that the saved name difference is actually persisted on disk
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "expectations",
             "a_new_new_suite_name.json",
@@ -1030,17 +829,24 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
 def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")
-    assert os.path.isdir(ge_dir)
-    assert os.path.isfile(os.path.join(ge_dir, FileDataContext.GX_YML))
+    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    assert os.path.isdir(ge_dir)  # noqa: PTH112
+    assert os.path.isfile(  # noqa: PTH113
+        os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
 
 
+def test_data_context_is_project_scaffolded(empty_context):
+    ge_dir = empty_context.root_directory
+    assert FileDataContext.is_project_scaffolded(ge_dir) is True
+
+
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
     ge_dir = empty_context.root_directory
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) == True
+    assert FileDataContext.does_config_exist_on_disk(ge_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
@@ -1048,8 +854,8 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) == False
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
+    assert FileDataContext.does_config_exist_on_disk(ge_dir) is False
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
@@ -1058,7 +864,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == True
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
     )
 
 
@@ -1067,7 +873,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -1075,9 +881,9 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -1085,9 +891,9 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir))
+    safe_remove(os.path.join(ge_dir))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -1095,10 +901,10 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:
+    with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:  # noqa: PTH118
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -1108,10 +914,10 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
-    context.create_expectation_suite("dent")
+    context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
-    assert FileDataContext.is_project_initialized(ge_dir) == True
+    assert FileDataContext.is_project_initialized(ge_dir) is True
 
 
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
@@ -1122,14 +928,14 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context.add_datasource("arthur", class_name="PandasDatasource")
     assert len(context.list_expectation_suites()) == 0
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(
@@ -1137,9 +943,9 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
+    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(
@@ -1147,9 +953,11 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR))
+    shutil.rmtree(
+        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+    )
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
@@ -1157,9 +965,13 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"))
+    shutil.rmtree(
+        os.path.join(  # noqa: PTH118
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"
+        )
+    )
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
@@ -1167,9 +979,13 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
 ):
     ge_dir = empty_context.root_directory
     # mangle project
-    shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"))
+    shutil.rmtree(
+        os.path.join(  # noqa: PTH118
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"
+        )
+    )
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(
@@ -1178,10 +994,12 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(
-        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml")
+        os.path.join(  # noqa: PTH118
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml"
+        )
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
@@ -1189,7 +1007,9 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_yml = os.path.join(project_path, "great_expectations/great_expectations.yml")
+    ge_yml = os.path.join(  # noqa: PTH118
+        project_path, "great_expectations/great_expectations.yml"
+    )
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
@@ -1208,8 +1028,8 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     FileDataContext.create(project_path)
 
     # mangle the existing setup
-    ge_dir = os.path.join(project_path, "great_expectations")
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
     with pytest.warns(
@@ -1219,7 +1039,9 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         FileDataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
 
-    assert os.path.isdir(uncommitted_dir), "No uncommitted directory created"
+    assert os.path.isdir(  # noqa: PTH112
+        uncommitted_dir
+    ), "No uncommitted directory created"
     assert (
         obs
         == """\
@@ -1269,7 +1091,7 @@ great_expectations/
             .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")
+    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
 
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(ge_dir)
@@ -1295,8 +1117,8 @@ uncommitted/
         .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
     assert fixture == expected
@@ -1305,8 +1127,8 @@ uncommitted/
     assert FileDataContext.all_uncommitted_directories_exist(ge_dir)
 
     # remove a few
-    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))
-    shutil.rmtree(os.path.join(uncommitted_dir, "validations"))
+    shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))  # noqa: PTH118
+    shutil.rmtree(os.path.join(uncommitted_dir, "validations"))  # noqa: PTH118
 
     # Test that not all exist
     assert not FileDataContext.all_uncommitted_directories_exist(project_path)
@@ -1324,8 +1146,8 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
         "checkpoints",
         "uncommitted",
     ]:
-        base_dir = os.path.join(project_path, context.GX_DIR, directory)
-        assert os.path.isdir(base_dir)
+        base_dir = os.path.join(project_path, context.GX_DIR, directory)  # noqa: PTH118
+        assert os.path.isdir(base_dir)  # noqa: PTH112
 
 
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
@@ -1333,9 +1155,11 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    config_vars_yml = os.path.join(uncommitted_dir, "config_variables.yml")
+    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
+    config_vars_yml = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "config_variables.yml"
+    )
 
     # modify config variables
     with open(config_vars_yml, "a") as ff:
@@ -1362,7 +1186,9 @@ def test_scaffold_directories(tmp_path_factory):
         ".gitignore",
         "uncommitted",
     }
-    assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
+    assert set(
+        os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118
+    ) == {
         "data_docs",
         "validations",
     }
@@ -1389,12 +1215,12 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
         "mydatasource", "mygenerator", data_asset_name="titanic"
     )
-    paths.append(os.path.basename(batch_kwargs["path"]))
+    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
 
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
         "mydatasource", "mygenerator", data_asset_name="titanic"
     )
-    paths.append(os.path.basename(batch_kwargs["path"]))
+    paths.append(os.path.basename(batch_kwargs["path"]))  # noqa: PTH119
 
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
@@ -1404,13 +1230,16 @@ def test_load_config_variables_property(
 ):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+    )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
-        os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
     basic_data_context_config[
@@ -1441,16 +1270,16 @@ def test_list_expectation_suite_with_no_suites(titanic_data_context):
 
 
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
-    titanic_data_context.create_expectation_suite("warning")
+    titanic_data_context.add_expectation_suite("warning")
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ["warning"]
 
 
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
-    titanic_data_context.create_expectation_suite("a.warning")
-    titanic_data_context.create_expectation_suite("b.warning")
-    titanic_data_context.create_expectation_suite("c.warning")
+    titanic_data_context.add_expectation_suite("a.warning")
+    titanic_data_context.add_expectation_suite("b.warning")
+    titanic_data_context.add_expectation_suite("c.warning")
 
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
@@ -1477,9 +1306,9 @@ def test_get_batch_when_passed_a_suite_name(titanic_data_context):
     root_dir = context.root_directory
     batch_kwargs = {
         "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     batch = context.get_batch(batch_kwargs, "foo")
     assert isinstance(batch, Dataset)
@@ -1491,9 +1320,9 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     root_dir = context.root_directory
     batch_kwargs = {
         "datasource": "mydatasource",
-        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
+        "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),  # noqa: PTH118
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     suite = context.get_expectation_suite("foo")
 
@@ -1528,13 +1357,16 @@ def test_list_checkpoints_on_context_with_two_checkpoints(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    checkpoints_file = os.path.join(
+    checkpoints_file = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_checkpoint.yml",
     )
     shutil.copy(
-        checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
+        checkpoints_file,
+        os.path.join(  # noqa: PTH118
+            os.path.dirname(checkpoints_file), "another.yml"  # noqa: PTH120
+        ),
     )
     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
 
@@ -1545,14 +1377,14 @@ def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoi
     context = empty_context_with_checkpoint
 
     for extension in [".json", ".txt", "", ".py"]:
-        path = os.path.join(
+        path = os.path.join(  # noqa: PTH118
             context.root_directory,
             DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
             f"foo{extension}",
         )
         with open(path, "w") as f:
             f.write("foo: bar")
-        assert os.path.isfile(path)
+        assert os.path.isfile(path)  # noqa: PTH113
 
     assert context.list_checkpoints() == ["my_checkpoint"]
 
@@ -1569,14 +1401,14 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    checkpoint_file_path = os.path.join(
+    checkpoint_file_path = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         f.write("# Not a Checkpoint file")
-    assert os.path.isfile(checkpoint_file_path)
+    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
     assert context.list_checkpoints() == ["my_checkpoint"]
 
     with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
@@ -1589,118 +1421,19 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
-    assert config == {
-        "name": "my_checkpoint",
-        "class_name": "LegacyCheckpoint",
-        "module_name": "great_expectations.checkpoint",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "datasource": "my_filesystem_datasource",
-                    "path": "/Users/me/projects/my_project/data/data.csv",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["suite_one", "suite_two"],
-            },
-            {
-                "batch_kwargs": {
-                    "datasource": "my_redshift_datasource",
-                    "query": "SELECT * FROM users WHERE status = 1",
-                },
-                "expectation_suite_names": ["suite_three"],
-            },
-        ],
-        "validation_operator_name": "action_list_operator",
-    }
-
-
-def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml_obj = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-    }
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml_obj = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": {"stuff": 33},
-    }
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
-    empty_data_context,
-):
-    yaml_obj = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {"foo": 33},
-            }
-        ],
-    }
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml_obj = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [{"expectation_suite_names": ["foo"]}],
-    }
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        context.get_checkpoint("foo")
+    assert sorted(config.keys()) == [
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "run_name_template",
+        "runtime_configuration",
+        "validations",
+    ]
 
 
 @pytest.mark.integration
@@ -1756,7 +1489,7 @@ def test_run_checkpoint_new_style(
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
@@ -1919,7 +1652,7 @@ def test_get_validator_with_batch(in_memory_runtime_context):
         )
     )[0]
 
-    my_validator = context.get_validator(
+    context.get_validator(
         batch=my_batch,
         create_expectation_suite_with_name="A_expectation_suite",
     )
@@ -1982,7 +1715,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     """
 
     context = data_context_with_bad_datasource
-    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    context.add_expectation_suite(expectation_suite_name="local_test.default")
     expectation_suite = context.get_expectation_suite("local_test.default")
     context.add_datasource("pandas_datasource", class_name="PandasDatasource")
     df = pd.DataFrame({"a": [1, 2, 3]})
@@ -2001,7 +1734,7 @@ def test_add_expectation_to_expectation_suite(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
     )
     expectation_suite.add_expectation(
@@ -2088,7 +1821,7 @@ validations:
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -2102,7 +1835,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
@@ -2118,11 +1850,13 @@ ge_cloud_id:
 expectation_suite_ge_cloud_id:
 """
 
-    checkpoint_dir = os.path.join(
+    checkpoint_dir = os.path.join(  # noqa: PTH118
         context.root_directory,
         context.checkpoint_store.config["store_backend"]["base_directory"],
     )
-    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+    checkpoint_file = os.path.join(  # noqa: PTH118
+        checkpoint_dir, f"{checkpoint_name}.yml"
+    )
 
     with open(checkpoint_file) as cf:
         checkpoint_from_disk = cf.read()
@@ -2164,7 +1898,7 @@ expectation_suite_ge_cloud_id:
         },
         {
             "name": "update_data_docs",
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            "action": {"class_name": "UpdateDataDocsAction"},
         },
     ]
 
@@ -2184,7 +1918,7 @@ expectation_suite_ge_cloud_id:
     ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "class_name": "Checkpoint",
+        "class_name": "SimpleCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
@@ -2198,7 +1932,7 @@ expectation_suite_ge_cloud_id:
             },
             {
                 "name": "update_data_docs",
-                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+                "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
         "validations": [
@@ -2415,7 +2149,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_add_datasource_from_yaml_sql_datasource(
+def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     mock_emit,
     sa,
     test_backends,
@@ -2956,7 +2690,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     """End to end test demonstrating usage of Stores evaluation parameters"""
     context = data_context_with_query_store
     suite_name = "eval_param_suite"
-    context.create_expectation_suite(expectation_suite_name=suite_name)
+    context.add_expectation_suite(expectation_suite_name=suite_name)
     batch_request = {
         "datasource_name": "my_datasource",
         "data_connector_name": "default_runtime_data_connector_name",
@@ -3086,7 +2820,7 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     assert res is False
 
 
-class ExpectSkyToBeColor(TableExpectation):
+class ExpectSkyToBeColor(BatchExpectation):
     metric_dependencies = ("table.color",)
     success_keys = ("color",)
     args_keys = ("color",)
@@ -3130,17 +2864,15 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.add_expectation_suite(expectation_suite=expectation_suite)
 
     # Without include_rendered_content set, all legacy rendered_content was None.
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert not any(
-        [
-            expectation_configuration.rendered_content
-            for expectation_configuration in expectation_suite.expectations
-        ]
+        expectation_configuration.rendered_content
+        for expectation_configuration in expectation_suite.expectations
     )
 
     # Once we include_rendered_content, we get rendered_content on each ExpectationConfiguration in the ExpectationSuite.
@@ -3150,10 +2882,8 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
     )
     for expectation_configuration in expectation_suite.expectations:
         assert all(
-            [
-                isinstance(rendered_content_block, RenderedAtomicContent)
-                for rendered_content_block in expectation_configuration.rendered_content
-            ]
+            isinstance(rendered_content_block, RenderedAtomicContent)
+            for rendered_content_block in expectation_configuration.rendered_content
         )
 
     # If we change the ExpectationSuite to use an Expectation that has two content block renderers, one of which is
@@ -3167,7 +2897,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.update_expectation_suite(expectation_suite=expectation_suite)
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
@@ -3192,6 +2922,8 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                 }
             ),
             value_type="StringValueType",
+            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '
+            '"expect_sky_to_be_color with exception message: This renderer is broken!".',
         ),
         RenderedAtomicContent(
             name=AtomicPrescriptiveRendererType.SUMMARY,

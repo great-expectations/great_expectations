@@ -48,7 +48,10 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(domain_type=MetricDomainTypes.TABLE, rule_name="table_rule",): {
+        Domain(
+            domain_type=MetricDomainTypes.TABLE,
+            rule_name="table_rule",
+        ): {
             "$parameter.table_row_count": {
                 "value": [
                     10000,
@@ -1577,8 +1580,8 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     root_dir: str = context.root_directory
 
     expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name, overwrite_existing=True
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name
     )
 
     notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")

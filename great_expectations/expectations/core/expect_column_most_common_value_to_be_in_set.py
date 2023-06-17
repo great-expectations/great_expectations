@@ -6,7 +6,7 @@ from great_expectations.core import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
+class ExpectColumnMostCommonValueToBeInSet(ColumnAggregateExpectation):
     """Expect the most common value to be within the designated value set.
 
     expect_column_most_common_value_to_be_in_set is a \
@@ -100,7 +100,18 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_contain_set`
+        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
+        or `dict`.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

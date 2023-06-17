@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import os
 import sys
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import click
 
-from great_expectations import DataContext
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import (
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
+)
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -17,23 +21,15 @@ from great_expectations.render.renderer.checkpoint_new_notebook_renderer import 
 )
 from great_expectations.util import lint_code
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.data_context import FileDataContext
 
 """
 --ge-feature-maturity-info--
 
     id: checkpoint_command_line
-    title: LegacyCheckpoint - Command Line
+    title: Checkpoint - Command Line
     icon:
     short_description: Run a configured Checkpoint from a command line.
     description: Run a configured Checkpoint from a command line in a Terminal shell.
@@ -74,7 +70,7 @@ def checkpoint(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type]
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -102,11 +98,27 @@ def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 
 
 def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
-
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+    has_fluent_datasource: bool = len(context.fluent_datasources) > 0
+    has_block_datasource: bool = (
+        len(context.datasources) - len(context.fluent_datasources)
+    ) > 0
 
     try:
+        if has_fluent_datasource and not has_block_datasource:
+            toolkit.exit_with_failure_message_and_stats(
+                data_context=context,
+                usage_event=usage_event_end,
+                message=f"<red>{CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY}</red>",
+            )
+            return
+
+        if has_fluent_datasource and has_block_datasource:
+            cli_message(
+                f"<yellow>{CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES}</yellow>"
+            )
+
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
 
         # Create notebook on disk
@@ -147,7 +159,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 
 def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint_name: str, usage_event: str
+    context: FileDataContext, checkpoint_name: str, usage_event: str
 ) -> None:
     try:
         if checkpoint_name in context.list_checkpoints():
@@ -162,9 +174,9 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
-    return os.path.abspath(
-        os.path.join(
+def _get_notebook_path(context: FileDataContext, notebook_name: str) -> str:
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )
@@ -174,10 +186,10 @@ def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
 @click.pass_context
 def checkpoint_list(ctx: click.Context) -> None:
     """List configured checkpoints."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    checkpoints: List[str] = context.list_checkpoints()
+    checkpoints: List[str] = context.list_checkpoints()  # type: ignore[assignment]
     if not checkpoints:
         cli_message(
             "No Checkpoints found.\n"
@@ -207,7 +219,7 @@ def checkpoint_list(ctx: click.Context) -> None:
 @click.pass_context
 def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     """Delete a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -239,7 +251,7 @@ def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
 @click.pass_context
 def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     """Run a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -286,18 +298,18 @@ def print_validation_operator_results_details(
     )
     for result_id, result_item in result.run_results.items():
         vr = result_item["validation_result"]
-        stats = vr.statistics
+        stats = vr.statistics  # type: ignore[union-attr]
         passed = stats["successful_expectations"]
         evaluated = stats["evaluated_expectations"]
         percentage_slug = (
             f"{round(passed / evaluated * 100, 2) if evaluated > 0 else 100} %"
         )
         stats_slug = f"{passed} of {evaluated} ({percentage_slug})"
-        if vr.success:
+        if vr.success:  # type: ignore[union-attr]
             status_slug = "<green>✔ Passed</green>"
         else:
             status_slug = "<red>✖ Failed</red>"
-        suite_name: str = str(vr.meta["expectation_suite_name"])
+        suite_name: str = str(vr.meta["expectation_suite_name"])  # type: ignore[union-attr]
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
             suite_name = f"{suite_name[:-1]}…"
@@ -317,7 +329,7 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 
     This script is provided for those who wish to run Checkpoints via python.
     """
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     toolkit.validate_checkpoint(
@@ -325,11 +337,11 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
     )
 
     script_name: str = f"run_{checkpoint}.py"
-    script_path: str = os.path.join(
+    script_path: str = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
-    if os.path.isfile(script_path):
+    if os.path.isfile(script_path):  # noqa: PTH113
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event_end,
@@ -357,7 +369,9 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 def _write_checkpoint_script_to_disk(
     context_directory: str, checkpoint_name: str, script_path: str
 ) -> None:
-    script_full_path: str = os.path.abspath(os.path.join(script_path))
+    script_full_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(script_path)  # noqa: PTH118
+    )
     template: str = _load_script_template().format(checkpoint_name, context_directory)
     linted_code: str = lint_code(code=template)
     with open(script_full_path, "w") as f:

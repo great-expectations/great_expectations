@@ -19,7 +19,7 @@ def parse_result_format(result_format):
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:
-        if "partial_unexpected_count" not in result_format:
+        if "partial_unexpected_count" not in result_format:  # noqa: PLR5501
             result_format["partial_unexpected_count"] = 20
 
     return result_format
@@ -79,7 +79,7 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexity 20
+def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert a dict object to one that is serializable
 

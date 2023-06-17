@@ -1,7 +1,7 @@
 import warnings
 
 # noinspection PyUnresolvedReferences
-from great_expectations.expectations.metrics.map_metric_provider import *  # noqa: F401
+from great_expectations.expectations.metrics.map_metric_provider import *  # noqa: F403
 
 # deprecated-v0.13.25
 warnings.warn(

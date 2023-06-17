@@ -7,28 +7,30 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
-from great_expectations.core.config_provider import _ConfigurationProvider
-from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
-    DataContextConfig,
-    IncludeRenderedContentConfig,
-    NotebookConfig,
-    ProgressBarsConfig,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core.config_provider import (
+        _ConfigurationProvider,
+    )
+    from great_expectations.core.data_context_key import DataContextKey
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
     from great_expectations.data_context.store import DataContextStore
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
+    from great_expectations.data_context.types.base import (
+        AnonymizedUsageStatisticsConfig,
+        ConcurrencyConfig,
+        DataContextConfig,
+        IncludeRenderedContentConfig,
+        NotebookConfig,
+        ProgressBarsConfig,
+    )
+    from great_expectations.datasource.fluent.interfaces import (
+        Datasource as FluentDatasource,
     )
 
 logger = logging.getLogger(__file__)
@@ -330,62 +332,70 @@ class FileDataContextVariables(DataContextVariables):
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
+        from great_expectations.data_context.store.inline_store_backend import (
+            InlineStoreBackend,
+        )
 
-        store_backend: dict = {
-            "class_name": "InlineStoreBackend",
-            "resource_type": DataContextVariableSchema.ALL_VARIABLES,
-            "data_context": self.data_context,
-        }
+        # Chetan - 20230222 - `instantiate_class_from_config` used in the Store constructor
+        # causes a runtime error with InlineStoreBackend due to attempting to deepcopy a DataContext.
+        #
+        # This should be resolved by moving the specific logic required from the context to a class
+        # and injecting that object instead of the entire context.
+        store_backend = InlineStoreBackend(
+            data_context=self.data_context,
+            resource_type=DataContextVariableSchema.ALL_VARIABLES,
+        )
         store = DataContextStore(
             store_name="file_data_context_store",
-            store_backend=store_backend,
-            runtime_environment=None,
         )
+        store._store_backend = store_backend
         return store
 
     def save_config(self) -> Any:
         """
         Persist any changes made to variables utilizing the configured Store.
         """
-        # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
+        # overridden in order to prevent calling `instantiate_class_from_config` on fluent objects
         # parent class does not have access to the `data_context`
-        with self._zep_objects_stash():
+        with self._fluent_objects_stash():
             save_result = super().save_config()
         return save_result
 
     @contextlib.contextmanager
-    def _zep_objects_stash(
+    def _fluent_objects_stash(
         self: FileDataContextVariables,
     ) -> Generator[None, None, None]:
         """
-        Temporarily remove and stash zep objects from the datacontext.
+        Temporarily remove and stash fluent objects from the datacontext.
         Replace them once the with block ends.
 
         NOTE: This could be generalized into a stand-alone context manager function,
-        but it would need to take in the data_context containing the zep objects.
+        but it would need to take in the data_context containing the fluent objects.
         """
-        config_xdatasources_stash: Dict[
-            str, XDatasource
-        ] = self.data_context._synchronize_zep_datasources()
+        config_fluent_datasources_stash: Dict[
+            str, FluentDatasource
+        ] = self.data_context._synchronize_fluent_datasources()
         try:
-            if config_xdatasources_stash:
+            if config_fluent_datasources_stash:
                 logger.info(
-                    f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
+                    f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"
                 )
-                for xdatasource_name in config_xdatasources_stash.keys():
-                    self.data_context.datasources.pop(xdatasource_name)
+                for fluent_datasource_name in config_fluent_datasources_stash.keys():
+                    self.data_context.datasources.pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
-                self.data_context.zep_config.xdatasources = {}
+                self.data_context.fluent_config.fluent_datasources = []
             yield
         except Exception:
             raise
         finally:
-            if config_xdatasources_stash:
+            if config_fluent_datasources_stash:
                 logger.info(
-                    f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
+                    f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
-                self.data_context.datasources.update(config_xdatasources_stash)
-                self.data_context.zep_config.xdatasources = config_xdatasources_stash
+                self.data_context.datasources.update(config_fluent_datasources_stash)
+                self.data_context.fluent_config.fluent_datasources = list(
+                    config_fluent_datasources_stash.values()
+                )
 
 
 @dataclass(repr=False)

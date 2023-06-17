@@ -83,7 +83,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -115,7 +115,6 @@ def test_upgrade_helper_intervention_on_cli_command(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "checkpoint",
             "list",
         ],
@@ -197,7 +196,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -304,7 +303,7 @@ def test_project_upgrade_with_manual_steps(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -416,7 +415,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -508,222 +507,6 @@ great_expectations/
 
 
 @freeze_time("01/19/2021 13:26:39")
-def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators(
-    v20_project_directory, caplog
-):
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        ["-c", v20_project_directory, "--v3-api", "project", "upgrade"],
-        input="\n",
-        catch_exceptions=False,
-    )
-    stdout: str = escape_ansi(result.stdout).strip()
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints_datasources_validation_operators_expected_stdout.fixture",
-        )
-    ) as f:
-        expected_stdout: str = f.read().strip()
-        expected_stdout = expected_stdout.replace(
-            "GX_PROJECT_DIR", v20_project_directory
-        )
-        assert stdout == expected_stdout
-
-    expected_project_tree_str: str = """\
-great_expectations/
-    .gitignore
-    great_expectations.yml
-    checkpoints/
-        .gitkeep
-        my_checkpoint.yml
-        titanic_checkpoint_0.yml
-        titanic_checkpoint_1.yml
-        titanic_checkpoint_2.yml
-    expectations/
-        .ge_store_backend_id
-        .gitkeep
-    notebooks/
-        .gitkeep
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
-    plugins/
-        custom_data_docs/
-            styles/
-                data_docs_custom_styles.css
-    uncommitted/
-        config_variables.yml
-        data_docs/
-            local_site/
-                expectations/
-                    .gitkeep
-                static/
-                    .gitkeep
-                validations/
-                    diabetic_data/
-                        warning/
-                            20200430T191246.763896Z/
-                                c3b4c5df224fef4b1a056a0f3b93aba5.html
-        logs/
-            project_upgrades/
-                UpgradeHelperV13_20210119T132639.000000Z.json
-        validations/
-            .ge_store_backend_id
-            diabetic_data/
-                warning/
-                    20200430T191246.763896Z/
-                        c3b4c5df224fef4b1a056a0f3b93aba5.json
-"""
-    obs_project_tree_str: str = gen_directory_tree_str(startpath=v20_project_directory)
-    assert obs_project_tree_str == expected_project_tree_str
-    # make sure config number incremented
-    assert (
-        FileDataContext.get_ge_config_version(context_root_dir=v20_project_directory)
-        == 3.0
-    )
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_with_manual_steps_checkpoints_datasources_validation_operators_log.json",
-        )
-    ) as f:
-        expected_upgrade_log_dict: dict = json.load(f)
-        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
-        expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GX_PROJECT_DIR", v20_project_directory
-        )
-        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
-
-    with open(
-        f"{v20_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
-    ) as f:
-        obs_upgrade_log_dict: dict = json.load(f)
-
-    assert obs_upgrade_log_dict == expected_upgrade_log_dict
-
-
-@freeze_time("01/19/2021 13:26:39")
-def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
-    v20_project_directory_with_v30_configuration_and_v20_checkpoints, caplog
-):
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        [
-            "-c",
-            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
-            "--v3-api",
-            "project",
-            "upgrade",
-        ],
-        input="\n",
-        catch_exceptions=False,
-    )
-    stdout: str = escape_ansi(result.stdout).strip()
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints.fixture",
-        )
-    ) as f:
-        expected_stdout: str = f.read().strip()
-        expected_stdout = expected_stdout.replace(
-            "GX_PROJECT_DIR",
-            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
-        )
-        assert stdout == expected_stdout
-
-    expected_project_tree_str: str = """\
-great_expectations/
-    .gitignore
-    great_expectations.yml
-    checkpoints/
-        .gitkeep
-        my_checkpoint.yml
-        titanic_checkpoint_0.yml
-        titanic_checkpoint_1.yml
-        titanic_checkpoint_2.yml
-    expectations/
-        .ge_store_backend_id
-        .gitkeep
-    notebooks/
-        .gitkeep
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
-    plugins/
-        custom_data_docs/
-            styles/
-                data_docs_custom_styles.css
-    uncommitted/
-        config_variables.yml
-        data_docs/
-            local_site/
-                expectations/
-                    .gitkeep
-                static/
-                    .gitkeep
-                validations/
-                    diabetic_data/
-                        warning/
-                            20200430T191246.763896Z/
-                                c3b4c5df224fef4b1a056a0f3b93aba5.html
-        logs/
-            project_upgrades/
-                UpgradeHelperV13_20210119T132639.000000Z.json
-        validations/
-            .ge_store_backend_id
-            diabetic_data/
-                warning/
-                    20200430T191246.763896Z/
-                        c3b4c5df224fef4b1a056a0f3b93aba5.json
-"""
-    obs_project_tree_str: str = gen_directory_tree_str(
-        startpath=v20_project_directory_with_v30_configuration_and_v20_checkpoints
-    )
-    assert obs_project_tree_str == expected_project_tree_str
-    # make sure config number incremented
-    assert (
-        FileDataContext.get_ge_config_version(
-            context_root_dir=v20_project_directory_with_v30_configuration_and_v20_checkpoints
-        )
-        == 3.0
-    )
-
-    with open(
-        file_relative_path(
-            __file__,
-            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_with_manual_steps_checkpoints_log.json",
-        )
-    ) as f:
-        expected_upgrade_log_dict: dict = json.load(f)
-        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
-        expected_upgrade_log_str = expected_upgrade_log_str.replace(
-            "GX_PROJECT_DIR",
-            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
-        )
-        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
-
-    with open(
-        f"{v20_project_directory_with_v30_configuration_and_v20_checkpoints}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
-    ) as f:
-        obs_upgrade_log_dict: dict = json.load(f)
-
-    assert obs_upgrade_log_dict == expected_upgrade_log_dict
-
-
-@freeze_time("01/19/2021 13:26:39")
 def test_v2_to_v3_project_upgrade_without_manual_steps(
     v20_project_directory_with_v30_configuration_and_no_checkpoints, caplog
 ):
@@ -733,7 +516,6 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
         [
             "-c",
             v20_project_directory_with_v30_configuration_and_no_checkpoints,
-            "--v3-api",
             "project",
             "upgrade",
         ],

@@ -41,8 +41,6 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration (EXPE
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
-   Passes all linting checks
-      The snake_case of ExpectColumnValuesToEqualThree__SecondIteration (expect_column_values_to_equal_three___second_iteration) does not match filename part (expect_column_values_to_equal_three)
    Has basic input validation and type checking
       No validate_configuration method defined on subclass
  ✔ Has both statement Renderers: prescriptive and diagnostic
@@ -69,8 +67,6 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration (EXPER
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
     ✔ All 3 tests for pandas are passing
-   Passes all linting checks
-      The snake_case of ExpectColumnValuesToEqualThree__ThirdIteration (expect_column_values_to_equal_three___third_iteration) does not match filename part (expect_column_values_to_equal_three)
    Has basic input validation and type checking
       No validate_configuration method defined on subclass
  ✔ Has both statement Renderers: prescriptive and diagnostic

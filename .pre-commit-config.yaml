@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.4.0
     hooks:
       - id: check-ast
       - id: check-json
@@ -12,24 +12,16 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 23.3.0
     hooks:
-      - id: black
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+      - id: black-jupyter
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.271'
     hooks:
-      - id: flake8
-        files: ^(great_expectations/core)
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.2
-    hooks:
-      - id: pyupgrade
-        args: ["--py3-plus"]
+      - id: ruff
+        files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests/datasource|tests/agent) # TODO: add tests/  docs/ etc.
+        args: ["--fix"]
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
@@ -40,8 +32,4 @@ ci:
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
-    # skip flake8 enforcement with pre-commit CI as it is enforced elsewhere
-    # flake8 hook also doesn't have an options to auto-fix
-    # pre-commit hooks should either have mechanisms for auto-fixing or should be simple to do manually
-    skip: [flake8]
     submodules: false

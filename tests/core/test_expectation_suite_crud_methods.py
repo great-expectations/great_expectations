@@ -1,6 +1,5 @@
 from copy import deepcopy
 from unittest import mock
-from uuid import UUID
 
 import pytest
 
@@ -161,7 +160,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(
     exp1, empty_data_context_stats_enabled
 ) -> ExpectationSuite:
     exp1_with_ge_cloud_id = deepcopy(exp1)
-    exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
+    exp1_with_ge_cloud_id.ge_cloud_id = "0faf94a9-f53a-41fb-8e94-32f218d4a774"
     context: DataContext = empty_data_context_stats_enabled
 
     return ExpectationSuite(
@@ -565,8 +564,9 @@ def test_add_expectation(
             exp2, match_type="success", overwrite_existing=False
         )
 
+    config = ExpectationConfiguration(expectation_type="not an expectation", kwargs={})
     with pytest.raises(InvalidExpectationConfigurationError):
-        single_expectation_suite.add_expectation("not an expectation")
+        single_expectation_suite.add_expectation(config)
 
     # Turn this on once we're ready to enforce strict typing.
     # with pytest.raises(TypeError):

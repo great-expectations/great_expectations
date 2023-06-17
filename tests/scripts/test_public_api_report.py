@@ -4,15 +4,20 @@ from typing import List, Union
 
 import pytest
 
-from scripts.public_api_report import (
+from docs.sphinx_api_docs_source.include_exclude_definition import (
+    IncludeExcludeDefinition,
+)
+from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
     DocsExampleParser,
     FileContents,
-    IncludeExcludeDefinition,
     PublicAPIChecker,
     PublicAPIReport,
+    _get_import_names,
+    get_shortest_dotted_path,
+    parse_docs_contents_for_class_names,
 )
 
 
@@ -49,6 +54,20 @@ example_public_api_module_level_function()
 epub = ExamplePublicAPIClass()
 
 assert d
+
+some_yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
 """
 
 
@@ -118,6 +137,33 @@ class ExamplePublicAPIClass:
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml() -> str:
+    return """# Title
+
+Content.
+
+More content.
+
+Some yaml:
+
+yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
+End of content.
+"""
+
+
+@pytest.fixture
 def repo_root() -> pathlib.Path:
     return pathlib.Path("/some/absolute/path/repo_root/")
 
@@ -169,12 +215,30 @@ def sample_with_definitions_file_contents(
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml_file_contents(
+    sample_markdown_doc_with_yaml: str,
+) -> FileContents:
+    return FileContents(
+        filepath=pathlib.Path("some/random/filepath/markdown.md"),
+        contents=sample_markdown_doc_with_yaml,
+    )
+
+
+@pytest.fixture
 def docs_example_parser(
     sample_docs_example_file_contents: FileContents,
 ) -> DocsExampleParser:
     docs_example_parser = DocsExampleParser(
         file_contents={sample_docs_example_file_contents}
     )
+    return docs_example_parser
+
+
+@pytest.fixture
+def empty_docs_example_parser(
+    sample_docs_example_file_contents: FileContents,
+) -> DocsExampleParser:
+    docs_example_parser = DocsExampleParser(file_contents=set())
     return docs_example_parser
 
 
@@ -185,7 +249,6 @@ class TestDocExampleParser:
 
     @pytest.mark.unit
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
-
         usages = docs_example_parser.get_names_from_usage_in_docs_examples()
         assert usages == {
             "ExampleClass",
@@ -200,6 +263,8 @@ class TestDocExampleParser:
             "example_public_classmethod",
             "example_public_staticmethod",
             "example_staticmethod",
+            "Datasource",
+            "SqlAlchemyExecutionEngine",
         }
 
 
@@ -268,6 +333,75 @@ class TestCodeParser:
         }
 
 
+def test_parse_docs_contents_for_class_names(
+    sample_markdown_doc_with_yaml_file_contents: FileContents,
+):
+    assert parse_docs_contents_for_class_names(
+        file_contents={sample_markdown_doc_with_yaml_file_contents}
+    ) == {"Datasource", "SqlAlchemyExecutionEngine"}
+
+
+def test_get_shortest_dotted_path(monkeypatch):
+    """Test path traversal using an example file.
+
+    The example is just any class that is imported in a __init__.py file in a
+    parent folder. This test can be modified to use any such import e.g. if the
+    example file changes, or a fixture created so the example isn't coming
+    from the repo.
+    """
+    repo_root = pathlib.Path(__file__).parent.parent.parent
+    monkeypatch.chdir(repo_root)
+    filepath = pathlib.Path("great_expectations/core/expectation_suite.py")
+    definition = Definition(
+        name="ExpectationSuite", filepath=filepath, ast_definition=ast.ClassDef()
+    )
+
+    # This is the actual path
+    assert (
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
+        != "great_expectations.core.expectation_suite.ExpectationSuite"
+    )
+    # This is the shortest path
+    assert (
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
+        == "great_expectations.core.ExpectationSuite"
+    )
+
+
+@pytest.fixture
+def various_imports() -> str:
+    return """import some_module
+import SomeClass
+from some_module import ClassFromSomeModule
+from some_other_module import ClassFromSomeOtherModule
+import AliasClass as ac
+import alias_module as am
+from alias_module import AliasClassFromAliasModule as acfam
+from a.b.c import some_method as sm
+"""
+
+
+def test__get_import_names(various_imports: str):
+    """Make sure the actual class and module names are returned."""
+    tree = ast.parse(various_imports)
+    import_names = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            import_names.extend(_get_import_names(node))
+
+    assert import_names == [
+        "some_module",
+        "SomeClass",
+        "ClassFromSomeModule",
+        "ClassFromSomeOtherModule",
+        "AliasClass",
+        "alias_module",
+        "AliasClassFromAliasModule",
+        "some_method",
+    ]
+
+
 @pytest.fixture
 def public_api_checker(
     docs_example_parser: DocsExampleParser, code_parser: CodeParser
@@ -305,7 +439,7 @@ class TestPublicAPIChecker:
         definitions = []
         for node in ast.walk(tree):
             if (
-                isinstance(node, ast.ClassDef)
+                isinstance(node, ast.ClassDef)  # noqa: PLR1701
                 or isinstance(node, ast.FunctionDef)
                 or isinstance(node, ast.AsyncFunctionDef)
             ):
@@ -486,6 +620,22 @@ def code_reference_filter_with_exclude_by_file(
 
 
 @pytest.fixture
+def code_reference_filter_with_references_from_docs_content(
+    repo_root: pathlib.Path,
+    empty_docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
+) -> CodeReferenceFilter:
+    return CodeReferenceFilter(
+        repo_root=repo_root,
+        docs_example_parser=empty_docs_example_parser,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
+        references_from_docs_content={"ExampleClass", "ExamplePublicAPIClass"},
+    )
+
+
+@pytest.fixture
 def code_reference_filter_with_exclude_by_file_and_name(
     repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
@@ -656,6 +806,22 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
+        assert {d.filepath for d in observed} == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
+
+    @pytest.mark.integration
+    def test_filter_definitions_with_references_from_docs_content(
+        self,
+        code_reference_filter_with_references_from_docs_content: CodeReferenceFilter,
+    ):
+        observed = (
+            code_reference_filter_with_references_from_docs_content.filter_definitions()
+        )
+        assert len(observed) == 1
+        assert {d.name for d in observed} == {"ExampleClass"}
         assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"

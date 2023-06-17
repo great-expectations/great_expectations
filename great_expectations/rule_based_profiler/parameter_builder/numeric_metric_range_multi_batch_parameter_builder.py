@@ -20,8 +20,10 @@ from typing import (
 import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
@@ -36,7 +38,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
     NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
-    NumericRangeEstimator,
+    NumericRangeEstimator,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
     QuantilesNumericRangeEstimator,
@@ -49,7 +51,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -120,7 +122,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "single_batch_mode",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_name: Optional[str] = None,
@@ -244,7 +246,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "upper_bound": None,
             }
         else:
-            if not isinstance(truncate_values, str):
+            if not isinstance(truncate_values, str):  # noqa: PLR5501
                 truncate_values_keys: set = set(truncate_values.keys())
                 if (
                     not truncate_values_keys
@@ -523,7 +525,7 @@ detected.
 
         return ExactNumericRangeEstimator()
 
-    def _estimate_metric_value_range(
+    def _estimate_metric_value_range(  # noqa: PLR0913, PLR0915
         self,
         metric_values: np.ndarray,
         numeric_range_estimator: NumericRangeEstimator,
@@ -646,7 +648,7 @@ detected.
                 max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
-            metric_value_idx = metric_value_idx[1:]
+            metric_value_idx = metric_value_idx[1:]  # noqa: PLW2901
 
             # Compute indices for metric value range min and max estimates.
             metric_value_range_min_idx = metric_value_idx + (
@@ -664,7 +666,7 @@ detected.
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
-                if round_decimals is None:
+                if round_decimals is None:  # noqa: PLR5501
                     metric_value_range[metric_value_range_min_idx] = np.float64(
                         min_value
                     )
@@ -748,14 +750,12 @@ detected.
 
         distribution_boundary: Optional[Union[int, float]]
         if not all(
-            [
-                (
-                    distribution_boundary is None
-                    or is_numeric(value=distribution_boundary)
-                    or isinstance(distribution_boundary, datetime.datetime)
-                )
-                for distribution_boundary in truncate_values.values()
-            ]
+            (
+                distribution_boundary is None
+                or is_numeric(value=distribution_boundary)
+                or isinstance(distribution_boundary, datetime.datetime)
+            )
+            for distribution_boundary in truncate_values.values()
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the

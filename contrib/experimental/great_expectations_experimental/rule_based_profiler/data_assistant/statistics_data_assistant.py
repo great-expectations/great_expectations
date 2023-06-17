@@ -549,7 +549,6 @@ class StatisticsDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
-
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
         text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(

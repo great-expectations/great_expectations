@@ -8,6 +8,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -15,7 +16,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
     FileDataContextVariables,
 )
-from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     datasourceConfigSchema,
@@ -23,10 +23,12 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
-from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
+    from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -34,10 +36,9 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+@public_api
 class FileDataContext(SerializableDataContext):
-    """
-    Extends AbstractDataContext, contains only functionality necessary to hydrate state from disk.
-    """
+    """Subclass of AbstractDataContext that contains functionality necessary to work in a filesystem-backed environment."""
 
     def __init__(
         self,
@@ -57,6 +58,8 @@ class FileDataContext(SerializableDataContext):
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir
         )
+        self._scaffold_project()
+
         self._project_config = self._init_project_config(project_config)
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -76,6 +79,21 @@ class FileDataContext(SerializableDataContext):
 
         return context_root_dir
 
+    def _scaffold_project(self) -> None:
+        """Prepare a `great_expectations` directory with all necessary subdirectories.
+        If one already exists, no-op.
+        """
+        if self.is_project_scaffolded(self._context_root_directory):
+            return
+
+        # GX makes an important distinction between project directory and context directory.
+        # The former corresponds to the root of the user's project while the latter
+        # encapsulates any config (in the form of a great_expectations/ directory).
+        project_root_dir = pathlib.Path(self._context_root_directory).parent
+        self._scaffold(
+            project_root_dir=project_root_dir,
+        )
+
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
     ) -> DataContextConfig:
@@ -89,7 +107,7 @@ class FileDataContext(SerializableDataContext):
             )
         return self._apply_global_config_overrides(config=project_config)
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -115,17 +133,7 @@ class FileDataContext(SerializableDataContext):
                 schema=datasourceConfigSchema
             ),
         )
-        self._datasource_store = datasource_store
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
+        return datasource_store
 
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
@@ -135,14 +143,41 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+    def _save_project_config(self, _fds_datasource=None) -> None:
         """
-        See parent `AbstractDataContext.add_store()` for more information.
+        See parent 'AbstractDataContext._save_project_config()` for more information.
 
+        Explicitly override base class implementation to retain legacy behavior.
         """
-        store = super().add_store(store_name=store_name, store_config=store_config)
-        self._save_project_config()
-        return store
+        config_filepath = pathlib.Path(self.root_directory, self.GX_YML)
+
+        logger.debug(
+            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
+        )
+
+        try:
+            with open(config_filepath, "w") as outfile:
+                fluent_datasources = self._synchronize_fluent_datasources()
+                if fluent_datasources:
+                    self.fluent_config.update_datasources(
+                        datasources=fluent_datasources
+                    )
+                    logger.info(
+                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
+                    )
+                    fluent_json_dict: dict[
+                        str, JSONValues
+                    ] = self.fluent_config._json_dict()
+                    fluent_json_dict = (
+                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                            config=fluent_json_dict
+                        )
+                    )
+                    self.config._commented_map.update(fluent_json_dict)
+
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
 
     @classmethod
     def _load_file_backed_project_config(
@@ -175,13 +210,18 @@ class FileDataContext(SerializableDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _load_zep_config(self) -> GxConfig:
-        logger.info(f"{type(self).__name__} loading zep config")
+    def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
+        logger.info(f"{type(self).__name__} loading fluent config")
         if not self.root_directory:
-            logger.warning("`root_directory` not set, cannot load zep config")
+            logger.warning("`root_directory` not set, cannot load fluent config")
         else:
-            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.GX_YML
-            if path_to_zep_yaml.exists():
-                return GxConfig.parse_yaml(path_to_zep_yaml, _allow_empty=True)
-            logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
-        return GxConfig(xdatasources={})
+            path_to_fluent_yaml = pathlib.Path(self.root_directory) / self.GX_YML
+            if path_to_fluent_yaml.exists():
+                gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
+
+                for datasource in gx_config.datasources:
+                    datasource._data_context = self
+
+                return gx_config
+            logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")
+        return GxConfig(fluent_datasources=[])

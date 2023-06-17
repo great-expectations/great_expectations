@@ -1,6 +1,7 @@
 import logging
 from typing import Iterator, List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_aws_glue_data_catalog_data_connector import (
     ConfiguredAssetAWSGlueDataCatalogDataConnector,
 )
@@ -10,18 +11,36 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class InferredAssetAWSGlueDataCatalogDataConnector(
     ConfiguredAssetAWSGlueDataCatalogDataConnector
 ):
-    """
-    The InferredAssetAWSGlueDataCatalogDataConnector is one of two classes (ConfiguredAssetAWSGlueDataCatalogDataConnector being the
-    other one) designed for connecting to data through AWS Glue Data Catalog.
+    """An Inferred Asset Data Connector used to connect to data through an AWS Glue Data Catalog.
 
-    InferredAssetAWSGlueDataCatalogDataConnector operates on AWS Glue Data Catalog and determines the data_asset_name
-    implicitly (e.g., by listing all databases, tables, and partitions from AWS Glue Data Catalog)
+    This Data Connector operates on AWS Glue Data Catalog and determines the Data Asset name
+    implicitly, by listing all databases, tables, and partitions from AWS Glue Data Catalog.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        catalog_id: The catalog ID from which to retrieve data. If none is provided, the AWS account
+            ID is used by default. Make sure you use the same catalog ID as configured in your spark session.
+        data_asset_name_prefix: A prefix to prepend to all names of Data Assets inferred by this Data Connector.
+        data_asset_name_suffix: A suffix to append to all names of Data Asset inferred by this Data Connector.
+        excluded_tables: A list of tables, in the form `([database].[table])`, to ignore when inferring Data Asset
+            names.
+        included_tables: A list of tables, in the form `([database].[table])`, to include when inferring Data Asset
+            names. When provided, only Data Assets matching this list will be inferred.
+        glue_introspection_directives: Arguments passed to the introspection method. Currently, the only available
+            directive is
+            `database` which filters to assets only in this database.
+        boto3_options: Options passed to the `boto3` library.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -36,22 +55,6 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ):
-        """
-        DataConnector for connecting to AWS Glue Data Catalog.
-
-        Args:
-            name (str): Required name for data_connector
-            datasource_name (str): Required name for datasource
-            execution_engine (ExecutionEngine): Optional reference to ExecutionEngine
-            catalog_id (str): Optional catalog ID from which to retrieve databases. If none is provided, the AWS account ID is used by default.
-            data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
-            data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
-            excluded_tables (List): A list of tables ([database].[table]) to ignore when inferring data asset_names
-            included_tables (List): If not None, only include tables ([database].[table]) in this list when inferring data asset_names
-            glue_introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
-            boto3_options (dict): optional boto3 options
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.warning(
             "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."

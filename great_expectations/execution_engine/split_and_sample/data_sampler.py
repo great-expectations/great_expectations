@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.id_dict import BatchSpec
+
+if TYPE_CHECKING:
+    from great_expectations.core.id_dict import BatchSpec
 
 T = TypeVar("T")
 
 
-class DataSampler(abc.ABC):
+class DataSampler(abc.ABC):  # noqa: B024 # abstract-base-class-without-abstract-method
     """Abstract base class containing methods for sampling data accessible via Execution Engines."""
 
     def get_sampler_method(self, sampler_method_name: str) -> Callable:

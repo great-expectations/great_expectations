@@ -21,7 +21,6 @@ from great_expectations.expectations.metrics import (
 
 
 class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.match_valid_icd_ten_category_or_subcategory"
 

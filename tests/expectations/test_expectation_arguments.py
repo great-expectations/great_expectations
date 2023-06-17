@@ -18,17 +18,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility import pyspark
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql import DataFrame
-except ImportError:
-    DataFrame = None
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 
 @pytest.fixture
@@ -41,7 +33,7 @@ def test_pandas_df():
 
 @pytest.fixture
 def test_spark_df(test_pandas_df, spark_session):
-    df: DataFrame = spark_session.createDataFrame(data=test_pandas_df)
+    df: pyspark.DataFrame = spark_session.createDataFrame(data=test_pandas_df)
     return df
 
 
@@ -60,8 +52,8 @@ def test_catch_exceptions_no_exceptions(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -174,8 +166,8 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -291,8 +283,8 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -444,9 +436,7 @@ def test_result_format_configured_no_set_default_override(
 
     suite: ExpectationSuite
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -518,9 +508,7 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -560,9 +548,7 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -672,9 +658,7 @@ def test_result_format_configured_with_set_default_override(
 
     suite: ExpectationSuite
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -763,9 +747,7 @@ def test_result_format_configured_with_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -838,6 +820,7 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=context._data_context_id,
+        oss_id=None,
         usage_statistics_url="http://fakeendpoint.com",
     )
     context._usage_statistics_handler = handler
@@ -851,8 +834,8 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration

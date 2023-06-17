@@ -1,6 +1,6 @@
 {
   "skipped_checkpoint_store_upgrade": false,
-  "skipped_checkpoint_config_upgrade": false,
+  "skipped_checkpoint_config_upgrade": true,
   "skipped_datasources_upgrade": false,
   "skipped_validation_operators_upgrade": false,
   "update_version": true,

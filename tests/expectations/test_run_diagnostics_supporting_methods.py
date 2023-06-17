@@ -147,7 +147,6 @@ Metrics could be used to make inferences, but they'd never provide comparably co
 """
 )
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
-
     assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
         metric_diagnostics_list=[],
         registered_metrics={},

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from hashlib import md5
@@ -12,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class BaseAnonymizer(ABC):
-
     # Any class that starts with this __module__ is considered a "core" object
     CORE_GX_OBJECT_MODULE_PREFIX = "great_expectations"
 
@@ -68,19 +69,19 @@ class BaseAnonymizer(ABC):
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
             elif object_class is None and object_config is not None:
-                object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get("module_name")
+                object_class_name: str = object_config["class_name"]
+                object_module_name: str = object_config["module_name"]
                 object_class = load_class(object_class_name, object_module_name)
 
             # Utilize candidate list if provided.
             if classes_to_check:
                 for class_to_check in classes_to_check:
-                    if issubclass(object_class, class_to_check):
+                    if issubclass(object_class, class_to_check):  # type: ignore[arg-type] # object_class could be None
                         return class_to_check.__name__
                 return None
 
             # Otherwise, iterate through parents in inheritance hierarchy.
-            parents: Tuple[type, ...] = object_class.__bases__
+            parents: Tuple[type, ...] = object_class.__bases__  # type: ignore[union-attr] # object_class could be None
             parent_class: type
             for parent_class in parents:
                 parent_module_name: str = parent_class.__module__
@@ -119,7 +120,7 @@ class BaseAnonymizer(ABC):
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
-    def _anonymize_object_info(
+    def _anonymize_object_info(  # noqa: PLR0913
         self,
         anonymized_info_dict: dict,
         object_: Optional[object] = None,
@@ -155,20 +156,22 @@ class BaseAnonymizer(ABC):
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
             elif object_class is None and object_config is not None:
-                object_class_name = object_config.get("class_name")
+                object_class_name = object_config["class_name"]
                 object_module_name = object_config.get(
                     "module_name"
                 ) or runtime_environment.get("module_name")
-                object_class = load_class(object_class_name, object_module_name)
+                object_class = load_class(
+                    object_class_name,  # type: ignore[arg-type] # object_class_name could be None
+                    object_module_name,  # type: ignore[arg-type] # object_module_name could be None
+                )
 
-            object_class_name = object_class.__name__
+            object_class_name = object_class.__name__  # type: ignore[union-attr] # object_class could be None
             object_module_name = object_class.__module__
-            parents: Tuple[type, ...] = object_class.__bases__
+            parents: Tuple[type, ...] = object_class.__bases__  # type: ignore[union-attr] # object_class could be None
 
             if self._is_core_great_expectations_class(object_module_name):
                 anonymized_info_dict["parent_class"] = object_class_name
             else:
-
                 # Chetan - 20220311 - If we can't identify the class in question, we iterate through the parents.
                 # While GX rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
                 # it is important to recognize that this is possibility.

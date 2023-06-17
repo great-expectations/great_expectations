@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_multicolumn_sum_to_equal",
   "datasets" : [{
+    "dataset_name": "expect_multicolumn_sum_to_equal_1",
     "data": {
         "a": [1,2,3,4],
         "b": [3,2,1,0],
@@ -73,6 +74,7 @@
         }
       ]
     }, {
+    "dataset_name": "expect_multicolumn_sum_to_equal_2",
     "data" : {
       "w": [0.2, 0.4, 0.3, 0.5, 0.8, 0.7, 0.71, 0.56, 0.45, 1.0],
       "x": [0.8, 0.6, 0.7, 0.5, 0.2, 0.3, 0.29, 0.44, 0.55, 0.0],
@@ -138,7 +140,7 @@
       "out": {
         "unexpected_list": [{"a": 1, "b": 1}, {"a": 4, "b": 0}, {"a": 0, "b": 0}, {"a": 1, "b": 2}, {"a": 3, "b": 0},
           {"a": 2, "b": 0}, {"a": -3, "b": 3}],
-        "unexpected_index_list": [0,2,3,4,7,8,9],
+        "unexpected_index_list":  [{"a": 1, "pk_index": 0, "b": 1}, {"a": 4, "pk_index": 2, "b": 0}, {"a": 0, "pk_index": 3, "b": 0}, {"a": 1, "pk_index": 4, "b": 2}, {"a": 3, "pk_index": 7, "b": 0}, {"a": 2, "pk_index": 8, "b": 0}, {"a": -3, "pk_index": 9, "b": 3}],
         "success": false
       }
     },{
@@ -151,7 +153,7 @@
       },
       "out": {
         "unexpected_list": [{"w": 0.4, "y": 0.8}, {"w": 0.8, "y": 0.4}, {"w": 0.56, "y": 0.48}],
-        "unexpected_index_list": [1,4,7],
+        "unexpected_index_list":[{"w": 0.4, "pk_index": 1, "y": 0.8}, {"w": 0.8, "pk_index": 4, "y": 0.4}, {"w": 0.56, "pk_index": 7, "y": 0.48}],
         "success": false
       }
     },{
@@ -167,7 +169,7 @@
           {"w": 0.8, "x": 0.2}, {"w": 0.7, "x": 0.3}, {"w": 0.71, "x": 0.29}, {"w": 0.56, "x": 0.44},
           {"w": 0.45, "x": 0.55}, {"w": 1, "x": 0.0}
         ],
-        "unexpected_index_list": [0,1,2,3,4,5,6,7,8,9],
+        "unexpected_index_list":[{"w": 0.2, "pk_index": 0, "x": 0.8}, {"w": 0.4, "pk_index": 1, "x": 0.6}, {"w": 0.3, "pk_index": 2, "x": 0.7}, {"w": 0.5, "pk_index": 3, "x": 0.5}, {"w": 0.8, "pk_index": 4, "x": 0.2}, {"w": 0.7, "pk_index": 5, "x": 0.3}, {"w": 0.71, "pk_index": 6, "x": 0.29}, {"w": 0.56, "pk_index": 7, "x": 0.44}, {"w": 0.45, "pk_index": 8, "x": 0.55}, {"w": 1.0, "pk_index": 9, "x": 0.0}],
         "success": false
       }
     }]

@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -11,6 +14,7 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
@@ -34,15 +38,16 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility import sqlalchemy
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":  # noqa: F821
+) -> sqlalchemy.Engine:  # noqa: F821
     if "sqlite" in test_backends:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
                 __file__, "../../test_sets/metrics_test.db"
@@ -65,7 +70,8 @@ def sqlite_table_for_unexpected_rows_with_index(
             # use try-except block to ensure we don't keep modifying the database
             # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
             try:
-                df.to_sql(
+                add_dataframe_to_db(
+                    df=df,
                     name="animal_names",
                     con=sqlite_engine,
                     index=False,
@@ -106,7 +112,7 @@ def expected_evr_without_unexpected_rows():
             "partial_unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_count": 3,
             "unexpected_index_list": [3, 4, 5],
-            "unexpected_index_query": [3, 4, 5],
+            "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -244,7 +250,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
+        == f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
     )
 
     mp = ColumnMax()
@@ -273,7 +279,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
 def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
     mp = ColumnValuesNonNull()
     metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -286,7 +292,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
     metric = MetricConfiguration(
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -295,11 +301,11 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
+        == f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -313,7 +319,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
     metric = MetricConfiguration(
-        metric_name="foo.unexpected_count",
+        metric_name=f"foo.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -324,7 +330,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name="foo.unexpected_rows",
+        metric_name=f"foo.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -335,7 +341,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name="foo.unexpected_values",
+        metric_name=f"foo.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -346,7 +352,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name="foo.unexpected_value_counts",
+        metric_name=f"foo.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -357,7 +363,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name="foo.unexpected_index_list",
+        metric_name=f"foo.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -369,12 +375,22 @@ def test_get_map_metric_dependencies():
 
 
 def test_is_sqlalchemy_metric_selectable():
-    assert MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=CompoundColumnsUnique
+    with pytest.warns(DeprecationWarning) as record:
+        assert MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=CompoundColumnsUnique
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
-    assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=ColumnValuesNonNull
+    with pytest.warns(DeprecationWarning) as record:
+        assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=ColumnValuesNonNull
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
 
@@ -540,7 +556,7 @@ def test_pandas_unexpected_rows_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -616,7 +632,7 @@ def test_pandas_default_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -670,7 +686,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
             {"animals": "lion", "pk_1": 4},
             {"animals": "zebra", "pk_1": 5},
         ],
-        "unexpected_index_query": [3, 4, 5],
+        "unexpected_index_query": "df.filter(items=[3, 4, 5], axis=0)",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -815,6 +831,8 @@ def test_spark_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "df.filter(F.expr((animals IS NOT NULL) AND (NOT "
+        "(animals IN (cat, fish, dog)))))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1024,6 +1042,10 @@ def test_sqlite_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "SELECT animals \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1078,7 +1100,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
             {"animals": "lion", "pk_1": 4},
             {"animals": "zebra", "pk_1": 5},
         ],
-        "unexpected_index_query": "SELECT animals, pk_1 \n"
+        "unexpected_index_query": "SELECT pk_1, animals \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
         "('cat', 'fish', 'dog'));",

@@ -308,6 +308,7 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -359,6 +360,18 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "meta": {},
@@ -370,7 +383,7 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
@@ -397,6 +410,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
                     "TINYINT",
                     "bool",
                     "boolean",
+                    "Bool",
                 ],
             },
             "meta": {},
@@ -429,6 +443,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
                     "TINYINT",
                     "bool",
                     "boolean",
+                    "Bool",
                 ],
             },
             "meta": {},
@@ -440,7 +455,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_enum_schema(empty_data_context, enum_types_schema):
@@ -503,6 +518,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -524,7 +540,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema):
@@ -556,6 +572,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -588,6 +605,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -625,6 +643,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -662,6 +681,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -699,6 +719,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -736,6 +757,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
             "meta": {},
@@ -747,7 +769,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema):
@@ -798,6 +820,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                                        "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -849,6 +883,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -905,6 +951,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -961,6 +1019,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1017,6 +1087,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1073,6 +1155,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1133,6 +1227,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1193,6 +1299,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1255,6 +1373,18 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
             "expectation_type": "expect_column_values_to_be_in_type_list",
@@ -1268,7 +1398,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
@@ -1308,6 +1438,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1347,6 +1479,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1391,6 +1525,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1435,6 +1571,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1479,6 +1617,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1523,6 +1663,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1571,6 +1713,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1619,6 +1763,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1669,6 +1815,8 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
             "meta": {},
@@ -1681,7 +1829,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_has_profile_create_expectations_from_complex_schema(
@@ -1722,6 +1870,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1754,6 +1903,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1810,6 +1960,18 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
         },
@@ -1842,6 +2004,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1874,6 +2037,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1906,6 +2070,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1938,6 +2103,7 @@ def test_has_profile_create_expectations_from_complex_schema(
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -1949,7 +2115,7 @@ def test_has_profile_create_expectations_from_complex_schema(
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_null_fields_schema(empty_data_context, null_fields_schema):
@@ -1993,6 +2159,7 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                     "object",
                     "str",
                     "string",
+                    "FixedString",
                 ],
             },
         },
@@ -2039,6 +2206,18 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                     "uint32",
                     "uint64",
                     "uint8",
+                    "Uint8",
+                    "Uint16",
+                    "Uint32",
+                    "Uint64",
+                    "Uint128",
+                    "Uint256",
+                    "Int8",
+                    "Int16",
+                    "Int32",
+                    "Int64",
+                    "Int128",
+                    "Int256",
                 ],
             },
         },
@@ -2073,6 +2252,8 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
                     "float64",
                     "float_",
                     "number",
+                    "Float32",
+                    "Float64",
                 ],
             },
         },
@@ -2089,4 +2270,4 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)

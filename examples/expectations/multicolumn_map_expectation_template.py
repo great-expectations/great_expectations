@@ -22,13 +22,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet>
 class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
-    # </snippet>
     # This is the id string that will be used to reference your metric.
-    # <snippet>
     condition_metric_name = "METRIC NAME GOES HERE"
-    # </snippet>
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "batch_id",
@@ -41,12 +37,9 @@ class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
     condition_value_keys = ()
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet>
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
         raise NotImplementedError
-
-    # </snippet>
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -60,12 +53,8 @@ class MulticolumnValuesMatchSomeCriteria(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet>
 class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
-    # </snippet>
-    # <snippet>
     """TODO: Add a docstring here"""
-    # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -73,9 +62,7 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet>
     map_metric = "METRIC NAME GOES HERE"
-    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -115,17 +102,13 @@ class ExpectMulticolumnValuesToMatchSomeCriteria(MulticolumnMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
-    # <snippet>
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
-    # </snippet>
 
 
 if __name__ == "__main__":
-    # <snippet>
     ExpectMulticolumnValuesToMatchSomeCriteria().print_diagnostic_checklist()
-# </snippet>

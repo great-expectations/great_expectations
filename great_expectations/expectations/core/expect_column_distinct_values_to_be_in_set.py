@@ -7,9 +7,10 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -34,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
+class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
     expect_column_distinct_values_to_be_in_set is a \
@@ -203,14 +204,12 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         )
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
-
             if renderer_configuration.include_column_name:
                 template_str = "$column distinct values must belong to this set: [ ]"
             else:
                 template_str = "distinct values must belong to a set, but that set is not specified."
 
         else:
-
             for i, v in enumerate(params["value_set"]):
                 params[f"v__{str(i)}"] = v
             values_string = " ".join(
@@ -279,18 +278,18 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             }
         )
 
-        if len(values) > 60:
+        if len(values) > 60:  # noqa: PLR2004
             return None
         else:
             chart_pixel_width = (len(values) / 60.0) * 500
-            if chart_pixel_width < 250:
+            if chart_pixel_width < 250:  # noqa: PLR2004
                 chart_pixel_width = 250
             chart_container_col_width = round((len(values) / 60.0) * 6)
-            if chart_container_col_width < 4:
+            if chart_container_col_width < 4:  # noqa: PLR2004
                 chart_container_col_width = 4
-            elif chart_container_col_width >= 5:
+            elif chart_container_col_width >= 5:  # noqa: PLR2004
                 chart_container_col_width = 6
-            elif chart_container_col_width >= 4:
+            elif chart_container_col_width >= 4:  # noqa: PLR2004
                 chart_container_col_width = 5
 
         mark_bar_args = {}
@@ -330,10 +329,25 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
 
         return new_block
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_be_in_set` we require that the `configuraton.kwargs` contain
+        a `value_set` key that is either a `list`, `set`, or `dict`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

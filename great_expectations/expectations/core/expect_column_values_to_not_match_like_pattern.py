@@ -92,13 +92,28 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """
+        Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_not_match_like_pattern` it is required that:
+            - configuration's kwargs contains a key 'like_pattern' of type str or dict
+            - if 'like_pattern' is dict, assert key "$PARAMETER" is present
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                  Expectation."
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
             assert isinstance(
                 configuration.kwargs.get("like_pattern"), (str, dict)
-            ), "like_pattern must be a string"
+            ), "like_pattern must be a string or dict"
             if isinstance(configuration.kwargs.get("like_pattern"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
                     "like_pattern"
@@ -114,7 +129,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         runtime_configuration = runtime_configuration or {}
         _ = False if runtime_configuration.get("include_column_name") is False else True
