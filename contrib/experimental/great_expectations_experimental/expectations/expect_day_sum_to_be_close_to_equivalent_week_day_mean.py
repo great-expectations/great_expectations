@@ -236,10 +236,9 @@ def average_if_nonempty(list_: list):
 
 
 def get_diff_fraction(yesterday_sum: int, result_dict: dict, days_back_list: List[int]):
-    days_ago_dict = {3: TODAY - timedelta(days=3)}
-    days_ago_dict.update({days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list})
+    days_ago_dict = {days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list}
 
-    equivalent_previous_days: List[date] = list(days_ago_dict.items())
+    equivalent_previous_days: List[date] = list(days_ago_dict.values())
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
     ]
