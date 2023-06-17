@@ -2,7 +2,6 @@ import pprint
 
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import BatchRequest, Datasource
