@@ -25,8 +25,7 @@ DAYS_AGO = {
     28: TODAY - timedelta(days=28),
 }
 
-FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
-
+DAYS_IN_WEEK = 7
 
 def generate_data_sample(n_appearances: dict):
     data = []
@@ -88,10 +87,19 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
 
 class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
-    """Expect No missing days in date column"""
+    """Expect No missing days in date column
+
+
+    Keyword Args:
+        - threshold (float between 0-1, default is 0.25): expectation fails if the difference in percentage is more than the threshold.
+        - weeks_back (int): how many weeks back the comparison goes
+
+    See Also:
+        [expect_day_sum_to_be_close_to_equivalent_week_day_mean](https://greatexpectations.io/expectations/expect_day_sum_to_be_close_to_equivalent_week_day_mean)
+    """
 
     # Default values
-    default_kwarg_values = {"threshold": 0.25}
+    default_kwarg_values = {"threshold": 0.25, "weeks_back": 4}
 
     examples = [
         {
@@ -185,6 +193,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
     success_keys = (
         "run_date",
         "threshold",
+        "week_back"
     )
 
     def validate_configuration(
@@ -201,15 +210,17 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
 
-        run_date: str = self.get_success_kwargs(configuration).get("run_date")
-        threshold: float = float(
-            self.get_success_kwargs(configuration).get("threshold")
-        )
+        success_kwargs = self.get_success_kwargs(configuration)
+        run_date: str = success_kwargs.get("run_date")
+        threshold: float = float(success_kwargs.get("threshold"))
+        weeks_back: int = success_kwargs.get("weeks_back")
 
-        day_counts_dict = get_counts_per_day_as_dict(metrics, run_date)
+        days_back_list = [DAYS_IN_WEEK*week_index for week_index in range(1, weeks_back+1)]
+
+        day_counts_dict = get_counts_per_day_as_dict(metrics, run_date, days_back_list)
         run_date_count: int = day_counts_dict[run_date]
 
-        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict)
+        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, days_back_list)
 
         if diff_fraction > threshold:
             msg = (
@@ -227,9 +238,9 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
         return {"success": success, "result": {"details": msg}}
 
 
-def get_counts_per_day_as_dict(metrics: dict, run_date: str) -> dict:
+def get_counts_per_day_as_dict(metrics: dict, run_date: str, days_back_list: List[int]) -> dict:
     equivalent_previous_days: List[datetime] = [
-        DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS
+        DAYS_AGO[i] for i in days_back_list
     ]
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
@@ -246,14 +257,14 @@ def get_counts_per_day_as_dict(metrics: dict, run_date: str) -> dict:
     return day_counts_dict
 
 
-def get_diff_fraction(run_date_count: int, day_counts_dict: dict) -> float:
+def get_diff_fraction(run_date_count: int, day_counts_dict: dict, days_back_list: List[int]) -> float:
     """
     Calculates the fractional difference between current and past average row counts (how much is the
     difference relative to the average).
     Added +1 to both nuemrator and denominator, to account for cases when previous average is 0.
     """
     equivalent_previous_days: List[datetime] = [
-        DAYS_AGO[i] for i in FOUR_PREVIOUS_WEEKS
+        DAYS_AGO[i] for i in days_back_list
     ]
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
