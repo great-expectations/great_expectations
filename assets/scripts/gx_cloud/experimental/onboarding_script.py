@@ -1,14 +1,10 @@
-import os
 import pprint
-
-import pandas as pd
 
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.fluent import BatchRequest, Datasource
 from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
 
@@ -16,7 +12,8 @@ from great_expectations.datasource.fluent.pandas_datasource import CSVAsset
 # are set in your environment or config_variables.yml
 # your organization_id is indicated on https://app.greatexpectations.io/tokens page
 
-# uncomment the next two lines to set them explicitly in this script
+# uncomment the next three lines to set them explicitly in this script
+# import os
 # os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
 # os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 
