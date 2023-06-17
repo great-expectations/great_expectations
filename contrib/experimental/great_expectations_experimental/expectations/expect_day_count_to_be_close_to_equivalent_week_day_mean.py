@@ -17,18 +17,17 @@ TODAY_EXAMPLE_STR: str = datetime.strftime(TODAY_EXAMPLE, "%Y-%m-%d")
 date_format = "%Y-%m-%d"
 
 METRIC_SAMPLE_LIMIT = 60
-
+DAYS_IN_WEEK = 7
 FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
 
 
-def get_days_ago_dict(current_date):
-    return {
-        3: current_date - timedelta(days=3),
-        FOUR_PREVIOUS_WEEKS[0]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[0]),
-        FOUR_PREVIOUS_WEEKS[1]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[1]),
-        FOUR_PREVIOUS_WEEKS[2]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[2]),
-        FOUR_PREVIOUS_WEEKS[3]: current_date - timedelta(days=FOUR_PREVIOUS_WEEKS[3]),
-    }
+def get_days_ago_dict(current_date, weeks_back: int = 4) -> dict:
+    days_back_list = [DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)]
+
+    days_ago_dict = {3: current_date - timedelta(days=3)}
+    days_ago_dict.update({n_days: current_date - timedelta(days=n_days) for n_days in days_back_list})
+
+    return days_ago_dict
 
 
 def generate_data_sample(n_appearances: dict):
@@ -231,16 +230,16 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        run_date_str = self.get_success_kwargs(configuration).get("run_date")
+        success_kwargs = self.get_success_kwargs(configuration)
+        run_date_str = success_kwargs.get("run_date")
+        threshold = float(success_kwargs.get("threshold"))
+        weeks_back = int(success_kwargs.get('weeks_back'))
 
         run_date = datetime.strptime(run_date_str, date_format)
-
-        threshold = float(self.get_success_kwargs(configuration).get("threshold"))
-
-        days_ago_dict = get_days_ago_dict(run_date)
+        days_ago_dict = get_days_ago_dict(run_date, weeks_back)
 
         equivalent_previous_days: List[datetime] = [
-            days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
+            days_ago_dict[i] for i in days_ago_dict
         ]
 
         assert min(equivalent_previous_days) > (
