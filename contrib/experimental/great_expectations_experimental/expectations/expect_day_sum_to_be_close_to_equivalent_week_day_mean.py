@@ -35,6 +35,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         - threshold (float; default = 0.25): threshold of difference between current and past weeks over which expectation fails
         - weeks_back (int; default = 4): how many weeks back to compare the current metric with
     """
+
     FOUR_PREVIOUS_WEEKS = [7, 14, 21, 28]
     DAYS_AGO = {
         3: TODAY - timedelta(days=3),
@@ -60,7 +61,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
         "meta": None,
         "threshold": 0.25,
         "query": query,
-        "weeks_back": 4
+        "weeks_back": 4,
     }
 
     examples = [
@@ -105,7 +106,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                         },
                         "run_date": TODAY_STR,
                         "threshold": default_kwarg_values["threshold"],
-                        "weeks_back": default_kwarg_values["weeks_back"]
+                        "weeks_back": default_kwarg_values["weeks_back"],
                     },
                     "out": {"success": True},
                 },
@@ -181,24 +182,26 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         # Setting up a configuration
         super().validate_configuration(configuration)
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         success_kwargs = self.get_success_kwargs(configuration)
         run_date: str = success_kwargs.get("run_date")
         threshold: float = float(success_kwargs.get("threshold"))
         weeks_back = success_kwargs.get("weeks_back")
 
-        days_back_list = [DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)]
+        days_back_list = [
+            DAYS_IN_WEEK * week_index for week_index in range(1, weeks_back + 1)
+        ]
 
         result_dict = get_results_dict(metrics)
 
@@ -236,7 +239,9 @@ def average_if_nonempty(list_: list):
 
 
 def get_diff_fraction(yesterday_sum: int, result_dict: dict, days_back_list: List[int]):
-    days_ago_dict = {days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list}
+    days_ago_dict = {
+        days_ago: TODAY - timedelta(days=days_ago) for days_ago in days_back_list
+    }
 
     equivalent_previous_days: List[date] = list(days_ago_dict.values())
     equivalent_previous_days_str: List[str] = [
