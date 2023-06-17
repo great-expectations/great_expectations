@@ -41,3 +41,22 @@ class Depth2CardinalityProbabilities(CardinalityCategoryProbabilities):
         }
         return max(stats, key=stats.get)
 
+
+BASE_TYPES = ["NOMINAL_OR_ORDINAL", "QUANTITATIVE", "TEMPORAL"]
+
+#!!! Move this elsewhere
+@dataclass
+class BaseTypeProbabilities:
+    
+    nominal_or_ordinal: float
+    quantitative: float
+    temporal: float
+
+    @property
+    def predicted_base_type(self):
+        stats = {
+            "NOMINAL_OR_ORDINAL": self.nominal_or_ordinal,
+            "QUANTITATIVE": self.quantitative,
+            "TEMPORAL": self.temporal,
+        }
+        return max(stats, key=stats.get)

@@ -146,8 +146,6 @@ class ColumnCardinalityCategoryProbabilities(ColumnAggregateMetricProvider):
                 ),
             )
 
-            print( total_to_unique_ratio, n_unique, n_nonmissing, [float(v)/n_nonmissing for v in value_counts[:5]])
-        
             proba = model.predict_proba([[
                 np.log(total_to_unique_ratio),
                 np.log(n_unique),
