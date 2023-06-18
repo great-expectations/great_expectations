@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
-class ColumnCountToBeBetween(ColumnAggregateMetricProvider):
+class ColumnRowCountToBeBetween(ColumnAggregateMetricProvider):
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.row_count"
 
@@ -45,8 +45,8 @@ class ColumnCountToBeBetween(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnCountToBeBetween(ColumnAggregateExpectation):
-    """Expect Column Count to be between a certain range"""
+class ExpectColumnRowCountToBeBetween(ColumnAggregateExpectation):
+    """Expect Column Row Count to be between a certain range without considering unique value"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -172,7 +172,7 @@ class ExpectColumnCountToBeBetween(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        column_count = metrics["column.row_count"]
+        column_row_count = metrics["column.row_count"]
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
@@ -182,27 +182,27 @@ class ExpectColumnCountToBeBetween(ColumnAggregateExpectation):
         # Checking if mean lies between thresholds
         if min_value is not None:
             if strict_min:
-                above_min = column_count > min_value
+                above_min = column_row_count > min_value
             else:
-                above_min = column_count >= min_value
+                above_min = column_row_count >= min_value
         else:
             above_min = True
 
         if max_value is not None:
             if strict_max:
-                below_max = column_count < max_value
+                below_max = column_row_count < max_value
             else:
-                below_max = column_count <= max_value
+                below_max = column_row_count <= max_value
         else:
             below_max = True
 
         success = above_min and below_max
 
-        return {"success": success, "result": {"observed_value": column_count}}
+        return {"success": success, "result": {"observed_value": column_row_count}}
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": ['column aggregate expectation', 'column count'],  # Tags for this Expectation in the Gallery
+        "tags": ['column aggregate expectation', 'column row count'],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@data-han",  # Don't forget to add your github handle here!
         ],
@@ -210,4 +210,4 @@ class ExpectColumnCountToBeBetween(ColumnAggregateExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnCountToBeBetween().print_diagnostic_checklist()
+    ExpectColumnRowCountToBeBetween().print_diagnostic_checklist()
