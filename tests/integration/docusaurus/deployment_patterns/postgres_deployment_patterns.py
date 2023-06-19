@@ -46,7 +46,11 @@ print(validator.head())
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add expectations">
-validator.expect_table_column_count_to_equal(value=18)
+validator.expect_column_values_to_not_be_null(column="passenger_count")
+
+validator.expect_column_values_to_be_between(
+    column="congestion_surcharge", min_value=0, max_value=1000
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py save suite">

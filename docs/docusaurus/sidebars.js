@@ -11,6 +11,9 @@ module.exports = {
       items: [
         {
           type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
+        },
+        {
+          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_with_sql'
         }
       ]
     },

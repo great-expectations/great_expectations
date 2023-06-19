@@ -12,7 +12,7 @@ This guide will help you run an end-to-end workflow with Great Expectations in [
 
 You will:
   - Load data
-  - Instantiate an <TechnicalTag tag="data_context" text="In-Memory Context" />
+  - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
   - Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
   - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
   - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
@@ -22,7 +22,7 @@ You will:
 <Prerequisites>
 
 - Have completed Databricks setup including having a running Databricks cluster with attached notebook
-- If you are using the file based version of this guide, you'll need to have DBFS set up
+- Have access to [DBFS](https://docs.databricks.com/dbfs/index.html)
 
 </Prerequisites>
 
@@ -44,8 +44,7 @@ Install Great Expectations as a notebook-scoped library by running the following
 A notebook-scoped library is what it sounds like - "custom Python environments that are specific to a notebook." You can also install a library at the cluster or workspace level. See the <a href="https://docs.databricks.com/libraries/index.html">Databricks documentation on Libraries</a> for more information.
 </details>
 
-After that we will take care of some imports that will be used later. Choose your configuration options to show applicable imports:
-
+After that we will take care of some imports that will be used later:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
 ```
@@ -223,8 +222,12 @@ with open(html, "r") as f:
 displayHTML(data)
 ```
 
-### 8. Congratulations!
 You've successfully validated your data with Great Expectations using Databricks and viewed the resulting Data Docs. Check out our other guides for more customization options and happy validating!
+
+### 8. What's next?
+
+Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, you can follow [our documentation on Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+to create a script to run this checkpoint without having to re-create your Assets & Expectations. For more on productionalizing Databricks notebooks, see [this guide](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.
 
 View the full scripts used in this page on GitHub:
 

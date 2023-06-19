@@ -52,7 +52,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 ## Reference Architectures
 
 * [How to instantiate a Data Context on an EMR Spark cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-* [How to use Great Expectations in Databricks](../../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
+* [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
