@@ -1,5 +1,6 @@
 ---
 title: How to Use Great Expectations in AWS Glue
+sidebar_custom_props: { icon: 'img/integrations/aws-icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
