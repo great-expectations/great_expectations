@@ -1,5 +1,7 @@
 ---
 title: How to use Great Expectations in Deepnote
+description: "Deepnote"
+sidebar_custom_props: { icon: 'img/integrations/deepnote_icon.png' }
 ---
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'

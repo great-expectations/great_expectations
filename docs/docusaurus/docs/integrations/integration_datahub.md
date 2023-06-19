@@ -3,6 +3,8 @@ title: Integrating DataHub With Great Expectations
 authors:
     name: Mayuri Nehate, John Joyce, Maggie Hays 
     url: https://datahubproject.io
+description: "DataHub"
+sidebar_custom_props: { icon: 'img/integrations/datahub_icon.png' }
 ---
 
 :::info

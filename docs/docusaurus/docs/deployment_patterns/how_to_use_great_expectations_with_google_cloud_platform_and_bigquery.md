@@ -1,5 +1,7 @@
 ---
 title: How to Use Great Expectations with Google Cloud Platform and BigQuery
+description: "Google Cloud Platform and BigQuery"
+sidebar_custom_props: { icon: 'img/integrations/google_cloud_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';

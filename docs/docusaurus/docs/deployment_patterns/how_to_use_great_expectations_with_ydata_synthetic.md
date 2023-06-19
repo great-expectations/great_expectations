@@ -1,5 +1,7 @@
 ---
 title: How to Use Great Expectations with YData-Synthetic
+description: "YData-Synthetic"
+sidebar_custom_props: { icon: 'img/integrations/page_icon.png' }
 ---
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'

@@ -1,5 +1,6 @@
 ---
-title: How to instantiate a Data Context on an EMR Spark cluster
+title: Instantiate a Data Context on an EMR Spark cluster
+description: "Instantiate a Data Context on an EMR Spark cluster."
 sidebar_custom_props: { icon: 'img/integrations/spark_icon.svg' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
