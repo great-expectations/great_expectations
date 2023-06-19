@@ -84,3 +84,14 @@ checkpoint_result = checkpoint.run(
     ],
 )
 # </snippet>
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+assert checkpoint_result["success"] is True
+statistics = checkpoint_result["run_results"][
+    list(checkpoint_result["run_results"].keys())[0]
+]["validation_result"]["statistics"]
+assert statistics["evaluated_expectations"] != 0
+assert statistics["evaluated_expectations"] == statistics["successful_expectations"]
+assert statistics["unsuccessful_expectations"] == 0
+assert statistics["success_percent"] == 100.0

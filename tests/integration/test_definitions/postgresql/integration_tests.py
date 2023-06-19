@@ -191,9 +191,21 @@ fluent_datasources = [
     ),
 ]
 
+getting_started = [
+    IntegrationTestFixture(
+        name="how_to_use_great_expectations_with_sql",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        util_script="tests/test_utils.py",
+        backend_dependencies=[BackendDependencies.POSTGRESQL]
+    )
+]
+
 postgresql_integration_tests += connecting_to_your_data
 postgresql_integration_tests += split_data
 postgresql_integration_tests += sample_data
 postgresql_integration_tests += creating_custom_expectations
 postgresql_integration_tests += evaluation_parameters
 postgresql_integration_tests += fluent_datasources
+postgresql_integration_tests += getting_started
