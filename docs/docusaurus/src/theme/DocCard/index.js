@@ -59,7 +59,7 @@ function CardCategory({item}) {
   );
 }
 function CardLink({item}) {
-  const icon = isInternalUrl(item.href) ? <img src={useBaseUrl(`img/fileicon.svg`)} alt="icon" /> : '🔗';
+  const icon = isInternalUrl(item.href) ? <img src={useBaseUrl(`img/integrations/page_icon.svg`)} alt="icon" /> : '🔗';
   const doc = useDocById(item.docId ?? undefined);
   return (
     <CardLayout
