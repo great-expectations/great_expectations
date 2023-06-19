@@ -149,7 +149,6 @@ module.exports = {
           type: 'category',
           label: 'AWS',
           link: { type: 'doc', id: 'deployment_patterns/aws_lp' },
-          sidebar_custom_props: { icon: 'img/integrations/aws-icon.png' },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
             { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' },
