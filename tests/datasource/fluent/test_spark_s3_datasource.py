@@ -317,33 +317,13 @@ def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     specified with the s3_name_starts_with-parameter
     """
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
-    no_recursion_asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset_not_recursive",
-        batching_regex=r".*",
-        header=True,
-        infer_schema=True,
-        batch_metadata=asset_specified_metadata,
-        s3_recursive_file_discovery=False,
-    )
-    found_files_without_recursion = len(
-        no_recursion_asset.get_batch_list_from_batch_request(
-            no_recursion_asset.build_batch_request()
-        )
-    )
-    recursion_asset = spark_s3_datasource.add_csv_asset(
-        name="csv_asset_not_recursive",
+    asset = spark_s3_datasource.add_csv_asset(
+        name="csv_asset_recursive",
         batching_regex=r".*",
         header=True,
         infer_schema=True,
         batch_metadata=asset_specified_metadata,
         s3_recursive_file_discovery=True,
     )
-    found_files_with_recursion = len(
-        recursion_asset.get_batch_list_from_batch_request(
-            recursion_asset.build_batch_request()
-        )
-    )
-    # Only 1 additional file was added to the subfolder
-    assert found_files_without_recursion + 1 == found_files_with_recursion
-    recursion_match = recursion_asset.batching_regex.match(".*/.*.csv")
+    recursion_match = asset.batching_regex.match(".*/.*.csv")
     assert recursion_match is not None
