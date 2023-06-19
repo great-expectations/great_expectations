@@ -465,10 +465,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if (
-            self.expectations_store.has_key(key)  # noqa: @601
-            and not overwrite_existing
-        ):
+        if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -2007,7 +2004,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.16.15",
         message="Pass in an existing validator instead of individual validations",
     )
-    def add_or_update_checkpoint(  # noqa: C901, PLR0913
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
@@ -3227,7 +3224,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
-        if not self.expectations_store.has_key(key):  # noqa: W601
+        if not self.expectations_store.has_key(key):
             raise gx_exceptions.DataContextError(
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
@@ -3799,7 +3796,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return list(self.validation_operators.keys())
 
-    def profile_data_asset(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def profile_data_asset(  # noqa: PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -5239,7 +5236,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return True
 
     @public_api
-    def test_yaml_config(  # noqa: C901, PLR0913
+    def test_yaml_config(  # noqa: PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,

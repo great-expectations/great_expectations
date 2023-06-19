@@ -434,104 +434,6 @@ def test_table_column_reflection_fallback(test_backends, sa):
         assert not validation_result.success
 
 
-@pytest.mark.skipif(
-    sa is None,
-    reason="sqlalchemy is not installed",
-)
-def test__generate_expectation_tests__with_test_backends():
-    expectation_type = "whatever"
-    data = TestData(stuff=[1, 2, 3, 4, 5])
-    test_case = ExpectationTestCase(
-        title="",
-        input={},
-        output={},
-        exact_match_out=False,
-        include_in_gallery=False,
-        suppress_test_for=[],
-        only_for=[],
-    )
-    test_backends = [
-        TestBackend(
-            backend="sqlalchemy",
-            dialects=["sqlite"],
-        ),
-    ]
-    test_data_cases = [
-        ExpectationTestDataCases(
-            dataset_name="generate_expectation_tests_dataset_1",
-            data=data,
-            tests=[test_case],
-            test_backends=test_backends,
-        )
-    ]
-    engines = ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=True,
-        SqlAlchemyExecutionEngine=True,
-        SparkDFExecutionEngine=False,
-    )
-
-    results = generate_expectation_tests(
-        expectation_type=expectation_type,
-        test_data_cases=test_data_cases,
-        execution_engine_diagnostics=engines,
-        raise_exceptions_for_backends=False,
-    )
-    backends_to_use = [r["backend"] for r in results]
-    assert backends_to_use == ["sqlite"] or backends_to_use == []
-
-
-@pytest.mark.skipif(
-    sa is None,
-    reason="sqlalchemy is not installed",
-)
-def test__generate_expectation_tests__with_test_backends2():
-    expectation_type = "whatever"
-    data = TestData(stuff=[1, 2, 3, 4, 5])
-    test_case = ExpectationTestCase(
-        title="",
-        input={},
-        output={},
-        exact_match_out=False,
-        include_in_gallery=False,
-        suppress_test_for=[],
-        only_for=[],
-    )
-    test_backends = [
-        TestBackend(
-            backend="sqlalchemy",
-            dialects=["sqlite"],
-        ),
-        TestBackend(
-            backend="pandas",
-            dialects=None,
-        ),
-    ]
-    test_data_cases = [
-        ExpectationTestDataCases(
-            dataset_name="generate_expectation_tests_dataset_2",
-            data=data,
-            tests=[test_case],
-            test_backends=test_backends,
-        )
-    ]
-    engines = ExpectationExecutionEngineDiagnostics(
-        PandasExecutionEngine=True,
-        SqlAlchemyExecutionEngine=True,
-        SparkDFExecutionEngine=False,
-    )
-
-    results = generate_expectation_tests(
-        expectation_type=expectation_type,
-        test_data_cases=test_data_cases,
-        execution_engine_diagnostics=engines,
-        raise_exceptions_for_backends=False,
-    )
-    backends_to_use = [r["backend"] for r in results]
-    assert sorted(backends_to_use) == ["pandas", "sqlite"] or backends_to_use == [
-        "pandas"
-    ]
-
-
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
@@ -539,7 +441,7 @@ def test__generate_expectation_tests__with_test_backends2():
     sa is None,
     reason="sqlalchemy is not installed",
 )
-def test__generate_expectation_tests__with_no_test_backends():
+def test__generate_expectation_tests():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
     test_case = ExpectationTestCase(

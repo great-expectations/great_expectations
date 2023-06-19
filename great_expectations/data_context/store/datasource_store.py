@@ -158,7 +158,7 @@ class DatasourceStore(Store):
         datasource_key: Union[
             DataContextVariableKey, GXCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
-        if not self.has_key(datasource_key):  # noqa: W601
+        if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )

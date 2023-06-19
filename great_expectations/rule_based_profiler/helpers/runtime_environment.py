@@ -7,7 +7,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
+from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)

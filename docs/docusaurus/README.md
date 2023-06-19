@@ -82,12 +82,13 @@ To add a new version, follow these steps:
 4. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
 5. Build API docs `invoke api-docs` from the repo root.
 6. Run `yarn install` from `docs/docusaurus/`.
-7. Run `yarn build` from `docs/docusaurus/`.
-8. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
-9. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
-10. Unzip and add your newly created versioned docs via the following:
-11. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
-12. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
-13. Add your version number to `versions.json` in the unzipped version file.
-14. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
-15. Once the docs are built again, this zip file will be used for the prior versions.
+7. Temporarily change onBrokenLinks: 'throw' to onBrokenLinks: 'warn' in `docusaurus.config.js` to allow the build to complete even if there are broken links.
+8. Run `yarn build` from `docs/docusaurus/`.
+9. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
+10. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
+11. Unzip and add your newly created versioned docs via the following:
+12. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
+13. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
+14. Add your version number to `versions.json` in the unzipped version file.
+15. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
+16. Once the docs are built again, this zip file will be used for the prior versions.

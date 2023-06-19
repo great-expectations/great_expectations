@@ -26,7 +26,6 @@ from tests.integration.usage_statistics.usage_stats_event_examples import (
     data_context_init_with_dependencies,
 )
 
-
 # Dummy values purely used for tests - analytics with these values should be ignored
 TEST_DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000002"
 TEST_DATA_CONTEXT_INSTANCE_ID = "10000000-0000-0000-0000-000000000002"
@@ -62,8 +61,6 @@ def test_generate_messages_with_defaults():
         "event_time": "2020-08-04T22:50:58.837Z",
         "data_context_id": TEST_DATA_CONTEXT_ID,
         "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-        "mac_address": TEST_MAC_ADDRESS,
-        "oss_id": TEST_OSS_ID,
     }
 
     message_stubs = [
@@ -107,8 +104,6 @@ def test_generate_messages_with_defaults():
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -119,8 +114,6 @@ def test_generate_messages_with_defaults():
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -131,8 +124,6 @@ def test_generate_messages_with_defaults():
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -143,8 +134,6 @@ def test_generate_messages_with_defaults():
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.18.manual_testing",
         },
         {
@@ -155,8 +144,6 @@ def test_generate_messages_with_defaults():
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.18.manual_testing",
         },
     ]
@@ -263,8 +250,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-03-28T01:14:21.155Z",
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_test",
         },
         # "new-style" expectation type system
@@ -378,9 +363,122 @@ valid_usage_statistics_messages = {
             "event_time": "2020-03-28T01:14:21.155Z",
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
+            "ge_version": "0.13.0.manual_test",
+        },
+        # v2 schema - persistent identifiers (mac_address & oss_id)
+        {
+            "event_payload": {
+                "platform.system": "Darwin",
+                "platform.release": "19.3.0",
+                "version_info": "sys.version_info(major=3, minor=8, micro=4, releaselevel='final', serial=0)",
+                "anonymized_datasources": [
+                    {
+                        "anonymized_name": "f57d8a6edae4f321b833384801847498",
+                        "parent_class": "SqlAlchemyDatasource",
+                        "sqlalchemy_dialect": "postgresql",
+                    },
+                ],
+                "anonymized_stores": [
+                    {
+                        "anonymized_name": "078eceafc1051edf98ae2f911484c7f7",
+                        "parent_class": "ExpectationsStore",
+                        "anonymized_store_backend": {
+                            "parent_class": "TupleFilesystemStoreBackend"
+                        },
+                    },
+                    {
+                        "anonymized_name": "313cbd9858dd92f3fc2ef1c10ab9c7c8",
+                        "parent_class": "ValidationsStore",
+                        "anonymized_store_backend": {
+                            "parent_class": "TupleFilesystemStoreBackend"
+                        },
+                    },
+                    {
+                        "anonymized_name": "2d487386aa7b39e00ed672739421473f",
+                        "parent_class": "EvaluationParameterStore",
+                        "anonymized_store_backend": {
+                            "parent_class": "InMemoryStoreBackend"
+                        },
+                    },
+                ],
+                "anonymized_validation_operators": [
+                    {
+                        "anonymized_name": "99d14cc00b69317551690fb8a61aca94",
+                        "parent_class": "ActionListValidationOperator",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "5a170e5b77c092cc6c9f5cf2b639459a",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "0fffe1906a8f2a5625a5659a848c25a3",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "101c746ab7597e22b94d6e5f10b75916",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
+                ],
+                "anonymized_data_docs_sites": [
+                    {
+                        "parent_class": "SiteBuilder",
+                        "anonymized_name": "eaf0cf17ad63abf1477f7c37ad192700",
+                        "anonymized_store_backend": {
+                            "parent_class": "TupleFilesystemStoreBackend"
+                        },
+                        "anonymized_site_index_builder": {
+                            "parent_class": "DefaultSiteIndexBuilder",
+                        },
+                    },
+                ],
+                "anonymized_expectation_suites": [
+                    {
+                        "anonymized_name": "238e99998c7674e4ff26a9c529d43da4",
+                        "expectation_count": 8,
+                        "anonymized_expectation_counts": [
+                            {
+                                "expectation_type": "expect_column_value_lengths_to_be_between",
+                                "count": 1,
+                            },
+                            {
+                                "expectation_type": "expect_table_row_count_to_be_between",
+                                "count": 1,
+                            },
+                            {
+                                "expectation_type": "expect_column_values_to_not_be_null",
+                                "count": 2,
+                            },
+                            {
+                                "expectation_type": "expect_column_distinct_values_to_be_in_set",
+                                "count": 1,
+                            },
+                            {
+                                "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+                                "count": 1,
+                            },
+                            {
+                                "expectation_type": "expect_table_column_count_to_equal",
+                                "count": 1,
+                            },
+                            {
+                                "expectation_type": "expect_table_columns_to_match_ordered_list",
+                                "count": 1,
+                            },
+                        ],
+                    },
+                ],
+            },
+            "event": "data_context.__init__",
+            "success": True,
+            "version": "2",
+            "event_time": "2020-06-08T01:14:21.155Z",
+            "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
+            "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
             "mac_address": TEST_MAC_ADDRESS,
             "oss_id": TEST_OSS_ID,
-            "ge_version": "0.13.0.manual_test",
+            "ge_version": "0.17.0.manual_test",
         },
         data_context_init_with_dependencies,
     ],
@@ -401,8 +499,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:36:26.422Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
     ],
@@ -418,9 +514,24 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:16.030Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        # v2 schema - persistent identifiers (mac_address & oss_id)
+        {
+            "event": "data_context.add_datasource",
+            "event_payload": {
+                "anonymized_name": "c9633f65c36d1ba9fbaa9009c1404cfa",
+                "parent_class": "PandasDatasource",
+            },
+            "success": True,
+            "version": "2",
+            "event_time": "2023-06-12T16:08:16.030Z",
+            "data_context_id": TEST_DATA_CONTEXT_ID,
+            "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
             "oss_id": TEST_OSS_ID,
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.17.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
@@ -439,8 +550,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:16.030Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -461,8 +570,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -483,8 +590,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -509,8 +614,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -535,8 +638,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:16.030Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -562,8 +663,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -587,8 +686,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -612,8 +709,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -627,9 +722,21 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:24.349Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        # v2 schema - persistent identifiers (mac_address & oss_id)
+        {
+            "event_payload": {},
+            "event": "data_context.build_data_docs",
+            "success": True,
+            "version": "2",
+            "event_time": "2023-06-05T16:08:24.349Z",
+            "data_context_id": TEST_DATA_CONTEXT_ID,
+            "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
             "oss_id": TEST_OSS_ID,
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.17.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
@@ -642,8 +749,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -657,8 +762,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -671,9 +774,22 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
+            "ge_version": "0.13.45.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        # v2 schema - persistent identifiers (mac_address & oss_id)
+        {
+            "event": "data_context.run_checkpoint",
+            "event_payload": {},
+            "success": True,
+            "version": "2",
+            "event_time": "2023-06-07T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": TEST_DATA_CONTEXT_ID,
+            "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
             "mac_address": TEST_MAC_ADDRESS,
             "oss_id": TEST_OSS_ID,
-            "ge_version": "0.13.45.manual_testing",
+            "ge_version": "0.17.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
@@ -687,8 +803,6 @@ valid_usage_statistics_messages = {
             "event_duration": 1,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -753,8 +867,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -805,8 +917,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -858,8 +968,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -921,8 +1029,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -984,8 +1090,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1079,8 +1183,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1126,8 +1228,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1173,8 +1273,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1200,8 +1298,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1224,8 +1320,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1248,8 +1342,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1272,8 +1364,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1296,8 +1386,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1320,8 +1408,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1344,8 +1430,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1368,8 +1452,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.45.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1385,8 +1467,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:23.570Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1402,8 +1482,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:23.570Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1419,8 +1497,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:23.570Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1433,8 +1509,6 @@ valid_usage_statistics_messages = {
             "event_time": "2021-06-18T14:36:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1578,8 +1652,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:38:32.664Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.5.manual_testing",
         },
     ],
@@ -1595,8 +1667,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:38:32.664Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1609,8 +1679,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.47.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
@@ -1624,8 +1692,6 @@ valid_usage_statistics_messages = {
             "event_time": "2022-04-21T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.6.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1639,8 +1705,6 @@ valid_usage_statistics_messages = {
             "event_time": "2022-04-21T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.8.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
@@ -1655,8 +1719,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:06:47.697Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1668,8 +1730,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:06:47.697Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1681,8 +1741,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:06:47.697Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1697,8 +1755,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -1709,8 +1765,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -1721,8 +1775,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1733,8 +1785,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:20:37.828Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1763,8 +1813,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:56:53.908Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1808,8 +1856,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1852,8 +1898,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1896,8 +1940,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -1947,8 +1989,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T01:03:17.567Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -1959,8 +1999,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T01:03:17.567Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -1971,8 +2009,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T01:03:17.567Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -1986,8 +2022,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:08.963Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -1999,8 +2033,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:08.963Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2012,8 +2044,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:08.963Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2026,8 +2056,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2070,8 +2098,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2114,8 +2140,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2184,8 +2208,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2254,8 +2276,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2305,8 +2325,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:58:51.961Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2317,8 +2335,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:58:51.961Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
         {
@@ -2329,8 +2345,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:58:51.961Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2342,8 +2356,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2386,8 +2398,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2430,8 +2440,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2474,8 +2482,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2518,8 +2524,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2570,8 +2574,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:32:33.635Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2582,8 +2584,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:32:33.635Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2596,8 +2596,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:33:15.664Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.11.9.manual_testing",
         },
         {
@@ -2608,8 +2606,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:33:15.664Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.13.0.manual_testing",
         },
     ],
@@ -2621,8 +2617,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:25:27.088Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2670,8 +2664,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:36:50.979Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2719,8 +2711,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:20:37.828Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
         },
         message_stubs=[
             {
@@ -2765,8 +2755,6 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:28.070Z",
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2823,8 +2811,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
@@ -2886,8 +2872,6 @@ valid_usage_statistics_messages = {
             "event_duration": 123,
             "data_context_id": TEST_DATA_CONTEXT_ID,
             "data_context_instance_id": TEST_DATA_CONTEXT_INSTANCE_ID,
-            "mac_address": TEST_MAC_ADDRESS,
-            "oss_id": TEST_OSS_ID,
             "ge_version": "0.14.7.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },

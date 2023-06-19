@@ -33,6 +33,7 @@ from great_expectations._version import get_versions  # isort:skip
 __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -100,7 +101,7 @@ if sa:
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401, TID251
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -735,6 +736,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
+            # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            if not isinstance(selectable, sa.Table):
+                selectable = selectable.subquery()
+
             selectable = (
                 sa.select(sa.text("*"))
                 .select_from(selectable)
@@ -1359,7 +1365,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
@@ -1425,7 +1430,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
             result = connection.execute(query)
 
@@ -1446,9 +1450,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
-            with connection.begin():
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
                 result = connection.execute(query)
+                connection.commit()
+            else:
+                with connection.begin():
+                    result = connection.execute(query)
 
         return result

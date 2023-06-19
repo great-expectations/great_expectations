@@ -4,6 +4,43 @@
 Changelog
 #########
 
+0.17.0
+-----------------
+* [FEATURE] Agent prints stack trace on error ([#8092](https://github.com/great-expectations/great_expectations/pull/8092))
+* [FEATURE] Clickhouse Integration ([#7719](https://github.com/great-expectations/great_expectations/pull/7719)) (thanks @Plozano94)
+* [FEATURE] Pandas 2.0.0 and Sqlalchemy 2.0.0 compatibility ([#7633](https://github.com/great-expectations/great_expectations/pull/7633))
+* [FEATURE] Better pandas query ([#8101](https://github.com/great-expectations/great_expectations/pull/8101))
+* [FEATURE] Add Pandas FWFAsset - fixed width file ([#8119](https://github.com/great-expectations/great_expectations/pull/8119))
+* [BUGFIX] Fix conditional for pyspark compatibility ([#8108](https://github.com/great-expectations/great_expectations/pull/8108))
+* [BUGFIX] respect result format bool only for validators and checkpoints ([#8111](https://github.com/great-expectations/great_expectations/pull/8111))
+* [BUGFIX] Robust Handling Of Column Types And Empty DataFrames For DataBricks/Spark Environment ([#8115](https://github.com/great-expectations/great_expectations/pull/8115))
+* [BUGFIX] Fix GXCloudStoreBackend updates by name ([#8116](https://github.com/great-expectations/great_expectations/pull/8116))
+* [BUGFIX] Patch bad mock in GCS test ([#8128](https://github.com/great-expectations/great_expectations/pull/8128))
+* [DOCS] Update Quickstart guide to be Cloud-compatible ([#8036](https://github.com/great-expectations/great_expectations/pull/8036))
+* [DOCS] Temporarily hardcode quickstart snippet due to substitution error ([#8091](https://github.com/great-expectations/great_expectations/pull/8091))
+* [DOCS] Update prefect gx tutorial ([#8009](https://github.com/great-expectations/great_expectations/pull/8009)) (thanks @discdiver)
+* [DOCS] Fix line breaks in quickstart ([#8098](https://github.com/great-expectations/great_expectations/pull/8098))
+* [DOCS] Remove Remaining CLI Admonitions ([#8070](https://github.com/great-expectations/great_expectations/pull/8070))
+* [DOCS] Remove examples of specifying a test_backends list of dicts ([#7816](https://github.com/great-expectations/great_expectations/pull/7816))
+* [MAINTENANCE] Add tests for file and Cloud-backed quickstart workflows ([#8037](https://github.com/great-expectations/great_expectations/pull/8037))
+* [MAINTENANCE] Update anonymous usage statistics payloads with hashed MAC address ([#8078](https://github.com/great-expectations/great_expectations/pull/8078))
+* [MAINTENANCE] Check if PR is a fork in some docs_integration stages ([#8090](https://github.com/great-expectations/great_expectations/pull/8090))
+* [MAINTENANCE] Update how_to_host_and_share_data_docs_on_gcs ([#8067](https://github.com/great-expectations/great_expectations/pull/8067))
+* [MAINTENANCE] Add persistent OSS user identifier to anonymized usage statistics payloads ([#8089](https://github.com/great-expectations/great_expectations/pull/8089))
+* [MAINTENANCE] Update MSSQL docker container and instructions for Apple Silicon Macs ([#8093](https://github.com/great-expectations/great_expectations/pull/8093))
+* [MAINTENANCE] Remove hardcoded `Datasource._EXCLUDED_EXEC_ENG_ARGS` ([#8100](https://github.com/great-expectations/great_expectations/pull/8100))
+* [MAINTENANCE] Update print_diagnostic_checklist ([#8018](https://github.com/great-expectations/great_expectations/pull/8018))
+* [MAINTENANCE] Type hint cleanup in usage statistics ([#8105](https://github.com/great-expectations/great_expectations/pull/8105))
+* [MAINTENANCE] remove unused noqa comments ([#8107](https://github.com/great-expectations/great_expectations/pull/8107))
+* [MAINTENANCE] Remove the mysql-mac-m1 and starburst directories from assets/docker ([#8104](https://github.com/great-expectations/great_expectations/pull/8104))
+* [MAINTENANCE] Typing Data Assistant Result ([#8110](https://github.com/great-expectations/great_expectations/pull/8110))
+* [MAINTENANCE] Ensure that new usage statistics schema changes are backwards compatible ([#8109](https://github.com/great-expectations/great_expectations/pull/8109))
+* [MAINTENANCE] Cleanup generate_expectation_tests ([#8019](https://github.com/great-expectations/great_expectations/pull/8019))
+* [MAINTENANCE] Update build_in_memory_runtime_context to accept which datasources to include ([#8017](https://github.com/great-expectations/great_expectations/pull/8017))
+* [MAINTENANCE] Pandas and SqlAlchemy 2.0 follow-up ([#8112](https://github.com/great-expectations/great_expectations/pull/8112))
+* [MAINTENANCE] Misc/docs integration uncommented ([#8076](https://github.com/great-expectations/great_expectations/pull/8076))
+* [MAINTENANCE] Fixes for test_dependency_versions pipeline ([#8122](https://github.com/great-expectations/great_expectations/pull/8122))
+
 0.16.16
 -----------------
 * [FEATURE] Update mySQL docker compose to specify platform ([#8046](https://github.com/great-expectations/great_expectations/pull/8046))
