@@ -2,6 +2,14 @@
 title: Deploy Great Expectations in hosted environments without a file system
 ---
 
+---
+title: "Deploy Great Expectations in hosted environments without a file system"
+sidebar_label: "Deploy Great Expectations in hosted environments without a file system"
+description: "Use Great Expectations in hosted environments."
+id: how_to_instantiate_a_data_context_hosted_environments
+sidebar_custom_props: { icon: 'img/integrations/aws-icon.png' }
+---
+
 The components in the ``great_expectations.yml`` file define the Validation Results Stores, Datasource connections, and Data Docs hosts for a Data Context. These components might be inaccessible in hosted environments, such as Databricks, Amazon EMR, and Google Cloud Composer. The information provided here is intended to help you use Great Expectations in hosted environments.
 
 ## Configure your Data Context
