@@ -885,7 +885,7 @@ def build_map_metric_rule(  # noqa: PLR0913
         ),
     ]
     column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name=f"{map_metric_name}.unexpected_value",
+        name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
         null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
