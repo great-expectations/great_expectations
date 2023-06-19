@@ -139,7 +139,11 @@ module.exports = {
     {
       type: 'category',
       label: 'Integrate',
-      link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
+      link: {
+        type: 'generated-index',
+        title: 'Integrations',
+        description: 'Integrate GX with commonly used data engineering tools.',
+      },
       items: [
         {
           type: 'category',
