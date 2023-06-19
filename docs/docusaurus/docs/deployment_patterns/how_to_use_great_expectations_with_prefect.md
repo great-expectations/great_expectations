@@ -1,7 +1,8 @@
 ---
-title: How to Use Great Expectations with Prefect
-description: "Prefect"
-sidebar_custom_props: { icon: 'img/integrations/prefect_icon.png' }
+title: Use Great Expectations with Prefect
+description: "Use Great Expectations with Prefect"
+sidebar_label: "Prefect"
+sidebar_custom_props: { icon: 'img/integrations/prefect_icon.svg' }
 ---
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
