@@ -12,9 +12,7 @@ This guide will help you trigger emails as an <TechnicalTag tag="action" text="A
 * Identified the email addresses for sent messages
 * A <TechnicalTag tag="checkpoint" text="Checkpoint" /> configured to send email
 
-## Steps
-
-### 1. Edit your configuration variables with email related information
+## Edit your configuration variables with email related information
 
 Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
 
@@ -27,7 +25,7 @@ sender_alias: [optional alias used to send the email (default = sender_login)]
 receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
 ````
 
-### 2. Update `action_list` in your Checkpoint configuration
+## Update `action_list` in your Checkpoint configuration
 
 Locate the relevant checkpoint that you want to set up an email trigger for. Open the checkpoint's configuration file that is located at `great_expectations/checkpoints/` (for example, `great_expectations/checkpoints/checkpoint_01.yml`) and add an email action to the `action_list`. Follow the snippet below to set up the detials of your email trigger.
 
@@ -54,7 +52,7 @@ action_list:
         receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
 ````
 
-### 3. Test your updated Action list
+## Test your updated Action list
 
 Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive an email on the success or failure of the Validation.
 
@@ -123,4 +121,4 @@ action_list:
 
 ## Additional resources
 
-The EmailAction uses smtplib. You can get more information about this module [here](https://docs.python.org/3/library/smtplib.html).
+The EmailAction uses smtplib. For more information about this module, see [smtplib — SMTP protocol client](https://docs.python.org/3/library/smtplib.html).

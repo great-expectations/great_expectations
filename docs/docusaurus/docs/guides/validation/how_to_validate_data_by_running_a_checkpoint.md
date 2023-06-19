@@ -23,6 +23,8 @@ Succinctly: Checkpoints are used to test your data and take action based on the 
 
 </Prerequisites>
 
+## Run the Checkpoint
+
 You can run the Checkpoint from the <TechnicalTag tag="cli" text="CLI" /> in a Terminal shell or using Python.
 
 <Tabs

@@ -16,9 +16,7 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 </Prerequisites>
 
-## Steps
-
-### 1. Update your Checkpoint
+## Update your Checkpoint
 
 A Checkpoint's ``action_list`` contains a list of Actions.  After the Checkpoint is <TechnicalTag tag="validation" text="Validated" />, these Actions are called in order. 
 
@@ -45,7 +43,7 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
        class_name: UpdateDataDocsAction
 ```
 
-### 2. (Optional) Specify Data Docs sites
+## Specify Data Docs sites (Optional)
 
 - By default, the ``UpdateDataDocsAction`` updates all Data Docs sites found within your project. 
   To specify which Data Docs sites to update, provide a ``site_names`` key to the ``action`` config inside your ``UpdateDataDocsAction``.
@@ -66,7 +64,7 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
          - team_site
 ```
 
-### 3. Test your configuration
+## Test your configuration
 
 Test that your new Action is configured correctly:
 
@@ -86,7 +84,7 @@ Finally, check your Data Docs sites to confirm that a new Validation Result has 
 The ``UpdateDataDocsAction`` generates an HTML file for the latest Validation Result and updates the index page to link to the new file, and re-renders pages for the <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> used for that Validation. It does not perform a full rebuild of Data Docs sites. This means that if you wish to render older Validation Results, you should run full Data Docs rebuild (via CLI's ``great_expectations docs build`` command or by calling ``context.build_data_docs()``).
 
 
-## Additional resources
+## Related documentation
 
 - [Checkpoints overview page](../../../terms/checkpoint.md)
 - [Actions overview page](../../../terms/action.md)

@@ -49,9 +49,7 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 </Tabs>
 
-## Steps
-
-### 1. Edit your configuration variables to include the Slack webhook
+## Edit your configuration variables to include the Slack webhook
 
 Open `uncommitted/config_variables.yml` file and add `validation_notification_slack_webhook` variable by adding the following line:
 
@@ -59,7 +57,7 @@ Open `uncommitted/config_variables.yml` file and add `validation_notification_sl
 validation_notification_slack_webhook: [address to web hook]
 ```
 
-### 2. Include the `send_slack_notification_on_validation_result` Action in your Checkpoint configuration
+## Include the `send_slack_notification_on_validation_result` Action in your Checkpoint configuration
 
 Open the `.yml` configuration file in `great_expectations/checkpoints` that corresponds to the <TechnicalTag tag="checkpoint" text="Checkpoint" /> you want to add Slack notifications to.  
 
@@ -122,7 +120,7 @@ action_list:
 
 </Tabs>
 
-### 3. Test your Slack notifications
+## Test your Slack notifications
 
 Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and receive Slack notification on the success or failure of the <TechnicalTag tag="expectation_suite" text="Expectation Suite's" /> Validation.  
 
@@ -182,6 +180,6 @@ Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_d
 ```
 
 
-## Additional resources
+## Related documentation
 
-- To set up a Slack app with a webhook, see [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks#).
+- [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks#).

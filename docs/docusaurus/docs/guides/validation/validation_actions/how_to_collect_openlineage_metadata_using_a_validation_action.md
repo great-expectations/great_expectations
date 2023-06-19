@@ -23,16 +23,13 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 </Prerequisites>
 
-## Steps
-
-
-### 1. Ensure that the `openlineage-integration-common` package has been installed in your Python environment.
+## Ensure that the `openlineage-integration-common` package has been installed in your Python environment.
 
  ```bash
  % pip3 install openlineage-integration-common
  ```
 
-### 2. Update the `action_list` key in your Validation Operator config.
+## Update the `action_list` key in your Validation Operator config.
 
  Add the ``OpenLineageValidationAction`` action to the ``action_list`` key your Checkpoint configuration.
 
@@ -52,7 +49,7 @@ action_list:
 
  A Great Expecations <TechnicalTag tag="checkpoint" text="Checkpoint" /> is recorded as a Job in OpenLineage, and will be named according to the `job_name` value. Similarly, the `openlineage_namespace` value can be optionally set. For more information on job naming, consult the [Naming section](https://github.com/OpenLineage/OpenLineage/blob/main/spec/Naming.md#job-namespace-and-constructing-job-names) of the OpenLineage spec.
 
-### 3.  Test your Action by Validating a Batch of data.
+## Test your Action by Validating a Batch of data.
 
 Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
@@ -63,7 +60,7 @@ Run the following command to retrieve and run a Checkpoint to Validate a <Techni
 Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md) has more detailed instructions for this step, including instructions on how to run a checkpoint from a Python script instead of from the <TechnicalTag tag="cli" text="CLI" />.
 :::
 
-## Additional resources
+## Related documentation
 
 - [Checkpoints overview page](../../../terms/checkpoint.md)
 - [Actions overview page](../../../terms/action.md)

@@ -171,7 +171,7 @@ Run the following Python code:
 </TabItem>
 <TabItem value="azure">
 
-## Microsoft Azure Blob Storage Source Data
+## Microsoft Azure Blob Storage
 
 Connect to Source Data on Microsoft Azure Blob Storage.
 
