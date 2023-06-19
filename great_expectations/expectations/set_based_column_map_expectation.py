@@ -118,7 +118,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         set_camel_name: str,
         set_: str,
     ) -> str:
-        """Register an ephemeral metric using a constructed name with the logic provided by RegexColumnMapMetricProvider.
+        """Register an ephemeral metric using a constructed name with the logic provided by SetColumnMapMetricProvider.
 
         Args:
             set_camel_name: A name describing a set of values, in camel case.
