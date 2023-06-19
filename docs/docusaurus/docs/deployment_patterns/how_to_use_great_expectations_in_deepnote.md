@@ -1,6 +1,6 @@
 ---
 title: Use Great Expectations in Deepnote
-description: "use Great Expectations in Deepnote"
+description: "Use Great Expectations with Deepnote"
 sidebar_label: "Deepnote"
 sidebar_custom_props: { icon: 'img/integrations/deepnote_icon.png' }
 ---

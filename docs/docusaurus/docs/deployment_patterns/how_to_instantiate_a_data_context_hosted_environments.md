@@ -1,7 +1,7 @@
 ---
 title: "Deploy Great Expectations in hosted environments without a file system"
 sidebar_label: "Hosted environments"
-description: "Use Great Expectations in hosted environments."
+description: "Use Great Expectations in hosted environments"
 id: how_to_instantiate_a_data_context_hosted_environments
 sidebar_custom_props: { icon: 'img/integrations/hosted_icon.svg' }
 ---

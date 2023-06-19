@@ -1,6 +1,6 @@
 ---
 title: Use Great Expectations in EMR Serverless
-description: "Use Great Expectations in EMR Serverless"
+description: "Use Great Expectations with EMR Serverless"
 sidebar_label: "EMR Serverless"
 sidebar_custom_props: { icon: 'img/integrations/page_icon.svg' }
 ---

@@ -1,6 +1,6 @@
 ---
 title: Use Great Expectations in Flyte
-description: "Use Great Expectations in Flyte"
+description: "Use Great Expectations with Flyte"
 sidebar_label: "Flyte"
 sidebar_custom_props: { icon: 'img/integrations/flyte_icon.png' }
 ---
