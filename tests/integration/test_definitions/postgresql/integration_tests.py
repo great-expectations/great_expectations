@@ -198,7 +198,7 @@ getting_started = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL]
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
     )
 ]
 

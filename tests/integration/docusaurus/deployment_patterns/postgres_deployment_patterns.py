@@ -2,6 +2,7 @@
 import great_expectations as gx
 
 from great_expectations.checkpoint import Checkpoint
+
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py set up context">
