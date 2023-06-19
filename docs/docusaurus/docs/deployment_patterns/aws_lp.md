@@ -2,7 +2,7 @@
 sidebar_label: 'AWS'
 title: 'Integrate Great Expectations with AWS'
 id: aws_lp
-description: Integrate Great Expectations with AWS Glue, AWS with S3 and Pandas, AWS with S3 and Spark, AWS with Athena, and AWS with Redshift.
+description: Integrate Great Expectations with AWS.
 sidebar_custom_props: { icon: 'img/aws-icon.png' }
 ---
 

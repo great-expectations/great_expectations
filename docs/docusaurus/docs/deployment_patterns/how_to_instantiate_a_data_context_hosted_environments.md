@@ -1,8 +1,4 @@
 ---
-title: Deploy Great Expectations in hosted environments without a file system
----
-
----
 title: "Deploy Great Expectations in hosted environments without a file system"
 sidebar_label: "Deploy Great Expectations in hosted environments without a file system"
 description: "Use Great Expectations in hosted environments."
