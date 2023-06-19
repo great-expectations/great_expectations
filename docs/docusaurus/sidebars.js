@@ -142,7 +142,7 @@ module.exports = {
       link: {
         type: 'generated-index',
         title: 'Integrations',
-        description: 'Integrate GX with commonly used data engineering tools.',
+        description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
       },
       items: [
         {
