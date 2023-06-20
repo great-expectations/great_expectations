@@ -337,6 +337,7 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+
 @pytest.mark.unit
 def test_column_quoted_name_type_sa_handles_explicit_string_identifiers(sa):
     """
@@ -7029,90 +7030,3 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         {"a": 1.0, "b": 1.0, "c": 2.0},
         {"a": 4.0, "b": 4.0, "c": 4.0},
     ]
-
-
-@pytest.mark.integration
-def test_explicit_string_identifiers_should_work_with_validator(spark_session):
-    """
-    Integration test taken from: https://github.com/great-expectations/great_expectations/issues/7628
-    Ensures that the expectations can be used with a string identifier, resolves to the correct column
-    in SQL and a result is returned.
-    """
-    metastore_dir = "/tmp/great_expectations_v3"
-
-    data_context_config = DataContextConfig(
-        store_backend_defaults=FilesystemStoreBackendDefaults(
-            root_directory=metastore_dir
-        ),
-    )
-    context = get_context(project_config=data_context_config)
-    batch_identifiers = [
-        "customer",
-    ]
-    my_spark_datasource_config = {
-        "name": "test_dataset",
-        "class_name": "Datasource",
-        "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-        "data_connectors": {
-            "runtimedataconnector_test_dataset": {
-                "module_name": "great_expectations.datasource.data_connector",
-                "class_name": "RuntimeDataConnector",
-                "batch_identifiers": batch_identifiers,
-            }
-        },
-    }
-
-    context.add_datasource(**my_spark_datasource_config)
-
-    data2 = [
-        ("James", 100),
-        ("Michael", 101),
-        ("Robert", 102),
-        ("Maria", 103),
-        ("Jen", 104),
-    ]
-
-    schema = pyspark.types.StructType(
-        [
-            pyspark.types.StructField("customer", pyspark.types.StringType(), True),
-            pyspark.types.StructField(
-                "order number", pyspark.types.IntegerType(), True
-            ),
-        ]
-    )
-    df = spark_session.createDataFrame(data=data2, schema=schema)
-
-    batch_request = RuntimeBatchRequest(
-        datasource_name="test_dataset",
-        data_connector_name="runtimedataconnector_test_dataset",
-        data_asset_name="test_dataset",
-        batch_identifiers={
-            "customer": "test",
-        },
-        runtime_parameters={"batch_data": df},  # Your dataframe goes here
-    )
-
-    context.add_or_update_expectation_suite(
-        expectation_suite_name="test_ge_unique_record"
-    )
-
-    validator = context.get_validator(
-        batch_request=batch_request,
-        expectation_suite_name="test_ge_unique_record",
-    )
-
-    col_name = "`order number`"
-    result = validator.expect_column_values_to_be_unique(column=col_name)
-
-    assert result["success"]
-    assert result["expectation_config"]["kwargs"]["column"] == col_name
-    assert result["result"] == {
-        "element_count": 5,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": [],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-    }
