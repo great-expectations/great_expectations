@@ -151,17 +151,17 @@ module.exports = {
           link: { type: 'doc', id: 'deployment_patterns/aws_lp' },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
-            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' },
-            { label: 'How to use Great Expectations with AWS using S3 and Spark', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark' },
-            { label: 'How to use Great Expectations with AWS using Athena', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena' },
-            { label: 'How to use Great Expectations with AWS using Redshift', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift' }
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
+            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift',
           ]
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
-        { type: 'doc', id: 'integrations/integration_datahub' },
+        'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
@@ -169,7 +169,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
         'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
-        { type: 'doc', id: 'integrations/integration_zenml' },
+        'integrations/integration_zenml',
       ]
     },
     {
