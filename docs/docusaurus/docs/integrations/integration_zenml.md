@@ -1,9 +1,9 @@
 ---
-title: Integrate ZenML With Great Expectations
+title: Integrate ZenML with Great Expectations
 authors:
     name: Stefan Nica
     url: https://zenml.io
-description: "Integrate ZenML With Great Expectations"
+description: "Integrate ZenML with Great Expectations"
 sidebar_label: "ZenML"
 sidebar_custom_props: { icon: 'img/integrations/zenml_icon.png' }
 ---
