@@ -145,18 +145,7 @@ module.exports = {
         description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
       },
       items: [
-        {
-          type: 'category',
-          label: 'AWS',
-          link: { type: 'doc', id: 'deployment_patterns/aws_lp' },
-          items: [
-            'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
-            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
-            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
-            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
-            'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift',
-          ]
-        },
+        'deployment_patterns/aws_lp',
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
