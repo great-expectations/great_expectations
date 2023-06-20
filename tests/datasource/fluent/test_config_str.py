@@ -21,7 +21,7 @@ class MyClass(FluentBaseModel):
     normal_field: str
     secret_field: SecretStr
     config_field: ConfigStr
-    config_field_w_default: ConfigStr = r"hello-${MY_SECRET}"
+    config_field_w_default: ConfigStr = r"hey-${MY_SECRET}"
 
 
 @pytest.fixture
