@@ -9,6 +9,7 @@ import signal
 import threading
 import time
 from functools import wraps
+from pprint import pformat as pf
 from queue import Queue
 from typing import TYPE_CHECKING, Callable
 
@@ -50,6 +51,14 @@ STOP_SIGNAL = object()
 logger = logging.getLogger(__name__)
 
 _anonymizers: dict[str | None, Anonymizer] = {}
+
+
+def _log_request_method_and_response(r: requests.Response, *args, **kwargs):
+    logger.warning(f"{r.request.method} {r.request.url} - {r}")  # TODO: quiet this down
+    try:
+        logger.debug(f"{r}\n{pf(r.json(), depth=3)}")
+    except json.JSONDecodeError:
+        logger.debug(f"{r}\n{r.content.decode()}")
 
 
 class UsageStatsExceptionPrefix(enum.Enum):
@@ -116,6 +125,9 @@ class UsageStatisticsHandler:
 
     def _requests_worker(self) -> None:
         session = requests.Session()
+        # add an event hook to log outgoing http requests
+        # https://requests.readthedocs.io/en/latest/user/advanced/#event-hooks
+        session.hooks["response"].append(_log_request_method_and_response)
         while True:
             message = self._message_queue.get()
             if message == STOP_SIGNAL:
