@@ -24,6 +24,11 @@ except ImportError:
     dialects = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from sqlalchemy import inspect
+except ImportError:
+    inspect = SQLALCHEMY_NOT_IMPORTED
+
+try:
     from sqlalchemy.dialects import sqlite
 except (ImportError, AttributeError):
     sqlite = SQLALCHEMY_NOT_IMPORTED

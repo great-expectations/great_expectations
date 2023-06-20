@@ -164,45 +164,6 @@ sample_data = [
     ),
 ]
 
-migration_guide = [
-    IntegrationTestFixture(
-        name="migration_guide_postgresql_v3_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v3_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
-    # There are some things using the old/bad "class_name: SqlAlchemyDataset"
-    #   - docs/docusaurus/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md
-    #   - tests/data_context/fixtures/contexts/incomplete_uncommitted/great_expectations/great_expectations.yml
-    #   - tests/data_context/fixtures/version_zero/great_expectations.yml
-    #   - tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py
-    #   - tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml
-    #   - tests/test_fixtures/great_expectations_bad_datasource.yml
-    #
-    # great_expectations.data_context.util.instantiate_class_from_config(...) will be mad
-    # on `class_ = load_class(class_name=class_name, module_name=module_name)` because
-    # The module: `great_expectations.datasource` does not contain the class: `SqlAlchemyDatasource`.
-    #
-    # The great_expectations.data_context.types.base.DatasourceConfig.__init__ method has a check
-    # that probably needs to change:
-    #
-    #       elif class_name == "SqlAlchemyDatasource":
-    #           data_asset_type = {
-    #               "class_name": "SqlAlchemyDataset",
-    #               "module_name": "great_expectations.dataset",
-    #           }
-    # IntegrationTestFixture(
-    #     name="migration_guide_postgresql_v2_api",
-    #     user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py",
-    #     data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
-    #     data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-    #     util_script="tests/test_utils.py",
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # ),
-]
-
 creating_custom_expectations = [
     IntegrationTestFixture(
         name="expect_multicolumn_values_to_be_multiples_of_three",
@@ -233,7 +194,6 @@ fluent_datasources = [
 postgresql_integration_tests += connecting_to_your_data
 postgresql_integration_tests += split_data
 postgresql_integration_tests += sample_data
-postgresql_integration_tests += migration_guide
 postgresql_integration_tests += creating_custom_expectations
 postgresql_integration_tests += evaluation_parameters
 postgresql_integration_tests += fluent_datasources

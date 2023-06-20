@@ -852,7 +852,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
             )
         else:
-            return gcs_response_object.download_as_string().decode("utf-8")
+            return gcs_response_object.download_as_bytes().decode("utf-8")
 
     def _set(
         self,

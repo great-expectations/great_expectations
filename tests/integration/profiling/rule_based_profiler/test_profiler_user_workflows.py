@@ -2,7 +2,18 @@ import contextlib
 import copy
 import datetime
 from numbers import Number
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Type, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    Type,
+    cast,
+)
 from unittest import mock
 
 import numpy as np
@@ -10,10 +21,6 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 from packaging import version
-from ruamel.yaml.comments import CommentedMap
-
-# To support python 3.7 we must import Protocol from typing_extensions instead of typing
-from typing_extensions import Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -54,6 +61,9 @@ from tests.core.usage_statistics.util import (
     usage_stats_invalid_messages_exist,
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 yaml = YAMLHandler()
 
