@@ -21,6 +21,7 @@ class MyClass(FluentBaseModel):
     normal_field: str
     secret_field: SecretStr
     config_field: ConfigStr
+    config_field_w_default: ConfigStr = r"hey-${MY_SECRET}"  # type: ignore[assignment]
 
 
 @pytest.fixture
@@ -65,6 +66,10 @@ def test_config_str_validation():
     ["input_value", "expected"],
     [
         (r"${VALID_CONFIG_STR}", r"${VALID_CONFIG_STR}"),
+        (
+            r"postgres://user:${VALID_CONFIG_STR}@host/dbname",
+            r"postgres://user:${VALID_CONFIG_STR}@host/dbname",
+        ),
         ("postgres://userName@hostname", "postgres://userName@hostname"),
     ],
 )
@@ -87,8 +92,13 @@ def test_config_substitution(
         normal_field="normal",
         secret_field="secret",  # type: ignore[arg-type]
         config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+        config_field_w_default=r"hello-${MY_ENV_VAR}",  # type: ignore[arg-type]
     )
     assert m.config_field.get_config_value(env_config_provider) == "success"
+    assert (
+        m.config_field_w_default.get_config_value(env_config_provider)
+        == "hello-success"
+    )
 
 
 def test_config_substitution_dict(
