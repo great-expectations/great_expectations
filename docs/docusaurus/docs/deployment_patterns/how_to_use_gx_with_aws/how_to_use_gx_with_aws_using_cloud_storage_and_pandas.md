@@ -1,5 +1,5 @@
 ---
-title: How to use Great Expectations with Amazon Web Services using S3 and Pandas
+title: Use Great Expectations with Amazon Web Services using S3 and Pandas
 description: AWS S3
 sidebar_custom_props: { icon: 'img/integrations/s3_icon.png' }
 ---
