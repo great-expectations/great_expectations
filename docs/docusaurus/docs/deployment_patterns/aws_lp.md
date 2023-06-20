@@ -3,7 +3,6 @@ title: "Integrate Great Expectations with AWS"
 sidebar_label: "AWS"
 description: "Integrate Great Expectations with AWS"
 id: aws_lp
-sidebar_custom_props: { icon: 'img/integrations/aws_logo.svg' }
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';
