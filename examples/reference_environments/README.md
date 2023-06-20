@@ -27,6 +27,11 @@ This example will show you how to start a reference environment for a postgres d
 
 2. Click on the jupyter notebook link in the output to open the notebook in your browser.
 
+If there are more than on URL being displayed, you can use the following command to display the URL for the notebook.
+
+    ```bash
+    great_expectations example postgres --url
+    ```
 That's it!
 
 The notebook contains a quickstart which you can edit to your heart's content.
