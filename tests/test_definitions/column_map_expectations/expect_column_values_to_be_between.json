@@ -688,7 +688,26 @@
             "column": "y",
             "min_value": 0,
             "max_value": 10,
-            "allow_cross_type_comparisons": true
+            "allow_cross_type_comparisons": true,
+            "catch_exceptions": true
+          },
+          "out": {},
+          "error": {
+            "traceback_substring": "NotImplementedError"
+          },
+          "suppress_test_for": [
+            "spark"
+          ]
+        },
+        {
+          "title": "test_allow_cross_type_comparisons_again",
+          "exact_match_out": false,
+          "in": {
+            "column": "numeric",
+            "min_value": 0,
+            "max_value": 10,
+            "allow_cross_type_comparisons": true,
+            "catch_exceptions": true
           },
           "out": {},
           "error": {
