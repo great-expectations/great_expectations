@@ -378,8 +378,10 @@ def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) ->
 def _prepend_version_info_to_name_for_md_relative_links(
     contents: str, version: str
 ) -> str:
-    pattern = re.compile(r"(?P<docs>(.*\.\./docs/))(?P<rest>(.*))")
-    contents = re.sub(pattern, rf"\g<docs>{version}/\g<rest>", contents)
+    pattern = re.compile(
+        r"(?P<docs>(.*\.\./docs/))(?P<middle>(.*))(?P<index>(index\.md))(?P<rest>(.*))"
+    )
+    contents = re.sub(pattern, rf"\g<docs>{version}/\g<middle>\g<rest>", contents)
 
     return contents
 
