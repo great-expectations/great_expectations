@@ -2,7 +2,7 @@
 title: Use Great Expectations in EMR Serverless
 description: "Use Great Expectations with EMR Serverless"
 sidebar_label: "EMR Serverless"
-sidebar_custom_props: { icon: 'img/integrations/page_icon.svg' }
+sidebar_custom_props: { icon: 'img/integrations/emr_serverless_icon.svg' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
