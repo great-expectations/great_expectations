@@ -30,6 +30,7 @@ plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
     "tests/datasource/fluent",
+    "tests/agent",
     # "contrib" # ignore entire `contrib` package
     ]
 warn_unused_configs = true
@@ -70,19 +71,12 @@ exclude = [
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59
     'cli/upgrade_helpers/upgrade_helper_v13\.py',  # 17
-    'core/usage_statistics/anonymizers/action_anonymizer\.py', # 1
-    'core/usage_statistics/anonymizers/anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/base\.py', # 8
     'core/usage_statistics/anonymizers/batch_anonymizer\.py', # 10
     'core/usage_statistics/anonymizers/batch_request_anonymizer\.py', # 16
     'core/usage_statistics/anonymizers/checkpoint_anonymizer\.py', # 16
-    'core/usage_statistics/anonymizers/data_connector_anonymizer\.py', # 3
     'core/usage_statistics/anonymizers/data_docs_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/datasource_anonymizer\.py', # 9
     'core/usage_statistics/anonymizers/expectation_anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/profiler_anonymizer\.py', # 2
-    'core/usage_statistics/anonymizers/store_anonymizer\.py', # 6
-    'core/usage_statistics/anonymizers/store_backend_anonymizer\.py', # 5
     'core/usage_statistics/anonymizers/validation_operator_anonymizer\.py',  # 5
     'dataset/sparkdf_dataset\.py', # 3
     'dataset/sqlalchemy_dataset\.py', # 16
@@ -284,7 +278,6 @@ ignore = [
 extend-exclude = [
     "docs/*",
     "build/*",
-    "assets/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
@@ -292,12 +285,20 @@ extend-exclude = [
     "tests/data_asset", # 10 warnings
     "tests/dataset", # 10 warnings
     "tests/expectations", # 56 warnings
-    "tests/integration", # 114 warnings
+    "tests/integration/docusaurus", # 208 warnings, 144 auto-fixable
     "tests/rule_based_profiler", # 28 warnings
     "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
 ]
 
 [tool.ruff.per-file-ignores]
+"assets/benchmark/benchmark.py" = [
+    "DTZ",  # flake8-datetimez-dtz - doesn't matter for benchmark tests
+]
+"assets/scripts/build_gallery.py" = [
+    "PLR0912",  # Too many branches  - scripts are not part of the main codebase
+    "PLR0913", # Too many arguments - scripts are not part of the main codebase
+    "PLR0915", # Too many statements - scripts are not part of the main codebase
+]
 "__init__.py" = [
     "F401",  # unused import
     "F403",  # star imports
@@ -327,8 +328,8 @@ runtime-evaluated-base-classes = [
     # NOTE: ruff is unable to detect that these are subclasses of pydantic.BaseModel
     "pydantic.BaseModel",
     "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
-    "great_expectations.datasource.fluent.Datasource",
-    "great_expectations.datasource.fluent.SQLDatasource",
+    "great_expectations.datasource.fluent.interfaces.Datasource",
+    "great_expectations.datasource.fluent.sql_datasource.SQLDatasource",
     ]
 runtime-evaluated-decorators = [
     "pydantic.dataclasses.dataclass",
@@ -418,10 +419,6 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
-
-    # Warnings related to GCS Data Connectors
-    "ignore:In order to access blobs with a ConfiguredAssetGCSDataConnector:UserWarning",
-    "ignore:In order to access blobs with an InferredAssetGCSDataConnector:UserWarning",
 
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
