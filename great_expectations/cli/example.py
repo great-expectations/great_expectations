@@ -60,7 +60,8 @@ def example_snowflake(stop: bool, url: bool) -> None:
         ).stdout
         raw_json = json.loads(url_json)
         notebook_url = (
-            f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}")
+            f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
+        )
         cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
     else:
         cli_message(
