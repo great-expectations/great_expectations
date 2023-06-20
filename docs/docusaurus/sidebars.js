@@ -151,7 +151,7 @@ module.exports = {
           link: {
             type: 'doc',
             id: 'deployment_patterns/aws_lp',
-            image: 'img/integrations/aws_logo.svg',
+            image: '/img/integrations/aws_logo.svg',
           },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
