@@ -35,24 +35,21 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 </details>
 
-
-## Steps
-
-### 1. Import the Great Expectations module and instantiate a Data Context
+## Import the Great Expectations module and instantiate a Data Context
 
 The simplest way to create a new Data Context is by using the `get_context()` method.
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context"
 ```
 
-### 2. Create a Validator from Data 
+## Create a Validator from Data 
 
 Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite create_validator"
 ```
 
-### 3. Create Expectations with Validator 
+## Create Expectations with Validator 
 
 Run the following commands to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses `auto=True` to detect a range of values in the `passenger_count` column.
 
@@ -62,7 +59,7 @@ Run the following commands to create two Expectations. The first Expectation use
 
 Under the hood, the Validator will be creating and updating an Expectation Suite, which we can view next. 
 
-### 4. View the Expectations in the Expectation Suite
+## View the Expectations in the Expectation Suite
 
 There are a number of different ways that this can be done, with one way being using the `show_expectations_by_expectation_type()` function, which will use `prettyprint` to print the Suite to the console in a way that can be easily visualized. 
 
@@ -91,7 +88,7 @@ Your output will look something similar to this:
                                              'domain': 'column'}}]
 ```
 
-### 5. Instantiate ExpectationConfiguration 
+## Instantiate ExpectationConfiguration 
 
 From the Expectation Suite, you will be able to create an ExpectationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
 
@@ -107,7 +104,7 @@ Here is the same configuration, but this time as a `ExpectationConfiguration` ob
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1"
 ```
 
-### 6. Update Configuration and ExpectationSuite
+## Update Configuration and ExpectationSuite
 
 Let's say that you are interested in adjusting the `max_value` of the Expectation to be `4` instead of `6`. Then you could create a new `ExpectationConfiguration` with the new value: 
 
@@ -124,7 +121,7 @@ You can check that the ExpectationSuite has been correctly updated by either run
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration"
 ```
 
-### 7. (Optional) Remove Configuration 
+## Remove the ExpectationConfiguration (Optional)
 
 If you would like to remove an ExpectationConfiguration, you can use the `remove_configuration()` function. 
 
@@ -141,7 +138,7 @@ The output of `show_expectations_by_expectation_type()` should now look like thi
                                              'domain': 'column'}}]
 ```
 
-### 8. Save ExpectationSuite 
+## Save ExpectationSuite 
 
 Finally, when you are done editing the `ExpectationSuite`, you can save it to your Data Context by using the `save_suite()` function. 
 
@@ -150,7 +147,7 @@ Finally, when you are done editing the `ExpectationSuite`, you can save it to yo
 
 ## Related Documentation
 
-* If you would like to learn more about the functions available at the Expectation Suite-level, please refer to our [API Documentation for `ExpectationSuite`](https://docs.greatexpectations.io/docs/reference/api/core/ExpectationSuite_class). 
+- If you would like to learn more about the functions available at the Expectation Suite-level, see the [API Documentation for `ExpectationSuite`](https://docs.greatexpectations.io/docs/reference/api/core/ExpectationSuite_class). 
 
-* To view the full script used for example code on this page, see it on GitHub:
+- To view the full script used for example code on this page, see it on GitHub:
 [how_to_edit_an_expectation_suite.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py)

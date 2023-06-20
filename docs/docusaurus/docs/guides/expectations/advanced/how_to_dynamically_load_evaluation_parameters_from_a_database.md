@@ -17,9 +17,7 @@ This guide will help you create an <TechnicalTag tag="expectation" text="Expecta
 
 </Prerequisites>
 
-## Steps
-
-### 1. Add a new SqlAlchemy Query Store to your Data Context
+## Add a new SqlAlchemy Query Store to your Data Context
 
 A SqlAlchemy Query <TechnicalTag tag="store" text="Store" /> acts as a bridge that can query a SqlAlchemy-connected database and return the result of the query to be available for an evaluation parameter.
 
@@ -35,12 +33,12 @@ Ensure you have added valid credentials to the ``config-variables.yml`` file (re
 ```yaml name="tests/integration/fixtures/query_store/great_expectations/uncommitted/config_variables.yml my_query_store_creds"
 ```
 
-### 2. In a notebook, get a test Batch of data to use for Validation
+## In a notebook, get a test Batch of data to use for Validation
 
 ```python name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py get_validator"
 ```
 
-### 3. Define an Expectation that relies on a dynamic query
+## Define an Expectation that relies on a dynamic query
 
 Great Expectations recognizes several types of Evaluation Parameters that can use advanced features provided by the <TechnicalTag tag="data_context" text="Data Context" />. To dynamically load data, we will be using a store-style URN, which starts with `urn:great_expectations:stores`. The next component of the URN is the name of the store we configured above (``my_query_store``), and the final component is the name of the query we defined above (``unique_passenger_counts``):
 
