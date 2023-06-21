@@ -1,4 +1,2 @@
 snowflake-connector-python>=2.5.0
 snowflake-sqlalchemy>=1.2.3
-# snowflake-sqlalchemy currently requires sqlalchemy<2.0.0,>=1.4.0
-sqlalchemy<2.0.0
