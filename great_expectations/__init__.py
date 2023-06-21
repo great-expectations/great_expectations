@@ -1,3 +1,17 @@
+import sys
+
+PYTHON_SUPPORTED_VERSION = {"major": 3, "minor": {"lower": 8, "upper": 10}}
+if (sys.version_info.major != PYTHON_SUPPORTED_VERSION["major"]) or (
+    sys.version_info.major == PYTHON_SUPPORTED_VERSION["major"]
+    and sys.version_info.minor < PYTHON_SUPPORTED_VERSION["minor"]["lower"]
+    or sys.version_info.minor > PYTHON_SUPPORTED_VERSION["minor"]["upper"]
+):
+    raise ImportError(
+        "Great Expectations is only supported on python 3.8 through 3.10. "
+        f"You are using: {sys.version}"
+    )
+
+
 # Set up version information immediately
 from ._version import get_versions  # isort:skip
 
