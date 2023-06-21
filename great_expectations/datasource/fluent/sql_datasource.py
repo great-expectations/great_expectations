@@ -810,8 +810,7 @@ class TableAsset(_SQLAsset):
 
     @pydantic.validator("table_name", pre=True, always=True)
     def default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
-        validated_table_name = table_name or values.get("name")
-        if not validated_table_name:
+        if not (validated_table_name := table_name or values.get("name")):
             raise ValueError(
                 "table_name cannot be empty and should default to name if not provided"
             )
