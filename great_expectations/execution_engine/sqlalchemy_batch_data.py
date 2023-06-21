@@ -82,16 +82,17 @@ class SqlAlchemyBatchData(BatchData):
         super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
+        # what is this?
+        self._schema_name = schema_name
+        self._use_quoted_name = use_quoted_name
+        self._source_table_name = source_table_name
+        self._source_schema_name = source_schema_name
+
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
         if not isinstance(self._record_set_name, str):
             raise TypeError(
                 f"record_set_name should be of type str, not {type(record_set_name)}"
             )
-
-        self._schema_name = schema_name
-        self._use_quoted_name = use_quoted_name
-        self._source_table_name = source_table_name
-        self._source_schema_name = source_schema_name
 
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
@@ -111,28 +112,7 @@ class SqlAlchemyBatchData(BatchData):
 
         self._dialect = dialect
 
-        if table_name:
-            # Suggestion: pull this block out as its own _function
-            if use_quoted_name:
-                table_name = sqlalchemy.quoted_name(table_name, quote=True)
-            if dialect == GXSqlDialect.BIGQUERY:
-                if schema_name is not None:
-                    logger.warning(
-                        "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
-                    )
-                # In BigQuery the table name is already qualified with its schema name
-                self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema=None,
-                )
-            else:
-                self._selectable = sa.Table(
-                    table_name,
-                    sa.MetaData(),
-                    schema=schema_name,
-                )
-        elif create_temp_table:
+        if create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if dialect == GXSqlDialect.MSSQL:
@@ -161,11 +141,20 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
+        elif table_name or source_table_name:
+            self._selectable = self._generate_selectable(
+                dialect=dialect,
+                use_quoted_name=use_quoted_name,
+                table_name=table_name,
+                source_table_name=source_table_name,
+                schema_name=schema_name,
+                source_schema_name=source_schema_name
+            )
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
             else:
-                self._selectable = selectable.alias(self._record_set_name)
+                self._selectable = selectable.alias(self._source_table_name)
 
     @property
     def dialect(self) -> GXSqlDialect:
@@ -233,7 +222,7 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"CREATE TEMPORARY TABLE `{temp_table_name}` AS {query}"
         elif dialect == GXSqlDialect.MSSQL:
             # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
-            # Split is case sensitive so detect case.
+            # Split is case-sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
             # noinspection PyUnresolvedReferences
@@ -292,3 +281,41 @@ class SqlAlchemyBatchData(BatchData):
         else:
             self.execution_engine.execute_query_in_transaction(sa.text(stmt))
         return stmt
+
+    def _generate_selectable(
+            self,
+            dialect: GXSqlDialect,
+            use_quoted_name: bool,
+            table_name: Optional[str] = None,
+            source_table_name: Optional[str] = None,
+            schema_name: Optional[str] = None,
+            source_schema_name: Optional[str] = None,
+    ):
+        if table_name and source_table_name:
+            logger.warning(
+                "either table_name or source_table_name should be used"
+            )
+        elif source_table_name:
+            table_name = source_table_name
+            schema_name = source_schema_name
+
+        if use_quoted_name:
+            table_name = sqlalchemy.quoted_name(table_name, quote=True)
+        if dialect == GXSqlDialect.BIGQUERY:
+            if schema_name is not None:
+                logger.warning(
+                    "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
+                )
+            # In BigQuery the table name is already qualified with its schema name
+            return sa.Table(
+                table_name,
+                sa.MetaData(),
+                schema=None,
+            )
+        else:
+            return sa.Table(
+                table_name,
+                sa.MetaData(),
+                schema=schema_name,
+            )
+
