@@ -154,7 +154,7 @@ This Expectation will fail (the NYC taxi data allows for four types of payments)
 - You cannot currently combine complex values with arithmetic expressions.
 :::
 
-The complete list of expressions usable in Evaluation Parameters and their corresponding functions is below:
+The expressions and the corresponding functions that you can use in Evaluation Parameters are listed in the following table:
 
 | **Evaluation Parameter Expression** | **Python Function Call**                                      |
 |-------------------------------------|---------------------------------------------------------------|
