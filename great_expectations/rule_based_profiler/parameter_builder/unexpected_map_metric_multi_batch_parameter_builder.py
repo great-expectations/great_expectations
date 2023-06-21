@@ -40,9 +40,7 @@ if TYPE_CHECKING:
     )
 
 
-class AggregateUnexpectedMapMetricMultiBatchParameterBuilder(
-    MetricMultiBatchParameterBuilder
-):
+class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
     Compute specified aggregate of unexpected count ratio of given map-style metric across every Batch of data given.
     """
@@ -264,28 +262,30 @@ class AggregateUnexpectedMapMetricMultiBatchParameterBuilder(
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.aggregation_method,
-            expected_return_type=str,
+            expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
-        if (
+        if (aggregation_method is not None) and (
             aggregation_method
-            not in AggregateUnexpectedMapMetricMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS
+            not in UnexpectedMapMetricMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS
         ):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"""The directive "aggregation_method" can be only one of \
-{AggregateUnexpectedMapMetricMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS} ("{aggregation_method}" was detected).
+                message=f"""The directive "aggregation_method" can only be empty or one of \
+{UnexpectedMapMetricMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS} ("{aggregation_method}" was detected).
 """
             )
 
-        aggregated_unexpected_count_ratio: np.float64
+        unexpected_count_output: Union[np.ndarray, np.float64]
 
-        if aggregation_method == "mean":
-            aggregated_unexpected_count_ratio = np.mean(unexpected_count_ratio_values)
+        if aggregation_method is None:
+            unexpected_count_output = unexpected_count_ratio_values
+        elif aggregation_method == "mean":
+            unexpected_count_output = np.mean(unexpected_count_ratio_values)
         elif aggregation_method == "std":
-            aggregated_unexpected_count_ratio = np.std(unexpected_count_ratio_values)
+            unexpected_count_output = np.std(unexpected_count_ratio_values)
         elif aggregation_method == "median":
-            aggregated_unexpected_count_ratio = np.median(unexpected_count_ratio_values)
+            unexpected_count_output = np.median(unexpected_count_ratio_values)
         elif aggregation_method == "quantile":
             false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(  # type: ignore[assignment] # could be float
                 false_positive_rate=self.false_positive_rate,  # type: ignore[union-attr] # configuration could be None
@@ -300,22 +300,23 @@ class AggregateUnexpectedMapMetricMultiBatchParameterBuilder(
                 variables=variables,
                 parameters=parameters,
             )
-            aggregated_unexpected_count_ratio = numpy.numpy_quantile(
+            unexpected_count_output = numpy.numpy_quantile(
                 a=unexpected_count_ratio_values,
                 q=1.0 - false_positive_rate,
                 axis=0,
                 method=quantile_statistic_interpolation_method,
             )
         else:
-            aggregated_unexpected_count_ratio = np.float64(
+            unexpected_count_output = np.float64(
                 0.0
             )  # This location cannot be reached.
 
+        details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
+        details["aggregation_method"] = aggregation_method
+
         return Attributes(
             {
-                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: aggregated_unexpected_count_ratio,
-                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: parameter_node[
-                    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
-                ],
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: unexpected_count_output,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )
