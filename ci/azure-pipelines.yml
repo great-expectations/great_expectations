@@ -635,6 +635,8 @@ stages:
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isRelease, true))
