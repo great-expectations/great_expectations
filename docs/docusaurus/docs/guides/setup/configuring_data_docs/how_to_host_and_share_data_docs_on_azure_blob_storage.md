@@ -18,7 +18,14 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 
 ## Steps
 
-### 1. Create an Azure Blob Storage static website
+## 1. Install Azure Storage Blobs client library for Python
+
+Run the following pip command in a terminal to install Azure Storage Blobs client library and its dependencies:
+
+```markup title="Terminal command:"
+pip install azure-storage-blob
+```
+### 2. Create an Azure Blob Storage static website
 
 - Create a [storage account](https://docs.microsoft.com/en-us/azure/storage).
 - In settings select [Static website](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-static-website-host) to display the configuration page for static websites.
@@ -29,7 +36,7 @@ Note the Primary endpoint url. Your team will be able to consult your data doc o
 A container called ``$web`` should have been created in your storage account.
 
 
-### 2. Configure the ``config_variables.yml`` file with your Azure Storage credentials
+### 3. Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
 Get the [Connection string](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal) of the storage account you have just created.
 
@@ -40,7 +47,7 @@ AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=
 ```
    
 
-### 3. Add a new Azure site to the data_docs_sites section of your great_expectations.yml
+### 4. Add a new Azure site to the data_docs_sites section of your great_expectations.yml
   
 ```yaml
 data_docs_sites:
@@ -91,7 +98,7 @@ The most common authentication methods are supported:
   You still need to provide the account url either through the config file or environment variable.
 
 
-### 4. Build the Azure Blob Data Docs site
+### 5. Build the Azure Blob Data Docs site
 
 You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and this will build the Data Docs website.
 
@@ -100,7 +107,7 @@ Run the following Python code to build and open your Data Docs:
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
 
-### 5. Limit the access to your company
+### 6. Limit the access to your company
 
 - On your Azure Storage Account Settings click on **Networking**
 - Allow access from **Selected networks**
