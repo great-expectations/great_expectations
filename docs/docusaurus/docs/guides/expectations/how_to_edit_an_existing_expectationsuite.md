@@ -1,5 +1,5 @@
 ---
-title: How to Edit an Expecation Suite 
+title: How to Edit an Expectation Suite 
 tag: [how-to, getting started]
 description: Create an Expectation Suite using a Validator. Then, examine and modify specific Expectations in the Suite.
 keywords: [Expectations, ExpectationsSuite]
@@ -93,7 +93,7 @@ Your output will look something similar to this:
 
 ### 5. Instantiate ExpectationConfiguration 
 
-From the Expectation Suite, you will be able to create an ExpecationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
+From the Expectation Suite, you will be able to create an ExpectationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
 
 It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects the min and max values to be `1` and `6` respectively. 
 
@@ -102,6 +102,8 @@ It runs the `expect_column_values_to_be_between` Expectation on the `passenger_c
 
 Here is the same configuration, but this time as a `ExpectationConfiguration` object.  
 
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_suite"
+```
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1"
 ```
 

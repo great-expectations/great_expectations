@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
 import json
 import os
 import pathlib
@@ -15,14 +16,24 @@ import requests
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     AnyPayload,
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
+    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -481,7 +492,6 @@ class MockResponse:
             raise requests.exceptions.HTTPError(
                 f"Mock {self.status_code} HTTPError", response=self
             )
-        return None
 
     def __repr__(self):
         return f"<Response [{self.status_code}]>"
@@ -637,8 +647,45 @@ def checkpoint_config() -> dict:
                 },
             },
         ],
+        "action_list": [
+            {
+                "action": {"class_name": "StoreValidationResultAction"},
+                "name": "store_validation_result",
+            },
+            {
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+                "name": "store_evaluation_params",
+            },
+        ],
     }
     return checkpoint_config
+
+
+@pytest.fixture
+def checkpoint_result(checkpoint_config: dict) -> CheckpointResult:
+    timestamp = dt.datetime(1996, 6, 1)
+    run_id = RunIdentifier(run_time=timestamp)
+    run_results = {
+        ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier("my_suite"),
+            run_id=RunIdentifier(run_time=timestamp),
+            batch_identifier="default_pandas_datasource-#ephemeral_pandas_asset",
+        ): {
+            "validation_result": ExpectationSuiteValidationResult(),
+            "actions_results": {"my_action": {"class": "StoreValidationResultAction"}},
+        }
+    }
+
+    config = CheckpointConfig(**checkpoint_config)
+
+    validation_result_url = "https://my.cloud.app/validation-result/123"
+
+    return CheckpointResult(
+        run_id=run_id,
+        run_results=run_results,
+        checkpoint_config=config,
+        validation_result_url=validation_result_url,
+    )
 
 
 @pytest.fixture

@@ -10,7 +10,9 @@ Data Assets are used to specify how Great Expectations will organize data into <
 
 Data Assets are usually tied to existing data that already has a name (e.g. “the UserEvents table”). In many cases, Data Assets slice the data one step further (e.g. “new records for each day within the UserEvents table.”) To further illustrate with some examples: in a SQL database, rows from a table grouped by the week they were delivered may be a data asset; in an S3 bucket or filesystem, files matching a particular regex pattern may be a data asset. 
 
-The specifics of a Data Asset are typically defined when it is configured within a <TechnicalTag relative="../" tag="datasource" text="Datasource's" /> <TechnicalTag relative="../" tag="data_connector" text="Data Connector" />. You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" />, the use of <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze data, and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
+The specifics of a filesystem Data Asset are defined by the parameters provided when it is created. With a SQL Data Asset, you can also add splitters after you have initially created the Data Asset.
+
+You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" />, the use of <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze data, and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on some specific ideas about *what* we're protecting with our Expectations. You usually do not need to think about these nuances to use Great Expectations, and many users never think about what *exactly* makes a Data Asset or Batch. But we think it can be extremely useful to understand the design decisions that guide Great Expectations.
 
@@ -56,13 +58,13 @@ For the most part, Data Assets are utilized by Great Expectations behind the sce
 
 ## Use cases
 
-When connecting to your data you will define a Data Asset as a part of each of your Datasources' configurations (under the configuration for their Data Connectors).  These configurations defining your Data Assets are where you will have the most direct interaction with Data Assets.  After this point, you will typically be interacting with the Datasources themselves, which will utilize their configured Data Assets behind the scenes in response to Batch Requests.
+When connecting to your data you will define at least one Data Asset for each Datasource you create.  From these Data Assets you will be able to create Batch Requests, which will specify the data that you provide to your Expectations.
 
 When using the interactive workflow for creating Expectations, it is often useful to utilize a simple Data Asset configuration for purposes of exploring the data.  This configuration can then be replaced when it is time to Validate data going forward.
 
 When using a Profiler, Great Expectations can take advantage of as much information about your data as you can provide.  It may even be useful to configure multiple Data Assets to support complex Profiler configurations.
 
-When you are Validating new Batches of data you'll be using a Datasource and Batch Request to indicate the Batch of data to Validate.  This process will use a Data Asset behind the scenes.
+When you are Validating new Batches of data you'll be using a Data Asset and Batch Request to indicate the Batch or Batches of data to Validate.
 
 ## Versatility
 
@@ -91,4 +93,4 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ## Configure
 
-Data Assets are configured under the `assets` key under a named Data Connector in the `data_connectors` key of a Datasource configuration.  Exactly how a Data Asset is configured will depend on the type of Data Connector you are using.  For detailed guidance on configuring Data Assets for various environments and source data systems, please see [our how-to guides for connecting to data](../guides/connecting_to_your_data/index.md).
+Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling thier methods for adding splitters  For detailed guidance on configuring Data Assets for various environments and source data systems, see [our how-to guides for connecting to data](/docs/guides/connecting_to_your_data/index).

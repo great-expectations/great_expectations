@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
@@ -21,6 +23,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -274,6 +277,29 @@ def multi_batch_taxi_validator(
     return validator_multi_batch
 
 
+@pytest.mark.integration
+def test_validator_convert_to_checkpoint_validations_list(multi_batch_taxi_validator):
+    validator = multi_batch_taxi_validator
+
+    actual = validator.convert_to_checkpoint_validations_list()
+    expected_config = CheckpointValidationConfig(
+        expectation_suite_name="validating_taxi_data",
+        expectation_suite_ge_cloud_id=None,
+        batch_request={
+            "datasource_name": "taxi_pandas",
+            "data_connector_name": "monthly",
+            "data_asset_name": "my_reports",
+            "data_connector_query": {"batch_filter_parameters": {"year": "2019"}},
+            "batch_spec_passthrough": None,
+            "limit": None,
+        },
+        id=None,
+        name=None,
+    )
+
+    assert all(config.to_dict() == expected_config.to_dict() for config in actual)
+
+
 @pytest.fixture()
 def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
@@ -323,11 +349,13 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("great_expectations.data_context.store.ExpectationsStore.update")
 @mock.patch("great_expectations.validator.validator.Validator.cloud_mode")
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_cloud_mode,
+    mock_expectation_store_update,
     mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
@@ -1013,7 +1041,7 @@ def test_validator_include_rendered_content_diagnostic(
             value=RenderedAtomicValue(
                 schema={"type": "com.superconductive.rendered.string"},
                 params={},
-                template="6",
+                template="--",
             ),
             value_type="StringValueType",
         )
@@ -1109,11 +1137,37 @@ def test_validator_include_rendered_content_diagnostic(
     )
 
 
-@pytest.fixture
-def validator_with_mock_execution_engine() -> Validator:
-    execution_engine = mock.MagicMock()
-    validator = Validator(execution_engine=execution_engine)
-    return validator
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(result_format: str | dict):
+    context = get_context()
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pd.DataFrame(
+            data=[1, 2, 3],
+            columns=["numbers_i_can_count_to"],
+        ),
+    )
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "test_result_format_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    expectation_validation_result = validator.expect_column_max_to_be_between(
+        column="numbers_i_can_count_to",
+        min_value=1000,
+        max_value=10000,
+        result_format=result_format,
+    )
+    assert expectation_validation_result.result == {}
 
 
 @pytest.mark.unit

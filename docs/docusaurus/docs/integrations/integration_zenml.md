@@ -36,8 +36,7 @@ tools and services that spans everything else MLOps.
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
 from configuring temporary <TechnicalTag tag="datasource" text="Datasources" />,
-<TechnicalTag tag="data_connector" text="Data Connectors" />, 
-and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
+Data Connectors, and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
 to access in-memory datasets to setting up and running <TechnicalTag tag="profiler" text="Profilers" />, <TechnicalTag tag="validator" text="Validators" /> and <TechnicalTag tag="checkpoint" text="Checkpoints" />, to generating the <TechnicalTag tag="data_docs" text="Data Docs" /> 
 for you. These details are abstracted away from you and all you have left
 to do is simply insert these steps into your ML pipelines to run either data
@@ -137,7 +136,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -231,7 +230,7 @@ from zenml.steps import Output, step
 @step(enable_cache=False)
 def importer(
 ) -> Output(dataset=pd.DataFrame, condition=bool):
-    """Load and return a random sample of the the University of Wisconsin breast
+    """Load and return a random sample of the University of Wisconsin breast
     cancer diagnosis dataset.
     """
     breast_cancer = datasets.load_breast_cancer()
@@ -309,7 +308,7 @@ custom ZenML pipeline steps that use Great Expectations while still benefiting
 from the other ZenML integration features:
 
 * the convenience of using a Great Expectations Data Context that is
-automatically configured to connect to the the infrastructure of your choise
+automatically configured to connect to the infrastructure of your choise
 * the ability to version, track and visualize Expectation Suites and Validation
 Results as pipeline artifacts
 * the freedom that comes from being able to combine Great Expectations with

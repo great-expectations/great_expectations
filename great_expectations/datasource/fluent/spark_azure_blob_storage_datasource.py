@@ -11,7 +11,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -80,7 +80,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if azure.BlobServiceClient:
+            if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
@@ -110,6 +110,11 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             self._azure_client = azure_client
+
+        if not azure_client:
+            raise SparkAzureBlobStorageDatasourceError(
+                "Failed to return `azure_client`"
+            )
 
         return azure_client
 

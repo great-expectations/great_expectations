@@ -56,11 +56,13 @@ def store_set(self, key, value, **kwargs):
 
 def list_keys(self, prefix: Tuple = ()):
     if self.ge_cloud_resource_type == GXCloudRESTResource.EXPECTATION_SUITE:
-        return (
-            GXCloudRESTResource.EXPECTATION_SUITE,
-            "1212e79d-f751-4c6e-921d-26de2b1db174",
-            "suite_name",
-        )
+        return [
+            (
+                GXCloudRESTResource.EXPECTATION_SUITE,
+                "1212e79d-f751-4c6e-921d-26de2b1db174",
+                "suite_name",
+            ),
+        ]
 
 
 class CallCounter:

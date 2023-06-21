@@ -5,7 +5,7 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 
-By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder.  Use the information provided here to configure Great Expectations to store Expectations in a PostgreSQL database.
 
 ## Prerequisites
 
@@ -17,27 +17,26 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 </Prerequisites>
 
+## 1. Configure the `config_variables.yml` file with your database credentials
 
-## Steps
+GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
 
-### 1. Configure the `config_variables.yml` file with your database credentials
-
-We recommend that database credentials be stored in the `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control. The following lines add database credentials under the key `db_creds`. Additional options for configuring the `config_variables.yml` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials.md).
+To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
 
 ```yaml
-db_creds:
-  drivername: postgresql
-  host: '<your_host_name>'
-  port: '<your_port>'
-  username: '<your_username>'
-  password: '<your_password>'
-  database: '<your_database_name>'
+    db_creds:
+      drivername: postgresql
+      host: '<your_host_name>'
+      port: '<your_port>'
+      username: '<your_username>'
+      password: '<your_password>'
+      database: '<your_database_name>'
 ```
+To configure the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../configuring_data_contexts/how_to_configure_credentials.md).
 
+## 2. Identify your Data Context Expectations Store
 
-### 2. Identify your Data Context Expectations Store
-
-In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a <TechnicalTag tag="store" text="Store" /> called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+Open ``great_expectations.yml``and find the following entry:
 
 ```yaml
 expectations_store_name: expectations_store
@@ -50,10 +49,11 @@ stores:
           base_directory: expectations/
 ```
 
+This configuration tells Great Expectations to look for Expectations in the ``expectations_store`` Store. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-### 3. Update your configuration file to include a new Store for Expectations on PostgreSQL
+## 3. Update your configuration file to include a new Store for Expectations
 
-In our case, the name is set to ``expectations_postgres_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``DatabaseStoreBackend``, and ``credentials`` will be set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.
+In the following example, `expectations_store_name` is set to ``expectations_postgres_store``, but it can be personalized. You also need to make some changes to the ``store_backend`` settings.  The ``class_name`` is ``DatabaseStoreBackend``, and ``credentials`` is ``${db_creds}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml
 expectations_store_name: expectations_postgres_store

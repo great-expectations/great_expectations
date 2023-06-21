@@ -16,7 +16,7 @@ Metrics are generated as part of running Expectations against a Batch (and can b
 
 ## Use cases
 
-Metrics are generated in accordance with the requirements of an Expectation when an Expectation is evaluated.  This includes Expectations that are evaluated as part of the [interactive process for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) and the [Profiler process for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).  
+Metrics are generated in accordance with the requirements of an Expectation when an Expectation is evaluated.  This includes Expectations that are evaluated as part of the [interactive process for creating Expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) and the DataAssistant or Custom Profiler based process for creating Expectations.
 
 Past Metrics can also be accessed by some Expectations through Evaluation Parameters.  However, when you are creating Expectations there may not be past Metrics to provide.  In these cases, it is possible to define a temporary value that the Evaluation Parameter can use in place of the missing past Metric.
 
@@ -39,7 +39,7 @@ A `metric_kwargs_id` is a string representation of the Metric Kwargs that can be
 The following examples demonstrate how Metrics are defined:
 
 ```python title="Python code"
-res = df.expect_column_values_to_be_in_set(
+res = validator.expect_column_values_to_be_in_set(
     "color",
     ["red", "green"]
 )

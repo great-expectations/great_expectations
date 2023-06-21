@@ -72,7 +72,6 @@ module.exports = {
               value: '<h4>Filesystem Data Contexts</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
@@ -251,7 +250,6 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
             { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
@@ -389,10 +387,9 @@ module.exports = {
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
     'contributing/contributing_maturity',
-    'guides/miscellaneous/how_to_use_the_great_expectations_cli',
-    'guides/miscellaneous/how_to_use_the_project_check_config_command',
     'reference/customize_your_deployment',
     'reference/usage_statistics',
+    'conceptual_guides/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',
@@ -419,7 +416,6 @@ module.exports = {
             'terms/data_context',
             'terms/data_asset',
             'terms/data_assistant',
-            'terms/data_connector',
             'terms/data_docs',
             'terms/evaluation_parameter',
             'terms/execution_engine',

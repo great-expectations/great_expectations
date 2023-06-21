@@ -2,7 +2,16 @@ import pathlib
 import re
 import typing
 from logging import Logger
-from typing import TYPE_CHECKING, Hashable, Iterable, Literal, Optional, Sequence, Union
+from typing import (
+    TYPE_CHECKING,
+    Hashable,
+    Iterable,
+    Literal,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
@@ -29,6 +38,7 @@ if TYPE_CHECKING:
         CSVAsset,
         ExcelAsset,
         FeatherAsset,
+        FWFAsset,
         HDFAsset,
         HTMLAsset,
         JSONAsset,
@@ -48,7 +58,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path]
     def test_connection(self, test_assets: bool = ...) -> None: ...
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -107,7 +117,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         memory_map: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> CSVAsset: ...
-    def add_excel_asset(
+    def add_excel_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -139,7 +149,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         mangle_dupe_cols: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> ExcelAsset: ...
-    def add_feather_asset(
+    def add_feather_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -151,7 +161,22 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> FeatherAsset: ...
-    def add_hdf_asset(
+    def add_fwf_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        *,
+        batching_regex: typing.Pattern = ...,
+        glob_directive: str = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        connect_options: typing.Mapping = ...,
+        colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
+        widths: Union[Sequence[int], None] = ...,
+        infer_nrows: int = ...,
+        kwargs: Optional[dict] = ...,
+    ) -> FWFAsset:
+        """Add a fixed-width-file asset to the catalog."""  # noqa: PYI021
+    def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -170,7 +195,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         chunksize: typing.Union[int, None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> HDFAsset: ...
-    def add_html_asset(
+    def add_html_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -193,7 +218,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         keep_default_na: bool = ...,
         displayed_only: bool = ...,
     ) -> HTMLAsset: ...
-    def add_json_asset(
+    def add_json_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -217,7 +242,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
     ) -> JSONAsset: ...
-    def add_orc_asset(
+    def add_orc_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -228,7 +253,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ORCAsset: ...
-    def add_parquet_asset(
+    def add_parquet_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -242,7 +267,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ParquetAsset: ...
-    def add_pickle_asset(
+    def add_pickle_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -253,7 +278,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> PickleAsset: ...
-    def add_sas_asset(
+    def add_sas_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -268,7 +293,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
     ) -> SASAsset: ...
-    def add_spss_asset(
+    def add_spss_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -279,7 +304,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
     ) -> SPSSAsset: ...
-    def add_stata_asset(
+    def add_stata_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -299,7 +324,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> StataAsset: ...
-    def add_xml_asset(
+    def add_xml_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

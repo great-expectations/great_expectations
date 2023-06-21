@@ -143,9 +143,9 @@ If you are interested in contributing your Custom Expectation back to Great Expe
 ```
 
 :::note
-You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+The optional `only_for` and `suppress_test_for` keys can be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, and so on).
 
-If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
 <details>

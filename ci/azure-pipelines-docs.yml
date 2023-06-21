@@ -57,6 +57,14 @@ stages:
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+
+    - job: name_tag_snippet_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python ci/checks/check_only_name_tag_snippets.py
+          name: NameTagSnippetChecker
+
     - job: public_api_report
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
@@ -79,4 +87,6 @@ stages:
             displayName: 'Use Python 3.8'
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
-            name: TestBuildDocs
+            displayName: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096

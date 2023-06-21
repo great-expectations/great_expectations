@@ -206,7 +206,7 @@ class ValidationGraph:
 
         return resolved_metrics, aborted_metrics_info
 
-    def _resolve(  # noqa: C901 - complexity 16
+    def _resolve(  # noqa: C901, PLR0912, PLR0915
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
         runtime_configuration: Optional[dict] = None,
@@ -340,7 +340,7 @@ class ValidationGraph:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
                 else:
-                    if edge.left.id not in unmet_dependency_ids:
+                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 

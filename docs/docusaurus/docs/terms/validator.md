@@ -16,7 +16,7 @@ Validators are responsible for running an Expectation Suite against a <Technical
 
 When connecting to Data, it is often useful to verify that you have configured your <TechnicalTag relative="../" tag="datasource" text="Datasource" /> correctly.  To verify a new Datasource, you can load data from it into a Validator using a Batch Request.  There are examples of this workflow at the end of most of [our guides on how to connect to specific source data systems](../guides/connecting_to_your_data/index.md#database).
 
-When creating Expectations for an Expectation Suite, most workflows will have you use a Validator.  You can see this in [our guide on how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), and in the Jupyter Notebook opened if you follow [our guide on how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+When creating Expectations for an Expectation Suite, most workflows will have you use a Validator.  You can see this in our guide on how to create and edit Expectations with a DataAssistant or a Custom Profiler.
 
 Checkpoints utilize a Validator when running an Expectation Suite against a Batch Request.  This process is entirely handled for you by the Checkpoint; you will not need to create or configure the Validator in question. 
 
@@ -26,7 +26,7 @@ Validators are not typically saved.  Instead, they are instantiated when needed.
 
 ## Create
 
-You can create a Validator through the `get_validator(...)` command of a Data Context.  For an example of this, you can reference the ["Instantiate your Validator"](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md#3-instantiate-your-validator) section of [our guide on how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md) 
+You can create a Validator through the `get_validator(...)` command of a Data Context.
 
 ## Configure
 

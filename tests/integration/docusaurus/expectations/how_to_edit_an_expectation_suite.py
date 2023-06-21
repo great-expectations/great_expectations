@@ -3,7 +3,10 @@ import great_expectations as gx
 import tempfile
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite import_expectation_suite">
 from great_expectations.core.expectation_suite import ExpectationSuite
+
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 import sys, io

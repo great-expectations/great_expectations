@@ -688,6 +688,42 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
+        reason="Close is not included in the public API.",
+        name="close",
+        filepath=pathlib.Path("great_expectations/agent/message_service/subscriber.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/agent.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="Close is not included in the public API.",
+        name="close",
+        filepath=pathlib.Path(
+            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Close is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/message_service/asyncio_rabbit_mq_client.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/run_onboarding_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path("great_expectations/agent/actions/agent_action.py"),
+    ),
+    IncludeExcludeDefinition(
         reason='The "columns()" property in this module is not included in the public API',
         name="columns",
         filepath=pathlib.Path("great_expectations/datasource/fluent/sql_datasource.py"),

@@ -8,6 +8,9 @@ keywords: [Great Expectations, SQL]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+<!-- ### Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
 
@@ -44,11 +47,7 @@ If you're using a Datasource that was created with the advanced block-config met
 
 ### 1. Import GX and instantiate a Data Context
 
-```python title="Python code"
-import great_expectations as gx
-
-context = gx.get_context()
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Retrieve a SQL Datasource
 
@@ -56,16 +55,14 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python title="Python code"
-datasource = context.get_datasource("my_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py datasource"
 ```
 
 ### 3. Add a query to the Datasource as a Data Asset
 
 To indicate the query that provides the data to connect to we will define a Data Asset.  This is done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
-```python title="Python code"
-table_asset = datasource.add_query_asset(name="my_asset", query="SELECT passenger_count, total_amount FROM yellow_tripdata")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data_using_a_query.py add_query_asset"
 ```
 
 ### 4. (Optional) Repeat step 3 as needed to add additional queries

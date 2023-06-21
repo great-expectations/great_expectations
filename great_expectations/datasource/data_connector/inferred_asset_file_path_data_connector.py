@@ -8,7 +8,7 @@ from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,

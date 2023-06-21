@@ -5,12 +5,13 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
 
 from pydantic import StrictInt, StrictStr
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import IDDict
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
@@ -174,7 +175,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
 
         # split and convert string to int
         for param in parsed_batch_slice.split(delimiter):
-            param = param.strip()
+            param = param.strip()  # noqa: PLW2901
             if param and param != "None":
                 try:
                     slice_params.append(int(param))
@@ -197,9 +198,9 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
         return slice(0, None, None)
     elif len(slice_params) == 1 and slice_params[0] is not None:
         return _batch_slice_from_int(batch_slice=slice_params[0])
-    elif len(slice_params) == 2:
+    elif len(slice_params) == 2:  # noqa: PLR2004
         return slice(slice_params[0], slice_params[1], None)
-    elif len(slice_params) == 3:
+    elif len(slice_params) == 3:  # noqa: PLR2004
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
         raise ValueError(
@@ -212,9 +213,9 @@ def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) ->
         return slice(0, None, None)
     elif len(batch_slice) == 1 and batch_slice[0] is not None:
         return slice(batch_slice[0] - 1, batch_slice[0])
-    elif len(batch_slice) == 2:
+    elif len(batch_slice) == 2:  # noqa: PLR2004
         return slice(batch_slice[0], batch_slice[1])
-    elif len(batch_slice) == 3:
+    elif len(batch_slice) == 3:  # noqa: PLR2004
         return slice(batch_slice[0], batch_slice[1], batch_slice[2])
     else:
         raise ValueError(
@@ -321,7 +322,7 @@ class BatchFilter:
         if self.index is None:
             selected_batch_definitions = selected_batch_definitions[: self.limit]
         else:
-            if isinstance(self.index, int):
+            if isinstance(self.index, int):  # noqa: PLR5501
                 selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:
                 selected_batch_definitions = list(

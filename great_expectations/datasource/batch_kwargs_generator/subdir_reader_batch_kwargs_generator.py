@@ -43,7 +43,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,

@@ -4,13 +4,11 @@ import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pandas as pd
 import pytest
-from _pytest.fixtures import FixtureRequest
-from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
@@ -35,6 +33,10 @@ from great_expectations.util import (
     filter_properties_dict,
     requires_lossy_conversion,
 )
+
+if TYPE_CHECKING:
+    from _pytest.fixtures import FixtureRequest
+    from marshmallow import Schema
 
 
 @pytest.fixture
@@ -937,7 +939,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 
 
 @pytest.mark.parametrize(
-    "checkpoint_config,expected_serialized_checkpoint_config",
+    "checkpoint_config_fixture_name,expected_serialized_checkpoint_config",
     [
         pytest.param(
             "checkpoint_config_spark",
@@ -1033,15 +1035,14 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 )
 @pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
-    checkpoint_config: Union[CheckpointConfig, str],
+    checkpoint_config_fixture_name: str,
     expected_serialized_checkpoint_config: dict,
     spark_session: pyspark.SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
     # request.getfixturevalue()
-    if isinstance(checkpoint_config, str):
-        checkpoint_config = request.getfixturevalue(checkpoint_config)
+    checkpoint_config = request.getfixturevalue(checkpoint_config_fixture_name)
 
     observed_dump = checkpointConfigSchema.dump(checkpoint_config)
     assert observed_dump == expected_serialized_checkpoint_config

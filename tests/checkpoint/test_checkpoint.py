@@ -14,7 +14,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -34,14 +34,15 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.render import RenderedAtomicContent
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-)
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
 from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import DataContextKey
+    from great_expectations.data_context.data_context.ephemeral_data_context import (
+        EphemeralDataContext,
+    )
 
 yaml = YAMLHandler()
 
@@ -98,70 +99,10 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     assert obs == [{"foo": "bar"}]
 
 
-def test_add_custom_checkpoint_extensions(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-):
-    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
-
-    checkpoint_config: dict = {
-        "class_name": "ExtendedCheckpoint",
-        "module_name": "extended_checkpoint",
-        "name": "my_custom_extended_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-    checkpoint = context.add_checkpoint(**checkpoint_config)
-    assert issubclass(checkpoint.__class__, Checkpoint)
-    assert checkpoint.__class__.__name__ == "ExtendedCheckpoint"
-
-    checkpoint_config: dict = {
-        "class_name": "ExtendedSimpleCheckpoint",
-        "module_name": "extended_checkpoint",
-        "name": "my_custom_extended_simple_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-    checkpoint = context.add_checkpoint(**checkpoint_config)
-    assert issubclass(checkpoint.__class__, SimpleCheckpoint)
-    assert checkpoint.__class__.__name__ == "ExtendedSimpleCheckpoint"
-
-    checkpoint_config: dict = {
-        "class_name": "ExtendedLegacyCheckpoint",
-        "module_name": "extended_checkpoint",
-        "name": "my_custom_extended_legacy_checkpoint",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as icpce:
-        context.add_checkpoint(**checkpoint_config)
-
-    assert (
-        str(icpce.value)
-        == 'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
-    )
-
-    checkpoint_config: dict = {
-        "class_name": "ExtendedCheckpointIllegalBaseClass",
-        "module_name": "extended_checkpoint",
-        "name": "my_custom_extended_checkpoint_illegal_base_class",
-        "expectation_suite_name": "my_expectation_suite",
-        "action_list": common_action_list,
-    }
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as icpce:
-        context.add_checkpoint(**checkpoint_config)
-
-    assert (
-        str(icpce.value)
-        == 'Custom class "ExtendedCheckpointIllegalBaseClass" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
-    )
-
-
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_basic_checkpoint_config_validation(
+def test_basic_checkpoint_config_validation(  # noqa: PLR0915
     mock_emit,
     empty_data_context_stats_enabled,
     common_action_list,
@@ -295,11 +236,6 @@ def test_basic_checkpoint_config_validation(
     captured = capsys.readouterr()
     assert any(
         'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-        in message
-        for message in [caplog.text, captured.out]
-    )
-    assert any(
-        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
         in message
         for message in [caplog.text, captured.out]
     )
@@ -1308,65 +1244,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     data_context.delete_checkpoint(name="my_base_checkpoint")
     data_context.delete_checkpoint(name="my_fancy_checkpoint")
     assert len(data_context.list_checkpoints()) == 0
-
-
-@pytest.mark.integration
-@pytest.mark.slow  # 1.05s
-def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    filesystem_csv_data_context_with_validation_operators,
-    common_action_list,
-):
-    rad_datasource = list(
-        filter(
-            lambda element: element["name"] == "rad_datasource",
-            filesystem_csv_data_context_with_validation_operators.list_datasources(),
-        )
-    )[0]
-    base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
-        "base_directory"
-    ]
-    batch_kwargs: dict = {
-        "path": base_directory + "/f1.csv",
-        "datasource": "rad_datasource",
-        "reader_method": "read_csv",
-    }
-
-    checkpoint_config_dict: dict = {
-        "name": "my_checkpoint",
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {"batch_kwargs": batch_kwargs, "expectation_suite_names": ["my_suite"]}
-        ],
-    }
-
-    checkpoint: LegacyCheckpoint = LegacyCheckpoint(
-        data_context=filesystem_csv_data_context_with_validation_operators,
-        **checkpoint_config_dict,
-    )
-
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        checkpoint.run()
-
-    assert (
-        len(
-            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
-        )
-        == 0
-    )
-
-    filesystem_csv_data_context_with_validation_operators.add_expectation_suite(
-        "my_suite"
-    )
-    checkpoint.run()
-
-    assert (
-        len(
-            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
-        )
-        == 1
-    )
 
 
 @pytest.mark.integration
@@ -2729,6 +2606,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 }
             },
         ],
+        action_list=[],
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -2989,6 +2867,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 }
             },
         ],
+        action_list=[],
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -4926,3 +4805,89 @@ def test_run_spark_checkpoint_with_schema(
     results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 
     assert results.success is True
+
+
+@pytest.mark.unit
+def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
+    validator_with_mock_execution_engine,
+):
+    context = mock.MagicMock()
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "cannot be called with a validator and contain a batch_request" in str(
+        e.value
+    )
+
+
+@pytest.mark.unit
+def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raises_error(
+    ephemeral_context_with_defaults,
+    validator_with_mock_execution_engine,
+):
+    context = ephemeral_context_with_defaults
+    validator = validator_with_mock_execution_engine
+    validations = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_asset",
+            }
+        }
+    ]
+
+    with pytest.raises(ValueError) as e:
+        _ = context.add_checkpoint(
+            name="my_checkpoint",
+            validator=validator,
+            validations=validations,
+        )
+
+    assert "either a validator or validations list" in str(e.value)
+
+
+@pytest.mark.integration
+def test_checkpoint_with_validator_creates_validations_list(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    csv_path: pathlib.Path,
+):
+    context = ephemeral_context_with_defaults
+    pandas_datasource = context.sources.pandas_default
+
+    file_path = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert file_path.exists()
+
+    validator = pandas_datasource.read_csv(
+        filepath_or_buffer=file_path,
+    )
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_checkpoint", validator=validator
+    )
+
+    validations = checkpoint.validations
+    assert len(validations) == 1
+
+    actual = validations[0]
+    expected = {
+        "batch_request": {
+            "data_asset_name": "#ephemeral_pandas_asset",
+            "datasource_name": "default_pandas_datasource",
+        },
+        "expectation_suite_name": "default",
+    }
+    assert actual == expected

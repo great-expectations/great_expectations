@@ -1,35 +1,23 @@
 from __future__ import annotations
 
 import difflib
-import functools
 import logging
 import pathlib
 import random
-import uuid
-from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable
 
 import pytest
-import responses
 
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import (
-    Datasource,
-)
-from tests.datasource.fluent.conftest import (
-    FAKE_DATA_CONTEXT_ID,
-    FAKE_ORG_ID,
-    GX_CLOUD_MOCK_BASE_URL,
-)
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from pytest import FixtureRequest
+    from pytest_mock import MockerFixture
 
-    from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -38,110 +26,6 @@ pytestmark = [pytest.mark.integration]
 YAML = YAMLHandler()
 
 logger = logging.getLogger(__file__)
-
-
-@pytest.fixture
-def fluent_only_config(
-    fluent_gx_config_yml_str: str, seed_ds_env_vars: tuple
-) -> GxConfig:
-    """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
-    fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
-    assert fluent_config.datasources
-    return fluent_config
-
-
-@pytest.fixture
-def fluent_yaml_config_file(
-    file_dc_config_dir_init: pathlib.Path,
-    fluent_gx_config_yml_str: str,
-) -> pathlib.Path:
-    """
-    Dump the provided GxConfig to a temporary path. File is removed during test teardown.
-
-    Append fluent config to default config file
-    """
-    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
-
-    assert config_file_path.exists() is True
-
-    with open(config_file_path, mode="a") as f_append:
-        yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
-        f_append.write(yaml_string)
-
-    logger.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
-    return config_file_path
-
-
-@pytest.fixture
-@functools.lru_cache(maxsize=1)
-def seeded_file_context(
-    cloud_storage_get_client_doubles,
-    fluent_yaml_config_file: pathlib.Path,
-    seed_ds_env_vars: tuple,
-) -> FileDataContext:
-    context = get_context(
-        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
-    )
-    assert isinstance(context, FileDataContext)
-    return context
-
-
-@pytest.fixture
-def seed_cloud(
-    cloud_storage_get_client_doubles,
-    cloud_api_fake: responses.RequestsMock,
-    fluent_only_config: GxConfig,
-):
-    """
-    In order to load the seeded cloud config, this fixture must be called before any
-    `get_context()` calls.
-    """
-    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
-    dc_config_url = f"{org_url_base}/data-context-configuration"
-
-    by_id = {}
-    fds_config = {}
-    for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
-        datasource["id"] = str(uuid.uuid4())
-        fds_config[datasource["name"]] = datasource
-        by_id[datasource["id"]] = datasource
-
-    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
-    assert fds_config
-
-    cloud_api_fake.upsert(
-        responses.GET,
-        dc_config_url,
-        json={
-            "anonymous_usage_statistics": {
-                "data_context_id": FAKE_DATA_CONTEXT_ID,
-                "enabled": False,
-            },
-            "datasources": fds_config,
-        },
-    )
-    yield cloud_api_fake
-
-    assert len(cloud_api_fake.calls) >= 1, f"{org_url_base} was never called"
-
-
-@pytest.fixture
-def seeded_cloud_context(
-    seed_cloud,  # NOTE: this fixture must be called before the CloudDataContext is created
-    empty_cloud_context_fluent,
-):
-    return empty_cloud_context_fluent
-
-
-@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
-def seeded_contexts(
-    request: FixtureRequest,
-):
-    """Parametrized fixture for seeded File and Cloud DataContexts."""
-    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
-        request.param
-    )
-    return context_fixture
 
 
 def test_load_an_existing_config(
@@ -173,34 +57,6 @@ def test_serialize_fluent_config(
 
         for asset_name in datasource.get_asset_names():
             assert asset_name in dumped_yaml
-
-
-def test_data_connectors_are_built_on_config_load(
-    seeded_contexts: CloudDataContext | FileDataContext,
-):
-    """
-    Ensure that all Datasources that require data_connectors have their data_connectors
-    created when loaded from config.
-    """
-    context = seeded_contexts
-    dc_datasources: dict[str, list[str]] = defaultdict(list)
-
-    assert context.fluent_datasources
-    for datasource in context.fluent_datasources.values():
-        if datasource.data_connector_type:
-            print(f"class: {datasource.__class__.__name__}")
-            print(f"type: {datasource.type}")
-            print(f"data_connector: {datasource.data_connector_type.__name__}")
-            print(f"name: {datasource.name}", end="\n\n")
-
-            dc_datasources[datasource.type].append(datasource.name)
-
-            for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
-            print()
-
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
-    assert dc_datasources
 
 
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
@@ -360,6 +216,97 @@ def test_ctx_delete_removes_datasource_from_yaml(
     print(f"{pf(yaml_contents, depth=2)}")
 
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+def test_checkpoint_with_validator_workflow(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    context = seeded_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    datasource_name = "sqlite_taxi"
+    asset_name = "my_asset"
+    month = 1
+    year = 2019
+
+    datasource = context.get_datasource(datasource_name)
+    assert isinstance(datasource, Datasource)
+
+    batch_request = datasource.get_asset(asset_name).build_batch_request(
+        {"year": year, "month": month}
+    )
+
+    validator = context.get_validator(batch_request=batch_request)
+    validator.save_expectation_suite()
+
+    checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
+
+    _: str | None = checkpoint.validations[0].pop("expectation_suite_ge_cloud_id", None)  # type: ignore[union-attr]
+
+    assert checkpoint.validations == [
+        {
+            "batch_request": {
+                "data_asset_name": asset_name,
+                "datasource_name": datasource_name,
+                "options": {
+                    "month": month,
+                    "year": year,
+                },
+            },
+            "expectation_suite_name": "default",
+        },
+    ]
+
+    result = checkpoint.run()
+
+    assert result.success
+
+
+def test_quickstart_workflow(
+    empty_contexts: CloudDataContext | FileDataContext,
+    csv_path: pathlib.Path,
+    mocker: MockerFixture,
+):
+    """
+    What does this test do and why?
+
+    Tests the Quickstart workflow noted in our docs: https://docs.greatexpectations.io/docs/tutorials/quickstart/
+
+    In particular, this test covers the file-backend and cloud-backed usecases with this script.
+    The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
+    """
+    # Slight deviation from the Quickstart here:
+    #   1. Using existing contexts instead of `get_context`
+    #   2. Using `read_csv` on a local file instead of making a network request
+    #
+    # These changes should be functionally equivalent to the real workflow but be better for testing
+    context = empty_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
+
+    validator = context.sources.pandas_default.read_csv(filepath)
+
+    # Create Expectations
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
+
+    # Validate data
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+    checkpoint_result = checkpoint.run()
+
+    # View results
+    mock_open = mocker.patch("webbrowser.open")
+    context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
 
 
 if __name__ == "__main__":

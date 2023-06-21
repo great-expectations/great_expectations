@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
-from capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
+from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
 from capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
     DataProfilerColumnDomainBuilder,
 )

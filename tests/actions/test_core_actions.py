@@ -464,22 +464,18 @@ class MockSMTPServer:
     def starttls(self, *args, **kwargs):
         if self.raise_on == "starttls":
             raise self.exception
-        return None
 
     def login(self, *args, **kwargs):
         if self.raise_on == "login":
             raise self.exception
-        return None
 
     def sendmail(self, *args, **kwargs):
         if self.raise_on == "sendmail":
             raise self.exception
-        return None
 
     def quit(self, *args, **kwargs):
         if self.raise_on == "quit":
             raise self.exception
-        return None
 
 
 @pytest.mark.parametrize(

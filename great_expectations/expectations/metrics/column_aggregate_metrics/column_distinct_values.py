@@ -7,7 +7,7 @@ from great_expectations.compatibility.pyspark import (
     functions as F,
 )
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -54,18 +54,17 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         )
         column_name: str = accessor_domain_kwargs["column"]
         column: sqlalchemy.ColumnClause = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy.Engine]
+        distinct_values: List[sqlalchemy.Row]
         if hasattr(column, "is_not"):
-            distinct_values = sqlalchemy_engine.execute(
+            distinct_values = execution_engine.execute_query(
                 sa.select(column)
                 .where(column.is_not(None))
                 .distinct()
                 .select_from(selectable)
             ).fetchall()
         else:
-            distinct_values = sqlalchemy_engine.execute(
+            distinct_values = execution_engine.execute_query(
                 sa.select(column)
                 .where(column.isnot(None))
                 .distinct()

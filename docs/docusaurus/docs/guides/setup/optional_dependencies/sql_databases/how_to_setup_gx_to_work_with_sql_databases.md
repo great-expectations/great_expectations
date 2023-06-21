@@ -9,9 +9,6 @@ keywords: [Great Expectations, SQL]
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!-- ## Prerequisites -->
 
@@ -86,7 +83,7 @@ If you install SqlAlchemy independently of the above pip commands, be certain to
 
 ### 5. Setting up credentials
 
-Different SQL dialects have different requirements for connection strings and methods of configuring credentials.  By default, GX allows you to define credentials as environment variables or as values in your Data Context ([once you have initialized one](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli)).
+Different SQL dialects have different requirements for connection strings and methods of configuring credentials.  By default, GX allows you to define credentials as environment variables or as values in your Data Context ([once you have initialized one](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)).
 
 There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials).
 

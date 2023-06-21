@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -173,7 +173,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -222,7 +222,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
             + values_string
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

@@ -25,35 +25,26 @@ An Ephemeral Data Context is a temporary, in-memory Data Context.  They are idea
 
 To create our Data Context, we will create a configuration that uses in-memory Metadata Stores.  This will require two classes from the Great Expectations module: the `DataContextConfig` class and the `InMemoryStoreBackendDefaults` class.  These can be imported with the code:
 
-```python title="Python code"
-from great_expectations.data_context.types.base import (
-        DataContextConfig,
-        InMemoryStoreBackendDefaults
-    )
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_data_context_config_with_in_memory_store_backend"
 ```
 
 We will also need to import the `EphemeralDataContext` class that we will be creating an instance of:
 
-```python title="Python code"
-from great_expectations.data_context import EphemeralDataContext
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py import_ephemeral_data_context"
 ```
 
 ### 2. Create the Data Context configuration
 
 To create a Data Context configuration that specifies the use of in-memory Metadata Stores we will pass in an instance of the `InMemoryStoreBackendDefaults` class as a parameter when initializing an instance of the `DataContextConfig` class:
 
-```python title="Python code"
-project_config = DataContextConfig(
-    store_backend_defaults=InMemoryStoreBackendDefaults()
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_data_context_config_with_in_memory_store_backend"
 ```
 
 ### 3. Instantiate an Ephemeral Data Context
 
 To create our Ephemeral Data Context instance, we initialize the `EphemeralDataContext` class while passing in the `DataContextConfig` instance we previously created as the value of the `project_config` parameter.
 
-```python title="Python code"
-context = EphemeralDataContext(project_config=project_config)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py instantiate_ephemeral_data_context"
 ```
 
 We now have an Ephemeral Data Context to use for the rest of this Python session.

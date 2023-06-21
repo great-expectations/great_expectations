@@ -3,16 +3,16 @@ from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
-from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.asset.asset import (
-    Asset,  # noqa: TCH001
+    Asset,
 )
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -74,7 +74,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     def _build_assets_from_config(self, config: Dict[str, dict]) -> None:
         for name, asset_config in config.items():
             if asset_config is None:
-                asset_config = {}
+                asset_config = {}  # noqa: PLW2901
             asset_config.update({"name": name})
             new_asset: Asset = _build_asset_from_config(
                 runtime_environment=self,
@@ -184,8 +184,10 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
-            if asset.group_names:
-                regex_config["group_names"] = asset.group_names
+                if asset.group_names:
+                    regex_config["group_names"] = asset.group_names
+                elif not regex_config.get("group_names"):
+                    regex_config["group_names"] = []
 
         return regex_config
 

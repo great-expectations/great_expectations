@@ -237,7 +237,7 @@ In the second example, a query `Asset` named `my_query_asset` is built by submit
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
 First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
@@ -259,7 +259,7 @@ For more details on how to configure the RuntimeBatchRequest, as well as an exam
 </TabItem>
 <TabItem value="bigquery">
 
-For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
+For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using a DataAssistant or a Custom Profiler, please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 

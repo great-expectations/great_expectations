@@ -1,21 +1,36 @@
 from __future__ import annotations
 
+import logging
 import pathlib
+import re
+from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import pytest
 import requests
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
-from tests.datasource.fluent.conftest import (
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+)
+from tests.datasource.fluent._fake_cloud_api import (
+    DEFAULT_HEADERS,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    UUID_REGEX,
+    CallbackResult,
+    CloudResponseSchema,
+)
+from tests.datasource.fluent.conftest import (
+    CloudDetails,
 )
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
+    from requests import PreparedRequest
     from responses import RequestsMock
 
 
@@ -24,6 +39,8 @@ pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
+
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -175,6 +192,47 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
 
 
 @pytest.mark.cloud
+def test_context_add_and_then_update_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource1 = context.sources.add_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    # add_or_update should be idempotent
+    datasource2 = context.sources.update_pandas_filesystem(
+        name="update_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    assert datasource1 == datasource2
+
+    # modify a field
+    datasource2.base_directory = pathlib.Path(__file__)
+    datasource3 = context.sources.update_pandas_filesystem(datasource2)
+
+    assert datasource1 != datasource3
+    assert datasource2 == datasource3
+
+
+@pytest.mark.cloud
+def test_update_non_existant_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_contexts: CloudDataContext | FileDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_contexts
+
+    with pytest.raises(ValueError, match="I_DONT_EXIST"):
+        context.sources.update_pandas_filesystem(
+            name="I_DONT_EXIST", base_directory=taxi_data_samples_dir
+        )
+
+
+@pytest.mark.cloud
 def test_cloud_context_delete_datasource(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -210,6 +268,88 @@ def test_cloud_context_delete_datasource(
     )
     print(f"After Delete -> {response2}\n{pf(response2.json())}")
     assert response2.status_code == 404
+
+
+@pytest.fixture
+def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDetails):
+    def verify_asset_name_cb(request: PreparedRequest) -> CallbackResult:
+        if request.body:
+            payload = CloudResponseSchema.from_datasource_json(request.body)
+            LOGGER.info(f"PUT payload: ->\n{pf(payload.dict())}")
+            assets = payload.data.attributes["datasource_config"]["assets"]  # type: ignore[index]
+            assert assets, "No assets found"
+            for asset in assets:
+                if asset["name"] == DEFAULT_PANDAS_DATA_ASSET_NAME:  # type: ignore[index]
+                    raise ValueError(
+                        f"Asset name should not be default - '{DEFAULT_PANDAS_DATA_ASSET_NAME}'"
+                    )
+            return CallbackResult(
+                200,
+                headers=DEFAULT_HEADERS,
+                body=payload.json(),
+            )
+        return CallbackResult(500, DEFAULT_HEADERS, "No body found")
+
+    cloud_url = re.compile(
+        f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{UUID_REGEX}"
+    )
+
+    cloud_api_fake.remove("PUT", url=cloud_url)
+    cloud_api_fake.add_callback("PUT", url=cloud_url, callback=verify_asset_name_cb)
+
+    return cloud_api_fake
+
+
+@pytest.mark.cloud
+class TestPandasDefaultWithCloud:
+    def test_payload_sent_to_cloud(
+        self,
+        cloud_details: CloudDetails,
+        empty_cloud_context_fluent: CloudDataContext,
+        verify_asset_names_mock: RequestsMock,
+    ):
+        context = empty_cloud_context_fluent
+        df = pd.DataFrame.from_dict(
+            {"col_1": [3, 2, 1, 0], "col_2": ["a", "b", "c", "d"]}
+        )
+
+        context.sources.pandas_default.read_dataframe(df)
+
+        pandas_default_id = context.sources.pandas_default.id
+        assert pandas_default_id
+
+        assert verify_asset_names_mock.assert_call_count(
+            f"{cloud_details.base_url}/organizations/{cloud_details.org_id}/datasources/{pandas_default_id}",
+            1,
+        )
+
+
+def test_data_connectors_are_built_on_config_load(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
+    context = seeded_contexts
+    dc_datasources: dict[str, list[str]] = defaultdict(list)
+
+    assert context.fluent_datasources
+    for datasource in context.fluent_datasources.values():
+        if datasource.data_connector_type:
+            print(f"class: {datasource.__class__.__name__}")
+            print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
+            print(f"name: {datasource.name}", end="\n\n")
+
+            dc_datasources[datasource.type].append(datasource.name)
+
+            for asset in datasource.assets:
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
+            print()
+
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
+    assert dc_datasources
 
 
 if __name__ == "__main__":

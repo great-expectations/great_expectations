@@ -29,7 +29,6 @@ The steps of this guide will allow you to quickly determine if you will want to 
 
 In some cases, a single Batch of data is all you need (or all that is supported).  In particular:
 - When you are Validating data, you will need to specify a single Batch of data.  If you provide multiple Batches in a Batch Request, Validations will default to operating on the last Batch in the list.
-- The Runtime Data Connector does not support handling multiple Batches of data.  You will always configure your Data Assets to correspond to at most a single Batch of Data when you are using a Runtime Data Connector.
 - If you want to quickly create some Expectations as part of an early Expectation Suite or exploratory data analysis, a single Batch is likely to be all that you need.
 
 :::note 
