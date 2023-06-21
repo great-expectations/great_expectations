@@ -808,9 +808,9 @@ class TableAsset(_SQLAsset):
             else self.table_name
         )
 
-    @pydantic.validator("table_name")
-    def default_table_name_if_omitted(cls, v, values, **kwargs) -> str:
-        return v or values.get("name")
+    @pydantic.validator("table_name", pre=True, always=True)
+    def default_table_name(cls, table_name, values, **kwargs) -> str:
+        return table_name or values.get("name")
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
