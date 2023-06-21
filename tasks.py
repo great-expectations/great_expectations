@@ -340,7 +340,7 @@ def mv_usage_stats_json(ctx: Context):
 
     version = usage_stats_utils.get_gx_version()
     outfile = f"v{version}_example_events.json"
-    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
+    cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/"
     cmd = cmd.format(outfile)
     ctx.run(cmd)
     print(f"'{outfile}' copied to dbfs.")
