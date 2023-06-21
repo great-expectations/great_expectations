@@ -797,7 +797,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str
+    table_name: Optional[str] = None
     schema_name: Optional[str] = None
 
     @property
@@ -807,6 +807,10 @@ class TableAsset(_SQLAsset):
             if self.schema_name
             else self.table_name
         )
+
+    @pydantic.validator("table_name")
+    def default_table_name_if_omitted(cls, v, values, **kwargs) -> str:
+        return v or values.get("name")
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
