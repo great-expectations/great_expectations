@@ -3,6 +3,7 @@ import pathlib
 import pytest
 
 from docs.prepare_prior_versions import (
+    _prepend_version_info_to_name_for_md_relative_links,
     _update_tag_references_for_correct_version_substitution,
     _use_relative_path_for_imports_substitution,
     _use_relative_path_for_imports_substitution_path_starting_with_forwardslash,
@@ -126,4 +127,16 @@ import CLIRemoval from './components/warnings/_cli_removal.md'
 <CLIRemoval />
 """
 
+    assert updated_contents == expected_contents
+
+
+@pytest.mark.unit
+def test__prepend_version_info_to_name_for_md_relative_links():
+    contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/guides/validation/index.md#checkpoints)."""
+
+    version = "0.16.16"
+    updated_contents = _prepend_version_info_to_name_for_md_relative_links(
+        contents, version
+    )
+    expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/0.16.16/guides/validation/#checkpoints)."""
     assert updated_contents == expected_contents
