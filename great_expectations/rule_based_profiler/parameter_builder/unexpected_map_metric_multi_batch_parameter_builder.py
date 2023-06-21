@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 
 class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
-    Compute specified aggregate of unexpected count ratio of given map-style metric across every Batch of data given.
+    Compute specified aggregate of unexpected count fraction of given map-style metric across every Batch of data given.
     """
 
     exclude_field_names: ClassVar[
@@ -71,6 +71,7 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
         aggregation_method: Optional[str] = None,
         false_positive_rate: Optional[Union[str, float]] = None,
         quantile_statistic_interpolation_method: str = None,
+        round_decimals: Optional[Union[str, int]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         evaluation_parameter_builder_configs: Optional[
@@ -87,10 +88,13 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
             ".unexpected_count" will be appended to "map_metric_name" to be used in MetricConfiguration to get values.
             total_count_parameter_builder_name: name of parameter that computes total_count (of rows in Batch).
             null_count_parameter_builder_name: name of parameter that computes null_count (of domain values in Batch).
-            aggregation_method: directive for aggregating unexpected count ratios of domain over observed Batch samples.
+            aggregation_method: directive for aggregating unexpected count fractions of domain over observed Batch samples.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
-                encountering unexpected values as judged by the upper quantile of the observed unexpected ratio.
+                encountering unexpected values as judged by the upper quantile of the observed unexpected fraction.
             quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()" statistic.
+            round_decimals: user-configured non-negative integer indicating the number of decimals of the
+                rounding precision of the computed quantile value prior to packaging it on output.  If omitted, then no
+                rounding is performed.
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
@@ -127,6 +131,8 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
             quantile_statistic_interpolation_method
         )
 
+        self._round_decimals = round_decimals
+
     @property
     def map_metric_name(self) -> str:
         return self._map_metric_name
@@ -150,6 +156,10 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
     @property
     def quantile_statistic_interpolation_method(self) -> str:
         return self._quantile_statistic_interpolation_method
+
+    @property
+    def round_decimals(self) -> Optional[Union[str, int]]:
+        return self._round_decimals
 
     def _build_parameters(
         self,
@@ -252,7 +262,7 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        unexpected_count_ratio_values: np.ndarray = unexpected_count_values / (
+        unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             nonnull_count_values + NP_EPSILON
         )
 
@@ -279,13 +289,13 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
         unexpected_count_output: Union[np.ndarray, np.float64]
 
         if aggregation_method is None:
-            unexpected_count_output = unexpected_count_ratio_values
+            unexpected_count_output = unexpected_count_fraction_values
         elif aggregation_method == "mean":
-            unexpected_count_output = np.mean(unexpected_count_ratio_values)
+            unexpected_count_output = np.mean(unexpected_count_fraction_values)
         elif aggregation_method == "std":
-            unexpected_count_output = np.std(unexpected_count_ratio_values)
+            unexpected_count_output = np.std(unexpected_count_fraction_values)
         elif aggregation_method == "median":
-            unexpected_count_output = np.median(unexpected_count_ratio_values)
+            unexpected_count_output = np.median(unexpected_count_fraction_values)
         elif aggregation_method == "quantile":
             false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(  # type: ignore[assignment] # could be float
                 false_positive_rate=self.false_positive_rate,  # type: ignore[union-attr] # configuration could be None
@@ -293,19 +303,47 @@ class UnexpectedMapMetricMultiBatchParameterBuilder(MetricMultiBatchParameterBui
                 variables=variables,
                 parameters=parameters,
             )
+
+            # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            round_decimals: Optional[
+                int
+            ] = get_parameter_value_and_validate_return_type(
+                domain=domain,
+                parameter_reference=self.round_decimals,
+                expected_return_type=None,
+                variables=variables,
+                parameters=parameters,
+            )
+            if not (
+                round_decimals is None
+                or (isinstance(round_decimals, int) and (round_decimals >= 0))
+            ):
+                raise gx_exceptions.ProfilerExecutionError(
+                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+positive integer, or must be omitted (or set to None).
+"""
+                )
+
             quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
                 quantile_statistic_interpolation_method=self.quantile_statistic_interpolation_method,  # type: ignore[union-attr] # configuration could be None
-                round_decimals=2,
+                round_decimals=round_decimals or 2,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
             )
             unexpected_count_output = numpy.numpy_quantile(
-                a=unexpected_count_ratio_values,
+                a=unexpected_count_fraction_values,
                 q=1.0 - false_positive_rate,
                 axis=0,
                 method=quantile_statistic_interpolation_method,
             )
+
+            if round_decimals is None:
+                unexpected_count_output = np.float64(unexpected_count_output)
+            else:
+                unexpected_count_output = round(
+                    np.float64(unexpected_count_output), round_decimals
+                )
         else:
             unexpected_count_output = np.float64(
                 0.0
