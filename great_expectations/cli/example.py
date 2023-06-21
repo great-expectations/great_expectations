@@ -92,7 +92,7 @@ def example_postgres(stop: bool, url: bool) -> None:
 
 @example.command(name="s3")
 @click.option(
-    "--shutdown",
+    "--stop",
     is_flag=True,
     help="Stop example and clean up. Default false.",
     default=False,
@@ -102,7 +102,7 @@ def example_postgres(stop: bool, url: bool) -> None:
     help="Bucket name to use for metadata stores",
     default="",
 )
-def example_s3(shutdown: bool, metadata_store_bucket_name: str) -> None:
+def example_s3(stop: bool, metadata_store_bucket_name: str) -> None:
     """Start an s3 example, using s3 as a datasource and optionally for metadata stores."""
     unset_env_vars = _check_aws_env_vars()
     if unset_env_vars:
@@ -111,10 +111,10 @@ def example_s3(shutdown: bool, metadata_store_bucket_name: str) -> None:
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "s3"
-    if shutdown:
+    if stop:
         cli_message("<green>Shutting down...</green>")
-        shutdown_commands = ["docker", "compose", "down"]
-        subprocess.run(shutdown_commands, cwd=example_directory)
+        stop_commands = ["docker", "compose", "down"]
+        subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done shutting down...</green>")
     else:
         cli_message("<green>Setting up s3 example...</green>")
