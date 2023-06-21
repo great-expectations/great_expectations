@@ -82,19 +82,19 @@ class SqlAlchemyBatchData(BatchData):
         super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
-        # what is this?
-        self._schema_name = schema_name
-        self._use_quoted_name = use_quoted_name
-        self._source_table_name = source_table_name
-        self._source_schema_name = source_schema_name
-
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
+
         if not isinstance(self._record_set_name, str):
             raise TypeError(
                 f"record_set_name should be of type str, not {type(record_set_name)}"
             )
 
-        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
+        self._schema_name = schema_name
+        self._use_quoted_name = use_quoted_name
+        self._source_table_name = source_table_name
+        self._source_schema_name = source_schema_name
+
+       if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"
             )
