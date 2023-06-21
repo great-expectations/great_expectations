@@ -63,6 +63,7 @@
         },
         "table_name": {
             "title": "Table Name",
+            "default": "",
             "type": "string"
         },
         "schema_name": {
