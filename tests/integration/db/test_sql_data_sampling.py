@@ -48,7 +48,7 @@ def _load_data(
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
@@ -76,7 +76,7 @@ if __name__ == "test_script_module":
         table_name: str = "ten_trips_from_each_month"
         test_df: pd.DataFrame = load_and_concatenate_csvs(
             csv_paths=[
-                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+                "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
             ],
             convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
             load_full_dataset=True,

@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed for pydantic
-)
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
