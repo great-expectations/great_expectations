@@ -32,18 +32,24 @@ def example() -> None:
     help="Print url for jupyter notebook.",
     default=False,
 )
-def example_postgres(stop: bool, url: bool) -> None:
+@click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+def example_postgres(stop: bool, url: bool, bash: bool) -> None:
     """Start a postgres database example."""
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "postgres"
     assert example_directory.is_dir(), "Example directory not found"
+    container_name = "gx_postgres_example_jupyter"
     if stop:
         cli_message("<green>Stopping example containers...</green>")
         stop_commands = ["docker", "compose", "down"]
         subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done stopping containers.</green>")
     elif url:
-        container_name = "gx_postgres_example_jupyter"
         url_commands = [
             "docker",
             "exec",
@@ -63,6 +69,9 @@ def example_postgres(stop: bool, url: bool) -> None:
             f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
         )
         cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
+    elif bash:
+        bash_commands = ["docker", "exec", "-it", container_name, "bash"]
+        subprocess.run(bash_commands, cwd=example_directory)
     else:
         cli_message(
             "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
