@@ -194,3 +194,36 @@ def test_instantiation_with_temp_table_schema():
             temp_table_schema_name="test_schema",
         )
         assert "test_schema" in query_to_create_temp_table
+
+
+def test_instantiation_with_temp_table_flag(sqlite_view_engine, sa):
+    """
+    What does this test and why?
+
+    In cases where we create a validator but explicitly set `create_temp_table`=False, we directly use the
+    selectable created by SqlAlchemyExecutionEngine's _build_selectable_from_batch_spec() method.
+    """
+
+    selectable = sa.select("*").select_from(sa.text("main.test_table"))
+    print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
+    # only have the view that is created by the `sqlite_view_engine` fixture
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        selectable=selectable,
+        create_temp_table=False
+    )
+    # No new views were created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        selectable=selectable,
+        create_temp_table=True
+    )
+    # One new temp_table was created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2

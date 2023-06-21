@@ -141,15 +141,16 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
-        elif table_name or source_table_name:
+        elif table_name:
             self._selectable = self._generate_selectable(
                 dialect=dialect,
                 use_quoted_name=use_quoted_name,
                 table_name=table_name,
-                source_table_name=source_table_name,
                 schema_name=schema_name,
-                source_schema_name=source_schema_name
             )
+        elif selectable is not None:
+            # directly use selectable if temp_tables are not created
+            self._selectable = selectable
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
@@ -287,18 +288,8 @@ class SqlAlchemyBatchData(BatchData):
             dialect: GXSqlDialect,
             use_quoted_name: bool,
             table_name: Optional[str] = None,
-            source_table_name: Optional[str] = None,
             schema_name: Optional[str] = None,
-            source_schema_name: Optional[str] = None,
     ):
-        if table_name and source_table_name:
-            logger.warning(
-                "either table_name or source_table_name should be used"
-            )
-        elif source_table_name:
-            table_name = source_table_name
-            schema_name = source_schema_name
-
         if use_quoted_name:
             table_name = sqlalchemy.quoted_name(table_name, quote=True)
         if dialect == GXSqlDialect.BIGQUERY:
