@@ -8,7 +8,7 @@ module.exports = {
   tagline: 'Always know what to expect from your data.',
   url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
-  onBrokenLinks: 'warn', // Temporary, please set this back to 'throw' when we have fixed all broken links.
+  onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: '/img/gx-mark.png',
   organizationName: 'great-expectations',
