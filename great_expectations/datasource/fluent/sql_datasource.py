@@ -797,7 +797,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str = ""
+    table_name: str = Field("", description="Name of the SQL table. Will default to the value of `name` if not provided.")
     schema_name: Optional[str] = None
 
     @property
