@@ -7,6 +7,7 @@ from docs.prepare_prior_versions import (
     _update_tag_references_for_correct_version_substitution,
     _use_relative_path_for_imports_substitution,
     _use_relative_path_for_imports_substitution_path_starting_with_forwardslash,
+    _prepend_version_info_for_md_absolute_links,
 )
 
 
@@ -140,3 +141,37 @@ def test__prepend_version_info_to_name_for_md_relative_links():
     )
     expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/0.16.16/guides/validation/#checkpoints)."""
     assert updated_contents == expected_contents
+
+
+class TestPrependVersionInfoForMdAbsoluteLinks:
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absolute_links(self):
+        contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+        version = "0.16.16"
+        expected_contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.16.16/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/0.16.16/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absolute_links_doesnt_update_if_version_already_exists(
+        self,
+    ):
+        contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.15.50/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+        version = "0.16.16"
+        expected_contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.15.50/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
