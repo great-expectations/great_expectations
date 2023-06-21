@@ -199,7 +199,11 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-lite.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev-mysql.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev-pagerduty.txt", "pypd", (("==", "1.1.0"),)),
-        ("requirements-dev-sqlalchemy-less-than-2.txt", "sqlalchemy", (("<", "2.0.0"),)),
+        (
+            "requirements-dev-sqlalchemy-less-than-2.txt",
+            "sqlalchemy",
+            (("<", "2.0.0"),),
+        ),
         (
             "requirements-dev-sqlalchemy.txt",
             "PyMySQL",
