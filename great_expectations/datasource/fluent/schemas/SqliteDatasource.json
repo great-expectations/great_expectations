@@ -376,8 +376,7 @@
                 }
             },
             "required": [
-                "name",
-                "table_name"
+                "name"
             ],
             "additionalProperties": false
         },
