@@ -95,7 +95,7 @@ context.run_checkpoint(`my_checkpoint`, evaluation_parameters={"upstream_row_cou
 
 Evaluation Parameters are defined by expressions that are evaluated at run time and replaced with the corresponding values.  These expressions can include such things as:
 - Values from previous Validation runs, such as the number of rows in a previous Validation.
-- Values modified by basic arithmatic, such as a percentage of rows in a previous Validation.
+- Values modified by basic arithmetic, such as a percentage of rows in a previous Validation.
 - Temporal values, such as "now" or "timedelta."
 - Complex values, such as lists.
 
@@ -156,16 +156,16 @@ This Expectation will fail (the NYC taxi data allows for four types of payments)
 
 The expressions and the corresponding functions that you can use in Evaluation Parameters are listed in the following table:
 
-| **Evaluation Parameter Expression** | **Python Function Call**                                      |
-|-------------------------------------|---------------------------------------------------------------|
-| `sin`                               | `math.sin`                                                    | 
-| `cos`                               | `math.cos`                                                    |
-| `tan`                               | `math.tan`                                                    |
-| `exp`                               | `math.exp`                                                    | 
-| `abs`                               | `abs`                                                         |
-| `trunc`                             | `lambda a: int(a)`                                            |
-| `round`                             | `round`                                                       |
-| `sgn`                               | `lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0` |
-| `now`                               | `datetime.datetime.now`                                       |
-| `datetime`                          | `datetime.datetime`                                           |
-| `timedelta`                         | `datetime.timedelta`                                          |
+| **Evaluation Parameter Expression**    | **Python Function Call**                                      |
+|----------------------------------------|---------------------------------------------------------------|
+| `sin`                                  | `math.sin`                                                    | 
+| `cos`                                  | `math.cos`                                                    |
+| `tan`                                  | `math.tan`                                                    |
+| `exp`                                  | `math.exp`                                                    | 
+| `abs`                                  | `abs`                                                         |
+| `trunc`                                | `lambda a: int(a)`                                            |
+| `round`                                | `round`                                                       |
+| `sgn`                                  | `lambda a: -1 if a < -_epsilon else 1 if a > _epsilon else 0` |
+| `now`                                  | `datetime.datetime.now`                                       |
+| `datetime`                             | `datetime.datetime`                                           |
+| `timedelta`                            | `datetime.timedelta`                                          |
