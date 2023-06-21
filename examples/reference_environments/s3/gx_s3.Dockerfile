@@ -3,5 +3,6 @@ FROM python:3.9
 WORKDIR /gx
 
 COPY ./run_quickstart.py ./
+COPY s3_public_nyc_tlc_bucket_example.ipynb ./
 
 RUN pip install great_expectations[s3]

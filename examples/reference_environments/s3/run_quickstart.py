@@ -14,8 +14,9 @@ datasource = context.sources.add_or_update_pandas_s3(
 
 batching_regex = r"green_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 s3_prefix = "csv_backup/"
+asset_name = "taxi_data_aws_open_data"
 data_asset = datasource.add_csv_asset(
-    name="taxi_data_aws_open_data", batching_regex=batching_regex, s3_prefix=s3_prefix
+    name=asset_name, batching_regex=batching_regex, s3_prefix=s3_prefix
 )
 
 print("data_asset.batch_request_options:", data_asset.batch_request_options)
