@@ -797,7 +797,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: Optional[str] = None
+    table_name: str = ""
     schema_name: Optional[str] = None
 
     @property
@@ -809,7 +809,7 @@ class TableAsset(_SQLAsset):
         )
 
     @pydantic.validator("table_name", pre=True, always=True)
-    def default_table_name(cls, table_name, values, **kwargs) -> str:
+    def default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
         return table_name or values.get("name")
 
     def test_connection(self) -> None:

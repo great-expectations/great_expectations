@@ -444,20 +444,6 @@ def test_catch_bad_top_level_config(
     [
         p(
             {
-                "name": "missing `table_name`",
-                "type": "table",
-            },
-            (
-                _FLUENT_DATASOURCES_KEY,
-                "assets",
-                0,
-                "table_name",
-            ),
-            "field required",
-            id="missing `table_name`",
-        ),
-        p(
-            {
                 "name": "unknown splitter",
                 "type": "table",
                 "table_name": "pool",
