@@ -33,6 +33,7 @@ def get_extras_require():
         "sqlalchemy",
         "test",
         "tools",
+        "sqlalchemy-alchemy-less-than-2"
         "all-contrib-expectations",
     )
 
