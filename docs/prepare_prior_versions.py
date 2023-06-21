@@ -386,6 +386,69 @@ def _prepend_version_info_to_name_for_md_relative_links(
     return contents
 
 
+def prepend_version_info_for_md_absolute_links(
+    verbose: bool = False,
+) -> None:
+    """Add version info to md absolute links.
+
+    e.g. `- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.16.16/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)`
+    instead of `- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)`
+
+    This also does not add the version if there already is a version in the link (e.g. when we manually reference earlier versions).
+
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    paths = _paths_to_versioned_docs()
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+
+    method_name_for_logging = "prepend_version_info_for_md_absolute_links"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only: str = version_from_path_name_pattern.search(version).group(
+            "version"
+        )
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(path.glob(f"**/*{extension}"))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _prepend_version_info_for_md_absolute_links(
+                    contents, version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _prepend_version_info_for_md_absolute_links(contents: str, version: str) -> str:
+    # The negative lookahead (?!\d{1,2}\.\d{1,2}\.\d{1,2}) ensures that we don't add the version if there
+    # already is a version in the link (e.g. when we manually reference earlier versions):
+    pattern = re.compile(
+        r"(?P<start>.*)(?P<text>\[.*\])(?P<link_start_no_version>\(/docs/(?!\d{1,2}\.\d{1,2}\.\d{1,2}))(?P<rest>.*)"
+    )
+    contents = re.sub(pattern, rf"\g<start>\g<text>(/docs/{version}/\g<rest>", contents)
+    return contents
+
+
 if __name__ == "__main__":
     print("Starting to process files in prepare_prior_versions.py...")
     change_paths_for_docs_file_references()
@@ -394,4 +457,5 @@ if __name__ == "__main__":
     update_tag_references_for_correct_version()
     use_relative_path_for_imports()
     prepend_version_info_to_name_for_md_relative_links()
+    prepend_version_info_for_md_absolute_links()
     print("Finished processing files in prepare_prior_versions.py")

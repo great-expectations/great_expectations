@@ -175,3 +175,20 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
             contents, version
         )
         assert updated_contents == expected_contents
+
+    @pytest.mark.unit
+    def test__prepend_version_info_for_md_absolute_links_doesnt_update_if_version_already_exists_mixed_versions(
+        self,
+    ):
+        contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+        version = "0.16.16"
+        expected_contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.16.16/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    """
+
+        updated_contents = _prepend_version_info_for_md_absolute_links(
+            contents, version
+        )
+        assert updated_contents == expected_contents
