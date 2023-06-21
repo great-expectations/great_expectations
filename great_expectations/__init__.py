@@ -7,7 +7,7 @@ if (sys.version_info.major != PYTHON_SUPPORTED_VERSION["major"]) or (
     or sys.version_info.minor > PYTHON_SUPPORTED_VERSION["minor"]["upper"]
 ):
     raise ImportError(
-        "Great Expectations is only supported on python 3.8 through 3.10. "
+        "Great Expectations is only supported on Python 3.8 through 3.10. "
         f"You are using: {sys.version}"
     )
 
