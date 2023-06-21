@@ -8,7 +8,7 @@ The jupyter notebook server contains a notebook with a quickstart for using Grea
 
 GX will use the `snowflake-sqlalchemy` connector to connect to Snowflake. 
 
-You can connect to the database setting up your Snowflake connection string as an environment variable named `SNOWFLAKE_CONNECTION_STRING`:
+You can connect to the database by setting up your Snowflake connection string as an environment variable named `SNOWFLAKE_CONNECTION_STRING`:
 ```bash
 SNOWFLAKE_CONNECTION_STRING='snowflake://<user_login_name>:<password>@<account_identifier>'
 ```
