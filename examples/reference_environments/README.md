@@ -40,6 +40,16 @@ The notebook contains a quickstart which you can edit to your heart's content.
     great_expectations example postgres --stop
     ```
 
+### To hop into a bash session instead of a notebook
+
+1. Navigate to the repo root and run:
+
+    ```bash
+    great_expectations example postgres --bash
+    ```
+
+Alternatively you can run `docker ps` to find the container name and then run `docker exec -it <container_name> bash` to hop into a bash session. The above command is just a shortcut.
+
 ### What about other reference environments?
 
 - We are working on adding more reference environments. To see the full list of what's available, run:
