@@ -94,7 +94,7 @@ class SqlAlchemyBatchData(BatchData):
         self._source_table_name = source_table_name
         self._source_schema_name = source_schema_name
 
-       if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
+        if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"
             )
@@ -284,11 +284,11 @@ class SqlAlchemyBatchData(BatchData):
         return stmt
 
     def _generate_selectable(
-            self,
-            dialect: GXSqlDialect,
-            use_quoted_name: bool,
-            table_name: Optional[str] = None,
-            schema_name: Optional[str] = None,
+        self,
+        dialect: GXSqlDialect,
+        use_quoted_name: bool,
+        table_name: Optional[str] = None,
+        schema_name: Optional[str] = None,
     ):
         if use_quoted_name:
             table_name = sqlalchemy.quoted_name(table_name, quote=True)
@@ -309,4 +309,3 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=schema_name,
             )
-

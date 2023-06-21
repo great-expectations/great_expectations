@@ -215,15 +215,13 @@ def test_instantiation_with_temp_table_flag(sqlite_view_engine, sa):
     SqlAlchemyBatchData(
         execution_engine=execution_engine,
         selectable=selectable,
-        create_temp_table=False
+        create_temp_table=False,
     )
     # No new views were created
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
     SqlAlchemyBatchData(
-        execution_engine=execution_engine,
-        selectable=selectable,
-        create_temp_table=True
+        execution_engine=execution_engine, selectable=selectable, create_temp_table=True
     )
     # One new temp_table was created
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2
