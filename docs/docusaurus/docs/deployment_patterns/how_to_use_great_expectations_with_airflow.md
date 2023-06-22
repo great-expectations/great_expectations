@@ -1,5 +1,9 @@
 ---
 title: How to Use Great Expectations with Airflow
+sidebar_label: "Airflow"
+description: "Run a Great Expectations checkpoint in Apache Airflow"
+id: how_to_use_great_expectations_with_airflow
+sidebar_custom_props: { icon: 'img/integrations/airflow_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 

@@ -1,5 +1,8 @@
 ---
-title: How to Use Great Expectations with Meltano
+title: Use Great Expectations with Meltano
+description: "Use Great Expectations with Meltano"
+sidebar_label: "Meltano"
+sidebar_custom_props: { icon: 'img/integrations/meltano_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
