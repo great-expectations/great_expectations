@@ -20,10 +20,10 @@ class SnowflakeDatasource(SQLDatasource):
     Args:
         name: The name of this Snowflake datasource.
         connection_string: The SQLAlchemy connection string used to connect to the Snowflake database.
-            For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+            For example: "snowflake://<user_login_name>:<password>@<account_identifier>"
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
     """
 
-    type: Literal["snowflake"] = "snowlfake"  # type: ignore[assignment]
+    type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
     connection_string: Union[ConfigStr, SnowflakeDsn]
