@@ -302,15 +302,3 @@ def _check_aws_env_vars() -> set[str]:
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
-
-
-def _check_aws_env_vars() -> set[str]:
-    """Return list of env var names that are not set."""
-    env_vars_to_check = (
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "AWS_SESSION_TOKEN",
-    )
-    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
-
-    return result
