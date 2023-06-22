@@ -46,6 +46,7 @@ from tests.datasource.fluent._fake_cloud_api import (
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
     CloudDetails,
+    FakeDBTypedDict,
     create_fake_db_seed_data,
     gx_cloud_api_fake_ctx,
 )
@@ -189,6 +190,13 @@ def cloud_details() -> CloudDetails:
 def cloud_api_fake(cloud_details: CloudDetails):
     with gx_cloud_api_fake_ctx(cloud_details=cloud_details) as requests_mock:
         yield requests_mock
+
+
+@pytest.fixture
+def cloud_api_fake_db(cloud_api_fake) -> FakeDBTypedDict:
+    from tests.datasource.fluent._fake_cloud_api import _CLOUD_API_FAKE_DB
+
+    return _CLOUD_API_FAKE_DB
 
 
 @pytest.fixture

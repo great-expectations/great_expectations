@@ -69,6 +69,8 @@
         },
         "table_name": {
             "title": "Table Name",
+            "description": "Name of the SQL table. Will default to the value of `name` if not provided.",
+            "default": "",
             "type": "string"
         },
         "schema_name": {
@@ -77,8 +79,7 @@
         }
     },
     "required": [
-        "name",
-        "table_name"
+        "name"
     ],
     "additionalProperties": false,
     "definitions": {

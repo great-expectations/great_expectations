@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     from requests import PreparedRequest
     from responses import RequestsMock
 
+    from tests.datasource.fluent._fake_cloud_api import FakeDBTypedDict
+
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -92,6 +94,31 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     print(pf(yaml_dict, depth=2))
     assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
+
+
+@pytest.mark.cloud
+def test_splitters_are_persisted_on_creation(
+    empty_cloud_context_fluent: CloudDataContext,
+    cloud_api_fake_db: FakeDBTypedDict,
+    db_file: pathlib.Path,
+):
+    context = empty_cloud_context_fluent
+
+    datasource_name = "save_ds_splitters_test"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+    my_asset = datasource.add_table_asset("table_partitioned_by_date_column__A")
+    my_asset.test_connection()
+    my_asset.add_splitter_year("date")
+
+    datasource_config = cloud_api_fake_db["datasources"][str(datasource.id)]["data"][
+        "attributes"
+    ]["datasource_config"]
+    print(f"'{datasource_name}' config -> \n\n{pf(datasource_config)}")
+
+    # splitters should be present
+    assert datasource_config["assets"][0]["splitter"]
 
 
 def test_assets_are_persisted_on_creation_and_removed_on_deletion(

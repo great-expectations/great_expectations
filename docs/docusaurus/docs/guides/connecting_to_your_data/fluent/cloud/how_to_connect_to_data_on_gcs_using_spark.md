@@ -13,6 +13,7 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 
 <!-- ### 3. Add GCS data to the Datasource as a Data Asset -->
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
+import GCSFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_gcs_fluent_data_asset_config_keys.mdx'
 
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
@@ -50,6 +51,10 @@ Once we have those three elements, we can define our Datasource like so:
 ```
 
 ### 3. Add GCS data to the Datasource as a Data Asset
+
+<GCSFluentAddDataAssetConfigKeys />
+
+We will define these values and create our DataAsset with the code:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
 ```
