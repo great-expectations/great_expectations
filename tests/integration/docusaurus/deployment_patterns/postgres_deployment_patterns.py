@@ -65,15 +65,6 @@ checkpoint = Checkpoint(
     name=my_checkpoint_name,
     run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
     data_context=context,
-)
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config">
-context.add_or_update_checkpoint(checkpoint=checkpoint)
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint">
-checkpoint_result = checkpoint.run(
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,
     action_list=[
@@ -84,6 +75,14 @@ checkpoint_result = checkpoint.run(
         {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
     ],
 )
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config">
+context.add_or_update_checkpoint(checkpoint=checkpoint)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint">
+checkpoint_result = checkpoint.run()
 # </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!

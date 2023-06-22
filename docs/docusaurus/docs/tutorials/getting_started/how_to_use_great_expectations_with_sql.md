@@ -102,7 +102,7 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
 
 Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
-First, we create the Checkpoint configuration utilizing our data context:
+First, we create the Checkpoint configuration utilizing our data context, passing in our Batch Request (our data) and our Expectation Suite (our tests):
 ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py checkpoint config"
 ```
 
@@ -110,7 +110,7 @@ Next, we save the Checkpoint:
 ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config"
 ```
 
-Finally, we run the Checkpoint, passing in our Batch Request (our data) and our Expectation Suite (our tests):
+Finally, we run the Checkpoint:
 ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint"
 ```
 
