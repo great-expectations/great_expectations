@@ -302,3 +302,35 @@ def _check_aws_env_vars() -> set[str]:
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
+
+
+def _get_jupyter_url(container_name: str, example_directory: pathlib.Path) -> str:
+    url_commands = [
+        "docker",
+        "exec",
+        container_name,
+        "jupyter",
+        "server",
+        "list",
+        "--json",
+    ]
+    url_json = subprocess.run(
+        url_commands,
+        cwd=example_directory,
+        capture_output=True,
+    ).stdout
+    raw_json = json.loads(url_json)
+    notebook_url = f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
+    return notebook_url
+
+
+def _check_aws_env_vars() -> set[str]:
+    """Return list of env var names that are not set."""
+    env_vars_to_check = (
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN",
+    )
+    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
+
+    return result
