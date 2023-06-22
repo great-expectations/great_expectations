@@ -1,3 +1,14 @@
+import sys
+
+# setup.py should restrict installing gx to Python >= 3.8
+PYTHON3_SUPPORTED_MINOR_VERSIONS = [8, 9, 10]
+if sys.version_info.minor not in PYTHON3_SUPPORTED_MINOR_VERSIONS:
+    raise ImportError(
+        "Great Expectations is only supported on Python 3.8 through 3.10. "
+        f"You are using: {sys.version}"
+    )
+
+
 # Set up version information immediately
 from ._version import get_versions  # isort:skip
 
