@@ -102,7 +102,7 @@ class SqlAlchemyBatchData(BatchData):
                 schema_name=schema_name,
             )
         elif not create_temp_table:
-            if query:  # noqa: PLR5501
+            if query:
                 self._selectable = sa.text(query)
             else:
                 self._selectable = selectable.alias()
