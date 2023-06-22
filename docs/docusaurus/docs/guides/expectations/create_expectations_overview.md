@@ -1,20 +1,11 @@
 ---
-title: "Create Expectations: Overview"
+sidebar_label: 'Expectation creation workflow'
+title: 'Expectation creation workflow'
+id: create_expectations_overview
+description: An overview of the process for creating and managing Expectations and Expectation Suites.
 ---
-# [![Create Expectations Icon](../../images/universal_map/Flask-active.png)](./create_expectations_overview.md) Create Expectations: Overview
 
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-
-<!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
-
-## Prerequisites
-
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
-
-## Workflows
 
 The following image shows the four workflows you can follow to create <TechnicalTag tag="expectation" text="Expectations" />:
 

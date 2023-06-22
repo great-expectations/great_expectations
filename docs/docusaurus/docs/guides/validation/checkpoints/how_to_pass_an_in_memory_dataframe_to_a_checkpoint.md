@@ -1,5 +1,5 @@
 ---
-title: How to pass an in-memory DataFrame to a Checkpoint
+title: Pass an in-memory DataFrame to a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';

@@ -1,5 +1,5 @@
 ---
-title: How to create and edit Expectations based on domain knowledge, without inspecting data directly
+title: Create and edit Expectations based on domain knowledge, without inspecting data directly
 tag: [how-to, getting started]
 description: Create ExpectationConfigurations based on domain knowledge.
 keywords: [Expectations, Domain Knowledge]

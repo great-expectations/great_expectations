@@ -49,6 +49,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
