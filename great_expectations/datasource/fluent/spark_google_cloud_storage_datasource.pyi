@@ -45,6 +45,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
+        gcs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
