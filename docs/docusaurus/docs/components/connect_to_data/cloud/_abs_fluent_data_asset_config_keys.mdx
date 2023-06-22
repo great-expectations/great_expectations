@@ -1,10 +1,11 @@
 import CodeBlock from '@theme/CodeBlock';
 
-To identify the data you want to connect to, you need to provide the following information:
-- `name`: A name for the Data Asset.
+To specify data to connect to you can specify the following elements:
+- `name`: A name by which you can reference the Data Asset in the future.
 - `batching_regex`: A regular expression that indicates which files to treat as batches in your Data Asset and how to identify them.
 - `abs_container`: The name of your Azure Blob Storage container.
 - `abs_name_starts_with`: A string indicating what part of the `batching_regex` to truncate from the final batch names.
+- `abs_recursive_file_discovery`: (Optional) A boolean (True/False) indicating if files should be searched recursively from subfolders
 
 1. Run the following Python code to define the connection values:
 
