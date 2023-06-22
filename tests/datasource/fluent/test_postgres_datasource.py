@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import copy
 import logging
+import pathlib
 from contextlib import contextmanager
+from pprint import pformat as pf
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +23,7 @@ from pydantic import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -44,7 +47,7 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context import AbstractDataContext, FileDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -1072,6 +1075,46 @@ def test_non_select_query_data_asset(create_source):
     ) as source:
         with pytest.raises(ValueError):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
+
+
+def test_adding_splitter_persists_results(
+    empty_data_context: FileDataContext,
+    create_source: CreateSourceFixture,
+    mock_test_connection,
+):
+    gx_yaml = pathlib.Path(
+        empty_data_context.root_directory, "great_expectations.yml"
+    ).resolve(strict=True)
+    initial_yaml: dict = (
+        YAMLHandler().load(gx_yaml.read_text()).get("fluent_datasources", {})
+    )
+    print(f"initial_yaml:\n{pf(initial_yaml, depth=5)}")
+    assert not initial_yaml
+
+    years = [2020, 2021]
+    batch_specs = []
+
+    def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
+        batch_specs.append(spec)
+
+    with create_source(
+        validate_batch_spec=collect_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
+        splitter_query_response=[{"year": year} for year in years],
+    ) as source:
+        # We use a query asset because then we don't have to mock out db connection tests
+        # in this unit test.
+        my_datasource = empty_data_context.sources.add_postgres(source)
+        asset = my_datasource.add_query_asset(
+            name="my_asset", query="select * from table", order_by=["year"]
+        )
+        asset.add_splitter_year(column_name="my_col")
+
+    final_yaml: dict = YAMLHandler().load(gx_yaml.read_text())["fluent_datasources"]
+    print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
+
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["splitter"]
 
 
 @pytest.mark.unit
