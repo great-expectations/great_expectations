@@ -1079,39 +1079,34 @@ def test_non_select_query_data_asset(create_source):
 
 def test_adding_splitter_persists_results(
     empty_data_context: FileDataContext,
-    create_source: CreateSourceFixture,
     mock_test_connection,
 ):
     gx_yaml = pathlib.Path(
         empty_data_context.root_directory, "great_expectations.yml"
     ).resolve(strict=True)
     initial_yaml: dict = (
-        YAMLHandler().load(gx_yaml.read_text()).get("fluent_datasources", {})
+        YAMLHandler()  # type: ignore[assignment]
+        .load(gx_yaml.read_text())
+        .get(
+            "fluent_datasources",
+            {},
+        )
     )
     print(f"initial_yaml:\n{pf(initial_yaml, depth=5)}")
     assert not initial_yaml
 
-    years = [2020, 2021]
-    batch_specs = []
+    my_datasource = empty_data_context.sources.add_postgres(
+        "my_datasource",
+        connection_string="postgresql://postgres:@localhost/not_a_real_db",
+    )
+    asset = my_datasource.add_query_asset(
+        name="my_asset", query="select * from table", order_by=["year"]
+    )
+    asset.add_splitter_year(column_name="my_col")
 
-    def collect_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
-        batch_specs.append(spec)
-
-    with create_source(
-        validate_batch_spec=collect_batch_spec,
-        dialect="postgresql",
-        data_context=empty_data_context,
-        splitter_query_response=[{"year": year} for year in years],
-    ) as source:
-        # We use a query asset because then we don't have to mock out db connection tests
-        # in this unit test.
-        my_datasource = empty_data_context.sources.add_postgres(source)
-        asset = my_datasource.add_query_asset(
-            name="my_asset", query="select * from table", order_by=["year"]
-        )
-        asset.add_splitter_year(column_name="my_col")
-
-    final_yaml: dict = YAMLHandler().load(gx_yaml.read_text())["fluent_datasources"]
+    final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
+        gx_yaml.read_text(),
+    )["fluent_datasources"]
     print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
 
     assert final_yaml["my_datasource"]["assets"]["my_asset"]["splitter"]
