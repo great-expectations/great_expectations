@@ -109,7 +109,7 @@ CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource
 
 @pytest.fixture
 def mock_test_connection(monkeypatch: pytest.MonkeyPatch):
-    """Monkeypaches the test_connection method of the PostgresDatasource class to return True."""
+    """Patches the test_connection method of the PostgresDatasource class to return True."""
 
     def _mock_test_connection(self: PostgresDatasource) -> bool:
         LOGGER.warning(
