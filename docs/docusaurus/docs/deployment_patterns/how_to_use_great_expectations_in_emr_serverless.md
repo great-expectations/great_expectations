@@ -1,5 +1,8 @@
 ---
-title: How to Use Great Expectations in EMR Serverless
+title: Use Great Expectations in EMR Serverless
+description: "Use Great Expectations with EMR Serverless"
+sidebar_label: "Amazon EMR Serverless"
+sidebar_custom_props: { icon: 'img/integrations/emr_serverless_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'

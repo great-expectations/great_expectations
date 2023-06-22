@@ -1,5 +1,5 @@
 ---
-title: How to use a Custom Expectation
+title: Use a Custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
