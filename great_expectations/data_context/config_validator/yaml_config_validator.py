@@ -14,8 +14,6 @@ from __future__ import annotations
 import traceback
 from typing import TYPE_CHECKING, Any, List, Literal, Optional, Tuple, Union, cast
 
-from ruamel.yaml import YAML
-
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
