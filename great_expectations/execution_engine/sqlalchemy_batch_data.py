@@ -112,10 +112,6 @@ class SqlAlchemyBatchData(BatchData):
 
         self._dialect = dialect
 
-        if not create_temp_table:
-            table_name = source_table_name
-            schema_name = source_schema_name
-
         if create_temp_table:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
@@ -145,6 +141,10 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
+        elif source_table_name:
+            # how do you create this with our selectable?
+            self._selectable = selectable
+
         elif table_name:
             self._selectable = self._generate_selectable(
                 dialect=dialect,
