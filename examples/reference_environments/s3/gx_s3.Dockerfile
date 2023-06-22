@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM jupyter/minimal-notebook:python-3.10
 
 WORKDIR /gx
 
