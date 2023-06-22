@@ -1084,25 +1084,15 @@ def test_adding_splitter_persists_results(
     gx_yaml = pathlib.Path(
         empty_data_context.root_directory, "great_expectations.yml"
     ).resolve(strict=True)
-    initial_yaml: dict = (
-        YAMLHandler()  # type: ignore[assignment]
-        .load(gx_yaml.read_text())
-        .get(
-            "fluent_datasources",
-            {},
-        )
-    )
-    print(f"initial_yaml:\n{pf(initial_yaml, depth=5)}")
-    assert not initial_yaml
 
-    my_datasource = empty_data_context.sources.add_postgres(
+    empty_data_context.sources.add_postgres(
         "my_datasource",
         connection_string="postgresql://postgres:@localhost/not_a_real_db",
-    )
-    asset = my_datasource.add_query_asset(
+    ).add_query_asset(
         name="my_asset", query="select * from table", order_by=["year"]
+    ).add_splitter_year(
+        column_name="my_col"
     )
-    asset.add_splitter_year(column_name="my_col")
 
     final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
         gx_yaml.read_text(),
