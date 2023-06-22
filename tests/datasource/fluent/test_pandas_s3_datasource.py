@@ -98,6 +98,7 @@ def pandas_s3_datasource(
         "will_20200810_1001.csv",
         "james_20200810_1003.csv",
         "alex_20200819_1300.csv",
+        "subfolder/for_recursive_search.csv",
     ]
 
     for key in keys:
@@ -405,3 +406,41 @@ def test_test_connection_failures(
         pandas_s3_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error_message)
+
+
+@pytest.mark.integration
+def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
+    pandas_s3_datasource: PandasS3Datasource,
+):
+    """
+    Tests that files from the subfolder(s) is returned
+    when the s3_recursive_file_discovery-flag is set to True
+
+    This makes the list_keys-function search and return files also
+    from sub-directories on S3, not just the files in the folder
+    specified with the s3_name_starts_with-parameter
+    """
+    no_recursion_asset = pandas_s3_datasource.add_csv_asset(
+        name="csv_asset_not_recursive",
+        batching_regex=r".*",
+        s3_recursive_file_discovery=False,
+    )
+    found_files_without_recursion = len(
+        no_recursion_asset.get_batch_list_from_batch_request(
+            no_recursion_asset.build_batch_request()
+        )
+    )
+    recursion_asset = pandas_s3_datasource.add_csv_asset(
+        name="csv_asset_recursive",
+        batching_regex=r".*",
+        s3_recursive_file_discovery=True,
+    )
+    found_files_with_recursion = len(
+        recursion_asset.get_batch_list_from_batch_request(
+            recursion_asset.build_batch_request()
+        )
+    )
+    # Only 1 additional file was added to the subfolder
+    assert found_files_without_recursion + 1 == found_files_with_recursion
+    recursion_match = recursion_asset.batching_regex.match(".*/.*.csv")
+    assert recursion_match is not None
