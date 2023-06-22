@@ -156,6 +156,14 @@ class SqlAlchemyBatchData(BatchData):
         return self._engine.dialect
 
     @property
+    def source_table_name(self):
+        return self._source_table_name
+
+    @property
+    def source_schema_name(self):
+        return self._source_schema_name
+
+    @property
     def selectable(self):
         return self._selectable
 
