@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: gx_s3.Dockerfile
-    stdin_open: true
-    tty: true
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
