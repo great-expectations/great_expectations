@@ -10,6 +10,29 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.1
+* [FEATURE] Fix spark docs tests ([#8131](https://github.com/great-expectations/great_expectations/pull/8131))
+* [FEATURE] Reference Environment - Snowflake ([#8148](https://github.com/great-expectations/great_expectations/pull/8148))
+* [FEATURE] Fluent Datasource ABS, GCS, and S3 recursive file discovery ([#8118](https://github.com/great-expectations/great_expectations/pull/8118)) (thanks @toivomattila)
+* [BUGFIX] Fix config substitution for substrings ([#8145](https://github.com/great-expectations/great_expectations/pull/8145))
+* [BUGFIX] Fix 'great_expectations[cloud]' extra install ([#8151](https://github.com/great-expectations/great_expectations/pull/8151))
+* [BUGFIX] Persist SQLDatasource splitters on creation ([#8164](https://github.com/great-expectations/great_expectations/pull/8164))
+* [DOCS] Enable docs versioning for 0.16.16 ([#8125](https://github.com/great-expectations/great_expectations/pull/8125))
+* [DOCS] Update set_based_column_map_expectation.py ([#8142](https://github.com/great-expectations/great_expectations/pull/8142))
+* [DOCS] Fix broken links and reenable link checking ([#8146](https://github.com/great-expectations/great_expectations/pull/8146))
+* [DOCS] Add version info to markdown links for earlier versions ([#8155](https://github.com/great-expectations/great_expectations/pull/8155))
+* [MAINTENANCE] update location of link in data docs footer ([#8130](https://github.com/great-expectations/great_expectations/pull/8130))
+* [MAINTENANCE] invoke show-automerges ([#8127](https://github.com/great-expectations/great_expectations/pull/8127))
+* [MAINTENANCE] Lint `assets` dir ([#8123](https://github.com/great-expectations/great_expectations/pull/8123))
+* [MAINTENANCE] test/integration linting ([#8132](https://github.com/great-expectations/great_expectations/pull/8132))
+* [MAINTENANCE] minimal Anonymizer type-checking ([#8106](https://github.com/great-expectations/great_expectations/pull/8106))
+* [MAINTENANCE] Use Available Enums Instead of Strings for Metric Name Extensions ([#8137](https://github.com/great-expectations/great_expectations/pull/8137))
+* [MAINTENANCE] Add env var to avoid out of memory error when building docs ([#8144](https://github.com/great-expectations/great_expectations/pull/8144))
+* [MAINTENANCE] Update single cloud onboarding script to use fluent datasources ([#8114](https://github.com/great-expectations/great_expectations/pull/8114))
+* [MAINTENANCE] Add --bash command for postgres reference env ([#8154](https://github.com/great-expectations/great_expectations/pull/8154))
+* [MAINTENANCE] Add default `table_name` to `TableAsset` if omitted ([#8152](https://github.com/great-expectations/great_expectations/pull/8152))
+* [CONTRIB] expect_queried_column_pair_values_to_be_both_filled_or_null ([#7949](https://github.com/great-expectations/great_expectations/pull/7949)) (thanks @eden-o)
+
 ### 0.17.0
 * [FEATURE] Agent prints stack trace on error ([#8092](https://github.com/great-expectations/great_expectations/pull/8092))
 * [FEATURE] Clickhouse Integration ([#7719](https://github.com/great-expectations/great_expectations/pull/7719)) (thanks @Plozano94)
