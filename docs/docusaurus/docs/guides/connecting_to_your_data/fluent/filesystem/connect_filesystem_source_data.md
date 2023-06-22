@@ -21,7 +21,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_batching_regex_explaination.mdx'
 import PrereqInstallGxWithDependencies from '/docs/components/prerequisites/_gx_installed_with_abs_dependencies.md'
 import AbsFluentAddDataAssetConfigKeys from '/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx'
-import AbsBatchingRegexExample from '/docs/components/connect_to_data/cloud/_abs_batching_regex_explaination.md'
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
