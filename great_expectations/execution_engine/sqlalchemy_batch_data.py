@@ -155,7 +155,7 @@ class SqlAlchemyBatchData(BatchData):
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
             else:
-                self._selectable = selectable.alias(self._source_table_name)
+                self._selectable = selectable.alias(self._record_set_name)
 
     @property
     def dialect(self) -> GXSqlDialect:
