@@ -1,11 +1,17 @@
 from typing import Literal, Union
 
+from pydantic import AnyUrl
+
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 
-class SnowflakeDsn:
-    pass
+
+class SnowflakeDsn(AnyUrl):
+    allowed_schemes = {
+        "snowflake",
+    }
+
 
 @public_api
 class SnowflakeDatasource(SQLDatasource):
