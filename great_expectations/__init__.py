@@ -1,11 +1,8 @@
 import sys
 
-PYTHON_SUPPORTED_VERSION = {"major": 3, "minor": {"lower": 8, "upper": 10}}
-if (sys.version_info.major != PYTHON_SUPPORTED_VERSION["major"]) or (
-    sys.version_info.major == PYTHON_SUPPORTED_VERSION["major"]
-    and sys.version_info.minor < PYTHON_SUPPORTED_VERSION["minor"]["lower"]
-    or sys.version_info.minor > PYTHON_SUPPORTED_VERSION["minor"]["upper"]
-):
+# setup.py should restrict install to by on Python 3.X
+PYTHON3_SUPPORTED_MINOR_VERSIONS = [8, 9, 10]
+if sys.version_info.minor not in PYTHON3_SUPPORTED_MINOR_VERSIONS:
     raise ImportError(
         "Great Expectations is only supported on Python 3.8 through 3.10. "
         f"You are using: {sys.version}"
