@@ -152,13 +152,11 @@ def example_postgres(stop: bool, url: bool, bash: bool) -> None:
     help="Rebuild the containers.",
     default=False,
 )
-@click.option(
-    "--metadata-store-bucket-name",
-    help="Bucket name to use for metadata stores",
-    default="",
-)
 def example_s3(
-    stop: bool, url: bool, bash: bool, rebuild: bool, metadata_store_bucket_name: str
+    stop: bool,
+    url: bool,
+    bash: bool,
+    rebuild: bool,
 ) -> None:
     """Start an s3 example, using s3 as a datasource and optionally for metadata stores."""
     unset_env_vars = _check_aws_env_vars()
@@ -190,12 +188,10 @@ def example_s3(
             "<green>------------------------------------------------------------------------------------------</green>"
         )
         cli_message("<green>Setting up s3 example...</green>")
-        if metadata_store_bucket_name:
-            cli_message(
-                f"<green>Using s3 bucket {metadata_store_bucket_name} for metadata stores.</green>"
-            )
-        else:
-            cli_message("<green>Using local metadata stores.</green>")
+
+        cli_message(
+            "<green>Using local filesystem metadata stores. To use s3 metadata stores, please edit the default configuration in the container.</green>"
+        )
 
         cli_message(
             "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
