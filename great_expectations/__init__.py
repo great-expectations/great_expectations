@@ -1,6 +1,6 @@
 import sys
 
-# setup.py should restrict install to by on Python 3.X
+# setup.py should restrict installing gx to Python >= 3.8
 PYTHON3_SUPPORTED_MINOR_VERSIONS = [8, 9, 10]
 if sys.version_info.minor not in PYTHON3_SUPPORTED_MINOR_VERSIONS:
     raise ImportError(
