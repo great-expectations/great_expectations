@@ -1346,10 +1346,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-
-        source_schema_name: str = batch_spec.get("schema_name", None)
-        source_table_name: str = batch_spec.get("table_name", None)
-
         temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
@@ -1374,8 +1370,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             selectable: Union[
@@ -1385,8 +1379,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 selectable=selectable,
                 create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
             )
 
         return batch_data, batch_markers

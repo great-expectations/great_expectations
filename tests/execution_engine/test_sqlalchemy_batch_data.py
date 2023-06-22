@@ -40,9 +40,6 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
-    assert type(batch_data.record_set_name) == str
-    assert batch_data.record_set_name == "great_expectations_sub_selection"
-
     assert batch_data.use_quoted_name is False
 
 

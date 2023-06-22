@@ -19,7 +19,6 @@ class SqlAlchemyBatchData(BatchData):
     def __init__(  # noqa: PLR0913, PLR0912
         self,
         execution_engine,
-        record_set_name: Optional[str] = None,
         # Option 1
         schema_name: Optional[str] = None,
         table_name: Optional[str] = None,
@@ -30,8 +29,6 @@ class SqlAlchemyBatchData(BatchData):
         create_temp_table: bool = True,
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
-        source_schema_name: Optional[str] = None,
-        source_table_name: Optional[str] = None,
     ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -39,9 +36,6 @@ class SqlAlchemyBatchData(BatchData):
             Args:
                 engine (SqlAlchemy Engine): \
                     A SqlAlchemy Engine or connection that will be used to access the data
-                record_set_name: (string or None): \
-                    The name of the record set available as a domain kwarg for Great Expectations validations. record_set_name
-                    can usually be None, but is required when there are multiple record_sets in the same Batch.
                 schema_name (string or None): \
                     The name of the schema_name in which the databases lie
                 table_name (string or None): \
@@ -60,12 +54,6 @@ class SqlAlchemyBatchData(BatchData):
                     used if a temporary table is requested.
                 use_quoted_name (bool): \
                     If true, names should be quoted to preserve case sensitivity on databases that usually normalize them
-                source_table_name (str): \
-                    For SqlAlchemyBatchData based on selectables, source_table_name provides the name of the table on which
-                    the selectable is based. This is required for most kinds of table introspection (e.g. looking up column types)
-                source_schema_name (str): \
-                    For SqlAlchemyBatchData based on selectables, source_schema_name provides the name of the schema on which
-                    the selectable is based. This is required for most kinds of table introspection (e.g. looking up column types)
 
         The query that will be executed against the DB can be determined in any of three ways:
 
@@ -82,17 +70,8 @@ class SqlAlchemyBatchData(BatchData):
         super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
-        self._record_set_name = record_set_name or "great_expectations_sub_selection"
-
-        if not isinstance(self._record_set_name, str):
-            raise TypeError(
-                f"record_set_name should be of type str, not {type(record_set_name)}"
-            )
-
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
-        self._source_table_name = source_table_name
-        self._source_schema_name = source_schema_name
 
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
@@ -112,6 +91,9 @@ class SqlAlchemyBatchData(BatchData):
 
         self._dialect = dialect
 
+        # 3 helper function correspoding to each of the function
+        # overload decorator
+
         if table_name:
             self._selectable = self._generate_selectable(
                 dialect=dialect,
@@ -119,13 +101,17 @@ class SqlAlchemyBatchData(BatchData):
                 table_name=table_name,
                 schema_name=schema_name,
             )
-        # using selectable: split this out
-        elif create_temp_table:
+        elif not create_temp_table:
+            if query:  # noqa: PLR5501
+                self._selectable = sa.text(query)
+            else:
+                self._selectable = selectable.alias()
+        else:
             generated_table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
             if dialect == GXSqlDialect.MSSQL:
                 generated_table_name = f"#{generated_table_name}"
-
+            # are situations where selectable is None?
             if selectable is not None:
                 if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
                     selectable, str
@@ -149,19 +135,6 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
-        elif source_table_name:
-            self._selectable = self._generate_selectable(
-                dialect=dialect,
-                use_quoted_name=use_quoted_name,
-                table_name=source_table_name,
-                schema_name=source_schema_name,
-            )
-        elif selectable is not None:
-            if record_set_name:
-                self._selectable = selectable.alias(self._record_set_name)
-        else:
-            if query:  # noqa: PLR5501
-                self._selectable = sa.text(query)
 
     @property
     def dialect(self) -> GXSqlDialect:
@@ -171,18 +144,6 @@ class SqlAlchemyBatchData(BatchData):
     def sql_engine_dialect(self) -> sqlalchemy.DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
-
-    @property
-    def record_set_name(self):
-        return self._record_set_name
-
-    @property
-    def source_table_name(self):
-        return self._source_table_name
-
-    @property
-    def source_schema_name(self):
-        return self._source_schema_name
 
     @property
     def selectable(self):
