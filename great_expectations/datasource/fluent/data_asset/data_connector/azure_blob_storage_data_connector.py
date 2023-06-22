@@ -27,6 +27,7 @@ class _AzureOptions(pydantic.BaseModel):
     abs_container: str
     abs_name_starts_with: str = ""
     abs_delimiter: str = "/"
+    abs_recursive_file_discovery: bool = False
 
 
 class AzureBlobStorageDataConnector(FilePathDataConnector):
@@ -41,6 +42,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         container (str): container name for Microsoft Azure Blob Storage
         name_starts_with (str): Microsoft Azure Blob Storage prefix
         delimiter (str): Microsoft Azure Blob Storage delimiter
+        recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -52,6 +54,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         "abs_container",
         "abs_name_starts_with",
         "abs_delimiter",
+        "abs_recursive_file_discovery",
     )
     asset_options_type: ClassVar[Type[_AzureOptions]] = _AzureOptions
 
@@ -65,6 +68,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -80,6 +84,8 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         self._sanitized_prefix: str = sanitize_prefix(text=name_starts_with)
 
         self._delimiter = delimiter
+
+        self._recursive_file_discovery = recursive_file_discovery
 
         super().__init__(
             datasource_name=datasource_name,
@@ -105,6 +111,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -122,6 +129,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage prefix
             delimiter: Microsoft Azure Blob Storage delimiter
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters: optional list of sorters for sorting data_references
@@ -140,6 +148,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
+            recursive_file_discovery=recursive_file_discovery,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -156,6 +165,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
+        recursive_file_discovery: bool = False,
     ) -> str:
         """Builds helpful error message for reporting issues when linking named DataAsset to Microsoft Azure Blob Storage.
 
@@ -166,11 +176,12 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage prefix
             delimiter: Microsoft Azure Blob Storage delimiter
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
 
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
@@ -179,6 +190,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
                 "container": container,
                 "name_starts_with": name_starts_with,
                 "delimiter": delimiter,
+                "recursive_file_discovery": recursive_file_discovery,
             }
         )
 
@@ -207,7 +219,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         path_list: List[str] = list_azure_keys(
             azure_client=self._azure_client,
             query_options=query_options,
-            recursive=False,
+            recursive=self._recursive_file_discovery,
         )
         return path_list
 
