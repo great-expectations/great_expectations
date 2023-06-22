@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from packaging.version import Version, parse as parse_version
+from packaging.version import Version
+from packaging.version import parse as parse_version
 
 from great_expectations.compatibility import pyspark
 

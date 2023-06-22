@@ -1,6 +1,5 @@
-from typing import Any, List
+from typing import TYPE_CHECKING, Any, List
 
-import pandas as pd
 import sqlalchemy as sa
 
 import great_expectations as gx
@@ -26,6 +25,9 @@ from tests.test_utils import (
     load_data_into_test_database,
 )
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
 
 
@@ -48,7 +50,7 @@ def _load_data(
     return load_data_into_test_database(
         table_name=table_name,
         csv_paths=[
-            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+            "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
         ],
         connection_string=connection_string,
         convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
@@ -73,13 +75,13 @@ def _get_loaded_table(dialect: str) -> LoadedTable:
     table_name: str
     loaded_table: LoadedTable
     if _is_dialect_athena(dialect):
-        athena_db_name: str = get_awsathena_db_name(
+        athena_db_name: str = get_awsathena_db_name(  # noqa: F841
             db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
         )
         table_name = "ten_trips_from_each_month"
         test_df = load_and_concatenate_csvs(
             csv_paths=[
-                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
+                "./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
             ],
             convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
             load_full_dataset=True,

@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed for pydantic
-)
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -799,7 +797,10 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str
+    table_name: str = pydantic.Field(
+        "",
+        description="Name of the SQL table. Will default to the value of `name` if not provided.",
+    )
     schema_name: Optional[str] = None
 
     @property
@@ -809,6 +810,15 @@ class TableAsset(_SQLAsset):
             if self.schema_name
             else self.table_name
         )
+
+    @pydantic.validator("table_name", pre=True, always=True)
+    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
+        if not (validated_table_name := table_name or values.get("name")):
+            raise ValueError(
+                "table_name cannot be empty and should default to name if not provided"
+            )
+
+        return validated_table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.

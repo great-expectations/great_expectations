@@ -15,10 +15,11 @@ from typing import List
 
 import pkg_resources
 import pytest
-
 from assets.scripts.build_gallery import execute_shell_command
+
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.abs.integration_tests import (
     abs_integration_tests,
 )
@@ -46,7 +47,6 @@ from tests.integration.test_definitions.mysql.integration_tests import (
 from tests.integration.test_definitions.postgresql.integration_tests import (
     postgresql_integration_tests,
 )
-from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.redshift.integration_tests import (
     redshift_integration_tests,
 )
@@ -448,7 +448,7 @@ def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments
     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(
+def _execute_integration_test(  # noqa: PLR0912, PLR0915
     integration_test_fixture: IntegrationTestFixture, tmp_path: pathlib.Path
 ):
     """
@@ -457,9 +457,9 @@ def _execute_integration_test(
     Note that the only required parameter for a test in the matrix is
     `user_flow_script` and that all other parameters are optional.
     """
-    workdir = os.getcwd()
+    workdir = pathlib.Path.cwd()
     try:
-        base_dir = file_relative_path(__file__, "../../")
+        base_dir = pathlib.Path(file_relative_path(__file__, "../../"))
         os.chdir(base_dir)
         # Ensure GX is installed in our environment
         installed_packages = [pkg.key for pkg in pkg_resources.working_set]
@@ -472,8 +472,8 @@ def _execute_integration_test(
         # DataContext
         data_context_dir = integration_test_fixture.data_context_dir
         if data_context_dir:
-            context_source_dir = os.path.join(base_dir, data_context_dir)
-            test_context_dir = os.path.join(tmp_path, "great_expectations")
+            context_source_dir = base_dir / data_context_dir
+            test_context_dir = tmp_path / "great_expectations"
             shutil.copytree(
                 context_source_dir,
                 test_context_dir,
@@ -482,8 +482,8 @@ def _execute_integration_test(
         # Test Data
         data_dir = integration_test_fixture.data_dir
         if data_dir:
-            source_data_dir = os.path.join(base_dir, data_dir)
-            target_data_dir = os.path.join(tmp_path, "data")
+            source_data_dir = base_dir / data_dir
+            target_data_dir = tmp_path / "data"
             shutil.copytree(
                 source_data_dir,
                 target_data_dir,
@@ -495,41 +495,40 @@ def _execute_integration_test(
         other_files = integration_test_fixture.other_files
         if other_files:
             for file_paths in other_files:
-                source_file = os.path.join(base_dir, file_paths[0])
-                dest_file = os.path.join(tmp_path, file_paths[1])
-                dest_dir = os.path.dirname(dest_file)
-                if not os.path.exists(dest_dir):
-                    os.makedirs(dest_dir)
+                source_file = base_dir / file_paths[0]
+                dest_file = tmp_path / file_paths[1]
+                dest_dir = dest_file.parent
+                if not dest_dir.exists():
+                    dest_dir.mkdir()
 
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
         user_flow_script = integration_test_fixture.user_flow_script
-        script_source = os.path.join(
-            base_dir,
-            user_flow_script,
-        )
-        script_path = os.path.join(tmp_path, "test_script.py")
+        script_source = base_dir / user_flow_script
+
+        script_path = tmp_path / "test_script.py"
         shutil.copyfile(script_source, script_path)
         logger.debug(
             f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}"
         )
-        if not script_source.endswith(".py"):
+        if script_source.suffix != ".py":
             logger.error(f"{script_source} is not a python script!")
-            with open(script_path) as fp:
-                text = fp.read()
+            text = script_source.read_text()
             print(f"contents of script_path:\n\n{text}\n\n")
             return
 
         util_script = integration_test_fixture.util_script
         if util_script:
-            script_source = os.path.join(base_dir, util_script)
-            os.makedirs(os.path.join(tmp_path, "tests/"))
-            util_script_path = os.path.join(tmp_path, "tests/test_utils.py")
+            script_source = base_dir / util_script
+            tmp_path.joinpath("tests/").mkdir()
+            util_script_path = tmp_path / "tests/test_utils.py"
             shutil.copyfile(script_source, util_script_path)
 
         # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
-        loader = importlib.machinery.SourceFileLoader("test_script_module", script_path)
+        loader = importlib.machinery.SourceFileLoader(
+            "test_script_module", str(script_path)
+        )
         spec = importlib.util.spec_from_loader("test_script_module", loader)
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
@@ -546,7 +545,10 @@ def _execute_integration_test(
         os.chdir(workdir)
 
 
-def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
+def _check_for_skipped_tests(  # noqa: PLR0912
+    pytest_args,
+    integration_test_fixture,
+) -> None:
     """Enable scripts to be skipped based on pytest invocation flags."""
     dependencies = integration_test_fixture.backend_dependencies
     if not dependencies:

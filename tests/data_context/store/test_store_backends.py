@@ -1153,7 +1153,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
-        mock_str = mock_blob.download_as_string.return_value
+        mock_str = mock_blob.download_as_bytes.return_value
 
         my_store.get(("BBB",))
 
@@ -1162,7 +1162,7 @@ def test_TupleGCSStoreBackend():  # noqa: PLR0915
         mock_bucket.get_blob.assert_called_once_with(
             "this_is_a_test_prefix/my_file_BBB"
         )
-        mock_blob.download_as_string.assert_called_once()
+        mock_blob.download_as_bytes.assert_called_once()
         mock_str.decode.assert_called_once_with("utf-8")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:

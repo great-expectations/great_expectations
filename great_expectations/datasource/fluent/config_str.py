@@ -53,7 +53,7 @@ class ConfigStr(SecretStr):
 
     @classmethod
     def _validate_template_str_format(cls, v):
-        if TEMPLATE_STR_REGEX.match(v):
+        if TEMPLATE_STR_REGEX.search(v):
             return v
         raise ValueError(
             cls.__name__
