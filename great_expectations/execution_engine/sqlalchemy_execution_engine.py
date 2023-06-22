@@ -1379,24 +1379,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             # MARKER : the selectable is temp table
-            if batch_spec.get("sampling_method") is None and batch_spec.get("splitter_method") is None:
+            if (
+                batch_spec.get("sampling_method") is None
+                and batch_spec.get("splitter_method") is None
+            ):
                 # then the source table is a table
                 batch_data = SqlAlchemyBatchData(
                     execution_engine=self,
                     create_temp_table=create_temp_table,
                     table_name=source_table_name,
-                    schema_name=source_schema_name
+                    schema_name=source_schema_name,
                 )
             else:
                 selectable: Union[
-                sqlalchemy.Selectable, str
+                    sqlalchemy.Selectable, str
                 ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
                 batch_data = SqlAlchemyBatchData(
-                execution_engine=self,
-                selectable=selectable,
-                create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
+                    execution_engine=self,
+                    selectable=selectable,
+                    create_temp_table=create_temp_table,
+                    source_table_name=source_table_name,
+                    source_schema_name=source_schema_name,
                 )
 
         return batch_data, batch_markers
