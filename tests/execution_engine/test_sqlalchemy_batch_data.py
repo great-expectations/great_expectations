@@ -196,7 +196,7 @@ def test_instantiation_with_temp_table_schema():
         assert "test_schema" in query_to_create_temp_table
 
 
-def test_instantiation_with_temp_table_flag(sqlite_view_engine, sa):
+def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine, sa):
     """
     What does this test and why?
 

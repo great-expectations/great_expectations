@@ -148,9 +148,9 @@ class SqlAlchemyBatchData(BatchData):
                 table_name=table_name,
                 schema_name=schema_name,
             )
-        elif selectable is not None:
-            # directly use selectable if temp_tables are not created
-            self._selectable = selectable
+        # elif selectable is not None:
+        #     # directly use selectable if temp_tables are not created
+        #     self._selectable = selectable
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
