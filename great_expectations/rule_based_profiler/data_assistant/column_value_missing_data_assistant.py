@@ -190,7 +190,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         # )
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -372,7 +372,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         # )
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
@@ -545,12 +545,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         # TODO: <Alex>ALEX</Alex>
         parameter_builders: List[ParameterBuilder] = [
             # TODO: <Alex>ALEX</Alex>
-            # column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
-            # column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
-            # column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
-            # # TODO: <Alex>ALEX</Alex>
-            # column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
-            # # TODO: <Alex>ALEX</Alex>
+            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
+            column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
+            column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
+            column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
             # TODO: <Alex>ALEX</Alex>
         ]
         # TODO: <Alex>ALEX</Alex>
