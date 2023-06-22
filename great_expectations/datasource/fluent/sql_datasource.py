@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -423,6 +424,10 @@ class _SQLAsset(DataAsset):
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
         self.test_splitter_connection()
+        # persist the config changes
+        context: AbstractDataContext | None
+        if context := self._datasource._data_context:
+            context._save_project_config(self._datasource)
         return self
 
     @public_api
