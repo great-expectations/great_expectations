@@ -222,8 +222,8 @@ def _execute_standard_functions(
     if (
         sum(
             [
-                int(i)
-                for i in (
+                int(option)
+                for option in (
                     command_options.stop,
                     command_options.url,
                     command_options.bash,
