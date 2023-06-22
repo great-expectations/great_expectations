@@ -149,8 +149,7 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
-        elif source_table_name:
-            # how do you create this with our selectable?
+        elif selectable is not None:
             self._selectable = selectable
         else:
             if query:  # noqa: PLR5501
