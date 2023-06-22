@@ -141,11 +141,25 @@ def example_postgres(stop: bool, url: bool, bash: bool) -> None:
     default=False,
 )
 @click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+@click.option(
     "--metadata-store-bucket-name",
     help="Bucket name to use for metadata stores",
     default="",
 )
-def example_s3(stop: bool, url: bool, metadata_store_bucket_name: str) -> None:
+def example_s3(
+    stop: bool, url: bool, bash: bool, rebuild: bool, metadata_store_bucket_name: str
+) -> None:
     """Start an s3 example, using s3 as a datasource and optionally for metadata stores."""
     unset_env_vars = _check_aws_env_vars()
     if unset_env_vars:
@@ -154,15 +168,23 @@ def example_s3(stop: bool, url: bool, metadata_store_bucket_name: str) -> None:
         )
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "reference_environments" / "s3"
+    container_name = "gx_s3_example_jupyter"
     if stop:
         cli_message("<green>Shutting down...</green>")
         stop_commands = ["docker", "compose", "down"]
         subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done shutting down...</green>")
     elif url:
-        container_name = "gx_s3_example_jupyter"
         notebook_url = _get_jupyter_url(container_name, example_directory)
         cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
+    elif bash:
+        bash_commands = ["docker", "exec", "-it", container_name, "bash"]
+        subprocess.run(bash_commands, cwd=example_directory)
+    elif rebuild:
+        cli_message("<green>Rebuilding containers...</green>")
+        rebuild_commands = ["docker", "compose", "build"]
+        subprocess.run(rebuild_commands, cwd=example_directory)
+        cli_message("<green>Done rebuilding containers.</green>")
     else:
         cli_message(
             "<green>------------------------------------------------------------------------------------------</green>"
