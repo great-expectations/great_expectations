@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 from contextlib import contextmanager
 from pprint import pprint
 from typing import (
@@ -53,6 +54,8 @@ if TYPE_CHECKING:
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
 _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
+LOGGER = logging.getLogger(__name__)
+
 
 @contextmanager
 def _source(
@@ -99,6 +102,19 @@ def create_source() -> ContextManager:
 
 
 CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
+
+
+@pytest.fixture
+def mock_test_connection(monkeypatch: pytest.MonkeyPatch):
+    """Monkeypaches the test_connection method of the PostgresDatasource class to return True."""
+
+    def _mock_test_connection(self: PostgresDatasource) -> bool:
+        LOGGER.warning(
+            f"Mocked {self.__class__.__name__}.test_connection() called and returning True"
+        )
+        return True
+
+    monkeypatch.setattr(PostgresDatasource, "test_connection", _mock_test_connection)
 
 
 @pytest.mark.unit
