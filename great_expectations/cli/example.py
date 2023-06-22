@@ -119,7 +119,7 @@ def example_s3(stop: bool, metadata_store_bucket_name: str) -> None:
             f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
         )
     repo_root = pathlib.Path(__file__).parents[2]
-    example_directory = repo_root / "examples" / "s3"
+    example_directory = repo_root / "examples" / "reference_environments" / "s3"
     if stop:
         cli_message("<green>Shutting down...</green>")
         stop_commands = ["docker", "compose", "down"]
