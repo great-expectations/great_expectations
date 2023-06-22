@@ -4,7 +4,7 @@ services:
     container_name: gx_s3_example_jupyter
     build:
       context: .
-      dockerfile: gx_s3.Dockerfile
+      dockerfile: jupyter.Dockerfile
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
