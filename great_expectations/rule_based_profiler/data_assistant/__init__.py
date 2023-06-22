@@ -4,6 +4,9 @@ from .domain_builder_data_assistant import DomainBuilderDataAssistant  # isort:s
 from .column_value_uniqueness_data_assistant import (  # isort:skip
     ColumnValueUniquenessDataAssistant,
 )
+from .column_value_missing_data_assistant import (  # isort:skip
+    ColumnValueMissingDataAssistant,
+)
 from .column_value_nullity_data_assistant import (  # isort:skip
     ColumnValueNullityDataAssistant,
 )

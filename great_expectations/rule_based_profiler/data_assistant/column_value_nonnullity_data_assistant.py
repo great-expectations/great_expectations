@@ -161,19 +161,11 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
 
         # Step-2: Declare "ParameterBuilder" for every relevant metric of interest.
 
-        parameter_builders: List[ParameterBuilder] = []
-
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         )
-        parameter_builders.append(
-            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        )
         column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
-        )
-        parameter_builders.append(
-            column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
         )
 
         total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
@@ -185,18 +177,31 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
             ParameterBuilderConfig(
                 **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
+            # TODO: <Alex>ALEX</Alex>
             ParameterBuilderConfig(
                 **column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
+            # TODO: <Alex>ALEX</Alex>
         ]
         map_metric_name: str = "column_values.nonnull"
 
+        aggregation_method: str
+
+        aggregation_method = "aggregation_method_noop"
+
         column_values_nonnull_unexpected_count_fraction_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedMapMetricMultiBatchParameterBuilder(
-            name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             map_metric_name=map_metric_name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method=None,
+            # TODO: <Alex>ALEX</Alex>
+            unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # null_count_parameter_builder_name=None,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            aggregation_method=f"{VARIABLES_KEY}{aggregation_method}",
+            # TODO: <Alex>ALEX</Alex>
             false_positive_rate=None,
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
@@ -205,18 +210,24 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
-        parameter_builders.append(
-            column_values_nonnull_unexpected_count_fraction_metric_multi_batch_parameter_builder_for_metrics
-        )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
 
+        aggregation_method = "aggregation_method_quantile"
+
         column_values_nonnull_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedMapMetricMultiBatchParameterBuilder(
-            name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             map_metric_name=map_metric_name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method="quantile",
+            # TODO: <Alex>ALEX</Alex>
+            unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # null_count_parameter_builder_name=None,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            aggregation_method=f"{VARIABLES_KEY}{aggregation_method}",
+            # TODO: <Alex>ALEX</Alex>
             false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
             quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
             round_decimals=f"{VARIABLES_KEY}round_decimals",
@@ -228,12 +239,21 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
 
         # Step-4: Set up "UnexpectedMapMetricMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
 
+        aggregation_method = "aggregation_method_median"
+
         column_values_nonnull_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedMapMetricMultiBatchParameterBuilder(
-            name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             map_metric_name=map_metric_name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method="median",
+            # TODO: <Alex>ALEX</Alex>
+            unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # null_count_parameter_builder_name=None,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            aggregation_method=f"{VARIABLES_KEY}{aggregation_method}",
+            # TODO: <Alex>ALEX</Alex>
             false_positive_rate=None,
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
@@ -258,7 +278,7 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             mostly=f"{column_values_nonnull_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
-            condition=f"{column_values_nonnull_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_nonnull_unexpected_count_median_fraction",
+            condition=f"{column_values_nonnull_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_nonnull_unexpected_count_median_fraction & {column_values_nonnull_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_mostly",
             meta={
                 "profiler_details": {
                     "condition_estimator": f"{column_values_nonnull_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
@@ -270,10 +290,16 @@ class ColumnValueNonNullityDataAssistant(DataAssistant):
         # Step-6: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
 
         variables: dict = {
-            "false_positive_rate": 9.8e-1,
+            "false_positive_rate": 2.0e-2,
             "quantile_statistic_interpolation_method": "auto",
             "round_decimals": 2,
             "max_nonnull_unexpected_count_median_fraction": 2.0e-1,
+            "max_mostly": 4.0e-1,
+            # TODO: <Alex>ALEX</Alex>
+            "aggregation_method_noop": "noop",
+            "aggregation_method_quantile": "quantile",
+            "aggregation_method_median": "median",
+            # TODO: <Alex>ALEX</Alex>
         }
         parameter_builders: List[ParameterBuilder] = [
             column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,

@@ -17,9 +17,6 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.datasource.fluent.batch_request import BatchRequest
-    from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
-        DataAssistantRunner,
-    )
     from great_expectations.rule_based_profiler.data_assistant_result import (
         DataAssistantResult,
         DomainBuilderDataAssistantResult,
@@ -32,8 +29,11 @@ logger = logging.getLogger(__name__)
 class DataAssistantComposer:
     TASK_NAME_TO_JOB_CATEGORY_MAP: Final[Dict[str, str]] = {
         "uniqueness": "column_value_uniqueness",
-        "nullity": "column_value_nullity",
-        "nonnullity": "column_value_nonnullity",
+        # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # "nullity": "column_value_nullity",
+        # "nonnullity": "column_value_nonnullity",
+        # TODO: <Alex>ALEX</Alex>
         "categorical_two": "categorical",
         "categorical_very_few": "categorical",
         "numeric": "numeric",
@@ -87,12 +87,18 @@ class DataAssistantComposer:
         candidate_column_value_uniqueness_domains: List[Domain] = domains_by_rule_name[
             "column_value_uniqueness_domain_rule"
         ]
-        candidate_column_value_nullity_domains: List[Domain] = domains_by_rule_name[
-            "column_value_nullity_domain_rule"
-        ]
-        candidate_column_value_nonnullity_domains: List[Domain] = domains_by_rule_name[
-            "column_value_nonnullity_domain_rule"
-        ]
+        # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # candidate_column_value_nullity_domains: List[Domain] = domains_by_rule_name[
+        #     "column_value_nullity_domain_rule"
+        # ]
+        # candidate_column_value_nonnullity_domains: List[Domain] = domains_by_rule_name[
+        #     "column_value_nonnullity_domain_rule"
+        # ]
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        candidate_column_value_nullity_domains: List[Domain] = []
+        # TODO: <Alex>ALEX</Alex>
         candidate_numeric_columns_domains: List[Domain] = domains_by_rule_name[
             "numeric_columns_domain_rule"
         ]
@@ -217,18 +223,13 @@ class DataAssistantComposer:
             )
         )
 
-        column_value_nullity_domains: List[
-            Domain
-        ] = candidate_column_value_nullity_domains
-
-        column_value_nonnullity_domains: List[
-            Domain
-        ] = candidate_column_value_nonnullity_domains
-
         self._task_name_to_domain_list_map = {
             "uniqueness": column_value_uniqueness_domains,
-            "nullity": column_value_nullity_domains,
-            "nonnullity": column_value_nonnullity_domains,
+            # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # "nullity": column_value_nullity_domains,
+            # "nonnullity": column_value_nonnullity_domains,
+            # TODO: <Alex>ALEX</Alex>
             "categorical_two": categorical_columns_domains_two,
             "categorical_very_few": categorical_columns_domains_very_few,
             "numeric": numeric_columns_domains,
@@ -239,21 +240,32 @@ class DataAssistantComposer:
         self,
         task_name: str,
     ) -> DataAssistantResult:
-        domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
-
-        domains: Domain
-        include_column_names = [domain.domain_kwargs["column"] for domain in domains]
-
-        job_category: str = DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP[
-            task_name
-        ]
-        data_assistant_runner: DataAssistantRunner = getattr(
-            self._data_context.assistants, job_category
-        )
-
-        data_assistant_result: DataAssistantResult = data_assistant_runner.run(
+        # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
+        #
+        # domains: Domain
+        # include_column_names = [domain.domain_kwargs["column"] for domain in domains]
+        #
+        # job_category: str = DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP[
+        #     task_name
+        # ]
+        # data_assistant_runner: DataAssistantRunner = getattr(
+        #     self._data_context.assistants, job_category
+        # )
+        #
+        # data_assistant_result: DataAssistantResult = data_assistant_runner.run(
+        #     batch_request=self._batch_request,
+        #     include_column_names=include_column_names,
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        data_assistant_result: DataAssistantResult = self._data_context.assistants.column_value_nonnullity.run(
             batch_request=self._batch_request,
-            include_column_names=include_column_names,
+            # TODO: <Alex>ALEX</Alex>
+            # include_column_names=include_column_names,
+            # TODO: <Alex>ALEX</Alex>
         )
+        # TODO: <Alex>ALEX</Alex>
 
         return data_assistant_result

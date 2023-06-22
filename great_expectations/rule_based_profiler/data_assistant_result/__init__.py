@@ -5,6 +5,9 @@ from .domain_builder_data_assistant_result import (  # isort:skip
 from .column_value_uniqueness_data_assistant_result import (  # isort:skip
     ColumnValueUniquenessDataAssistantResult,
 )
+from .column_value_missing_data_assistant_result import (  # isort:skip
+    ColumnValueMissingDataAssistantResult,
+)
 from .column_value_nullity_data_assistant_result import (  # isort:skip
     ColumnValueNullityDataAssistantResult,
 )

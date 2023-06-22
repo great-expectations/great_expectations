@@ -285,6 +285,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 if "rule_based_profiler" in progress_bars:
                     disable = not progress_bars["rule_based_profiler"]
 
+        # TODO: <Alex>ALEX</Alex>
+        disable = True
+        # TODO: <Alex>ALEX</Alex>
         effective_variables: Optional[
             ParameterContainer
         ] = self.reconcile_profiler_variables(

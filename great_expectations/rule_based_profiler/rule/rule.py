@@ -146,6 +146,9 @@ class Rule(SerializableDictDot):
         for domain in pbar_method(
             domains,
             desc="Profiling Dataset:",
+            # TODO: <Alex>ALEX</Alex>
+            disable=True,
+            # TODO: <Alex>ALEX</Alex>
             position=1,
             leave=False,
             bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",

@@ -75,38 +75,41 @@ class DomainBuilderDataAssistant(DataAssistant):
                 min_max_unexpected_values_proportion=9.75e-1,
             )
         )
-        column_value_nullity_domain_rule: Rule = build_map_metric_domain_builder_rule(
-            rule_name="column_value_nullity_domain_rule",
-            map_metric_name="column_values.null",
-            include_column_names=None,
-            exclude_column_names=None,
-            include_column_name_suffixes=None,
-            exclude_column_name_suffixes=None,
-            semantic_type_filter_module_name=None,
-            semantic_type_filter_class_name=None,
-            include_semantic_types=None,
-            exclude_semantic_types=None,
-            max_unexpected_values=0,
-            max_unexpected_ratio=None,
-            min_max_unexpected_values_proportion=9.75e-1,
-        )
-        column_value_nonnullity_domain_rule: Rule = (
-            build_map_metric_domain_builder_rule(
-                rule_name="column_value_nonnullity_domain_rule",
-                map_metric_name="column_values.nonnull",
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                max_unexpected_values=0,
-                max_unexpected_ratio=None,
-                min_max_unexpected_values_proportion=9.75e-1,
-            )
-        )
+        # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # column_value_nullity_domain_rule: Rule = build_map_metric_domain_builder_rule(
+        #     rule_name="column_value_nullity_domain_rule",
+        #     map_metric_name="column_values.null",
+        #     include_column_names=None,
+        #     exclude_column_names=None,
+        #     include_column_name_suffixes=None,
+        #     exclude_column_name_suffixes=None,
+        #     semantic_type_filter_module_name=None,
+        #     semantic_type_filter_class_name=None,
+        #     include_semantic_types=None,
+        #     exclude_semantic_types=None,
+        #     max_unexpected_values=0,
+        #     max_unexpected_ratio=None,
+        #     min_max_unexpected_values_proportion=9.75e-1,
+        # )
+        # column_value_nonnullity_domain_rule: Rule = (
+        #     build_map_metric_domain_builder_rule(
+        #         rule_name="column_value_nonnullity_domain_rule",
+        #         map_metric_name="column_values.nonnull",
+        #         include_column_names=None,
+        #         exclude_column_names=None,
+        #         include_column_name_suffixes=None,
+        #         exclude_column_name_suffixes=None,
+        #         semantic_type_filter_module_name=None,
+        #         semantic_type_filter_class_name=None,
+        #         include_semantic_types=None,
+        #         exclude_semantic_types=None,
+        #         max_unexpected_values=0,
+        #         max_unexpected_ratio=None,
+        #         min_max_unexpected_values_proportion=9.75e-1,
+        #     )
+        # )
+        # TODO: <Alex>ALEX</Alex>
         numeric_columns_domain_rule: Rule = self._build_numeric_columns_domain_rule()
         datetime_columns_domain_rule: Rule = self._build_datetime_columns_domain_rule()
         text_columns_domain_rule: Rule = self._build_text_columns_domain_rule()
@@ -150,8 +153,10 @@ class DomainBuilderDataAssistant(DataAssistant):
         return [
             table_domain_rule,
             column_value_uniqueness_domain_rule,
-            column_value_nullity_domain_rule,
-            column_value_nonnullity_domain_rule,
+            # TODO: <Alex>ALEX</Alex>
+            # column_value_nullity_domain_rule,
+            # column_value_nonnullity_domain_rule,
+            # TODO: <Alex>ALEX</Alex>
             numeric_columns_domain_rule,
             datetime_columns_domain_rule,
             text_columns_domain_rule,
