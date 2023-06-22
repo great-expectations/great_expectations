@@ -29,6 +29,8 @@ class SqlAlchemyBatchData(BatchData):
         create_temp_table: bool = True,
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
+        source_schema_name: Optional[str] = None,
+        source_table_name: Optional[str] = None,
     ) -> None:
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -54,6 +56,12 @@ class SqlAlchemyBatchData(BatchData):
                     used if a temporary table is requested.
                 use_quoted_name (bool): \
                     If true, names should be quoted to preserve case sensitivity on databases that usually normalize them
+                source_table_name (str): \
+                    For SqlAlchemyBatchData based on selectables, source_table_name provides the name of the table on which
+                    the selectable is based. This is required for most kinds of table introspection (e.g. looking up column types)
+                source_schema_name (str): \
+                    For SqlAlchemyBatchData based on selectables, source_schema_name provides the name of the schema on which
+                    the selectable is based. This is required for most kinds of table introspection (e.g. looking up column types)
 
         The query that will be executed against the DB can be determined in any of three ways:
 
@@ -72,6 +80,8 @@ class SqlAlchemyBatchData(BatchData):
         self._engine = engine
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
+        self._source_table_name = source_table_name
+        self._source_schema_name = source_schema_name
 
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
