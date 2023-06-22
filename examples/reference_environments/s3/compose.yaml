@@ -1,6 +1,7 @@
 services:
   gx_sandbox:
     image: gx/s3
+    container_name: gx_s3_example_jupyter
     build:
       context: .
       dockerfile: gx_s3.Dockerfile

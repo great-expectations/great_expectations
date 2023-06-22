@@ -48,24 +48,7 @@ def example_snowflake(stop: bool, url: bool) -> None:
         cli_message("<green>Done stopping containers.</green>")
     elif url:
         container_name = "gx_snowflake_example_jupyter"
-        url_commands = [
-            "docker",
-            "exec",
-            container_name,
-            "jupyter",
-            "server",
-            "list",
-            "--json",
-        ]
-        url_json = subprocess.run(
-            url_commands,
-            cwd=example_directory,
-            capture_output=True,
-        ).stdout
-        raw_json = json.loads(url_json)
-        notebook_url = (
-            f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
-        )
+        notebook_url = _get_jupyter_url(container_name, example_directory)
         cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
     else:
         cli_message(
@@ -116,24 +99,7 @@ def example_postgres(stop: bool, url: bool, bash: bool) -> None:
         subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done stopping containers.</green>")
     elif url:
-        url_commands = [
-            "docker",
-            "exec",
-            container_name,
-            "jupyter",
-            "server",
-            "list",
-            "--json",
-        ]
-        url_json = subprocess.run(
-            url_commands,
-            cwd=example_directory,
-            capture_output=True,
-        ).stdout
-        raw_json = json.loads(url_json)
-        notebook_url = (
-            f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
-        )
+        notebook_url = _get_jupyter_url(container_name, example_directory)
         cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
     elif bash:
         bash_commands = ["docker", "exec", "-it", container_name, "bash"]
@@ -169,11 +135,17 @@ def example_postgres(stop: bool, url: bool, bash: bool) -> None:
     default=False,
 )
 @click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+@click.option(
     "--metadata-store-bucket-name",
     help="Bucket name to use for metadata stores",
     default="",
 )
-def example_s3(stop: bool, metadata_store_bucket_name: str) -> None:
+def example_s3(stop: bool, url: bool, metadata_store_bucket_name: str) -> None:
     """Start an s3 example, using s3 as a datasource and optionally for metadata stores."""
     unset_env_vars = _check_aws_env_vars()
     if unset_env_vars:
@@ -187,7 +159,14 @@ def example_s3(stop: bool, metadata_store_bucket_name: str) -> None:
         stop_commands = ["docker", "compose", "down"]
         subprocess.run(stop_commands, cwd=example_directory)
         cli_message("<green>Done shutting down...</green>")
+    elif url:
+        container_name = "gx_s3_example_jupyter"
+        notebook_url = _get_jupyter_url(container_name, example_directory)
+        cli_message(f"<green>Url for jupyter notebook:</green> {notebook_url}")
     else:
+        cli_message(
+            "<green>------------------------------------------------------------------------------------------</green>"
+        )
         cli_message("<green>Setting up s3 example...</green>")
         if metadata_store_bucket_name:
             cli_message(
@@ -195,8 +174,38 @@ def example_s3(stop: bool, metadata_store_bucket_name: str) -> None:
             )
         else:
             cli_message("<green>Using local metadata stores.</green>")
-        example_setup_file = example_directory / "setup_s3.sh"
-        subprocess.run(example_setup_file, cwd=example_directory)
+
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+        )
+        cli_message(
+            "<green>------------------------------------------------------------------------------------------</green>"
+        )
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
+
+
+def _get_jupyter_url(container_name: str, example_directory: pathlib.Path) -> str:
+    url_commands = [
+        "docker",
+        "exec",
+        container_name,
+        "jupyter",
+        "server",
+        "list",
+        "--json",
+    ]
+    url_json = subprocess.run(
+        url_commands,
+        cwd=example_directory,
+        capture_output=True,
+    ).stdout
+    raw_json = json.loads(url_json)
+    notebook_url = f"http://127.0.0.1:{raw_json['port']}/lab?token={raw_json['token']}"
+    return notebook_url
 
 
 def _check_aws_env_vars() -> set[str]:
