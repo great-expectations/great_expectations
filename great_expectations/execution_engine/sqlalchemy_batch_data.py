@@ -150,12 +150,13 @@ class SqlAlchemyBatchData(BatchData):
                 schema=temp_table_schema_name,
             )
         elif selectable is not None:
-            self._selectable = selectable
+            if record_set_name:
+                self._selectable = selectable.alias(self._record_set_name)
+            else:
+                self._selectable = selectable
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
-            else:
-                self._selectable = selectable.alias(self._record_set_name)
 
     @property
     def dialect(self) -> GXSqlDialect:
