@@ -42,6 +42,56 @@
 
     /* enlarge the sidebar width */
     --doc-sidebar-width: 350px !important;
+    
+     /* Colors */
+      --white: #fff;
+      --black: #000;
+      --blue-100: #eefaff;
+      --blue-200: #dff5ff;
+      --blue-300: #bfeaff;
+      --blue-400: #6eceff;
+      --blue-500: #32b8fb;
+      --blue-600: #00a7fb;
+      --blue-700: #008ace;
+      --blue-800: #005580;
+      --blue-900: #00273b;
+      --purple-100: #f5f2fc;
+      --purple-200: #ece6f9;
+      --purple-300: #dbcdf6;
+      --purple-400: #c2aef0;
+      --purple-500: #9478d2;
+      --purple-600: #7352ba;
+      --purple-700: #59418d;
+      --purple-800: #3f2971;
+      --purple-900: #1a0d36;
+      --mint-100: #effbf9;
+      --mint-200: #cff2ec;
+      --mint-300: #9ee5d9;
+      --mint-400: #6fd7c6;
+      --mint-500: #4fceba;
+      --mint-600: #30b09c;
+      --mint-700: #26907f;
+      --mint-800: #1b6054;
+      --mint-900: #134038;
+      --orange-100: #fdf3ef;
+      --orange-200: #ffe0d5;
+      --orange-300: #ffc1ad;
+      --orange-400: #fea285;
+      --orange-500: #ff865e;
+      --orange-600: #ff6632;
+      --orange-700: #f53d01;
+      --orange-800: #cc3201;
+      --orange-900: #791f00;
+      --gray-100: #f2f4f7;
+      --gray-200: #e9ebf0;
+      --gray-300: #dadce0;
+      --gray-400: #c4c7cd;
+      --gray-500: #9ba0a8;
+      --gray-600: #858993;
+      --gray-700: #65686f;
+      --gray-800: #414246;
+      --gray-900: #1a1c1f;
+    
 }
 
 /* override huge h1 */
@@ -270,10 +320,10 @@ table.borderless tr:nth-child(2n) {
 
 div[role="tabpanel"]{
    --ifm-code-background: var(--ifm-alert-background-color-highlight);
-    border-radius: var(--ifm-alert-border-radius);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px 0px;
+    border-radius: 0;
+    box-shadow:none;
     border-top: 0;
-    padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
+    padding: 0;
 }
 
 .tooltip {
