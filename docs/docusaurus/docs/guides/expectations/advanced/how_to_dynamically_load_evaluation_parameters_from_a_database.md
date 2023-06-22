@@ -7,11 +7,13 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create an <TechnicalTag tag="expectation" text="Expectation" /> that loads part of its Expectation configuration from a database at runtime. Using a dynamic <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameter" /> makes it possible to maintain part of an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> in a shared database.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- Obtained credentials for a database to query for dynamic values
-- Identified a SQL query that will return values for your expectation configuration.
+- [A working deployment of Great Expectations](/docs/guides/setup/setup_overview).
+- Credentials for a database to query for dynamic values.
+- A SQL query to return values for your expectation configuration.
 
 </Prerequisites>
 

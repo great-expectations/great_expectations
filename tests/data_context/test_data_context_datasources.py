@@ -1,9 +1,9 @@
 import pathlib
 from unittest import mock
-import great_expectations as gx
 
 import pytest
 
+import great_expectations as gx
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -453,3 +453,21 @@ def test_list_datasources() -> None:
     context.sources.add_pandas(datasource_name)
 
     assert len(context.list_datasources()) == 2
+
+
+@pytest.mark.integration
+def test_get_available_data_assets_names(empty_data_context) -> None:
+    datasource_name = "my_fluent_pandas_datasource"
+    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    asset_name = "test_data_frame"
+    datasource.add_dataframe_asset(name=asset_name)
+
+    assert len(empty_data_context.get_available_data_asset_names()) == 1
+
+    data_asset_names = dict(
+        empty_data_context.get_available_data_asset_names(
+            datasource_names=datasource_name
+        )
+    )
+
+    assert asset_name in data_asset_names[datasource_name]

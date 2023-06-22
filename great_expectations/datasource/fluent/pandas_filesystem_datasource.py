@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
@@ -31,6 +29,11 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     data_connector_type: ClassVar[
         Type[FilesystemDataConnector]
     ] = FilesystemDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "base_directory",
+        "data_context_root_directory",
+    }
 
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"

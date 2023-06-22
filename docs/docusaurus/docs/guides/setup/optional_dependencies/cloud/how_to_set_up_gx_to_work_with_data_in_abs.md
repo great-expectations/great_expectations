@@ -26,18 +26,11 @@ import AbsInstallDependencies from '/docs/components/setup/dependencies/_abs_ins
 <!-- ### 4. Verify that GX has been installed correctly -->
 import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
 
-<!-- ### 5. Initialize a Data Context to store your Azure Storage credentials -->
-import InitializeDataContextFromCli from '/docs/components/setup/data_context/_filesystem_data_context_initialize_with_cli.md'
-import VerifyDataContextInitializedFromCli from '/docs/components/setup/data_context/_filesystem_data_context_verify_initialization_from_cli.md'
-
-<!-- ### 6. Configure the `config_variables.yml` file with your Azure Storage credentials -->
+<!-- ### 5. Configure the `config_variables.yml` file with your Azure Storage credentials -->
 import AbsConfigureCredentialsInDataContext from '/docs/components/setup/dependencies/_abs_configure_credentials_in_data_context.md'
-
 
 <!-- ## Next steps -->
 import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
-
-## Introduction
 
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored in Azure Blob Storage.
 
@@ -47,7 +40,6 @@ This guide will walk you through best practices for creating your GX Python envi
 
 - The ability to install Python modules with pip
 - <PrereqAbsConfiguredAnAbsAccount />
-- A passion for data quality
 
 </Prerequisites>
 
@@ -71,17 +63,7 @@ This guide will walk you through best practices for creating your GX Python envi
 
 <GxVerifyInstallation />
 
-### 5. Initialize a Data Context to store your Azure Storage credentials
-
-<InitializeDataContextFromCli />
-
-:::info Verifying the Data Context initialized successfully
-
-<VerifyDataContextInitializedFromCli />
-
-:::
-
-### 6. Configure the `config_variables.yml` file with your Azure Storage credentials
+### 5. Configure the `config_variables.yml` file with your Azure Storage credentials
 
 <AbsConfigureCredentialsInDataContext />
 

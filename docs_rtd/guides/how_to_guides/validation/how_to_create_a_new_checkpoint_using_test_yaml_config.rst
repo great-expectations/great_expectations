@@ -266,7 +266,7 @@ Steps
                 """
 
 
-           To run this Checkpoint, the `batch_request` with the `batch_data` nested under the `runtime_parameters` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the the data to be validated is accessible only dynamically during the execution of the pipeline.
+           To run this Checkpoint, the `batch_request` with the `batch_data` nested under the `runtime_parameters` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the data to be validated is accessible only dynamically during the execution of the pipeline.
 
            .. code-block:: python
 

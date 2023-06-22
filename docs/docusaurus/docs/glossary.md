@@ -21,8 +21,6 @@ title: "Glossary of Terms"
 
 [**Data Assistant:**](./terms/data_assistant.md) A utility that asks questions about your data, gathering information to describe what is observed, and then presents Metrics and proposes Expectations based on the answers.
 
-[**Data Connector:**](./terms/data_connector.md) Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
-
 [**Data Context:**](./terms/data_context.md) The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 
 [**Data Docs:**](./terms/data_docs.md) Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.

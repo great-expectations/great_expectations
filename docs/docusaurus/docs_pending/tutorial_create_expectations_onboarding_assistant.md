@@ -6,11 +6,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
-:::note Prerequisites
+Prerequisites
 
-- Completed [Step 2: Connect to Data](./tutorial_connect_to_data.md) of this tutorial.
+- Completion of [Step 2: Connect to Data](./tutorial_connect_to_data.md)
 
-:::
 
 <TechnicalTag relative="../../" tag="expectation" text="Expectations" /> are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
 

@@ -128,7 +128,6 @@ class GXExecutionEnvironment:
         """
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
-
             package_version: Optional[version.Version]
             installed: bool
             if dependency_name in self._get_all_installed_packages():

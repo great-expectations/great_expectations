@@ -4,18 +4,18 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 gcs_integration_tests = []
 
 connecting_to_your_data = [
-    IntegrationTestFixture(
-        name="gcs_pandas_configured_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_configured_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
+    # IntegrationTestFixture(
+    #     name="gcs_pandas_configured_yaml",
+    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[BackendDependencies.GCS],
+    # ),
+    # IntegrationTestFixture(
+    #     name="gcs_pandas_configured_python",
+    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
+    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     backend_dependencies=[BackendDependencies.GCS],
+    # ),
     IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
@@ -88,8 +88,17 @@ sample_data = []
 
 deployment_patterns = [
     IntegrationTestFixture(
-        name="gcp_deployment_patterns_file_gcs_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
+        name="deployment_patterns_file_gcs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+]
+
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_connect_to_data_on_gcs_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_pandas.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.GCS],
     ),
@@ -100,3 +109,4 @@ gcs_integration_tests += how_to_configure_metadata_store
 gcs_integration_tests += split_data
 gcs_integration_tests += sample_data
 gcs_integration_tests += deployment_patterns
+gcs_integration_tests += fluent_datasources

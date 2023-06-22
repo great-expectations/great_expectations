@@ -9,9 +9,8 @@ from pydantic import ValidationError
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent import BatchRequest, PandasDatasource
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
     DataAsset,
     Datasource,
     HeadData,
@@ -239,7 +238,7 @@ def run_multibatch_data_assistant_and_checkpoint(
     )
 
 
-def run_batch_head(
+def run_batch_head(  # noqa: PLR0915
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
@@ -268,7 +267,7 @@ def run_batch_head(
         results: Dict[Tuple[str, str, str], MetricValue]
 
         table_columns_metric, results = get_table_columns_metric(
-            engine=execution_engine
+            execution_engine=execution_engine
         )
         metrics.update(results)
 
@@ -347,7 +346,7 @@ def _configure_and_run_data_assistant(
 ) -> tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
     context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    data_assistant_result = context.assistants.onboarding.run(  # type: ignore[attr-defined] # no attribute .run
+    data_assistant_result = context.assistants.onboarding.run(
         batch_request=batch_request,
         numeric_columns_rule={
             "estimator": "exact",

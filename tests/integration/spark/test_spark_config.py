@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from packaging.version import Version, parse as parse_version
 
@@ -27,7 +27,7 @@ def test_current_pyspark_version_installed(spark_session):
 
 def test_spark_config_datasource(spark_session_v012):
     name: str = "great_expectations-ds-config"
-    spark_config: Dict[str, str] = {
+    spark_config: Dict[str, Any] = {
         "spark.app.name": name,
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "768m",
@@ -49,7 +49,7 @@ def test_spark_config_datasource(spark_session_v012):
 
 def test_spark_config_execution_engine(spark_session):
     old_app_id = spark_session.sparkContext.applicationId
-    new_spark_config: Dict[str, str] = {
+    new_spark_config: Dict[str, Any] = {
         "spark.app.name": "great_expectations-ee-config",
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "512m",

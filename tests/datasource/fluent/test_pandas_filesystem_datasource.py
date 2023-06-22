@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
+        BatchSlice,
         SortersDefinition,
     )
 
@@ -62,17 +63,6 @@ def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasour
     )
     pandas_filesystem_datasource._data_context = empty_data_context
     return pandas_filesystem_datasource
-
-
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    abs_csv_path = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
-    return abs_csv_path
 
 
 class SpyInterrupt(RuntimeError):
@@ -118,9 +108,7 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param(
-                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
-            ),
+            param("read_fwf"),
             param("read_gbq", marks=pytest.mark.xfail(reason="not path based")),
             param("read_hdf"),
             param("read_html"),
@@ -675,6 +663,42 @@ def test_pandas_sorter(
             metadata = batches[batch_index].metadata
             assert metadata[key1] == range1
             assert metadata[key2] == range2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "batch_slice,expected_batch_count",
+    [
+        ("[-3:]", 3),
+        ("[5:9]", 4),
+        ("[:10:2]", 5),
+        (slice(-3, None), 3),
+        (slice(5, 9), 4),
+        (slice(0, 10, 2), 5),
+        ("-5", 1),
+        ("-1", 1),
+        (11, 1),
+        (0, 1),
+        ([3], 1),
+        (None, 12),
+        ("", 12),
+    ],
+)
+def test_pandas_slice_batch_count(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    batch_slice: BatchSlice,
+    expected_batch_count: int,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    batch_request = asset.build_batch_request(
+        options={"year": "2019"},
+        batch_slice=batch_slice,
+    )
+    batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+    assert len(batches) == expected_batch_count
 
 
 def bad_batching_regex_config(

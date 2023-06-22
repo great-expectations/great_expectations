@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Sequence
 
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
@@ -21,27 +21,44 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
+
 logger = logging.getLogger(__name__)
+
+
+class ActionDetails(TypedDict):
+    class_name: str
+    site_names: NotRequired[list[str]]
+    slack_webhook: NotRequired[Any]
+    notify_on: NotRequired[Any]
+    notify_with: NotRequired[list[str] | str | None]
+    renderer: NotRequired[dict]
 
 
 class ActionDict(TypedDict):
     name: str
-    action: dict[str, Any]
+    action: ActionDetails
 
 
 class ActionDicts:
-    STORE_VALIDATION_RESULT: ActionDict = {
+    STORE_VALIDATION_RESULT: ClassVar[ActionDict] = {
         "name": "store_validation_result",
         "action": {"class_name": "StoreValidationResultAction"},
     }
-    STORE_EVALUATION_PARAMS: ActionDict = {
+    STORE_EVALUATION_PARAMS: ClassVar[ActionDict] = {
         "name": "store_evaluation_params",
         "action": {"class_name": "StoreEvaluationParametersAction"},
     }
-    UPDATE_DATA_DOCS: ActionDict = {
+    UPDATE_DATA_DOCS: ClassVar[ActionDict] = {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        "action": {"class_name": "UpdateDataDocsAction"},
     }
+    DEFAULT_ACTION_LIST: ClassVar[Sequence[ActionDict]] = (
+        STORE_VALIDATION_RESULT,
+        STORE_EVALUATION_PARAMS,
+        UPDATE_DATA_DOCS,
+    )
 
     @staticmethod
     def build_slack_action(webhook, notify_on, notify_with) -> ActionDict:
@@ -66,7 +83,7 @@ class SimpleCheckpointConfigurator:
     Checkpoint.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         data_context,
@@ -206,7 +223,7 @@ class SimpleCheckpointConfigurator:
         are intentionally hiding this from users of SimpleCheckpoint by having a
         default of "all" that sets the configuration appropriately.
         """
-        _notify_with = self.notify_with
+        _notify_with: str | list[str] | None = self.notify_with
         if self.notify_with == "all":
             _notify_with = None
         action_list.append(

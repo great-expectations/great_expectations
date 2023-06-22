@@ -1,7 +1,9 @@
 import os
 
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
+from great_expectations.datasource.fluent import (
+    BatchRequest as FluentBatchRequest,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -16,28 +18,14 @@ yaml = YAMLHandler()
 context = gx.get_context()
 
 # Add datasource for all tests
-datasource_yaml = """
-name: taxi_datasource
-class_name: Datasource
-module_name: great_expectations.datasource
-execution_engine:
-  module_name: great_expectations.execution_engine
-  class_name: PandasExecutionEngine
-data_connectors:
-  default_inferred_data_connector_name:
-    class_name: InferredAssetFilesystemDataConnector
-    base_directory: ../data/
-    default_regex:
-      group_names:
-        - data_asset_name
-      pattern: (.*)\\.csv
-  default_runtime_data_connector_name:
-    class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
-"""
-context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.load(datasource_yaml))
+context.sources.add_pandas_filesystem(
+    "taxi_datasource",
+    base_directory="./data",
+).add_csv_asset(
+    "taxi_asset",
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+)
+
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
@@ -51,8 +39,10 @@ run_name_template: "%Y-%M-foo-bar-template"
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
     expectation_suite_name: my_expectation_suite
     action_list:
       - name: <ACTION NAME FOR STORING VALIDATION RESULTS>
@@ -121,10 +111,10 @@ assert typed_results == results
 # A few different Checkpoint examples
 os.environ["VAR"] = "ge"
 
-batch_request = BatchRequest(
+batch_request = FluentBatchRequest(
     datasource_name="taxi_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="yellow_tripdata_sample_2019-01",
+    data_asset_name="taxi_asset",
+    options={"year": "2019", "month": "01"},
 )
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="my_expectation_suite"
@@ -153,8 +143,10 @@ run_name_template: "%Y-%M-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
     expectation_suite_name: my_expectation_suite
     action_list:
       - name: store_validation_result
@@ -206,12 +198,16 @@ run_name_template: "%Y-%M-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-02
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "02"
 expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
@@ -252,28 +248,28 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
+
 assert first_expectation_suite == "my_expectation_suite"
-assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_expectation_suite"
-assert second_data_asset == "yellow_tripdata_sample_2019-02"
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01
-
-print(second_expectation_suite)
-my_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
+assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
@@ -312,16 +308,16 @@ results = context.run_checkpoint(
         {
             "batch_request": {
                 "datasource_name": "taxi_datasource",
-                "data_connector_name": "default_inferred_data_connector_name",
-                "data_asset_name": "yellow_tripdata_sample_2019-01",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "01"},
             },
             "expectation_suite_name": "my_expectation_suite",
         },
         {
             "batch_request": {
                 "datasource_name": "taxi_datasource",
-                "data_connector_name": "default_inferred_data_connector_name",
-                "data_asset_name": "yellow_tripdata_sample_2019-02",
+                "data_asset_name": "taxi_asset",
+                "options": {"year": "2019", "month": "02"},
             },
             "expectation_suite_name": "my_other_expectation_suite",
         },
@@ -337,33 +333,32 @@ first_expectation_suite = first_validation_result["meta"]["expectation_suite_nam
 first_data_asset = first_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert first_expectation_suite == "my_expectation_suite"
-assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_other_expectation_suite"
-assert second_data_asset == "yellow_tripdata_sample_2019-02"
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2 just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01
-
-print(second_expectation_suite)
-my_other_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
+assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
 
 context.add_or_update_expectation_suite("my_expectation_suite")
@@ -379,13 +374,17 @@ template_name: my_base_checkpoint
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
     expectation_suite_name: my_expectation_suite
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-02
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "02"
     expectation_suite_name: my_other_expectation_suite
 # </snippet>
 """
@@ -403,35 +402,33 @@ first_expectation_suite = first_validation_result["meta"]["expectation_suite_nam
 first_data_asset = first_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert first_expectation_suite == "my_expectation_suite"
-assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_other_expectation_suite"
-assert second_data_asset == "yellow_tripdata_sample_2019-02"
+assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3 just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01"
-
-print(second_expectation_suite)
-my_other_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
-# </snippet>
-
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
 using_simple_checkpoint = """
@@ -442,8 +439,10 @@ class_name: SimpleCheckpoint
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
     expectation_suite_name: my_expectation_suite
 site_names: all
 slack_webhook: <YOUR SLACK WEBHOOK URL>
@@ -465,16 +464,17 @@ validation_result = list(results.run_results.items())[0][1]["validation_result"]
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+batch_identifiers = validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert expectation_suite == "my_expectation_suite"
-assert data_asset == "yellow_tripdata_sample_2019-01"
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_4">
-documentation_results: str = """
-print(expectation_suite)
-my_expectation_suite
-"""
+assert data_asset == "taxi_asset"
+assert batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
@@ -486,8 +486,10 @@ class_name: Checkpoint
 validations:
   - batch_request:
       datasource_name: taxi_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01
+      data_asset_name: taxi_asset
+      options:
+        year: "2019"
+        month: "01"
     expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
@@ -524,19 +526,15 @@ validation_result = list(results.run_results.items())[0][1]["validation_result"]
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+batch_identifiers = validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert expectation_suite == "my_expectation_suite"
-assert data_asset == "yellow_tripdata_sample_2019-01"
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_5">
-documentation_results: str = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results">
-print(expectation_suite)
-my_expectation_suite
-
-print(data_asset)
-yellow_tripdata_sample_2019-01"
-# </snippet>
-"""
+assert data_asset == "taxi_asset"
+assert batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
 # </snippet>

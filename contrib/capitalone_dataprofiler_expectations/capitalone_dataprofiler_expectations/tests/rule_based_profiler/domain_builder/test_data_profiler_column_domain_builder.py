@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
-from capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
+from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
 from capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
     DataProfilerColumnDomainBuilder,
 )
@@ -19,7 +19,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import FileDataContext
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
-    VARIABLES_KEY,
     ParameterContainer,
     build_parameter_container_for_variables,
 )
@@ -55,9 +54,16 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     )
 
     variables_configs: dict = {
-        "estimator": "quantiles",
-        "false_positive_rate": 1.0e-2,
-        "mostly": 1.0,
+        "strict_min": False,
+        "strict_max": False,
+        "profile_path": profile_path,
+        "profile_report_filtering_key": "data_type",
+        "profile_report_accepted_filtering_values": [
+            "int",
+            "float",
+            "string",
+            "datetime",
+        ],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -71,7 +77,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=profile_path,
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -325,6 +330,13 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_default_refere
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "profile_report_filtering_key": "data_type",
+        "profile_report_accepted_filtering_values": [
+            "int",
+            "float",
+            "string",
+            "datetime",
+        ],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -587,10 +599,17 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "profile_report_filtering_key": "data_type",
+        "profile_report_accepted_filtering_values": [
+            "int",
+            "float",
+            "string",
+            "datetime",
+        ],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -604,7 +623,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -854,10 +872,17 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "profile_report_filtering_key": "data_type",
+        "profile_report_accepted_filtering_values": [
+            "int",
+            "float",
+            "string",
+            "datetime",
+        ],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -871,7 +896,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         exclude_column_names=[
             "store_and_fwd_flag",
             "congestion_surcharge",
@@ -1057,10 +1081,17 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "profile_report_filtering_key": "data_type",
+        "profile_report_accepted_filtering_values": [
+            "int",
+            "float",
+            "string",
+            "datetime",
+        ],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -1074,7 +1105,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         data_context=data_context,
     )
     with mock.patch(

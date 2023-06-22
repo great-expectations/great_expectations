@@ -9,9 +9,11 @@ They are evaluated for an entire Batch, and answer a semantic question about the
 
 This guide will walk you through the process of creating your own custom `BatchExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
@@ -150,11 +152,9 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"strict": True}` in the example above is equivalent to `expect_batch_columns_to_be_unique(strict=True)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
-
-<details>
-<summary><code>test_backends</code>?</summary>
-<code>test_backends</code> is an optional key you can pass to offer more granular control over which backends and SQL dialects your tests are run against.
-</details>
+* `only_for` (optional): the list of backends that the Expectation should use for testing
+* `suppress_test_for` (optional): the list of backends that the Expectation should not use for testing
+* `only_for` and `suppres_test_for` can be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, and so on)
 
 If you run your Expectation file again, you won't see any new checkmarks, as the logic for your Custom Expectation hasn't been implemented yet. 
 However, you should see that the tests you've written are now being caught and reported in your checklist:
@@ -287,7 +287,7 @@ Completeness checklist for ExpectBatchColumnsToBeUnique:
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
-If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+If you've [set up your dev environment](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
@@ -319,8 +319,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </div>
 
 ### 9. Contribution (Optional)
-
-This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 

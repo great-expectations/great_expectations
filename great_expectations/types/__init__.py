@@ -4,11 +4,12 @@ from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
+import pydantic
 
 from great_expectations.compatibility import pyspark
 
-from ..alias_types import JSONValues  # noqa: TCH001
-from ..core._docs_decorators import public_api  # noqa: F401
+from ..alias_types import JSONValues
+from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
@@ -118,7 +119,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists or tuples
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
@@ -140,15 +141,21 @@ class DictDot:
             )
         }
         for key, value in new_dict.items():
+            if isinstance(value, pydantic.BaseModel):
+                new_dict[key] = value.dict()
+
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
 
             if isinstance(value, Enum):
                 new_dict[key] = value.value
 
-            if isinstance(value, list) or isinstance(value, tuple):
+            if isinstance(value, list) or isinstance(value, tuple):  # noqa: PLR1701
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
+                    if isinstance(value, pydantic.BaseModel):
+                        new_dict[key][i] = element.dict()
+
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
 

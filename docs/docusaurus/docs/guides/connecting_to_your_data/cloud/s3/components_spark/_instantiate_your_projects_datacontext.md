@@ -7,4 +7,4 @@ Import these necessary packages and modules.
 
 <SparkDataContextNote />
 
-Please proceed only after you have instantiated your `DataContext`.
+Proceed after you have instantiated your `DataContext`.

@@ -39,8 +39,6 @@ import VerifyDataContextInitializedFromCli from '/docs/components/setup/data_con
 [//]: # (TODO: import FurtherConfiguration from '/docs/components/setup/next_steps/_links_after_installing_gx.md')
 
 
-## Introduction
-
 <IntroInstallPythonGxAndDependencies dependencies="Athena" />
 
 ## Prerequisites
@@ -48,8 +46,6 @@ import VerifyDataContextInitializedFromCli from '/docs/components/setup/data_con
 <Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - The ability to install Python modules with pip
-- 
-- A passion for data quality
 
 </Prerequisites>
 

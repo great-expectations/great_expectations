@@ -25,7 +25,6 @@ def is_ip_address_in_network(addr: str, ip_network) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesIpAddressInNetwork(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.ip_address_in_network"
     condition_value_keys = ("ip_network",)

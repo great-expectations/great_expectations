@@ -4,33 +4,32 @@ title: How to configure an Expectation Store to use Azure Blob Storage
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder. This guide will help you configure Great Expectations to store them in Azure Blob Storage.
+By default, new <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  Use the information provided here to configure a new storage location for Expectations in Azure Blob Storage.
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your Expectations.
-- Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
+- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
 </Prerequisites>
     
+## 1. Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
-## Steps
-
-### 1. Configure the ``config_variables.yml`` file with your Azure Storage credentials
-
-We recommend that Azure Storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables).
+GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials below the ``AZURE_STORAGE_CONNECTION_STRING`` key:
 
 ```yaml
 AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
 ```
+To learn more about the additional options for configuring the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../../setup/configuring_data_contexts/how_to_configure_credentials.md)
 
+## 2. Identify your Data Context Expectations Store
 
-### 2. Identify your Data Context Expectations Store
-
-In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a <TechnicalTag tag="store" text="Store" /> called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+Your Expectations Store configuration is provided in your <TechnicalTag tag="data_context" text="Data Context" />. Open ``great_expectations.yml`` and find the following entry:
 
 ```yaml
 expectations_store_name: expectations_store
@@ -43,10 +42,11 @@ stores:
           base_directory: expectations/
 ```
 
+This configuration tells Great Expectations to look for Expectations in a Store named ``expectations_store``. The default ``base_directory`` for ``expectations_store`` is ``expectations/``.
 
-### 3. Update your configuration file to include a new Store for Expectations on Azure Storage account
+## 3. Update your configuration file to include a new Store for Expectations
 
-In our case, the name is set to ``expectations_AZ_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleAzureBlobStoreBackend``,  ``container`` will be set to the name of your blob container (the equivalent of S3 bucket for Azure) you wish to store your expectations, ``prefix`` will be set to the folder in the container where Expectation files will be located, and ``connection_string`` will be set to ``${AZURE_STORAGE_CONNECTION_STRING}``, which references the corresponding key in the ``config_variables.yml`` file.
+In the following example, ``expectations_store_name`` is set to ``expectations_AZ_store``, but it can be personalized.  You also need to change the ``store_backend`` settings.  The ``class_name`` is ``TupleAzureBlobStoreBackend``, ``container`` is the name of your blob container where Expectations are stored, ``prefix`` is the folder in the container where Expectations are located, and ``connection_string`` is ``${AZURE_STORAGE_CONNECTION_STRING}`` to reference the corresponding key in the ``config_variables.yml`` file.
 
 ```yaml
 expectations_store_name: expectations_AZ_store
@@ -62,17 +62,14 @@ stores:
 ```
 
 :::note
-If the container is called ``$web`` (for [hosting and sharing Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+If the container for [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) is named ``$web``, use ``container: \$web`` to allow access to the ``$web``container.
 :::
 
-:::note
-Various authentication and configuration options are available as documented in [hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
-:::
+Additional authentication and configuration options are available. See [Hosting and sharing Data Docs on Azure Blob Storage](../../setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
 
+## 4. Copy existing Expectation JSON files to the Azure blob (Optional)
 
-### 4. Copy existing Expectation JSON files to the Azure blob (This step is optional)
-
-One way to copy Expectations into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the Azure blob.   Information on other ways to copy Expectation JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).
+You can use the ``az storage blob upload`` command to copy Expectations into Azure Blob Storage. The following command copies the Expectation ``exp1`` from a local folder to Azure Blob Storage: 
 
 ```bash
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -86,35 +83,27 @@ Finished[#############################################################]  100.000
 "lastModified": "2021-03-06T10:55:33+00:00"
 }
 ```
+To learn more about other methods that are available to copy Expectation JSON files into Azure Blob Storage, see [Introduction to Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).
 
+## 5. Confirm that the new Expectation Suites have been added
 
-### 5. Confirm that the new Expectations Store has been added by running ``great_expectations store list``
+If you copied your existing Expectation Suites to Azure Blob Storage, run the following Python command to confirm that Great Expectations can find them:
 
-Notice the output contains two <TechnicalTag tag="expectation_store" text="Expectation Stores" />: the original ``expectations_store`` on the local filesystem and the ``expectations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in Azure Blob as long as we set the ``expectations_store_name`` variable to ``expectations_AZ_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
+<!--A snippet is required for this code block.-->
 
-```bash
-great_expectations store list
+```python
+import great_expectations as gx
 
-- name: expectations_store
- class_name: ExpectationsStore
- store_backend:
-   class_name: TupleFilesystemStoreBackend
-   base_directory: expectations/
-
-- name: expectations_AZ_store
- class_name: ExpectationsStore
- store_backend:
-   class_name: TupleAzureBlobStoreBackend
-   connection_string: DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>
-   container: <blob-container>
-   prefix: expectations
+context = gx.get_context()
+context.list_expectation_suite_names()
 ```
+A list of Expectations you copied to Azure Blob Storage is returned. Expectations that weren't copied to the new folder are not listed.
 
+## 6. Confirm that Expectations can be accessed from Azure Blob Storage
 
-### 6. Confirm that Expectations can be accessed from Azure Blob Storage by running ``great_expectations suite list``
-
-If you followed Step 4, the output should include the Expectation we copied to Azure Blob: ``exp1``.  If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
+Run the following command to confirm your Expectations have been copied to Azure Blob Storage: 
 
 ```bash
 great_expectations suite list
 ```
+If your Expectations have not been copied to Azure Blob Storage, the message "No Expectations were found" is returned.

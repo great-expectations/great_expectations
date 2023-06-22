@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 import pydantic
 
@@ -14,6 +14,13 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    file_get_unfiltered_batch_definition_list_fn,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +49,7 @@ class FilesystemDataConnector(FilePathDataConnector):
     asset_level_option_keys: ClassVar[tuple[str, ...]] = ("glob_directive",)
     asset_options_type: ClassVar[Type[FilesystemOptions]] = FilesystemOptions
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
@@ -55,6 +62,9 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
@@ -71,6 +81,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @property
@@ -85,7 +96,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_data_connector(
+    def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
         data_asset_name: str,
@@ -98,6 +109,9 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
 
@@ -113,6 +127,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters: optional list of sorters for sorting data_references
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
+            get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
         Returns:
             Instantiated "FilesystemDataConnector" object
@@ -129,10 +144,11 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @classmethod
-    def build_test_connection_error_message(
+    def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
         batching_regex: re.Pattern,

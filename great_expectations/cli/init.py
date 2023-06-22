@@ -43,7 +43,7 @@ if not SQLAlchemyError:
     default=True,
 )
 @click.pass_context
-def init(ctx: click.Context, usage_stats: bool) -> None:
+def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
     """
     Initialize a new Great Expectations project.
 
@@ -66,20 +66,18 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         message = f"""Warning. An existing `{FileDataContext.GX_YML}` was found here: {ge_dir}."""
         warnings.warn(message)
         try:
-            project_file_structure_exists = (
-                FileDataContext.does_config_exist_on_disk(ge_dir)
-                and FileDataContext.all_uncommitted_directories_exist(ge_dir)
-                and FileDataContext.config_variables_yml_exist(ge_dir)
+            project_file_structure_exists = FileDataContext.is_project_scaffolded(
+                ge_dir
             )
             if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
             else:
                 # Prompt to modify the project to add missing files
-                if not ctx.obj.assume_yes:
+                if not ctx.obj.assume_yes:  # noqa: PLR5501
                     if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
                         cli_message(RUN_INIT_AGAIN)
-                        exit(0)
+                        sys.exit(0)
 
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message(f"<red>{e.message}</red>")
@@ -94,12 +92,12 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         except DataContextError as e:
             cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
-            exit(5)
+            sys.exit(5)
     else:
         if not ctx.obj.assume_yes:
             if not click.confirm(LETS_BEGIN_PROMPT, default=True):
                 cli_message(RUN_INIT_AGAIN)
-                exit(0)
+                sys.exit(0)
 
         try:
             context = FileDataContext.create(

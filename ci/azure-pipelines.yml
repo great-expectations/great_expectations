@@ -68,8 +68,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -88,15 +88,19 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
+          versionSpec: 3.8
+        displayName: 'Use Python 3.8'
       - script: |
+          python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
+        name: InstallDependencies
+      - script: |
           invoke type-check --ci --pretty
+        name: StaticTypeCheck
+      - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources
-        name: StaticTypeCheck
-
+        name: TypeCheckStubSourceFiles
     - job: docstring_linter
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -121,6 +125,13 @@ stages:
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+    - job: name_tag_snippet_checker
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python ci/checks/check_only_name_tag_snippets.py
+          name: NameTagSnippetChecker
+
     - job: check_repo_root_size
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -131,7 +142,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: docker_tests
@@ -165,8 +177,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -186,7 +196,6 @@ stages:
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SQLALCHEMY_WARN_20=true "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}
@@ -213,8 +222,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -269,8 +276,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -295,8 +300,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -323,8 +326,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -369,8 +370,6 @@ stages:
         timeoutInMinutes: 120
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -405,8 +404,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -431,9 +428,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
-              constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
               constraints: 'ci/constraints-test/py38-min-install.txt'
@@ -472,8 +466,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -496,8 +488,6 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:
@@ -536,8 +526,6 @@ stages:
 
         strategy:
          matrix:
-           Python37:
-             python.version: '3.7'
            Python38:
              python.version: '3.8'
            Python39:
@@ -614,8 +602,6 @@ stages:
 
         strategy:
           matrix:
-            Python37:
-              python.version: '3.7'
             Python38:
               python.version: '3.8'
             Python39:

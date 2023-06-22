@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
 import pydantic
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
+    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 BOTO3_IMPORTED = False
 try:
-    import boto3  # noqa: disable=E0602
+    import boto3  # : disable=E0602
 
     BOTO3_IMPORTED = True
 except ImportError:
@@ -50,6 +50,11 @@ class SparkS3DatasourceError(SparkDatasourceError):
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket",
+        "boto3_options",
+    }
 
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"
@@ -65,8 +70,16 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         if not s3_client:
             # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
             if BOTO3_IMPORTED:
+                _check_config_substitutions_needed(
+                    self, self.boto3_options, raise_warning_if_provider_not_present=True
+                )
+                # pull in needed config substitutions using the `_config_provider`
+                # The `FluentBaseModel.dict()` call will do the config substitution on the serialized dict if a `config_provider` is passed.
+                boto3_options: dict = self.dict(
+                    config_provider=self._config_provider
+                ).get("boto3_options", {})
                 try:
-                    s3_client = boto3.client("s3", **self.boto3_options)
+                    s3_client = boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise SparkS3DatasourceError(
@@ -104,7 +117,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,

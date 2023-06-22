@@ -7,10 +7,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created at least one Expectation Suite](../../expectations/index.md#core-skills)
- - [Created at least one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
+ - [A minimum of one Expectation Suite](../../expectations/index.md#core-skills)
+ - [A minimum of one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>
 
@@ -68,16 +70,13 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
 
 Test that your new Action is configured correctly:
 
-Run the Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" /> and verify that no errors are thrown.
+Run the following command to run the Checkpoint and verify that no errors are returned:
 
 ```python
 import great_expectations as gx
 context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)
-```
-```bash
-$ great_expectations checkpoint run <your checkpoint name>
 ```
 
 Finally, check your Data Docs sites to confirm that a new Validation Result has been added.

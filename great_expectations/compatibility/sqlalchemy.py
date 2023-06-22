@@ -1,27 +1,6 @@
 from __future__ import annotations
 
-import warnings
-
-from packaging.version import Version
-
 from great_expectations.compatibility.not_imported import NotImported
-
-
-def sqlalchemy_version_check(version: str | Version) -> None:
-    """Check if the sqlalchemy version is supported or warn if not.
-
-    Args:
-        version: sqlalchemy version as a string or Version.
-    """
-    if isinstance(version, str):
-        version = Version(version)
-
-    if version >= Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
-            UserWarning,
-        )
-
 
 # GX optional imports
 SQLALCHEMY_NOT_IMPORTED = NotImported(
@@ -31,7 +10,6 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 try:
     import sqlalchemy
 
-    sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
@@ -44,6 +22,11 @@ try:
     from sqlalchemy import dialects
 except ImportError:
     dialects = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy import inspect
+except ImportError:
+    inspect = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.dialects import sqlite
@@ -168,6 +151,11 @@ except (ImportError, AttributeError):
     quoted_name = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from sqlalchemy.sql.elements import _anonymous_label
+except (ImportError, AttributeError):
+    _anonymous_label = SQLALCHEMY_NOT_IMPORTED
+
+try:
     from sqlalchemy.sql.elements import ColumnElement
 except (ImportError, AttributeError):
     ColumnElement = SQLALCHEMY_NOT_IMPORTED
@@ -236,3 +224,18 @@ try:
     from sqlalchemy.sql.operators import custom_op
 except (ImportError, AttributeError):
     custom_op = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.engine.cursor import LegacyCursorResult
+except (ImportError, AttributeError):
+    LegacyCursorResult = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.engine.cursor import CursorResult
+except (ImportError, AttributeError):
+    CursorResult = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.pool import StaticPool
+except (ImportError, AttributeError):
+    StaticPool = SQLALCHEMY_NOT_IMPORTED

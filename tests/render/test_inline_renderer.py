@@ -377,7 +377,6 @@ def test_inline_renderer_expectation_validation_result_serialization(
     fake_result: dict,
     expected_serialized_expectation_validation_result_rendered_atomic_content: dict,
 ):
-
     expectation_validation_result = ExpectationValidationResult(
         exception_info={
             "raised_exception": False,
@@ -639,7 +638,64 @@ def test_inline_renderer_expectation_validation_result_serialization(
                     },
                 }
             ],
-            id="meta_notes",
+            id="meta_notes content list",
+        ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                kwargs={"value": 3},
+                meta={
+                    "notes": {
+                        "format": MetaNotesFormat.STRING,
+                        "content": "This is the most important Expectation!!",
+                    }
+                },
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Must have exactly $value rows.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 3},
+                        },
+                        "meta_notes": {
+                            "content": ["This is the most important Expectation!!"],
+                            "format": MetaNotesFormat.STRING,
+                        },
+                    },
+                }
+            ],
+            id="meta_notes content string",
+        ),
+        pytest.param(
+            ExpectationConfiguration(
+                expectation_type="expect_table_row_count_to_equal",
+                kwargs={"value": 3},
+                meta={
+                    "notes": "This is the most important Expectation!!",
+                },
+            ),
+            [
+                {
+                    "value_type": "StringValueType",
+                    "name": AtomicPrescriptiveRendererType.SUMMARY,
+                    "value": {
+                        "template": "Must have exactly $value rows.",
+                        "schema": {"type": "com.superconductive.rendered.string"},
+                        "params": {
+                            "value": {"schema": {"type": "number"}, "value": 3},
+                        },
+                        "meta_notes": {
+                            "content": ["This is the most important Expectation!!"],
+                            "format": MetaNotesFormat.STRING,
+                        },
+                    },
+                }
+            ],
+            id="meta_notes string",
         ),
     ],
 )
@@ -647,7 +703,6 @@ def test_inline_renderer_expectation_configuration_serialization(
     expectation_configuration: ExpectationConfiguration,
     expected_serialized_expectation_configuration_rendered_atomic_content: dict,
 ):
-
     inline_renderer: InlineRenderer = InlineRenderer(
         render_object=expectation_configuration
     )

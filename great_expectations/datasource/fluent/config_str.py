@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+import warnings
+from typing import TYPE_CHECKING, Mapping
 
 from pydantic import SecretStr
 
@@ -9,6 +10,7 @@ from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.datasource.fluent import Datasource
 
 LOGGER = logging.getLogger(__name__)
 
@@ -37,6 +39,7 @@ class ConfigStr(SecretStr):
         Resolve the config template string to its string value according to the passed
         _ConfigurationProvider.
         """
+        LOGGER.info(f"Substituting '{self}'")
         return config_provider.substitute_config(self.template_str)
 
     def _display(self) -> str:
@@ -65,3 +68,26 @@ class ConfigStr(SecretStr):
         # the value returned from the previous validator
         yield cls._validate_template_str_format
         yield cls.validate
+
+
+def _check_config_substitutions_needed(
+    datasource: Datasource,
+    options: Mapping,
+    raise_warning_if_provider_not_present: bool,
+) -> set[str]:
+    """
+    Given a Datasource and a dict-like mapping type return the keys whose value is a `ConfigStr` type.
+    Optionally raise a warning if config substitution is needed but impossible due to a missing `_config_provider`.
+    """
+    need_config_subs: set[str] = {
+        k for (k, v) in options.items() if isinstance(v, ConfigStr)
+    }
+    if (
+        need_config_subs
+        and raise_warning_if_provider_not_present
+        and not datasource._config_provider
+    ):
+        warnings.warn(
+            f"config variables '{','.join(need_config_subs)}' need substitution but no `_ConfigurationProvider` is present"
+        )
+    return need_config_subs

@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Dict, Optional
+from typing import Dict, Final, Optional
 
 import pytest
 
@@ -27,6 +27,10 @@ What does this test and why?
 This file will hold various tests to ensure that the UI functions as expected when creating a DataContextConfig object. It will ensure that the appropriate defaults are used, including when the store_backend_defaults parameter is set.
 """
 
+_DEFAULT_CONFIG_VERSION: Final[float] = float(
+    DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
+)
+
 
 @pytest.fixture(scope="function")
 def construct_data_context_config():
@@ -39,9 +43,7 @@ def construct_data_context_config():
     def _construct_data_context_config(
         data_context_id: str,
         datasources: Dict,
-        config_version: float = float(
-            DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
-        ),
+        config_version: float = _DEFAULT_CONFIG_VERSION,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,

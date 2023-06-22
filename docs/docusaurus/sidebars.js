@@ -72,7 +72,6 @@ module.exports = {
               value: '<h4>Filesystem Data Contexts</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
@@ -95,7 +94,6 @@ module.exports = {
               value: '<h4>Data Context Configuration</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },
@@ -239,64 +237,6 @@ module.exports = {
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
           ]
         },
-        {
-          type: 'category',
-          label: 'Advanced Datasource configuration',
-          items: [
-            {
-              type: 'category',
-              label: 'Filesystem block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'In-memory block-configuration',
-              items: [
-                'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Cloud block-configuration',
-              items: [
-                'guides/connecting_to_your_data/cloud/s3/pandas',
-                'guides/connecting_to_your_data/cloud/s3/spark',
-                'guides/connecting_to_your_data/cloud/gcs/pandas',
-                'guides/connecting_to_your_data/cloud/gcs/spark',
-                'guides/connecting_to_your_data/cloud/azure/pandas',
-                'guides/connecting_to_your_data/cloud/azure/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'SQL database block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
-                'guides/connecting_to_your_data/database/athena',
-                'guides/connecting_to_your_data/database/bigquery',
-                'guides/connecting_to_your_data/database/mssql',
-                'guides/connecting_to_your_data/database/mysql',
-                'guides/connecting_to_your_data/database/postgres',
-                'guides/connecting_to_your_data/database/redshift',
-                'guides/connecting_to_your_data/database/snowflake',
-                'guides/connecting_to_your_data/database/sqlite',
-                'guides/connecting_to_your_data/database/trino'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Block-configuration compatible Batch Requests',
-              items: [
-                'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
-                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
-              ]
-            }
-          ]
-        },
         { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
       ]
     },
@@ -310,8 +250,8 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+            'guides/expectations/how_to_edit_an_existing_expectationsuite',
             { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
           ]
         },
@@ -329,7 +269,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant'
           ]
         },
         {
@@ -403,8 +343,7 @@ module.exports = {
           items: [
             'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
-            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
-            'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
+            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
           ]
         },
         { type: 'doc', id: 'guides/validation/index', label: 'Index' }
@@ -444,73 +383,13 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Contributing',
-      link: { type: 'doc', id: 'contributing/contributing' },
-      items: [
-        {
-          type: 'category',
-          label: 'Contributing basics',
-          items: [
-            { type: 'doc', id: 'contributing/contributing_setup' },
-            { type: 'doc', id: 'contributing/contributing_checklist' },
-            { type: 'doc', id: 'contributing/contributing_github' },
-            { type: 'doc', id: 'contributing/contributing_test' },
-            { type: 'doc', id: 'contributing/contributing_maturity' },
-            { type: 'doc', id: 'contributing/contributing_misc' }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Contributing specifics',
-          items: [
-            {
-              type: 'category',
-              label: 'How to contribute how-to guides',
-              items: [
-                { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-                { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'How to contribute integration documentation',
-              items: [
-                'integrations/contributing_integration',
-                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
-              ]
-            },
-            { type: 'doc', id: 'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations' },
-            { type: 'doc', id: 'contributing/contributing_package' }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Style guides',
-          items: [
-            { type: 'doc', id: 'contributing/style_guides/docs_style' },
-            { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
-          ]
-        },
-        'contributing/index'
-      ]
-    },
-    {
-      type: 'category',
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          link: { type: 'doc', id: 'reference/supplemental_documentation' },
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/usage_statistics' }
-          ]
-        },
+    'contributing/contributing_maturity',
+    'reference/customize_your_deployment',
+    'reference/usage_statistics',
+    'conceptual_guides/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',
@@ -537,7 +416,6 @@ module.exports = {
             'terms/data_context',
             'terms/data_asset',
             'terms/data_assistant',
-            'terms/data_connector',
             'terms/data_docs',
             'terms/evaluation_parameter',
             'terms/execution_engine',
@@ -581,6 +459,7 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
-    { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+    { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'contributing/contributing',
   ]
 }

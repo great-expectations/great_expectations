@@ -25,7 +25,6 @@ DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 
 @pytest.fixture
 def in_memory_data_context_config_usage_stats_enabled():
-
     return DataContextConfig(
         **{
             "commented_map": {},

@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional, Type
 
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
@@ -35,7 +33,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     # S3 specific attributes
     bucket: str
     boto3_options: dict[str, ConfigStr | Any] = {}
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,

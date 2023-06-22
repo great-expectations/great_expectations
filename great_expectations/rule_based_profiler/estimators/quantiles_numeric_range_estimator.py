@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional
-
-import numpy as np
-from typing_extensions import Final
+from typing import TYPE_CHECKING, Dict, Final, Optional
 
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
@@ -26,6 +23,7 @@ from great_expectations.types.attributes import Attributes  # noqa: TCH001
 from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
 
 if TYPE_CHECKING:
+    import numpy as np
     import numpy.typing as npt
 
 logger = logging.getLogger(__name__)

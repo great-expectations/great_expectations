@@ -1417,7 +1417,6 @@ def test_add_rule_overwrite_first_rule(
     mock_data_context: mock.MagicMock,
     sample_rule_dict: dict,
 ):
-
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rbp",
         config_version=1.0,

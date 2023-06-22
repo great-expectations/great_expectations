@@ -72,7 +72,6 @@ function codeImport () {
       }
 
       node.value = snippetMap[name].contents
-      console.log(`Substituted value for named snippet "${name}"`)
     }
 
     if (promises.length) {

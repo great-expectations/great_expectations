@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Type
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import DBFSPath

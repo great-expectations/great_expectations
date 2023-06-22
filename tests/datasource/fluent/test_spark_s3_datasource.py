@@ -10,6 +10,7 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.compatibility import aws
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import SparkS3Datasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -26,13 +27,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__file__)
-
-
-try:
-    import boto3
-except ImportError:
-    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
 
 
 @pytest.fixture()
@@ -54,10 +48,11 @@ def aws_credentials() -> None:
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
+@pytest.mark.skipif(not aws.boto3)
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
-        client = boto3.client("s3", region_name=aws_region_name)
+        client = aws.boto3.client("s3", region_name=aws_region_name)
         yield client
 
 

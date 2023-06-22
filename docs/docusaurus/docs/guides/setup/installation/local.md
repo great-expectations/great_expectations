@@ -1,5 +1,5 @@
 ---
-title: How to install Great Expectations locally
+title: Install Great Expectations locally
 ---
 
 import Preface from './components_local/_preface.mdx'
@@ -11,6 +11,12 @@ import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import InstallCongratulations from '/docs/guides/setup/components/install_congrats.md'
 
 <Preface />
+
+:::info Windows Support
+
+Windows support for the open source Python version of GX is currently unavailable. If you’re using GX in a Windows environment, you might experience errors or performance issues.
+
+:::
 
 ## Steps
 

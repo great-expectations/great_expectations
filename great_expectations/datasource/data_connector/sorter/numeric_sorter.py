@@ -3,7 +3,7 @@ import logging
 from typing import Any
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.util import is_int, is_numeric
 

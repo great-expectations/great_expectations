@@ -3,13 +3,16 @@ import pathlib
 from typing import List, Union
 
 import pytest
+
+from docs.sphinx_api_docs_source.include_exclude_definition import (
+    IncludeExcludeDefinition,
+)
 from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
     DocsExampleParser,
     FileContents,
-    IncludeExcludeDefinition,
     PublicAPIChecker,
     PublicAPIReport,
     _get_import_names,
@@ -246,7 +249,6 @@ class TestDocExampleParser:
 
     @pytest.mark.unit
     def test_retrieve_all_usages_in_files(self, docs_example_parser: DocsExampleParser):
-
         usages = docs_example_parser.get_names_from_usage_in_docs_examples()
         assert usages == {
             "ExampleClass",
@@ -437,7 +439,7 @@ class TestPublicAPIChecker:
         definitions = []
         for node in ast.walk(tree):
             if (
-                isinstance(node, ast.ClassDef)
+                isinstance(node, ast.ClassDef)  # noqa: PLR1701
                 or isinstance(node, ast.FunctionDef)
                 or isinstance(node, ast.AsyncFunctionDef)
             ):

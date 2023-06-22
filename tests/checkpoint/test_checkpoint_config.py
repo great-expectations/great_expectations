@@ -55,7 +55,7 @@ def checkpoint(
             ],
             "ge_cloud_id": None,
             "expectation_suite_ge_cloud_id": None,
-        }
+        },
     )
 
 

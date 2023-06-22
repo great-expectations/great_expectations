@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import importlib
 import itertools
 import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
+
+if TYPE_CHECKING:
+    import requests
 
 
 class GreatExpectationsError(Exception):
@@ -453,6 +458,12 @@ class GXCloudError(GreatExpectationsError):
     """
     Generic error used to provide additional context around Cloud-specific issues.
     """
+
+    response: requests.Response
+
+    def __init__(self, message: str, response: requests.Response) -> None:
+        super().__init__(message)
+        self.response = response
 
 
 class GXCloudConfigurationError(GreatExpectationsError):

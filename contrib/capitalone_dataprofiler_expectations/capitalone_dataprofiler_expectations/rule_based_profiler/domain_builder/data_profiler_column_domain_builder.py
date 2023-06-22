@@ -13,8 +13,8 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    VARIABLES_KEY,  # noqa: TCH001
-    ParameterContainer,  # noqa: TCH001
+    VARIABLES_KEY,
+    ParameterContainer,
 )
 from great_expectations.util import is_candidate_subset_of_target
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -33,7 +33,6 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        profile_path: str = f"{VARIABLES_KEY}profile_path",
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -75,12 +74,6 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             data_context=data_context,
         )
 
-        self._profile_path = profile_path
-
-    @property
-    def profile_path(self) -> str:
-        return self._profile_path
-
     def _get_domains(
         self,
         rule_name: str,
@@ -110,18 +103,39 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         # Obtain profile_path from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         profile_path: str = get_parameter_value_and_validate_return_type(
             domain=None,
-            parameter_reference=self.profile_path,
+            parameter_reference=f"{VARIABLES_KEY}profile_path",
             expected_return_type=str,
             variables=variables,
             parameters=None,
         )
 
+        profile_report_filtering_key: str = (
+            get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=f"{VARIABLES_KEY}profile_report_filtering_key",
+                expected_return_type=str,
+                variables=variables,
+                parameters=None,
+            )
+        )
+
+        profile_report_accepted_filtering_values: str = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=f"{VARIABLES_KEY}profile_report_accepted_filtering_values",
+            expected_return_type=list,
+            variables=variables,
+            parameters=None,
+        )
+
+        # get metrics and profile path from variables and then pass them into here
         profile_report_column_names: List[str] = validator.get_metric(  # type: ignore[assignment] # could be None
             metric=MetricConfiguration(
                 metric_name="data_profiler.table_column_list",
                 metric_domain_kwargs={},
                 metric_value_kwargs={
                     "profile_path": profile_path,
+                    "profile_report_filtering_key": profile_report_filtering_key,
+                    "profile_report_accepted_filtering_values": profile_report_accepted_filtering_values,
                 },
             )
         )

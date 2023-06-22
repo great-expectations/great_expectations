@@ -6,12 +6,14 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
-- [Installed and initialized the Google Cloud SDK (in order to use the gcloud CLI)](https://cloud.google.com/sdk/docs/quickstarts)
-- [Set up the gsutil command line tool](https://cloud.google.com/storage/docs/gsutil_install)
-- Have permissions to: list and create buckets, deploy Google App Engine apps, add app firewall rules
+- [A Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
+- [The Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstarts)
+- [The gsutil command line tool](https://cloud.google.com/storage/docs/gsutil_install)
+- Permissions to list and create buckets, deploy Google App Engine apps, add app firewall rules
 
 </Prerequisites>
 
@@ -53,7 +55,7 @@ We recommend placing it in your project directory, for example ``great_expectati
 
 ### 4. Deploy your Google App Engine app
 
-Issue the following <TechnicalTag relative="../../../" tag="cli" text="CLI" /> command from within the app directory created above:
+Run the following CLI command from within the app directory you created previously:
 
 ```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy"
 ```
@@ -71,14 +73,9 @@ You may also replace the default ``local_site`` if you would only like to mainta
 
 ### 7. Build the GCS Data Docs site
 
-Use the following CLI command: 
+Run the following Python code to build and open your Data Docs:
 
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command"
-```
-
-If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
-
-```bash name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output"
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
 
 ### 8. Test that everything was configured properly by launching your App Engine app

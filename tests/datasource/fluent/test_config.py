@@ -4,16 +4,22 @@ import copy
 import functools
 import json
 import logging
+import os
 import pathlib
 import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
+from typing import (  # TODO: revert use of cast
+    TYPE_CHECKING,
+    Callable,
+    Final,
+    List,
+    cast,
+)
 
 import pydantic
 import pytest
-from typing_extensions import Final
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
@@ -48,6 +54,7 @@ yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
+
 
 CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -203,19 +210,6 @@ def ds_dict_config() -> dict:
     return copy.deepcopy(COMPLEX_CONFIG_DICT)
 
 
-@pytest.fixture
-def sqlite_database_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-
-
 @pytest.mark.parametrize(
     "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
 )
@@ -265,7 +259,7 @@ class TestExcludeUnsetAssetFields:
 
     def test_from_gx_config(self, asset_dict: dict):
         """
-        Ensure that unset fields are excluded even when being parsed by the the top-level `GxConfig` class.
+        Ensure that unset fields are excluded even when being parsed by the top-level `GxConfig` class.
         """
         # fill in required args
         asset_dict.update(
@@ -804,11 +798,15 @@ def file_dc_config_file_with_substitutions(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save(
-    monkeypatch: pytest.MonkeyPatch,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}\n")
+    my_conn_str = os.environ["MY_CONN_STR"]
+
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
@@ -820,10 +818,6 @@ def test_config_substitution_retains_original_value_on_save(
     )
 
     print(context.fluent_config)
-
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
     ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
 
@@ -846,14 +840,12 @@ def test_config_substitution_retains_original_value_on_save(
 
 @pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
-    monkeypatch: pytest.MonkeyPatch,
-    sqlite_database_path: pathlib.Path,
+    seed_ds_env_vars: tuple,
     file_dc_config_file_with_substitutions: pathlib.Path,
     cloud_storage_get_client_doubles,
 ):
-    # inject env variable
-    my_conn_str = f"sqlite:///{sqlite_database_path}"
-    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
+    # show injected env variable
+    print(f"injected env variables:\n{pf(seed_ds_env_vars)}")
 
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())

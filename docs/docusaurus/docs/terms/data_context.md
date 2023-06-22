@@ -3,26 +3,14 @@ title: Data Context
 id: data_context
 hoverText: The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 ---
-import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import SetupHeader from '/docs/images/universal_map/_um_setup_header.mdx'
-import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
-import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
+
 import TechnicalTag from '../term_tags/_tag.mdx';
-
-<UniversalMap setup='active' connect='active' create='active' validate='active'/> 
-
-## Overview
-
-### Definition
 
 A Data Context is the primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 
-### Features and promises
-
 As the primary entry point for all of Great Expectations' APIs, the Data Context provides convenience methods for accessing common objects based on untyped input or common defaults.  It also provides the ability to easily handle configuration of its own top-level components, and the configs and data necessary to back up your Data Context itself can be stored in a variety of ways.  It doesn’t matter how you instantiate your `DataContext`, or store its configs: once you have the `DataContext` in memory, it will always behave in the same way.
 
-### Relationships to other objects
+## Relationships to other objects
 
 Your Data Context will provide you with methods to configure your Stores, plugins, and Data Docs.  It will also provide the methods needed to create, configure, and access your <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.  In addition to all of that, it will internally manage your <TechnicalTag relative="../" tag="metric" text="Metrics" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and the contents of your <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> for you!
 
@@ -30,38 +18,27 @@ Your Data Context will provide you with methods to configure your Stores, plugin
 
 ![What your Data Context does for you throughout using Great Expectations](../guides/images/overview_illustrations/data_context_does_for_you.png)
 
-<SetupHeader/>
-
-During Setup you will initialize a Data Context.  For instructions on how to do this, please see our [Setup Overview: Initialize a Data Context](../guides/setup/setup_overview.md#3-initialize-a-data-context) documentation. For more information on configuring a newly initialized Data Context, please see our [guides for configuring your Data Context](../guides/setup/index.md#data-contexts).
+During Setup you will initialize a Data Context.  For instructions on how to do this, see [Setup Overview: Initialize a Data Context](../guides/setup/setup_overview.md#3-initialize-a-data-context) documentation. For more information on configuring a newly initialized Data Context, see [guides for configuring your Data Context](../guides/setup/index.md#data-contexts).
 
 You can also use the Data Context to manage optional configurations for your Stores, Plugins, and Data Docs.  For information on configuring Stores, please check out our [guides for configuring stores](../guides/setup/index.md#stores). For Data Docs, please reference our [guides on configuring Data Docs](../guides/setup/index.md#data-docs).
 
-<ConnectHeader/>
+When connecting to Data, your Data Context will be used to create and configure Datasources.  For more information on how to create and configure Datasources, see [overview documentation for the Connect to Data step](../guides/connecting_to_your_data/connect_to_data_overview.md), as well as our [how-to guides for connecting to data](../guides/connecting_to_your_data/index.md).
 
-When connecting to Data, your Data Context will be used to create and configure Datasources.  For more information on how to create and configure Datasources, please see our [overview documentation for the Connect to Data step](../guides/connecting_to_your_data/connect_to_data_overview.md), as well as our [how-to guides for connecting to data](../guides/connecting_to_your_data/index.md).
+When creating Expectations, your Data Context will be used to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, as well as save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />.  The Data Context also provides your starting point for creating Custom Profilers, and will manage the Metrics and Validation Results involved in running a Profiler automatically.  Finally, the Data Context will manage the content of your Data Docs (displaying such things as the Validation Results and Expectations generated by a Profiler) for you.  For more information on creating Expectations, see [overview documentation for the Create Expectations step](../guides/expectations/create_expectations_overview.md), as well as our [how-to guides for creating Expectations](../guides/expectations/index.md). 
 
-<CreateHeader/>
-
-When creating Expectations, your Data Context will be used to create <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and Expectations, as well as save them to an <TechnicalTag relative="../" tag="expectation_store" text="Expectations Store" />.  The Data Context also provides your starting point for creating Profilers, and will manage the Metrics and Validation Results involved in running a Profiler automatically.  Finally, the Data Context will manage the content of your Data Docs (displaying such things as the Validation Results and Expectations generated by a Profiler) for you.  For more information on creating Expectations, please see our [overview documentation for the Create Expectations step](../guides/expectations/create_expectations_overview.md), as well as our [how-to guides for creating Expectations](../guides/expectations/index.md). 
-
-
-<ValidateHeader/>
-
-When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, please see our [overview documentation for the Validate Data step](../guides/validation/validate_data_overview.md).
+When Validating data, the Data Context provides your entry point for creating, configuring, saving, and accessing Checkpoints.  For more information on using your Data Context to create a Checkpoint, see [overview documentation for the Validate Data step](../guides/validation/validate_data_overview.md).
 
 Additionally, it continues to manage all the same behind the scenes activity involved in using Metrics, saving Validation Results, and creating the contents of your Data Docs for you. 
 
-## Features
-
-### Access to APIs
+## Access to APIs
 
 The Data Context provides a primary entry point to all of Great Expectations' APIs.  Your Data Context will provide convenience methods for accessing common objects.  While internal workflows of Great Expectations are strongly typed, the convenience methods available from the Data Context are exceptions, allowing access based on untyped input or common defaults.
 
-#### Configuration management
+### Configuration management
 
-The Data Context makes it easy to manage configuration of its own top-level components. It includes basic CRUD operations for all of the core components for a Great Expectations deployment (Datasources, Expectation Suites, Checkpoints) and provides access and default integrations with Data Docs, your Stores, Plugins, etc.  It also provides convenience methods such as `test_yaml_config()` for testing configurations.  For more information on configuring Data Context components and the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
+A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a Great Expectations deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
 
-#### Component management and config storage
+### Component management and config storage
 
 The Data Context doesn't just give you convenient ways to access and configure components.  It also provides the ability to *create* top-level components such as Datasources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
@@ -69,14 +46,11 @@ For production deployments you will want to define these components according to
 
 If the exact deployment pattern you want to follow isn't documented in a Reference Architecture, you can see details for configuring specific components that component's related how-to guides.
 
-### Great Expectations Cloud compatability
+## Great Expectations Cloud compatability
 
 Because your Data Context contains the entirety of your Great Expectations project, Great Expectations Cloud can reference it to permit seamless upgrading from open source Great Expectations to Great Expectations Cloud.
 
-
-## API basics
-
-### Instantiating a DataContext
+## Instantiating a DataContext
 
 As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
 
@@ -92,34 +66,7 @@ If you’re using Great Expectations Cloud, you’d set up cloud environment var
 
 That’s it! You now have access to all the goodness of a DataContext.
 
-### Interactively testing configurations from your Data Context
-
-Especially during the beginning of a Great Expecations project, it is often incredibly useful to rapidly iterate over
-configurations of key Data Context components. The `test_yaml_config()` feature makes that easy.
-
-`test_yaml_config()` is a convenience method for configuring the moving parts of a Great Expectations deployment. It
-allows you to quickly test out configs for Datasources, Checkpoints, and each type of Store (ExpectationStores,
-ValidationResultStores, and MetricsStores). For many deployments of Great Expectations, these components (plus
-Expectations) are the only ones you'll need.
-
-Here's a typical example:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml"
-```
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py test_yaml_config"
-```
-
-Running `test_yaml_config()` will show some feedback on the configuration. The helpful output can include any result 
-from the "self check" of an artifact produced using that configuration.  You should note, however, that `test_yaml_config()` never overwrites the underlying configuration.  If you make edits in the course of your work, you will have to explicitly save the configuration before running `test_yaml_config()`.
-
-For more detailed guidance on using the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
-
-## More details
-
-### Design motivations
-
-#### Untyped inputs
+## Untyped inputs
 
 The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you could follow these steps:
 

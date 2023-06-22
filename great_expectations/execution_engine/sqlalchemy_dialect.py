@@ -9,7 +9,7 @@ class GXSqlDialect(Enum):
     Also contains an unsupported attribute if the dialect is not in the list.
     """
 
-    AWSATHENA = "athena"
+    AWSATHENA = "awsathena"
     BIGQUERY = "bigquery"
     DREMIO = "dremio"
     HIVE = "hive"
@@ -23,6 +23,7 @@ class GXSqlDialect(Enum):
     TERADATASQL = "teradatasql"
     TRINO = "trino"
     VERTICA = "vertica"
+    CLICKHOUSE = "clickhouse"
     OTHER = "other"
 
     def __eq__(self, other: Union[str, bytes, GXSqlDialect]):  # type: ignore[override] # supertype uses `object`

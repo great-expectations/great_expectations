@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "sqlite_table",
+            "default": "table",
             "enum": [
-                "sqlite_table"
+                "table"
             ],
             "type": "string"
         },

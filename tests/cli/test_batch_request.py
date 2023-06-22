@@ -98,7 +98,6 @@ def test__print_configured_asset_sql_data_connector_message_prints_message(
     expected_message: str,
     capsys,
 ):
-
     data_connector = DummyDataConnector()
     data_connector_name: str = "data_connector_name"
 
@@ -138,7 +137,6 @@ def test__is_data_connector_of_type(
     data_connector_type: DummyDataConnector | NotDummyDataConnector,
     _is_data_connector_of_type_expected: bool,
 ):
-
     data_connector = DummyDataConnector()
     data_connector_name: str = "data_connector_name"
 

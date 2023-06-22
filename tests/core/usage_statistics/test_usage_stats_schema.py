@@ -254,7 +254,6 @@ def test_cli_data_asset_validate():
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
-
             # record itself
             jsonschema.validators.Draft202012Validator(
                 schema=anonymized_usage_statistics_record_schema,
@@ -391,6 +390,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.validation_operator.run",
     ]
     for message_type in usage_stats_records_messages:
+        print(message_type)
         for message in valid_usage_statistics_messages[message_type]:
             jsonschema.validators.Draft202012Validator(
                 schema=anonymized_usage_statistics_record_schema,

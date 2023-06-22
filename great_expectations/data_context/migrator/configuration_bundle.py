@@ -38,7 +38,6 @@ if TYPE_CHECKING:
 
 class ConfigurationBundle:
     def __init__(self, context: AbstractDataContext) -> None:
-
         self._context = context
         self._context_id = context.data_context_id
 
@@ -98,7 +97,6 @@ class ConfigurationBundle:
         return self._validation_results
 
     def _get_all_datasources(self) -> List[DatasourceConfig]:
-
         datasource_names: List[str] = list(self._context.datasources.keys())
 
         # Note: we are accessing the protected _datasource_store to not add a public property

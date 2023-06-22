@@ -1,18 +1,17 @@
 import inspect
 import logging
-import warnings
 from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -39,10 +38,13 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.util import get_pyathena_potential_type
+from great_expectations.util import (
+    get_clickhouse_sqlalchemy_potential_type,
+    get_pyathena_potential_type,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import (
-    ValidationDependencies,  # noqa: TCH001
+    ValidationDependencies,
 )
 
 if TYPE_CHECKING:
@@ -58,54 +60,31 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    GEOGRAPHY,
+    bigquery_types_tuple,
+)
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as BigQueryDialect,
+)
 
-    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
-    bigquery_types_tuple = None
-    try:
-        from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
-
-        BIGQUERY_GEO_SUPPORT = True
-    except ImportError:
-        BIGQUERY_GEO_SUPPORT = False
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = None
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-    except ImportError:
-        sqla_bigquery = None
-        bigquery_types_tuple = None
-        pybigquery = None
+if GEOGRAPHY:
+    BIGQUERY_GEO_SUPPORT = True
+else:
+    BIGQUERY_GEO_SUPPORT = False
 
 try:
     import teradatasqlalchemy.dialect
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+
+try:
+    import clickhouse_sqlalchemy
+    import clickhouse_sqlalchemy.types as ch_types
+except (ImportError, KeyError):
+    clickhouse_sqlalchemy = None
+    ch_types = None
 
 try:
     import trino.sqlalchemy.datatype as trinotypes
@@ -236,7 +215,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
         params = renderer_configuration.params
 
-        if params.mostly and params.mostly.value < 1.0:
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
             renderer_configuration = cls._add_mostly_pct_param(
                 renderer_configuration=renderer_configuration
             )
@@ -274,7 +253,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -386,6 +365,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     else:
                         real_type = potential_type
                     types.append(real_type)
+                elif type_module.__name__ == "clickhouse_sqlalchemy.drivers.base":
+                    actual_column_type = get_clickhouse_sqlalchemy_potential_type(
+                        type_module, actual_column_type
+                    )()
+                    potential_type = get_clickhouse_sqlalchemy_potential_type(
+                        type_module, expected_type
+                    )
+                    types.append(potential_type)
                 else:
                     potential_type = getattr(type_module, expected_type)
                     types.append(potential_type)
@@ -551,7 +538,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(
+def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
@@ -571,10 +558,10 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
+        if BigQueryDialect and (
             isinstance(
                 execution_engine.dialect_module,
-                sqla_bigquery.BigQueryDialect,
+                BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -595,6 +582,18 @@ def _get_dialect_type_module(
     except (TypeError, AttributeError):
         pass
 
+    try:
+        if (
+            issubclass(
+                execution_engine.dialect_module,
+                clickhouse_sqlalchemy.drivers.base.ClickHouseDialect,
+            )
+            and ch_types is not None
+        ):
+            return ch_types
+    except (TypeError, AttributeError):
+        pass
+
     # Trino types module
     try:
         if (
@@ -611,7 +610,7 @@ def _get_dialect_type_module(
     return execution_engine.dialect_module
 
 
-def _native_type_type_map(type_):
+def _native_type_type_map(type_):  # noqa: PLR0911
     # We allow native python types in cases where the underlying type is "object":
     if type_.lower() == "none":
         return (type(None),)

@@ -5,6 +5,8 @@ title: How to add input validation and type checking for a Custom Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+## Prerequisites
+
 <Prerequisites>
 
  - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
@@ -13,7 +15,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <p class="markdown"><TechnicalTag tag="expectation" text="Expectations" /> will typically be configured using input parameters. These parameters are required to provide your <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> with the context it needs to <TechnicalTag tag="validation" text="Validate" /> your data.  Ensuring that these requirements are fulfilled is the purpose of type checking and validating your input parameters.</p>
 
-For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
+For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
 
 This guide will walk you through the process of adding validation and Type Checking to the input parameters of the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md). When you have completed this guide, you will have implemented a method to validate that the input parameters provided to this Custom Expectation satisfy the requirements necessary for them to be used as intended by the Custom Expectation's code.
 
@@ -105,7 +107,7 @@ Congratulations!<br/>&#127881; You've successfully added input validation & type
 
 ### 5. Contribution (Optional)
 
-The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
+The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at Beta and Production levels.
 
 If you would like to contribute your Custom Expectation to the Great Expectations codebase, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls).
 

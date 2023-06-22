@@ -15,8 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 
 # This class defines a Metric to support your Expectation.
-class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
-
+class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
     condition_metric_name = "multicolumn_values.column_datetime_difference_in_months"
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
@@ -32,48 +31,6 @@ class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
         "end_datetime",
         "gap",
     )
-
-    # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, dataframe, start_datetime, end_datetime, gap, **kwargs):
-    #     print(dataframe)
-
-    #     def date_diff_in_months(df):
-    #         col_start = column(start_datetime)
-    #         col_end = column(end_datetime)
-    #         col_gap = column(gap)
-    #         if col_start is None or col_end is None or col_gap is None:
-    #             return None
-
-    #         # Calculate the difference in months between the start_datetime and end_datetime columns
-    #         diff_months = cast(
-    #             (func.strftime("%Y", col_end) - func.strftime("%Y", col_start)) * 12
-    #             + (func.strftime("%m", col_end) - func.strftime("%m", col_start)),
-    #             Integer,
-    #         )
-    #         return col_gap == diff_months
-
-    #     return date_diff_in_months(dataframe)
-
-    # @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, dataframe, start_datetime, end_datetime, gap, **kwargs):
-    #     def date_diff_in_months(row):
-    #         col_start = row(start_datetime)
-    #         col_end = row[end_datetime]
-    #         col_gap = row[gap]
-
-    #         if col_start is None or col_end is None or col_gap is None:
-    #             return None
-
-    #         # Convert start_datetime and end_datetime columns to date format
-    #         col_start = to_date(col_start)
-    #         col_end = to_date(col_end)
-
-    #         # Calculate the difference in months between the start_datetime and end_datetime columns
-    #         diff_months = floor(months_between(col_end, col_start))
-
-    #         return col(col_gap) == diff_months
-
-    #     return functools.reduce(operator.add, date_diff_in_months(col("*")))
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, dataframe, start_datetime, end_datetime, gap, **kwargs):
@@ -158,14 +115,6 @@ class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
                     "backend": "pandas",
                     "dialects": None,
                 },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite"],  # , "postgresql"
-                # },
-                # {
-                #     "backend": "spark",
-                #     "dialects": None,
-                # },
             ],
         },
     ]

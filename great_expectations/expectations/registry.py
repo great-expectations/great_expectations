@@ -204,7 +204,7 @@ def _add_response_key(res, key, value):
 
 
 @public_api
-def register_metric(
+def register_metric(  # noqa: PLR0913
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
@@ -221,7 +221,7 @@ def register_metric(
         metric_name: A name identifying the metric. Metric Name must be globally unique in
             a great_expectations installation.
         metric_domain_keys: A tuple of the keys used to determine the domain of the metric.
-        metric_value_keys: A tuple of the keys used to determine the domain of the metric.
+        metric_value_keys: A tuple of the keys used to determine the value of the metric.
         execution_engine: The execution_engine used to execute the metric.
         metric_class: A valid Metric class containing logic to compute attributes of data.
         metric_provider: The MetricProvider class from which the metric_class inherits.
@@ -389,6 +389,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
         "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
         "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
         "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
+        "expect_yesterday_count_compared_to_avg_equivalent_days_of_week": "expect_day_count_to_be_close_to_equivalent_week_day_mean",
     }
     if expectation_name in renamed:
         # deprecated-v0.14.12

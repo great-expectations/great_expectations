@@ -1,7 +1,5 @@
 import logging
-from typing import Optional, Union
-
-from ruamel.yaml.comments import CommentedMap
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -18,6 +16,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 yaml = YAMLHandler()
 
@@ -136,7 +137,7 @@ class ConfigurationStore(Store):
             if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
                     print(f"		{str(key)}")
-            if len_keys > 10:
+            if len_keys > 10:  # noqa: PLR2004
                 print("\t\t...")
             print()
 

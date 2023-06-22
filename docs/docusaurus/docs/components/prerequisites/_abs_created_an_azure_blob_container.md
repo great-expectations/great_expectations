@@ -1,2 +1,2 @@
-<span>Created an Azure Blob container. <ul><li>If you also wish
-to <a href='/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage'>host and share Data Docs on Azure Blob Storage</a> then you may set up this first and then use the `$web` existing container to store your Expectations.</li></ul></span>
+<span>An Azure Blob container. <ul><li>If you need
+to <a href='/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage'>host and share Data Docs on Azure Blob Storage,</a> you can set this up first, and then use the existing `$web` container to store your Expectations.</li></ul></span>

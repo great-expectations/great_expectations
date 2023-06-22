@@ -1,9 +1,19 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+    cast,
+)
 
 import pydantic
-from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
@@ -119,9 +129,17 @@ SqliteSplitter = Union[Splitter, SplitterHashedColumn, SplitterConvertedDateTime
 
 
 class _SQLiteAssetMixin:
+    @public_api
     def add_splitter_hashed_column(
         self: Self, column_name: str, hash_digits: int
     ) -> Self:
+        """Associates a hashed column splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            hash_digits: Number of digits to truncate output of hashing function (to limit length of hashed result).
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterHashedColumn(
                 method_name="split_on_hashed_column",
@@ -130,9 +148,17 @@ class _SQLiteAssetMixin:
             )
         )
 
+    @public_api
     def add_splitter_converted_datetime(
         self: Self, column_name: str, date_format_string: str
     ) -> Self:
+        """Associates a converted datetime splitter with this sqlite data asset.
+        Args:
+            column_name: The column name of the date column where year and month will be parsed out.
+            date_format_string: Format for converting string representation of datetime to actual datetime object.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
             SplitterConvertedDateTime(
                 method_name="split_on_converted_datetime",
@@ -143,12 +169,12 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
+    type: Literal["table"] = "table"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
-    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
+    type: Literal["query"] = "query"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
@@ -178,7 +204,7 @@ class SqliteDatasource(SQLDatasource):
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str,
@@ -215,9 +241,3 @@ class SqliteDatasource(SQLDatasource):
         )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__
-
-
-# Removed automatically added add_*_asset methods we don't want.
-# TODO: Prevent these from being created.
-delattr(SqliteDatasource, "add_sqlite_table_asset")
-delattr(SqliteDatasource, "add_sqlite_query_asset")

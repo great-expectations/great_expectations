@@ -22,6 +22,15 @@ resources:
     env:
       POSTGRES_DB: "test_ci"
       POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
 
 variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -66,8 +75,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -87,8 +96,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
 
          - script: |
              pip install .
@@ -98,25 +107,24 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: sqlalchemy_compatibility
+  - stage: sqlalchemy_and_pandas_compatibility
     dependsOn: [scope_check, lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: sqlalchemy_compatibility_postgres
+      - job: compatibility_postgres
         timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to run against the latest patch versions of
-          # sqlalchemy minor versions that we support.
+          # sqlalchemy and pandas minor versions that we support.
           # (versions as semver major.minor.patch)
           matrix:
-            sqlalchemy_1_4_x:
-              sqlalchemy_base_version: '1.4.0'
-            # Uncomment when we are compatible with 2.0.x.
-            # sqlalchemy_2_0_x:
-            #   sqlalchemy_base_version: '2.0.0'
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
 
         services:
           postgres: postgres
@@ -124,21 +132,82 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
-              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt 
-              pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+              
+              pip install --constraint constraints-dev-temp.txt ".[test, postgresql]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
-          # TODO: Currently the below test only runs tests with postgresql. We should figure out what the
-          # TODO: best way to test for sqlalchemy version compatibility and implement that here.
           - script: |
               # Run pytest
               pytest --postgresql -m sqlalchemy_version_compatibility
               pytest --postgresql -m unit
+
+            displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: compatibility_mssql
+        timeoutInMinutes: 90
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        strategy:
+          # This matrix is intended to run against the latest patch versions of
+          # sqlalchemy and pandas minor versions that we support.
+          # (versions as semver major.minor.patch)
+          matrix:
+            less_than_2:
+              comparison: '<'
+            greater_than_2:
+              comparison: '>='
+
+        services:
+          mssql: mssql 
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
+              cp constraints-dev.txt constraints-dev-temp.txt
+              echo "SQLAlchemy$(comparison)2.0.0" >> constraints-dev-temp.txt
+              echo "pandas$(comparison)2.0.0" >> constraints-dev-temp.txt
+              
+              pip install --constraint constraints-dev-temp.txt ".[test, mssql]" pytest-azurepipelines
+            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
+
+          - script: |
+              # Run pytest
+              pytest --mssql -m sqlalchemy_version_compatibility
+              pytest --mssql -m unit
 
             displayName: 'pytest'
             env:

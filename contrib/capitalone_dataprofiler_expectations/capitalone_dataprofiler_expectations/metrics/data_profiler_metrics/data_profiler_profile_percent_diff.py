@@ -54,7 +54,7 @@ class DataProfilerProfilePercentDiff(DataProfilerProfileMetricProvider):
             dr_stats = dr_col["statistics"]
             percent_delta_col = copy.deepcopy(dr_col)
             percent_delta_stats = {}
-            for (dr_stat, dr_val) in dr_stats.items():
+            for dr_stat, dr_val in dr_stats.items():
                 if dr_stat not in numerical_diff_stats:
                     percent_delta_stats[dr_stat] = dr_val
                     continue

@@ -37,7 +37,7 @@ class MetaSparkDFDataset(Dataset):
         super().__init__(*args, **kwargs)
 
     @classmethod
-    def column_map_expectation(cls, func):
+    def column_map_expectation(cls, func):  # noqa: PLR0915
         """Constructs an expectation using column-map semantics.
 
 
@@ -52,7 +52,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             column,
             mostly=None,
@@ -129,7 +129,7 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if isinstance(val, str):
-                                val = parse(val)
+                                val = parse(val)  # noqa: PLW2901
                             parsed_maybe_limited_unexpected_list.append(
                                 datetime.strftime(val, output_strftime_format)
                             )
@@ -183,7 +183,7 @@ class MetaSparkDFDataset(Dataset):
         return inner_wrapper
 
     @classmethod
-    def column_pair_map_expectation(cls, func):
+    def column_pair_map_expectation(cls, func):  # noqa: PLR0915
         """
         The column_pair_map_expectation decorator handles boilerplate issues surrounding the common pattern of evaluating
         truthiness of some condition on a per row basis across a pair of columns.
@@ -192,7 +192,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0913, PLR0912
             self,
             column_A,
             column_B,
@@ -303,7 +303,7 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if isinstance(val[0], str) and isinstance(val[1], str):
-                                val = (parse(val[0]), parse(val[1]))
+                                val = (parse(val[0]), parse(val[1]))  # noqa: PLW2901
                             parsed_maybe_limited_unexpected_list.append(
                                 (
                                     datetime.strftime(val[0], output_strftime_format),
@@ -357,7 +357,7 @@ class MetaSparkDFDataset(Dataset):
         return inner_wrapper
 
     @classmethod
-    def multicolumn_map_expectation(cls, func):
+    def multicolumn_map_expectation(cls, func):  # noqa: PLR0915
         """
         The multicolumn_map_expectation decorator handles boilerplate issues surrounding the common pattern of
         evaluating truthiness of some condition on a per row basis across a set of columns.
@@ -366,7 +366,7 @@ class MetaSparkDFDataset(Dataset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             column_list,
             mostly=None,
@@ -460,7 +460,9 @@ class MetaSparkDFDataset(Dataset):
                             parsed_maybe_limited_unexpected_list.append(val)
                         else:
                             if all(isinstance(v, str) for k, v in val):
-                                val = OrderedDict((k, parse(v)) for k, v in val)
+                                val = OrderedDict(  # noqa: PLW2901
+                                    (k, parse(v)) for k, v in val
+                                )
                             parsed_maybe_limited_unexpected_list.append(
                                 OrderedDict(
                                     (k, datetime.strftime(v, output_strftime_format))
@@ -786,7 +788,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
         return hist
 
-    def get_column_count_in_range(
+    def get_column_count_in_range(  # noqa: PLR0913
         self, column, min_val=None, max_val=None, strict_min=False, strict_max=True
     ):
         if min_val is None and max_val is None:
@@ -818,7 +820,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     # Expectations
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_in_set(
+    def expect_column_values_to_be_in_set(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         value_set,  # List[Any]
@@ -849,7 +851,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_be_in_set(
+    def expect_column_values_to_not_be_in_set(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         value_set,  # List[Any]
@@ -871,7 +873,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_between(
+    def expect_column_values_to_be_between(  # noqa: PLR0911, PLR0913, PLR0912
         self,
         column,
         min_value=None,
@@ -954,7 +956,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_value_lengths_to_be_between(
+    def expect_column_value_lengths_to_be_between(  # noqa: PLR0913
         self,
         column,
         min_value=None,
@@ -997,7 +999,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_unique(
+    def expect_column_values_to_be_unique(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1013,7 +1015,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_value_lengths_to_equal(
+    def expect_column_value_lengths_to_equal(  # noqa: PLR0913
         self,
         column,
         value,  # int
@@ -1030,7 +1032,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_strftime_format(
+    def expect_column_values_to_match_strftime_format(  # noqa: PLR0913
         self,
         column,
         strftime_format,  # str
@@ -1043,15 +1045,16 @@ class SparkDFDataset(MetaSparkDFDataset):
         # Below is a simple validation that the provided format can both format and parse a datetime object.
         # %D is an example of a format that can format but not parse, e.g.
         try:
-            datetime.strptime(
-                datetime.strftime(datetime.now(), strftime_format), strftime_format
+            datetime.strptime(  # noqa: DTZ007
+                datetime.strftime(datetime.now(), strftime_format),  # noqa: DTZ005
+                strftime_format,
             )
         except ValueError as e:
             raise ValueError(f"Unable to use provided strftime_format. {e.message}")
 
         def is_parseable_by_format(val):
             try:
-                datetime.strptime(val, strftime_format)
+                datetime.strptime(val, strftime_format)  # noqa: DTZ007
                 return True
             except TypeError:
                 raise TypeError(
@@ -1065,7 +1068,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_be_null(
+    def expect_column_values_to_not_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1078,7 +1081,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_null(
+    def expect_column_values_to_be_null(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1091,7 +1094,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_json_schema(
+    def expect_column_values_to_match_json_schema(  # noqa: PLR0913
         self,
         column,
         json_schema,
@@ -1121,7 +1124,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_json_parseable(
+    def expect_column_values_to_be_json_parseable(  # noqa: PLR0913
         self,
         column,
         mostly=None,
@@ -1143,7 +1146,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @DataAsset.expectation(["column", "type_", "mostly"])
-    def expect_column_values_to_be_of_type(
+    def expect_column_values_to_be_of_type(  # noqa: PLR0913
         self,
         column,
         type_,
@@ -1184,7 +1187,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @DataAsset.expectation(["column", "type_list", "mostly"])
-    def expect_column_values_to_be_in_type_list(
+    def expect_column_values_to_be_in_type_list(  # noqa: PLR0913
         self,
         column,
         type_list: List[str],
@@ -1230,7 +1233,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_regex(
+    def expect_column_values_to_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1244,7 +1247,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex(
+    def expect_column_values_to_not_match_regex(  # noqa: PLR0913
         self,
         column,
         regex,
@@ -1258,7 +1261,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_match_regex_list(
+    def expect_column_values_to_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1281,7 +1284,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_not_match_regex_list(
+    def expect_column_values_to_not_match_regex_list(  # noqa: PLR0913
         self,
         column,
         regex_list,
@@ -1296,7 +1299,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_equal(
+    def expect_column_pair_values_to_be_equal(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1318,7 +1321,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_A_to_be_greater_than_B(
+    def expect_column_pair_values_A_to_be_greater_than_B(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1375,7 +1378,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
-    def expect_column_pair_values_to_be_in_set(
+    def expect_column_pair_values_to_be_in_set(  # noqa: PLR0913
         self,
         column_A,
         column_B,
@@ -1412,7 +1415,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_select_column_values_to_be_unique_within_record(
+    def expect_select_column_values_to_be_unique_within_record(  # noqa: PLR0913
         self,
         column_list,  # pyspark.sql.DataFrame
         mostly=None,
@@ -1437,7 +1440,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_compound_columns_to_be_unique(
+    def expect_compound_columns_to_be_unique(  # noqa: PLR0913
         self,
         column_list,  # pyspark.sql.DataFrame
         mostly=None,
@@ -1447,7 +1450,6 @@ class SparkDFDataset(MetaSparkDFDataset):
         catch_exceptions=None,
         meta=None,
     ):
-
         # Might want to throw an exception if only 1 column is passed
         column_names = column_list.schema.names[:]
         return column_list.withColumn(
@@ -1458,7 +1460,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_increasing(
+    def expect_column_values_to_be_increasing(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         strictly=False,
@@ -1527,7 +1529,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.column_map_expectation
-    def expect_column_values_to_be_decreasing(
+    def expect_column_values_to_be_decreasing(  # noqa: PLR0913
         self,
         column,  # pyspark.sql.DataFrame
         strictly=False,
@@ -1596,7 +1598,7 @@ class SparkDFDataset(MetaSparkDFDataset):
 
     @DocInherit
     @MetaSparkDFDataset.multicolumn_map_expectation
-    def expect_multicolumn_sum_to_equal(
+    def expect_multicolumn_sum_to_equal(  # noqa: PLR0913
         self,
         column_list,
         sum_total,

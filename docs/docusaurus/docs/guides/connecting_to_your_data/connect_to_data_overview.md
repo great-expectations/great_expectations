@@ -14,66 +14,46 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
-	
-Connecting to your data in Great Expectations is designed to be a painless process.  Once you have defined your Datasources and Data Assets, you will have a consistent API for accessing and validating data on all kinds of source data systems such as SQL-type data sources, local and remote file stores, and in-memory data frames.
+Datasources and Data Assets provide an API for accessing and validating data on source data systems such as SQL-type data sources, local and remote file stores, and in-memory data frames.
 
-## The connect to data process
+## Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
+
+## Workflow
 
 <!-- Brief outline of what the process entails.  -->
 
-Connecting to your data is built around the <TechnicalTag tag="datasource" text="Datasource" /> object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems. This makes working with Datasources very convenient!
+A <TechnicalTag tag="datasource" text="Datasource" /> provides a standard API for accessing and interacting with data from different source systems.
 
 ![How you work with a Datasource](../../images/universal_map/overviews/you_work_with_datasource.png)
   
-Behind the scenes, however, the Datasource is doing a lot of work for you.  The Datasource provides an interface for an <TechnicalTag tag="execution_engine" text="Execution Engine" /> and possible external storage, and handles all the heavy lifting involved in communication between Great Expectations and your source data systems.
+A Datasource provides an interface for an <TechnicalTag tag="execution_engine" text="Execution Engine" /> and possible external storage, and it allows Great Expectations to communicate with your source data systems.
 
 ![How a Datasource works for you](../../images/universal_map/overviews/datasource_works_for_you.png)
 
-The majority of the work involved in connecting to data is a simple matter of adding a new Datasource to your <TechnicalTag tag="data_context" text="Data Context" /> according to the requirements of your underlying data system.  Once your Datasource is configured you will only need to use the Datasource API to access and interact with your data, regardless of the original source system (or systems) that your data is stored in.
+To connect to data, you add a new Datasource to your <TechnicalTag tag="data_context" text="Data Context" /> according to the requirements of your underlying data system.  After you've configured your Datasource, you'll use the Datasource API to access and interact with your data, regardless of the original source systems that you use to store data.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
-### Configuring your Datasource
+### Configure your Datasource
 
-Because the underlying data systems are different, how you connect to each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more complex scenarios.  It is strongly advised that you find the guide that pertains to your use case and follow it.  The following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
+Your existing data systems determine how you connect to each Datasource type. To help you with your Datasource implementation, use one of the GX how-to guides for your specific use case and source data systems.
 
-Datasource configurations can be written in Python using our Fluent Datasource API. Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
+You configure a Datasource with Python and the GX Fluent Datasource API. A typical Datasource configuration appears similar to the following example:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource"
 ```
 
-Please note that this is just a broad outline of how to configure a datasource.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
+The `name` key is a descriptive name for your Datasource. The `add_<datasource>` method takes the Datasource-specific arguments that are used to configure it. For example, the `add_pandas_filesystem` takes a `base_directory` argument in the previous example, while the `context.sources.add_postgres(name, ...)` method takes a `connection_string` that is used to connect to the database.
 
-The `name` key will be the first you need to define.  The `name` key can be anything you want, but it is best to use a descriptive name as you will use this to reference your Datasource in the future.
-The `add_<datasource>` method will take Datasource-specific arguments used to configure it. 
-For example, the `add_pandas_filesystem` takes a `base_directory` argument in the example above while the 
-`context.sources.add_postgres(name, ...)` method takes a `connection_string` that is used to connect to the database.
+Call the `add_<datasource>` method in your context to run configuration checks. For example, it makes sure the `base_directory` exists for the `pandas_filesystem` Datasource and the `connection_string` is valid for a SQL database.
 
-Calling the `add_<datasource>` method on your context will run configuration checks. 
-For example, it will make sure the `base_directory` exists for the `pandas_filesystem` Datasource and the `connection_string` is valid for a SQL database.
+These methods also persist your Datasource to your Data Context. The storage location for a Datasource and its reusability are determined by the <TechnicalTag tag="data_context" text="Data Context" /> type. For a File Data Context the changes are persisted to disk, for a Cloud Data Context the changes are persisted to the cloud, and for an Ephemeral Data Context the data remains in memory and don't persist beyond the current Python session.
 
-These methods also persist your Datasource to the underlying storage. The storage depends on your <TechnicalTag tag="data_context" text="Data Context" />. 
-For a File Data Context the changes will be persisted to disk; 
-for a Cloud Data Context the changes will be persisted to the cloud;
-for an Ephemeral Data Context the data will remain only in memory.
+## View your Datasource configuration
 
-## Accessing your Datasource from your Data Context
-
-If you need to directly access your Datasource in the future, the `context.datasources` attribute of your Data Context will provide a convenient way to do so.
-Here is how to view the configuration:
+The `context.datasources` attribute in your Data Context allows you to access your Datasource configuration. For example, the following command returns the Datasource configuration:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
 ```
-
-## Retrieving Batches of data with your Datasource
-
-This is primarily done when running Profilers in the Create Expectation step, or when running Checkpoints in the Validate Data step, and will be covered in more detail in those sections of the documentation.
-
-## Wrapping up
-
-<!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
-
-With your Datasources defined, you will now have access to the data in your source systems from a single, consistent API.  From here you will move on to the next step of working with Great Expectations: Create Expectations.

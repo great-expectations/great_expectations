@@ -9,7 +9,7 @@ import pydantic
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
-    sanitize_prefix_for_s3,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
@@ -57,7 +57,7 @@ class S3DataConnector(FilePathDataConnector):
     )
     asset_options_type: ClassVar[Type[_S3Options]] = _S3Options
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
@@ -76,14 +76,19 @@ class S3DataConnector(FilePathDataConnector):
         self._s3_client: BaseClient = s3_client
 
         self._bucket: str = bucket
-        self._prefix: str = sanitize_prefix_for_s3(prefix)
+
+        self._prefix: str = prefix
+        self._sanitized_prefix: str = sanitize_prefix_for_gcs_and_s3(text=prefix)
+
         self._delimiter: str = delimiter
         self._max_keys: int = max_keys
 
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
+            batching_regex=re.compile(
+                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
+            ),
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -92,7 +97,7 @@ class S3DataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_data_connector(
+    def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
         data_asset_name: str,
@@ -145,7 +150,7 @@ class S3DataConnector(FilePathDataConnector):
         )
 
     @classmethod
-    def build_test_connection_error_message(
+    def build_test_connection_error_message(  # noqa: PLR0913
         cls,
         data_asset_name: str,
         batching_regex: re.Pattern,
@@ -195,7 +200,7 @@ class S3DataConnector(FilePathDataConnector):
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
-            "Prefix": self._prefix,
+            "Prefix": self._sanitized_prefix,
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }

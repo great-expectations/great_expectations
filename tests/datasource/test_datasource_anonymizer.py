@@ -1,5 +1,6 @@
+from typing import TYPE_CHECKING
+
 import pytest
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
@@ -7,6 +8,9 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import Datasource
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 yaml = YAMLHandler()
 
@@ -237,7 +241,6 @@ introspection:
 
 
 def test_get_parent_class_yes():
-
     v3_batch_request_api_datasources = [
         "SimpleSqlalchemyDatasource",
         "Datasource",

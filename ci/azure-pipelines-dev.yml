@@ -79,6 +79,7 @@ stages:
                 setup.py
                 MANIFEST.in
                 tests/**
+                docs/**/*.py
                 /*.txt
                 /*.yml
                 requirements*
@@ -99,8 +100,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -120,8 +121,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -154,13 +155,14 @@ stages:
       - script: |
           python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
+        name: InstallDependencies
+      - script: |
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
-
     - job: docstring_linter
       steps:
       - script: |
@@ -196,10 +198,19 @@ stages:
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+
+    - job: name_tag_snippet_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+        - script: |
+            python ci/checks/check_only_name_tag_snippets.py
+          name: NameTagSnippetChecker
+
     - job: public_api_report
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: import_ge
@@ -213,8 +224,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
 
          - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
@@ -226,55 +237,8 @@ stages:
          - script: |
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
-
-  - stage: runme_script_runner_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-
-    jobs:
-      - job: runme_script_runner_tests
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]"
-              pip uninstall -y sqlalchemy
-            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
-
-          # tests containing the name "RUNME" are run
-          - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
-      - job: runme_script_runner_tests_postgres
-
-        services:
-          postgres: postgres
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql]"
-            displayName: 'Install GX and required dependencies'
-
-          # tests containing the name "RUNME_POSTGRES" are run
-          - script: |
-              pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
-
-
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -297,8 +261,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -360,14 +324,14 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
@@ -623,8 +587,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
             name: CheckMinAirflowDependencyCompatibility

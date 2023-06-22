@@ -13,7 +13,6 @@ if TYPE_CHECKING:
 
 @pytest.mark.unit
 def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
-
     create_engine_spy = mocker.spy(sqlalchemy, "create_engine")
 
     ds = SQLDatasource(

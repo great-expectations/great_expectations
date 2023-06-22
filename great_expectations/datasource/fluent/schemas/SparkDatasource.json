@@ -1,6 +1,6 @@
 {
     "title": "SparkDatasource",
-    "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "description": "--Public API--",
     "type": "object",
     "properties": {
         "type": {
@@ -28,6 +28,31 @@
             "items": {
                 "$ref": "#/definitions/DataFrameAsset"
             }
+        },
+        "spark_config": {
+            "title": "Spark Config",
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "force_reuse_spark_context": {
+            "title": "Force Reuse Spark Context",
+            "default": true,
+            "type": "boolean"
         }
     },
     "required": [
@@ -92,8 +117,7 @@
                 }
             },
             "required": [
-                "name",
-                "dataframe"
+                "name"
             ],
             "additionalProperties": false
         }

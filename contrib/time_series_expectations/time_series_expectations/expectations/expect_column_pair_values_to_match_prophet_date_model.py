@@ -21,7 +21,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
-
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 
     condition_domain_keys = (
@@ -135,6 +134,7 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     examples = [
         {
             "data": example_data,
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -177,20 +177,6 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

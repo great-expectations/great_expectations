@@ -137,7 +137,7 @@ class ExecutionEngine(ABC):
 
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
         caching: bool = True,
@@ -194,7 +194,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 
@@ -783,7 +785,7 @@ class ExecutionEngine(ABC):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )

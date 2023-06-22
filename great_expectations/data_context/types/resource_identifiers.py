@@ -223,7 +223,7 @@ class MetricIdentifier(DataContextKey):
 
 
 class ValidationMetricIdentifier(MetricIdentifier):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id,
         data_asset_name,
@@ -298,7 +298,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     @classmethod
     def from_tuple(cls, tuple_):
-        if len(tuple_) < 6:
+        if len(tuple_) < 6:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
@@ -319,7 +319,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
-        if len(tuple_) != 6:
+        if len(tuple_) != 6:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier fixed length tuple must have exactly six "
                 "components."
@@ -344,33 +344,33 @@ class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,
-        id: Optional[str] = None,
-        resource_name: Optional[str] = None,
+        id: str | None = None,
+        resource_name: str | None = None,
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._id = id or ""
-        self._resource_name = resource_name or ""
+        self._id = id
+        self._resource_name = resource_name
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> GXCloudRESTResource:
         return self._resource_type
 
     @resource_type.setter
-    def resource_type(self, value) -> None:
+    def resource_type(self, value: GXCloudRESTResource) -> None:
         self._resource_type = value
 
     @property
-    def id(self):
+    def id(self) -> str | None:
         return self._id
 
     @id.setter
-    def id(self, value) -> None:
+    def id(self, value: str) -> None:
         self._id = value
 
     @property
-    def resource_name(self) -> str:
+    def resource_name(self) -> str | None:
         return self._resource_name
 
     def to_tuple(self):
@@ -382,7 +382,7 @@ class GXCloudIdentifier(DataContextKey):
     @classmethod
     def from_tuple(cls, tuple_):
         # Only add resource name if it exists in the tuple_
-        if len(tuple_) == 3:
+        if len(tuple_) == 3:  # noqa: PLR2004
             return cls(resource_type=tuple_[0], id=tuple_[1], resource_name=tuple_[2])
         return cls(resource_type=tuple_[0], id=tuple_[1])
 

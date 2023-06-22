@@ -1,5 +1,4 @@
 import React from 'react'
-import Admonition from '@theme/Admonition'
 import GxData from '/docs/components/_data.jsx'
 
 /**
@@ -54,14 +53,13 @@ export default class Prerequisites extends React.Component {
   defaultPrerequisiteItems () {
     const returnItems = []
     if (this.props.requirePython === true) {
-      returnItems.push(<li>A supported version of Python (versions {GxData.min_python} to {GxData.max_python})</li>)
-      returnItems.push(<ul><li>For details on how to download and install Python on your platform, please see <a href='https://www.python.org/doc/'>Python's documentation</a> and <a href='https://www.python.org/downloads/'>download sites</a></li></ul>)
+      returnItems.push(<li>A supported version of Python ({GxData.min_python} to {GxData.max_python}). To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
     }
     if (this.props.requireInstallation === true) {
-      returnItems.push(<li>Set up an <a href='/docs/guides/setup/installation/local'>installation of Great Expectations</a></li>)
+      returnItems.push(<li>A Great Expectations instance. See <a href='/docs/guides/setup/installation/local'>Install Great Expectations locally</a>.</li>)
     }
     if (this.props.requireDataContext === true) {
-      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli'>Created your Data Context</a></li>)
+      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context'>A Data Context.</a></li>)
     }
     if (this.props.requireSourceData === 'filesystem') {
       returnItems.push(<li>Access to data stored in a filesystem.</li>)
@@ -69,16 +67,16 @@ export default class Prerequisites extends React.Component {
       returnItems.push(<li>Access to data stored in a SQL database.</li>)
     }
     if (this.props.requireDatasource === 'Pandas') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>Configured a Datasource to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'Spark') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>Configured a Datasource to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'SQL') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>Configured a Datasource to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === true) {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/connect_to_data_overview'>Configured a Datasource to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/connect_to_data_overview'>A Datasource configured to access your source data</a></li>)
     }
     if (this.props.requireExpectationSuite === true) {
-      returnItems.push(<li><a href='/docs/guides/expectations/create_expectations_overview'>Configured and saved an Expectation Suite</a></li>)
+      returnItems.push(<li><a href='/docs/guides/expectations/create_expectations_overview'>A configured and saved Expectation Suite.</a></li>)
     }
 
     return returnItems
@@ -87,12 +85,10 @@ export default class Prerequisites extends React.Component {
   render () {
     return (
       <div>
-        <Admonition type='caution' title='This guide assumes you have:'>
           <ul>
             {this.defaultPrerequisiteItems()}
             {this.extractMarkdownListItems().map((prereq, i) => (<li key={i}>{prereq}</li>))}
           </ul>
-        </Admonition>
       </div>
     )
   }

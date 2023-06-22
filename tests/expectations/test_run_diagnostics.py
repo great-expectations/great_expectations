@@ -18,7 +18,6 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 
 
 def test_expectation_self_check():
-
     my_expectation = ExpectColumnValuesToEqualThree()
     expectation_diagnostic = my_expectation.run_diagnostics()
     print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
@@ -212,7 +211,6 @@ def test_expectation_self_check():
 
 
 def test_include_in_gallery_flag():
-
     my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
@@ -341,7 +339,6 @@ def test_self_check_on_an_existing_expectation():
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
 def test_expectation__get_renderers():
-
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 

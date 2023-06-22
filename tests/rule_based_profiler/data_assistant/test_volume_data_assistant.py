@@ -48,7 +48,10 @@ from tests.test_utils import find_strings_in_nested_obj
 @pytest.fixture
 def quentin_expected_metrics_by_domain() -> Dict[Domain, Dict[str, Any]]:
     expected_metrics_by_domain: Dict[Domain, Dict[str, Any]] = {
-        Domain(domain_type=MetricDomainTypes.TABLE, rule_name="table_rule",): {
+        Domain(
+            domain_type=MetricDomainTypes.TABLE,
+            rule_name="table_rule",
+        ): {
             "$parameter.table_row_count": {
                 "value": [
                     10000,

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, cast
 from unittest import mock
 
 import pytest
-from capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
-from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
+from capitalone_dataprofiler_expectations.metrics import *  # noqa: F403
+from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401  # registers this DataAssistant and prevents removal of "unused" import
     DataProfilerStructuredDataAssistant,
 )
 from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
@@ -49,12 +49,6 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
         "data_asset_name": "my_reports",
         "data_connector_query": {"index": -1},
     }
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
@@ -64,8 +58,18 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["int", "float", "string"],
         },
-        exclude_column_names=exclude_column_names,
+        float_rule={
+            "profile_path": os.path.join(  # noqa: PTH118
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["float"],
+        },
         estimation="flag_outliers",
     )
 
@@ -87,22 +91,25 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         "data_connector_query": {"index": -1},
     }
 
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
-
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
-        exclude_column_names=exclude_column_names,
         numeric_rule={
             "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["int", "float", "string"],
+        },
+        float_rule={
+            "profile_path": os.path.join(  # noqa: PTH118
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+            "profile_report_filtering_key": "data_type",
+            "profile_report_accepted_filtering_values": ["float"],
         },
         estimation="flag_outliers",
     )
@@ -130,7 +137,7 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         len(
             bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
         )
-        == 1
+        == 2
     )
 
 
@@ -193,8 +200,9 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-
-    assert num_metrics == 28
+    assert (
+        num_metrics == 50
+    )  # 2 * ((numeric_rule: 6 int + 9 float + 1 string) + (float_rule: 9 float))
 
 
 @pytest.mark.integration

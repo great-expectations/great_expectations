@@ -230,7 +230,6 @@ def test_datasource_store_set_cloud_mode(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         retrieved_datasource_config = store.set(
             key=None, value=block_config_datasource_config
         )

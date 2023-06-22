@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import copy
+import logging
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
@@ -19,10 +21,25 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from typing import Literal
+
+    from typing_extensions import TypedDict
+
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+
+    class DataPayload(TypedDict):
+        id: str
+        attributes: dict
+        type: Literal["datasource"]
+
+    class CloudResponsePayloadTD(TypedDict):
+        data: DataPayload | list[DataPayload]
+
+
+logger = logging.getLogger(__name__)
 
 
 class DatasourceStore(Store):
@@ -103,15 +120,24 @@ class DatasourceStore(Store):
         else:
             return self._schema.loads(value)
 
-    def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
+    def ge_cloud_response_json_to_object_dict(
+        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
+    ) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        datasource_ge_cloud_id: str = response_json["data"]["id"]
-        datasource_config_dict: dict = response_json["data"]["attributes"][
-            "datasource_config"
-        ]
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
+        data = response_json["data"]
+        if isinstance(data, list):
+            if len(data) > 1:
+                # TODO: handle larger arrays of Datasources
+                raise TypeError(
+                    f"GX Cloud returned {len(data)} Datasources but expected 1"
+                )
+            data = data[0]
+        datasource_ge_cloud_id: str = data["id"]
+        datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_ge_cloud_id
 
         return datasource_config_dict
@@ -132,7 +158,7 @@ class DatasourceStore(Store):
         datasource_key: Union[
             DataContextVariableKey, GXCloudIdentifier
         ] = self.store_backend.build_key(name=datasource_name)
-        if not self.has_key(datasource_key):  # noqa: W601
+        if not self.has_key(datasource_key):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )

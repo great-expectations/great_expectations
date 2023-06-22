@@ -367,7 +367,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator = migrator_with_stub_base_data_context
 
     with mock.patch(
-        f"great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
+        "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
         autospec=True,
     ) as mock_post:
         mock_post.return_value = MigrationResponse(
@@ -416,7 +416,7 @@ def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     )
 
     with mock.patch(
-        f"great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
+        "great_expectations.data_context.migrator.cloud_migrator.CloudMigrator._post_to_cloud_backend",
         autospec=True,
     ) as mock_post:
         # Ensure that the first call, which is the bundle request, goes through successfully

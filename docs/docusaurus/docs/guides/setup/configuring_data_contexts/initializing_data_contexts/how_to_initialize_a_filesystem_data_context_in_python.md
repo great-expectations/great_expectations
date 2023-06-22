@@ -14,17 +14,13 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 2. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
-## Introduction
+A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX, and when using the <TechnicalTag tag="cli" text="CLI" />.
 
-A <TechnicalTag tag="data_context" text="Data Context" /> will be required in almost all Python scripts utilizing GX, and will be implemented behind the scenes when using GX's <TechnicalTag tag="cli" text="CLI" />.
-
-This guide will demonstrate how to initialize, instantiate, and verify the contents of a Filesystem Data Context from through Python code.
+Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- A passion for data quality
 
 </Prerequisites>
 
@@ -38,24 +34,22 @@ This guide will demonstrate how to initialize, instantiate, and verify the conte
 
 For purposes of this example, we will assume that we have an empty folder to initialize our Filesystem Data Context in:
 
-```python title="Python code"
-path_to_empty_folder = '/my_gx_project/'
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py path_to_empty_folder"
 ```
 
-### 3. Run GX's `get_context(...)` method
+### 3. Create a GX context
 
-We will provide our empty folder's path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an empty folder `get_context(...)` will initialize a Filesystem Data Context at that location.
+We will provide our empty folder's path to the GX library's `FileDataContext.create(...)` method as the `project_root_dir` parameter.  Because we are providing a path to an empty folder `FileDataContext.create(...)` will initialize a Filesystem Data Context at that location.
 
-For convenience, the `get_context(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
+For convenience, the `FileDataContext.create(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
 
-```python title="Python code"
-context = gx.get_context(context_root_dir=path_to_empty_folder)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_initialize_a_filesystem_data_context_in_python.py initialize_filesystem_data_context"
 ```
 
 :::info What if the folder is not empty?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a Filesystem Data Context at that location even if other files and folders are present.  This allows you to easily initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
+If the `project_root_dir` provided to the `FileDataContext.create(...)` method points to a folder that does not already have a Data Context present, the `FileDataContext.create(...)` method will initialize a Filesystem Data Context at that location even if other files and folders are present.  This allows you to easily initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
 
-If a Data Context already exists at the provided `path`, the `get_context(...)` method will not re-initialize it.  Instead, `get_context(...)` will simply instantiate and return the existing Data Context as is.
+If a Data Context already exists at the provided `project_root_dir`, the `FileDataContext.create(...)` method will not re-initialize it.  Instead, `FileDataContext.create(...)` will simply instantiate and return the existing Data Context as is.
 :::
 
 
@@ -72,15 +66,13 @@ For guidance on further customizing your Data Context's configurations for <Tech
 - [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-- [How to configure a Spark Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [How to configure a SQL Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
+- [How to configure a Pandas Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ## Additional information
 
 ### Related guides
-
-To initialize a Filesystem Data Context from the terminal, please see: [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
 
 To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 <!-- TODO

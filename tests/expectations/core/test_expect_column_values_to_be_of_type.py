@@ -57,7 +57,6 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
 
 
 def test_expect_column_values_to_be_of_type_string_dialect_sqlite(sa):
-
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
     validator = build_sa_validator_with_data(
         df=df,

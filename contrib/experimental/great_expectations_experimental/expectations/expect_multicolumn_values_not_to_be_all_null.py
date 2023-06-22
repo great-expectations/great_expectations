@@ -14,7 +14,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
 class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
 
     condition_metric_name = "multicolumn_values.not_all_null"
@@ -61,6 +60,7 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                 "one_non_null": [np.nan, 2, np.nan, np.nan, np.nan],
                 "all_nulls": [np.nan, np.nan, np.nan, np.nan, np.nan],
             },
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -94,12 +94,6 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
                 },
             ],
         }
@@ -158,5 +152,4 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-
     ExpectMulticolumnValuesNotToBeAllNull().print_diagnostic_checklist()

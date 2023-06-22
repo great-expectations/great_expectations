@@ -18,7 +18,6 @@ from great_expectations.expectations.metrics import (
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_alphabetical"
@@ -28,7 +27,6 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, reverse=False, **kwargs):
-
         # lowercase the whole column to avoid issues with capitalization
         # (since every capital letter is "before" the lowercase letters)
         column_lower = column.map(str.lower)

@@ -153,7 +153,6 @@ class Anonymizer(BaseAnonymizer):
     def _anonymize_validation_operator_init_payload(
         self, payload: Optional[Dict[str, "ValidationOperator"]] = None
     ) -> List[dict]:
-
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
         )

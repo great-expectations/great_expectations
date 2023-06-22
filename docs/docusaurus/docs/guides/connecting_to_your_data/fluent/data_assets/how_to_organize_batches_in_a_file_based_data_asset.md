@@ -22,8 +22,6 @@ import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/con
 <!-- ## Next steps -->
 import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
-## Introduction
-
 In this guide we will demonstrate the ways in which Batches can be organized in a file-based Data Asset.  We will discuss how to use a regular expression to indicate which files should be returned as Batches.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
 
 ## Prerequisites
@@ -32,7 +30,6 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 
 - A working installation of Great Expectations
 - A Datasource that connects to a location with source data files
-- A passion for data quality
 
 </Prerequisites>
 
@@ -82,8 +79,8 @@ Please reference the appropriate one of these guides:
 :::caution Datasources defined with the block-config method
 
 If you are using a Datasource that was created with the advanced block-config method please follow the appropriate guide from:
-- [how to configure a Spark Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [how to configure a Pandas Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [how to configure a Spark Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [how to configure a Pandas Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 
 :::
 
@@ -99,8 +96,7 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python title="Python code"
-my_datasource = context.get_datasource("my_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
 ```
 
 ### 3. Create a `batching_regex`
@@ -108,14 +104,13 @@ my_datasource = context.get_datasource("my_datasource")
 In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
 
 For this example, our Datasource points to a folder that contains the following files:
-- "taxi_data_2019.csv"
-- "taxi_data_2020.csv"
-- "taxi_data_2021.csv"
+- "yellow_tripdata_sample_2019-03.csv"
+- "yellow_tripdata_sample_2020-07.csv"
+- "yellow_tripdata_sample_2021-02.csv"
 
 To create a `batching_regex` that matches multiple files, we will include a named group in our regular expression:
 
-```python title="Python code"
-my_batching_regex = "taxi_data_(?P<year>\d{4})\.csv"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_batching_regex"
 ```
 
 In the above example, the named group "`year`" will match any four numeric characters in a file name.  This will result in each of our source data files matching the regular expression.
@@ -136,8 +131,7 @@ For more information on how to format regular expressions, we recommend referenc
 
 Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
 
-```python title="Python code"
-my_asset = my_datasource.add_csv_asset(name="my_taxi_data_asset", batching_regex=my_batching_regex)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_asset"
 ```
 
 :::tip What if I don't provide a `batching_regex`?
@@ -152,28 +146,23 @@ We will now add a Batch Sorter to our Data Asset.  This will allow us to explici
 
 The items in our list of sorters will correspond to the names of the groups in our `batching_regex` that we want to sort our Batches on.  The names are prefixed with a `+` or a `-` depending on if we want to sort our Batches in ascending or descending order based on the given group.
 
-If there were multiple named groups we could include multiple items in our sorter list and our Batches would be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
+When there are multiple named groups, we can include multiple items in our sorter list and our Batches will be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
 
-However, in this example we only have one named group, `"year"`, so our list of sorters will only have one element.  We will add an ascending sorter based on the contents of the regex group `"year"`:
+In this example we have two named groups, `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the regex group `"year"` and a descending sorter based on the contents of the regex group `"month"`:
 
-```python title="Python code"
-my_asset.add_sorters(["+year"])
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py add_sorters"
 ```
 
 ### 6. Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
-```python title="Python code"
-my_batch_request = my_asset.build_batch_request()
-batches = datasource.get_batch_list_from_batch_request(my_batch_request)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_batch_list"
 ```
 
 Because a Batch List contains a lot of metadata, it will be easiest to verify which files were included in the returned Batches if we only look at the `batch_spec` of each returned Batch:
 
-```python title="Python code"
-for batch in batches:
-    print(batch.batch_spec)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py print_batch_spec"
 ```
 
 ## Next steps

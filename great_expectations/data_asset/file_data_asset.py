@@ -55,14 +55,14 @@ class MetaFileDataAsset(DataAsset):
 
         @cls.expectation(argspec)
         @wraps(func)
-        def inner_wrapper(
+        def inner_wrapper(  # noqa: PLR0912
             self,
             skip=None,
             mostly=None,
             null_lines_regex=r"^\s*$",
             result_format=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             try:
                 f = open(self._path)
@@ -105,7 +105,7 @@ class MetaFileDataAsset(DataAsset):
                         (boolean_mapped_null_lines == False).sum()  # noqa: E712
                     )
                     boolean_mapped_success_lines = np.array(
-                        func(self, _lines=nonnull_lines, *args, **kwargs)
+                        func(self, _lines=nonnull_lines, *args, **kwargs)  # noqa: B026
                     )
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
                     unexpected_list = list(
@@ -172,7 +172,7 @@ class FileDataAsset(MetaFileDataAsset):
         self._path = file_path
 
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_be_between(
+    def expect_file_line_regex_match_count_to_be_between(  # noqa: PLR0913, PLR0912
         self,
         regex,
         expected_min_count=0,
@@ -295,7 +295,7 @@ class FileDataAsset(MetaFileDataAsset):
         return truth_list
 
     @MetaFileDataAsset.file_lines_map_expectation
-    def expect_file_line_regex_match_count_to_equal(
+    def expect_file_line_regex_match_count_to_equal(  # noqa: PLR0913
         self,
         regex,
         expected_count=0,
@@ -308,7 +308,6 @@ class FileDataAsset(MetaFileDataAsset):
         meta=None,
         _lines=None,
     ):
-
         """
         Expect the number of times a regular expression appears on each line of
         a file to be between a maximum and minimum value.
@@ -373,7 +372,7 @@ class FileDataAsset(MetaFileDataAsset):
         return [len(comp_regex.findall(line)) == expected_count for line in _lines]
 
     @DataAsset.expectation(["value"])
-    def expect_file_hash_to_equal(
+    def expect_file_hash_to_equal(  # noqa: PLR0913
         self,
         value,
         hash_alg="md5",
@@ -382,7 +381,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Expect computed file hash to equal some given value.
 
@@ -433,7 +431,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation(["minsize", "maxsize"])
-    def expect_file_size_to_be_between(
+    def expect_file_size_to_be_between(  # noqa: PLR0913, PLR0912
         self,
         minsize=0,
         maxsize=None,
@@ -442,7 +440,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Expect file size to be between a user specified maxsize and minsize.
 
@@ -511,7 +508,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success, "result": {"observed_value": size}}
 
     @DataAsset.expectation(["filepath"])
-    def expect_file_to_exist(
+    def expect_file_to_exist(  # noqa: PLR0913
         self,
         filepath=None,
         result_format=None,
@@ -519,7 +516,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Checks to see if a file specified by the user actually exists
 
@@ -564,7 +560,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation([])
-    def expect_file_to_have_valid_table_header(
+    def expect_file_to_have_valid_table_header(  # noqa: PLR0913
         self,
         regex,
         skip=None,
@@ -642,7 +638,7 @@ class FileDataAsset(MetaFileDataAsset):
         return {"success": success}
 
     @DataAsset.expectation([])
-    def expect_file_to_be_valid_json(
+    def expect_file_to_be_valid_json(  # noqa: PLR0913
         self,
         schema=None,
         result_format=None,
@@ -650,7 +646,6 @@ class FileDataAsset(MetaFileDataAsset):
         catch_exceptions=None,
         meta=None,
     ):
-
         """
         Args:
             schema : string

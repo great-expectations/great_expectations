@@ -15,7 +15,6 @@ yaml = YAMLHandler()
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):
-
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
     )

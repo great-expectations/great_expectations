@@ -405,7 +405,6 @@ def section_9_test_your_configuration__inferred_and_configured():
             12,
         ),
     ):
-
         test_result = data_context.test_yaml_config(yaml.dump(datasource_config))
         datasource_check = test_result.self_check(max_examples=12)
         assert (

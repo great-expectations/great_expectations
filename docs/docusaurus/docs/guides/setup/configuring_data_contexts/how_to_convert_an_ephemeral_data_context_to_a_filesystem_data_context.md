@@ -9,8 +9,6 @@ import IfYouStillNeedToSetupGx from '/docs/components/prerequisites/_if_you_stil
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 import SetupConfigurations from '/docs/components/setup/link_lists/_setup_configurations.md'
 
-## Introduction
-
 An Ephemeral Data Context is a temporary, in-memory Data Context that will not persist beyond the current Python session.  However, if you decide you would like to save the contents of an Ephemeral Data Context for future use you can do so by converting it to a Filesystem Data Context.
 
 ## Prerequisites
@@ -19,7 +17,6 @@ An Ephemeral Data Context is a temporary, in-memory Data Context that will not p
 
 - A working installation of Great Expectations
 - An Ephemeral Data Context instance
-- A passion for Data Quality
 
 </Prerequisites> 
 
@@ -60,13 +57,7 @@ You can also instantiate an Ephemeral Data Context (for those occasions when you
 
 You can easily check to see if you are working with an Ephemeral Data Context with the following code (in this example, we are assuming your Data Context is stored in the variable `context`):
 
-```python title="Python code"
-from great_expectations.data_context import EphemeralDataContext
-
-# ...
-
-if isinstance(context, EphemeralDataContext):
-    print(It's Ephemeral!)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py check_data_context_is_ephemeral"
 ```
 
 </details>
@@ -83,8 +74,7 @@ You can determine if your current working directory already has a Filesystem Dat
 
 Converting an Ephemeral Data Context into a Filesystem Data Context can be done with one line of code:
 
-```python title="Python code"
-context = context.convert_to_file_context()
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_explicitly_instantiate_an_ephemeral_data_context.py convert_ephemeral_data_context_filesystem_data_context"
 ```
 
 :::info Replacing the Ephemeral Data Context

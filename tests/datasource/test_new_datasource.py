@@ -31,7 +31,7 @@ yaml = YAMLHandler()
 
 
 @pytest.fixture
-def basic_pandas_datasource_v013(tmp_path_factory):
+def basic_pandas_datasource_v013(tmp_path_factory) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_pandas_datasource_v013_filesystem_data_connector"
@@ -80,7 +80,7 @@ data_connectors:
 
 
 @pytest.fixture
-def basic_spark_datasource(tmp_path_factory, spark_session):
+def basic_spark_datasource(tmp_path_factory, spark_session) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
     )
@@ -124,7 +124,7 @@ data_connectors:
 @pytest.fixture
 def sample_datasource_v013_with_single_partition_file_data_connector(
     tmp_path_factory,
-):
+) -> Datasource:
     base_directory: str = str(
         tmp_path_factory.mktemp(
             "basic_pandas_datasource_v013_single_partition_filesystem_data_connector"
@@ -237,7 +237,7 @@ def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
 
     # The structure of this config is dynamic based on PySpark version;
     # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_config: Dict[str, str] = {
+    expected_spark_config: Dict[str, Any] = {
         "spark.app.name": "default_great_expectations_spark_application",
         "spark.default.parallelism": 4,
         "spark.driver.memory": "6g",
@@ -493,7 +493,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal
@@ -1073,3 +1073,34 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
         batch_request=multi_batch_batch_request
     )
     assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
+
+
+@pytest.mark.unit
+class TestAttrAccess:
+    @pytest.mark.parametrize(
+        "attr_name",
+        ["get_asset", "read_csv", "add_table_asset", "add_json_asset", "read_sql"],
+    )
+    def test_fluent_attrs_raise_not_implemented_error(
+        self, basic_pandas_datasource_v013: Datasource, attr_name: str
+    ):
+        with pytest.raises(NotImplementedError):
+            getattr(basic_pandas_datasource_v013, attr_name)
+
+    def test_other_attrs_raise_attribute_error(
+        self, basic_pandas_datasource_v013: Datasource
+    ):
+        with pytest.raises(AttributeError):
+            _ = basic_pandas_datasource_v013.foo_bar
+
+        with pytest.raises(AttributeError):
+            _ = basic_pandas_datasource_v013.add_not_a_real_asset_type
+
+    def test_standard_attrs(self, basic_pandas_datasource_v013: Datasource):
+        _ = basic_pandas_datasource_v013.name
+        _ = basic_pandas_datasource_v013.execution_engine
+        _ = basic_pandas_datasource_v013.get_available_data_asset_names()
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-vv"])

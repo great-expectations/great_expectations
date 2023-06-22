@@ -8,5 +8,5 @@ As part of the new modular expectations API in Great Expectations, Validation Op
 
 This guide originally demonstrated how to load an Expectation Suite and Validate data without using a Checkpoint. That used to be suitable for environments or workflows where a user does not want to or cannot create a Checkpoint, e.g. in a [hosted environment](../../../deployment_patterns/how_to_instantiate_a_data_context_hosted_environments.md). However, this workflow is no longer supported. 
 
-As an alternative, you can instead run Validations by using a Checkpoint that is configured and initialized entierly in-memory, as demonstrated in our guide on [How to validate data with an in-memory Checkpoint](./how_to_validate_data_with_an_in_memory_checkpoint.md).
+As an alternative, you can use a Checkpoint that is configured and initialized entirely in-memory to run Validations. See [How to validate data with an in-memory Checkpoint](../checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md).
 :::

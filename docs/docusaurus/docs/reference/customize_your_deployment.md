@@ -57,17 +57,17 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
 
-* [How to connect to a Athena database](../guides/connecting_to_your_data/database/athena.md)
-* [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
-* [How to connect to a MSSQL database](../guides/connecting_to_your_data/database/mssql.md)
-* [How to connect to a MySQL database](../guides/connecting_to_your_data/database/mysql.md)
-* [How to connect to a Postgres database](../guides/connecting_to_your_data/database/postgres.md)
-* [How to connect to a Redshift database](../guides/connecting_to_your_data/database/redshift.md)
-* [How to connect to a Snowflake database](../guides/connecting_to_your_data/database/snowflake.md)
-* [How to connect to a SQLite database](../guides/connecting_to_your_data/database/sqlite.md)
-* [How to connect to data on a filesystem using Spark](../guides/connecting_to_your_data/filesystem/spark.md)
-* [How to connect to data on S3 using Spark](../guides/connecting_to_your_data/cloud/s3/spark.md)
-* [How to connect to data on GCS using Spark](../guides/connecting_to_your_data/cloud/gcs/spark.md)
+* [How to connect to a Athena database](/docs/0.15.50/guides/connecting_to_your_data/database/athena)
+* [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
+* [How to connect to a MSSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/mssql)
+* [How to connect to a MySQL database](/docs/0.15.50/guides/connecting_to_your_data/database/mysql)
+* [How to connect to a Postgres database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres)
+* [How to connect to a Redshift database](/docs/0.15.50/guides/connecting_to_your_data/database/redshift)
+* [How to connect to a Snowflake database](/docs/0.15.50/guides/connecting_to_your_data/database/snowflake)
+* [How to connect to a SQLite database](/docs/0.15.50/guides/connecting_to_your_data/database/sqlite)
+* [How to connect to data on a filesystem using Spark](/docs/0.15.50/guides/connecting_to_your_data/filesystem/spark)
+* [How to connect to data on S3 using Spark](/docs/0.15.50/guides/connecting_to_your_data/cloud/s3/spark)
+* [How to connect to data on GCS using Spark](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/spark)
 
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
@@ -86,7 +86,6 @@ Most teams will want to configure various Checkpoints and Validation Actions as 
 * [How to deploy a scheduled Checkpoint with cron](../guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md)
 * [How to get Data Docs URLs for custom Validation Actions](../guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions.md)
 * [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md)
-* [How to validate data with an in-memory Checkpoint](../guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint.md)
 * [How to run a Checkpoint in Airflow](../deployment_patterns/how_to_use_great_expectations_with_airflow.md)
 
 ## Not interested in managing your own configuration or infrastructure?

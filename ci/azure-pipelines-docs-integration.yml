@@ -4,7 +4,11 @@
 #
 # The pipeline is run under the following conditions:
 #   - On any PR
-#   - When manually triggered
+
+trigger:
+  branches:
+    include:
+    - develop
 
 resources:
   containers:
@@ -43,7 +47,6 @@ variables:
 
 stages:
   - stage: scope_check
-    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -58,6 +61,8 @@ stages:
                 docs/**
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
+                tests/integration/test_definitions/**
+                tests/integration/test_script_runner.py
                 tests/test_sets/**
 
           - bash: ./ci/checks/check_for_docs_deps_changes.sh
@@ -65,7 +70,6 @@ stages:
 
   - stage: docusaurus_tests
     dependsOn: scope_check
-    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -82,7 +86,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -107,7 +111,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -134,8 +138,21 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
           displayName: 'Install dependencies'
+
+        - script: |
+            printf 'Waiting for MySQL database to accept connections'
+            until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+              printf '.'
+              sleep 1;
+            done;
+          displayName: Wait for database to initialise
+
+        - script: |
+            echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+            mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+          displayName: 'Configure mysql'
 
         - script: |
             pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
@@ -161,17 +178,16 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
             pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'
 
-
     - job: test_docs_bigquery
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -182,9 +198,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with BigQuery'
+          # 202306 Note: BigQuery PyPi says library is only compatible with SqlAlchemy < 2.0.0
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
@@ -230,7 +246,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -238,12 +254,13 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mssql tests/integration/test_script_runner.py
+            # Note expect_column_values_to_only_contain_vowels is skipped because metrics are not implemented for MSSQL.
+            pytest -v --docs-tests -m integration --mssql -k "not test_docs[expect_column_values_to_only_contain_vowels]" tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_snowflake
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -254,7 +271,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -272,7 +289,7 @@ stages:
 
     - job: test_docs_redshift
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -283,9 +300,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, redshift]" pytest-azurepipelines
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Redshift'
+          # 202306 Note: Redshift Repo constrains sqlalchemy in setup.py. https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/a077110366a3c451f1c41b2fa56f6e3cd5c438dd/setup.py#L24
         - script: |
             pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
           displayName: 'pytest'
@@ -297,10 +314,14 @@ stages:
             REDSHIFT_PORT: $(REDSHIFT_PORT)
             REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
     - job: test_docs_aws
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -311,7 +332,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+            pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
 
         - script: |
@@ -322,9 +343,47 @@ stages:
             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
+    - job: test_docs_aws_spark
+      timeoutInMinutes: 30
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
+      variables:
+        python.version: '3.8'
+        spark.version: '3.3.2'
+        matching_aws_java_sdk_bundle_version: '1.11.1026'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+        - script: |
+            pip install pyspark==$(spark.version)
+          displayName: Install Pyspark $(spark.version)
+        - script: |
+            export JAVA_HOME=$JAVA_HOME_11_X64
+          displayName: Set JAVA_HOME  to existing directory
+        - script: |
+            wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$(spark.version)/hadoop-aws-$(spark.version).jar
+            wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/$(matching_aws_java_sdk_bundle_version)/aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar
+            export pyspark_dir=`python -c 'import pyspark; print(pyspark.__path__[0] + "/jars/")'`
+            mv hadoop-aws-$(spark.version).jar $pyspark_dir
+            mv aws-java-sdk-bundle-$(matching_aws_java_sdk_bundle_version).jar $pyspark_dir
+
+          displayName: download the AWS JARs and move to pyspark's JAR directory.
+        - script: |
+            pip install --constraint constraints-dev.txt ".[test, spark]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
+          displayName: 'Install dependencies'
+        - script: |
+            pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+
     - job: test_docs_azure
       timeoutInMinutes: 30
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: and(or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true)), ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true))
       variables:
         python.version: '3.8'
 
@@ -335,7 +394,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, azure]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -360,9 +419,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-          displayName: 'Install dependencies'
-
+            pip install --constraint constraints-dev-sqlalchemy-pandas-v1.txt ".[test, trino]" pytest-azurepipelines
+          displayName: 'Install dependencies and constrain sqlalchemy and pandas versions (2.0.0) that are not compatible with Trino'
+          # 202306 Note: there isn’t explicit statement about not being compatible with 2.0, but only that it is compatible up to 1.4
         - script: |
             pytest -v --docs-tests -m integration --trino tests/integration/test_script_runner.py
           displayName: 'pytest'
@@ -380,7 +439,7 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, athena]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
@@ -391,6 +450,10 @@ stages:
             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
             ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
@@ -413,8 +476,21 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            pip install --constraint constraints-dev.txt ".[test, mysql, postgresql]" pytest-azurepipelines
           displayName: 'Install dependencies'
+
+        - script: |
+            printf 'Waiting for MySQL database to accept connections'
+            until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+              printf '.'
+              sleep 1;
+            done;
+          displayName: Wait for database to initialise
+
+        - script: |
+            echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+            mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+          displayName: 'Configure mysql'
 
         - script: |
             pytest -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py

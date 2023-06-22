@@ -10,6 +10,12 @@ from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
 # noinspection PyPep8Naming
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.compatibility import sqlalchemy
@@ -122,7 +128,7 @@ Assumes --interactive flag.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_new(
+def suite_new(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: Optional[str],
     interactive_flag: bool,
@@ -137,6 +143,16 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_NEW_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_NEW_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
     profile: bool = _determine_profile(profiler_name)
@@ -175,7 +191,7 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
     return profile
 
 
-def _process_suite_new_flags_and_prompt(
+def _process_suite_new_flags_and_prompt(  # noqa: PLR0913
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -222,7 +238,7 @@ def _process_suite_new_flags_and_prompt(
     return interactive_mode, profile
 
 
-def _suite_new_workflow(
+def _suite_new_workflow(  # noqa: PLR0913
     context: DataContext,
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
@@ -367,7 +383,6 @@ def _suite_new_process_profile_and_batch_request_flags(
     profile: bool,
     batch_request: Optional[str],
 ) -> CLISuiteInteractiveFlagCombinations:
-
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     interactive_flag = interactive_mode.value["interactive_flag"]
 
@@ -459,7 +474,7 @@ How would you like to create your Expectation Suite?
         show_default=False,
     )
     # Default option
-    if suite_create_method == "":
+    if suite_create_method == "":  # noqa: PLC1901
         profile = False
         interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
     elif suite_create_method == "1":
@@ -526,7 +541,7 @@ Assumes --interactive flag.  Incompatible with --datasource-name option.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_edit(
+def suite_edit(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: str,
     interactive_flag: bool,
@@ -548,6 +563,16 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_EDIT_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_EDIT_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     interactive_mode: CLISuiteInteractiveFlagCombinations = (
         _process_suite_edit_flags_and_prompt(
@@ -581,7 +606,7 @@ def suite_edit(
     )
 
 
-def _process_suite_edit_flags_and_prompt(
+def _process_suite_edit_flags_and_prompt(  # noqa: PLR0913, PLR0912
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -692,7 +717,7 @@ How would you like to edit your Expectation Suite?
             show_default=False,
         )
         # Default option
-        if suite_edit_method == "":
+        if suite_edit_method == "":  # noqa: PLC1901
             interactive_mode = (
                 CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
             )
@@ -704,7 +729,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(  # noqa: C901 - 19
+def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,

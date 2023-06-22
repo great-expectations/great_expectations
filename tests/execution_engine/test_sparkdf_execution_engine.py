@@ -7,6 +7,8 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
@@ -20,8 +22,6 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility import pyspark
 
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
@@ -684,7 +684,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
     metrics.update(results)
 
@@ -959,7 +959,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
             },
             domain_type="column",
         )
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as g:
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1037,7 +1037,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     # Expect GreatExpectationsError because parser doesn't exist
     with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data = engine.get_domain_records(
+        engine.get_domain_records(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
@@ -1079,7 +1079,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
-        res = engine.resolve_metrics(
+        engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
                 desired_metric_2,
@@ -1120,7 +1120,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(

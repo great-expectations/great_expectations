@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import datetime
 import os
 from typing import List
@@ -7,6 +8,9 @@ import pandas as pd
 import pytest
 from dateutil.parser import parse
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_context.util import file_relative_path
@@ -18,11 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import import_library_module
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
-    add_dataframe_to_db,
-)
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -253,10 +254,9 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 
 @pytest.mark.integration
 def test_sqlite_sample_using_limit(sa):
-
     csv_path: str = file_relative_path(
-        os.path.dirname(os.path.dirname(__file__)),
-        os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "ten_trips_from_each_month",
@@ -264,7 +264,7 @@ def test_sqlite_sample_using_limit(sa):
         ),
     )
     df: pd.DataFrame = pd.read_csv(csv_path)
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df, sa)
 
     n: int = 10
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
@@ -276,14 +276,14 @@ def test_sqlite_sample_using_limit(sa):
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()
@@ -324,22 +324,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
+    rows_0: List[tuple] = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
+    rows_1: List[tuple] = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
@@ -363,25 +363,61 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_0 = batch_data.execution_engine.engine.execute(
+    rows_0 = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_1 = batch_data.execution_engine.engine.execute(
+    rows_1 = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     assert len(rows_0) == len(rows_1)
 
     assert not (rows_0 == rows_1)
+
+
+@pytest.mark.unit
+def test_sample_using_random_batch_spec_test_table_name_required():
+    fake_execution_engine = None
+    batch_spec = BatchSpec()
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+    assert "table name must be specified" in str(e.value)
+
+
+@pytest.mark.unit
+def test_sample_using_random_batch_spec_test_sampling_kwargs_required():
+    fake_execution_engine = None
+    batch_spec = BatchSpec(table_name="table")
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+        assert "sample_using_random" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("sampling_kwargs", [{}, "a_string", []])
+def test_sample_using_random_batch_spec_test_sampling_kwargs_p_required(
+    sampling_kwargs,
+):
+    fake_execution_engine = None
+    batch_spec = BatchSpec(table_name="table", sampling_kwargs=sampling_kwargs)
+    with pytest.raises(ValueError) as e:
+        SqlAlchemyDataSampler.sample_using_random(
+            execution_engine=fake_execution_engine, batch_spec=batch_spec
+        )
+        assert "sample_using_random" in str(e.value)

@@ -3,14 +3,15 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import pandas as pd
-
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -41,14 +42,24 @@ class MetricsCalculator:
     def show_progress_bars(self, enable: bool) -> None:
         self._show_progress_bars = enable
 
+    @public_api
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         """
         Convenience method to run "table.columns" metric.
+
+        Arguments:
+            domain_kwargs: Optional dictionary of domain kwargs (e.g., containing "batch_id").
+
+        Returns:
+            The list of Batch columns.
         """
         if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self._execution_engine.batch_manager.active_batch_data_id,
-            }
+            domain_kwargs = {}
+
+        if domain_kwargs.get("batch_id") is None:
+            domain_kwargs[
+                "batch_id"
+            ] = self._execution_engine.batch_manager.active_batch_id
 
         columns: List[str] = self.get_metric(
             metric=MetricConfiguration(
@@ -59,14 +70,22 @@ class MetricsCalculator:
 
         return columns
 
+    @public_api
     def head(
         self,
         n_rows: int = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """
-        Convenience method to run "table.head" metric.
+        """Convenience method to return the first several rows or records from a Batch of data.
+
+        Args:
+            n_rows: The number of rows to return.
+            domain_kwargs: If provided, the domain for which to return records.
+            fetch_all: If True, ignore n_rows and return the entire batch.
+
+        Returns:
+            A Pandas DataFrame containing the records' data.
         """
         if domain_kwargs is None:
             domain_kwargs = {}
@@ -212,7 +231,10 @@ class MetricsCalculator:
             Tuple[str, str, str],
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
-        (resolved_metrics, aborted_metrics_info,) = self.resolve_validation_graph(
+        (
+            resolved_metrics,
+            aborted_metrics_info,
+        ) = self.resolve_validation_graph(
             graph=graph,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,

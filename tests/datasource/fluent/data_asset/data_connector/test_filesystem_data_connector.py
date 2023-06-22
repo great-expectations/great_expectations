@@ -2,14 +2,15 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, List
 
+import pydantic
 import pytest
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
@@ -54,7 +55,7 @@ def test_basic_instantiation(tmp_path_factory):
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
+    with pytest.raises(pydantic.ValidationError):
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list(
             BatchRequest(

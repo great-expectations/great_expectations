@@ -34,7 +34,7 @@ def test_cli_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "datasource new",
-        input="2\n8\n",
+        input="y\n2\n9\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

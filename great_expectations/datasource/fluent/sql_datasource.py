@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -9,14 +8,15 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Literal,
     Optional,
+    Protocol,
     Type,
     Union,
     cast,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
@@ -24,6 +24,10 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed for pydantic
 )
@@ -33,8 +37,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
     Sorter,
@@ -51,7 +53,10 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
 
 
 class SQLDatasourceError(Exception):
@@ -422,6 +427,7 @@ class _SQLAsset(DataAsset):
         self.test_splitter_connection()
         return self
 
+    @public_api
     def add_splitter_year(
         self: Self,
         column_name: str,
@@ -436,6 +442,7 @@ class _SQLAsset(DataAsset):
             SplitterYear(method_name="split_on_year", column_name=column_name)
         )
 
+    @public_api
     def add_splitter_year_and_month(
         self: Self,
         column_name: str,
@@ -452,6 +459,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_year_and_month_and_day(
         self: Self,
         column_name: str,
@@ -468,6 +476,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
@@ -486,6 +495,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
         """Associates a column value splitter with this sql asset.
         Args:
@@ -500,6 +510,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
@@ -518,6 +529,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         """Associates a mod integer splitter with this sql asset.
         Args:
@@ -534,6 +546,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    @public_api
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
         """Associates a multi column value splitter with this sql asset.
         Args:
@@ -666,18 +679,22 @@ class _SQLAsset(DataAsset):
                 )
             )
         self.sort_batches(batch_list)
-        return batch_list
+        return batch_list[batch_request.batch_slice]
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -691,10 +708,12 @@ class _SQLAsset(DataAsset):
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
+            batch_slice=batch_slice,
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -713,11 +732,12 @@ class _SQLAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
@@ -837,7 +857,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        return sa.text(self.table_name)
+        return sa.text(self.qualified_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -899,7 +919,7 @@ class SQLDatasource(Datasource):
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
-                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    exclude=self._get_exec_engine_excludes(),
                     config_provider=self._config_provider,
                 )
                 connection_string = model_dict.pop("connection_string")
@@ -939,7 +959,7 @@ class SQLDatasource(Datasource):
                 asset.test_connection()
 
     @public_api
-    def add_table_asset(
+    def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
         table_name: str,

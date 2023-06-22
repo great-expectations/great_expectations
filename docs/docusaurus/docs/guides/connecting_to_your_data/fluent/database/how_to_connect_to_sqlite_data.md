@@ -8,7 +8,8 @@ keywords: [Great Expectations, SQLite, SQL]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-## Introduction
+<!-- ### 1. Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
 In this guide we will demonstrate how to connect Great Expectations to data in a SQLite database.  We will demonstrate how to create a SQLite Datasource.  With our SQLite Datasource we will then show the methods for connecting to data in a SQLite table and connecting to data from a SQLite query.
 
@@ -18,7 +19,6 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 - [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a SQLite database
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -26,33 +26,25 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 ### 1. Import GX and instantiate a Data Context
 
-```python title="Python code"
-import great_expectations as gx
-
-context = gx.get_context()
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Determine your connection string
 
 For this example we will use a connection string to connect to our PostgreSQL database.  In PostgreSQL, connection strings are formatted like:
 
-```python title="Python code"
-my_connection_string = "sqlite:///<PATH_TO_DB_FILE>"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
 ```
 
 ### 3. Create a SQLite Datasource
 
 Creating a PostgreSQL Datasource is as simple as providing the `add_sqlite(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
 
-```python title="Python code"
-datasource_name = "my_datasource"
-my_connection_string = "sqlite:///<PATH_TO_DB_FILE>"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
 ```
 
 With these two values, we can create our Datasource:
 
-```python title="Python code"
-datasource = context.sources.add_sqlite(name=datasource_name, connection_string=my_connection_string)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
 ```
 
 :::caution Using `add_sql(...)` vs `add_sqlite(...)` to create a Datasource
@@ -69,30 +61,24 @@ If you are working with SQLite data, you should always use `add_sqlite(...)` to 
 
 We will indicate a table to connect to with a Table Data Asset.  This is done by providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `table_name` to specify the table we wish the Data Asset to connect to.
 
-```python title="Python code"
-asset_name = "my_asset"
-asset_table_name = "yellow_tripdata_sample"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
 ```
 
 With these two values, we can create our Data Asset:
 
-```python title="Python code"
-table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
 ```
 
 ### 5. (Optional) Connect to the data in a query
 
 To indicate the query that provides data to connect to we will define a Query Data Asset.  This done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
-```python title = "Python code"
-asset_name = "my_asset"
-assest_query = "SELECT * from yellow_tripdata_sample"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
 ```
 
 Once we have these two values, we can create our Data Asset with:
 
-```python title="Python code"
-table_asset = datasource.add_query_asset(name=asset_name, query=asset_query)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
 ```
 
 ### 6. (Optional) Repeat steps 4 or 5 as needed to add additional tables or queries

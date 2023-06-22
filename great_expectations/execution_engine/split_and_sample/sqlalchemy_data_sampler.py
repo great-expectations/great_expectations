@@ -145,19 +145,28 @@ class SqlAlchemyDataSampler(DataSampler):
         Returns:
             Sqlalchemy selectable.
         """
+        try:
+            table_name: str = batch_spec["table_name"]
+        except KeyError as e:
+            raise ValueError(
+                "A table name must be specified when using sample_using_random. "
+                "Please update your configuration"
+            ) from e
+        try:
+            p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
+        except (KeyError, TypeError) as e:
+            raise ValueError(
+                "To use sample_using_random you must specify the parameter 'p' in "
+                "the 'sampling_kwargs' configuration."
+            ) from e
 
-        # TODO: AJB 20220429 WARNING THIS METHOD IS NOT COVERED BY TESTS
-
-        table_name: str = batch_spec["table_name"]
-
-        num_rows: int = execution_engine.engine.execute(
+        num_rows: int = execution_engine.execute_query(
             sa.select(sa.func.count())
             .select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))
             )
             .where(where_clause)
         ).scalar()
-        p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
         sample_size: int = round(p * num_rows)
         return (
             sa.select("*")

@@ -3,42 +3,38 @@ title: How to instantiate a Data Context on an EMR Spark cluster
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
-This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
+Use the information provided here to instantiate a Data Context on an EMR Spark cluster without a full configuration directory.
 
-The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md).
-
+## Prerequisites
 
 <Prerequisites>
 
 </Prerequisites>
 
-Steps
------
+## Install Great Expectations on your EMR Spark cluster
 
-1. **Install Great Expectations on your EMR Spark cluster.**
+- Copy this code snippet into a cell in your EMR Spark notebook and then run it:
 
-   Copy this code snippet into a cell in your EMR Spark notebook and run it:
-
-    ```python
+  ```python
   sc.install_pypi_package("great_expectations")
-    ```
+  ```
 
+## Configure a Data Context in code
 
-2. **Configure a Data Context in code.**
+1. Create an in-code Data Context. See [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
-    Follow the steps for creating an in-code Data Context in [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+2. Copy the Python code at the end of **How to instantiate an Ephemeral Data Context** into a cell in your EMR Spark notebook, or use the other examples to customize your configuration. The code instantiates and configures a Data Context for an EMR Spark cluster.
 
-    The snippet at the end of the guide shows Python code that instantiates and configures a Data Context in code for an EMR Spark cluster. Copy this snippet into a cell in your EMR Spark notebook or use the other examples to customize your configuration.
+## Test your configuration
 
+1. Execute the cell with the snippet you copied in the previous step.
 
-3. **Test your configuration.**
+2. Copy the code snippet into a cell in your EMR Spark notebook.
 
-       Execute the cell with the snippet above.
+3. Run the following command to verify that an error isn't returned:
 
-       Then copy this code snippet into a cell in your EMR Spark notebook, run it and verify that no error is displayed:
-
-      ```python
+  ```python
       context.list_datasources()
-      ```
+   ```
 

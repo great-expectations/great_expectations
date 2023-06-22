@@ -17,7 +17,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAverageLatLonPairwiseDistance(ColumnAggregateMetricProvider):
-
     metric_name = "column.average_lat_lon_pairwise_distance"
     value_keys = ()
 

@@ -27,7 +27,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 # This class defines a Metric to support your Expectation.
 # For most BatchExpectations, the main business logic for calculation will live in this class.
 class BatchMeetsSomeCriteria(TableMetricProvider):
-
     # This is the id string that will be used to reference your Metric.
     metric_name = "METRIC NAME GOES HERE"
 

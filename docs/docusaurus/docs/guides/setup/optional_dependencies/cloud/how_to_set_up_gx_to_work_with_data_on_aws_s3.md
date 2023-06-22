@@ -36,8 +36,6 @@ import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation
 <!-- ## Next steps -->
 import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
 
-## Introduction
-
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored in Amazon Web Services S3 storage.
 
 ## Prerequisites
@@ -47,7 +45,6 @@ This guide will walk you through best practices for creating your GX Python envi
 - The ability to install Python modules with pip
 - <PrereqInstalledAwsCli />
 - <PrereqAwsConfiguredCredentials />
-- A passion for data quality
 
 </Prerequisites>
 

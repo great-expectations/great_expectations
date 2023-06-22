@@ -23,14 +23,14 @@ class ColumnBootstrappedKSTestPValue(ColumnAggregateMetricProvider):
     value_keys = ("partition_object", "p", "bootstrap_sample", "bootstrap_sample_size")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         column,
         partition_object=None,
         p=0.05,
         bootstrap_samples=None,
         bootstrap_sample_size=None,
-        **kwargs
+        **kwargs,
     ):
         if not is_valid_continuous_partition_object(partition_object):
             raise ValueError("Invalid continuous partition object.")

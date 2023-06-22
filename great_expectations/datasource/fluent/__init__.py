@@ -8,6 +8,10 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     BatchMetadata,
 )
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,
@@ -63,6 +67,6 @@ from great_expectations.datasource.fluent.sqlite_datasource import (
 )
 
 _PANDAS_SCHEMA_VERSION: str = (
-    "1.3.5"  # this is the version schemas we generated for. Update as needed
+    "1.5.3"  # this is the version schemas we generated for. Update as needed
 )
 _SCHEMAS_DIR = pathlib.Path(__file__).parent / "schemas"

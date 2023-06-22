@@ -89,7 +89,7 @@ class ExpectationSuite(SerializableDictDot):
         ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         data_context: Optional[AbstractDataContext] = None,
@@ -132,7 +132,7 @@ class ExpectationSuite(SerializableDictDot):
     def name(self) -> str:
         return self.expectation_suite_name
 
-    def add_citation(
+    def add_citation(  # noqa: PLR0913
         self,
         comment: str,
         batch_request: Optional[
@@ -246,7 +246,7 @@ class ExpectationSuite(SerializableDictDot):
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
-        setattr(result, "_data_context", self._data_context)
+        result._data_context = self._data_context
 
         return result
 
@@ -454,13 +454,14 @@ class ExpectationSuite(SerializableDictDot):
                 if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
             else:
-                if expectation.isEquivalentTo(
+                if expectation.isEquivalentTo(  # noqa: PLR5501
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):
                     match_indexes.append(idx)
 
         return match_indexes
 
+    @public_api
     def find_expectations(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -544,7 +545,7 @@ class ExpectationSuite(SerializableDictDot):
 
         self.expectations[found_expectation_indexes[0]] = new_expectation_configuration  # type: ignore[assignment]
 
-    def patch_expectation(
+    def patch_expectation(  # noqa: PLR0913
         self,
         expectation_configuration: ExpectationConfiguration,
         op: str,

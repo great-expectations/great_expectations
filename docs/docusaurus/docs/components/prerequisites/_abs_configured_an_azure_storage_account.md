@@ -1,1 +1,1 @@
-<span><a href='https://docs.microsoft.com/en-us/azure/storage'>Configured an Azure Storage account</a>.</span>
+<span>An<a href='https://docs.microsoft.com/en-us/azure/storage'> Azure Storage account</a>.</span>

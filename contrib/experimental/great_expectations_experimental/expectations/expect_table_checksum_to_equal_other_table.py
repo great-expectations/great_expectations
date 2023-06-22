@@ -45,9 +45,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableChecksum(TableMetricProvider):
-
     # This is a built in metric - you do not have to implement it yourself. If you would like to use
     # a metric that does not yet exist, you can use the template below to implement it!
     metric_name = "table.checksum"
@@ -107,7 +107,7 @@ class TableChecksum(TableMetricProvider):
         if DEBUG:
             logger.error("\n***********cksumquery***********\n" + cksumquery)
 
-        return int(execution_engine.engine.execute(sa.text(cksumquery)).scalar())
+        return int(execution_engine.execute_query(sa.text(cksumquery)).scalar())
 
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
@@ -151,7 +151,6 @@ def get_bigquery_checksum_query(table_name, selectcolumns, ignore_columns):
 
 # function to form sqlite query as some functions will be different in each dialect.
 def get_sqlite_checksum_query(table_name, selectcolumns, ignore_columns):
-
     logger.warning(
         "“Warning: get_sqlite_checksum_query is experimental. The checksum or similar hashing function is not there in sqlite so using length function for testing purposes"
     )
@@ -174,7 +173,6 @@ def select_column_list(columns, ignore_columns):
 
 
 class TableChecksumValues(TableMetricProvider):
-
     # This is a built in metric - you do not have to implement it yourself. If you would like to use
     # a metric that does not yet exist, you can use the template below to implement it!
     metric_name = "table.checksum.values"
@@ -205,7 +203,6 @@ class TableChecksumValues(TableMetricProvider):
         metrics: Dict[Tuple, Any],
         runtime_configuration: Dict,
     ):
-
         cksum_value_self = metrics.get("table.checksum.self")
         cksum_value_other = metrics.get("table.checksum.other")
 
@@ -234,7 +231,6 @@ class TableChecksumValues(TableMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-
         # set ignore_columns to '' if it is not provided.
         if configuration and "ignore_columns" in configuration.kwargs:
             runtime_configuration["ignore_columns"] = configuration.kwargs[
@@ -485,7 +481,7 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
@@ -512,7 +508,6 @@ class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-
         checksum_self, checksum_other = metrics.get("table.checksum.values")
 
         if DEBUG:

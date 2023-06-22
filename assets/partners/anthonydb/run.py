@@ -7,7 +7,6 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 
 def test_ge():
-
     CONNECTION_STRING = os.environ.get("DB_URL")
 
     context = gx.get_context()

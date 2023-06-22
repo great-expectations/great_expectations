@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import uuid
 import warnings
@@ -18,6 +19,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -31,7 +33,6 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -132,6 +133,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
+from great_expectations.checkpoint import Checkpoint
 
 SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
@@ -141,7 +143,9 @@ if not SQLAlchemyError:
 
 
 if TYPE_CHECKING:
-    from great_expectations.checkpoint import Checkpoint
+    from typing_extensions import TypeAlias
+
+    from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.expectation_configuration import (
         ExpectationConfiguration,
@@ -164,6 +168,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequestOptions,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -233,12 +240,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
-    GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser(  # noqa: PTH111
-            "~/.great_expectations/great_expectations.conf"
-        ),
-        "/etc/great_expectations.conf",
-    ]
+    _ROOT_CONF_DIR = pathlib.Path.home() / ".great_expectations"
+    _ROOT_CONF_FILE = _ROOT_CONF_DIR / "great_expectations.conf"
+    _ETC_CONF_DIR = pathlib.Path("/etc")
+    _ETC_CONF_FILE = _ETC_CONF_DIR / "great_expectations.conf"
+    GLOBAL_CONFIG_PATHS = [_ROOT_CONF_FILE, _ETC_CONF_FILE]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
     MIGRATION_WEBSITE: str = "https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
 
@@ -370,7 +376,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
@@ -457,10 +465,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite_name
             )
-        if (
-            self.expectations_store.has_key(key)  # noqa: @601
-            and not overwrite_existing
-        ):
+        if self.expectations_store.has_key(key) and not overwrite_existing:  # : @601
             raise gx_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -708,10 +713,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
+            from_config: bool = False
             datasource_name = datasource.name
         else:
+            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -733,20 +740,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert isinstance(datasource, FluentDatasource)
 
         datasource._data_context = self
-        # config provider needed for config substitution
-        datasource._config_provider = self.config_provider
 
         datasource._data_context._save_project_config()
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode:
+        if self._datasource_store.cloud_mode and not from_config:
             set_datasource = self._datasource_store.set(key=None, value=datasource)
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
         self.datasources[datasource_name] = datasource
+        return datasource
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -768,15 +774,29 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = datasource
 
         update_datasource._data_context = self
-        # config provider needed for config substitution
-        update_datasource._config_provider = self.config_provider
+
+        update_datasource._rebuild_asset_data_connectors()
 
         update_datasource.test_connection()
         update_datasource._data_context._save_project_config()
 
         self.datasources[datasource_name] = update_datasource
 
-    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+    def _delete_fluent_datasource(
+        self, datasource_name: str, _call_store: bool = True
+    ) -> None:
+        """
+        _call_store = False allows for local deletes without deleting the persisted storage datasource.
+        This should generally be avoided.
+        """
+        self.fluent_config.pop(datasource_name, None)
+        datasource = self.datasources.get(datasource_name)
+        if datasource:
+            if self._datasource_store.cloud_mode and _call_store:
+                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+        else:
+            # Raise key error instead?
+            logger.info(f"No Datasource '{datasource_name}' to delete")
         self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
@@ -938,7 +958,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
-                module_name=module_name, class_name=class_name
+                class_name=class_name, module_name=module_name
             )
 
             # For any class that should be loaded, it may control its configuration construction
@@ -1105,7 +1125,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
     @public_api
-    def get_batch(
+    def get_batch(  # noqa: PLR0912
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1174,7 +1194,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_parameters=batch_parameters,
         )
 
-    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
+    def _get_data_context_version(  # noqa: PLR0912
+        self, arg1: Any, **kwargs
+    ) -> Optional[str]:
         """
         arg1: the first positional argument (can take on various types)
 
@@ -1297,7 +1319,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return validator.get_dataset()
 
-    def _get_batch_v3(
+    def _get_batch_v3(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -1523,23 +1545,26 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._cached_datasources[datasource_name]._data_context = self
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
-            datasource_name=datasource_name
+        datasource_config: DatasourceConfig | FluentDatasource = (
+            self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
-        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        raw_config = datasourceConfigSchema.load(raw_config_dict)
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
+        if isinstance(datasource_config, FluentDatasource):
+            datasource = datasource_config
+            datasource_config._data_context = self
+            # Fluent Datasource has already been hydrated into runtime model and uses lazy config substitution
+        else:
+            raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+            raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substituted_config = self.config_provider.substitute_config(raw_config_dict)
+            substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
-        # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = (
-            self._instantiate_datasource_from_config(
+            # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
+            datasource = self._instantiate_datasource_from_config(
                 raw_config=raw_config, substituted_config=substituted_config
             )
-        )
-        if isinstance(datasource, FluentDatasource):
-            datasource._data_context = self
+
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -1622,7 +1647,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
             if isinstance(datasource_config, dict):
-                datasource_config = DatasourceConfig(**datasource_config)
+                datasource_config = DatasourceConfig(  # noqa: PLW2901
+                    **datasource_config
+                )
             datasource_config.name = datasource_name
 
             masked_config: dict = (
@@ -1664,31 +1691,34 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
-        if save_changes and not isinstance(datasource, FluentDatasource):
+        if isinstance(datasource, FluentDatasource):
+            # Note: this results in some unnecessary dict lookups
+            self._delete_fluent_datasource(datasource_name)
+        elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+        if save_changes:
+            self._save_project_config()
+
     @overload
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str = ...,
-        config_version: int | float | None = ...,
+        config_version: int | float = ...,
         template_name: str | None = ...,
-        module_name: str | None = ...,
-        class_name: str | None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: list[dict] | None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
@@ -1699,6 +1729,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1708,23 +1739,21 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_checkpoint(
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: None = ...,
-        config_version: None = ...,
+        config_version: int | float = ...,
         template_name: None = ...,
-        module_name: None = ...,
-        class_name: None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
@@ -1734,6 +1763,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1743,8 +1773,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
-    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
-    @deprecated_argument(argument_name="batches", version="0.14.0")
     @new_argument(
         argument_name="id",
         version="0.15.48",
@@ -1760,24 +1788,26 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing checkpoint instead of individual constructor args",
     )
-    def add_checkpoint(
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
+    def add_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -1788,6 +1818,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
@@ -1809,8 +1840,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
-            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
             site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
@@ -1820,6 +1849,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -1848,19 +1878,19 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
+        result: Checkpoint | CheckpointConfig
         try:
-            return self.checkpoint_store.add_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_checkpoint(checkpoint)
         except gx_exceptions.CheckpointError as e:
             # deprecated-v0.15.50
             warnings.warn(
@@ -1868,7 +1898,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
                 DeprecationWarning,
             )
-            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+            result = self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1884,21 +1922,30 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The updated Checkpoint.
         """
-        return self.checkpoint_store.update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = self.checkpoint_store.update_checkpoint(
+            checkpoint
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=result.name,
+            )
+        return result
 
     @overload
-    def add_or_update_checkpoint(
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: str = ...,
         id: str | None = ...,
-        config_version: int | float | None = ...,
+        config_version: int | float = ...,
         template_name: str | None = ...,
-        module_name: str | None = ...,
-        class_name: str | None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: str | None = ...,
         expectation_suite_name: str | None = ...,
         batch_request: dict | None = ...,
-        action_list: list[dict] | None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: dict | None = ...,
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
@@ -1909,6 +1956,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = ...,
         expectation_suite_id: str | None = ...,
         default_validation_id: str | None = ...,
+        validator: Validator | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1918,18 +1966,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_checkpoint(
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: None = ...,
         id: None = ...,
-        config_version: None = ...,
+        config_version: int | float = ...,
         template_name: None = ...,
-        module_name: None = ...,
-        class_name: None = ...,
+        module_name: str = ...,
+        class_name: str = ...,
         run_name_template: None = ...,
         expectation_suite_name: None = ...,
         batch_request: None = ...,
-        action_list: None = ...,
+        action_list: Sequence[ActionDict] | None = ...,
         evaluation_parameters: None = ...,
         runtime_configuration: None = ...,
         validations: None = ...,
@@ -1940,6 +1988,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: None = ...,
         expectation_suite_id: None = ...,
         default_validation_id: None = ...,
+        validator: Validator | None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -1950,18 +1999,23 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
+    @new_argument(
+        argument_name="validator",
+        version="0.16.15",
+        message="Pass in an existing validator instead of individual validations",
+    )
+    def add_or_update_checkpoint(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -1973,6 +2027,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
@@ -1998,6 +2053,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            validator: An existing validator used to generate a validations list.
             checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
@@ -2024,35 +2080,44 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            validator=validator,
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        result: Checkpoint | CheckpointConfig = (
+            self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+        )
+        if isinstance(result, CheckpointConfig):
+            result = Checkpoint.instantiate_from_config_with_runtime_args(
+                checkpoint_config=result,
+                data_context=self,
+                name=name,
+            )
+        return result
 
-    def _resolve_add_checkpoint_args(
+    def _resolve_add_checkpoint_args(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
-        config_version: int | float | None = None,
+        config_version: int | float = 1.0,
         template_name: str | None = None,
-        module_name: str | None = None,
-        class_name: str | None = None,
+        module_name: str = "great_expectations.checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
         batch_request: dict | None = None,
-        action_list: list[dict] | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
         notify_on: str | None = None,
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        validator: Validator | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2061,6 +2126,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError(
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
+
+        action_list = action_list or self._determine_default_action_list()
 
         if not checkpoint:
             assert (
@@ -2073,7 +2140,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config_version=config_version,
                 template_name=template_name,
                 module_name=module_name,
-                class_name=class_name,
+                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
@@ -2082,8 +2149,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                validation_operator_name=validation_operator_name,
-                batches=batches,
                 site_names=site_names,
                 slack_webhook=slack_webhook,
                 notify_on=notify_on,
@@ -2091,9 +2156,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 ge_cloud_id=id,
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
+                validator=validator,
             )
 
         return checkpoint
+
+    def _determine_default_action_list(self) -> Sequence[ActionDict]:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.DEFAULT_ACTION_LIST
 
     @public_api
     @new_argument(
@@ -2183,15 +2254,15 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
-    def run_checkpoint(
+    def run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
         ge_cloud_id: str | None = None,
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | dict | None = None,
-        action_list: list[dict] | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2259,15 +2330,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _run_checkpoint(
+    def _run_checkpoint(  # noqa: PLR0913
         self,
         checkpoint_name: str | None = None,
         id: str | None = None,
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | dict | None = None,
-        action_list: list[dict] | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
@@ -2346,7 +2417,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return keys  # type: ignore[return-value]
 
     @public_api
-    def get_validator(
+    def get_validator(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2605,7 +2676,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
     )
-    def get_batch_list(
+    def get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2626,6 +2697,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2663,6 +2735,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             splitter_method: The method used to split the Data Asset into Batches
             splitter_kwargs: Arguments for the splitting method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+            batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2696,10 +2769,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
 
-    def _get_batch_list(
+    def _get_batch_list(  # noqa: PLR0913
         self,
         datasource_name: Optional[str] = None,
         data_connector_name: Optional[str] = None,
@@ -2720,9 +2794,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        batch_request = get_batch_request_from_acceptable_arguments(
+        result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2742,18 +2817,21 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
+        datasource_name = result.datasource_name
+        if datasource_name not in self.datasources:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
+        datasource = self.datasources[
+            datasource_name
+        ]  # this can return one of three datasource types, including Fluent datasource types
+        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
     @deprecated_method_or_class(
@@ -2815,7 +2893,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -2833,7 +2911,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -2852,7 +2930,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_expectation_suite(
+    def add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -2901,6 +2979,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
+            ValueError: The arguments provided are invalid.
         """
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -2914,7 +2993,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=False,  # `add` does not resolve collisions
         )
 
-    def _add_expectation_suite(
+    def _add_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -2928,16 +3007,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
-        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
-            raise ValueError(
-                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
-            )
+            raise ValueError("overwrite_existing must be of type bool.")
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
+        )
 
         if not expectation_suite:
-            assert (
-                expectation_suite_name
-            ), "If constructing a suite with individual args, suite name must be guaranteed"
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
             expectation_suite = ExpectationSuite(
                 expectation_suite_name=expectation_suite_name,
                 data_context=self,
@@ -2994,6 +3075,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
+
+    def _update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> ExpectationSuite:
+        """
+        Like `update_expectation_suite` but without the usage statistics logging.
+        """
         name = expectation_suite.expectation_suite_name
         id = expectation_suite.ge_cloud_id
         key = self._determine_key_for_suite_update(name=name, id=id)
@@ -3006,7 +3096,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return ExpectationSuiteIdentifier(name)
 
     @overload
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str,
         id: str | None = ...,
@@ -3025,7 +3115,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: None = ...,
         id: str | None = ...,
@@ -3051,7 +3141,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
     )
-    def add_or_update_expectation_suite(
+    def add_or_update_expectation_suite(  # noqa: PLR0913
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -3065,29 +3155,51 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
         Args:
-            expectation_suite_name: The name of the suite to create.
-            id: Identifier to associate with this suite.
+            expectation_suite_name: The name of the suite to create or replace.
+            id: Identifier to associate with this suite (ignored if updating existing suite).
             expectations: Expectation Configurations to associate with this suite.
             evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
-            data_asset_type: Type of data asset to associate with this suite.
-            execution_engine_type: Name of the execution engine type.
+            data_asset_type: Type of Data Asset to associate with this suite.
+            execution_engine_type: Name of the Execution Engine type.
             meta: Metadata related to the suite.
-            expectation_suite: An existing ExpectationSuite object you wish to persist.
+            expectation_suite: The `ExpectationSuite` object you wish to persist.
 
         Returns:
-            A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
+            The persisted `ExpectationSuite`.
         """
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-            expectation_suite=expectation_suite,
-            overwrite_existing=True,  # `add_or_update` always overwrites.
+
+        self._validate_expectation_suite_xor_expectation_suite_name(
+            expectation_suite, expectation_suite_name
         )
+
+        if not expectation_suite:
+            # type narrowing
+            assert isinstance(
+                expectation_suite_name, str
+            ), "expectation_suite_name must be specified."
+
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self,
+                ge_cloud_id=id,
+                expectations=expectations,
+                evaluation_parameters=evaluation_parameters,
+                data_asset_type=data_asset_type,
+                execution_engine_type=execution_engine_type,
+                meta=meta,
+            )
+
+        try:
+            existing = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite.name
+            )
+        except gx_exceptions.DataContextError:
+            # not found
+            return self._add_expectation_suite(expectation_suite=expectation_suite)
+
+        # The suite object must have an ID in order to request a PUT to GX Cloud.
+        expectation_suite.ge_cloud_id = existing.ge_cloud_id
+        return self._update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
     @new_argument(
@@ -3112,7 +3224,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
-        if not self.expectations_store.has_key(key):  # noqa: W601
+        if not self.expectations_store.has_key(key):
             raise gx_exceptions.DataContextError(
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
@@ -3130,7 +3242,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
-            include_rendered_content (bool): Whether or not to re-populate rendered_content for each
+            include_rendered_content (bool): Whether to re-populate rendered_content for each
                 ExpectationConfiguration.
             ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
@@ -3148,16 +3260,19 @@ class AbstractDataContext(ConfigPeer, ABC):
                 DeprecationWarning,
             )
 
-        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
-            expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
-        )
+        if expectation_suite_name:
+            key = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_name
+            )
+        else:
+            raise ValueError("expectation_suite_name must be provided")
 
         if include_rendered_content is None:
             include_rendered_content = (
                 self._determine_if_expectation_suite_include_rendered_content()
             )
 
-        if self.expectations_store.has_key(key):  # type: ignore[arg-type] # noqa: W601
+        if self.expectations_store.has_key(key):
             expectations_schema_dict: dict = cast(
                 dict, self.expectations_store.get(key)
             )
@@ -3175,7 +3290,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @overload
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -3190,7 +3305,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3210,7 +3325,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="Pass in an existing profiler instead of individual constructor args",
     )
-    def add_profiler(
+    def add_profiler(  # noqa: PLR0913
         self,
         name: str | None = None,
         config_version: float | None = None,
@@ -3345,7 +3460,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     @overload
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: str,
         config_version: float,
@@ -3360,7 +3475,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @overload
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: None = ...,
         config_version: None = ...,
@@ -3376,7 +3491,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
-    def add_or_update_profiler(
+    def add_or_update_profiler(  # noqa: PLR0913
         self,
         name: str | None = None,
         id: str | None = None,
@@ -3412,7 +3527,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )
-    def run_profiler_with_dynamic_arguments(
+    def run_profiler_with_dynamic_arguments(  # noqa: PLR0913
         self,
         batch_list: list[Batch] | None = None,
         batch_request: BatchRequestBase | dict | None = None,
@@ -3453,7 +3568,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             rules=rules,
         )
 
-    def _run_profiler_with_dynamic_arguments(
+    def _run_profiler_with_dynamic_arguments(  # noqa: PLR0913
         self,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
@@ -3476,7 +3591,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
     )
-    def run_profiler_on_data(
+    def run_profiler_on_data(  # noqa: PLR0913
         self,
         batch_list: list[Batch] | None = None,
         batch_request: BatchRequestBase | None = None,
@@ -3566,7 +3681,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         args_payload_fn=run_validation_operator_usage_statistics,
     )
-    def run_validation_operator(
+    def run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
         assets_to_validate: List,
@@ -3607,7 +3722,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs,
         )
 
-    def _run_validation_operator(
+    def _run_validation_operator(  # noqa: PLR0913
         self,
         validation_operator_name: str,
         assets_to_validate: List,
@@ -3681,7 +3796,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return list(self.validation_operators.keys())
 
-    def profile_data_asset(  # noqa: C901 - complexity 16
+    def profile_data_asset(  # noqa: PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -3757,12 +3872,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiling_results = {"success": False, "results": []}
 
         total_columns, total_expectations, total_rows = 0, 0, 0
-        total_start_time = datetime.datetime.now()
+        total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
         name = data_asset_name
         # logger.info("\tProfiling '%s'..." % name)
 
-        start_time = datetime.datetime.now()
+        start_time = datetime.datetime.now()  # noqa: DTZ005
 
         if expectation_suite_name is None:
             if batch_kwargs_generator_name is None and data_asset_name is None:
@@ -3838,13 +3953,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         total_expectations += new_expectation_count
 
         self.save_expectation_suite(expectation_suite)
-        duration = (datetime.datetime.now() - start_time).total_seconds()
+        duration = (
+            datetime.datetime.now() - start_time  # noqa: DTZ005
+        ).total_seconds()
         # noinspection PyUnboundLocalVariable
         logger.info(
             f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
-        total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
+        total_duration = (
+            datetime.datetime.now() - total_start_time  # noqa: DTZ005
+        ).total_seconds()
         logger.info(
             f"""
 Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
@@ -3878,12 +3997,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return generator
 
+    BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
+    FluentDataAssetNames: TypeAlias = List[str]
+
     @public_api
-    def get_available_data_asset_names(
+    def get_available_data_asset_names(  # noqa: PLR0912
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
-    ):
+    ) -> dict[str, BlockConfigDataAssetNames | FluentDataAssetNames]:
         """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
@@ -3898,6 +4020,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ValueError: `datasource_names` is not None, a string, or list of strings.
         """
         data_asset_names = {}
+        fluent_data_asset_names = {}
         if datasource_names is None:
             datasource_names = [
                 datasource["name"] for datasource in self.list_datasources()
@@ -3917,27 +4040,30 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names[idx]
-                    )
+                    if isinstance(datasource, FluentDatasource):
+                        fluent_data_asset_names[datasource_name] = sorted(
+                            datasource.get_asset_names()
+                        )
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names(
+                            batch_kwargs_generator_names[idx]
+                        )
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                assert not isinstance(
-                    datasource, FluentDatasource
-                ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
-                #                     within a list. This will result in a runtime error.
-                datasource_names[  # type:ignore[call-overload]
-                    datasource_names[0]
-                ] = datasource.get_available_data_asset_names(
-                    batch_kwargs_generator_names
-                )
+                if isinstance(datasource, FluentDatasource):
+                    fluent_data_asset_names[datasource_names[0]] = sorted(
+                        datasource.get_asset_names()
+                    )
+
+                else:
+                    data_asset_names[
+                        datasource_names[0]
+                    ] = datasource.get_available_data_asset_names(
+                        batch_kwargs_generator_names
+                    )
 
             else:
                 raise ValueError(
@@ -3948,17 +4074,25 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names()
+                    if isinstance(datasource, FluentDatasource):
+                        fluent_data_asset_names[datasource_name] = sorted(
+                            datasource.get_asset_names()
+                        )
+
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names()
+
                 except ValueError:
                     # handle the edge case of a non-existent datasource
                     data_asset_names[datasource_name] = {}
 
-        return data_asset_names
+        fluent_and_config_data_asset_names = {
+            **data_asset_names,
+            **fluent_data_asset_names,
+        }
+        return fluent_and_config_data_asset_names
 
     def build_batch_kwargs(
         self,
@@ -4032,7 +4166,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for url in urls_to_open:
             if url is not None:
                 logger.debug(f"Opening Data Docs found here: {url}")
-                webbrowser.open(url)
+                self._open_url_in_browser(url)
+
+    @staticmethod
+    def _open_url_in_browser(url: str) -> None:
+        webbrowser.open(url)
 
     def get_docs_sites_urls(
         self,
@@ -4315,7 +4453,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _apply_global_config_overrides(
         self, config: DataContextConfig
     ) -> DataContextConfig:
-
         """
         Applies global configuration overrides for
             - usage_statistics being enabled
@@ -4581,11 +4718,91 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             data_context=self,
             data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
+            oss_id=self._get_oss_id(),
         )
+
+    @classmethod
+    def _get_oss_id(cls) -> uuid.UUID | None:
+        """
+        Retrieves a user's `oss_id` from disk ($HOME/.great_expectations/great_expectations.conf).
+
+        If no such value is present, a new UUID is generated and written to disk for subsequent usage.
+        If there is an error when reading from / writing to disk, we default to a NoneType.
+        """
+        config = configparser.ConfigParser()
+
+        if not cls._ROOT_CONF_FILE.exists():
+            success = cls._scaffold_root_conf()
+            if not success:
+                return None
+            return cls._set_oss_id(config)
+
+        try:
+            config.read(cls._ROOT_CONF_FILE)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to read from the user's conf file: {e}"
+            )
+            return None
+
+        oss_id = config.get("anonymous_usage_statistics", "oss_id", fallback=None)
+        if not oss_id:
+            return cls._set_oss_id(config)
+
+        return uuid.UUID(oss_id)
+
+    @classmethod
+    def _set_oss_id(cls, config: configparser.ConfigParser) -> uuid.UUID | None:
+        """
+        Generates a random UUID and writes it to disk for subsequent usage.
+        Assumes that the root conf file exists.
+
+        Args:
+            config: The parser used to read/write the oss_id.
+
+        If there is an error when writing to disk, we default to a NoneType.
+        """
+        oss_id = uuid.uuid4()
+        config["anonymous_usage_statistics"] = {}
+        config["anonymous_usage_statistics"]["oss_id"] = str(oss_id)
+
+        try:
+            with cls._ROOT_CONF_FILE.open("w") as f:
+                config.write(f)
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return None
+
+        return oss_id
+
+    @classmethod
+    def _scaffold_root_conf(cls) -> bool:
+        """
+        Set up an empty root conf file ($HOME/.great_expectations/great_expectations.conf)
+
+        Returns:
+            Whether or not directory/file creation was successful.
+        """
+        try:
+            cls._ROOT_CONF_DIR.mkdir(exist_ok=True)
+            cls._ROOT_CONF_FILE.touch()
+        except OSError as e:
+            logger.info(
+                f"Something went wrong when trying to write the user's conf file to disk: {e}"
+            )
+            return False
+        return True
 
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
+
+        if self._datasource_store.cloud_mode:
+            for fds in config.fluent_datasources.values():
+                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
         )
@@ -4637,7 +4854,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raw_config=raw_config, substituted_config=substituted_config
             )
         except Exception as e:
-            name = substituted_config.name or ""
+            name = getattr(substituted_config, "name", None) or ""
             raise gx_exceptions.DatasourceInitializationError(
                 datasource_name=name, message=str(e)
             )
@@ -4799,7 +5016,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         self._evaluation_parameter_dependencies_compiled = True
 
-    def get_validation_result(
+    def get_validation_result(  # noqa: PLR0913
         self,
         expectation_suite_name,
         run_id=None,
@@ -5019,7 +5236,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return True
 
     @public_api
-    def test_yaml_config(  # noqa: C901 - complexity 17
+    def test_yaml_config(  # noqa: PLR0913
         self,
         yaml_config: str,
         name: Optional[str] = None,
@@ -5080,7 +5297,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             shorten_tracebacks=shorten_tracebacks,
         )
 
-    def profile_datasource(  # noqa: C901 - complexity 25
+    def profile_datasource(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         datasource_name,
         batch_kwargs_generator_name=None,
@@ -5252,7 +5469,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 0,
                 0,
             )
-            total_start_time = datetime.datetime.now()
+            total_start_time = datetime.datetime.now()  # noqa: DTZ005
 
             for name in data_asset_names_to_profiled:
                 logger.info(f"\tProfiling '{name}'...")
@@ -5287,7 +5504,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     skipped_data_assets += 1
 
             total_duration = (
-                datetime.datetime.now() - total_start_time
+                datetime.datetime.now() - total_start_time  # noqa: DTZ005
             ).total_seconds()
             logger.info(
                 f"""
@@ -5333,7 +5550,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             build_index: a flag if False, skips building the index page
 
         Returns:
-            A dictionary with the names of the updated data documentation sites as keys and the the location info
+            A dictionary with the names of the updated data documentation sites as keys and the location info
             of their index.html files as values
 
         Raises:
@@ -5413,10 +5630,26 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "site_name": site_name,
             },
             config_defaults={
-                "module_name": "great_expectations.render.renderer.site_builder"
+                "class_name": "SiteBuilder",
+                "module_name": "great_expectations.render.renderer.site_builder",
             },
         )
         return site_builder
+
+    @public_api
+    @new_method_or_class(version="0.16.15")
+    def view_validation_result(self, result: CheckpointResult) -> None:
+        """
+        Opens a validation result in a browser.
+
+        Args:
+            result: The result of a Checkpoint run.
+        """
+        self._view_validation_result(result)
+
+    def _view_validation_result(self, result: CheckpointResult) -> None:
+        validation_result_identifier = result.list_validation_result_identifiers()[0]
+        self.open_data_docs(resource_identifier=validation_result_identifier)
 
     def escape_all_config_variables(
         self,
@@ -5435,7 +5668,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Returns:
             input value with all `$` characters replaced with the escape string
         """
-        if isinstance(value, dict) or isinstance(value, OrderedDict):
+        if isinstance(value, dict) or isinstance(value, OrderedDict):  # noqa: PLR1701
             return {  # type: ignore[return-value] # recursive call expects str
                 k: self.escape_all_config_variables(
                     value=v,
@@ -5525,11 +5758,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            # if Datasource required a data_connector we need to build the data_connector for each asset
-            if datasource.data_connector_type:
-                for data_asset in datasource.assets:
-                    connect_options = getattr(data_asset, "connect_options", {})
-                    datasource._build_data_connector(data_asset, **connect_options)
+            datasource._rebuild_asset_data_connectors()
 
             self._add_fluent_datasource(datasource=datasource)
 
@@ -5551,3 +5780,23 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if id and ge_cloud_id:
             raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
         return id or ge_cloud_id
+
+    @staticmethod
+    def _validate_expectation_suite_xor_expectation_suite_name(
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+    ) -> None:
+        """
+        Validate that only one of expectation_suite or expectation_suite_name is specified.
+
+        Raises:
+            ValueError: Invalid arguments.
+        """
+        if expectation_suite_name is not None and expectation_suite is not None:
+            raise ValueError(
+                "Only one of expectation_suite_name or expectation_suite may be specified."
+            )
+        if expectation_suite_name is None and expectation_suite is None:
+            raise ValueError(
+                "One of expectation_suite_name or expectation_suite must be specified."
+            )

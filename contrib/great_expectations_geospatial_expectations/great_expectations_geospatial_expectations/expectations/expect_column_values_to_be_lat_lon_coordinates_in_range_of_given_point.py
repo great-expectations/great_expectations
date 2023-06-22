@@ -37,7 +37,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.coordinates.in_range"
     condition_value_keys = ("center_point", "range", "unit", "projection")

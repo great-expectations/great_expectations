@@ -1,6 +1,5 @@
 from enum import Enum
-
-from typing_extensions import Final
+from typing import Final
 
 SUPPORT_EMAIL = "support@greatexpectations.io"
 CLOUD_DEFAULT_BASE_URL: Final[str] = "https://api.greatexpectations.io/"

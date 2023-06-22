@@ -5,23 +5,24 @@ description: A technical guide demonstrating how to request data from a Data Ass
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method]
 ---
 
-<!-- Import statements start here. -->
+<!-- ## Prerequisites -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-## Introduction
+<!-- ### Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
-In this guide we will demonstrate the process of requesting data from a Datasource that has been defined using the `context.sources.add_*` method.
 
-If you are using a Datasource that was created by using the block-config method of directly building the Datasource's yaml or Python dictionary configuration, please see:
-- [How to request data from a block-config style Datasource](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
+<!-- ### Retrieve existing DataAsset from existing Datsource -->
+import GetExistingDataAssetFromExistingDatasource from '/docs/components/setup/datasource/data_asset/_get_existing_data_asset_from_existing_datasource.md'
+
+This guide demonstrates how you can request data from a Datasource that has been defined with the `context.sources.add_*` method.
 
 ## Prerequisites
 
-<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+<Prerequisites> 
 
 - An installation of GX
 - A Datasource with a configured Data Asset
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -29,21 +30,11 @@ If you are using a Datasource that was created by using the block-config method 
 
 ### 1. Import GX and instantiate a Data Context
 
-```python title="Python code"
-import great_expectations as gx
-
-context = gx.get_context()
-```
+<ImportGxAndInstantiateADataContext />
 
 ### 2. Retrieve your Data Asset
 
-If you already have an instance of your Data Asset stored in a Python variable, you do not need to retrieve it again.  If you do not, you can instantiate a previously defined Datasource with your Data Context's `get_datasource(...)` method.  Likewise, a Datasource's `get_asset(...)` method will instantiate a previously defined Data Asset.
-
-In this example we will use a previously defined Datasource named `my_datasource` and a previously defined Data Asset named `my_taxi_data_asset`.
-
-```python title="Python code
-my_asset = context.get_datasource("my_datasource").get_asset("my_taxi_data_asset")
-```
+<GetExistingDataAssetFromExistingDatasource />
 
 ### 3. (Optional) Build an `options` dictionary for your Batch Request
 
@@ -51,8 +42,7 @@ An `options` dictionary can be used to limit the Batches returned by a Batch Req
 
 The structure of the `options` dictionary will depend on the type of Data Asset being used.  The valid keys for the `options` dictionary can be found by checking the Data Asset's `batch_request_options` property.
 
-```python title="Python code"
-print(my_asset.batch_request_options)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options"
 ```
 
 The `batch_request_options` property is a tuple that contains all the valid keys that can be used to limit the Batches returned in a Batch Request.
@@ -63,18 +53,24 @@ You can create a dictionary of keys pulled from the `batch_request_options` tupl
 
 We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request.
 
-```python title="Python code"
-my_batch_request = my_asset.build_batch_request()
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request"
+```
+
+For `dataframe` Data Assets, the `dataframe` is always specified as the argument of exactly one API method:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe"
 ```
 
 ### 5. Verify that the correct Batches were returned
 
-The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request returns.  Because Batch definitions are quite verbose, it is easiest to determine what data the Batch Request will return by printing just the `batch_spec` of each Batch.
+The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request refers to.
 
-```python title="Python code"
-batches = datasource.get_batch_list_from_batch_request(my_batch_request)
-for batch in batches:
-    print(batch.batch_spec)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_list"
+```
+
+Because Batch definitions are quite verbose, it is easiest to determine what data the Batch Request will return by printing just the `batch_spec` of each Batch.
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec"
 ```
 
 ## Next steps

@@ -132,7 +132,7 @@ def test_cli_datasource_new(
     result = runner.invoke(
         cli,
         "datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -247,7 +247,7 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
     result = runner.invoke(
         cli,
         "datasource new --no-jupyter",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -312,7 +312,7 @@ def test_cli_datasource_new_with_name_param(
     result = runner.invoke(
         cli,
         "datasource new --name foo",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -396,7 +396,7 @@ def test_cli_datasource_new_from_misc_directory(
     result = runner.invoke(
         cli,
         f"--config {root_dir} datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\n",
+        input=f"y\n1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

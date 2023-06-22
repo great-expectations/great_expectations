@@ -82,4 +82,4 @@ You can find instructions for using your Custom Expectation in our guide: [how t
 
 ### Publishing your Expectation as an open source contribution
 
-Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md).
+Optionally, you can also publish Custom Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md).

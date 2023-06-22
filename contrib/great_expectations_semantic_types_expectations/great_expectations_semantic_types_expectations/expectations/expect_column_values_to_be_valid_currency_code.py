@@ -22,14 +22,12 @@ def is_valid_currency_code(code: str, currency_codes: Tuple[str]) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.currency_code"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-
         currency_codes: Tuple[str] = generate_all_currency_codes()
 
         return column.apply(lambda x: is_valid_currency_code(x, currency_codes))

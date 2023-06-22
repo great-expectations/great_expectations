@@ -6,13 +6,23 @@ import logging
 import pickle
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 import pandas as pd
-from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure, google
+from great_expectations.compatibility import aws, azure, google
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
@@ -43,19 +53,10 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_splitter i
     PandasDataSplitter,
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
 logger = logging.getLogger(__name__)
-
-
-try:
-    import boto3
-    from botocore.exceptions import ClientError, ParamValidationError
-except ImportError:
-    boto3 = None
-    ClientError = None
-    ParamValidationError = None
-    logger.debug(
-        "Unable to load AWS connection object; install optional boto3 dependency for support"
-    )
 
 
 HASH_THRESHOLD = 1e9
@@ -115,7 +116,7 @@ class PandasExecutionEngine(ExecutionEngine):
         # Instantiate cloud provider clients as None at first.
         # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
         self._s3 = None
-        self._azure = None
+        self._azure: azure.BlobServiceClient | None = None
         self._gcs = None
 
         super().__init__(*args, **kwargs)
@@ -134,7 +135,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
     def _instantiate_azure_client(self) -> None:
         self._azure = None
-        if azure.BlobServiceClient:
+        if azure.BlobServiceClient:  # type: ignore[truthy-function] # False if NotImported
             azure_options = self.config.get("azure_options", {})
             try:
                 if "conn_str" in azure_options:
@@ -148,12 +149,9 @@ class PandasExecutionEngine(ExecutionEngine):
                 pass
 
     def _instantiate_s3_client(self) -> None:
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
+        # Try initializing cloud provider client. If unsuccessful, we'll die here.
         boto3_options = self.config.get("boto3_options", {})
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            self._s3 = None
+        self._s3 = aws.boto3.client("s3", **boto3_options)
 
     def _instantiate_gcs_client(self) -> None:
         """
@@ -183,6 +181,7 @@ class PandasExecutionEngine(ExecutionEngine):
                     )
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
+        # This exception handling causes a TypeError if google dependency not installed
         except (TypeError, AttributeError, google.DefaultCredentialsError):
             self._gcs = None
 
@@ -202,7 +201,7 @@ class PandasExecutionEngine(ExecutionEngine):
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def get_batch_data_and_markers(  # noqa: C901 - 22
+    def get_batch_data_and_markers(  # noqa: C901, PLR0912, PLR0915
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
         # We need to build a batch_markers to be used in the dataframe
@@ -238,12 +237,6 @@ class PandasExecutionEngine(ExecutionEngine):
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 self._instantiate_s3_client()
-            # if we were not able to instantiate S3 client, then raise error
-            if self._s3 is None:
-                raise gx_exceptions.ExecutionEngineError(
-                    """PandasExecutionEngine has been passed a S3BatchSpec,
-                        but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
-                )
             s3_engine = self._s3
             try:
                 reader_method: str = batch_spec.reader_method
@@ -254,8 +247,14 @@ class PandasExecutionEngine(ExecutionEngine):
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
-                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
-            except (ParamValidationError, ClientError) as error:
+                if s3_engine:
+                    s3_object: dict = s3_engine.get_object(
+                        Bucket=s3_url.bucket, Key=s3_url.key
+                    )
+            except (
+                aws.exceptions.ParamValidationError,
+                aws.exceptions.ClientError,
+            ) as error:
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
@@ -397,7 +396,7 @@ not {batch_spec.__class__.__name__}"""
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path: str):
+    def guess_reader_method_from_path(path: str):  # noqa: PLR0911
         """Helper method for deciding which reader to use to read in a certain path.
 
         Args:
@@ -493,7 +492,7 @@ not {batch_spec.__class__.__name__}"""
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     @public_api
-    def get_domain_records(  # noqa: C901 - 17
+    def get_domain_records(  # noqa: C901, PLR0912
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
@@ -523,7 +522,7 @@ not {batch_spec.__class__.__name__}"""
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_manager.batch_data_cache:
+            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
                 data = cast(
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
@@ -574,7 +573,7 @@ not {batch_spec.__class__.__name__}"""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if != "neither":
+                if ignore_row_if != "neither":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -598,7 +597,7 @@ not {batch_spec.__class__.__name__}"""
                     subset=column_list,
                 )
             else:
-                if ignore_row_if != "never":
+                if ignore_row_if != "never":  # noqa: PLR5501
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )

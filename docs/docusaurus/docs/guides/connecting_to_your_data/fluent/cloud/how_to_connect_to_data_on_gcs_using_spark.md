@@ -17,8 +17,6 @@ import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_b
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to csv files.
 
 ## Prerequisites
@@ -27,7 +25,6 @@ In this guide we will demonstrate how to use Spark to connect to data stored on 
 
 - [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
 - Access to data on a GCS bucket
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -44,32 +41,17 @@ We can define a GCS datasource by providing three pieces of information:
 - `bucket_or_name`: In this example, we will provide a GCS bucket
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
-```python title="Python code"
-datasource_name = "my_gcs_datasource"
-bucket_name = "test_docs_data"
-gcs_options = {}
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py define_add_spark_gcs_args"
 ```
 
 Once we have those three elements, we can define our Datasource like so:
 
-```python title="Python code"
-datasource = context.sources.add_spark_gcs(
-    name=dataspirce_name, bucket_or_name=bucket_name, gcs_options=gcs_options
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py create_datasource"
 ```
 
 ### 3. Add GCS data to the Datasource as a Data Asset
 
-```python title = "Python code"
-batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-prefix = "data/taxi_yellow_tripdata_samples/"
-data_asset = datasource.add_csv_asset(
-    name="my_taxi_data_asset",
-    batching_regex=batching_regex,
-    header=True,
-    infer_schema=True,
-    gcs_prefix=prefix,
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_data_on_gcs_using_spark.py add_asset"
 ```
 
 :::info Optional parameters: `header` and `infer_schema`
@@ -109,4 +91,4 @@ For more information on Google Cloud and authentication, please visit the follow
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

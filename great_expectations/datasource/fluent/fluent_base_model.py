@@ -68,7 +68,7 @@ class FluentBaseModel(pydantic.BaseModel):
         return config
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, None] = None,
         *,
@@ -85,7 +85,7 @@ class FluentBaseModel(pydantic.BaseModel):
         ...
 
     @overload
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: pathlib.Path,
         *,
@@ -101,7 +101,7 @@ class FluentBaseModel(pydantic.BaseModel):
     ) -> pathlib.Path:
         ...
 
-    def yaml(
+    def yaml(  # noqa: PLR0913
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
         *,
@@ -142,7 +142,7 @@ class FluentBaseModel(pydantic.BaseModel):
             return stream_or_path
         return stream_or_path.getvalue()
 
-    def json(
+    def json(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -184,7 +184,7 @@ class FluentBaseModel(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
-    def _json_dict(
+    def _json_dict(  # noqa: PLR0913
         self,
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
@@ -215,7 +215,7 @@ class FluentBaseModel(pydantic.BaseModel):
             )
         )
 
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
@@ -285,19 +285,19 @@ class FluentBaseModel(pydantic.BaseModel):
 
 def _recursively_set_config_value(
     data: MutableMapping | MutableSequence, config_provider: _ConfigurationProvider
-):
+) -> None:
     if isinstance(data, MutableMapping):
         for k, v in data.items():
             if isinstance(v, ConfigStr):
                 data[k] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
     elif isinstance(data, MutableSequence):
         for i, v in enumerate(data):
             if isinstance(v, ConfigStr):
                 data[i] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
-                return _recursively_set_config_value(v, config_provider)
+                _recursively_set_config_value(v, config_provider)
 
 
 def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) -> None:

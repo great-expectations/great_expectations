@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Optional, Type
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
@@ -16,9 +14,8 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
-
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 logger = logging.getLogger(__name__)
@@ -30,6 +27,11 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     data_connector_type: ClassVar[
         Type[FilesystemDataConnector]
     ] = FilesystemDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "base_directory",
+        "data_context_root_directory",
+    }
 
     # instance attributes
     type: Literal["spark_filesystem"] = "spark_filesystem"
@@ -56,7 +58,10 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 asset.test_connection()
 
     def _build_data_connector(
-        self, data_asset: CSVAsset, glob_directive: str = "**/*", **kwargs
+        self,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        glob_directive: str = "**/*",
+        **kwargs,
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
@@ -70,6 +75,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
+            get_unfiltered_batch_definition_list_fn=data_asset.get_unfiltered_batch_definition_list_fn(),
         )
 
         # build a more specific `_test_connection_error_message`

@@ -71,7 +71,7 @@ class _RendererValueBase(BaseModel):
     def __len__(self) -> int:
         return len(self.__fields__)
 
-    def dict(
+    def dict(  # noqa: PLR0913
         self,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
@@ -200,7 +200,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             allow_mutation = False
 
         @root_validator(pre=True)
-        def _validate_param_type_matches_value(cls, values: dict) -> dict:
+        def _validate_param_type_matches_value(  # noqa: PLR0912
+            cls, values: dict
+        ) -> dict:
             """
             This root_validator ensures that a value can be parsed by its RendererValueType.
             If RendererValueType.OBJECT is passed, it is treated as valid for any value.
@@ -370,15 +372,32 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[MetaNotes]
+        meta_notes: Optional[
+            dict[str, Optional[dict[str, list[str] | tuple[str] | str]]]
+        ]
         if (
             "result" in values
             and values["result"] is not None
             and values["result"].expectation_config is not None
         ):
-            values["meta_notes"] = values["result"].expectation_config.meta.get("notes")
+            meta_notes = values["result"].expectation_config.meta.get("notes")
         else:
-            values["meta_notes"] = values["configuration"].meta.get("notes")
+            meta_notes = values["configuration"].meta.get("notes")
+
+        if meta_notes and isinstance(meta_notes, dict):
+            meta_notes_content = meta_notes.get("content")
+
+            if isinstance(meta_notes_content, (list, tuple)):
+                meta_notes["content"] = list(meta_notes_content)
+            elif isinstance(meta_notes_content, str):
+                meta_notes["content"] = [meta_notes_content]
+            values["meta_notes"] = meta_notes
+        elif meta_notes and isinstance(meta_notes, str):
+            values["meta_notes"] = {
+                "content": [meta_notes],
+                "format": MetaNotesFormat.STRING,
+            }
+
         return values
 
     @root_validator()
@@ -390,7 +409,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             if _params:
                 renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
-                    renderer_param_type: Type[  # noqa: F841 # never used
+                    renderer_param_type: Type[
                         BaseModel
                     ] = RendererConfiguration._get_renderer_value_base_model_type(
                         name=name

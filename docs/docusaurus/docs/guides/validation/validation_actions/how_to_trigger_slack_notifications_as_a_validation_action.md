@@ -25,10 +25,10 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 <Prerequisites>
 
-- Configured a Slack app with the Webhook function enabled (See Additional Resources below for more information on setting up a new Slack app).
-- Obtained the Webhook address for your Slack app.
-- Identified the Slack channel that messages will be sent to.
-- Created a Checkpoint that will be configured to send the notification.
+- A Slack app with the Webhook function enabled. See [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks#).
+- A Webhook address for your Slack app.
+- A Slack channel to send messages to.
+- A Checkpoint configured to send the notification.
 
 </Prerequisites>
 
@@ -38,10 +38,10 @@ Great Expectations is able to use a Slack webhook or Slack app to send notificat
 
 <Prerequisites>
 
-- Configure a Slack app with a Bot Token (See Additional Resources below for more information on setting up a new Slack app)
-- Obtain the Bot Token for your Slack app.
-- Identified the Slack channel that the messages will be sent to. 
-- Created a Checkpoint that will be configured to send the notification.
+- A Slack app with a Bot Token. See [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks#).
+- A Bot Token for your Slack app.
+- A Slack channel to send messages to.
+- A Checkpoint configured to send the notification.
 
 </Prerequisites>
 
@@ -184,4 +184,4 @@ Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_d
 
 ## Additional resources
 
-- Instructions on how to set up a Slack app with webhook can be found in the documentation for the [Slack API](https://api.slack.com/messaging/webhooks#)
+- To set up a Slack app with a webhook, see [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks#).

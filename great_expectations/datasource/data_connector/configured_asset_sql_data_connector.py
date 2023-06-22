@@ -73,7 +73,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         SplitterMethod.SPLIT_ON_HASHED_COLUMN: LexicographicSorter,
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -88,7 +88,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-
         if execution_engine:
             execution_engine = cast(SqlAlchemyExecutionEngine, execution_engine)
 

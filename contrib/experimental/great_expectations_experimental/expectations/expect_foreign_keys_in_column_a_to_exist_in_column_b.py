@@ -14,7 +14,6 @@ from great_expectations.expectations.metrics import (
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.foreign_key_in_other_col"
@@ -41,7 +40,8 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
     """Expect foreign keys in a column to exist in another specified column.
 
-    Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available."""
+    Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available.
+    """
 
     examples = [
         {

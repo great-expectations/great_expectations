@@ -16,7 +16,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     metric_name = "column_values.geometry_overlap"
 
@@ -132,7 +131,6 @@ class ExpectColumnValuesGeometryToOverlap(ColumnAggregateExpectation):
         runtime_configuration: dict = None,
         execution_engine=None,
     ):
-
         success = metrics.get("column_values.geometry_overlap").get("success")
         indices = metrics.get("column_values.geometry_overlap").get("indices")
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import uuid
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -19,14 +20,17 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final, TypeAlias
-
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.constants import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+)
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pydantic
+    from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource import BaseDatasource, LegacyDatasource
@@ -40,10 +44,6 @@ if TYPE_CHECKING:
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
-
-DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
 
 
 class DefaultPandasDatasourceError(Exception):
@@ -126,7 +126,6 @@ class _SourceFactories:
 
         # rollback type registrations if exception occurs
         with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
-
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource(
@@ -277,7 +276,6 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
-
                 # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
@@ -441,7 +439,7 @@ class _SourceFactories:
         if (
             name_or_datasource
             and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"
+            and "name" not in "kwargs"  # noqa: PLR0133
         ) or (
             name_or_datasource is None
             and "name" in kwargs
@@ -475,8 +473,6 @@ class _SourceFactories:
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
-            # config provider needed for config substitution
-            datasource._config_provider = self._data_context.config_provider
             datasource.test_connection()
             self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
@@ -498,24 +494,37 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs: str
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             new_datasource: Optional[Datasource] = self._datasource_passed_in(
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name = (
-                new_datasource.name
+            datasource_name: str = (
+                new_datasource.name  # type: ignore[assignment] # always a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
-                datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name,
                 datasource_type,
             )
+
+            # preserve any pre-existing id for usage with cloud
+            id_: uuid.UUID | None = getattr(
+                self._data_context.datasources.get(datasource_name), "id", None
+            )
+            if id_:
+                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
+                if name_or_datasource and not isinstance(name_or_datasource, str):
+                    name_or_datasource.id = id_
+                else:
+                    kwargs["id"] = id_
+
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name=datasource_name, _call_store=False
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -545,17 +554,32 @@ class _SourceFactories:
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
-            datasource_name = (
-                new_datasource.name
+            datasource_name: str = (
+                new_datasource.name  # type: ignore[assignment] # will be a str
                 if new_datasource
                 else name_or_datasource or kwargs["name"]
             )
-            logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
-            self._validate_current_datasource_type(
-                datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
+            logger.debug(
+                f"Adding or updating {datasource_type.__name__} with '{datasource_name}'"
             )
+            self._validate_current_datasource_type(
+                datasource_name, datasource_type, raise_if_none=False
+            )
+
+            # preserve any pre-existing id for usage with cloud
+            id_: uuid.UUID | None = getattr(
+                self._data_context.datasources.get(datasource_name), "id", None
+            )
+            if id_:
+                # if not a str `name_or_datasource` is a datasource and `id` can be directly attached
+                if name_or_datasource and not isinstance(name_or_datasource, str):
+                    name_or_datasource.id = id_
+                else:
+                    kwargs["id"] = id_
+
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
+                datasource_name=datasource_name, _call_store=False
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -582,6 +606,7 @@ class _SourceFactories:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
             self._data_context._delete_fluent_datasource(datasource_name=name)
+            self._data_context._save_project_config()
 
         delete_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
@@ -615,17 +640,19 @@ class _SourceFactories:
         return [*self.factories, *super().__dir__()]
 
 
-def _iter_all_registered_types() -> Generator[
-    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
-]:
+def _iter_all_registered_types(
+    include_datasource: bool = True, include_data_asset: bool = True
+) -> Generator[tuple[str, Type[Datasource] | Type[DataAsset]], None, None]:
     """
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
     for ds_name in _SourceFactories.type_lookup.type_names():
         ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
-        yield ds_name, ds_type
+        if include_datasource:
+            yield ds_name, ds_type
 
-        for asset_name in ds_type._type_lookup.type_names():
-            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
-            yield asset_name, asset_type
+        if include_data_asset:
+            for asset_name in ds_type._type_lookup.type_names():
+                asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+                yield asset_name, asset_type

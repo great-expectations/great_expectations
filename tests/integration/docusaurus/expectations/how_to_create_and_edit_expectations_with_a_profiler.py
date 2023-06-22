@@ -29,9 +29,6 @@ asset = datasource.add_csv_asset(
     batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     order_by=["year", "month"],
 )
-
-# Any changes to a datasource require calling update to persist the modified datasource
-context.sources.update_pandas_filesystem(datasource)
 # </snippet>
 
 assert "my_pandas_datasource" in context.datasources
@@ -66,6 +63,7 @@ assert context.get_expectation_suite(expectation_suite_name) is not None
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name
 )
+validator.head()
 # </snippet>
 
 assert validator.active_batch.metadata["year"] == "2019"

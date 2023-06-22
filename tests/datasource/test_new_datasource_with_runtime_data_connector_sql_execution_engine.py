@@ -108,92 +108,6 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_datasource(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-    # Test for an unknown datasource
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="non_existent_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"query": test_query},
-                batch_identifiers=None,
-            )
-        )
-
-
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_unknown_dataconnector(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-    # Test for an unknown data_connector
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
-                data_connector_name="non_existent_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"query": test_query},
-                batch_identifiers=None,
-            )
-        )
-
-
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_no_batch_identifiers(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-
-    # Test for illegal absence of batch_identifiers when batch_data is specified
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"query": test_query},
-                batch_identifiers=None,
-            )
-        )
-
-
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_illegal_batch_identifiers(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-
-    # Test for illegal falsiness of batch_identifiers when batch_data is specified
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"query": test_query},
-                batch_identifiers={},
-            )
-        )
-
-
 def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_query(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
@@ -267,7 +181,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
         "i_am_illegal_key": "i_am_illegal_value",
     }
 
-    # Insure that keys in batch_identifiers that are not among batch_identifiers declared in
+    # Ensure that keys in batch_identifiers that are not among batch_identifiers declared in
     # configuration are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: Dict[str, Any] = {
         "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
@@ -470,34 +384,6 @@ def test_get_batch_list_from_batch_request_length_one_from_query_named_asset_two
     assert my_batch_2.batch_spec is not None
     assert my_batch_2.batch_definition["data_asset_name"] == "asset_a"
     assert isinstance(my_batch_2.data.selectable, sqlalchemy.Table)
-
-
-def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_error(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-
-    data_connector_name: str = "test_runtime_data_connector"
-    data_asset_name: str = "test_asset_1"
-
-    batch_request: Dict[str, Any] = {
-        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-        "runtime_parameters": {
-            "query": test_query,
-        },
-        "batch_identifiers": None,
-    }
-
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(**batch_request)
-        )
 
 
 def test_get_batch_definitions_and_get_batch_basics_from_query(

@@ -3,6 +3,7 @@ import enum
 
 class BackendDependencies(enum.Enum):
     AWS = "AWS"
+    AWS_GLUE = "AWS_GLUE"
     ATHENA = "ATHENA"
     AZURE = "AZURE"
     BIGQUERY = "BIGQUERY"

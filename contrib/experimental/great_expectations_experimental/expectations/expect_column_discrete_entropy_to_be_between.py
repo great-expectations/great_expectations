@@ -95,7 +95,6 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-
         dependencies = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,

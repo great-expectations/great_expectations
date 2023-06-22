@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 
-import pandas as pd
 import pytest
 
+from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -13,13 +13,18 @@ from great_expectations.core import (
 )
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.data_context import (
+    AbstractDataContext,
     DataContext,
     FileDataContext,
-    AbstractDataContext,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+    from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()
 
@@ -41,7 +46,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [],
         "profilers": [],
         "action_list": [
             {
@@ -131,7 +135,9 @@ def expectation_config_expect_multicolumn_sum_to_equal() -> ExpectationConfigura
 
 
 @pytest.fixture()
-def expectation_config_expect_column_pair_values_to_be_equal() -> ExpectationConfiguration:
+def expectation_config_expect_column_pair_values_to_be_equal() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_pair_values_to_be_equal",
         kwargs={"column_A": "ordered_item", "column_B": "received_item"},
@@ -150,7 +156,9 @@ def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfigu
 
 
 @pytest.fixture()
-def expectation_config_expect_column_values_to_not_be_in_set() -> ExpectationConfiguration:
+def expectation_config_expect_column_values_to_not_be_in_set() -> (
+    ExpectationConfiguration
+):
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_not_be_in_set",
         kwargs={
@@ -222,7 +230,7 @@ def batch_request_for_pandas_unexpected_rows_and_index(
 def batch_request_for_spark_unexpected_rows_and_index(
     spark_dataframe_for_unexpected_rows_with_index,
 ) -> dict:
-    dataframe: "pyspark.sql.dataframe.DataFrame" = (
+    dataframe: pyspark.sql.dataframe.DataFrame = (
         spark_dataframe_for_unexpected_rows_with_index
     )
     return {
@@ -242,7 +250,7 @@ def batch_request_for_spark_unexpected_rows_and_index(
 def batch_request_for_spark_unexpected_rows_and_index_column_pair(
     spark_column_pairs_dataframe_for_unexpected_rows_and_index,
 ) -> dict:
-    dataframe: "pyspark.sql.dataframe.DataFrame" = (
+    dataframe: pyspark.sql.dataframe.DataFrame = (
         spark_column_pairs_dataframe_for_unexpected_rows_and_index
     )
     return {
@@ -262,7 +270,7 @@ def batch_request_for_spark_unexpected_rows_and_index_column_pair(
 def batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum(
     spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index,
 ) -> dict:
-    dataframe: "pyspark.sql.dataframe.DataFrame" = (
+    dataframe: pyspark.sql.dataframe.DataFrame = (
         spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index
     )
     return {
@@ -300,11 +308,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext | EphemeralDataContext | FileDataContext,
+    data_context: DataContext | FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
     dict_to_update_checkpoint: dict | None = None,
-) -> DataContext | EphemeralDataContext | FileDataContext:
+) -> DataContext | FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -840,7 +848,7 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         "unexpected_index_column_names": ["i_dont_exist"],
     }
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             result_format=result_format,
             runtime_configuration={"catch_exceptions": False},
@@ -1102,7 +1110,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1152,7 +1160,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1295,7 +1303,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1356,7 +1364,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1419,7 +1427,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     first_result_unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]
-    assert first_result_unexpected_index_query == [3, 4, 5]
+    assert first_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
@@ -1430,7 +1438,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     second_result_unexpected_index_query: str = evrs[0]["results"][1]["result"][
         "unexpected_index_query"
     ]
-    assert second_result_unexpected_index_query == [3, 4, 5]
+    assert second_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -1483,7 +1491,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1516,11 +1524,11 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         "unexpected_index_query"
     ]
     # result_format is SUMMARY
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1552,7 +1560,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1571,7 +1579,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_pandas_unexpected_rows_and_index,
@@ -1585,7 +1593,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
+def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1626,7 +1634,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
     first_result_unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]
-    assert first_result_unexpected_index_query == [3, 4, 5]
+    assert first_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
     second_result_full_list = evrs[0]["results"][1]["result"]["unexpected_index_list"]
     assert second_result_full_list == expected_unexpected_indices_output
     second_result_partial_list = evrs[0]["results"][1]["result"][
@@ -1637,11 +1645,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
         "unexpected_index_query"
     ]
     # result_format is COMPLETE
-    assert second_result_unexpected_index_query == [3, 4, 5]
+    assert second_result_unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1952,7 +1960,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
         "unexpected_index_column_names": ["i_dont_exist"],
     }
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_spark_unexpected_rows_and_index,
@@ -2279,7 +2287,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
     first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
-    assert first_result_full_list == None
+    assert first_result_full_list is None
     first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
         "result"
     ].get("partial_unexpected_index_list")
@@ -2291,7 +2299,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
     unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == None
+    assert unexpected_index_query is None
 
 
 @pytest.mark.integration
@@ -2434,7 +2442,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
     first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
         "unexpected_index_list"
     )
-    assert first_result_full_list == None
+    assert first_result_full_list is None
 
     first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
         "result"
@@ -2541,7 +2549,7 @@ def test_spark_complete_output_no_id_pk_fallback(
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2699,7 +2707,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             expectation_suite_name="metrics_exp",
             batch_request=batch_request,
@@ -2849,7 +2857,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(
+def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2962,7 +2970,7 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
     )
 
     with pytest.raises(CheckpointError) as e:
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name="my_checkpoint",
             expectation_suite_name="metrics_exp",
             batch_request=batch_request,
@@ -3131,10 +3139,10 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_1": 4, "received_item": "desk"},
         {"ordered_item": "eraser", "pk_1": 5, "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [3, 4, 5]
+    assert unexpected_index_query == "df.filter(items=[3, 4, 5], axis=0)"
 
 
 @pytest.mark.integration
@@ -3202,10 +3210,12 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_2": "four", "received_item": "desk"},
         {"ordered_item": "eraser", "pk_2": "five", "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == ["three", "four", "five"]
+
+    items_str = str(["three", "four", "five"])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3274,10 +3284,11 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
         {"ordered_item": "eraser", "pk_1": 4, "pk_2": "four", "received_item": "desk"},
         {"ordered_item": "eraser", "pk_1": 5, "pk_2": "five", "received_item": "desk"},
     ]
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [(3, "three"), (4, "four"), (5, "five")]
+    items_str = str([(3, "three"), (4, "four"), (5, "five")])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3333,10 +3344,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "b": 60, "c": 60, "pk_1": 5},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
-    )
-    assert unexpected_index_query == [1, 2, 3, 4, 5]
+    ]
+    items_str = str([1, 2, 3, 4, 5])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3409,10 +3421,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "b": 60, "c": 60, "pk_2": "five"},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == ["one", "two", "three", "four", "five"]
+    items_str = str(["one", "two", "three", "four", "five"])
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
 
 
 @pytest.mark.integration
@@ -3485,13 +3498,157 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         {"a": 60, "pk_1": 5, "pk_2": "five", "b": 60, "c": 60},
     ]
 
-    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
         "unexpected_index_query"
     )
-    assert unexpected_index_query == [
-        (1, "one"),
-        (2, "two"),
-        (3, "three"),
-        (4, "four"),
-        (5, "five"),
-    ]
+
+    items_str = str(
+        [
+            (1, "one"),
+            (2, "two"),
+            (3, "three"),
+            (4, "four"),
+            (5, "five"),
+        ]
+    )
+
+    assert unexpected_index_query == f"df.filter(items={items_str}, axis=0)"
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
+    empty_data_context: AbstractDataContext,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    context = empty_data_context
+    expectation_suite_name = "metrics_exp"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    data_frame_asset = context.sources.add_pandas(
+        name="pandas_datasource"
+    ).add_dataframe_asset(name="IN_MEMORY_DATA_ASSET")
+    batch_request = data_frame_asset.build_batch_request(
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator.expect_column_values_to_be_unique(column="animals")
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint_config_yml = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%m-foo-bar-template-test"
+batch_request:
+  datasource_name: pandas_datasource
+  data_asset_name: IN_MEMORY_DATA_ASSET
+action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+"""
+
+    checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
+
+    context.add_checkpoint(**checkpoint_config.to_json_dict())
+
+    result: CheckpointResult
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+    )
+    assert result.checkpoint_config.batch_request == {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+    }
+
+    # TODO: <Alex>06/01/2023: For "DataAsset" types containing ephemeral data references, best practices is to supply "batch_request" as argument to "run_checkpoint()" method.</Alex>
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+        batch_request=batch_request,
+    )
+    assert result.success
+    assert dict(
+        sorted(
+            list(result.run_results.values())[0]["validation_result"][
+                "statistics"
+            ].items(),
+            key=lambda element: element[0],
+        )
+    ) == {
+        "evaluated_expectations": 1,
+        "successful_expectations": 1,
+        "success_percent": 100.0,
+        "unsuccessful_expectations": 0,
+    }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
+)
+def test_rendered_content_bool_only_respected(
+    empty_data_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+    result_format: str | dict,
+):
+    context = empty_data_context
+    csv_asset = context.sources.pandas_default.add_dataframe_asset(
+        "df",
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    )
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "test_result_format_suite"
+    context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+    )
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name=expectation_suite_name,
+    )
+    expectation_validation_result = (
+        validator.expect_column_distinct_values_to_contain_set(
+            column="animals",
+            value_set={"anglerfish"},
+        )
+    )
+    validator.save_expectation_suite(discard_failed_expectations=False)
+
+    checkpoint = SimpleCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+            }
+        ],
+        runtime_configuration={
+            "result_format": result_format,
+        },
+    )
+
+    checkpoint_result = checkpoint.run()
+    validation_result_identifier = (
+        checkpoint_result.list_validation_result_identifiers()[0]
+    )
+    expectation_validation_result = checkpoint_result.run_results[
+        validation_result_identifier
+    ]["validation_result"]["results"][0]
+    assert expectation_validation_result.result == {}

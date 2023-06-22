@@ -2,19 +2,10 @@
 title: How to create a new Checkpoint
 ---
 
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import Preface from './components_how_to_create_a_new_checkpoint/_preface.mdx'
 import StepsForCheckpoints from './components_how_to_create_a_new_checkpoint/_steps_for_checkpoints_.mdx'
-import UseTheCliToOpenAJupyterNotebookForCreatingANewCheckpoint from './components_how_to_create_a_new_checkpoint/_use_the_cli_to_open_a_jupyter_notebook_for_creating_a_new_checkpoint.mdx'
-import AEditTheConfiguration from './components_how_to_create_a_new_checkpoint/_a_edit_the_configuration.mdx'
-import BTestYourConfigUsingContextTestYamlConfig from './components_how_to_create_a_new_checkpoint/_b_test_your_config_using_contexttest_yaml_config.mdx'
-import CStoreYourCheckpointConfig from './components_how_to_create_a_new_checkpoint/_c_store_your_checkpoint_config.mdx'
-import DOptionalCheckYourStoredCheckpointConfig from './components_how_to_create_a_new_checkpoint/_d_optional_check_your_stored_checkpoint_config.mdx'
-import EOptionalTestRunTheNewCheckpointAndOpenDataDocs from './components_how_to_create_a_new_checkpoint/_e_optional_test_run_the_new_checkpoint_and_open_data_docs.mdx'
 import AdditionalResources from './components_how_to_create_a_new_checkpoint/_additional_resources.mdx'
-
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
 
 <Preface />
 
@@ -22,25 +13,43 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 ## Steps
 
-### 1. Use the CLI to open a Jupyter Notebook for creating a new Checkpoint
-<UseTheCliToOpenAJupyterNotebookForCreatingANewCheckpoint />
+### 1. Create a Checkpoint
 
-### 2. Configure your SimpleCheckpoint (Example)
+In this guide, we will use the SimpleCheckpoint class, which takes care of some defaults.
 
-#### 2.1. Edit the configuration
-<AEditTheConfiguration />
+To modify this code sample for your use case, replace the `batch_request` and `expectation_suite_name` with your own.
 
-#### 2.2. Validate and test your configuration
-<BTestYourConfigUsingContextTestYamlConfig />
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
+```
 
-### 3. Store your Checkpoint configuration
-<CStoreYourCheckpointConfig />
+Note: There are other configuration options for more advanced deployments, please refer to [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more details.
 
-### 4. (Optional) Check your stored Checkpoint config
-<DOptionalCheckYourStoredCheckpointConfig />
 
-### 5. (Optional) Test run the new Checkpoint and open Data Docs
-<EOptionalTestRunTheNewCheckpointAndOpenDataDocs />
+### 2. (Optional) Run your Checkpoint
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint batch_request"
+```
+
+The returned `checkpoint_result` contains information about the checkpoint run.
+
+### 3. (Optional) Build Data Docs
+
+You can build <TechnicalTag tag="data_docs" text="Data Docs" /> with the latest checkpoint run result included by running:
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs"
+```
+
+### 4. (Optional) Store your Checkpoint
+
+If you want to store your Checkpoint for later use:
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py add checkpoint"
+```
+
+And retrieve via the name we set earlier:
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get checkpoint"
+```
 
 ## Additional Resources
 <AdditionalResources />

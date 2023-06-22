@@ -81,7 +81,7 @@ def ordinal(num):
     """Convert a number to ordinal"""
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
-    if 10 <= num % 100 <= 20:
+    if 10 <= num % 100 <= 20:  # noqa: PLR2004
         suffix = "th"
     else:
         # the second parameter is a default.
@@ -194,7 +194,7 @@ def parse_row_condition_string_pandas_engine(
     conditions_list = [
         condition.strip()
         for condition in conditions_list
-        if condition != "" and condition != " "
+        if condition != "" and condition != " "  # noqa: PLC1901
     ]
 
     for i, condition in enumerate(conditions_list):
@@ -261,9 +261,9 @@ def build_count_table(
         count: Optional[int] = unexpected_count_dict.get("count")
         if count:
             total_count += count
-        if value is not None and value != "":
+        if value is not None and value != "":  # noqa: PLC1901
             table_rows.append([value, count])
-        elif value == "":
+        elif value == "":  # noqa: PLC1901
             table_rows.append(["EMPTY", count])
         else:
             table_rows.append(["null", count])
@@ -318,7 +318,6 @@ def build_count_and_index_table(
         unexpected_index_column_names = ["Index"]
 
     for index, row in unexpected_index_df.iterrows():
-
         row_list: List[Union[str, int]] = []
 
         unexpected_value = index
@@ -326,10 +325,10 @@ def build_count_and_index_table(
 
         total_count += count
 
-        if unexpected_value is not None and unexpected_value != "":
+        if unexpected_value is not None and unexpected_value != "":  # noqa: PLC1901
             row_list.append(unexpected_value)
             row_list.append(count)
-        elif unexpected_value == "":
+        elif unexpected_value == "":  # noqa: PLC1901
             row_list.append("EMPTY")
             row_list.append(count)
         else:

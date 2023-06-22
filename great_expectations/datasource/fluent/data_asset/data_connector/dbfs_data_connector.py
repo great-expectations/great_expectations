@@ -3,11 +3,19 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+    file_get_unfiltered_batch_definition_list_fn,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +35,10 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters (list): Optional list if you want to sort the data_references
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
+        get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_name: str,
         data_asset_name: str,
@@ -42,6 +51,9 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -55,10 +67,11 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @classmethod
-    def build_data_connector(
+    def build_data_connector(  # noqa: PLR0913
         cls,
         datasource_name: str,
         data_asset_name: str,
@@ -71,6 +84,9 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.
 
@@ -86,6 +102,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters: optional list of sorters for sorting data_references
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
+            get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
         Returns:
             Instantiated "DBFSDataConnector" object
@@ -102,6 +119,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     # Interface Method

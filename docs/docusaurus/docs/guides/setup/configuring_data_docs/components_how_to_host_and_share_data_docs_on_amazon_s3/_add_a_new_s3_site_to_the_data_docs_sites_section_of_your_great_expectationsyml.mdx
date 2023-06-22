@@ -1,22 +1,5 @@
 
 The below example shows the default `local_site` configuration that you will find in your `great_expectations.yml` file, followed by the `s3_site` configuration that you will need to add.  You may optionally remove the default `local_site` configuration completely and replace it with the new `s3_site` configuration if you would only like to maintain a single S3 Data Docs site.
 
-```yaml title="File content: great_expectations.yml"
-data_docs_sites:
-  local_site:
-    class_name: SiteBuilder
-    show_how_to_buttons: true
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/data_docs/local_site/
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
-  s3_site:  # this is a user-selected name - you may select your own
-    class_name: SiteBuilder
-    store_backend:
-      class_name: TupleS3StoreBackend
-      bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
-    site_index_builder:
-      class_name: DefaultSiteIndexBuilder
-      show_cta_footer: true
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_data_docs_store"
 ```

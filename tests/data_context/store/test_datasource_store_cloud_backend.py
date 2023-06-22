@@ -45,7 +45,6 @@ def test_datasource_store_set(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         saved_datasource_config: DatasourceConfig = (
             datasource_store_ge_cloud_backend.set(
                 key=key, value=block_config_datasource_config
@@ -92,7 +91,6 @@ def test_datasource_store_get_by_id(
     key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {
                 "data": {
@@ -106,7 +104,6 @@ def test_datasource_store_get_by_id(
     with mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_response
     ) as mock_get:
-
         datasource_store_ge_cloud_backend.get(key=key)
 
         mock_get.assert_called_once_with(
@@ -133,7 +130,6 @@ def test_datasource_store_get_by_name(
     datasource_name: str = "example_datasource_config_name"
 
     def mocked_response(*args, **kwargs):
-
         return MockResponse(
             {
                 "data": {
@@ -225,7 +221,6 @@ def test_datasource_http_error_handling(
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*"
     ) as exc_info:
-
         backend_method = getattr(datasource_store_ge_cloud_backend, method)
         backend_method(key, *args)
 

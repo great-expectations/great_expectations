@@ -1,3 +1,17 @@
+"""
+Pre-requisites:
+- install google-cloud-sdk: https://cloud.google.com/sdk/docs/install or brew install
+- create authentication credentials file: https://cloud.google.com/docs/authentication/external/set-up-adc
+
+To run this test, you must set the following environment variables:
+GE_TEST_GCP_PROJECT
+GE_TEST_BIGQUERY_DATASET
+
+Then run the following command from the great_expectations directory:
+```
+GE_TEST_GCP_PROJECT=<YOUR GCP PROJECT> GE_TEST_BIGQUERY_DATASET=<YOUR BIGQUERY DATASET> pytest -v --docs-tests -m integration -k "how_to_host_and_share_data_docs_on_gcs" tests/integration/test_script_runner.py --bigquery
+```
+"""
 import os
 import subprocess
 
@@ -14,6 +28,12 @@ gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 if not gcp_project:
     raise ValueError(
         "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
+    )
+# Although not used explicitly in this test, the following environment variable is required
+bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET")
+if not bigquery_dataset:
+    raise ValueError(
+        "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run GCS integration tests"
     )
 
 # set GCP project
@@ -175,10 +195,13 @@ gcloud_app_deploy_command = """
 gcloud app deploy
 """
 
-result = subprocess.Popen(
+with subprocess.Popen(
     gcloud_app_deploy_command.strip().split(),
     cwd=team_gcs_app_directory,
-)
+) as result:
+    stdout, stderr = result.communicate()
+    result.kill()
+
 
 data_docs_site_yaml = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml">
@@ -191,7 +214,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  gs_site:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleGCSStoreBackend
@@ -220,26 +243,27 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 build_data_docs_command = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command">
-great_expectations docs build --site-name gs_site
+great_expectations docs build --site-name new_site_name
 # </snippet>
 """
 # Overwrite the version with the snippet tags
 build_data_docs_command = """
-great_expectations docs build --site-name gs_site
+great_expectations docs build --site-name new_site_name
 """
 
-result = subprocess.Popen(
+with subprocess.Popen(
     "echo Y | " + build_data_docs_command.strip() + " --no-view",
     shell=True,
     stdout=subprocess.PIPE,
-)
-stdout = result.stdout.read().decode("utf-8")
+) as result:
+    stdout = result.stdout.read().decode("utf-8")
+    result.kill()
 
 build_data_docs_output = """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output">
 The following Data Docs sites will be built:
 
- - gs_site: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
+ - new_site_name: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
 
 Would you like to proceed? [Y/n]: Y
 Building Data Docs...

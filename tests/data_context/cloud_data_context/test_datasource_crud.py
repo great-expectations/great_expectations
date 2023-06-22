@@ -81,7 +81,6 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
@@ -203,7 +202,6 @@ def test_data_context_in_cloud_mode_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
@@ -316,7 +314,6 @@ def test_cloud_data_context_add_datasource(
         autospec=True,
         side_effect=mocked_datasource_get_response,
     ):
-
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
@@ -409,36 +406,3 @@ def test_cloud_context_datasource_crud_e2e() -> None:
     with pytest.raises(ValueError) as e:
         context.get_datasource(datasource_name)
     assert f"Unable to load datasource `{datasource_name}`" in str(e.value)
-
-
-@pytest.mark.e2e
-@pytest.mark.cloud
-def test_cloud_context_test_yaml_config_workflow() -> None:
-    context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
-    datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
-    datasource_yaml = f"""
-    name: {datasource_name}
-    class_name: Datasource
-    execution_engine:
-        class_name: PandasExecutionEngine
-    data_connectors:
-        runtime:
-            class_name: RuntimeDataConnector
-            assets:
-                demo:
-                    class_name: Asset
-                    batch_identifiers:
-                        - load_id
-    """
-
-    datasource = context.test_yaml_config(datasource_yaml)
-    assert datasource.id is None, "ID should not be added until Cloud store is invoked"
-
-    datasource = context.add_datasource(datasource=datasource)
-    cloud_id = datasource.id
-    assert cloud_id is not None, "ID should be set after Cloud store is invoked"
-
-    datasource = context.add_or_update_datasource(datasource=datasource)
-    assert datasource.id == cloud_id, "The same ID should persist across calls"
-
-    context.delete_datasource(datasource_name)

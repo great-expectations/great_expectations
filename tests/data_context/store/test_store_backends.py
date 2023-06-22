@@ -8,7 +8,6 @@ import pyparsing as pp
 import pytest
 from moto import mock_s3
 
-import tests.test_utils as test_utils
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -41,6 +40,7 @@ from great_expectations.util import (
     get_context,
     is_library_loadable,
 )
+from tests import test_utils
 
 yaml = YAMLHandler()
 
@@ -245,7 +245,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
     )
     # Check that store_backend_id is created on instantiation, before being accessed
     desired_directory_tree_str = f"""\
@@ -267,7 +267,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     project_path_with_filepath_template = str(full_test_dir_with_file_template)
 
     tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, path),
+        root_directory=os.path.join(project_path, path),  # noqa: PTH118
         base_directory=project_path_with_filepath_template,
         filepath_template="my_file_{0}",
     )
@@ -285,7 +285,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     # Create a new store with the same config and make sure it reports the same store_backend_id
     tuple_filesystem_store_backend_duplicate = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         # filepath_template="my_file_{0}",
     )
     check_store_backend_store_backend_id_functionality(
@@ -387,7 +387,6 @@ def test_TupleS3StoreBackend_store_backend_id():
 
 @pytest.mark.unit
 def test_InMemoryStoreBackend():
-
     my_store = InMemoryStoreBackend()
 
     my_key = ("A",)
@@ -419,7 +418,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
             root_directory=project_path,
-            base_directory=os.path.join(project_path, path),
+            base_directory=os.path.join(project_path, path),  # noqa: PTH118
             filepath_prefix="invalid_prefix_ends_with/",
         )
     assert "filepath_prefix may not end with" in e.value.message
@@ -427,7 +426,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
             root_directory=project_path,
-            base_directory=os.path.join(project_path, path),
+            base_directory=os.path.join(project_path, path),  # noqa: PTH118
             filepath_prefix="invalid_prefix_ends_with\\",
         )
     assert "filepath_prefix may not end with" in e.value.message
@@ -444,7 +443,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 
     my_store = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
@@ -472,7 +471,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
     my_store = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="my_file_{0}",
     )
 
@@ -498,11 +497,11 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     )
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
-        assert my_store.get(("BBB",)) == ""
+        assert my_store.get(("BBB",)) == ""  # noqa: PLC1901
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="my_file_{0}",
         base_public_path=base_public_path,
     )
@@ -519,16 +518,16 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     test_dir = full_test_dir.parts[-1]
     project_path = str(full_test_dir)
 
-    checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")
-    os.mkdir(checkpoint_dir)
-    assert os.path.isdir(checkpoint_dir)
-    nb_file = os.path.join(checkpoint_dir, "foo.json")
+    checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")  # noqa: PTH118
+    os.mkdir(checkpoint_dir)  # noqa: PTH102
+    assert os.path.isdir(checkpoint_dir)  # noqa: PTH112
+    nb_file = os.path.join(checkpoint_dir, "foo.json")  # noqa: PTH118
 
     with open(nb_file, "w") as f:
         f.write("")
-    assert os.path.isfile(nb_file)
+    assert os.path.isfile(nb_file)  # noqa: PTH113
     my_store = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, "dummy_str"),
+        root_directory=os.path.join(project_path, "dummy_str"),  # noqa: PTH118
         base_directory=project_path,
     )
 
@@ -752,7 +751,7 @@ def test_TupleS3StoreBackend_with_prefix():
 
 @mock_s3
 @pytest.mark.integration
-def test_tuple_s3_store_backend_slash_conditions():
+def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -1000,7 +999,6 @@ def test_TupleS3StoreBackend_with_empty_prefixes():
 @mock_s3
 @pytest.mark.integration
 def test_TupleS3StoreBackend_with_s3_put_options():
-
     bucket = "leakybucket"
     conn = boto3.client("s3", region_name="us-east-1")
     conn.create_bucket(Bucket=bucket)
@@ -1054,11 +1052,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-        mock_client = mock_gcs_client.return_value
-        mock_bucket = mock_client.get_bucket.return_value
-        mock_blob = mock_bucket.blob.return_value
-
+    with mock.patch("google.cloud.storage.Client", autospec=True):
         my_store_with_base_public_path = TupleGCSStoreBackend(
             filepath_template=None,
             bucket=bucket,
@@ -1097,7 +1091,7 @@ def test_TupleGCSStoreBackend_base_public_path():
 )
 @pytest.mark.slow  # 1.35s
 @pytest.mark.integration
-def test_TupleGCSStoreBackend():
+def test_TupleGCSStoreBackend():  # noqa: PLR0915
     # pytest.importorskip("google-cloud-storage")
     """
     What does this test test and why?
@@ -1111,10 +1105,8 @@ def test_TupleGCSStoreBackend():
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
-    base_public_path = "http://www.test.com/"
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.blob.return_value
@@ -1158,7 +1150,6 @@ def test_TupleGCSStoreBackend():
         )
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
@@ -1175,7 +1166,6 @@ def test_TupleGCSStoreBackend():
         mock_str.decode.assert_called_once_with("utf-8")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-
         mock_client = mock_gcs_client.return_value
 
         my_store.list_keys()
@@ -1234,7 +1224,6 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     with mock.patch(
         "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
-
         mock_container_client = my_store._container_client
         mock_azure_blob_client.from_connection_string.assert_called_once()
 
@@ -1469,7 +1458,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 @pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
-    path_to_great_expectations_yml: str = os.path.join(
+    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
         empty_data_context.root_directory, empty_data_context.GX_YML
     )
 

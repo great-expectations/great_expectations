@@ -27,8 +27,6 @@ import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesys
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 <Introduction execution_engine="Spark" />
 
 ## Prerequisites
@@ -36,7 +34,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - Access to source data stored in a filesystem
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -53,17 +50,14 @@ A Filesystem Datasource can be created with two pieces of information:
 
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
-```python title="Python code"
-datasource_name = "MyNewDatasource"
-path_to_folder_containing_csv_files = "../taxi_data"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py define_add_spark_filesystem_args"
 ```
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
 Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
 
-```python title = "Python code"
-datasource = context.sources.add_spark_filesystem(name=datasource_name, base_path=path_to_folder_containing_csv_files)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py create_datasource"
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -78,19 +72,15 @@ A Data Asset requires two pieces of information to be defined:
 
 For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `batching_regex`:
 
-```python title="Python code"
-name = "my_taxi_data_asset"
-batching_regex = "yellow_tripdata_sample_2023_01\.csv"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py define_add_csv_asset_args"
 ```
 
-Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
+In addition, the argument `header` informs the Spark `DataFrame` reader that the files contain a header column, while the argument `infer_schema` instructs the Spark `DataFrame` reader to make a best effort to determine the schema of the columns automatically.
 
-```python title="Python code"
-data_asset = datasource.add_csv_asset(
-    name=name, batching_regex=batching_regex
-)
+Once we have determined those two values as well as the optional `header` and `infer_schema` arguments, we will pass them in as parameters when we create our Data Asset:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_spark.py add_asset"
 ```
-
 
 ### 4. Repeat step 3 as needed to add additional files as Data Assets
 

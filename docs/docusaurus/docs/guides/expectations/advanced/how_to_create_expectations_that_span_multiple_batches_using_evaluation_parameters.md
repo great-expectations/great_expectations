@@ -7,13 +7,15 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create <TechnicalTag tag="expectation" text="Expectations" /> that span multiple <TechnicalTag tag="batch" text="Batches" /> of data using <TechnicalTag tag="evaluation_parameter" text="Evaluation Parameters" /> (see also <TechnicalTag tag="evaluation_parameter_store" text="Evaluation Parameter Stores" />). This pattern is useful for things like verifying that row counts between tables stay consistent.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Configured a <TechnicalTag tag="data_context" text="Data Context" />.
-- Configured a <TechnicalTag tag="datasource" text="Datasource" /> (or several Datasources) with at least two <TechnicalTag tag="data_asset" text="Data Assets" /> and understand the basics of <TechnicalTag tag="batch_request" text="Batch Requests" />.
-- Also created <TechnicalTag tag="expectation_suite" text="Expectations Suites" /> for those Data Assets.
-- Have a working Evaluation Parameter store. (The default in-memory <TechnicalTag tag="store" text="Store" /> from ``great_expectations init`` can work for this.)
-- Have a working <TechnicalTag tag="checkpoint" text="Checkpoint" />
+- A configured <TechnicalTag tag="data_context" text="Data Context" />.
+- A configured <TechnicalTag tag="datasource" text="Datasource" /> (or several Datasources) with a minimum of two <TechnicalTag tag="data_asset" text="Data Assets" /> and an understanding of the basics of <TechnicalTag tag="batch_request" text="Batch Requests" />.
+- A <TechnicalTag tag="expectation_suite" text="Expectations Suites" /> for the Data Assets.
+- A working Evaluation Parameter store. The default in-memory <TechnicalTag tag="store" text="Store" /> from ``great_expectations init`` can work for this.
+- A working <TechnicalTag tag="checkpoint" text="Checkpoint" />
 
 </Prerequisites>
 

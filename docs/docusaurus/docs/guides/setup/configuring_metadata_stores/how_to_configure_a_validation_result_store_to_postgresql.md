@@ -4,49 +4,53 @@ title: How to configure a Validation Result Store to PostgreSQL
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since <TechnicalTag tag="validation_result" text="Validation Results" /> may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
+
+By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder. Validation Results can include sensitive or regulated data that should not be committed to a source control system.  Use the information provided here to configure Great Expectations to store Validation Results in a PostgreSQL database.
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- [Configured a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
-- [Configured a PostgreSQL](https://www.postgresql.org/) database with appropriate credentials.
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- [A PostgreSQL database](https://www.postgresql.org/) with appropriate credentials.
 
 </Prerequisites>
 
-## Steps
+## 1. Configure the ``config_variables.yml`` file with your database credentials
 
-### 1. Configure the ``config_variables.yml`` file with your database credentials
+GX recommends storing database credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and not part of source control. 
 
-We recommend that database credentials be stored in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials.md).
+1. To add database credentials, open ``config_variables.yml`` and add the following entry below the ``db_creds`` key: 
 
-```yaml
-db_creds:
-  drivername: postgresql
-  host: '<your_host_name>'
-  port: '<your_port>'
-  username: '<your_username>'
-  password: '<your_password>'
-  database: '<your_database_name>'
-```
+    ```yaml
+    db_creds:
+      drivername: postgresql
+      host: '<your_host_name>'
+      port: '<your_port>'
+      username: '<your_username>'
+      password: '<your_password>'
+      database: '<your_database_name>'
+    ```
+    To configure the ``config_variables.yml`` file, or additional environment variables, see [How to configure credentials](../configuring_data_contexts/how_to_configure_credentials.md).
 
-It is also possible to specify `schema` as an additional keyword argument if you would like to use a specific schema as the backend, but this is entirely optional.
+2. Optional. To use a specific schema as the backend, specify `schema` as an additional keyword argument. For example:
 
-```yaml
-db_creds:
-  drivername: postgresql
-  host: '<your_host_name>'
-  port: '<your_port>'
-  username: '<your_username>'
-  password: '<your_password>'
-  database: '<your_database_name>'
-  schema: '<your_schema_name>'
-```
+    ```yaml
+    db_creds:
+      drivername: postgresql
+      host: '<your_host_name>'
+      port: '<your_port>'
+      username: '<your_username>'
+      password: '<your_password>'
+      database: '<your_database_name>'
+      schema: '<your_schema_name>'
+    ```
 
-### 2. Identify your Data Context Validation Results Store
+## 2. Identify your Data Context Validation Results Store
 
-As with all <TechnicalTag tag="store" text="Stores" />, you can use your <TechnicalTag tag="data_context" text="Data Context" /> to find your <TechnicalTag tag="validation_result_store" text="Validation Results Store" />.  In your ``great_expectations.yml``, look for the following lines.  The configuration tells Great Expectations to look for Validation Results in a Store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
+The configuration for your <TechnicalTag tag="validation_result_store" text="Validation Results Store" /> is available in your <TechnicalTag tag="data_context" text="Data Context" />.  Open ``great_expectations.yml``and find the following entry:
 
 ```yaml
 validations_store_name: validations_store
@@ -58,10 +62,11 @@ stores:
           class_name: TupleFilesystemStoreBackend
           base_directory: uncommitted/validations/
 ```
+This configuration tells Great Expectations to look for Validation Results in the ``validations_store`` Store. The default ``base_directory`` for ``validations_store`` is ``uncommitted/validations/``.
 
-### 3. Update your configuration file to include a new Store for Validation Results on PostgreSQL
+## 3. Update your configuration file to include a new Validation Results Store
 
-In our case, the name is set to ``validations_postgres_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``DatabaseStoreBackend``, and ``credentials`` will be set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.
+Add the following entry to your ``great_expectations.yml``: 
 
 ```yaml
 validations_store_name: validations_postgres_store
@@ -74,10 +79,11 @@ stores:
           credentials: ${db_creds}
 ```
 
+In the previous example, `validations_store_name` is set to ``validations_postgres_store``, but it can be personalized.  Also, ``class_name`` is set to ``DatabaseStoreBackend``, and ``credentials`` is set to ``${db_creds}``, which references the corresponding key in the ``config_variables.yml`` file.  
 
-### 5. Confirm that the new Validation Results Store has been added by running ``great_expectations store list``
+## 4. Confirm the addition of the new Validation Results Store
 
-Notice the output contains two Validation Result Stores: the original ``validations_store`` on the local filesystem and the ``validations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in PostgreSQL as long as we set the ``validations_store_name`` variable to ``validations_postgres_store``. The config for ``validations_store`` can be removed if you would like.
+In the previous example, a ``validations_store`` on the local filesystem and a ``validations_postgres_store`` are configured.  Great Expectations looks for Validation Results in PostgreSQL when the ``validations_store_name`` variable is set to ``validations_postgres_store``. Run the following command to remove ``validations_store`` and confirm the ``validations_postgres_store`` configuration:
 
 ```bash
 great_expectations store list
@@ -101,8 +107,8 @@ store_backend:
       username: '<your_username>'
 ```
 
-### 6. Confirm that the Validation Results Store has been correctly configured
+## 5. Confirm the Validation Results Store is configured correctly
 
-[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results store in PostgreSQL then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
+[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results store in PostgreSQL, and then visualize the results by [re-building Data Docs](../../../terms/data_docs.md).
 
-Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation Results.
+Great Expectations creates a new table in your database named ``ge_validations_store``, and populates the fields with information from the Validation Results.

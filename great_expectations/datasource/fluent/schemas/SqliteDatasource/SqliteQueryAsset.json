@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "sqlite_query",
+            "default": "query",
             "enum": [
-                "sqlite_query"
+                "query"
             ],
             "type": "string"
         },

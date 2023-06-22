@@ -3,7 +3,7 @@ from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
 from great_expectations.core.metric_function_types import (
@@ -33,8 +33,8 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentDomainTypeDirectives,  # noqa: TCH001
-    RuntimeEnvironmentVariablesDirectives,  # noqa: TCH001
+    RuntimeEnvironmentDomainTypeDirectives,
+    RuntimeEnvironmentVariablesDirectives,
 )
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -62,7 +62,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-from great_expectations.validator.validator import Validator  # noqa: TCH001
+from great_expectations.validator.validator import Validator
 
 # noinspection PyMethodParameters
 
@@ -134,17 +134,18 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         def get_table_columns_metric_multi_batch_parameter_builder(
-            self,
+            self, include_nested: bool = False
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
-            metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
-                metric_name=metric_name,
+                metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
+                metric_value_kwargs={
+                    "include_nested": include_nested,
+                },
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
@@ -721,7 +722,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     execution_time_property_name="profiler_execution_time",
     pretty_print=False,
 )
-def run_profiler_on_data(
+def run_profiler_on_data(  # noqa: PLR0913
     data_assistant: DataAssistant,
     data_assistant_result: DataAssistantResult,
     profiler: BaseRuleBasedProfiler,
@@ -777,7 +778,7 @@ configuration included.
     result.citation = rule_based_profiler_result.citation
 
 
-def build_map_metric_rule(
+def build_map_metric_rule(  # noqa: PLR0913
     data_assistant_class_name: str,
     rule_name: str,
     expectation_type: str,

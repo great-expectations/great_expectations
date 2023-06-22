@@ -12,6 +12,7 @@ from great_expectations.expectations.metrics import (
 
 SP500_TICKERS_LIST = [t.lower() for t in si.tickers_sp500()]
 
+
 # This method compares a string to the valid S&P 500 ticker
 def is_valid_sp500_ticker(ticker: str) -> bool:
     return ticker.lower() in SP500_TICKERS_LIST
@@ -20,7 +21,6 @@ def is_valid_sp500_ticker(ticker: str) -> bool:
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesToBeValidSp500Ticker(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_sp500_ticker"
 

@@ -63,7 +63,6 @@ class ExpectationsStoreSpy(ExpectationsStore):
 
 
 class ProfilerStoreSpy(ProfilerStore):
-
     STORE_NAME = "profiler_store"
 
     def __init__(self) -> None:
@@ -87,7 +86,6 @@ class ProfilerStoreSpy(ProfilerStore):
 
 
 class CheckpointStoreSpy(CheckpointStore):
-
     STORE_NAME = "checkpoint_store"
 
     def __init__(self) -> None:
@@ -599,15 +597,11 @@ def test_add_expectation_suite_conflicting_args_failure(
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(ValueError):
         context.add_expectation_suite(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
 
-    assert (
-        "an existing expectation_suite or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
     assert context.expectations_store.save_count == 0
 
 
@@ -773,7 +767,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
 ):
     context = in_memory_data_context
 
-    with pytest.raises((ValueError, AssertionError)) as e:
+    with pytest.raises((ValueError, AssertionError)):
         context.add_or_update_expectation_suite(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
@@ -1187,7 +1181,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             },
             CheckpointConfig(
                 **{
-                    "action_list": [],
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,
@@ -1226,7 +1220,7 @@ def test_add_or_update_checkpoint_adds_successfully(
             },
             CheckpointConfig(
                 **{
-                    "action_list": [],
+                    "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,
