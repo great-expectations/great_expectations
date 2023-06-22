@@ -83,6 +83,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
+        gcs_recursive_file_discovery: bool = False,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None, Literal["infer"]] = "infer",

@@ -1,5 +1,5 @@
 ---
-title: How to request data from a Data Asset
+title: Request data from a Data Asset
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to request data from a Data Asset.
 keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method]
@@ -26,17 +26,15 @@ This guide demonstrates how you can request data from a Datasource that has been
 
 </Prerequisites> 
 
-## Steps
-
-### 1. Import GX and instantiate a Data Context
+## Import GX and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
-### 2. Retrieve your Data Asset
+## Retrieve your Data Asset
 
 <GetExistingDataAssetFromExistingDatasource />
 
-### 3. (Optional) Build an `options` dictionary for your Batch Request
+## Build an `options` dictionary for your Batch Request (Optional)
 
 An `options` dictionary can be used to limit the Batches returned by a Batch Request.  Omitting the `options` dictionary will result in all available Batches being returned.
 
@@ -49,7 +47,7 @@ The `batch_request_options` property is a tuple that contains all the valid keys
 
 You can create a dictionary of keys pulled from the `batch_request_options` tuple and values that you want to use to specify the Batch or Batches your Batch Request should return, then pass this dictionary in as the `options` parameter when you build your Batch Request.
 
-### 4. Build your Batch Request
+## Build your Batch Request
 
 We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request.
 
@@ -61,7 +59,7 @@ For `dataframe` Data Assets, the `dataframe` is always specified as the argument
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py build_batch_request_with_dataframe"
 ```
 
-### 5. Verify that the correct Batches were returned
+## Verify that the correct Batches were returned
 
 The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request refers to.
 
