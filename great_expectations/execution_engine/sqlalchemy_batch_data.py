@@ -149,11 +149,16 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
+        elif source_table_name:
+            self._selectable = self._generate_selectable(
+                dialect=dialect,
+                use_quoted_name=use_quoted_name,
+                table_name=source_table_name,
+                schema_name=source_schema_name,
+            )
         elif selectable is not None:
             if record_set_name:
                 self._selectable = selectable.alias(self._record_set_name)
-            else:
-                self._selectable = selectable
         else:
             if query:  # noqa: PLR5501
                 self._selectable = sa.text(query)
