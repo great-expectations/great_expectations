@@ -1,5 +1,5 @@
 ---
-title: How to configure and use a MetricStore
+title: Configure a MetricStore
 ---
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
@@ -17,7 +17,7 @@ Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="va
 - Completion of the [Quickstart](tutorials/quickstart/quickstart.md)
 - [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 
-## 1. Add a MetricStore
+## Add a MetricStore
 
 To define a `MetricStore`, add a <TechnicalTag tag="metric_store" text="Metric Store" /> configuration to the `stores` section of your `great_expectations.yml`. The configuration must include the following keys:
 
@@ -53,7 +53,7 @@ stores:
 
 The next time your Data Context is loaded, it will connect to the database and initialize a table to store metrics if one has not already been created.
 
-## 2. Configure a Validation Action
+## Configure a Validation Action
 
 When a `MetricStore` is available, add a `StoreMetricsAction` validation <TechnicalTag tag="action" text="Action" /> to your <TechnicalTag tag="checkpoint" text="Checkpoint" /> to save Metrics during Validation. The validation Action must include the following fields:
 
@@ -107,7 +107,7 @@ action_list:
         - statistics.unsuccessful_expectations
 ```
 
-## 3. Test your MetricStore and StoreMetricsAction
+## Test your MetricStore and StoreMetricsAction
 
 Run the following command to run your Checkpoint and test `StoreMetricsAction`:
 
