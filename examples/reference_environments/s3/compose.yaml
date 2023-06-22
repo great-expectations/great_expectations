@@ -1,6 +1,6 @@
 services:
-  gx_sandbox:
-    image: gx/s3
+  jupyter:
+    image: gx/s3_example_jupyter
     container_name: gx_s3_example_jupyter
     build:
       context: .
@@ -11,3 +11,5 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+    ports:
+      - "8888:8888"
