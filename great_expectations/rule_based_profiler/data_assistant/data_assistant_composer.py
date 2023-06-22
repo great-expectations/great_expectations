@@ -9,18 +9,25 @@ from typing import (
     Mapping,
 )
 
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 if TYPE_CHECKING:
-    from great_expectations.core.domain import Domain
+    from great_expectations.core import ExpectationConfiguration
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
     from great_expectations.datasource.fluent.batch_request import BatchRequest
+    from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+        DataAssistantRunner,
+    )
     from great_expectations.rule_based_profiler.data_assistant_result import (
         DataAssistantResult,
-        DomainBuilderDataAssistantResult,
     )
+
+    # TODO: <Alex>ALEX</Alex>
+    # DomainBuilderDataAssistantResult,
+    # TODO: <Alex>ALEX</Alex>
     from great_expectations.rule_based_profiler.rule import Rule
 
 logger = logging.getLogger(__name__)
@@ -34,6 +41,9 @@ class DataAssistantComposer:
         # "nullity": "column_value_nullity",
         # "nonnullity": "column_value_nonnullity",
         # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        "missingness": "column_value_missing",
+        # TODO: <Alex>ALEX</Alex>
         "categorical_two": "categorical",
         "categorical_very_few": "categorical",
         "numeric": "numeric",
@@ -43,9 +53,11 @@ class DataAssistantComposer:
     def __init__(
         self,
         batch_request: BatchRequest,
+        expectation_suite_name: str,
         data_context: AbstractDataContext,
     ) -> None:
         self._batch_request: BatchRequest = batch_request
+        self._expectation_suite_name: str = expectation_suite_name
         self._data_context: AbstractDataContext = data_context
 
         self._task_name_to_domain_list_map: Mapping[str, List[Domain]] | None = None
@@ -57,10 +69,10 @@ class DataAssistantComposer:
         rule: Rule
         rule_names: List[str] = [rule.name for rule in rules]
 
-        data_assistant_result: DomainBuilderDataAssistantResult = (
-            self._data_context.assistants.domains.run(
-                batch_request=self._batch_request,
-            )
+        data_assistant_result: DataAssistantResult
+
+        data_assistant_result = self._data_context.assistants.domains.run(
+            batch_request=self._batch_request,
         )
 
         domains: List[Domain] = list(data_assistant_result.metrics_by_domain.keys())
@@ -97,7 +109,41 @@ class DataAssistantComposer:
         # ]
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        candidate_column_value_nullity_domains: List[Domain] = []
+        # candidate_column_value_nullity_domains: List[Domain] = []
+        # candidate_column_value_nonnullity_domains: List[Domain] = []
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        data_assistant_result = self._data_context.assistants.column_value_missing.run(
+            batch_request=self._batch_request,
+        )
+        expectation_configurations: List[
+            ExpectationConfiguration
+        ] = data_assistant_result.get_expectation_suite(
+            expectation_suite_name=self._expectation_suite_name
+        ).get_column_expectations()
+        expectation_configuration: ExpectationConfiguration
+        candidate_column_value_nullity_domains: List[Domain] = [
+            Domain(
+                domain_type=MetricDomainTypes.COLUMN,
+                domain_kwargs={"column": expectation_configuration.kwargs["column"]},
+                details=None,
+                rule_name=None,
+            )
+            for expectation_configuration in expectation_configurations
+            if expectation_configuration["expectation_type"]
+            == "expect_column_values_to_be_null"
+        ]
+        candidate_column_value_nonnullity_domains: List[Domain] = [
+            Domain(
+                domain_type=MetricDomainTypes.COLUMN,
+                domain_kwargs={"column": expectation_configuration.kwargs["column"]},
+                details=None,
+                rule_name=None,
+            )
+            for expectation_configuration in expectation_configurations
+            if expectation_configuration["expectation_type"]
+            == "expect_column_values_to_not_be_null"
+        ]
         # TODO: <Alex>ALEX</Alex>
         candidate_numeric_columns_domains: List[Domain] = domains_by_rule_name[
             "numeric_columns_domain_rule"
@@ -223,12 +269,29 @@ class DataAssistantComposer:
             )
         )
 
+        # TODO: <Alex>ALEX</Alex>
+        column_value_nullity_domains: List[
+            Domain
+        ] = candidate_column_value_nullity_domains
+
+        column_value_nonnullity_domains: List[
+            Domain
+        ] = candidate_column_value_nonnullity_domains
+
+        column_value_missing_domains: List[Domain] = (
+            column_value_nullity_domains + column_value_nonnullity_domains
+        )
+        # TODO: <Alex>ALEX</Alex>
+
         self._task_name_to_domain_list_map = {
             "uniqueness": column_value_uniqueness_domains,
             # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
             # TODO: <Alex>ALEX</Alex>
             # "nullity": column_value_nullity_domains,
             # "nonnullity": column_value_nonnullity_domains,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            "missingness": column_value_missing_domains,
             # TODO: <Alex>ALEX</Alex>
             "categorical_two": categorical_columns_domains_two,
             "categorical_very_few": categorical_columns_domains_very_few,
@@ -240,32 +303,32 @@ class DataAssistantComposer:
         self,
         task_name: str,
     ) -> DataAssistantResult:
+        # TODO: <Alex>ALEX</Alex>
+        domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
+
+        domains: Domain
+        include_column_names = [domain.domain_kwargs["column"] for domain in domains]
+
+        job_category: str = DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP[
+            task_name
+        ]
+        data_assistant_runner: DataAssistantRunner = getattr(
+            self._data_context.assistants, job_category
+        )
+
+        data_assistant_result: DataAssistantResult = data_assistant_runner.run(
+            batch_request=self._batch_request,
+            include_column_names=include_column_names,
+        )
+        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
         # TODO: <Alex>ALEX</Alex>
-        # domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
-        #
-        # domains: Domain
-        # include_column_names = [domain.domain_kwargs["column"] for domain in domains]
-        #
-        # job_category: str = DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP[
-        #     task_name
-        # ]
-        # data_assistant_runner: DataAssistantRunner = getattr(
-        #     self._data_context.assistants, job_category
-        # )
-        #
-        # data_assistant_result: DataAssistantResult = data_assistant_runner.run(
+        # data_assistant_result: DataAssistantResult = self._data_context.assistants.column_value_nonnullity.run(
         #     batch_request=self._batch_request,
-        #     include_column_names=include_column_names,
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # include_column_names=include_column_names,
+        #     # TODO: <Alex>ALEX</Alex>
         # )
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        data_assistant_result: DataAssistantResult = self._data_context.assistants.column_value_nonnullity.run(
-            batch_request=self._batch_request,
-            # TODO: <Alex>ALEX</Alex>
-            # include_column_names=include_column_names,
-            # TODO: <Alex>ALEX</Alex>
-        )
         # TODO: <Alex>ALEX</Alex>
 
         return data_assistant_result
