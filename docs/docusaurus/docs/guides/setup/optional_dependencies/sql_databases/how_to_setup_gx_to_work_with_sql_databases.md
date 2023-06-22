@@ -1,5 +1,5 @@
 ---
-title: How to set up GX to work with SQL databases
+title: Connect to a SQL database
 tag: [how-to, setup]
 keywords: [Great Expectations, SQL]
 
