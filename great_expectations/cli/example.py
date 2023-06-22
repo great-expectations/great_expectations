@@ -35,6 +35,7 @@ class CommandOptions:
 @example.command(name="snowflake")
 @click.option(
     "--stop",
+    "--down",
     is_flag=True,
     help="Stop example and clean up. Default false.",
     default=False,
@@ -89,6 +90,7 @@ def example_snowflake(
 @example.command(name="postgres")
 @click.option(
     "--stop",
+    "--down",
     is_flag=True,
     help="Stop example and clean up. Default false.",
     default=False,
@@ -148,6 +150,7 @@ def example_postgres(
 @example.command(name="s3")
 @click.option(
     "--stop",
+    "--down",
     is_flag=True,
     help="Stop example and clean up. Default false.",
     default=False,
