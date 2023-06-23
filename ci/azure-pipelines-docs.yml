@@ -65,6 +65,13 @@ stages:
             python ci/checks/check_only_name_tag_snippets.py
           name: NameTagSnippetChecker
 
+    - job: name_tag_snippet_referenced_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+        - script: |
+            python ci/checks/check_name_tag_snippets_referenced.py
+          name: NameTagSni
+
     - job: public_api_report
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:

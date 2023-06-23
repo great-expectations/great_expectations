@@ -1,23 +1,7 @@
 """
-Purpose: To ensure that no docs snippets use the old "Mark Down" style of including Python code snippets.
+Purpose: To ensure that all named snippets are referenced in the docs.
 
-The old "Mark Down" style of including Python code snippets has the following form:
-
-```python Python code
-import great_expectations as gx
-
-context = gx.get_context()
-```
-
-It can also be expressed in the following form:
-
-```python title="Python code"
-import great_expectations as gx
-
-context = gx.get_context()
-```
-
-However, the new style of including Python code snippets refers to the Python module, containing the test, as follows:
+Python code snippets refers to the Python module, containing the test, as follows:
 
 ```python name="tests/integration/docusaurus/general_directory/specic_directory/how_to_do_my_operation.py get_context"
 ```
@@ -32,7 +16,7 @@ import great_expectations as gx
 context = gx.get_context()
 # </snippet>
 
-Adherence to this pattern is assertained by the present checker module.
+Find all named snippets and ensure that they are referenced in the docs using the above syntax.
 """
 
 import pathlib
@@ -41,11 +25,6 @@ import shutil
 import subprocess
 import sys
 from typing import List
-
-ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
-    "docs/docusaurus/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx",
-}
-EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 
 
 def check_dependencies(*deps: str) -> None:
@@ -56,65 +35,73 @@ def check_dependencies(*deps: str) -> None:
 
 def run_grep(target_dir: pathlib.Path) -> List[str]:
     try:
-        res_positive = subprocess.run(
+        res_snippets = subprocess.run(
             [
                 "grep",
                 "--recursive",
-                "--files-with-matches",
+                "--binary-files=without-match",
+                "--no-filename",
                 "--ignore-case",
                 "--word-regexp",
                 "--regexp",
-                r"```python",
+                r"^# <snippet .*name=.*>",
                 str(target_dir),
             ],
             text=True,
             capture_output=True,
         )
-        res_negative = subprocess.run(
+        res_snippet_names = subprocess.run(
+            ["sed", 's/.*name="//; s/">//; s/version-[0-9\.]* //'],
+            text=True,
+            input=res_snippets.stdout,
+            capture_output=True,
+        )
+
+        res_snippet_usages = subprocess.run(
             [
                 "grep",
                 "--recursive",
-                "--files-with-matches",
+                "--binary-files=without-match",
+                "--no-filename",
                 "--ignore-case",
+                "-E",
                 "--regexp",
-                r"```python name=",
+                r"```(python|yaml).*name=",
                 str(target_dir),
             ],
             text=True,
             capture_output=True,
         )
-        res = list(
-            set(res_positive.stdout.splitlines()).difference(
-                set(res_negative.stdout.splitlines())
+        res_snippet_used_names = subprocess.run(
+            ["sed", 's/.*="//; s/".*//; s/version-[0-9\.]* //'],
+            text=True,
+            input=res_snippet_usages.stdout,
+            capture_output=True,
+        )
+        unused_snippet_names = sorted(
+            list(
+                set(res_snippet_names.stdout.splitlines()).difference(
+                    set(res_snippet_used_names.stdout.splitlines())
+                )
             )
         )
+        return unused_snippet_names
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
         ) from e
-    return res
 
 
 def main() -> None:
     check_dependencies("grep")
+    check_dependencies("sed")
     project_root = pathlib.Path(__file__).parent.parent.parent
     docs_dir = project_root / "docs"
     assert docs_dir.exists()
-    grep_output = run_grep(docs_dir)
-    grep_output = list(
-        filter(
-            lambda filename: EXCLUDED_FILENAMES_PATTERN.match(filename),
-            grep_output,
-        )
-    )
-    excluded_documents = {
-        project_root / file_path
-        for file_path in ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER
-    }
-    new_violations = set(grep_output).difference(excluded_documents)
+    new_violations = run_grep(docs_dir)
     if new_violations:
         print(
-            f'[ERROR] Found {len(new_violations)} snippets using "Mark Down" snippet style.  Please use named snippet syntax:'
+            f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file."
         )
         for line in new_violations:
             print(line)
