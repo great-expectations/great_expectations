@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, overload
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -16,6 +16,64 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
+    # Instantiating SqlAlchemyBatchData with table_name and schema_name
+    @overload
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
+        # Option 1
+        schema_name: Optional[str] = ...,
+        table_name: str = ...,
+        # Option 2
+        query: None = ...,
+        # Option 3
+        selectable: None = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: None = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: None = ...,
+        source_table_name: None = ...,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
+        # Option 1
+        schema_name: None = ...,
+        table_name: None = ...,
+        # Option 2
+        query: str = ...,
+        # Option 3
+        selectable: None = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: Optional[str] = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: None = ...,
+        source_table_name: None = ...,
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(  # noqa: PLR0913
+        self,
+        execution_engine,
+        # Option 1
+        schema_name: None = ...,
+        table_name: None = ...,
+        # Option 2
+        query: None = ...,
+        # Option 3
+        selectable: sqlalchemy.Selectable = ...,
+        create_temp_table: bool = ...,
+        temp_table_schema_name: Optional[str] = ...,
+        use_quoted_name: bool = ...,
+        source_schema_name: Optional[str] = ...,
+        source_table_name: str = ...,
+    ) -> None:
+        ...
+
     def __init__(  # noqa: PLR0913
         self,
         execution_engine,
@@ -25,7 +83,7 @@ class SqlAlchemyBatchData(BatchData):
         # Option 2
         query: Optional[str] = None,
         # Option 3
-        selectable=None,
+        selectable: Optional[sqlalchemy.Selectable] = None,
         create_temp_table: bool = True,
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
