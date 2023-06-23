@@ -87,7 +87,6 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
           ]
         },
-        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
         {
           type: 'category',
           label: 'Add Features to Custom Expectations',
@@ -101,6 +100,7 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/add_custom_parameters',
           ]
         },
+        'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
       ]
     },
     {
