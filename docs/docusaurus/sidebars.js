@@ -6,10 +6,10 @@ module.exports = {
       label: 'Getting started',
       items: [
         {
-          type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+          type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
         },
         {
-          type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+          type: 'doc', id: 'conceptual_guides/gx_overview/gx-overview-lp', label: 'GX Overview'
         }
       ]
     },
