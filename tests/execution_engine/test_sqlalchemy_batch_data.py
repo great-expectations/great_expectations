@@ -169,8 +169,8 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    query_to_create_temp_table: str = batch_data._create_temporary_table(
-        temp_table_name="hello",
+    (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+        dialect=GXSqlDialect.SQLITE,
         query="test_query",
         temp_table_schema_name="test_schema",
     )
@@ -185,8 +185,8 @@ def test_instantiation_with_temp_table_schema():
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        query_to_create_temp_table: str = batch_data._create_temporary_table(
-            temp_table_name="hello",
+        (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+            dialect=GXSqlDialect.SQLITE,
             query="test_query",
             temp_table_schema_name="test_schema",
         )

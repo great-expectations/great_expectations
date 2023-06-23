@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -144,9 +144,9 @@ class SqlAlchemyBatchData(BatchData):
     def use_quoted_name(self):
         return self._use_quoted_name
 
-    def _create_temporary_table(  # noqa: C901, PLR0912
+    def _create_temporary_table(  # noqa: C901, PLR0912, PLR0915
         self, dialect, query, temp_table_schema_name=None
-    ) -> (str, str):
+    ) -> Tuple[str, str]:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
@@ -157,7 +157,7 @@ class SqlAlchemyBatchData(BatchData):
         if dialect == GXSqlDialect.MSSQL:
             temp_table_name = f"#{temp_table_name}"
 
-        dialect: GXSqlDialect = self.dialect
+        dialect = self.dialect
         stmt: str = ""
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
@@ -295,7 +295,7 @@ class SqlAlchemyBatchData(BatchData):
         self, selectable, dialect, create_temp_table, temp_table_schema_name
     ):
         if not create_temp_table:
-            self._selectable = selectable.alias()
+            return selectable.alias()
 
         else:
             if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
