@@ -24,7 +24,7 @@ The tuple in the example includes the two columns being evaluated and the `mostl
 
 ## Use case
 
-In this use case, a `condition_value_keys` tuple and a `condition_domain_keys` tuple are added to ColumnPairMapMetrics, MulticolumnMapMetrics, and ColumnMapMetrics. The `condition_value_keys` tuple supplies the arguments needed to compute your Metric, and the `condition_domain_keys` tuple defines the domain on which the Metric is operating.
+In this use case, a `condition_value_keys` tuple and a `condition_domain_keys` tuple are added to ColumnPairMapMetrics, MulticolumnMapMetrics, and ColumnMapMetrics. The `condition_value_keys` tuple supplies the arguments needed to compute your Metric, and the `condition_domain_keys` tuple defines the domain on which the Metric operates.
 
 This is how the tuples appear in the MulticolumnMapMetrics Metric:
 
@@ -45,7 +45,7 @@ value_keys = ("column",)
 domain_keys = ("query",)
 ```
 
-After the attributes are added to the Expectation and the Metric, the custom parameters can be passed into and utilized within the individual Metric functions. For example, this how it appears in the ColumnValuesBetween Metric:
+After the attributes are added to the Expectation and the Metric, the custom parameters can be passed into and used within the individual Metric functions. For example, this is how it appears in the ColumnValuesBetween Metric:
 
 ```python
 classColumnValuesBetween(ColumnMapMetricProvider):   
@@ -73,3 +73,21 @@ def_pandas(
 ```
 To view the full code that you would use to pass custom parameters in a Custom Expectation, see [expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/great_expectations_geospatial_expectations/great_expectations_geospatial_expectations/expectations/expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py).
 
+## kwarg-based access
+
+GX recommends using custom parameters to create validations and optimize workflows. However, you can also use `kwarg` syntax to define Metrics for your Expectations. An example `kwarg` implementation is provided in [expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/great_expectations_geospatial_expectations/great_expectations_geospatial_expectations/expectations/expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py).
+
+## Allowable parameters
+
+The following table lists the allowable parameters that are available for each Expectation class.
+
+| Expectation class                 | Allowable parameters   |
+| ----------------------------------| ---------------------- |
+| BatchExpectation                  | parameter              |
+| ColumnAggregateExpectation        | parameter              |
+| ColumnMapExpectation              | parameter              |
+| RegexBasedColumnMapExpectation    | parameter              |
+| SetBasedColumnMapExpectation      | parameter              |
+| ColumnPairMapExpectation          | parameter              |
+| MulticolumnMapExpectation         | parameter              |
+| QueryExpectation                  | parameter              |

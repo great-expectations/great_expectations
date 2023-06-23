@@ -99,7 +99,8 @@ module.exports = {
             'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
             'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
           ]
-        }
+        },
+        'guides/expectations/creating_custom_expectations/add_custom_parameters',
       ]
     },
     {
