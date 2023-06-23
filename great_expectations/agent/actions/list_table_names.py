@@ -16,7 +16,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
         datasource_name: str = event.datasource_name
         datasource: FluentDatasource = self._context.get_datasource(datasource_name=datasource_name)
         if not isinstance(datasource, SQLDatasource):
-            raise TypeError(f"This operation requires a SQL Datasource but got {type(datasource).__name__}")
+            raise TypeError(f"This operation requires a SQL Datasource but got {type(datasource).__name__}.")
 
         inspector: Inspector = inspect(datasource.get_engine())
         table_names: list[str] = inspector.get_table_names()
