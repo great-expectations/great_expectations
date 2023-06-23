@@ -335,12 +335,11 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=None,
             )
-        else:
-            return sa.Table(
-                table_name,
-                sa.MetaData(),
-                schema=schema_name,
-            )
+        return sa.Table(
+            table_name,
+            sa.MetaData(),
+            schema=schema_name,
+        )
 
     def _generate_selectable_from_query(
         self,
@@ -362,18 +361,17 @@ class SqlAlchemyBatchData(BatchData):
         """
         if not create_temp_table:
             return sa.text(query)
-        else:
-            (_, temp_table_name) = self._create_temporary_table(
-                dialect=dialect,
-                query=query,
-                temp_table_schema_name=temp_table_schema_name,
-            )
+        (_, temp_table_name) = self._create_temporary_table(
+            dialect=dialect,
+            query=query,
+            temp_table_schema_name=temp_table_schema_name,
+        )
 
-            return sa.Table(
-                temp_table_name,
-                sa.MetaData(),
-                schema=temp_table_schema_name,
-            )
+        return sa.Table(
+            temp_table_name,
+            sa.MetaData(),
+            schema=temp_table_schema_name,
+        )
 
     def _generate_selectable_from_selectable(
         self,
@@ -397,24 +395,23 @@ class SqlAlchemyBatchData(BatchData):
         if not create_temp_table:
             return selectable.alias()
 
+        if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
+            selectable, str
+        ):
+            # oracle, mssql query could already be passed as a string
+            query = selectable
         else:
-            if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
-                selectable, str
-            ):
-                # oracle, mssql query could already be passed as a string
-                query = selectable
-            else:
-                # compile selectable to sql statement
-                query = selectable.compile(
-                    dialect=self.sql_engine_dialect,
-                    compile_kwargs={"literal_binds": True},
-                )
-
-            (_, temp_table_name) = self._create_temporary_table(
-                dialect=dialect,
-                query=query,
-                temp_table_schema_name=temp_table_schema_name,
+            # compile selectable to sql statement
+            query = selectable.compile(
+                dialect=self.sql_engine_dialect,
+                compile_kwargs={"literal_binds": True},
             )
+
+        (_, temp_table_name) = self._create_temporary_table(
+            dialect=dialect,
+            query=query,
+            temp_table_schema_name=temp_table_schema_name,
+        )
 
         return sa.Table(
             temp_table_name,
