@@ -547,6 +547,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def expectations_store_name(self) -> Optional[str]:
         return self.variables.expectations_store_name
 
+    @expectations_store_name.setter
+    def expectations_store_name(self, value: str) -> None:
+        self.variables.expectations_store_name = value
+
     @property
     def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
@@ -562,6 +566,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def validations_store_name(self) -> Optional[str]:
         return self.variables.validations_store_name
+
+    @validations_store_name.setter
+    def validations_store_name(self, value: str) -> None:
+        self.variables.validations_store_name = value
 
     @property
     def validations_store(self) -> ValidationsStore:
@@ -606,6 +614,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+
+    @checkpoint_store_name.setter
+    def checkpoint_store_name(self, value: str) -> None:
+        self.variables.checkpoint_store_name = value
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
@@ -673,6 +685,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
+
+    @profiler_store_name.setter
+    def profiler_store_name(self, value: str) -> None:
+        self.variables.profiler_store_name = value
 
     @property
     def profiler_store(self) -> ProfilerStore:
