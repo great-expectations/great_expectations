@@ -475,3 +475,34 @@ def test_test_connection_failures(
         pandas_abs_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error_message)
+
+
+# noinspection PyUnusedLocal
+@pytest.mark.integration
+@mock.patch(
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+)
+@mock.patch("azure.storage.blob.BlobServiceClient")
+def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
+    mock_azure_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_abs_datasource: PandasAzureBlobStorageDatasource,
+):
+    """
+    Tests that the abs_recursive_file_discovery-flag is passed on
+    to the list_keys-function as the recursive-parameter
+
+    This makes the list_keys-function search and return files also
+    from sub-directories on Azure, not just the files in the folder
+    specified with the abs_name_starts_with-parameter
+    """
+    mock_list_keys.return_value = object_keys
+    pandas_abs_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r".*",
+        abs_container="my_container",
+        abs_recursive_file_discovery=True,
+    )
+    assert "recursive" in mock_list_keys.call_args.kwargs.keys()
+    assert mock_list_keys.call_args.kwargs["recursive"] is True

@@ -33,7 +33,7 @@ def get_extras_require():
         "sqlalchemy",
         "test",
         "tools",
-        "all-contrib-expectations",
+        "sqlalchemy-alchemy-less-than-2" "all-contrib-expectations",
     )
 
     requirements_dir = "reqs"
@@ -57,7 +57,7 @@ def get_extras_require():
     lite = results.pop("lite")
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
-    cloud = results.pop("cloud")
+    cloud = results["cloud"]
     arrow = results.pop("arrow")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
