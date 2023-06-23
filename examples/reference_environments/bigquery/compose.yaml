@@ -1,0 +1,12 @@
+services:
+  jupyter:
+    image: gx/bigquery_example_jupyter
+    container_name: gx_bigquery_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      BIGQUERY_CONNECTION_STRING: ${BIGQUERY_CONNECTION_STRING}
+    ports:
+      - "8888:8888"
