@@ -22,10 +22,10 @@ from great_expectations.datasource.fluent.pandas_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.google import Client
     from great_expectations.datasource.fluent.file_path_data_asset import (
         _FilePathDataAsset,
     )
-    from great_expectations.compatibility.google import Client
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +56,8 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
     _gcs_client: Union[Client, None] = pydantic.PrivateAttr(default=None)
 
-    def _get_gcs_client(self) -> Client:
-        gcs_client: Union[Client, None] = self._gcs_client
+    def _get_gcs_client(self) -> google.Client:
+        gcs_client: Union[google.Client, None] = self._gcs_client
         if not gcs_client:
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
             if google.service_account and google.storage:
