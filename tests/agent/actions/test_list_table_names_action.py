@@ -5,13 +5,11 @@ import pytest
 from sqlalchemy.engine import Inspector
 
 from great_expectations.agent.actions import (
-    CreatedResource,
     ListTableNamesAction,
 )
 from great_expectations.agent.models import ListTableNamesEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import (
-    Datasource,
     PandasDatasource,
     SQLDatasource,
 )
