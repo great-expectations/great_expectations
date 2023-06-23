@@ -20,7 +20,6 @@ Find all named snippets and ensure that they are referenced in the docs using th
 """
 
 import pathlib
-import re
 import shutil
 import subprocess
 import sys
@@ -51,7 +50,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
         res_snippet_names = subprocess.run(
-            ["sed", 's/.*name="//; s/">//; s/version-[0-9\.]* //'],
+            ["sed", 's/.*name="//; s/">//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippets.stdout,
             capture_output=True,
@@ -73,7 +72,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
         res_snippet_used_names = subprocess.run(
-            ["sed", 's/.*="//; s/".*//; s/version-[0-9\.]* //'],
+            ["sed", 's/.*="//; s/".*//; s/version-[0-9\\.]* //'],
             text=True,
             input=res_snippet_usages.stdout,
             capture_output=True,
