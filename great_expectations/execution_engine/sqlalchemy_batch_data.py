@@ -361,7 +361,7 @@ class SqlAlchemyBatchData(BatchData):
         """
         if not create_temp_table:
             return sa.text(query)
-        (_, temp_table_name) = self._create_temporary_table(
+        _, temp_table_name = self._create_temporary_table(
             dialect=dialect,
             query=query,
             temp_table_schema_name=temp_table_schema_name,
@@ -407,7 +407,7 @@ class SqlAlchemyBatchData(BatchData):
                 compile_kwargs={"literal_binds": True},
             )
 
-        (_, temp_table_name) = self._create_temporary_table(
+        _, temp_table_name = self._create_temporary_table(
             dialect=dialect,
             query=query,
             temp_table_schema_name=temp_table_schema_name,

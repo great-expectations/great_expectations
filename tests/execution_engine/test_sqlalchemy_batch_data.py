@@ -205,7 +205,6 @@ def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine
     """
 
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
-    print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
     # only have the view that is created by the `sqlite_view_engine` fixture
     assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
