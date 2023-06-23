@@ -28,6 +28,7 @@ class _S3Options(pydantic.BaseModel):
     s3_prefix: str = ""
     s3_delimiter: str = "/"
     s3_max_keys: int = 1000
+    s3_recursive_file_discovery: bool = False
 
 
 class S3DataConnector(FilePathDataConnector):
@@ -43,6 +44,7 @@ class S3DataConnector(FilePathDataConnector):
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
+        recursive_file_discovery (bool): Flag to indicate if files should be searched recursively from subfolders
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -54,6 +56,7 @@ class S3DataConnector(FilePathDataConnector):
         "s3_prefix",
         "s3_delimiter",
         "s3_max_keys",
+        "s3_recursive_file_discovery",
     )
     asset_options_type: ClassVar[Type[_S3Options]] = _S3Options
 
@@ -67,6 +70,7 @@ class S3DataConnector(FilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -82,6 +86,8 @@ class S3DataConnector(FilePathDataConnector):
 
         self._delimiter: str = delimiter
         self._max_keys: int = max_keys
+
+        self._recursive_file_discovery = recursive_file_discovery
 
         super().__init__(
             datasource_name=datasource_name,
@@ -107,6 +113,7 @@ class S3DataConnector(FilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
+        recursive_file_discovery: bool = False,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -124,6 +131,7 @@ class S3DataConnector(FilePathDataConnector):
             prefix: S3 prefix
             delimiter: S3 delimiter
             max_keys: S3 max_keys (default is 1000)
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters: optional list of sorters for sorting data_references
@@ -142,6 +150,7 @@ class S3DataConnector(FilePathDataConnector):
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
+            recursive_file_discovery=recursive_file_discovery,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -157,6 +166,7 @@ class S3DataConnector(FilePathDataConnector):
         bucket: str,
         prefix: str = "",
         delimiter: str = "/",
+        recursive_file_discovery: bool = False,
     ) -> str:
         """Builds helpful error message for reporting issues when linking named DataAsset to Microsoft Azure Blob Storage.
 
@@ -166,11 +176,12 @@ class S3DataConnector(FilePathDataConnector):
             bucket: bucket for S3
             prefix: S3 prefix
             delimiter: S3 delimiter
+            recursive_file_discovery: Flag to indicate if files should be searched recursively from subfolders
 
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" and recursive file discovery set to "{recursive_file_discovery}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
@@ -178,6 +189,7 @@ class S3DataConnector(FilePathDataConnector):
                 "bucket": bucket,
                 "prefix": prefix,
                 "delimiter": delimiter,
+                "recursive_file_discovery": recursive_file_discovery,
             }
         )
 
@@ -209,7 +221,7 @@ class S3DataConnector(FilePathDataConnector):
                 s3=self._s3_client,
                 query_options=query_options,
                 iterator_dict={},
-                recursive=False,
+                recursive=self._recursive_file_discovery,
             )
         )
         return path_list

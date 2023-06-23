@@ -132,12 +132,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
-    def _build_data_connector(
+    def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _FilePathDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
         **kwargs,
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
@@ -159,6 +160,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container=abs_container,
             name_starts_with=abs_name_starts_with,
             delimiter=abs_delimiter,
+            recursive_file_discovery=abs_recursive_file_discovery,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
 
@@ -171,5 +173,6 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 container=abs_container,
                 name_starts_with=abs_name_starts_with,
                 delimiter=abs_delimiter,
+                recursive_file_discovery=abs_recursive_file_discovery,
             )
         )
