@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
@@ -27,7 +27,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
             )
 
         inspector: Inspector = inspect(datasource.get_engine())
-        table_names: list[str] = inspector.get_table_names()
+        table_names: List[str] = inspector.get_table_names()
 
         return ActionResult(
             id=id,
