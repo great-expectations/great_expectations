@@ -115,7 +115,9 @@ class SqlAlchemyBatchData(BatchData):
                 query, dialect, create_temp_table, temp_table_schema_name
             )
         else:
-            self._selectable = self._generate_selectable_from_selectable()
+            self._selectable = self._generate_selectable_from_selectable(
+                selectable, dialect, create_temp_table, temp_table_schema_name
+            )
 
     @property
     def dialect(self) -> GXSqlDialect:
@@ -290,7 +292,7 @@ class SqlAlchemyBatchData(BatchData):
             )
 
     def _generate_selectable_from_selectable(
-        self, dialect, create_temp_table, temp_table_schema_name, selectable
+        self, selectable, dialect, create_temp_table, temp_table_schema_name
     ):
         if not create_temp_table:
             self._selectable = selectable.alias()
