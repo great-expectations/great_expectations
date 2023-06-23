@@ -1,9 +1,9 @@
-from great_expectations.agent.actions import RunOnboardingDataAssistantAction
+from great_expectations.agent.actions import RunOnboardingDataAssistantAction, ListTableNamesAction
 from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.models import (
     Event,
     RunCheckpointEvent,
-    RunOnboardingDataAssistantEvent,
+    RunOnboardingDataAssistantEvent, ListTableNamesEvent,
 )
 from great_expectations.data_context import CloudDataContext
 
@@ -21,6 +21,8 @@ class EventHandler:
 
         if isinstance(event, RunOnboardingDataAssistantEvent):
             action = RunOnboardingDataAssistantAction(context=self._context)
+        elif isinstance(event, ListTableNamesEvent):
+            action = ListTableNamesAction(context=self._context)
         elif isinstance(event, RunCheckpointEvent):
             raise NotImplementedError
         else:
