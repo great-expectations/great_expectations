@@ -26,7 +26,6 @@ from tests.integration.usage_statistics.usage_stats_event_examples import (
     data_context_init_with_dependencies,
 )
 
-
 # Dummy values purely used for tests - analytics with these values should be ignored
 TEST_DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000002"
 TEST_DATA_CONTEXT_INSTANCE_ID = "10000000-0000-0000-0000-000000000002"

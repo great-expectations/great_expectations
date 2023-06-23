@@ -1,5 +1,5 @@
 ---
-title: How to configure credentials
+title: Configure credentials
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'

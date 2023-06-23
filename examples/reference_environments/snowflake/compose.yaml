@@ -1,0 +1,11 @@
+services:
+  jupyter:
+    image: gx/snowflake_example_jupyter
+    container_name: gx_snowflake_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      SNOWFLAKE_CONNECTION_STRING: ${SNOWFLAKE_CONNECTION_STRING}
+    ports:
+      - "8888:8888"
