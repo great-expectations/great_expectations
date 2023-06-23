@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 _MISSING: Final = object()
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
@@ -53,9 +54,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
-    _azure_client: Union[azure.BlobServiceClient, None] = pydantic.PrivateAttr(
-        default=None
-    )
+    _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
 
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
