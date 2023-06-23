@@ -79,13 +79,13 @@ GX recommends using custom parameters to create validations and optimize workflo
 
 The following table lists the allowable parameters that are available for each Expectation class.
 
-| Expectation class                 | Allowable parameters   |
-| ----------------------------------| ---------------------- |
-| BatchExpectation                  | parameter              |
-| ColumnAggregateExpectation        | parameter              |
-| ColumnMapExpectation              | parameter              |
-| RegexBasedColumnMapExpectation    | parameter              |
-| SetBasedColumnMapExpectation      | parameter              |
-| ColumnPairMapExpectation          | parameter              |
-| MulticolumnMapExpectation         | parameter              |
-| QueryExpectation                  | parameter              |
+| Expectation class                 | Allowable parameters           |
+| ----------------------------------| -------------------------------|
+| BatchExpectation                  | See [BatchExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/BatchExpectation_class)             |
+| ColumnAggregateExpectation        | See [ColumnAggregateExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/ColumnAggregateExpectation_class)              |
+| ColumnMapExpectation              | See [ColumnMapExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/ColumnMapExpectation_class)              |
+| RegexBasedColumnMapExpectation    | See [RegexBasedColumnMapExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/regex_based_column_map_expectation/RegexBasedColumnMapExpectation_class)              |
+| SetBasedColumnMapExpectation      | See [SetBasedColumnMapExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/set_based_column_map_expectation/SetBasedColumnMapExpectation_class)              |
+| ColumnPairMapExpectation          | See [ColumnPairMapExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/ColumnPairMapExpectation_class)              |
+| MulticolumnMapExpectation         | See [MulticolumnMapExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/MulticolumnMapExpectation_class)              |
+| QueryExpectation                  |  See [QueryExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/QueryExpectation_class)              |
