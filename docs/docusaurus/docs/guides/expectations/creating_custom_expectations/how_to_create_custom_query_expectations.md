@@ -1,5 +1,5 @@
 ---
-title: How to create a Custom Query Expectation
+title: Create a Custom Query Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';

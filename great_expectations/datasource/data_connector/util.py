@@ -447,6 +447,7 @@ def list_gcs_keys(
     if delimiter is None and not recursive:
         warnings.warn(
             'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            or with a Fluent datasource without enabling recursive file discovery, \
             the delimiter that has been passed to gcs_options in your config cannot be empty; \
             please note that the value is being set to the default "/" in order to work with the Google SDK.'
         )
@@ -454,6 +455,7 @@ def list_gcs_keys(
     elif delimiter is not None and recursive:
         warnings.warn(
             "In order to access blobs with an InferredAssetGCSDataConnector, \
+            or enabling recursive file discovery with a Fluent datasource, \
             the delimiter that has been passed to gcs_options in your config must be empty; \
             please note that the value is being set to None in order to work with the Google SDK."
         )

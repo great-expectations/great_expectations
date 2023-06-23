@@ -1,5 +1,8 @@
 ---
-title: How to Use Great Expectations in Flyte
+title: Use Great Expectations in Flyte
+description: "Use Great Expectations with Flyte"
+sidebar_label: "Flyte"
+sidebar_custom_props: { icon: 'img/integrations/flyte_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 

@@ -83,6 +83,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = ...,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
+        s3_recursive_file_discovery: bool = False,
         s3_max_keys: int = 1000,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
