@@ -16,7 +16,7 @@ class SqlAlchemyBatchData(BatchData):
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 
-    def __init__(  # noqa: PLR0913, PLR0912
+    def __init__(  # noqa: PLR0913
         self,
         execution_engine,
         # Option 1
@@ -101,50 +101,21 @@ class SqlAlchemyBatchData(BatchData):
 
         self._dialect = dialect
 
-        # 3 helper function correspoding to each of the function
-        # overload decorator
-
         if table_name:
-            self._selectable = self._generate_selectable(
-                dialect=dialect,
-                use_quoted_name=use_quoted_name,
-                table_name=table_name,
-                schema_name=schema_name,
+            self._selectable = (
+                self._generate_selectable_from_schema_name_and_table_name(
+                    dialect=dialect,
+                    use_quoted_name=use_quoted_name,
+                    table_name=table_name,
+                    schema_name=schema_name,
+                )
             )
-        elif not create_temp_table:
-            if query:
-                self._selectable = sa.text(query)
-            else:
-                self._selectable = selectable.alias()
+        elif query:
+            self._selectable = self._generate_selectable_from_query(
+                query, dialect, create_temp_table, temp_table_schema_name
+            )
         else:
-            generated_table_name = generate_temporary_table_name()
-            # mssql expects all temporary table names to have a prefix '#'
-            if dialect == GXSqlDialect.MSSQL:
-                generated_table_name = f"#{generated_table_name}"
-            # are situations where selectable is None?
-            if selectable is not None:
-                if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
-                    selectable, str
-                ):
-                    # oracle, mssql query could already be passed as a string
-                    query = selectable
-                else:
-                    # compile selectable to sql statement
-                    query = selectable.compile(
-                        dialect=self.sql_engine_dialect,
-                        compile_kwargs={"literal_binds": True},
-                    )
-
-            self._create_temporary_table(
-                temp_table_name=generated_table_name,
-                query=query,
-                temp_table_schema_name=temp_table_schema_name,
-            )
-            self._selectable = sa.Table(
-                generated_table_name,
-                sa.MetaData(),
-                schema=temp_table_schema_name,
-            )
+            self._selectable = self._generate_selectable_from_selectable()
 
     @property
     def dialect(self) -> GXSqlDialect:
@@ -172,12 +143,17 @@ class SqlAlchemyBatchData(BatchData):
         return self._use_quoted_name
 
     def _create_temporary_table(  # noqa: C901, PLR0912
-        self, temp_table_name, query, temp_table_schema_name=None
-    ) -> str:
+        self, dialect, query, temp_table_schema_name=None
+    ) -> (str, str):
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
+
+        temp_table_name = generate_temporary_table_name()
+        # mssql expects all temporary table names to have a prefix '#'
+        if dialect == GXSqlDialect.MSSQL:
+            temp_table_name = f"#{temp_table_name}"
 
         dialect: GXSqlDialect = self.dialect
         stmt: str = ""
@@ -266,9 +242,9 @@ class SqlAlchemyBatchData(BatchData):
                 self.execution_engine.execute_query_in_transaction(sa.text(stmt_2))
         else:
             self.execution_engine.execute_query_in_transaction(sa.text(stmt))
-        return stmt
+        return (stmt, temp_table_name)
 
-    def _generate_selectable(
+    def _generate_selectable_from_schema_name_and_table_name(
         self,
         dialect: GXSqlDialect,
         use_quoted_name: bool,
@@ -294,3 +270,52 @@ class SqlAlchemyBatchData(BatchData):
                 sa.MetaData(),
                 schema=schema_name,
             )
+
+    def _generate_selectable_from_query(
+        self, query, dialect: GXSqlDialect, create_temp_table, temp_table_schema_name
+    ):
+        if not create_temp_table:
+            return sa.text(query)
+        else:
+            (_, temp_table_name) = self._create_temporary_table(
+                dialect=dialect,
+                query=query,
+                temp_table_schema_name=temp_table_schema_name,
+            )
+
+            return sa.Table(
+                temp_table_name,
+                sa.MetaData(),
+                schema=temp_table_schema_name,
+            )
+
+    def _generate_selectable_from_selectable(
+        self, dialect, create_temp_table, temp_table_schema_name, selectable
+    ):
+        if not create_temp_table:
+            self._selectable = selectable.alias()
+
+        else:
+            if dialect in [GXSqlDialect.ORACLE, GXSqlDialect.MSSQL] and isinstance(
+                selectable, str
+            ):
+                # oracle, mssql query could already be passed as a string
+                query = selectable
+            else:
+                # compile selectable to sql statement
+                query = selectable.compile(
+                    dialect=self.sql_engine_dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+
+            (_, temp_table_name) = self._create_temporary_table(
+                dialect=dialect,
+                query=query,
+                temp_table_schema_name=temp_table_schema_name,
+            )
+
+        return sa.Table(
+            temp_table_name,
+            sa.MetaData(),
+            schema=temp_table_schema_name,
+        )
