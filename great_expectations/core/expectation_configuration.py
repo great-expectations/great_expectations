@@ -325,7 +325,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value",
                 "strict_min",
                 "strict_max",
-                "allow_cross_type_comparisons",
                 "parse_strings_as_datetimes",
                 "output_strftime_format",
                 "mostly",
@@ -337,7 +336,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "max_value": None,
                 "strict_min": False,
                 "strict_max": False,
-                "allow_cross_type_comparisons": None,
                 "parse_strings_as_datetimes": None,
                 "output_strftime_format": None,
                 "mostly": None,
@@ -789,7 +787,6 @@ class ExpectationConfiguration(SerializableDictDot):
             "success_kwargs": (
                 "or_equal",
                 "parse_strings_as_datetimes",
-                "allow_cross_type_comparisons",
                 "ignore_row_if",
             ),
             "default_kwarg_values": {
@@ -797,7 +794,6 @@ class ExpectationConfiguration(SerializableDictDot):
                 "condition_parser": "pandas",
                 "or_equal": None,
                 "parse_strings_as_datetimes": None,
-                "allow_cross_type_comparisons": None,
                 "ignore_row_if": "both_values_are_missing",
                 "result_format": "BASIC",
                 "include_config": True,
