@@ -6,6 +6,6 @@ services:
       context: .
       dockerfile: jupyter.Dockerfile
     environment:
-      CONNECTION_STRING: $(SNOWFLAKE_CONNECTION_STRING)
+      SNOWFLAKE_CONNECTION_STRING: ${SNOWFLAKE_CONNECTION_STRING}
     ports:
       - "8888:8888"

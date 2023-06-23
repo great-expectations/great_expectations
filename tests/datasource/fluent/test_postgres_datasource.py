@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import copy
+import logging
+import pathlib
 from contextlib import contextmanager
+from pprint import pformat as pf
 from pprint import pprint
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +23,7 @@ from pydantic import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -43,7 +47,7 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.data_context import AbstractDataContext, FileDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -52,6 +56,8 @@ if TYPE_CHECKING:
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
 _DEFAULT_TEST_MONTHS = list(range(1, 13))
+
+LOGGER = logging.getLogger(__name__)
 
 
 @contextmanager
@@ -99,6 +105,19 @@ def create_source() -> ContextManager:
 
 
 CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
+
+
+@pytest.fixture
+def mock_test_connection(monkeypatch: pytest.MonkeyPatch):
+    """Patches the test_connection method of the PostgresDatasource class to return True."""
+
+    def _mock_test_connection(self: PostgresDatasource) -> bool:
+        LOGGER.warning(
+            f"Mocked {self.__class__.__name__}.test_connection() called and returning True"
+        )
+        return True
+
+    monkeypatch.setattr(PostgresDatasource, "test_connection", _mock_test_connection)
 
 
 @pytest.mark.unit
@@ -1056,6 +1075,31 @@ def test_non_select_query_data_asset(create_source):
     ) as source:
         with pytest.raises(ValueError):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
+
+
+def test_adding_splitter_persists_results(
+    empty_data_context: FileDataContext,
+    mock_test_connection,
+):
+    gx_yaml = pathlib.Path(
+        empty_data_context.root_directory, "great_expectations.yml"
+    ).resolve(strict=True)
+
+    empty_data_context.sources.add_postgres(
+        "my_datasource",
+        connection_string="postgresql://postgres:@localhost/not_a_real_db",
+    ).add_query_asset(
+        name="my_asset", query="select * from table", order_by=["year"]
+    ).add_splitter_year(
+        column_name="my_col"
+    )
+
+    final_yaml: dict = YAMLHandler().load(  # type: ignore[assignment]
+        gx_yaml.read_text(),
+    )["fluent_datasources"]
+    print(f"final_yaml:\n{pf(final_yaml, depth=5)}")
+
+    assert final_yaml["my_datasource"]["assets"]["my_asset"]["splitter"]
 
 
 @pytest.mark.unit
