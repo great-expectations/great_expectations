@@ -1,9 +1,13 @@
-from great_expectations.agent.actions import RunOnboardingDataAssistantAction, ListTableNamesAction
+from great_expectations.agent.actions import (
+    ListTableNamesAction,
+    RunOnboardingDataAssistantAction,
+)
 from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.models import (
     Event,
+    ListTableNamesEvent,
     RunCheckpointEvent,
-    RunOnboardingDataAssistantEvent, ListTableNamesEvent,
+    RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
 

@@ -10,7 +10,11 @@ from great_expectations.agent.actions import (
 )
 from great_expectations.agent.models import ListTableNamesEvent
 from great_expectations.data_context import CloudDataContext
-from great_expectations.datasource.fluent import Datasource, PandasDatasource, SQLDatasource
+from great_expectations.datasource.fluent import (
+    Datasource,
+    PandasDatasource,
+    SQLDatasource,
+)
 from great_expectations.exceptions import StoreBackendError
 
 pytestmark = pytest.mark.unit
@@ -29,9 +33,7 @@ def event():
     )
 
 
-def test_list_table_names_event_raises_for_non_sql_datasource(
-    context, event
-):
+def test_list_table_names_event_raises_for_non_sql_datasource(context, event):
     action = ListTableNamesAction(context=context)
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
@@ -39,7 +41,9 @@ def test_list_table_names_event_raises_for_non_sql_datasource(
     datasource = MagicMock(spec=PandasDatasource)
     context.get_datasource.return_value = datasource
 
-    with pytest.raises(TypeError, match=r"This operation requires a SQL Datasource but got"):
+    with pytest.raises(
+        TypeError, match=r"This operation requires a SQL Datasource but got"
+    ):
         action.run(event=event, id=id)
 
 
@@ -47,7 +51,9 @@ def test_run_list_table_names_action_returns_action_result(context, event):
     action = ListTableNamesAction(context=context)
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
 
-    with mock.patch("great_expectations.agent.actions.list_table_names.inspect") as mock_inspect:
+    with mock.patch(
+        "great_expectations.agent.actions.list_table_names.inspect"
+    ) as mock_inspect:
         datasource = MagicMock(spec=SQLDatasource)
         context.get_datasource.return_value = datasource
 

@@ -3,7 +3,7 @@ from great_expectations.agent.actions.agent_action import (
     AgentAction,
     CreatedResource,
 )
+from great_expectations.agent.actions.list_table_names import ListTableNamesAction
 from great_expectations.agent.actions.run_onboarding_data_assistant import (
     RunOnboardingDataAssistantAction,
 )
-from great_expectations.agent.actions.list_table_names import ListTableNamesAction
