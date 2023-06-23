@@ -41,6 +41,7 @@ if TYPE_CHECKING:
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
         SparkS3Datasource,
+        SnowflakeDatasource,
         SQLDatasource,
         SqliteDatasource,
     )

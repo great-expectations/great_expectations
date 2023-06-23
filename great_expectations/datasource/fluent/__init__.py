@@ -65,6 +65,7 @@ from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 from great_expectations.datasource.fluent.sqlite_datasource import (
     SqliteDatasource,
 )
+from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDatasource
 
 _PANDAS_SCHEMA_VERSION: str = (
     "1.5.3"  # this is the version schemas we generated for. Update as needed
