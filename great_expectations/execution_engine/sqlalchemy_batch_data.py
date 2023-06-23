@@ -252,7 +252,7 @@ class SqlAlchemyBatchData(BatchData):
         use_quoted_name: bool,
         table_name: str,
         schema_name: Optional[str] = None,
-    ) -> sa.Table:
+    ) -> sqlalchemy.Table:
         """Helper method to generate selectable using schema and table name
 
         Args:
@@ -262,7 +262,7 @@ class SqlAlchemyBatchData(BatchData):
             schema_name (Optional[str], optional): Optional schema name. Defaults to None.
 
         Returns:
-            sa.Table: SqlAlchemy Table that is Selectable.
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
         """
         if use_quoted_name:
             table_name = sqlalchemy.quoted_name(table_name, quote=True)
@@ -290,7 +290,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
-    ) -> sa.Table:
+    ) -> sqlalchemy.Table:
         """Helper method to generate Selectable from query string.
 
         Args:
@@ -300,7 +300,7 @@ class SqlAlchemyBatchData(BatchData):
             temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema.  Defaults to None.
 
         Returns:
-            sa.Table: SqlAlchemy Table that is Selectable.
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
         """
         if not create_temp_table:
             return sa.text(query)
@@ -323,7 +323,7 @@ class SqlAlchemyBatchData(BatchData):
         dialect: GXSqlDialect,
         create_temp_table: bool,
         temp_table_schema_name: Optional[str] = None,
-    ):
+    ) -> sqlalchemy.Table:
         """Helper method to generate Selectable from Selectable that is passed into __init__.
         This method is needed to either turn the passed-in Selectable as an alias, or to create a temp_table that refers to it.
 
@@ -334,7 +334,7 @@ class SqlAlchemyBatchData(BatchData):
             temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema. Defaults to None.
 
         Returns:
-            _type_: _description_
+            sqlalchemy.Table: SqlAlchemy Table that is Selectable.
         """
         if not create_temp_table:
             return selectable.alias()

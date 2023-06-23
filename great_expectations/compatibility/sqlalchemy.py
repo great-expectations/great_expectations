@@ -239,3 +239,8 @@ try:
     from sqlalchemy.pool import StaticPool
 except (ImportError, AttributeError):
     StaticPool = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy import Table
+except (ImportError, AttributeError):
+    Table = SQLALCHEMY_NOT_IMPORTED
