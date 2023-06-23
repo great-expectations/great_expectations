@@ -25,12 +25,17 @@ class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
+class ListTableNamesEvent(EventBase):
+    type: Literal["list_table_names_request.received"] = "list_table_names_request.received"
+    datasource_name: str
+
+
 class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
 
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, ListTableNamesEvent, UnknownEvent],
     Field(discriminator="type"),
 ]
 
