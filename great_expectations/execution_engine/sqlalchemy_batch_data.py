@@ -250,9 +250,20 @@ class SqlAlchemyBatchData(BatchData):
         self,
         dialect: GXSqlDialect,
         use_quoted_name: bool,
-        table_name: Optional[str] = None,
+        table_name: str,
         schema_name: Optional[str] = None,
-    ):
+    ) -> sa.Table:
+        """Helper method to generate selectable using schema and table name
+
+        Args:
+            dialect (GXSqlDialect): Needed to check for BigQuery, which needs to be handled differently. 
+            use_quoted_name (bool): To be passed to sqlalchemy. 
+            table_name (str): Table name to build selectable from.
+            schema_name (Optional[str], optional): Optional schema name. Defaults to None.
+
+        Returns:
+            sa.Table: SqlAlchemy Table that is Selectable.  
+        """
         if use_quoted_name:
             table_name = sqlalchemy.quoted_name(table_name, quote=True)
         if dialect == GXSqlDialect.BIGQUERY:
@@ -274,8 +285,23 @@ class SqlAlchemyBatchData(BatchData):
             )
 
     def _generate_selectable_from_query(
-        self, query, dialect: GXSqlDialect, create_temp_table, temp_table_schema_name
-    ):
+        self,
+        query: str,
+        dialect: GXSqlDialect,
+        create_temp_table: bool,
+        temp_table_schema_name: Optional[str] = None
+    ) -> sa.Table:
+        """Helper method to generate Selectable from query string.
+
+        Args:
+            query (str): query passed in as RuntimeBatchRequest. 
+            dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently. 
+            create_temp_table (bool): Should we create a temp_table? 
+            temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema.  Defaults to None.
+
+        Returns:
+            sa.Table: SqlAlchemy Table that is Selectable.   
+        """
         if not create_temp_table:
             return sa.text(query)
         else:
@@ -292,8 +318,24 @@ class SqlAlchemyBatchData(BatchData):
             )
 
     def _generate_selectable_from_selectable(
-        self, selectable, dialect, create_temp_table, temp_table_schema_name
+        self,
+        selectable,
+        dialect: GXSqlDialect,
+        create_temp_table: bool,
+        temp_table_schema_name: Optional[str] = None
     ):
+        """Helper method to generate Selectable from Selectable that is passed into __init__. 
+        This method is needed to either turn the passed-in Selectable as an alias, or to create a temp_table that refers to it.
+
+        Args:
+            selectable: selectable that is passed into SqlAlchemyBatchData's init method. It may contain sampling and splitting directives. 
+            dialect (GXSqlDialect): Needed for _create_temporary_table, since different backends name temp_tables differently. 
+            create_temp_table (bool): Should we create a temp_table? 
+            temp_table_schema_name (Optional[str], optional): Optional string for temp_table schema. Defaults to None.
+
+        Returns:
+            _type_: _description_
+        """
         if not create_temp_table:
             return selectable.alias()
 
