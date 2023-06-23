@@ -35,7 +35,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     )
 
     # noinspection PyUnusedLocal
-    parameter_builder: ParameterBuilder = (
+    (
         MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             name="my_name",
             map_metric_name="column_values.nonnull",
@@ -55,7 +55,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
+        (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 map_metric_name="column_values.nonnull",
@@ -70,7 +70,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ParameterBuilder = (
+        (
             MeanUnexpectedMapMetricMultiBatchParameterBuilder(
                 name="my_name",
                 total_count_parameter_builder_name="my_total_count",

@@ -19,7 +19,6 @@ from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import (
     BaseRuleBasedProfiler,
     RuleBasedProfiler,
-    RuleBasedProfilerResult,
 )
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -994,7 +993,7 @@ def test_run_profiler_with_dynamic_args(
     rules = {"baz": "qux"}
 
     # noinspection PyUnusedLocal
-    rule_based_profiler_result: RuleBasedProfilerResult = (
+    (
         RuleBasedProfiler.run_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,

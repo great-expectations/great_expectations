@@ -350,7 +350,7 @@ def test_column_pair_domain_builder_wrong_column_names(
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
@@ -457,7 +457,7 @@ def test_multi_column_domain_builder_wrong_column_list(
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 
@@ -467,7 +467,7 @@ def test_multi_column_domain_builder_wrong_column_list(
 
     with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
-        domains: List[Domain] = domain_builder.get_domains(
+        domain_builder.get_domains(
             rule_name="my_rule", variables=variables, batch_request=batch_request
         )
 

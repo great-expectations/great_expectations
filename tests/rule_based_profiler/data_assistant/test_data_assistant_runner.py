@@ -67,7 +67,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_override(
         for domain in data_assistant_result.metrics_by_domain.keys()
         if domain["domain_type"] == MetricDomainTypes.COLUMN
     }
-    assert not any([column_name.endswith("ID") for column_name in columns_used])
+    assert not any(column_name.endswith("ID") for column_name in columns_used)
 
 
 @pytest.mark.integration

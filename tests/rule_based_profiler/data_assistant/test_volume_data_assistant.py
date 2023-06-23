@@ -1584,7 +1584,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
         expectation_suite_name=expectation_suite_name
     )
 
-    notebook_path: str = os.path.join(root_dir, f"run_volume_data_assistant.ipynb")
+    notebook_path: str = os.path.join(root_dir, "run_volume_data_assistant.ipynb")
 
     notebook_code_initialization: str = """
     from typing import Optional, Union
@@ -2061,12 +2061,10 @@ def test_volume_data_assistant_get_metrics_and_expectations_using_implicit_invoc
 
     rule_config: dict
     assert all(
-        [
-            rule_config["variables"]["estimator"] == "exact"
-            if "estimator" in rule_config["variables"]
-            else True
-            for rule_config in data_assistant_result.profiler_config.rules.values()
-        ]
+        rule_config["variables"]["estimator"] == "exact"
+        if "estimator" in rule_config["variables"]
+        else True
+        for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
 

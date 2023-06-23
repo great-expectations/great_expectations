@@ -4,7 +4,7 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 import pytest
-import scipy.stats as stats
+from scipy import stats
 
 RANDOM_SEED: int = 43792
 RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_SEED))
