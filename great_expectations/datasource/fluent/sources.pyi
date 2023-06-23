@@ -35,13 +35,13 @@ if TYPE_CHECKING:
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
         PostgresDatasource,
+        SnowflakeDatasource,
         SparkAzureBlobStorageDatasource,
         SparkDatasource,
         SparkDBFSDatasource,
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
         SparkS3Datasource,
-        SnowflakeDatasource,
         SQLDatasource,
         SqliteDatasource,
     )
@@ -50,8 +50,8 @@ if TYPE_CHECKING:
         DataAsset,
         Datasource,
     )
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
     from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
+    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
