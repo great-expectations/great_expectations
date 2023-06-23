@@ -59,6 +59,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     bucket_or_name: str
     gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
+    # on 3.11 the annotation must be type-checking import otherwise it will fail at import time
     _gcs_client: Union[Client, None] = pydantic.PrivateAttr(default=None)
 
     def _get_gcs_client(self) -> google.Client:
