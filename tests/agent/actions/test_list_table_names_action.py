@@ -65,4 +65,4 @@ def test_run_list_table_names_action_returns_action_result(context, event):
 
         assert action_result.type == event.type
         assert action_result.id == id
-        assert action_result.details.value == table_names
+        assert action_result.details == table_names

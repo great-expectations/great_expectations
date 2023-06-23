@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from great_expectations.agent.actions.agent_action import (
-    ActionDetails,
     ActionResult,
     AgentAction,
 )
@@ -34,5 +33,5 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
             id=id,
             type=event.type,
             created_resources=[],
-            details=ActionDetails(value=table_names),
+            details=table_names,
         )
