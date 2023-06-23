@@ -1,7 +1,5 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import inspect
-
 from great_expectations.agent.actions.agent_action import (
     ActionDetails,
     ActionResult,
@@ -10,11 +8,12 @@ from great_expectations.agent.actions.agent_action import (
 from great_expectations.agent.models import (
     ListTableNamesEvent,
 )
+from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.datasource.fluent import SQLDatasource
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Inspector
+    from great_expectations.compatibility.sqlalchemy.engine import Inspector
 
 
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
