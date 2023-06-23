@@ -172,16 +172,10 @@ fluent_datasources:
         type: csv
         connect_options:
           abs_container: "this_is_always_required"
-    my_snowflake_ds:
-      type: snowflake
-      connection_string: "snowflake://user_login_name:password@account_identifier"
-      assets:
-        my_asset:
-          type: table
-          table_name: yellow_tripdata_sample_2019_01
-          splitter:
-            column_name: pickup_datetime
-            method_name: split_on_year_and_month
-          order_by:
-            - key: year
-            - key: month
+  my_snowflake_ds:
+    type: snowflake
+    connection_string: "snowflake://user_login_name:password@account_identifier"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table
