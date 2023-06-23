@@ -3,7 +3,7 @@ from sqlalchemy.engine import Inspector
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
-    AgentAction,
+    AgentAction, ActionDetails,
 )
 from great_expectations.agent.models import (
     ListTableNamesEvent,
@@ -25,5 +25,7 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
             id=id,
             type=event.type,
             created_resources=[],
-            details=table_names
+            details=ActionDetails(
+                value=table_names
+            )
         )
