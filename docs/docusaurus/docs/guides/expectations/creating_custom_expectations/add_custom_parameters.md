@@ -5,9 +5,7 @@ id: add_custom_parameters
 description: Add custom parameters to Custom Expectations.
 ---
 
-Use custom parameters in your Custom Expectations when you have data dependencies that can’t or shouldn’t be hardcoded. The Custom Expectation class determines how you implement custom parameters.
-
-Using custom parameters in your Custom Expectations can help you create powerful, business-specific validations and help you optimize your Great Expectations (GX) workflows.
+Using custom parameters in your Custom Expectations can help you create powerful, business-specific validations and help you optimize your Great Expectations (GX) workflows. Custom parameters should be implemented when you have data dependencies that can’t or shouldn’t be hardcoded. The method of implementing custom parameters is specific to the Custom Expectation class being extended.
 
 ## Implementation
 
