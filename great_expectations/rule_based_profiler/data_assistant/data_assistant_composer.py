@@ -7,7 +7,11 @@ from typing import (
     Final,
     List,
     Mapping,
+    MutableMapping,
 )
+
+logger = logging.getLogger(__name__)
+
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -19,6 +23,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
+        DataAssistant,
         DataAssistantRunner,
     )
     from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -29,8 +34,6 @@ if TYPE_CHECKING:
     # DomainBuilderDataAssistantResult,
     # TODO: <Alex>ALEX</Alex>
     from great_expectations.rule_based_profiler.rule import Rule
-
-logger = logging.getLogger(__name__)
 
 
 class DataAssistantComposer:
@@ -62,8 +65,18 @@ class DataAssistantComposer:
 
         self._task_name_to_domain_list_map: Mapping[str, List[Domain]] | None = None
 
+        task_name: str
+        self._task_name_to_data_assistant_result_map: MutableMapping[
+            str, DataAssistantResult
+        ] = {
+            task_name: None
+            for task_name in DataAssistantComposer.TASK_NAME_TO_JOB_CATEGORY_MAP
+        }
+
     def build_domains(self) -> None:
-        data_assistant = self._data_context.assistants.domains._build_data_assistant()
+        data_assistant: DataAssistant = (
+            self._data_context.assistants.domains._build_data_assistant()
+        )
         rules: List[Rule] = data_assistant.get_rules()
 
         rule: Rule
@@ -116,6 +129,10 @@ class DataAssistantComposer:
         data_assistant_result = self._data_context.assistants.column_value_missing.run(
             batch_request=self._batch_request,
         )
+        self._task_name_to_data_assistant_result_map[
+            "missingness"
+        ] = data_assistant_result
+
         expectation_configurations: List[
             ExpectationConfiguration
         ] = data_assistant_result.get_expectation_suite(
@@ -316,10 +333,14 @@ class DataAssistantComposer:
             self._data_context.assistants, job_category
         )
 
+        if self._task_name_to_data_assistant_result_map.get(task_name):
+            return self._task_name_to_data_assistant_result_map[task_name]
+
         data_assistant_result: DataAssistantResult = data_assistant_runner.run(
             batch_request=self._batch_request,
             include_column_names=include_column_names,
         )
+        self._task_name_to_data_assistant_result_map[task_name] = data_assistant_result
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
         # TODO: <Alex>ALEX</Alex>
