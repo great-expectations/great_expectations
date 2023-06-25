@@ -260,8 +260,6 @@ ignore = [
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
     # minimal cost for standard lib imports; keep this disabled
     "TCH003", # typing-only-standard-library-import
-    # gives false positives if we use try imports and type-checking import
-    "TCH004", # runtime-import-in-type-checking-block
     "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
