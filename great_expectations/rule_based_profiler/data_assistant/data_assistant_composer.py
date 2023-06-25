@@ -29,10 +29,6 @@ if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.data_assistant_result import (
         DataAssistantResult,
     )
-
-    # TODO: <Alex>ALEX</Alex>
-    # DomainBuilderDataAssistantResult,
-    # TODO: <Alex>ALEX</Alex>
     from great_expectations.rule_based_profiler.rule import Rule
 
 
@@ -320,7 +316,6 @@ class DataAssistantComposer:
         self,
         task_name: str,
     ) -> DataAssistantResult:
-        # TODO: <Alex>ALEX</Alex>
         domains: list[Domain] = self._task_name_to_domain_list_map[task_name]
 
         domains: Domain
@@ -341,15 +336,5 @@ class DataAssistantComposer:
             include_column_names=include_column_names,
         )
         self._task_name_to_data_assistant_result_map[task_name] = data_assistant_result
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>06/21/2023: This approach is currently disfavored, because it determines domains automatically.</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # data_assistant_result: DataAssistantResult = self._data_context.assistants.column_value_nonnullity.run(
-        #     batch_request=self._batch_request,
-        #     # TODO: <Alex>ALEX</Alex>
-        #     # include_column_names=include_column_names,
-        #     # TODO: <Alex>ALEX</Alex>
-        # )
-        # TODO: <Alex>ALEX</Alex>
 
         return data_assistant_result
