@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from logging import Logger
 from typing import TYPE_CHECKING, Literal, Optional, Union
