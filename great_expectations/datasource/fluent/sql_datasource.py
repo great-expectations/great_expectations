@@ -50,7 +50,9 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from great_expectations.compatibility import sqlalchemy
+    from great_expectations.compatibility import (
+        sqlalchemy,  # noqa: TCH004 # not needed at runtime
+    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,

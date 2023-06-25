@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchRequestOptions,
-        DataAsset,
+        DataAsset,  # noqa: TCH004 # ClassVar is not needed at runtime
         SortersDefinition,
     )
 
