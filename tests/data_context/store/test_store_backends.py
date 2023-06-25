@@ -497,7 +497,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     )
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
-        assert my_store.get(("BBB",)) == ""  # noqa: PLC1901
+        assert my_store.get(("BBB",)) == ""
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
         root_directory=project_path,

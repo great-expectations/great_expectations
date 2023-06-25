@@ -189,8 +189,7 @@ def test_substitute_config_variable():
 
     # Null cases
     assert (
-        config_substitutor.substitute_config_variable("", config_variables_dict)
-        == ""  # noqa: PLC1901
+        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
