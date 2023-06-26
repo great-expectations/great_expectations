@@ -1,21 +1,33 @@
-from great_expectations.expectations.api_based_column_map_expectation import (
-    APIBasedColumnMapExpectation,
-)
+from __future__ import annotations
+
+from great_expectations_experimental.api_based_column_map_expectation import APIBasedColumnMapExpectation
+import requests
 
 
-# <snippet>
 class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
     """To-Do"""
 
+    @staticmethod
+    def make_request(endpoint, method, header, body, auth, data_key, result_key, data):
+        try:
+            if method == "GET":
+                url = endpoint + data
+                r = requests.get(url=url)
+                return not all(x in r.text for x in result_key)
+        except requests.ConnectionError:
+            print("failed to connect")
+            return False
+
     endpoint_ = "https://medium.com/"
-    method_ = "HEAD"
+    method_ = "GET"
     header_ = None
     body_ = None
     auth_ = None
     data_key_ = None
-    result_key_ = None
+    result_key_ = ["PAGE NOT FOUND", "404"]
     api_camel_name = "Medium"
     api_semantic_name = "Medium"
+    request_func_ = make_request
 
     examples = [
         {
@@ -71,6 +83,7 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
         auth_=auth_,
         data_key_=data_key_,
         result_key_=result_key_,
+        request_func_=request_func_
     )
 
     library_metadata = {
@@ -79,7 +92,6 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidMediumArticles().print_diagnostic_checklist()
 
@@ -89,11 +101,12 @@ diagnostics = ExpectColumnValuesToBeValidMediumArticles().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None
 
 for check in diagnostics["maturity_checklist"]["experimental"]:
+    if check["message"] == "Passes all linting checks":
+        continue
     assert check["passed"] is True

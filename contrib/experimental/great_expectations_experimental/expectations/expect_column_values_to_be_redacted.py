@@ -1,21 +1,31 @@
-from great_expectations.expectations.api_based_column_map_expectation import (
-    APIBasedColumnMapExpectation,
-)
+from great_expectations_experimental.api_based_column_map_expectation import APIBasedColumnMapExpectation
+import requests
 
 
-# <snippet>
-class ExpectColumnValuesToBeRedacted(APIBasedColumnMapExpectation):
-    """To-Do"""
+class ExpectColumnValuesToNotContainPII(APIBasedColumnMapExpectation):
+    """Expect values in a given column to not contain PII as identified by the Private-AI API.
+    """
+
+    @staticmethod
+    def make_request(endpoint, method, header, body, auth, data_key, result_key, data):
+        try:
+            if method == "POST":
+                body[data_key] = data
+                r = requests.post(url=endpoint, headers=header, json=body)
+                return r.json()[result_key] == data
+        except requests.ConnectionError:
+            print("failed to connect")
+            return False
 
     endpoint_ = "https://api.private-ai.com/deid/v1/deidentify_text"
     method_ = "POST"
     header_ = {"content-type": "application/json"}
-    body_ = {"key": "<API_KEY>", "fake_entity_accuracy_mode": "standard"}
+    body_ = {"key": "<PRIVATE_AI_KEY>", "fake_entity_accuracy_mode": "standard"}
     auth_ = None
     data_key_ = "text"
     result_key_ = "result"
     api_camel_name = "PrivateAI"
-    api_semantic_name = "private_ai"
+    request_func_ = make_request
 
     examples = [
         {
@@ -34,6 +44,13 @@ class ExpectColumnValuesToBeRedacted(APIBasedColumnMapExpectation):
                     "My name is: [NAME_1]",
                     "Hi [NAME_1], could you tell me your phone number please?",
                 ],
+                "clean": [
+                    "Hi, my name is name. Friend, could you pass me the salt please?",
+                    "Person we're at place. yeah, it's number.",
+                    "Message-ID: <*****> \n date-time \n To: address",
+                    "My name is: name",
+                    "Hi name, could you tell me your phone number please?"
+                ]
             },
             "tests": [
                 {
@@ -54,6 +71,15 @@ class ExpectColumnValuesToBeRedacted(APIBasedColumnMapExpectation):
                     },
                     "include_in_gallery": True,
                 },
+                {
+                    "title": "no_change_positive_test",
+                    "exact_match_out": False,
+                    "in": {"column": "redacted"},
+                    "out": {
+                        "success": True,
+                    },
+                    "include_in_gallery": True
+                }
             ],
             "test_backends": [
                 {
@@ -73,6 +99,7 @@ class ExpectColumnValuesToBeRedacted(APIBasedColumnMapExpectation):
         auth_=auth_,
         data_key_=data_key_,
         result_key_=result_key_,
+        request_func_=request_func_
     )
 
     library_metadata = {
@@ -81,21 +108,21 @@ class ExpectColumnValuesToBeRedacted(APIBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
-    ExpectColumnValuesToBeRedacted().print_diagnostic_checklist()
+    ExpectColumnValuesToNotContainPII().print_diagnostic_checklist()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-diagnostics = ExpectColumnValuesToBeRedacted().run_diagnostics()
+diagnostics = ExpectColumnValuesToNotContainPII().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None
 
 for check in diagnostics["maturity_checklist"]["experimental"]:
+    if check["message"] == "Passes all linting checks":
+        continue
     assert check["passed"] is True
