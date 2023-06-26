@@ -1,5 +1,5 @@
 ---
-title: How to validate data by running a Checkpoint
+title: Run a Checkpoint to validate data 
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx';
@@ -22,6 +22,8 @@ Succinctly: Checkpoints are used to test your data and take action based on the 
 - [Configured a Checkpoint](./checkpoints/how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>
+
+## Run the Checkpoint
 
 You can run the Checkpoint from the <TechnicalTag tag="cli" text="CLI" /> in a Terminal shell or using Python.
 
