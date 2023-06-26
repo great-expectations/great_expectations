@@ -12,12 +12,13 @@ from great_expectations.core.batch import (
     BatchRequestBase,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 if TYPE_CHECKING:
     import pandas as pd
+
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

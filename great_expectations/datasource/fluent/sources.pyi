@@ -35,6 +35,7 @@ if TYPE_CHECKING:
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
         PostgresDatasource,
+        SnowflakeDatasource,
         SparkAzureBlobStorageDatasource,
         SparkDatasource,
         SparkDBFSDatasource,
@@ -49,6 +50,7 @@ if TYPE_CHECKING:
         DataAsset,
         Datasource,
     )
+    from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
@@ -551,6 +553,37 @@ class _SourceFactories:
         create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def delete_sqlite(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> SnowflakeDatasource: ...
+    def update_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> SnowflakeDatasource: ...
+    def add_or_update_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> SnowflakeDatasource: ...
+    def delete_snowflake(
         self,
         name: str,
     ) -> None: ...
