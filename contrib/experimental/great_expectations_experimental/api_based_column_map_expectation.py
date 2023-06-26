@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Optional
 
 from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError
+    InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -40,15 +40,15 @@ class APIColumnMapMetricProvider(ColumnMapMetricProvider):
 class APIBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     @staticmethod
     def register_metric(
-            api_camel_name: str,
-            endpoint_: str,
-            method_: str = None,
-            header_=None,
-            body_=None,
-            auth_=None,
-            data_key_=None,
-            result_key_=None,
-            request_func_=None
+        api_camel_name: str,
+        endpoint_: str,
+        method_: str = None,
+        header_=None,
+        body_=None,
+        auth_=None,
+        data_key_=None,
+        result_key_=None,
+        request_func_=None,
     ):
         api_snake_name = camel_to_snake(api_camel_name)
         map_metric = "column_values.match_" + api_snake_name + "_api"
@@ -66,23 +66,23 @@ class APIBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 "auth_": auth_,
                 "data_key_": data_key_,
                 "result_key_": result_key_,
-                "request_func_": request_func_
+                "request_func_": request_func_,
             },
         )
 
         return map_metric
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration] = None
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         try:
             assert (
-                    getattr(self, "endpoint_", None) is not None
+                getattr(self, "endpoint_", None) is not None
             ), "endpoint_ is required for APIBasedColumnMap Expectations"
 
             assert (
-                    "column" in configuration.kwargs
+                "column" in configuration.kwargs
             ), "'column' parameter is required for ColumnMap expectations"
 
             if "mostly" in configuration.kwargs:

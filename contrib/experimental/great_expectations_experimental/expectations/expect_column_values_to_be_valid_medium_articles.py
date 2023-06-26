@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from great_expectations_experimental.api_based_column_map_expectation import APIBasedColumnMapExpectation
+from great_expectations_experimental.api_based_column_map_expectation import (
+    APIBasedColumnMapExpectation,
+)
 import requests
 
 
@@ -83,7 +85,7 @@ class ExpectColumnValuesToBeValidMediumArticles(APIBasedColumnMapExpectation):
         auth_=auth_,
         data_key_=data_key_,
         result_key_=result_key_,
-        request_func_=request_func_
+        request_func_=request_func_,
     )
 
     library_metadata = {

@@ -1,10 +1,11 @@
-from great_expectations_experimental.api_based_column_map_expectation import APIBasedColumnMapExpectation
+from great_expectations_experimental.api_based_column_map_expectation import (
+    APIBasedColumnMapExpectation,
+)
 import requests
 
 
 class ExpectColumnValuesToNotContainPII(APIBasedColumnMapExpectation):
-    """Expect values in a given column to not contain PII as identified by the Private-AI API.
-    """
+    """Expect values in a given column to not contain PII as identified by the Private-AI API."""
 
     @staticmethod
     def make_request(endpoint, method, header, body, auth, data_key, result_key, data):
@@ -49,8 +50,8 @@ class ExpectColumnValuesToNotContainPII(APIBasedColumnMapExpectation):
                     "Person we're at place. yeah, it's number.",
                     "Message-ID: <*****> \n date-time \n To: address",
                     "My name is: name",
-                    "Hi name, could you tell me your phone number please?"
-                ]
+                    "Hi name, could you tell me your phone number please?",
+                ],
             },
             "tests": [
                 {
@@ -78,8 +79,8 @@ class ExpectColumnValuesToNotContainPII(APIBasedColumnMapExpectation):
                     "out": {
                         "success": True,
                     },
-                    "include_in_gallery": True
-                }
+                    "include_in_gallery": True,
+                },
             ],
             "test_backends": [
                 {
@@ -99,7 +100,7 @@ class ExpectColumnValuesToNotContainPII(APIBasedColumnMapExpectation):
         auth_=auth_,
         data_key_=data_key_,
         result_key_=result_key_,
-        request_func_=request_func_
+        request_func_=request_func_,
     )
 
     library_metadata = {
