@@ -77,13 +77,13 @@ Sometimes, the MetricProvider class is created directly from the Expectation cla
 
 ## Define Metrics with a MetricProvider
 
-The API for MetricProvider classes is unusual. MetricProvider classes are never intended to be instantiated, and they don’t have inputs or outputs in the normal sense of method arguments and return values. Instead, the inputs for MetricProvider classes are methods for calculating the Metric on different backend applications. Each method must be decorated with an appropriate decorator. On `new`, the class registers the methods as part of the Metrics registry so that they can be invoked as Metrics. The registered Metrics are the only output from MetricProviders.
+The API for MetricProvider classes is unusual. MetricProvider classes are never intended to be instantiated, and they don’t have inputs or outputs in the normal sense of method arguments and return values. Instead, the inputs for MetricProvider classes are methods for calculating the Metric on different backend applications. Each method must be decorated with an appropriate decorator. On `new`, the MetricProvider class registers the decorated methods as part of the Metrics registry so that they can be invoked to calculate Metrics. The registered methods are the only output from MetricProviders.
 
 :::note
 Decorators invoked on `new` can make maintainability challenging. GX intends to address this shortcoming in future releases.
 :::
 
-A typical MetricProvider class has three methods that correspond to the three primary ExecutionEngines used by GX (pandas, SQL and SparkDF). Each of the three methods are marked with an appropriate decorator.
+A typical MetricProvider class has three methods that correspond to the three primary ExecutionEngines used by GX (pandas, SQL, and SparkDF). Each of the three methods are marked with an appropriate decorator.
 
 Each MetricProvider class supports different decorators. Every MetricProvider class can use `@metric_value` and `@metric_partial`. For the MetricProvider, QueryMetricProvider, and TableMetricProvider classes, these are the only supported Metric decorators.
 
