@@ -3,14 +3,14 @@ Purpose: To ensure that all named snippets are referenced in the docs.
 
 Python code snippets refers to the Python module, containing the test, as follows:
 
-```python name="tests/integration/docusaurus/general_directory/specic_directory/how_to_do_my_operation.py get_context"
+```python name="tests/integration/docusaurus/general_directory/specific_directory/how_to_do_my_operation.py get_context"
 ```
 
-whereby "tests/integration/docusaurus/general_directory/specic_directory/how_to_do_my_operation.py get_context", which
+whereby "tests/integration/docusaurus/general_directory/specific_directory/how_to_do_my_operation.py get_context", which
 is the Python module, containing the integration test in the present example, would contain the following tagged code:
 
 # Python
-# <snippet name="tests/integration/docusaurus/general_directory/specic_directory/how_to_do_my_operation.py get_context">
+# <snippet name="tests/integration/docusaurus/general_directory/specific_directory/how_to_do_my_operation.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
@@ -50,7 +50,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
         res_snippet_names = subprocess.run(
-            ["sed", 's/.*name="//; s/">//; s/version-[0-9\\.]* //'],
+            ["sed", 's/.*name="//; s/">//; s/version-[0-9\.]* //'],
             text=True,
             input=res_snippets.stdout,
             capture_output=True,
@@ -72,7 +72,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             capture_output=True,
         )
         res_snippet_used_names = subprocess.run(
-            ["sed", 's/.*="//; s/".*//; s/version-[0-9\\.]* //'],
+            ["sed", 's/.*="//; s/".*//; s/version-[0-9\.]* //'],
             text=True,
             input=res_snippet_usages.stdout,
             capture_output=True,
