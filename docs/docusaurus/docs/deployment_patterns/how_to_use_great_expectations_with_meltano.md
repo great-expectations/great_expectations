@@ -11,9 +11,8 @@ Using Meltano enables teams to easily implement DataOps best practices like conf
 
 :::info 
 
-The most recent guide for using GX with Meltano is for GX version 0.15.50 and can be read in [GX's versioned integration documentation for Meltano](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_with_meltano).
+To use GX with Meltano, see [How to use GX with Meltano](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_with_meltano) in version 0.15.50 of the documentation.
 
-Visit [Meltano](https://meltano.com/)
-to learn more about how to use Meltano to enable DataOps best practices like configuration as code, code reviews, isolated test environments, CI/CD, etc.
+For more information about implementing and using Meltano, see the [Meltano site](https://meltano.com/).
 
 :::
