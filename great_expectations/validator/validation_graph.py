@@ -19,6 +19,7 @@ from tqdm.auto import tqdm
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.core import IDDict
@@ -28,7 +29,13 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.computed_metric import MetricValue
-    from great_expectations.validator.metric_configuration import MetricConfiguration
+
+__all__ = [
+    "ExpectationValidationGraph",
+    "MetricConfiguration",
+    "MetricEdge",
+    "ValidationGraph",
+]
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
