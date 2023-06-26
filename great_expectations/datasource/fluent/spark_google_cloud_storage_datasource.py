@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.google import Client
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
@@ -58,7 +59,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     bucket_or_name: str
     gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
-    _gcs_client: Union[google.Client, None] = pydantic.PrivateAttr(default=None)
+    # on 3.11 the annotation must be type-checking import otherwise it will fail at import time
+    _gcs_client: Union[Client, None] = pydantic.PrivateAttr(default=None)
 
     def _get_gcs_client(self) -> google.Client:
         gcs_client: Union[google.Client, None] = self._gcs_client
