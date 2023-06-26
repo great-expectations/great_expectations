@@ -64,12 +64,12 @@ class DataAssistantRunner:
             data_assistant_cls: DataAssistant class associated with this DataAssistantRunner
             data_context: AbstractDataContext associated with this DataAssistantRunner
         """
-        self._data_assistant_cls = data_assistant_cls
-        self._data_context = data_context
+        self._data_assistant_cls: Type[DataAssistant] = data_assistant_cls
+        self._data_context: AbstractDataContext = data_context
 
-        self._profiler = self.get_profiler()
+        self._profiler: BaseRuleBasedProfiler = self.get_profiler()
 
-        self.run = self.run_impl()
+        self.run: Callable = self.run_impl()
 
     def get_profiler(self) -> BaseRuleBasedProfiler:
         """
@@ -136,6 +136,7 @@ class DataAssistantRunner:
             if estimation is None:
                 estimation = NumericRangeEstimatorType.EXACT
 
+            # The "estimation" directive needs to be a recognized member of "NumericRangeEstimatorType" "Enum" type.
             if isinstance(estimation, str):
                 estimation = estimation.lower()
                 estimation = NumericRangeEstimatorType(estimation)
@@ -146,6 +147,11 @@ class DataAssistantRunner:
             directives: dict = deep_filter_properties_iterable(
                 properties=kwargs,
             )
+            """
+            To supply user-configurable override arguments/directives:
+            1) obtain "Domain"-level attributes;
+            2) split passed-in arguments/directives into "Domain"-level and "variables"-level.
+            """
             rule_based_profiler_domain_type_attributes: List[
                 str
             ] = self._get_rule_based_profiler_domain_type_attributes()
@@ -163,6 +169,10 @@ class DataAssistantRunner:
                     directives.items(),
                 )
             )
+            """
+            Convert "dict"-typed "variables"-level and "Domain"-level arguments/directives into lists of corresponding
+            "Enum" typed objects ("RuntimeEnvironmentVariablesDirectives" and "RuntimeEnvironmentDomainTypeDirectives").
+            """
             variables_directives_list: List[
                 RuntimeEnvironmentVariablesDirectives
             ] = build_variables_directives(
