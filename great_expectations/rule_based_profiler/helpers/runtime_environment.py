@@ -73,7 +73,7 @@ def build_variables_directives(
             if rule.name in kwargs:
                 rule_variables_configs.update(kwargs[rule.name])
 
-            # Since "exact_estimation" is set, "estimator" value of "exact" must be set on "variables" of every "Rule".
+            # Since "exact_estimation" is True, "estimator" value of "exact" must be set on "variables" of every "Rule".
             rule_variables_configs.update(
                 {
                     "estimator": "exact",
