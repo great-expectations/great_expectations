@@ -73,7 +73,7 @@ If you’re not sure which MetricProvider you should use with an Expectation, yo
 | QueryExpectation                  | QueryMetricProvider                     |
 
 
-Sometimes, the MetricProvider class is created directly from the Expectation class, so you don’t need to specify a MetricProvider or methods when declaring a new Expectation. For example, the RegexColumnMapMetricProvider and the SetColumnMapMetricProvider classes.
+Sometimes, the MetricProvider class is created directly from the Expectation class, so you don’t need to specify a MetricProvider or methods when declaring a new Expectation. For example, the RegexBasedColumnMapExpectation automatically implements the RegexColumnMapMetricProvider, and the SetBasedColumnMapExpectation automatically implements the SetColumnMapMetricProvider.
 
 ## Define Metrics with a MetricProvider
 
