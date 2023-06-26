@@ -40,9 +40,6 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
-    assert type(batch_data.record_set_name) == str
-    assert batch_data.record_set_name == "great_expectations_sub_selection"
-
     assert batch_data.use_quoted_name is False
 
 
@@ -172,8 +169,8 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    query_to_create_temp_table: str = batch_data._create_temporary_table(
-        temp_table_name="hello",
+    (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+        dialect=GXSqlDialect.SQLITE,
         query="test_query",
         temp_table_schema_name="test_schema",
     )
@@ -188,9 +185,42 @@ def test_instantiation_with_temp_table_schema():
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        query_to_create_temp_table: str = batch_data._create_temporary_table(
-            temp_table_name="hello",
+        (
+            query_to_create_temp_table,
+            temp_table_name,
+        ) = batch_data._create_temporary_table(
+            dialect=GXSqlDialect.SQLITE,
             query="test_query",
             temp_table_schema_name="test_schema",
         )
         assert "test_schema" in query_to_create_temp_table
+
+
+def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine, sa):
+    """
+    What does this test and why?
+
+    In cases where we create a validator but explicitly set `create_temp_table`=False, we directly use the
+    selectable created by SqlAlchemyExecutionEngine's _build_selectable_from_batch_spec() method.
+    """
+
+    selectable = sa.select("*").select_from(sa.text("main.test_table"))
+    # only have the view that is created by the `sqlite_view_engine` fixture
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        selectable=selectable,
+        create_temp_table=False,
+    )
+    # No new views were created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine, selectable=selectable, create_temp_table=True
+    )
+    # One new temp_table was created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2
