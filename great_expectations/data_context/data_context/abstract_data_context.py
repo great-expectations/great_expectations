@@ -161,7 +161,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
-    from great_expectations.data_context.store.store import StoreConfigTypedDict
+    from great_expectations.data_context.store.store import (
+        DataDocsSiteConfigTypedDict,
+        StoreConfigTypedDict,
+    )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -1623,6 +1626,31 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
         return store
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def add_data_docs_site(
+        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
+    ):
+        """Add a new Data Docs Site to the DataContext.
+
+        Example site config dicts can be found in our "Host and share Data Docs" guides.
+
+        Args:
+            site_name: New site name to add.
+            site_config: Config dict for the new site.
+
+        Returns:
+            The instantiated Data Docs Site.
+        """
+        if site_name in self.config.data_docs_sites:
+            raise ValueError(
+                f"Data Docs Site {site_name} already exists in the DataContext."
+            )
+
+        sites = self.config.data_docs_sites
+        sites[site_name] = site_config
+        self.variables.data_docs_sites = sites
 
     @public_api
     @new_method_or_class(version="0.15.48")
