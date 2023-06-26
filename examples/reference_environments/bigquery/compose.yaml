@@ -6,7 +6,9 @@ services:
       context: .
       dockerfile: jupyter.Dockerfile
     environment:
-      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
       BIGQUERY_CONNECTION_STRING: ${BIGQUERY_CONNECTION_STRING}
     ports:
       - "8888:8888"
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/creds.json
