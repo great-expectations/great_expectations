@@ -179,3 +179,18 @@ fluent_datasources:
       my_table_asset_wo_splitters:
         type: table
         table_name: my_table
+  my_snowflake_ds_with_connect_args:
+    type: snowflake
+    account: "myorganization"
+    user: "testuser1" 
+    password: "foobarbaz" 
+    database: "testdb" 
+    schema: "public" 
+    warehouse: "testwh" 
+    role: "admin" 
+    numpy: true 
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table
+          my_redshift_ds_w_connect_args:
