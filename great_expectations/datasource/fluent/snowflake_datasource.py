@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from pydantic import AnyUrl
+from snowflake.sqlalchemy import URL
 
-from snowflake.sqlalchemy import URL 
 from great_expectations.compatibility import sqlalchemy as sa
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
