@@ -34,6 +34,7 @@ __all__ = [
     "ExpectationValidationGraph",
     "MetricConfiguration",
     "MetricEdge",
+    "MetricValue",
     "ValidationGraph",
 ]
 
