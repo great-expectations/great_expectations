@@ -1319,7 +1319,7 @@ def test_validator_result_format_config_from_expectation(
 
 
 @pytest.mark.integration
-def test_graph_validate_with_two_expectaions_and_first_expectation_without_additional_configuration(
+def test_graph_validate_with_two_expectations_and_first_expectation_without_additional_configuration(
     in_memory_runtime_context, basic_datasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
@@ -1486,7 +1486,7 @@ def test_graph_validate_with_two_expectaions_and_first_expectation_without_addit
 
 
 @pytest.mark.integration
-def test_graph_validate_with_two_expectaions_and_first_expectation_with_result_format_complete(
+def test_graph_validate_with_two_expectations_and_first_expectation_with_result_format_complete(
     in_memory_runtime_context, basic_datasource
 ):
     in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
