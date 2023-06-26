@@ -22,11 +22,10 @@ You will see the following output:
 
 .. code-block:: bash
 
-    Using v3 (Batch Request) API
     How would you like to create your Expectation Suite?
-        1. Manually, without interacting with a sample batch of data (default)
-        2. Interactively, with a sample batch of data
-        3. Automatically, using a profiler
+        1. Manually, without interacting with a sample Batch of data (default)
+        2. Interactively, with a sample Batch of data
+        3. Automatically, using a Data Assistant
     : 3
 
     A batch of data is required to edit the suite - let's help you to specify it.

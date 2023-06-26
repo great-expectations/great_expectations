@@ -1,19 +1,20 @@
 import datetime
 import json
 import os
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
-from ruamel.yaml.comments import CommentedMap
-
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint  # noqa: TCH001
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
 )
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 
 class UpgradeHelperV13(BaseUpgradeHelper):
@@ -22,7 +23,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         data_context: Optional[DataContext] = None,
         context_root_dir: Optional[str] = None,
         update_version: bool = False,
-    ):
+    ) -> None:
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
@@ -56,13 +57,13 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
         self._generate_upgrade_checklist()
 
-    def _generate_upgrade_checklist(self):
+    def _generate_upgrade_checklist(self) -> None:
         self._process_checkpoint_store_for_checklist()
         self._process_checkpoint_config_for_checklist()
         self._process_datasources_for_checklist()
         self._process_validation_operators_for_checklist()
 
-    def _process_checkpoint_store_for_checklist(self):
+    def _process_checkpoint_store_for_checklist(self) -> None:
         if CheckpointStore.default_checkpoints_exist(
             directory_path=self.data_context.root_directory
         ):
@@ -98,9 +99,9 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         else:
             self.upgrade_log["skipped_checkpoint_store_upgrade"] = True
 
-    def _process_checkpoint_config_for_checklist(self):
-        legacy_checkpoints: List[Union[Checkpoint, LegacyCheckpoint]] = []
-        checkpoint: Union[Checkpoint, LegacyCheckpoint]
+    def _process_checkpoint_config_for_checklist(self) -> None:
+        legacy_checkpoints: List[Checkpoint] = []
+        checkpoint: Checkpoint
         checkpoint_name: str
         try:
             for checkpoint_name in sorted(self.data_context.list_checkpoints()):
@@ -115,11 +116,11 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
             if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
                 self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
-        except ge_exceptions.InvalidTopLevelConfigKeyError:
+        except gx_exceptions.InvalidTopLevelConfigKeyError:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
-    def _process_datasources_for_checklist(self):
+    def _process_datasources_for_checklist(self) -> None:
         config_commented_map: CommentedMap = (
             self.data_context.get_config().commented_map
         )
@@ -139,7 +140,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         if len(self.upgrade_checklist["manual"]["datasources"]) == 0:
             self.upgrade_log["skipped_datasources_upgrade"] = True
 
-    def _process_validation_operators_for_checklist(self):
+    def _process_validation_operators_for_checklist(self) -> None:
         config_commented_map: CommentedMap = (
             self.data_context.get_config().commented_map
         )
@@ -157,15 +158,13 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         if len(self.upgrade_checklist["manual"]["validation_operators"]) == 0:
             self.upgrade_log["skipped_validation_operators_upgrade"] = True
 
-    def manual_steps_required(self):
+    def manual_steps_required(self) -> bool:
         return any(
-            [
-                len(manual_upgrade_item.keys()) > 0
-                for manual_upgrade_item in self.upgrade_checklist["manual"].values()
-            ]
+            len(manual_upgrade_item.keys()) > 0
+            for manual_upgrade_item in self.upgrade_checklist["manual"].values()
         )
 
-    def get_upgrade_overview(self):
+    def get_upgrade_overview(self) -> Tuple[str, bool]:
         manual_steps_required = self.manual_steps_required()
 
         increment_version = self.upgrade_log["update_version"]
@@ -216,7 +215,7 @@ Your project needs to be upgraded in order to be compatible with Great Expectati
 
         return upgrade_overview, confirmation_required
 
-    def _upgrade_overview_common_content(self, manual_steps_required: bool):
+    def _upgrade_overview_common_content(self, manual_steps_required: bool) -> str:
         stores_upgrade_checklist = list(
             self.upgrade_checklist["automatic"]["stores"].keys()
         )
@@ -343,7 +342,7 @@ No manual upgrade steps are required.
         ) = self._generate_upgrade_report()
         return upgrade_report, increment_version, exception_occurred
 
-    def _upgrade_configuration_automatically(self):
+    def _upgrade_configuration_automatically(self) -> None:
         if not self.upgrade_log["skipped_checkpoint_store_upgrade"]:
             config_commented_map: CommentedMap = (
                 self.data_context.get_config().commented_map
@@ -409,7 +408,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if manual_steps_required:
+            if manual_steps_required:  # noqa: PLR5501
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper does not have any automated upgrade steps to perform as part of upgrading your project to be \
@@ -440,7 +439,7 @@ A log detailing the upgrade can be found here:
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
-        dest_path = os.path.join(
+        dest_path = os.path.join(  # noqa: PTH118
             self.data_context.root_directory,
             "uncommitted",
             "logs",
@@ -448,7 +447,7 @@ A log detailing the upgrade can be found here:
             f"UpgradeHelperV13_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
-        os.makedirs(dest_dir, exist_ok=True)
+        os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103
 
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)

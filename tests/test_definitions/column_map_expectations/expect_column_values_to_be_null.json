@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_values_to_be_null",
   "datasets": [
     {
+      "dataset_name": "expect_column_values_to_be_null_1",
       "data": {
         "one_null": [4, 5, null, 7],
         "two_null": [null, null, 5, 6],
@@ -46,7 +47,7 @@
           "out": {
             "success": false,
             "unexpected_list": ["a", "b", "c", "d"],
-            "unexpected_index_list": [0, 1, 2, 3]
+            "unexpected_index_list": [{"no_null": "a", "pk_index": 0}, {"no_null": "b", "pk_index": 1}, {"no_null": "c", "pk_index": 2}, {"no_null": "d", "pk_index": 3}]
           }
         },{
           "title": "positive_mostly",
@@ -58,7 +59,7 @@
           "out": {
             "success": true,
             "unexpected_list": [5],
-            "unexpected_index_list": [3]
+            "unexpected_index_list": [{"three_null": 5.0, "pk_index": 3}]
           }
         },{
           "title": "negative_mostly",
@@ -70,7 +71,7 @@
           "out": {
             "success": false,
             "unexpected_list": [5],
-            "unexpected_index_list": [3]
+            "unexpected_index_list": [{"three_null": 5.0, "pk_index": 3}]
           }
         },{
           "title": "positive_case_with_mostly_and_no_unexpected_values",
@@ -99,9 +100,7 @@
               7
             ],
             "unexpected_index_list": [
-              0,
-              1,
-              3
+          {"one_null": 4.0, "pk_index": 0}, {"one_null": 5.0, "pk_index": 1}, {"one_null": 7.0, "pk_index": 3}
             ]
           }
         }]

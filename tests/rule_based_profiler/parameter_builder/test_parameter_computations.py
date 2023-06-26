@@ -1,23 +1,34 @@
-import math
-from numbers import Number
-from typing import Callable, Dict, List, Tuple, Union
+import datetime
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
-import scipy
-from packaging import version
+import pytest
 
-from great_expectations.rule_based_profiler.helpers.util import (
-    _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method,
-    _compute_bootstrap_quantiles_point_estimate_custom_mean_method,
-    _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method,
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core import IDDict
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
 )
-from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from tests.conftest import skip_if_python_below_minimum_version
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.helpers.util import (
+    compute_bootstrap_quantiles_point_estimate,
+    sanitize_parameter_name,
+)
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+)
+
 EFFICACY_TOLERANCE: float = 1.0e-2
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
@@ -26,84 +37,8 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
-def compute_quantile_root_mean_squared_error_of_bootstrap(
-    method: Callable,
-    false_positive_rate: np.float64,
-    distribution_parameters: Dict[str, Dict[str, Number]],
-    distribution_samples: pd.DataFrame,
-) -> Tuple[Number, Number]:
-    """
-    Computes the root mean squared error (RMSE) for how closely the lower and upper quantile point estimates from the
-    sample, approximate the lower and upper quantile parameters in the population.
-
-    Root mean squared error was selected as a performance metric, due to its abilities to evaluate prediction accuracy
-    among different models, but there are other options.
-
-    Performance metrics for continuous values:
-        - Mean absolute error (MAE)
-        - Mean squred error (MSE)
-        - Root mean squared error (RMSE)
-        - R squared
-        - Adjusted R squared
-
-    For a detailed comparison see:
-    https://medium.com/analytics-vidhya/mae-mse-rmse-coefficient-of-determination-adjusted-r-squared-which-metric-is-better-cd0326a5697e
-
-    sklearn and statsmodels both have built-in methods for computing RMSE, but neither are GE dependencies as of 3/4/22.
-    """
-    distribution_types: pd.Index = distribution_samples.columns
-    distribution: str
-
-    distribution_lower_quantile_point_estimate: np.float64
-    distribution_upper_quantile_point_estimate: np.float64
-    lower_quantile_point_estimates: List[np.float64] = []
-    upper_quantile_point_estimates: List[np.float64] = []
-    lower_quantile_residuals: List[Number] = []
-    upper_quantile_residuals: List[Number] = []
-
-    for distribution in distribution_types:
-        (
-            distribution_lower_quantile_point_estimate,
-            distribution_upper_quantile_point_estimate,
-        ) = method(
-            metric_values=distribution_samples[distribution],
-            false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-        )
-
-        lower_quantile_point_estimates.append(
-            distribution_lower_quantile_point_estimate
-        )
-        upper_quantile_point_estimates.append(
-            distribution_upper_quantile_point_estimate
-        )
-
-        distribution_lower_quantile_residual_legacy: Number = abs(
-            distribution_lower_quantile_point_estimate
-            - distribution_parameters[distribution]["lower_quantile"]
-        )
-        distribution_upper_quantile_residual_legacy: Number = abs(
-            distribution_upper_quantile_point_estimate
-            - distribution_parameters[distribution]["upper_quantile"]
-        )
-
-        lower_quantile_residuals.append(distribution_lower_quantile_residual_legacy)
-        upper_quantile_residuals.append(distribution_upper_quantile_residual_legacy)
-
-    # RMSE
-    lower_quantile_root_mean_squared_error: Number = math.sqrt(
-        sum([r**2 for r in lower_quantile_residuals]) / len(lower_quantile_residuals)
-    )
-    upper_quantile_root_mean_squared_error: Number = math.sqrt(
-        sum([r**2 for r in upper_quantile_residuals]) / len(upper_quantile_residuals)
-    )
-
-    return (
-        lower_quantile_root_mean_squared_error,
-        upper_quantile_root_mean_squared_error,
-    )
-
-
+@pytest.mark.integration
+@pytest.mark.slow  # 6.20s
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
 ):
@@ -123,18 +58,21 @@ def test_bootstrap_point_estimate_efficacy(
 
     distribution_types: pd.Index = distribution_samples.columns
     distribution: str
+    numeric_range_estimation_result: NumericRangeEstimationResult
     lower_quantile_point_estimate: np.float64
     upper_quantile_point_estimate: np.float64
     actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate,
-            upper_quantile_point_estimate,
-        ) = _compute_bootstrap_quantiles_point_estimate_custom_mean_method(
+        numeric_range_estimation_result = compute_bootstrap_quantiles_point_estimate(
             metric_values=distribution_samples[distribution],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            quantile_statistic_interpolation_method="linear",
+            quantile_bias_correction=True,
+            quantile_bias_std_error_ratio_threshold=2.5e-1,
         )
+        lower_quantile_point_estimate = numeric_range_estimation_result.value_range[0]
+        upper_quantile_point_estimate = numeric_range_estimation_result.value_range[1]
         actual_false_positive_rates[distribution] = (
             1.0
             - np.sum(
@@ -155,108 +93,208 @@ def test_bootstrap_point_estimate_efficacy(
         )
 
 
-def test_bootstrap_point_estimate_bias_corrected_efficacy(
-    bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
+def test_sanitize_parameter_name(
+    table_row_count_metric_config,
+    table_row_count_aggregate_fn_metric_config,
+    table_head_metric_config,
+    column_histogram_metric_config,
 ):
-    """
-    Efficacy means the custom bootstrap bias corrected method approximates the sample +/- efficacy tolerance
-    """
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
+    sanitized_name: str
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_row_count_metric_config.metric_name,
+        suffix=None,
     )
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
+    assert sanitized_name == "table_row_count"
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_row_count_aggregate_fn_metric_config.metric_name,
+        suffix=None,
+    )
+    assert sanitized_name == "table_row_count_aggregate_fn"
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_head_metric_config.metric_name,
+        suffix=table_head_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "table_head_444fc52627dde82ad1d5c4fe290bfa6b"
+
+    table_head_metric_config._metric_value_kwargs = IDDict({})
+    sanitized_name = sanitize_parameter_name(
+        name=table_head_metric_config.metric_name,
+        suffix=table_head_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "table_head"
+
+    sanitized_name = sanitize_parameter_name(
+        name=column_histogram_metric_config.metric_name,
+        suffix=column_histogram_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "column_histogram_f78021ff11b53f9d3588655b2b8b4f3e"
+
+
+@pytest.mark.parametrize(
+    "metric_name,metric_values_by_batch_id,",
+    [
+        pytest.param(
+            "my_metric_0",
+            {
+                "batch_id_0": 1.3,
+                "batch_id_1": 1.69e2,
+                "batch_id_2": 3.38e2,
+                "batch_id_3": 6.5e1,
+            },
+        ),
+        pytest.param(
+            "my_metric_1",
+            {
+                "batch_id_0": None,
+                "batch_id_1": None,
+                "batch_id_2": None,
+                "batch_id_3": None,
+            },
+        ),
+        pytest.param(
+            "my_metric_2",
+            {
+                "batch_id_0": [
+                    1.3,
+                    3.9,
+                    9.1,
+                ],
+                "batch_id_1": [
+                    1.69e2,
+                    3.38e2,
+                    1.014e3,
+                ],
+                "batch_id_2": [
+                    3.38e2,
+                    1.014e3,
+                    5.07e3,
+                ],
+                "batch_id_3": [
+                    1.3e1,
+                    2.6e1,
+                    6.5e1,
+                ],
+            },
+        ),
+        pytest.param(
+            "my_metric_3",
+            {
+                "batch_id_0": [
+                    1.3,
+                    3.9,
+                    9.1,
+                ],
+                "batch_id_1": [
+                    None,
+                    None,
+                    None,
+                ],
+                "batch_id_2": [
+                    3.38e2,
+                    1.014e3,
+                    5.07e3,
+                ],
+                "batch_id_3": [
+                    None,
+                    None,
+                    None,
+                ],
+            },
+        ),
+        pytest.param(
+            "my_metric_4",
+            {
+                "batch_id_0": datetime.datetime(2019, 1, 4, 0, 12, 12),
+                "batch_id_1": datetime.datetime(2019, 2, 21, 0, 12, 12),
+                "batch_id_2": datetime.datetime(2019, 3, 20, 0, 12, 12),
+                "batch_id_3": datetime.datetime(2019, 7, 13, 0, 12, 12),
+            },
+        ),
+        pytest.param(
+            "my_metric_5",
+            {
+                "batch_id_0": "2019-01-04T00:12:12",
+                "batch_id_1": "2019-02-21T00:12:12",
+                "batch_id_2": "2019-03-20T00:12:12",
+                "batch_id_3": "2019-07-13T00:12:12",
+            },
+        ),
+        pytest.param(
+            "my_metric_6",
+            {
+                "batch_id_0": None,
+                "batch_id_1": "unparseable_metric_value_0",
+                "batch_id_2": "unparseable_metric_value_1",
+                "batch_id_3": None,
+            },
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id: dict):
+    batch_ids: List[str] = list(metric_values_by_batch_id.keys())
+    attributed_resolved_metrics = AttributedResolvedMetrics(
+        batch_ids=batch_ids,
+        metric_attributes=None,
+        metric_values_by_batch_id=None,
     )
 
-    distribution_types: pd.Index = distribution_samples.columns
-    distribution: str
-    lower_quantile_point_estimate_bias_corrected: np.float64
-    upper_quantile_point_estimate_bias_corrected: np.float64
-    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
-    for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate_bias_corrected,
-            upper_quantile_point_estimate_bias_corrected,
-        ) = _compute_bootstrap_quantiles_point_estimate_custom_bias_corrected_method(
-            metric_values=distribution_samples[distribution],
-            false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+    batch_id: str
+    for batch_id in batch_ids:
+        attributed_resolved_metrics.add_resolved_metric(
+            batch_id=batch_id,
+            value=metric_values_by_batch_id[batch_id],
         )
-        actual_false_positive_rates[distribution] = (
-            1.0
-            - np.sum(
-                distribution_samples[distribution].between(
-                    lower_quantile_point_estimate_bias_corrected,
-                    upper_quantile_point_estimate_bias_corrected,
-                )
+
+    enforce_numeric_metric: bool = True
+    replace_nan_with_zero: bool = True
+    reduce_scalar_metric: bool = True
+
+    metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="my_parameter_builder",
+            metric_name=metric_name,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=False,
+            enforce_numeric_metric=enforce_numeric_metric,
+            replace_nan_with_zero=replace_nan_with_zero,
+            reduce_scalar_metric=reduce_scalar_metric,
+            evaluation_parameter_builder_configs=None,
+            data_context=None,
+        )
+    )
+    if metric_name == "my_metric_6":
+        with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
+            metric_multi_batch_parameter_builder._sanitize_metric_computation(
+                parameter_builder=metric_multi_batch_parameter_builder,
+                metric_name=metric_name,
+                attributed_resolved_metrics=attributed_resolved_metrics,
+                enforce_numeric_metric=metric_multi_batch_parameter_builder.enforce_numeric_metric,
+                replace_nan_with_zero=metric_multi_batch_parameter_builder.replace_nan_with_zero,
+                domain=None,
+                variables=None,
+                parameters=None,
             )
-            / distribution_samples.shape[0]
+
+        assert (
+            """Applicability of MetricMultiBatchParameterBuilder is restricted to numeric-valued and datetime-valued metrics (value unparseable_metric_value_0 of type "<class 'numpy.str_'>" was computed)."""
+            in str(excinfo.value)
         )
-        # Actual false-positives must be within the efficacy tolerance of desired (configured)
-        # false_positive_rate parameter value.
-        np.testing.assert_allclose(
-            actual=actual_false_positive_rates[distribution],
-            desired=false_positive_rate,
-            rtol=RTOL,
-            atol=EFFICACY_TOLERANCE,
-            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
-        )
-
-
-def test_bootstrap_point_estimate_scipy_efficacy(
-    bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,
-):
-    """
-    Efficacy means the scipy.stats.bootstrap confidence interval midpoint method
-    approximates the sample +/- efficacy tolerance
-    """
-    skip_if_python_below_minimum_version()
-
-    false_positive_rate: np.float64 = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "false_positive_rate"
-        ]
-    )
-    distribution_samples: pd.DataFrame = (
-        bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive[
-            "distribution_samples"
-        ]
-    )
-
-    distribution_types: pd.Index = distribution_samples.columns
-    distribution: str
-    lower_quantile_point_estimate_scipy: np.float64
-    upper_quantile_point_estimate_scipy: np.float64
-    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
-    for distribution in distribution_types:
-        (
-            lower_quantile_point_estimate_scipy,
-            upper_quantile_point_estimate_scipy,
-        ) = _compute_bootstrap_quantiles_point_estimate_scipy_confidence_interval_midpoint_method(
-            metric_values=distribution_samples[distribution],
-            false_positive_rate=false_positive_rate,
-            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
-        )
-        actual_false_positive_rates[distribution] = (
-            1.0
-            - np.sum(
-                distribution_samples[distribution].between(
-                    lower_quantile_point_estimate_scipy,
-                    upper_quantile_point_estimate_scipy,
-                )
+    else:
+        try:
+            metric_multi_batch_parameter_builder._sanitize_metric_computation(
+                parameter_builder=metric_multi_batch_parameter_builder,
+                metric_name=metric_name,
+                attributed_resolved_metrics=attributed_resolved_metrics,
+                enforce_numeric_metric=metric_multi_batch_parameter_builder.enforce_numeric_metric,
+                replace_nan_with_zero=metric_multi_batch_parameter_builder.replace_nan_with_zero,
+                domain=None,
+                variables=None,
+                parameters=None,
             )
-            / distribution_samples.shape[0]
-        )
-        # Actual false-positives must be within the efficacy tolerance of desired (configured)
-        # false_positive_rate parameter value.
-        np.testing.assert_allclose(
-            actual=actual_false_positive_rates[distribution],
-            desired=false_positive_rate,
-            rtol=RTOL,
-            atol=EFFICACY_TOLERANCE,
-            err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
-        )
+        except gx_exceptions.ProfilerExecutionError:
+            pytest.fail()

@@ -53,11 +53,11 @@ However, it can also be assigned to an a relative path like ``../`` as can be se
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -124,7 +124,7 @@ However, it can also be assigned to an a relative path like ``../`` as can be se
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 
 5. **Obtain an ExpectationSuite**
@@ -209,18 +209,18 @@ If you have the following ``numeric_example/`` directory in your filesystem, and
     numeric_example/test_555.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -288,7 +288,7 @@ GE will begin looking for the files in the parent directory.
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 5. **Obtain an ExpectationSuite**
 
@@ -372,17 +372,17 @@ If you have the following ``datetime_example/`` directory in your filesystem, an
     datetime_example/test_20210102.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 1. **Load or create a DataContext**
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -450,7 +450,7 @@ GE will begin looking for the files in the parent directory.
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 5. **Obtain an ExpectationSuite**
 
@@ -536,18 +536,18 @@ If you have the following ``elements/`` directory in your filesystem, and you wa
     elements_example/test_C.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -621,7 +621,7 @@ GE will begin looking for the files in the parent directory.
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 
 5. **Obtain an ExpectationSuite**
@@ -708,18 +708,18 @@ files as batches within the ``my_data_asset`` DataAsset, sorting them by 1) Date
     multiple_sorters_example/test_EEE_555_20210103.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 
 1. **Load or create a DataContext**
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -798,7 +798,7 @@ GE will begin looking for the files in the parent directory.
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 
 5. **Obtain an ExpectationSuite**
@@ -883,17 +883,17 @@ and we only wanted to consider the reports **on or after 2000**, and in **ascend
     year_reports/report_2020.csv
 
 **Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``),
-GE will begin looking for the files in the parent directory.
+GX will begin looking for the files in the parent directory.
 
 1. **Load or create a DataContext**
 
   .. code-block:: python
 
-    import great_expectations as ge
+    import great_expectations as gx
     from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
     from great_expectations.core.batch import BatchRequest
 
-    context = ge.get_context()
+    context = gx.get_context()
 
 2. **Configure a Datasource**
 
@@ -958,7 +958,7 @@ GE will begin looking for the files in the parent directory.
 
     # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
-    context = ge.get_context()
+    context = gx.get_context()
 
 
 5. **Obtain an ExpectationSuite**

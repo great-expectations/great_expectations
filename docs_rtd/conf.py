@@ -17,14 +17,12 @@
 #
 
 import os
-import re
 import sys
 import uuid
-from collections import namedtuple
 
 from sphinx.ext.autodoc import between
 
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../"))  # noqa: PTH100
 
 
 # -- General configuration ------------------------------------------------
@@ -133,7 +131,7 @@ html_static_path = [
 ]
 html_css_files = ["style.css"]
 
-# html_logo = '../pip-logo.png'
+# html_logo = '../static/img/pip-logo.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -256,8 +254,7 @@ texinfo_documents = [
 autodoc_member_order = "bysource"
 
 
-def process_docstring(app, what, name, obj, options, lines):
-
+def process_docstring(app, what, name, obj, options, lines):  # noqa: PLR0913
     from docs_rtd.feature_annotation_parser import parse_feature_annotation
 
     docstring = "\n".join(lines)

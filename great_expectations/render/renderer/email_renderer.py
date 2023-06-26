@@ -8,10 +8,12 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class EmailRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def render(self, validation_result=None, data_docs_pages=None, notify_with=None):
+    def render(  # noqa: PLR0912
+        self, validation_result=None, data_docs_pages=None, notify_with=None
+    ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -98,7 +100,7 @@ class EmailRenderer(Renderer):
                 report_element = f"- <strong>Validation data asset</strong>: {dataset_reference}</br>"
                 html += report_element
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
+        documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
         footer_section = f'<p>Learn <a href="{documentation_url}">here</a> how to review validation results in Data Docs</p>'
         html += footer_section
         return title, html

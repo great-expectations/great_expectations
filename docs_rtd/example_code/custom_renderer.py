@@ -1,8 +1,7 @@
 import altair as alt
 import pandas as pd
 
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBulletListContent,
     RenderedDocumentContent,
     RenderedGraphContent,
@@ -12,6 +11,7 @@ from great_expectations.render.types import (
     RenderedTableContent,
     ValueListContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class CustomPageRenderer(Renderer):

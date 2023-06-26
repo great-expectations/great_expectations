@@ -42,7 +42,6 @@ def main():
 
     # determine distance between each of 403 vectors and each centroid, find closest neighbor
     for i, v in enumerate(whitened):
-
         # distance between centroid 0 and feature vector
         distance = math.sqrt(sum((v - output[0][0]) ** 2))
 

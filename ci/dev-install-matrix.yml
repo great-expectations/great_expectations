@@ -1,0 +1,95 @@
+parameters:
+  vmImage: '' # Must be specified in primary YAML
+  pythonVersion: ["3.8", "3.9", "3.10"]
+
+jobs:
+  - ${{ each pythonVersion in parameters.pythonVersion }}:
+    - job:
+      timeoutInMinutes: 120
+      displayName: full${{ pythonVersion }}
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: ${{ pythonVersion }}
+          displayName: Use Python ${{ pythonVersion }}
+
+        - bash: python -m pip install --upgrade pip
+          displayName: 'Update pip'
+
+        - script: |
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
+
+        - script: |
+            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
+            pip install .
+          displayName: 'Install dependencies'
+
+        - script: |
+            pip install pytest pytest-cov pytest-azurepipelines
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+          displayName: 'pytest'
+
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFiles: '**/test-*.xml'
+            testRunTitle: Publish test results for Python ${{ pythonVersion }}
+
+        - task: PublishCodeCoverageResults@1
+          inputs:
+            codeCoverageTool: Cobertura
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+            reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+    - job:
+      timeoutInMinutes: 120
+      displayName: lightweight${{ pythonVersion }}
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: ${{ pythonVersion }}
+          displayName: Use Python ${{ pythonVersion }}
+
+        - bash: python -m pip install --upgrade pip
+          displayName: 'Update pip'
+
+        - script: |
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
+
+        - script: |
+            pip install \
+              --requirement requirements.txt \
+              --requirement reqs/requirements-dev-test.txt \
+              --constraint constraints-dev.txt \
+              --editable .
+          displayName: 'Install dependencies'
+
+        - script: |
+            pip install -I pytest
+            pip install pytest-cov pytest-azurepipelines
+            pytest --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics -m "not external_sqldialect"
+          displayName: 'pytest'
+
+        - task: PublishTestResults@2
+          condition: succeededOrFailed()
+          inputs:
+            testResultsFiles: '**/test-*.xml'
+            testRunTitle: Publish test results for Python ${{ pythonVersion }}
+
+        - task: PublishCodeCoverageResults@1
+          inputs:
+            codeCoverageTool: Cobertura
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+            reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'

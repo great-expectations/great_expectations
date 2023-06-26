@@ -1,23 +1,39 @@
-from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.util import (
-    add_values_with_json_schema_from_list_in_params,
+from typing import TYPE_CHECKING, Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
+
 
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
-    """
-     Expect that the columns are unique together, e.g. a multi-column primary key
+    """Expect that the columns are unique together (e.g. a multi-column primary key)
+
      Note that all instances of any duplicates are considered failed
 
-     For example::
+     expect_multicolumnvalues_to_be_unique is a \
+     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
+
+     For example:
+     ::
 
          A B C
          1 1 2 Fail
@@ -32,23 +48,32 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
      Keyword Args:
          ignore_row_if (str): "all_values_are_missing", "any_value_is_missing", "never"
 
-     Other Parameters:
-         result_format (str or None): \
-             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-         include_config (boolean): \
-             If True, then include the expectation config as part of the result object. \
-         catch_exceptions (boolean or None): \
-             If True, then catch exceptions and include them as part of the result object. \
-         meta (dict or None): \
-             A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
      Returns:
-         An ExpectationSuiteValidationResult
+         An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+         Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     library_metadata = {
         "maturity": "production",
-        "tags": ["core expectation", "multi-column expectation"],
+        "tags": [
+            "core expectation",
+            "multi-column expectation",
+            "column map expectation",
+        ],
         "contributors": [
             "@great_expectations",
         ],
@@ -74,118 +99,58 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
     args_keys = ("column_list",)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_list", RendererValueType.ARRAY),
+            ("mostly", RendererValueType.NUMBER),
+            ("ignore_row_if", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        # NOTE: This expectation is deprecated, please use
-        # expect_select_column_values_to_be_unique_within_record instead.
+        params = renderer_configuration.params
 
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column_list",
-                "ignore_row_if",
-                "row_condition",
-                "condition_parser",
-                "mostly",
-            ],
-        )
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list"),
-            },
-            "ignore_row_if": {
-                "schema": {"type": "string"},
-                "value": params.get("ignore_row_if"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly"),
-            },
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-        }
-
-        if params["mostly"] is not None:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
+        else:
+            template_str = "Values must always be unique across columns: "
 
-        template_str = f"Values must always be unique across columns{mostly_str}: "
-        for idx in range(len(params["column_list"]) - 1):
-            template_str += f"$column_list_{str(idx)}, "
-            params[f"column_list_{str(idx)}"] = params["column_list"][idx]
-
-        last_idx = len(params["column_list"]) - 1
-        template_str += f"$column_list_{str(last_idx)}"
-        params[f"column_list_{str(last_idx)}"] = params["column_list"][last_idx]
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.column_list:
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="column_list",
-        )
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
 
         # NOTE: This expectation is deprecated, please use

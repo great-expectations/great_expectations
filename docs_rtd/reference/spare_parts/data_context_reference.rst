@@ -91,7 +91,7 @@ like this:
 .. code-block:: yaml
 
     data_warehouse:
-      drivername: postgres
+      drivername: postgresql
       host: warehouse.ourcompany.biz
       port: '5432'
       username: bob
@@ -174,18 +174,18 @@ providing the bucket/prefix combination:
         store_backend:
           class_name: TupleS3StoreBackend
           base_directory: expectations/
-          bucket: ge.my_org.com
+          bucket: gx.my_org.com
           prefix:
       validations_store:
         class_name: ValidationsStore
         store_backend:
           class_name: TupleS3StoreBackend
-          bucket: ge.my_org.com
+          bucket: gx.my_org.com
           prefix: common_validations
       evaluation_parameter_store:
         class_name: EvaluationParameterStore
 
-GE uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
+GX uses `boto3 <https://boto3.amazonaws.com/v1/documentation/api/latest/index.html>`_ to access AWS, so credentials
 simply need to be available in any standard place searched by that library. You may also specify keyword arguments
 for boto3 to use in the `boto3_options key` of the store_backend configuration.
 
@@ -225,7 +225,7 @@ useful for configuring database access.
 Variable substitution enables: 1) keeping secrets out of source control & 2)
 environment-based configuration changes such as staging vs prod.
 
-When GE encounters substitution syntax (like ``my_key: ${my_value}`` or
+When GX encounters substitution syntax (like ``my_key: ${my_value}`` or
 ``my_key: $my_value``) in the great_expectations.yml config file it will attempt to replace the value
 of ``my_key`` with the value from an environment variable ``my_value`` or a
 corresponding key read from the file specified using ``config_variables_file_path``, which is located in uncommitted/config_variables.yml by default. This is an example of a config_variables.yml file:
@@ -312,7 +312,7 @@ new directory or use this template:
     # secrets out of source control & 2) environment-based configuration changes
     # such as staging vs prod.
     #
-    # When GE encounters substitution syntax (like `my_key: ${my_value}` or
+    # When GX encounters substitution syntax (like `my_key: ${my_value}` or
     # `my_key: $my_value`) in the config file it will attempt to replace the value
     # of `my_key` with the value from an environment variable `my_value` or a
     # corresponding key read from the file specified using
@@ -398,7 +398,7 @@ new directory or use this template:
 Usage Statistics
 #################
 
-To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. Our `blog post from April 2020 <https://greatexpectations.io/blog/anonymous-usage-statistics/>`_ explains a little bit more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GE features are used. You can see the exact
+To help us improve the tool, by default we track event data when certain Data Context-enabled commands are run. Our `blog post from April 2020 <https://greatexpectations.io/blog/anonymous-usage-statistics/>`_ explains a little bit more about what we want to capture with usage statistics and why! The usage statistics include things like the OS and python version, and which GX features are used. You can see the exact
 schemas for all of our messages `here <https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/core/usage_statistics/schemas.py>`_.
 
 While we hope you'll leave them on, you can easily disable usage statistics for a Data Context by adding the

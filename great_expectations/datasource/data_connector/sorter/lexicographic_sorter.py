@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any
 
@@ -19,4 +20,4 @@ class LexicographicSorter(Sorter):
             "reverse": self.reverse,
             "type": "LexicographicSorter",
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

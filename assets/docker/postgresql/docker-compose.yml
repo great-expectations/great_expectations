@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   travis_db:
-    image: postgres:12
+    image: postgres:15.1
     command:
       - postgres
       - "-c"

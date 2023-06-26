@@ -1,27 +1,12 @@
-import json
-
 import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-)
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
 )
 
 
@@ -30,7 +15,6 @@ from great_expectations.expectations.registry import (
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
     # for information on how to choose an id string for your Metric.
@@ -44,7 +28,6 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, from_value, to_value, **kwargs):
-
         # throw an error if one of the values is not numeric
         if not pd.to_numeric(column, errors="coerce").notnull().all():
             raise TypeError("Column values must be numeric !")
@@ -73,19 +56,19 @@ class ColumnValuesToChangeBetween(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
-    """
-    Given a list of numeric values,
-    check if the difference between the current and the previous row
-    is within the expected difference range.
+    """Expect the numeric difference between current and previous row is within expected range.
 
     E.g:
     input = [1,2,5]
     expected difference range = between 1 and 2
-    Result: `false` because the difference between 2 and 5 is not between 1 and 2
+    result = false because the difference between 2 and 5 is not between 1 and 2
 
-    parameters:
-        from_value: low range value
-        to_value: high range value
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        from_value (float): low range value
+        to_value (float): high range value
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -173,7 +156,7 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -185,7 +168,7 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -203,16 +186,12 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,

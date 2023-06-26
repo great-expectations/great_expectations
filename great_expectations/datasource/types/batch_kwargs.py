@@ -38,7 +38,7 @@ class SqlAlchemyDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):
 
 
 class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchKwargsError("PathBatchKwargs requires a path element")
@@ -53,7 +53,7 @@ class PathBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs)
 
 
 class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "s3" not in self:
             raise InvalidBatchKwargsError("S3BatchKwargs requires a path element")
@@ -68,7 +68,7 @@ class S3BatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
 
 
 class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "dataset" not in self:
             raise InvalidBatchKwargsError(
@@ -81,7 +81,7 @@ class InMemoryBatchKwargs(PandasDatasourceBatchKwargs, SparkDFDatasourceBatchKwa
 
 
 class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         import pandas as pd
 
@@ -92,22 +92,23 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
 
 
 class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        try:
-            import pyspark
-        except ImportError:
+        from great_expectations.compatibility import pyspark
+
+        if not pyspark:
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceInMemoryBatchKwargs requires a valid pyspark installation, but pyspark import failed."
             )
-        if not isinstance(self["dataset"], pyspark.sql.DataFrame):
+
+        if not (pyspark.DataFrame and isinstance(self["dataset"], pyspark.DataFrame)):  # type: ignore[truthy-function]
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame"
             )
 
 
 class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "table" not in self:
             raise InvalidBatchKwargsError(
@@ -120,7 +121,7 @@ class SqlAlchemyDatasourceTableBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
 
 
 class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchKwargsError(
@@ -137,7 +138,7 @@ class SqlAlchemyDatasourceQueryBatchKwargs(SqlAlchemyDatasourceBatchKwargs):
 
 
 class SparkDFDatasourceQueryBatchKwargs(SparkDFDatasourceBatchKwargs):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if "query" not in self:
             raise InvalidBatchKwargsError(

@@ -1,49 +1,40 @@
-import json
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
-import pandas as pd
 import scipy.stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
+    ColumnAggregateExpectation,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
-    num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnDiscreteEntropy(ColumnMetricProvider):
+class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
     """MetricProvider Class for Discrete Entropy MetricProvider"""
 
     metric_name = "column.discrete.entropy"
@@ -54,28 +45,28 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         column_value_counts = column.value_counts()
         return scipy.stats.entropy(column_value_counts, base=base)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    def _sqlalchemy(
-        cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
-        runtime_configuration: Dict,
-    ):
-        (
-            selectable,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
-        )
-        base = metric_value_kwargs["base"]
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(
+    #     cls,
+    #     execution_engine: "SqlAlchemyExecutionEngine",
+    #     metric_domain_kwargs: Dict,
+    #     metric_value_kwargs: Dict,
+    #     metrics: Dict[Tuple, Any],
+    #     runtime_configuration: Dict,
+    # ):
+    #     (
+    #         selectable,
+    #         compute_domain_kwargs,
+    #         accessor_domain_kwargs,
+    #     ) = execution_engine.get_compute_domain(
+    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
+    #     )
+    #     base = metric_value_kwargs["base"]
 
-        column_value_counts = metrics.get("column.value_counts")
-        return scipy.stats.entropy(column_value_counts, base=base)
+    #     column_value_counts = metrics.get("column.value_counts")
+    #     return scipy.stats.entropy(column_value_counts, base=base)
 
-    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",
@@ -104,7 +95,6 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-
         dependencies = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
@@ -137,7 +127,7 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         return dependencies
 
 
-class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
+class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
     """Expect the column discrete entropy to be between a minimum value and a maximum value.
             The Shannon entropy of a discrete probability distribution is given by
             - \\sum_{i=1}^{n} P(x_i) * \\log(P(x_i))
@@ -281,7 +271,9 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
         "base": 2,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         neccessary configuration arguments have been provided for the validation of the expectation.
@@ -290,7 +282,7 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -300,16 +292,14 @@ class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

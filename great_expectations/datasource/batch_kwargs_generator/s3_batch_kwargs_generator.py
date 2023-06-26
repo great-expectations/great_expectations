@@ -1,7 +1,7 @@
 import datetime
 import logging
 import re
-import warnings
+from typing import Dict, Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -60,7 +60,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     }
 
     # FIXME add tests for new partitioner functionality
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -71,7 +71,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         boto3_options=None,
         max_keys=1000,
-    ):
+    ) -> None:
         """Initialize a new S3GlobReaderBatchKwargsGenerator
 
         Args:
@@ -100,7 +100,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         if boto3_options is None:
             boto3_options = {}
         self._max_keys = max_keys
-        self._iterators = {}
+        self._iterators: Dict = {}
         try:
             self._s3 = boto3.client("s3", **boto3_options)
         except TypeError:
@@ -129,8 +129,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
         logger.debug(
-            "Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for data_asset_name: %s"
-            % data_asset_name
+            f"Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
         )
 
         if data_asset_name not in self._assets:
@@ -157,9 +156,11 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             limit=limit,
         )
 
-    def _build_batch_kwargs_path_iter(self, path_list, reader_options=None, limit=None):
+    def _build_batch_kwargs_path_iter(
+        self, path_list, reader_options=None, limit=None
+    ) -> Iterable[S3BatchKwargs]:
         for path in path_list:
-            yield self._build_batch_kwargs(
+            yield self._build_batch_kwargs(  # type: ignore[call-arg] # no parameters `reader_options` or `limit`
                 path, reader_options=reader_options, limit=limit
             )
 
@@ -204,8 +205,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
             if batch_kwargs is None:
                 raise BatchKwargsError(
-                    "Unable to identify partition %s for asset %s"
-                    % (partition_id, data_asset_name),
+                    f"Unable to identify partition {partition_id} for asset {data_asset_name}",
                     {data_asset_name: data_asset_name, partition_id: partition_id},
                 )
 
@@ -216,14 +216,14 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 data_asset_name=data_asset_name, **batch_parameters, **batch_kwargs
             )
 
-    def _build_batch_kwargs_from_key(
+    def _build_batch_kwargs_from_key(  # noqa: PLR0913
         self,
         key,
         asset_config=None,
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> S3BatchKwargs:
         batch_kwargs = {
             "s3": f"s3a://{self.bucket}/{key}",
             "reader_options": self.reader_options,
@@ -245,7 +245,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         return S3BatchKwargs(batch_kwargs)
 
-    def _get_asset_options(self, asset_config, iterator_dict):
+    def _get_asset_options(self, asset_config, iterator_dict) -> Iterable[str]:
         query_options = {
             "Bucket": self.bucket,
             "Delimiter": asset_config.get("delimiter", self._delimiter),
@@ -311,14 +311,14 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
 
-    def _build_asset_iterator(
+    def _build_asset_iterator(  # noqa: PLR0913
         self,
         asset_config,
         iterator_dict,
         reader_method=None,
         reader_options=None,
         limit=None,
-    ):
+    ) -> Iterable[S3BatchKwargs]:
         for key in self._get_asset_options(asset_config, iterator_dict):
             yield self._build_batch_kwargs_from_key(
                 key,
@@ -328,20 +328,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 limit=limit,
             )
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def get_available_partition_ids(self, data_asset_name=None):
         if data_asset_name not in self._iterators:
             self._iterators[data_asset_name] = {}
         iterator_dict = self._iterators[data_asset_name]
@@ -370,9 +357,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(
-                        "No match group %d in key %s" % (match_group_id, key)
-                    )
+                    logger.warning(f"No match group {match_group_id} in key {key}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

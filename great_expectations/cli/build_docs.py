@@ -1,18 +1,24 @@
-from typing import Dict, List, Optional
+from __future__ import annotations
 
-from great_expectations import DataContext
+from typing import TYPE_CHECKING, Dict, List, Optional
+
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
 from great_expectations.cli.pretty_printing import cli_message
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
+
 
 def build_docs(
-    context: DataContext,
+    context: FileDataContext,
     usage_stats_event: str,
     site_names: Optional[List[str]] = None,
     view: bool = True,
     assume_yes: bool = False,
-):
+) -> None:
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 

@@ -1,26 +1,39 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.expectations.expectation import MulticolumnMapExpectation
-from great_expectations.expectations.util import (
-    add_values_with_json_schema_from_list_in_params,
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation import (
+    MulticolumnMapExpectation,
     render_evaluation_parameter_string,
 )
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
+
 
 class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
-    """
-    Expect the values for each record to be unique across the columns listed.
+    """Expect the values for each record to be unique across the columns listed.
+
     Note that records can be duplicated.
 
-    For example::
+    expect_select_column_values_to_be_unique_within_record is a \
+    [Multicolumn Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations).
+
+    For example:
+    ::
 
         A B C
         1 1 2 Fail
@@ -37,23 +50,28 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     library_metadata = {
         "maturity": "production",
         "tags": [
             "core expectation",
-            "table expectation",
+            "multi-column expectation",
         ],
         "contributors": [
             "@great_expectations",
@@ -64,7 +82,6 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     }
 
     map_metric = "select_column_values.unique.within_record"
-    success_keys = ()
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -76,137 +93,78 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
     args_keys = ("column_list",)
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        Validates the configuration for the Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods
+        in its Expectation superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
+                it will be pulled from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required
+                by the Expectation.
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
-        return True
-
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_list", RendererValueType.ARRAY),
+            ("mostly", RendererValueType.NUMBER),
+            ("ignore_row_if", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column_list",
-                "ignore_row_if",
-                "row_condition",
-                "condition_parser",
-                "mostly",
-            ],
-        )
-        params_with_json_schema = {
-            "column_list": {
-                "schema": {"type": "array"},
-                "value": params.get("column_list", []),
-            },
-            "ignore_row_if": {
-                "schema": {"type": "string"},
-                "value": params.get("ignore_row_if"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition", ""),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser", ""),
-            },
-            "mostly": {
-                "schema": {"type": "number"},
-                "value": params.get("mostly", 1),
-            },
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-        }
+        params = renderer_configuration.params
 
-        if params["mostly"] is not None:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
+        else:
+            template_str = "Values must always be unique across columns: "
 
-        template_str = f"Values must always be unique across columns{mostly_str}: "
-        column_list = params.get("column_list") if params.get("column_list") else []
-        if len(column_list) > 0:
-            for idx, val in enumerate(column_list[:-1]):
-                param = f"$column_list_{idx}"
-                template_str += f"{param}, "
-                params[param] = val
-
-            last_idx = len(column_list) - 1
-            last_param = f"$column_list_{last_idx}"
-            template_str += last_param
-            params[last_param] = column_list[last_idx]
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+        if params.column_list:
+            array_param_name = "column_list"
+            param_prefix = "column_list_"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
+            template_str += cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="column_list",
-        )
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
 
         params = substitute_none_for_missing(
@@ -220,17 +178,14 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
             ],
         )
 
-        if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
+            params["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
+            template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
+        else:
+            template_str = "Values must always be unique across columns: "
 
-        template_str = f"Values must always be unique across columns{mostly_str}: "
         for idx in range(len(params["column_list"]) - 1):
             template_str += f"$column_list_{str(idx)}, "
             params[f"column_list_{str(idx)}"] = params["column_list"][idx]

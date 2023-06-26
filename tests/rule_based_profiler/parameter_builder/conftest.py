@@ -6,8 +6,8 @@ import pandas as pd
 import pytest
 import scipy.stats as stats
 
-RANDOM_SEED = 43792
-RANDOM_STATE = np.random.Generator(np.random.PCG64(RANDOM_SEED))
+RANDOM_SEED: int = 43792
+RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_SEED))
 
 
 def generate_distribution_parameters(
@@ -64,7 +64,7 @@ def generate_distribution_parameters(
         a=bimodal_approximation, q=1 - false_positive_rate / 2
     )
 
-    exponential_shape: int = 1.5
+    exponential_shape: float = 1.5
     exponential_lower_bound: int = 5000
     exponential_scale: int = 1000
     exponential_lower_quantile: Number = stats.gamma.ppf(
@@ -170,22 +170,6 @@ def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
     ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
     distribution_samples: pd.DataFrame = generate_distribution_samples(
         distribution_parameters=distribution_parameters, size=1000
-    )
-    return {
-        "false_positive_rate": false_positive_rate,
-        "distribution_parameters": distribution_parameters,
-        "distribution_samples": distribution_samples,
-    }
-
-
-@pytest.fixture
-def bootstrap_distribution_parameters_and_20_samples_with_01_false_positive():
-    false_positive_rate: np.float64 = np.float64(0.01)
-    distribution_parameters: Dict[
-        str, Dict[str, Number]
-    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
-    distribution_samples: pd.DataFrame = generate_distribution_samples(
-        distribution_parameters=distribution_parameters, size=20
     )
     return {
         "false_positive_rate": false_positive_rate,

@@ -7,9 +7,8 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -17,14 +16,16 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-    FilePathDataConnector,
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations.datasource.data_connector.util import (
+    sanitize_prefix,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @mock_s3
@@ -84,7 +85,7 @@ def test_basic_instantiation():
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -643,7 +644,7 @@ def test_return_all_batch_definitions_sorted():
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
@@ -878,7 +879,7 @@ def test_foxtrot():
 
 
 @mock_s3
-def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group():
+def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -905,7 +906,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         )
 
     my_data_connector_yaml = yaml.load(
-        f"""
+        """
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
         bucket: bucket
@@ -933,9 +934,9 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               name: for_me_Me_Me
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = (
+        my_data_connector: ConfiguredAssetS3DataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -1002,9 +1003,9 @@ def test_return_all_batch_definitions_too_many_sorters():
 
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = (
+        my_data_connector: ConfiguredAssetS3DataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -1125,8 +1126,8 @@ assets:
 
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
-        s3_sanitized = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
-        file_system_sanitized = FilePathDataConnector.sanitize_prefix(prefix)
+        s3_sanitized = sanitize_prefix_for_gcs_and_s3(text=prefix)
+        file_system_sanitized = sanitize_prefix(prefix)
         if os.sep == "\\":  # Fix to ensure tests work on Windows
             file_system_sanitized = file_system_sanitized.replace("\\", "/")
 

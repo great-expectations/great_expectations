@@ -1,11 +1,72 @@
-import nbformat
+import os
+import shutil
+from typing import TYPE_CHECKING
+
 import pytest
 
+import great_expectations as gx
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
+from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    import nbformat
+
+
+@pytest.fixture
+def assetless_dataconnector_context(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    context = gx.get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config = f"""
+            class_name: Datasource
+
+            execution_engine:
+                class_name: PandasExecutionEngine
+
+            data_connectors:
+                my_other_data_connector:
+                    class_name: ConfiguredAssetFilesystemDataConnector
+                    base_directory: {data_path}
+                    glob_directive: "*.csv"
+
+                    default_regex:
+                        pattern: (.+)\\.csv
+                        group_names:
+                            - name
+                    assets:
+                        {{}}
+            """
+
+    context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
 
 
 def test_find_datasource_with_asset_on_context_with_no_datasources(
@@ -41,6 +102,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
     assert obs is None
 
 
+@pytest.mark.slow  # 2.27s
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconnector_that_has_no_assets(
     assetless_dataconnector_context,
 ):
@@ -53,7 +115,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
     config = context.get_config_with_variables_substituted()
     root_directory = context.root_directory
 
-    context = BaseDataContext(project_config=config, context_root_dir=root_directory)
+    context = get_context(project_config=config, context_root_dir=root_directory)
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
     obs = renderer._find_datasource_with_asset()
@@ -61,9 +123,9 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
 
 
 def test_find_datasource_with_asset_on_happy_path_context(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
@@ -77,9 +139,9 @@ def test_find_datasource_with_asset_on_happy_path_context(
 
 
 def test_find_datasource_with_asset_on_context_with_a_full_datasource_and_one_with_no_dataconnectors(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
     context.add_datasource(
         "aaa_datasource",
@@ -115,7 +177,9 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = gx.get_context()",
+            # Use this commented version once YAMLHandler is in place everywhere (not just tests and docs)
+            # "source": "import great_expectations as gx\nfrom great_expectations.core.yaml_handler import YAMLHandler\nfrom pprint import pprint\n\nyaml = YAMLHandler()\ncontext = gx.get_context()",
             "outputs": [],
         },
     ]
@@ -221,7 +285,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": f"context.add_checkpoint(**yaml.load(yaml_config))",
+            "source": "context.add_checkpoint(**yaml.load(yaml_config))",
             "outputs": [],
         },
     ]
@@ -254,8 +318,9 @@ validations:
     }
 
 
+@pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
     checkpoint_new_notebook_assets,
 ):
@@ -264,10 +329,10 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     The CheckpointNewNotebookRenderer should generate a notebook with an example SimpleCheckpoint yaml config based on the first available data asset.
     """
 
-    context: DataContext = deterministic_asset_dataconnector_context
+    context: DataContext = deterministic_asset_data_connector_context
 
     assert context.list_checkpoints() == []
-    context.save_expectation_suite(titanic_expectation_suite)
+    context.add_expectation_suite(expectation_suite=titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
     checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(

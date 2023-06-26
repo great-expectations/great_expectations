@@ -1,0 +1,1 @@
+Your Datasource can contain multiple Data Assets.  If you have additional files to connect to, you can provide different `name` and `batching_regex` parameters to create additional Data Assets for those files in your Datasource.  You can even include the same files in multiple Data Assets, if a given file matches the `batching_regex` of more than one Data Asset.

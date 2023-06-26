@@ -4,12 +4,7 @@ from collections import OrderedDict
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
-    expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
-)
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -25,6 +20,11 @@ from great_expectations.render.renderer.content_block import (
     ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +37,38 @@ def titanic_expectations(empty_data_context_module_scoped):
             json.load(infile, object_pairs_hook=OrderedDict)
         )
         return ExpectationSuite(**titanic_expectation_suite_dict, data_context=context)
+
+
+@pytest.fixture
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+    with open(
+        file_relative_path(
+            __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
+        ),
+    ) as infile:
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
+
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
+    name_column_expectations = columns["Name"]
+
+    return name_column_expectations
+
+
+@pytest.fixture
+def titanic_validation_results():
+    with open(
+        file_relative_path(__file__, "../test_sets/expected_cli_results_default.json"),
+    ) as infile:
+        return expectationSuiteValidationResultSchema.load(json.load(infile))
 
 
 @pytest.mark.smoketest
@@ -60,6 +92,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
                 "./output/test_render_profiling_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -94,6 +127,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
                 "./output/test_render_expectation_suite_column_section_renderer"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -382,7 +416,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "markdown",
+                "format": MetaNotesFormat.MARKDOWN,
                 "content": [
                     "#### These are expectation notes \n - you can use markdown \n - or just strings"
                 ],
@@ -544,7 +578,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "string",
+                "format": MetaNotesFormat.STRING,
                 "content": [
                     "This is a",
                     "string list,",
@@ -709,7 +743,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
         meta={
             "BasicDatasetProfiler": {"confidence": "very low"},
             "notes": {
-                "format": "string",
+                "format": MetaNotesFormat.STRING,
                 "content": "This is just a single string, assigned to the 'content' key of a notes dict.",
             },
         },
@@ -1400,6 +1434,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 
 
 # noinspection PyPep8Naming
+@pytest.mark.integration
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
     evr = ExpectationValidationResult(
         success=True,
@@ -1529,6 +1564,112 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                         },
                     },
                 ],
+                "True",
+            ]
+        ],
+        "header_row": ["Status", "Expectation", "Observed Value"],
+        "header_row_options": {"Status": {"sortable": True}},
+        "table_options": {"search": True, "icon-size": "sm"},
+    }
+
+    # also test case where evaluation_parameters aren't required at runtime such as using now()
+    evr = ExpectationValidationResult(
+        success=True,
+        result={
+            "observed_value": True,
+            "element_count": 162,
+            "missing_count": 153,
+            "missing_percent": 94.44444444444444,
+        },
+        exception_info={
+            "raised_exception": False,
+            "exception_message": None,
+            "exception_traceback": None,
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_min_to_be_between",
+            kwargs={
+                "column": "start_date",
+                "min_value": {"$PARAMETER": "now() - timedelta(weeks=208)"},
+                "max_value": {"$PARAMETER": "now() - timedelta(weeks=1)"},
+                "result_format": "SUMMARY",
+            },
+        ),
+    )
+
+    result = ValidationResultsTableContentBlockRenderer.render(
+        [evr],
+    ).to_json_dict()
+
+    assert result == {
+        "content_block_type": "table",
+        "styling": {
+            "body": {"classes": ["table"]},
+            "classes": [
+                "ml-2",
+                "mr-2",
+                "mt-0",
+                "mb-0",
+                "table-responsive",
+                "hide-succeeded-validations-column-section-target-child",
+            ],
+        },
+        "table": [
+            [
+                {
+                    "content_block_type": "string_template",
+                    "styling": {
+                        "parent": {
+                            "classes": ["hide-succeeded-validation-target-child"]
+                        }
+                    },
+                    "string_template": {
+                        "template": "$icon",
+                        "params": {"icon": "", "markdown_status_icon": "✅"},
+                        "styling": {
+                            "params": {
+                                "icon": {
+                                    "classes": [
+                                        "fas",
+                                        "fa-check-circle",
+                                        "text-success",
+                                    ],
+                                    "tag": "i",
+                                }
+                            }
+                        },
+                    },
+                },
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "params": {
+                            "column": "start_date",
+                            "condition_parser": None,
+                            "max_value": {
+                                "$PARAMETER": "now() " "- " "timedelta(weeks=1)"
+                            },
+                            "min_value": {
+                                "$PARAMETER": "now() " "- " "timedelta(weeks=208)"
+                            },
+                            "parse_strings_as_datetimes": None,
+                            "result_format": "SUMMARY",
+                            "row_condition": None,
+                            "strict_max": None,
+                            "strict_min": None,
+                        },
+                        "styling": {
+                            "default": {"classes": ["badge", "badge-secondary"]},
+                            "params": {
+                                "column": {"classes": ["badge", "badge-primary"]}
+                            },
+                        },
+                        "template": "$column minimum value must be "
+                        "greater than or equal to "
+                        "$min_value and less than or "
+                        "equal to $max_value.",
+                    },
+                },
                 "True",
             ]
         ],

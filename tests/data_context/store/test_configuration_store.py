@@ -1,25 +1,23 @@
+import logging
+import string
 from pathlib import Path
+from typing import List, Optional
 
 import pytest
-from ruamel.yaml import YAML
+from marshmallow import INCLUDE, Schema, fields, validates_schema
 from ruamel.yaml.comments import CommentedMap
 
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
-
-import logging
-
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    fields,
-    validates_schema,
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GXCloudIdentifier,
 )
+from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import (
     delete_config_from_filesystem,
@@ -27,7 +25,7 @@ from tests.test_utils import (
     save_config_to_filesystem,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +70,18 @@ class SampleConfigSchema(Schema):
 class SampleConfigurationStore(ConfigurationStore):
     _configuration_class = SampleConfig
 
+    def serialization_self_check(self, pretty_print: bool) -> None:
+        # Required to fulfill contract set by parent
+        pass
 
+    def list_keys(self) -> List[DataContextKey]:
+        # Mock values to work with self.self_check
+        return [
+            ConfigurationIdentifier(f"key{char}") for char in string.ascii_uppercase
+        ]
+
+
+@pytest.mark.integration
 def test_v3_configuration_store(tmp_path_factory):
     root_directory_path: str = "test_v3_configuration_store"
     root_directory: str = str(tmp_path_factory.mktemp(root_directory_path))
@@ -137,7 +146,7 @@ def test_v3_configuration_store(tmp_path_factory):
             base_directory="unknown_base_directory",
             configuration_key=configuration_name_0,
         )
-    with pytest.raises(ge_exceptions.InvalidKeyError):
+    with pytest.raises(gx_exceptions.InvalidKeyError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",
@@ -239,4 +248,120 @@ def test_v3_configuration_store(tmp_path_factory):
             ]
         )
         == 0
+    )
+
+
+@pytest.mark.unit
+def test_overwrite_existing_property_and_setter() -> None:
+    store = SampleConfigurationStore(store_name="my_configuration_store")
+
+    assert store.overwrite_existing is False
+    store.overwrite_existing = True
+    assert store.overwrite_existing is True
+
+
+@pytest.mark.unit
+def test_config_property_and_defaults() -> None:
+    store = SampleConfigurationStore(store_name="my_configuration_store")
+
+    assert store.config == {
+        "class_name": "SampleConfigurationStore",
+        "module_name": "tests.data_context.store.test_configuration_store",
+        "overwrite_existing": False,
+        "store_name": "my_configuration_store",
+    }
+
+
+@pytest.mark.unit
+def test_self_check(capsys) -> None:
+    store = SampleConfigurationStore(store_name="my_configuration_store")
+
+    report_obj = store.self_check(pretty_print=True)
+
+    keys = [f"key{char}" for char in string.ascii_uppercase]
+
+    assert report_obj == {
+        "config": {
+            "class_name": "SampleConfigurationStore",
+            "module_name": "tests.data_context.store.test_configuration_store",
+            "overwrite_existing": False,
+            "store_name": "my_configuration_store",
+        },
+        "keys": keys,
+        "len_keys": len(keys),
+    }
+
+    stdout = capsys.readouterr().out
+
+    messages = [
+        "Checking for existing keys...",
+        f"{len(keys)} keys found",
+    ]
+
+    for message in messages:
+        assert message in stdout
+
+
+@pytest.mark.parametrize(
+    "name,id,expected_key",
+    [
+        pytest.param(
+            "my_name",
+            None,
+            ConfigurationIdentifier(configuration_key="my_name"),
+            id="name",
+        ),
+        pytest.param(
+            None,
+            "abc123",
+            GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123"
+            ),
+            id="id",
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_determine_key_constructs_key(
+    name: Optional[str], id: Optional[str], expected_key: DataContextKey
+) -> None:
+    actual_key = ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+    assert actual_key == expected_key
+
+
+@pytest.mark.parametrize(
+    "name,id",
+    [
+        pytest.param("my_name", "abc123", id="too many args"),
+        pytest.param(
+            None,
+            None,
+            id="too few args",
+        ),
+    ],
+)
+@pytest.mark.unit
+def test_determine_key_raises_error_with_conflicting_args(
+    name: Optional[str], id: Optional[str]
+) -> None:
+    with pytest.raises(AssertionError) as e:
+        ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
+
+    assert "Must provide either name or id" in str(e.value)
+
+
+@pytest.mark.unit
+def test_init_with_invalid_configuration_class_raises_error() -> None:
+    class InvalidConfigClass:
+        pass
+
+    class InvalidConfigurationStore(ConfigurationStore):
+        _configuration_class = InvalidConfigClass
+
+    with pytest.raises(DataContextError) as e:
+        InvalidConfigurationStore(store_name="my_configuration_store")
+
+    assert (
+        "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
+        in str(e.value)
     )

@@ -33,13 +33,13 @@ Set up your machine for the tutorial
 
 For this tutorial, we will use a simplified version of the NYC taxi ride data.
 
-Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repository to download the data and directories with the final versions of the tutorial, which you can use for reference:
+Clone the `ge_tutorials <https://github.com/great-expectations/gx_tutorials>`_ repository to download the data and directories with the final versions of the tutorial, which you can use for reference:
 
 .. code-block:: bash
 
-   git clone https://github.com/superconductive/ge_tutorials
+   git clone https://github.com/great-expectations/gx_tutorials
    cd ge_tutorials
-   
+
 
 What you find in the ge_tutorials repository
 ---------------------------------------------
@@ -77,8 +77,6 @@ To initialize your Great Expectations deployment for the project, run this comma
 You should see this:
 
 .. code-block::
-
-    Using v3 (Batch Request) API
 
       ___              _     ___                  _        _   _
      / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___

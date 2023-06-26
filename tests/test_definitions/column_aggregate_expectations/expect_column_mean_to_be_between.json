@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_mean_to_be_between",
   "datasets": [{
+      "dataset_name": "expect_column_mean_to_be_between_1",
       "data": {
         "x": [2.0, 5.0],
         "y": [1, 2],
@@ -22,6 +23,20 @@
           "z": "INTEGER",
           "n": "INTEGER",
           "b": "BIT"
+        },
+        "postgresql": {
+          "x": "DOUBLE_PRECISION",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BOOLEAN"
+        },
+        "snowflake": {
+          "x": "DOUBLE",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BOOLEAN"
         }
       },
       "tests": [{
@@ -136,6 +151,35 @@
       ]
     },
     {
+      "dataset_name": "expect_column_mean_to_be_between_decimal_type",
+      "data": {
+        "a": [2.2345, 1.123]
+      },
+      "schemas": {
+        "spark": {
+          "a": "DecimalType"
+        }
+      },
+      "tests": [
+        {
+          "title": "simple_mean_positive_range_decimal_type",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2,
+            "max_value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.6787500000000002
+          },
+          "only_for": ["spark"]
+        }
+      ]
+    },
+    {
+      "dataset_name": "expect_column_mean_to_be_between_2",
       "data": {
         "s": ["s", null, null, null],
         "b": [true, false, false, true],
@@ -167,7 +211,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery"],
+          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery", "trino", "redshift", "snowflake"],
           "_comment": "postgresql, mssql, bigquery, and spark will not allow coercing the boolean type to an average"
         },
         {
@@ -182,7 +226,7 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "bigquery","spark"],
+          "suppress_test_for": ["postgresql", "mssql", "bigquery", "spark", "trino", "redshift", "snowflake"],
           "_comment": "postgresql, mssql, bigquery and spark will not allow coercing the boolean type to an average"
         },
         {
@@ -210,6 +254,7 @@
           }
         }]},
     {
+      "dataset_name": "expect_column_mean_to_be_between_3",
       "data": {
         "empty_column": []
       },

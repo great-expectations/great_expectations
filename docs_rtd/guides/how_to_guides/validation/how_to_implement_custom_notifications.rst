@@ -14,10 +14,10 @@ If you would like to implement custom notifications that include a link to Data 
 
     .. code-block:: python
 
-        import great_expectations as ge
+        import great_expectations as gx
 
         # Load the Data Context
-        context = ge.data_context.DataContext()
+        context = gx.data_context.DataContext()
 
         # The batch_kwargs will differ depending on the type of Datasource,
         # see the docs for help

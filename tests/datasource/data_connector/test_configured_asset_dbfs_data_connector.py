@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import os
 import pathlib
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import boto3
 import botocore
-from ruamel.yaml import YAML
+import pytest
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetDBFSDataConnector,
@@ -16,10 +19,15 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
+yaml = YAMLHandler()
 
 
-def test__get_full_file_path_for_asset_pandas(fs):
+@pytest.mark.integration
+@pytest.mark.slow  # 1.05s
+def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when
@@ -132,6 +140,7 @@ def test__get_full_file_path_for_asset_pandas(fs):
     assert batch_spec.path == f"{base_directory}/test_dir_0/A/B/C/logfile_0.csv"
 
 
+@pytest.mark.integration
 def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?

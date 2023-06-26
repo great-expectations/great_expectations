@@ -1,13 +1,71 @@
 import os
+import shutil
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
+import great_expectations as gx
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.util import file_relative_path
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+
+
+@pytest.fixture
+def titanic_data_context_clean_usage_stats_enabled(
+    tmp_path_factory, monkeypatch
+) -> DataContext:
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "../test_fixtures/great_expectations_v013clean_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return gx.get_context(context_root_dir=context_path)
+
+
+@pytest.fixture
+def titanic_data_context_v2_datasources_and_validation_operators_usage_stats_enabled(
+    tmp_path_factory, monkeypatch
+) -> DataContext:
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+
+    titanic_yml_path = file_relative_path(
+        __file__, "../test_fixtures/great_expectations_v013_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return gx.get_context(context_root_dir=context_path)
 
 
 def test_project_check_on_missing_ge_dir_guides_user_to_fix(
@@ -18,7 +76,7 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -33,17 +91,14 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_project_check_on_valid_project_says_so(
-    mock_emit, caplog, monkeypatch, titanic_data_context_clean
+    mock_emit, caplog, monkeypatch, titanic_data_context_clean_usage_stats_enabled
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    context = titanic_data_context_clean
+    context = titanic_data_context_clean_usage_stats_enabled
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output
@@ -74,17 +129,19 @@ def test_project_check_on_valid_project_says_so(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_project_check_on_project_with_v2_datasources_and_validation_operators(
-    mock_emit, caplog, monkeypatch, titanic_data_context
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_v2_datasources_and_validation_operators_usage_stats_enabled,
 ):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    context = titanic_data_context
+    context = (
+        titanic_data_context_v2_datasources_and_validation_operators_usage_stats_enabled
+    )
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output
@@ -133,7 +190,7 @@ def test_project_check_on_project_with_missing_config_file_guides_user(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "project", "check-config"],
+        ["project", "check-config"],
         catch_exceptions=False,
     )
     assert result.exit_code == 1

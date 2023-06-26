@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 import inspect
-import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Tuple
+from typing import List, Sequence, Tuple, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestDataCases,
+    ExpectationTestDataCases,  # noqa: TCH001
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
+    ExpectationBackendTestResultCounts,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
+    ExpectationDiagnosticCheckMessageDict,
     ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -22,21 +25,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import camel_to_snake, lint_code
-
-try:
-    import black
-except ImportError:
-    black = None
-
-try:
-    import isort
-except ImportError:
-    isort = None
-
-# from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -62,15 +51,17 @@ class ExpectationDiagnostics(SerializableDictDot):
     # introspection alone, but in order to see what they return, we need to
     # instantiate the Expectation and actually run the method.
 
-    library_metadata: AugmentedLibraryMetadata
+    library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics]
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
     renderers: List[ExpectationRendererDiagnostics]
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
+    backend_test_result_counts: List[ExpectationBackendTestResultCounts]
     errors: List[ExpectationErrorDiagnostics]
     maturity_checklist: ExpectationDiagnosticMaturityMessages
+    coverage_score: float
 
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
@@ -87,19 +78,31 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Generates the checklist in CLI-appropriate string format."""
         str_ = self._convert_checks_into_output_message(
             self.description["camel_name"],
+            self.library_metadata.maturity,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
             self.maturity_checklist,
         )
         return str_
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
+        for problem in library_metadata.problems:  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
+            sub_messages.append(
+                {
+                    "message": problem,
+                    "passed": False,
+                }
+            )
 
         return ExpectationDiagnosticCheckMessage(
-            message="Has a library_metadata object",
-            passed=library_metadata.library_metadata_passed_checks,
+            message="Has a valid library_metadata object",
+            passed=library_metadata.library_metadata_passed_checks,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
+            sub_messages=sub_messages,
         )
 
     @staticmethod
@@ -158,34 +161,31 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        test_results: List[ExpectationTestDiagnostics],
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        sub_messages = []
-        backends_passing_all_tests = []
-        backend_results = defaultdict(list)
+        sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
         passed = False
         message = "Has core logic and passes tests on at least one Execution Engine"
+        all_passing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is None
+            and backend_test_result.num_passed >= 1
+        ]
 
-        for test_result in test_results:
-            backend_results[test_result.backend].append(test_result.test_passed)
-
-        for backend in backend_results:
-            if all(backend_results[backend]):
-                backends_passing_all_tests.append(backend)
-
-        if len(backends_passing_all_tests) > 0:
+        if len(all_passing) > 0:
             passed = True
-            backend = backends_passing_all_tests[0]
-            sub_messages.append(
-                {
-                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
-                    "passed": True,
-                }
-            )
+            for result in all_passing:
+                sub_messages.append(
+                    {
+                        "message": f"All {result.num_passed} tests for {result.backend} are passing",
+                        "passed": True,
+                    }
+                )
 
-        if not test_results:
+        if not backend_test_result_counts:
             sub_messages.append(
                 {
                     "message": "There are no test results",
@@ -200,59 +200,79 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
 
     @staticmethod
-    def _check_core_logic_for_all_applicable_execution_engines(
+    def _get_backends_from_test_results(
         test_results: List[ExpectationTestDiagnostics],
-    ) -> ExpectationDiagnosticCheckMessage:
-        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
-
-        sub_messages = []
-        backends_passing_all_tests = []
-        backends_failing_any_tests = []
-        failing_names = []
+    ) -> List[ExpectationBackendTestResultCounts]:
+        """Has each tested backend and the number of passing/failing tests"""
         backend_results = defaultdict(list)
-        passed = False
-        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        backend_failing_names = defaultdict(list)
+        results: List[ExpectationBackendTestResultCounts] = []
+
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
             if test_result.test_passed is False:
-                failing_names.append(test_result.test_title)
+                backend_failing_names[test_result.backend].append(
+                    test_result.test_title
+                )
 
         for backend in backend_results:
-            if all(backend_results[backend]):
-                backends_passing_all_tests.append(backend)
-            else:
-                backends_failing_any_tests.append(backend)
+            result_counts = ExpectationBackendTestResultCounts(
+                backend=backend,
+                num_passed=backend_results[backend].count(True),
+                num_failed=backend_results[backend].count(False),
+                failing_names=backend_failing_names.get(backend),
+            )
+            results.append(result_counts)
 
-        if len(backends_passing_all_tests) > 0 and len(backends_failing_any_tests) == 0:
+        return results
+
+    @staticmethod
+    def _check_core_logic_for_all_applicable_execution_engines(
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
+
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
+        passed = False
+        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        all_passing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is None
+            and backend_test_result.num_passed >= 1
+        ]
+        some_failing = [
+            backend_test_result
+            for backend_test_result in backend_test_result_counts
+            if backend_test_result.failing_names is not None
+        ]
+
+        if len(all_passing) > 0 and len(some_failing) == 0:
             passed = True
 
-        for backend in backends_passing_all_tests:
+        for result in all_passing:
             sub_messages.append(
                 {
-                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "message": f"All {result.num_passed} tests for {result.backend} are passing",
                     "passed": True,
                 }
             )
 
-        for backend in backends_failing_any_tests:
-            num_tests = len(backend_results[backend])
-            num_passing = backend_results[backend].count(True)
+        for result in some_failing:
             sub_messages.append(
                 {
-                    "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
+                    "message": f"Only {result.num_passed} / {result.num_passed + result.num_failed} tests for {result.backend} are passing",
+                    "passed": False,
+                }
+            )
+            sub_messages.append(
+                {
+                    "message": f"  - Failing: {', '.join(result.failing_names)}",  # type: ignore[arg-type]
                     "passed": False,
                 }
             )
 
-        if len(failing_names) > 0:
-            sub_messages.append(
-                {
-                    "message": f"Failing: {', '.join(failing_names)}",
-                    "passed": False,
-                }
-            )
-
-        if not test_results:
+        if not backend_test_result_counts:
             sub_messages.append(
                 {
                     "message": "There are no test results",
@@ -286,7 +306,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _count_unexpected_test_cases(
-        test_diagnostics: ExpectationTestDiagnostics,
+        test_diagnostics: Sequence[ExpectationTestDiagnostics],
     ) -> int:
         """Scans test_diagnostics and returns the number of cases that did not pass."""
 
@@ -301,11 +321,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _convert_checks_into_output_message(
-        class_name: str, maturity_messages: ExpectationDiagnosticMaturityMessages
+        class_name: str,
+        maturity_level: str,
+        maturity_messages: ExpectationDiagnosticMaturityMessages,
     ) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
-        output_message = f"Completeness checklist for {class_name}:"
+        output_message = f"Completeness checklist for {class_name} ({maturity_level}):"
 
         checks = (
             maturity_messages.experimental
@@ -336,7 +358,8 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check that the validate_configuration exists and doesn't raise a config error"""
         passed = False
-        sub_messages = []
+        sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
+        rx = re.compile(r"^[\s]+assert", re.MULTILINE)
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
@@ -350,7 +373,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if "validate_configuration" not in expectation_instance.__class__.__dict__:
                 sub_messages.append(
                     {
-                        "message": "No validate_configuration method defined",
+                        "message": "No validate_configuration method defined on subclass",
                         "passed": passed,
                     }
                 )
@@ -359,6 +382,23 @@ class ExpectationDiagnostics(SerializableDictDot):
                     expectation_type=expectation_instance.expectation_type,
                     kwargs=first_test.input,
                 )
+                validate_configuration_source = inspect.getsource(
+                    expectation_instance.__class__.validate_configuration
+                )
+                if rx.search(validate_configuration_source):
+                    sub_messages.append(
+                        {
+                            "message": "Custom 'assert' statements in validate_configuration",
+                            "passed": True,
+                        }
+                    )
+                else:
+                    sub_messages.append(
+                        {
+                            "message": "Using default validate_configuration from template",
+                            "passed": False,
+                        }
+                    )
                 try:
                     expectation_instance.validate_configuration(expectation_config)
                 except InvalidExpectationConfigurationError:
@@ -378,9 +418,9 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check if all statment renderers are defined"""
         passed = False
-        # For now, don't include the "question" and "descriptive" types since they are so
-        # sparsely implemented
-        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
+        # For now, don't include the "question", "descriptive", or "answer"
+        # types since they are so sparsely implemented
+        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive", "answer"}
         all_renderer_types = {"diagnostic", "prescriptive"}
         renderer_names = [
             name
@@ -388,7 +428,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             if name.endswith("renderer") and name.startswith("_")
         ]
         renderer_types = {name.split("_")[1] for name in renderer_names}
-        if renderer_types - {"question", "descriptive"} == all_renderer_types:
+        if all_renderer_types & renderer_types == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
             # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
@@ -397,128 +437,25 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
 
     @staticmethod
-    def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
-        """Check if linting checks pass for Expectation"""
-        sub_messages: List[dict] = []
-        message: str = "Passes all linting checks"
-        passed: bool = False
-        black_ok: bool = False
-        isort_ok: bool = False
-        file_and_class_names_ok: bool = False
-        rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
-
-        try:
-            expectation_camel_name = rx_expectation_instance_repr.match(
-                repr(expectation_instance)
-            ).group(1)
-        except AttributeError:
-            sub_messages.append(
-                {
-                    "message": "Arg passed to _check_linting was not an instance of an Expectation, so cannot check linting",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
-        try:
-            source_file_path = inspect.getfile(impl)
-        except TypeError:
-            sub_messages.append(
-                {
-                    "message": "inspect.getfile(impl) raised a TypeError (impl is a built-in class)",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        snaked_impl_name = camel_to_snake(impl.__name__)
-        source_file_base_no_ext = os.path.basename(source_file_path).rsplit(".", 1)[0]
-        with open(source_file_path) as fp:
-            code = fp.read()
-
-        if snaked_impl_name != source_file_base_no_ext:
-            sub_messages.append(
-                {
-                    "message": f"The snake_case of {impl.__name__} does not match filename part {source_file_base_no_ext}",
-                    "passed": False,
-                }
-            )
-        else:
-            file_and_class_names_ok = True
-
-        if black is None:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'black', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if isort is None:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'isort', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if black and isort:
-            blacked_code = lint_code(code)
-            if code != blacked_code:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with black",
-                        "passed": False,
-                    }
-                )
-            else:
-                black_ok = True
-            isort_ok = isort.check_code(
-                code,
-                **isort.profiles.black,
-                ignore_whitespace=True,
-                known_local_folder=["great_expectations"],
-            )
-            if not isort_ok:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with isort",
-                        "passed": False,
-                    }
-                )
-
-        passed = black_ok and isort_ok and file_and_class_names_ok
-        return ExpectationDiagnosticCheckMessage(
-            message=message,
-            passed=passed,
-            sub_messages=sub_messages,
-        )
-
-    @staticmethod
     def _check_full_test_suite(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
             message="Has a full suite of tests, as determined by a code owner",
-            passed=library_metadata.has_full_test_suite,
+            passed=library_metadata.has_full_test_suite,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
         )
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: AugmentedLibraryMetadata,
+        library_metadata: Union[
+            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
+        ],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(
             message="Has passed a manual review by a code owner for code standards and style guides",
-            passed=library_metadata.manually_reviewed_code,
+            passed=library_metadata.manually_reviewed_code,  # type: ignore[union-attr] # could be ExpectationDescriptionDiagnostics
         )

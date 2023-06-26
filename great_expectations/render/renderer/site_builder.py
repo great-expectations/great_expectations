@@ -1,12 +1,14 @@
 import logging
 import os
 import traceback
+import urllib
 from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
-import great_expectations.exceptions as exceptions
+from great_expectations import exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
@@ -14,7 +16,7 @@ from great_expectations.data_context.store.html_site_store import (
 from great_expectations.data_context.store.json_site_store import JsonSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -109,7 +111,7 @@ class SiteBuilder:
                         class_name: DefaultJinjaIndexPageView
     """
 
-    def __init__(
+    def __init__(  # noqa: C901, PLR0912, PLR0913
         self,
         data_context,
         store_backend,
@@ -118,14 +120,19 @@ class SiteBuilder:
         show_how_to_buttons=True,
         site_section_builders=None,
         runtime_environment=None,
+        cloud_mode=False,
+        # <GX_RENAME> Deprecated 0.15.37
         ge_cloud_mode=False,
         **kwargs,
-    ):
+    ) -> None:
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
-        self.ge_cloud_mode = ge_cloud_mode
+        if ge_cloud_mode:
+            cloud_mode = ge_cloud_mode
+        self.cloud_mode = cloud_mode
+        self.ge_cloud_mode = cloud_mode
 
         usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
@@ -141,19 +148,21 @@ class SiteBuilder:
         # set custom_styles_directory if present
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
-        if plugins_directory and os.path.isdir(
-            os.path.join(plugins_directory, "custom_data_docs", "styles")
+        if plugins_directory and os.path.isdir(  # noqa: PTH112
+            os.path.join(  # noqa: PTH118
+                plugins_directory, "custom_data_docs", "styles"
+            )
         ):
-            custom_styles_directory = os.path.join(
+            custom_styles_directory = os.path.join(  # noqa: PTH118
                 plugins_directory, "custom_data_docs", "styles"
             )
 
         # set custom_views_directory if present
         custom_views_directory = None
-        if plugins_directory and os.path.isdir(
-            os.path.join(plugins_directory, "custom_data_docs", "views")
+        if plugins_directory and os.path.isdir(  # noqa: PTH112
+            os.path.join(plugins_directory, "custom_data_docs", "views")  # noqa: PTH118
         ):
-            custom_views_directory = os.path.join(
+            custom_views_directory = os.path.join(  # noqa: PTH118
                 plugins_directory, "custom_data_docs", "views"
             )
 
@@ -164,7 +173,7 @@ class SiteBuilder:
         # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        if ge_cloud_mode:
+        if cloud_mode:
             self.target_store = JsonSiteStore(
                 store_backend=store_backend, runtime_environment=runtime_environment
             )
@@ -232,7 +241,7 @@ class SiteBuilder:
                     "custom_views_directory": custom_views_directory,
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
-                    "ge_cloud_mode": self.ge_cloud_mode,
+                    "cloud_mode": self.cloud_mode,
                 },
                 config_defaults={"name": site_section_name, "module_name": module_name},
             )
@@ -264,7 +273,7 @@ class SiteBuilder:
                     if section_config not in FALSEY_YAML_STRINGS
                 },
                 "site_section_builders_config": site_section_builders,
-                "ge_cloud_mode": self.ge_cloud_mode,
+                "cloud_mode": self.cloud_mode,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -279,7 +288,7 @@ class SiteBuilder:
                 class_name=site_index_builder["class_name"],
             )
 
-    def clean_site(self):
+    def clean_site(self) -> None:
         self.target_store.clean_site()
 
     def build(self, resource_identifiers=None, build_index: bool = True):
@@ -303,9 +312,9 @@ class SiteBuilder:
         for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        # GE Cloud supports JSON Site Data Docs
+        # GX Cloud supports JSON Site Data Docs
         # Skip static assets, indexing
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             return
 
         self.target_store.copy_static_assets()
@@ -334,7 +343,7 @@ class SiteBuilder:
 
 
 class DefaultSiteSectionBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         data_context,
@@ -348,9 +357,11 @@ class DefaultSiteSectionBuilder:
         renderer=None,
         view=None,
         data_context_id=None,
+        cloud_mode=False,
+        # <GX_RENAME> Deprecated 0.15.37
         ge_cloud_mode=False,
         **kwargs,
-    ):
+    ) -> None:
         self.name = name
         self.data_context = data_context
         self.source_store = data_context.stores[source_store_name]
@@ -359,7 +370,10 @@ class DefaultSiteSectionBuilder:
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
-        self.ge_cloud_mode = ge_cloud_mode
+        if ge_cloud_mode:
+            cloud_mode = ge_cloud_mode
+        self.cloud_mode = cloud_mode
+        self.ge_cloud_mode = cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration "
@@ -402,7 +416,7 @@ class DefaultSiteSectionBuilder:
                 class_name=view["class_name"],
             )
 
-    def build(self, resource_identifiers=None):
+    def build(self, resource_identifiers=None) -> None:  # noqa: PLR0912
         source_store_keys = self.source_store.list_keys()
         if self.name == "validations" and self.validation_results_limit:
             source_store_keys = sorted(
@@ -412,13 +426,13 @@ class DefaultSiteSectionBuilder:
         for resource_key in source_store_keys:
             # if no resource_identifiers are passed, the section
             # builder will build
-            # a page for every keys in its source store.
+            # a page for every key in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_name_filter and not isinstance(resource_key, GeCloudIdentifier):
+            if self.run_name_filter and not isinstance(resource_key, GXCloudIdentifier):
                 if not resource_key_passes_run_name_filter(
                     resource_key, self.run_name_filter
                 ):
@@ -452,7 +466,6 @@ class DefaultSiteSectionBuilder:
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
-
                     logger.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
@@ -460,14 +473,14 @@ class DefaultSiteSectionBuilder:
             try:
                 rendered_content = self.renderer_class.render(resource)
 
-                if self.ge_cloud_mode:
+                if self.cloud_mode:
                     self.target_store.set(
-                        GeCloudIdentifier(
-                            resource_type="rendered_data_doc",
+                        GXCloudIdentifier(
+                            resource_type=GXCloudRESTResource.RENDERED_DATA_DOC
                         ),
                         rendered_content,
                         source_type=resource_key.resource_type,
-                        source_id=resource_key.ge_cloud_id,
+                        source_id=resource_key.id,
                     )
                 else:
                     viewable_content = self.view_class.render(
@@ -498,7 +511,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class DefaultSiteIndexBuilder:
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name,
         site_name,
@@ -514,7 +527,7 @@ class DefaultSiteIndexBuilder:
         data_context_id=None,
         source_stores=None,
         **kwargs,
-    ):
+    ) -> None:
         # NOTE: This method is almost identical to DefaultSiteSectionBuilder
         self.name = name
         self.site_name = site_name
@@ -568,7 +581,7 @@ class DefaultSiteIndexBuilder:
                 class_name=view["class_name"],
             )
 
-    def add_resource_info_to_index_links_dict(
+    def add_resource_info_to_index_links_dict(  # noqa: PLR0913
         self,
         index_links_dict,
         expectation_suite_name,
@@ -589,7 +602,7 @@ class DefaultSiteIndexBuilder:
 
         if run_id:
             filepath = (
-                os.path.join(
+                os.path.join(  # noqa: PTH118
                     "validations",
                     *expectation_suite_name.split("."),
                     *run_id.to_tuple(),
@@ -599,11 +612,15 @@ class DefaultSiteIndexBuilder:
             )
         else:
             filepath = (
-                os.path.join("expectations", *expectation_suite_name.split("."))
+                os.path.join(  # noqa: PTH118
+                    "expectations", *expectation_suite_name.split(".")
+                )
                 + ".html"
             )
 
-        expectation_suite_filepath = os.path.join(
+        url_encoded_filepath = urllib.parse.quote(filepath)
+
+        expectation_suite_filepath = os.path.join(  # noqa: PTH118
             "expectations", *expectation_suite_name.split(".")
         )
         expectation_suite_filepath += ".html"
@@ -611,7 +628,7 @@ class DefaultSiteIndexBuilder:
         index_links_dict[f"{section_name}_links"].append(
             {
                 "expectation_suite_name": expectation_suite_name,
-                "filepath": filepath,
+                "filepath": url_encoded_filepath,
                 "run_id": run_id,
                 "batch_identifier": batch_identifier,
                 "validation_success": validation_success,
@@ -675,7 +692,7 @@ class DefaultSiteIndexBuilder:
             "How to Create Expectations",
             "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
         )
-        see_glossary = CallToActionButton(
+        _ = CallToActionButton(
             "See More Kinds of Expectations",
             "https://greatexpectations.io/expectations",
         )
@@ -683,7 +700,7 @@ class DefaultSiteIndexBuilder:
             "How to Validate Data",
             "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint",
         )
-        customize_data_docs = CallToActionButton(
+        _ = CallToActionButton(
             "How to Customize Data Docs",
             "https://docs.greatexpectations.io/docs/reference/data_docs#customizing-html-documentation",
         )
@@ -816,9 +833,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 if (validations and validations not in FALSEY_YAML_STRINGS)
                 else "profiling"
             )
-            validation_and_profiling_result_source_keys = self.data_context.stores[
-                self.site_section_builders_config[source_store].get("source_store_name")
-            ].list_keys()
+            validation_and_profiling_result_source_keys = set(
+                self.data_context.stores[
+                    self.site_section_builders_config[source_store].get(
+                        "source_store_name"
+                    )
+                ].list_keys()
+            )
             validation_and_profiling_result_site_keys = [
                 ValidationResultIdentifier.from_tuple(validation_result_tuple)
                 for validation_result_tuple in self.target_store.store_backends[
@@ -948,6 +969,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
 
 class CallToActionButton:
-    def __init__(self, title, link):
+    def __init__(self, title, link) -> None:
         self.title = title
         self.link = link

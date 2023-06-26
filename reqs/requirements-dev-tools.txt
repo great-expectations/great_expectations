@@ -1,0 +1,4 @@
+jupyter
+jupyterlab
+matplotlib
+scikit-learn

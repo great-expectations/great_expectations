@@ -1,19 +1,19 @@
 import os
-from uuid import UUID
 
 import boto3
 import pytest
 from moto import mock_sns
 
 from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     BatchIdentifier,
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
+from great_expectations.util import get_context
 
 
 @pytest.fixture(scope="module")
@@ -79,7 +79,7 @@ def basic_data_context_config_for_validation_operator():
 def basic_in_memory_data_context_for_validation_operator(
     basic_data_context_config_for_validation_operator,
 ):
-    return BaseDataContext(basic_data_context_config_for_validation_operator)
+    return get_context(basic_data_context_config_for_validation_operator)
 
 
 @pytest.fixture(scope="module")
@@ -113,8 +113,9 @@ def validation_result_suite():
 
 @pytest.fixture(scope="module")
 def validation_result_suite_ge_cloud_identifier(validation_result_suite_ge_cloud_id):
-    return GeCloudIdentifier(
-        resource_type="contract", ge_cloud_id=validation_result_suite_ge_cloud_id
+    return GXCloudIdentifier(
+        resource_type=GXCloudRESTResource.CHECKPOINT,
+        id=validation_result_suite_ge_cloud_id,
     )
 
 
@@ -134,7 +135,7 @@ def validation_result_suite_with_ge_cloud_id(validation_result_suite_ge_cloud_id
             "expectation_suite_name": "asset.default",
             "run_id": "test_100",
         },
-        ge_cloud_id=UUID(validation_result_suite_ge_cloud_id),
+        ge_cloud_id=validation_result_suite_ge_cloud_id,
     )
 
 

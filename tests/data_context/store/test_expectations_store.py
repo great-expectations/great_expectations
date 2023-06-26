@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ExpectationsStore
@@ -10,12 +9,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
 
 
+@pytest.mark.integration
 def test_expectations_store(empty_data_context):
     context: DataContext = empty_data_context
     my_store = ExpectationsStore()
@@ -30,7 +31,7 @@ def test_expectations_store(empty_data_context):
     )
 
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning", data_context=context
     )
@@ -41,7 +42,7 @@ def test_expectations_store(empty_data_context):
         ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
     )
     ns_2_dict: dict = my_store.get(ns_2)
-    ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+    ns_2_suite = ExpectationSuite(**ns_2_dict, data_context=context)
     assert ns_2_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.failure", data_context=context
     )
@@ -52,6 +53,7 @@ def test_expectations_store(empty_data_context):
     }
 
 
+@pytest.mark.integration
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     context: DataContext = empty_data_context
     # Use sqlite so we don't require postgres for this test.
@@ -79,7 +81,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     # initial set and check if first suite exists
     my_store.set(ns_1, default_suite)
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
@@ -96,7 +98,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     )
     my_store.set(ns_1, updated_suite)
     ns_1_dict: dict = my_store.get(ns_1)
-    ns_1_suite: ExpectationSuite = ExpectationSuite(**ns_1_dict, data_context=context)
+    ns_1_suite = ExpectationSuite(**ns_1_dict, data_context=context)
     assert ns_1_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
@@ -110,7 +112,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
         ExpectationSuite(expectation_suite_name="a.b.c.failure", data_context=context),
     )
     ns_2_dict: dict = my_store.get(ns_2)
-    ns_2_suite: ExpectationSuite = ExpectationSuite(**ns_2_dict, data_context=context)
+    ns_2_suite = ExpectationSuite(**ns_2_dict, data_context=context)
     assert ns_2_suite == ExpectationSuite(
         expectation_suite_name="a.b.c.failure",
         data_context=context,
@@ -122,6 +124,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     }
 
 
+@pytest.mark.unit
 def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     """
     What does this test and why?
@@ -135,6 +138,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
 
+@pytest.mark.integration
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -142,17 +146,16 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     What does this test and why?
     A store with the same config (must be persistent store) should report the same store_backend_id
     """
-    path = "dummy_str"
-    project_path = str(
-        tmp_path_factory.mktemp(
-            "test_expectations_store_report_same_id_with_same_configuration__dir"
-        )
+    full_test_dir = tmp_path_factory.mktemp(
+        "test_expectations_store_report_same_id_with_same_configuration__dir"
     )
+    test_dir = full_test_dir.parts[-1]
+    project_path = str(full_test_dir)
 
     assert (
         gen_directory_tree_str(project_path)
-        == """\
-test_expectations_store_report_same_id_with_same_configuration__dir0/
+        == f"""\
+{test_dir}/
 """
     )
 
@@ -164,14 +167,15 @@ test_expectations_store_report_same_id_with_same_configuration__dir0/
         }
     )
     # Check successful initialization with a store_backend_id
-    initialized_directory_tree_with_store_backend_id = """\
-test_expectations_store_report_same_id_with_same_configuration__dir0/
+    initialized_directory_tree_with_store_backend_id = f"""\
+{test_dir}/
     .ge_store_backend_id
 """
     assert (
         gen_directory_tree_str(project_path)
         == initialized_directory_tree_with_store_backend_id
     )
+
     assert persistent_expectations_store.store_backend_id is not None
 
     # Check that a duplicate store reports the same store_backend_id
@@ -196,6 +200,7 @@ test_expectations_store_report_same_id_with_same_configuration__dir0/
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -232,3 +237,29 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = ExpectationsStore(store_name="expectations_store")
+
+    suite_id = "03d61d4e-003f-48e7-a3b2-f9f842384da3"
+    suite_config = {
+        "expectation_suite_name": "my_suite",
+    }
+    response_json = {
+        "data": {
+            "id": suite_id,
+            "attributes": {
+                "suite": suite_config,
+            },
+        }
+    }
+
+    expected = suite_config
+    expected["ge_cloud_id"] = suite_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected

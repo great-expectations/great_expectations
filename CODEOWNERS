@@ -1,3 +1,5 @@
 # Each line is a file pattern followed by one or more owners.
 
-sidebars.js    @donaldheppner
+sidebars.js    @donaldheppner @Rachel-Reverie @tjholsman
+
+great_expectations/core/usage_statistics/schemas.py @tannerbeam

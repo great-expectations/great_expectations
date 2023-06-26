@@ -18,10 +18,13 @@ Usage:
 """
 import sys
 
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.data_context import DataContext
+from great_expectations.checkpoint.types.checkpoint_result import (
+    CheckpointResult,
+)
+from great_expectations.data_context import FileDataContext
+from great_expectations.util import get_context
 
-data_context: DataContext = DataContext(context_root_dir="{1:s}")
+data_context: FileDataContext = get_context(context_root_dir="{1:s}")
 
 result: CheckpointResult = data_context.run_checkpoint(
     checkpoint_name="{0:s}",

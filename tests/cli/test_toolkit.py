@@ -4,14 +4,14 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.toolkit import (
     get_relative_path_from_config_file_to_base_path,
     is_cloud_file_url,
 )
-from great_expectations.data_context import DataContext
 from great_expectations.exceptions import UnsupportedConfigVersionError
+from great_expectations.util import get_context
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -41,7 +41,7 @@ def test_launch_jupyter_notebook_env_set_in_env(mock_subprocess):
 
 def test_load_data_context_with_error_handling_v1_config(v10_project_directory):
     with pytest.raises(UnsupportedConfigVersionError):
-        DataContext(context_root_dir=v10_project_directory)
+        get_context(context_root_dir=v10_project_directory)
 
 
 def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
@@ -113,7 +113,7 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
     fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
 
     for fixture in fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
         # Create files and re-run assertions
@@ -146,7 +146,6 @@ def test_parse_cli_config_file_location_posix_paths(tmp_path_factory):
 def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension(
     tmp_path_factory,
 ):
-
     filename_no_extension_fixtures = [
         {
             "input_path": "relative/path/to/file/no_extension",
@@ -172,7 +171,7 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
     ]
 
     for fixture in filename_no_extension_fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
     # Create files and re-run assertions
@@ -204,7 +203,6 @@ def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_exten
 
 
 def test_parse_cli_config_file_location_empty_paths():
-
     posix_fixtures = [
         {
             "input_path": None,
@@ -300,7 +298,7 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
 
     for fixture in fixtures:
-        with pytest.raises(ge_exceptions.ConfigNotFoundError):
+        with pytest.raises(gx_exceptions.ConfigNotFoundError):
             toolkit.parse_cli_config_file_location(fixture["input_path"])
 
     # Create files and re-run assertions
@@ -308,39 +306,46 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     # We are unable to create files with windows paths on our unix test CI
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_local_posix():
     assert not is_cloud_file_url("bucket/files/ ")
     assert not is_cloud_file_url("./bucket/files/ ")
     assert not is_cloud_file_url("/full/path/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_file_url():
     assert not is_cloud_file_url("file://bucket/files/ ")
     assert not is_cloud_file_url("file://./bucket/files/ ")
     assert not is_cloud_file_url("file:///full/path/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_ftp_url():
     assert is_cloud_file_url("ftp://bucket/files/ ")
     assert is_cloud_file_url("ftp://./bucket/files/ ")
     assert is_cloud_file_url("ftp:///full/path/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_s3():
     assert is_cloud_file_url("s3://bucket/files/")
     assert is_cloud_file_url(" s3://bucket/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_google_storage():
     assert is_cloud_file_url("gs://bucket/files/")
     assert is_cloud_file_url(" gs://bucket/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_azure_storage():
     assert is_cloud_file_url("wasb://bucket/files/")
     assert is_cloud_file_url(" wasb://bucket/files/ ")
 
 
+@pytest.mark.cloud
 def test_is_cloud_file_path_http_url():
     assert is_cloud_file_url("http://bucket/files/")
     assert is_cloud_file_url(" http://bucket/files/ ")
@@ -517,3 +522,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_batch_request_using_datasource_name_has_data_asset_name_(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    batch_request = toolkit.get_batch_request_using_datasource_name(
+        in_memory_runtime_context, "my_datasource"
+    )
+    assert batch_request["data_asset_name"] == "default_data_asset_name"

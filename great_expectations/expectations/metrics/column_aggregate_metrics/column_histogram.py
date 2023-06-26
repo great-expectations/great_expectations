@@ -1,9 +1,15 @@
 import copy
 import logging
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import numpy as np
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import (
     convert_to_json_serializable,
     get_sql_dialect_floating_point_infinity_value,
@@ -13,12 +19,13 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
-from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -28,30 +35,33 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
     value_keys = ("bins",)
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
-        hist, bin_edges = np.histogram(df[column], bins, density=False)
+        column_series: pd.Series = df[column]
+        column_null_elements_cond: pd.Series = column_series.isnull()
+        column_nonnull_elements: pd.Series = column_series[~column_null_elements_cond]
+        hist, bin_edges = np.histogram(column_nonnull_elements, bins, density=False)
         return list(hist)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         """return a list of counts corresponding to bins
 
@@ -65,12 +75,69 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         column = accessor_domain_kwargs["column"]
         bins = metric_value_kwargs["bins"]
 
-        case_conditions = []
-        idx = 0
         if isinstance(bins, np.ndarray):
             bins = bins.tolist()
         else:
             bins = list(bins)
+
+        case_conditions = []
+        if len(bins) == 1 and not (
+            (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=True
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_np", negative=False
+                )
+            )
+            or (
+                bins[0]
+                == get_sql_dialect_floating_point_infinity_value(
+                    schema="api_cast", negative=False
+                )
+            )
+        ):
+            # Single-valued column data are modeled using "impulse" (or "sample") distributions (on open interval).
+            case_conditions.append(
+                sa.func.sum(
+                    sa.case(
+                        (
+                            sa.and_(
+                                float(bins[0] - np.finfo(float).eps)
+                                < sa.column(column),
+                                sa.column(column)
+                                < float(bins[0] + np.finfo(float).eps),
+                            ),
+                            1,
+                        ),
+                        else_=0,
+                    )
+                ).label("bin_0")
+            )
+            query = (
+                sa.select(*case_conditions)
+                .where(
+                    sa.column(column) != None,  # noqa: E711
+                )
+                .select_from(selectable)
+            )
+
+            # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
+            return convert_to_json_serializable(
+                list(execution_engine.execute_query(query).fetchone())
+            )
+
+        idx = 0
 
         # If we have an infinite lower bound, don't express that in sql
         if (
@@ -86,24 +153,28 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         ):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
+                    sa.case((sa.column(column) < bins[idx + 1], 1), else_=0)
                 ).label(f"bin_{str(idx)}")
             )
             idx += 1
 
-        for idx in range(idx, len(bins) - 2):
+        negative_boundary: float
+        positive_boundary: float
+        for idx in range(  # noqa: B020 # loop-variable-overrides-iterator
+            idx, len(bins) - 2
+        ):
+            negative_boundary = float(bins[idx])
+            positive_boundary = float(bins[idx + 1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    bins[idx] <= sa.column(column),
-                                    sa.column(column) < bins[idx + 1],
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.and_(
+                                negative_boundary <= sa.column(column),
+                                sa.column(column) < positive_boundary,
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label(f"bin_{str(idx)}")
@@ -120,51 +191,51 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 schema="api_cast", negative=False
             )
         ):
+            negative_boundary = float(bins[-2])
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                    sa.case((negative_boundary <= sa.column(column), 1), else_=0)
                 ).label(f"bin_{str(len(bins) - 1)}")
             )
         else:
+            negative_boundary = float(bins[-2])
+            positive_boundary = float(bins[-1])
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    bins[-2] <= sa.column(column),
-                                    sa.column(column) <= bins[-1],
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.and_(
+                                negative_boundary <= sa.column(column),
+                                sa.column(column) <= positive_boundary,
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label(f"bin_{str(len(bins) - 1)}")
             )
 
         query = (
-            sa.select(case_conditions)
+            sa.select(*case_conditions)
             .where(
-                sa.column(column) != None,
+                sa.column(column) != None,  # noqa: E711
             )
             .select_from(selectable)
         )
 
         # Run the data through convert_to_json_serializable to ensure we do not have Decimal types
-        hist = convert_to_json_serializable(
-            list(execution_engine.engine.execute(query).fetchone())
+        return convert_to_json_serializable(
+            list(execution_engine.execute_query(query).fetchone())
         )
-        return hist
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
@@ -176,6 +247,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
+
         if bins[0] == -np.inf or bins[0] == -float("inf"):
             added_min = False
             bins[0] = -float("inf")
@@ -191,7 +263,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             bins.append(float("inf"))
 
         temp_column = df.select(column).where(F.col(column).isNotNull())
-        bucketizer = Bucketizer(splits=bins, inputCol=column, outputCol="buckets")
+        bucketizer = pyspark.Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets"
+        )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 
         # This is painful to do, but: bucketizer cannot handle values outside of a range

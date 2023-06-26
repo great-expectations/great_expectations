@@ -18,10 +18,16 @@ from great_expectations.core.usage_statistics.schemas import (
 
 def test_anonymized_name_validation():
     string = "aa41efe0a1b3eeb9bf303e4561ff8392"
-    jsonschema.validate(string, anonymized_string_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_string_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(string)
 
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(string[:5], anonymized_string_schema)
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_string_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(string[:5])
 
 
 def test_anonymized_datasource_validation():
@@ -29,21 +35,30 @@ def test_anonymized_datasource_validation():
         "anonymized_name": "aa41efe0a1b3eeb9bf303e4561ff8392",
         "parent_class": "hello",
     }
-    jsonschema.validate(record, anonymized_datasource_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_datasource_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(record)
 
     record = {
         "anonymized_name": "aa41efe0a1b3eeb9bf303e4561ff8392",
         "parent_class": "hello",
         "anonymized_class": "aa41efe0a1b3eeb9bf303e4561ff8392",
     }
-    jsonschema.validate(record, anonymized_datasource_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_datasource_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(record)
     record = {
         "anonymized_name": "aa41efe0a1b3eeb9bf303e4561ff8392",
         "parent_class": "SparkDFDataset",
         "anonymized_class": "aa41efe0a1b3eeb9bf303e4561ff8392",
         "sqlalchemy_dialect": "postgres",
     }
-    jsonschema.validate(record, anonymized_datasource_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_datasource_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(record)
 
 
 def test_init_payload_validation():
@@ -108,7 +123,6 @@ def test_init_payload_validation():
                 },
                 "anonymized_site_index_builder": {
                     "parent_class": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         ],
@@ -128,7 +142,10 @@ def test_init_payload_validation():
             }
         ],
     }
-    jsonschema.validate(payload, anonymized_init_payload_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_init_payload_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(payload)
 
 
 def test_run_val_op_message():
@@ -142,9 +159,14 @@ def test_run_val_op_message():
         "event_time": "2020-03-26T23:02:17.932Z",
         "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
+        "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
-    jsonschema.validate(message, anonymized_usage_statistics_record_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_usage_statistics_record_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(message)
 
 
 def test_anonymized_domain_builder_schema():
@@ -169,7 +191,10 @@ def test_anonymized_domain_builder_schema():
     ]
 
     for message in messages:
-        jsonschema.validate(message, anonymized_domain_builder_schema)
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_domain_builder_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
 
 
 def test_anonymized_parameter_builder_schema() -> None:
@@ -197,7 +222,10 @@ def test_anonymized_parameter_builder_schema() -> None:
     ]
 
     for message in messages:
-        jsonschema.validate(message, anonymized_parameter_builder_schema)
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_parameter_builder_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
 
 
 def test_anonymized_expectation_configuration_builder_schema() -> None:
@@ -256,7 +284,10 @@ def test_anonymized_rule_schema():
         ],
     }
 
-    jsonschema.validate(message, anonymized_rule_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_rule_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(message)
 
 
 def test_anonymized_rule_based_profiler_validation():
@@ -303,14 +334,78 @@ def test_anonymized_rule_based_profiler_validation():
     }
 
     # Populated payload (valid)
-    jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_rule_based_profiler_run_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(message)
 
     # Remove mandatory field (invalid)
     with pytest.raises(jsonschema.ValidationError) as e:
         message.pop("variable_count")
-        jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
-    assert "'variable_count' is a required property" in str(e.value)
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_rule_based_profiler_run_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
+
+    expected_error_msg = "'variable_count' is a required property"
+    assert any(
+        expected_error_msg in args
+        for args in [context.args for context in e.value.context]
+    )
 
     # Empty payload (valid)
     message.clear()
-    jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
+    jsonschema.validators.Draft202012Validator(
+        schema=anonymized_rule_based_profiler_run_schema,
+        format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+    ).validate(message)
+
+
+def test_uuid_format_validation_success():
+    message = {
+        "event_payload": {
+            "anonymized_operator_name": "50daa62a8739db21009f452f7e36153b",
+        },
+        "event": "data_context.run_validation_operator",
+        "success": True,
+        "version": "1.0.0",
+        "event_time": "2020-03-26T23:02:17.932Z",
+        "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+        "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
+        "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
+        "ge_version": "0.9.7+203.ge3a97f44.dirty",
+    }
+    try:
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_usage_statistics_record_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
+    except jsonschema.ValidationError as e:
+        assert False, e.message
+
+
+def test_uuid_format_validation_failure():
+    message = {
+        "event_payload": {
+            "anonymized_operator_name": "50daa62a8739db21009f452f7e36153b",
+        },
+        "event": "data_context.run_validation_operator",
+        "success": True,
+        "version": "1.0.0",
+        "event_time": "2020-03-26T23:02:17.932Z",
+        "data_context_id": "705dd2a2-27f8-470f-9ebe-e7058fd7a534",
+        "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5 other_invalid_text",
+        "mac_address": "8422aebe6c3db9612f79d14c6b9280e65e53ef969db3aff4281e3035fb3ce86f",
+        "oss_id": None,
+        "ge_version": "0.9.7+203.ge3a97f44.dirty",
+    }
+    with pytest.raises(jsonschema.ValidationError) as e:
+        jsonschema.validators.Draft202012Validator(
+            schema=anonymized_usage_statistics_record_schema,
+            format_checker=jsonschema.validators.Draft202012Validator.FORMAT_CHECKER,
+        ).validate(message)
+    assert (
+        "'4f6deb55-8fbd-4131-9f97-b42b0902eae5 other_invalid_text' is not a 'uuid'"
+        in e.value.message
+    )

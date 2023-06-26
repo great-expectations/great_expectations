@@ -7,26 +7,31 @@ WARNING: This module is experimental.
 
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
-from typing import Any, Optional
+from typing import Generic, Optional, TypeVar
 
-from urllib3 import connectionpool, poolmanager
+import requests
 
+from great_expectations.compatibility.google import python_bigquery
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
+T = TypeVar("T")
 
-class AsyncResult:
+
+class AsyncResult(Generic[T]):
     """Wrapper around Future to facilitate single code path
     for both when concurrency is enabled and disabled.
 
     WARNING: This class is experimental.
     """
 
-    def __init__(self, future: Optional[Future] = None, value: Optional[Any] = None):
+    def __init__(
+        self, future: Optional[Future] = None, value: Optional[T] = None
+    ) -> None:
         """AsyncResult instances are created by AsyncExecutor.submit() and should not otherwise be created directly."""
         self._future = future
         self._value = value
 
-    def result(self):
+    def result(self) -> T:
         """Return the value corresponding to the AsyncExecutor.submit() call, blocking if necessary until the execution
         finishes.
         """
@@ -44,7 +49,7 @@ class AsyncExecutor(AbstractContextManager):
         self,
         concurrency_config: Optional[ConcurrencyConfig],
         max_workers: int,
-    ):
+    ) -> None:
         """Initializes a new AsyncExecutor instance used to organize code for multithreaded execution.
 
         If multithreading is disabled, all execution will be done synchronously (e.g. on the main thread) during the
@@ -80,7 +85,7 @@ class AsyncExecutor(AbstractContextManager):
             else None
         )
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.shutdown()
         # Do NOT use the context manager exception arguments in order to get the desired default behavior (i.e. any
         # exception is NOT suppressed and the exception is propagated normally upon exit from this method). For more
@@ -94,12 +99,12 @@ class AsyncExecutor(AbstractContextManager):
         """
         if self._execute_concurrently:
             return AsyncResult(
-                future=self._thread_pool_executor.submit(fn, *args, **kwargs)
+                future=self._thread_pool_executor.submit(fn, *args, **kwargs)  # type: ignore[union-attr]
             )
         else:
             return AsyncResult(value=fn(*args, **kwargs))
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Clean-up the resources associated with the AsyncExecutor and blocks until all running async results finish
         executing.
 
@@ -114,7 +119,9 @@ class AsyncExecutor(AbstractContextManager):
         return self._execute_concurrently
 
 
-def patch_https_connection_pool(concurrency_config: ConcurrencyConfig):
+def patch_https_connection_pool(
+    concurrency_config: ConcurrencyConfig, google_cloud_project: str
+) -> None:
     """Patch urllib3 to enable a higher default max pool size to reduce concurrency bottlenecks.
 
     To have any effect, this method must be called before any database connections are made, e.g. by scripts leveraging
@@ -126,13 +133,13 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig):
     ###
     # NOTE: 20210907 - jdimatteo: The python requests pool size can bottleneck concurrency and result in warnings
     # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
-    # bigquery.googleapis.com". To remove this bottleneck, patch the https connection pool as described at
-    # https://stackoverflow.com/a/22253656/1007353. After upgrading from the deprecated packages pybigquery and
-    # google-cloud-python to python-bigquery-sqlalchemy and python-bigquery, this patching code can be replaced
-    # following the instructions at https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
-    class HTTPSConnectionPoolWithHigherMaxSize(connectionpool.HTTPSConnectionPool):
-        def __init__(self, *args, **kwargs):
-            kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)
-            super().__init__(*args, **kwargs)
+    # bigquery.googleapis.com". To remove this bottleneck, following the instructions at
+    # https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
+    if not concurrency_config.enabled:
+        return
 
-    poolmanager.pool_classes_by_scheme["https"] = HTTPSConnectionPoolWithHigherMaxSize
+    bq = python_bigquery.Client()
+
+    # Increase the HTTP pool size to avoid the "Connection pool is full, discarding connection: bigquery.googleapis.com"
+    adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
+    bq._http.mount("https://", adapter)

@@ -1,15 +1,31 @@
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
+from typing import TYPE_CHECKING, Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation import (
+    BatchExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import (
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
 
+class ExpectColumnPairCramersPhiValueToBeLessThan(BatchExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "production",
@@ -46,50 +62,40 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
     )
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column_A", RendererValueType.STRING),
+            ("column_B", RendererValueType.STRING),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs, ["column_A", "column_B"]
-        )
-        if (params["column_A"] is None) or (params["column_B"] is None):
-            template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
-        else:
-            template_str = "Values in $column_A and $column_B must be independent."
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params_with_json_schema = {
-            "column_A": {"schema": {"type": "string"}, "value": params.get("column_A")},
-            "column_B": {"schema": {"type": "string"}, "value": params.get("column_B")},
-        }
-        return (template_str, params_with_json_schema, styling)
+        params = renderer_configuration.params
+
+        if not params.column_A or not params.column_B:
+            renderer_configuration.template_str = " unrecognized kwargs for expect_column_pair_cramers_phi_value_to_be_less_than: missing column."
+        else:
+            renderer_configuration.template_str = (
+                "Values in $column_A and $column_B must be independent."
+            )
+
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs, ["column_A", "column_B"]
@@ -113,13 +119,12 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         return [rendered_string_template_content]
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         observed_value = result.result.get("observed_value")

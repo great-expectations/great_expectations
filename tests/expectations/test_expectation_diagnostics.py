@@ -1,11 +1,8 @@
-import pytest
-
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationLegacyTestCaseAdapter,
-    ExpectationTestCase,
     ExpectationTestDataCases,
     TestData,
 )
@@ -14,13 +11,13 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
     ExpectationDiagnosticMaturityMessages,
-    ExpectationExecutionEngineDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
     RendererTestDiagnostics,
 )
 
 expectation_test_data_case = ExpectationTestDataCases(
+    dataset_name="expectation_diagnostics_test_data",
     data=TestData(
         **{
             "a": ["aaa", "abb", "acc", "add", "bee"],
@@ -106,7 +103,9 @@ edr = ExpectationDiagnostics(
         "SparkDFExecutionEngine": True,
     },
     tests=[],
+    backend_test_result_counts=[],
     errors=[],
+    coverage_score=5,
     maturity_checklist=ExpectationDiagnosticMaturityMessages(
         experimental=[
             ExpectationDiagnosticCheckMessage(
@@ -143,10 +142,11 @@ def test__convert_checks_into_output_message():
     assert (
         edr._convert_checks_into_output_message(
             class_name="ExpectColumnValuesToEqualThree",
+            maturity_level="EXPERIMENTAL",
             maturity_messages=edr.maturity_checklist,
         )
         == """\
-Completeness checklist for ExpectColumnValuesToEqualThree:
+Completeness checklist for ExpectColumnValuesToEqualThree (EXPERIMENTAL):
  ✔ AAA
    BBB
    CCC
@@ -162,16 +162,25 @@ def test__count_unexpected_test_cases___with_everything_passing():
             test_title="positive_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="negative_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="other_negative_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
     ]
     assert edr._count_unexpected_test_cases(tests) == 0
@@ -183,16 +192,25 @@ def test__count_unexpected_test_cases__with_one_failure():
             test_title="positive_test_with_mostly",
             backend="pandas",
             test_passed=False,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="negative_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="other_negative_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
     ]
     assert edr._count_unexpected_test_cases(tests) == 1
@@ -204,30 +222,41 @@ def test__count_unexpected_test_cases__with_an_error():
             test_title="positive_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="negative_test_with_mostly",
             backend="pandas",
             test_passed=True,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="other_negative_test_with_mostly",
             backend="pandas",
             test_passed=False,
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="test_that_will_error_out",
             backend="pandas",
             test_passed=False,
-            error_message='Error: The column "column_that_doesnt_exist" in BatchData does not exist.',
-            stack_trace='Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/execution_engine/execution_engine.py", line 368, in resolve_metrics\n    **metric_provider_kwargs\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/metrics/metric_provider.py", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py", line 327, in inner_func\n    message=f\'Error: The column "{column_name}" in BatchData does not exist.\'\ngreat_expectations.exceptions.exceptions.InvalidMetricAccessorDomainKwargsKeyError: Error: The column "column_that_doesnt_exist" in BatchData does not exist.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/expectation.py", line 1286, in _get_test_results\n    test=exp_test["test"],\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/self_check/util.py", line 1904, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 347, in inst_expectation\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 308, in inst_expectation\n    runtime_configuration=basic_runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/expectation.py", line 830, in validate\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 572, in graph_validate\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 523, in graph_validate\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 750, in resolve_validation_graph\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 720, in resolve_validation_graph\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 1634, in _resolve_metrics\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/execution_engine/execution_engine.py", line 372, in resolve_metrics\n    message=str(e), failed_metrics=(metric_to_resolve,)\ngreat_expectations.exceptions.exceptions.MetricResolutionError: Error: The column "column_that_doesnt_exist" in BatchData does not exist.\n',
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
         ExpectationTestDiagnostics(
             test_title="another_test_that_will_error_out",
             backend="pandas",
             test_passed=False,
-            error_message='Error: The column "broken_column" in BatchData does not exist.',
-            stack_trace='Traceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/execution_engine/execution_engine.py", line 368, in resolve_metrics\n    **metric_provider_kwargs\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/metrics/metric_provider.py", line 55, in inner_func\n    return metric_fn(*args, **kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/metrics/map_metric_provider.py", line 327, in inner_func\n    message=f\'Error: The column "{column_name}" in BatchData does not exist.\'\ngreat_expectations.exceptions.exceptions.InvalidMetricAccessorDomainKwargsKeyError: Error: The column "broken_column" in BatchData does not exist.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/expectation.py", line 1286, in _get_test_results\n    test=exp_test["test"],\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/self_check/util.py", line 1904, in evaluate_json_test_cfe\n    result = getattr(validator, expectation_type)(**runtime_kwargs)\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 347, in inst_expectation\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 308, in inst_expectation\n    runtime_configuration=basic_runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/expectations/expectation.py", line 830, in validate\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 572, in graph_validate\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 523, in graph_validate\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 750, in resolve_validation_graph\n    raise err\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 720, in resolve_validation_graph\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/validator/validator.py", line 1634, in _resolve_metrics\n    runtime_configuration=runtime_configuration,\n  File "/Users/abe/Documents/superconductive/tools/great_expectations/great_expectations/execution_engine/execution_engine.py", line 372, in resolve_metrics\n    message=str(e), failed_metrics=(metric_to_resolve,)\ngreat_expectations.exceptions.exceptions.MetricResolutionError: Error: The column "broken_column" in BatchData does not exist.\n',
+            include_in_gallery=False,
+            validation_result=[],
+            error_diagnostics=None,
         ),
     ]
     assert edr._count_unexpected_test_cases(tests) == 3
@@ -247,11 +276,17 @@ def test__check_example_cases__with_enough_test_cases_but_all_failing():
                 test_title="positive_test_exact_mostly_w_one_non_matching_value",
                 backend="pandas",
                 test_passed=False,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
             ExpectationTestDiagnostics(
                 test_title="negative_test_insufficient_mostly_and_one_non_matching_value",
                 backend="pandas",
                 test_passed=False,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
         ],
     ) == ExpectationDiagnosticCheckMessage(
@@ -270,11 +305,17 @@ def test__check_example_cases__with_enough_test_cases_but_some_failing():
                 test_title="positive_test_exact_mostly_w_one_non_matching_value",
                 backend="pandas",
                 test_passed=True,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
             ExpectationTestDiagnostics(
                 test_title="negative_test_insufficient_mostly_and_one_non_matching_value",
                 backend="pandas",
                 test_passed=False,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
         ],
     ) == ExpectationDiagnosticCheckMessage(
@@ -293,11 +334,17 @@ def test__check_example_cases__with_enough_test_cases_and_no_failing():
                 test_title="positive_test_exact_mostly_w_one_non_matching_value",
                 backend="pandas",
                 test_passed=True,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
             ExpectationTestDiagnostics(
                 test_title="negative_test_insufficient_mostly_and_one_non_matching_value",
                 backend="pandas",
                 test_passed=True,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
         ],
     ) == ExpectationDiagnosticCheckMessage(
@@ -310,6 +357,7 @@ def test__check_example_cases__with_enough_test_cases_and_no_failing():
 
 def test__check_example_cases__with_enough_not_enough_test_cases_but_no_failing():
     expectation_test_data_case = ExpectationTestDataCases(
+        dataset_name="expectation_diagnostics_example_test_case",
         data=TestData(
             **{
                 "a": ["aaa", "abb", "acc", "add", "bee"],
@@ -341,6 +389,9 @@ def test__check_example_cases__with_enough_not_enough_test_cases_but_no_failing(
                 test_title="negative_test_insufficient_mostly_and_one_non_matching_value",
                 backend="pandas",
                 test_passed=True,
+                include_in_gallery=False,
+                validation_result=[],
+                error_diagnostics=None,
             ),
         ],
     ) == ExpectationDiagnosticCheckMessage(

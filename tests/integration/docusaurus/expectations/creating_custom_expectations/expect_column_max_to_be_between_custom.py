@@ -1,6 +1,8 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -11,21 +13,20 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     ExpectationValidationResult,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    MetricDomainTypes,
-    MetricFunctionTypes,
     column_aggregate_partial,
     column_aggregate_value,
-    metric_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -33,21 +34,23 @@ from great_expectations.render.util import (
 )
 
 
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py ColumnCustomMax class_def">
 class ColumnCustomMax(ColumnAggregateMetricProvider):
+    # </snippet>
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
-
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_name">
     metric_name = "column.custom_max"
 
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _pandas">
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Max Implementation"""
         return column.max()
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_def">
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -56,6 +59,8 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        # </snippet>
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -66,26 +71,38 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
-
+        # </snippet>
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query">
         query = sa.select(sa.func.max(column)).select_from(selectable)
-        result = sqlalchemy_engine.execute(query).fetchone()
+        result = execution_engine.execute_query(query).fetchone()
 
         return result[0]
 
+    # </snippet>
+
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _spark">
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
         return F.max(column)
 
 
-class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
+#     </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py ExpectColumnMaxToBeBetween class_def">
+class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py docstring">
     """Expect column max to be between a given range."""
+    # </snippet>
 
     # Defining test cases
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples">
     examples = [
         {
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -114,25 +131,14 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                     "out": {"success": False},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
         }
     ]
+    # </snippet>
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py metric_dependencies">
     metric_dependencies = ("column.custom_max",)
+    # </snippet>
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -146,7 +152,10 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         "mostly": 1,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config">
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -154,45 +163,57 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
+        # </snippet>
 
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_params">
         min_value = configuration.kwargs["min_value"]
         max_value = configuration.kwargs["max_value"]
         strict_min = configuration.kwargs["strict_min"]
         strict_max = configuration.kwargs["strict_max"]
+        # </snippet>
 
         # Validating that min_val, max_val, strict_min, and strict_max are of the proper format and type
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_values">
         try:
             assert (
                 min_value is not None or max_value is not None
             ), "min_value and max_value cannot both be none"
+            # </snippet>
+            # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_types">
             assert min_value is None or isinstance(
                 min_value, (float, int)
             ), "Provided min threshold must be a number"
             assert max_value is None or isinstance(
                 max_value, (float, int)
             ), "Provided max threshold must be a number"
+            # </snippet>
+            # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_comparison">
             if min_value and max_value:
                 assert (
                     min_value <= max_value
                 ), "Provided min threshold must be less than or equal to max threshold"
+            #     </snippet>
+            # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_none">
             assert strict_min is None or isinstance(
                 strict_min, bool
             ), "strict_min must be a boolean value"
             assert strict_max is None or isinstance(
                 strict_max, bool
             ), "strict_max must be a boolean value"
+        #     </snippet>
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py validate_config_except">
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        return True
+    #     </snippet>
 
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -230,13 +251,14 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
         return {"success": success, "result": {"observed_value": column_max}}
 
+    # </snippet>
+
     @renderer(renderer_type="render.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -245,9 +267,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ), "Must provide renderers either a configuration or result."
 
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         # get params dict with all expected kwargs
@@ -305,14 +326,20 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ]
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py library_metadata">
     library_metadata = {
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
+#     </snippet>
+
+
 if __name__ == "__main__":
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py diagnostics">
     ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
@@ -320,8 +347,7 @@ diagnostics = ExpectColumnMaxToBeBetweenCustom().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None

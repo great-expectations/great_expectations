@@ -1,6 +1,9 @@
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     InvalidExpectationConfigurationError,
@@ -8,8 +11,50 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
-    """
-    Expect paired values from columns A and B to belong to a set of valid pairs.
+    """Expect the paired values from columns A and B to belong to a set of valid pairs.
+
+    expect_column_pair_values_to_be_in_set is a \
+    [Column Pair Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations).
+
+    For example:
+    ::
+        >>> d = {'fruit': ['appple','apple','apple','banana','banana'],
+                'color': ['red','green','yellow','yellow','red']}
+        >>> my_df = pd.DataFrame(data=d)
+        >>> my_df.expect_column_pair_values_to_be_in_set(
+                'fruit',
+                'color',
+                [
+                    ('apple','red'),
+                    ('apple','green'),
+                    ('apple','yellow'),
+                    ('banana','yellow'),
+                ]
+        )
+        {
+            "success": false,
+            "meta": {},
+            "exception_info": {
+                "raised_exception": false,
+                "exception_traceback": null,
+                "exception_message": null
+            },
+            "result": {
+                "element_count": 5,
+                "unexpected_count": 1,
+                "unexpected_percent": 20.0,
+                "partial_unexpected_list": [
+                    [
+                        "banana",
+                        "red"
+                    ]
+                ],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 20.0,
+                "unexpected_percent_nonmissing": 20.0
+            }
+        }
 
     Args:
         column_A (str): The first column name
@@ -21,16 +66,21 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
+            For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -38,7 +88,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "maturity": "production",
         "tags": [
             "core expectation",
-            "multi-column expectation",
+            "column pair map expectation",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],
@@ -65,12 +115,28 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "value_pairs_set",
     )
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_pair_values_to_be_in_set` it is required that the `configuration.kwargs` contain `column_A`,
+        `column_B`, and `value_pairs_set` keys.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "column_A" in configuration.kwargs
@@ -81,4 +147,3 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
             ), "must provide value_pairs_set"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True

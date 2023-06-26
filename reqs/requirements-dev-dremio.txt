@@ -1,0 +1,2 @@
+pyodbc>=4.0.30
+sqlalchemy-dremio==1.2.1 # 2.0.1 introduces breaking changes

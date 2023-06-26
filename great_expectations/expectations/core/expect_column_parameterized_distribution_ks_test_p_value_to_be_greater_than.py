@@ -1,10 +1,19 @@
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from typing import Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.expectations.expectation import (
+    BatchExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyDiagnosticRendererType, LegacyRendererType
 from great_expectations.render.renderer.renderer import renderer
 
 
 class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
-    TableExpectation
+    BatchExpectation
 ):
     # This expectation is a stub - it needs migration to the modular expectation API
 
@@ -26,26 +35,24 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     args_keys = ()
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> None:
         pass
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
-    ):
+    ) -> None:
         pass

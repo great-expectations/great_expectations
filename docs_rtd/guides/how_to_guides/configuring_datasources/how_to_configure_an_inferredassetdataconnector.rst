@@ -29,8 +29,8 @@ All of the examples below assume you’re testing configurations using something
 
 .. code-block:: python
 
-    import great_expectations as ge
-    context = ge.DataContext()
+    import great_expectations as gx
+    context = gx.DataContext()
 
     context.test_yaml_config("""
     my_data_source:
@@ -59,7 +59,7 @@ Imagine you have the following files in ``my_directory/``:
     my_directory/alpha-2020-01-02.csv
     my_directory/alpha-2020-01-03.csv
 
-We can imagine 2 approaches to loading the data into GE.
+We can imagine 2 approaches to loading the data into GX.
 
 The simplest approach would be to consider each file to be its own DataAsset.  In that case, the configuration would look like the following:
 

@@ -7,7 +7,7 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class OpsgenieRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def render(
@@ -16,7 +16,6 @@ class OpsgenieRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
     ):
-
         summary_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )

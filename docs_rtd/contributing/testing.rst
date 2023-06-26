@@ -170,9 +170,9 @@ The test fixture files are stored in subdirectories of ``tests/test_definitions/
     * multicolumn_map_expectations
     * other_expectations
 
-By convention, the name of the the file is the name of the Expectation, with a ``.json`` suffix. Creating a new json file will automatically add the new Expectation tests to the test suite.
+By convention, the name of the file is the name of the Expectation, with a ``.json`` suffix. Creating a new json file will automatically add the new Expectation tests to the test suite.
 
-Note: If you are implementing a new Expectation, but don't plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the ``candidate_test_is_on_temporary_notimplemented_list`` method within ``tests/test_utils.py``. Often, we see Expectations developed first for pandas, then later extended to SqlAlchemy and Spark.
+Note: If you are implementing a new Expectation, but don't plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the ``candidate_test_is_on_temporary_notimplemented_list_v2_api`` method within ``tests/test_utils.py``. Often, we see Expectations developed first for pandas, then later extended to SqlAlchemy and Spark.
 
 You can run just the Expectation tests with ``pytest tests/test_definitions/test_expectations.py``.
 

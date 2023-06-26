@@ -1,5 +1,7 @@
 from functools import wraps
+from typing import Any
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -19,15 +21,14 @@ def renderer(renderer_type, **kwargs):
     return wrapper
 
 
+@public_api
 class Renderer:
-    def __init__(self):
+    """A convenience class to provide an explicit mechanism to instantiate any Renderer."""
+
+    def __init__(self) -> None:
         # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
         # used to be composed exclusively of classmethods
         pass
-
-    @classmethod
-    def render(cls, ge_object):
-        return ge_object
 
     @classmethod
     def _get_expectation_type(cls, ge_object):
@@ -115,3 +116,9 @@ class Renderer:
             columns[column].append(evr)
 
         return columns
+
+    def render(self, **kwargs: dict) -> Any:
+        """
+        Render interface method.
+        """
+        raise NotImplementedError

@@ -1,9 +1,9 @@
-from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.core.batch import BatchData
 
 
 class SparkDFBatchData(BatchData):
-    def __init__(self, execution_engine, dataframe):
-        super().__init__(execution_engine)
+    def __init__(self, execution_engine, dataframe) -> None:
+        super().__init__(execution_engine=execution_engine)
         self._dataframe = dataframe
 
     @property

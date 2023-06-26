@@ -1,24 +1,23 @@
 import datetime
-import warnings
 from typing import Any, Dict
 
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
-from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesDecreasing(ColumnMapMetricProvider):
@@ -42,14 +41,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             try:
                 temp_column = column.map(parse)
@@ -69,11 +61,11 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         strictly: bool = kwargs.get("strictly") or False
         if strictly:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() < 0.0
+                return series_diff.dt.total_seconds() < 0.0  # noqa: PLR2004
             return series_diff < 0
         else:
             if parse_strings_as_datetimes:
-                return series_diff.dt.total_seconds() <= 0.0
+                return series_diff.dt.total_seconds() <= 0.0  # noqa: PLR2004
             return series_diff <= 0
 
     @metric_partial(
@@ -81,26 +73,19 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         domain_type=MetricDomainTypes.COLUMN,
     )
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         parse_strings_as_datetimes: bool = (
             metric_value_kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
@@ -111,9 +96,9 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         if isinstance(
             column_metadata["type"],
             (
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ),
         ):
             # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -137,13 +122,17 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         # instead detect types naturally
         column = F.col(column_name)
         if isinstance(
-            column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+            column_metadata["type"],
+            (pyspark.types.TimestampType, pyspark.types.DateType),
         ):
             diff = F.datediff(
-                column, F.lag(column).over(Window.orderBy(F.lit("constant")))
+                column,
+                F.lag(column).over(pyspark.Window.orderBy(F.lit("constant"))),
             )
         else:
-            diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
+            diff = column - F.lag(column).over(
+                pyspark.Window.orderBy(F.lit("constant"))
+            )
             diff = F.when(diff.isNull(), -1).otherwise(diff)
 
         # NOTE: because in spark we are implementing the window function directly,

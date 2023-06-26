@@ -2,7 +2,9 @@ import os
 
 from setuptools import find_packages, setup
 
-with open(os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")) as versionfile:
+with open(
+    os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")  # noqa: PTH118, PTH120
+) as versionfile:
     version = versionfile.read().strip()
 
 long_description = "Great Expectations community contributions package. (See https://github.com/great-expectations/great_expectations for full description)."
@@ -30,9 +32,9 @@ config = {
         "Topic :: Software Development :: Testing",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 }
 

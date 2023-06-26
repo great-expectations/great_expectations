@@ -1,16 +1,22 @@
+from __future__ import annotations
+
 import logging
-from typing import List, Optional, Set
+from typing import TYPE_CHECKING, List, Optional, Set, Union
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 
 logger = logging.getLogger(__name__)
 
 
 def send_usage_message(
-    data_context: Optional["BaseDataContext"],  # noqa: F821
-    event: str,
+    data_context: Optional[AbstractDataContext],
+    event: Union[str, None],
     event_payload: Optional[dict] = None,
     api_version: str = "v3",
     success: bool = False,
-):
+) -> None:
     if not event:
         event = None
 

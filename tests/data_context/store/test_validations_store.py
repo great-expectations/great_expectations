@@ -6,17 +6,14 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
-import tests.test_utils as test_utils
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-)
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -28,6 +25,7 @@ from tests.core.usage_statistics.util import (
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
     prefix = "test/prefix"
@@ -103,6 +101,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 def test_ValidationsStore_with_InMemoryStoreBackend():
     my_store = ValidationsStore(
         store_backend={
@@ -158,17 +157,17 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
+@pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
 def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
-    path = str(
-        tmp_path_factory.mktemp(
-            "test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir"
-        )
+    full_test_dir = tmp_path_factory.mktemp(
+        "test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir"
     )
-    project_path = str(tmp_path_factory.mktemp("my_dir"))
+    test_dir = full_test_dir.parts[-1]
+    path = str(full_test_dir)
 
     my_store = ValidationsStore(
         store_backend={
@@ -206,17 +205,15 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
         success=False, statistics={}, results=[]
     )
 
-    print(my_store.list_keys())
     assert set(my_store.list_keys()) == {
         ns_1,
         ns_2,
     }
 
-    print(gen_directory_tree_str(path))
     assert (
         gen_directory_tree_str(path)
-        == """\
-test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
+        == f"""\
+{test_dir}/
     my_store/
         .ge_store_backend_id
         asset/
@@ -255,6 +252,7 @@ test_ValidationResultStore_with_TupleFileSystemStoreBackend__dir0/
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
@@ -317,6 +315,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -353,3 +352,36 @@ store_backend:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_ge_cloud_response_json_to_object_dict() -> None:
+    store = ValidationsStore(store_name="validations_store")
+
+    validation_id = "c1e8f964-ba44-4a13-a9b6-7331a358f12d"
+    validation_config = {
+        "results": [],
+        "success": True,
+        "statistics": {
+            "evaluated_expectations": 0,
+            "successful_expectations": 0,
+            "unsuccessful_expectations": 0,
+            "success_percent": None,
+        },
+    }
+    response_json = {
+        "data": {
+            "id": validation_id,
+            "attributes": {
+                "result": validation_config,
+            },
+        }
+    }
+
+    expected = validation_config
+    expected["ge_cloud_id"] = validation_id
+
+    actual = store.ge_cloud_response_json_to_object_dict(response_json)
+
+    assert actual == expected

@@ -1,16 +1,9 @@
-import os
-from unittest import mock
 from unittest.mock import patch
 
-from click.testing import CliRunner
-
-from great_expectations import DataContext
-from great_expectations.cli import cli
 from great_expectations.cli.datasource import (
     SnowflakeAuthMethod,
     _prompt_for_snowflake_auth_method,
 )
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 # TODO this test errors out in CI with a bash 137. It was deemed low enough risk
 #  to comment out. A backlog task was created to address this after release.
@@ -25,7 +18,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 #     monkeypatch.chdir(os.path.dirname(context.root_directory))
 #     result = runner.invoke(
 #         cli,
-#         "--v3-api datasource new",
+#         "datasource new",
 #         catch_exceptions=False,
 #         input="2\n4\n1\n",
 #     )
@@ -35,7 +28,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 #     assert "What data would you like Great Expectations to connect to?" in stdout
 #     assert "Which database backend are you using?" in stdout
 #
-#     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+#     uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
 #     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
 #     assert os.path.isfile(expected_notebook)
 #     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])

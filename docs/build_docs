@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Build API docs then build docusaurus docs.
+# Currently used in our netlify pipeline.
+
+source ../logging.sh
+
+print_orange_header "Preparing to build docs..."
+../prepare_to_build_docs.sh
+
+print_orange_header "Building docusaurus docs..."
+yarn build

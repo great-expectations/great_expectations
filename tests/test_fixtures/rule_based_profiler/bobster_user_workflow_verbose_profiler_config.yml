@@ -5,15 +5,12 @@ class_name: RuleBasedProfiler
 config_version: 1.0
 
 variables:
-  # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
-  jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
-    datasource_name: taxi_pandas
-    data_connector_name: monthly
-    data_asset_name: my_reports
-    data_connector_query:
-      index: ":-1"
   false_positive_rate: 5.0e-2
-  bootstrap_random_seed: 43792
+  n_resamples: 9999
+  random_seed: 43792
+  quantile_statistic_interpolation_method: auto
+  quantile_bias_std_error_ratio_threshold: 0.25
+  include_estimator_samples_histogram_in_details: False
 
 rules:
   row_count_range_rule:
@@ -22,18 +19,20 @@ rules:
     parameter_builders:
       - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
-        batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
         metric_name: table.row_count
         false_positive_rate: $variables.false_positive_rate
-        bootstrap_random_seed: $variables.bootstrap_random_seed
-        round_decimals: 0
+        n_resamples: $variables.n_resamples
+        random_seed: $variables.random_seed
+        quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
+        quantile_bias_std_error_ratio_threshold: $variables.quantile_bias_std_error_ratio_threshold
         truncate_values:
           lower_bound: 0
+        round_decimals: 0
     expectation_configuration_builders:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.value_range[0]
-        max_value: $parameter.row_count_range.value.value_range[1]
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
         meta:
           profiler_details: $parameter.row_count_range.details

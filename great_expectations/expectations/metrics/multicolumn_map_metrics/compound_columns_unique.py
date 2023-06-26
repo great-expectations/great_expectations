@@ -1,16 +1,25 @@
 from typing import Optional
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -70,25 +79,25 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             "_table"
         )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
-        # First, obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
+        # Step-1: Obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
         # elements are themselves subclasses of the SQLAlchemy "ColumnElement" class).
         table_columns_selector = [
             sa.column(column_name) for column_name in table_columns
         ]
         original_table_clause = (
-            sa.select(table_columns_selector)
+            sa.select(*table_columns_selector)
             .select_from(table)
             .alias("original_table_clause")
         )
 
-        # Second, "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
+        # Step-2: "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
         # Give this aggregated group count a distinctive label.
         # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
         count_selector = column_list + [sa.func.count().label("_num_rows")]
         group_count_query = (
-            sa.select(count_selector)
+            sa.select(*count_selector)
             .group_by(*column_list)
             .select_from(original_table_clause)
             .alias("group_counts_subquery")
@@ -108,10 +117,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [
-                    original_table_clause,
-                    group_count_query.c._num_rows.label("_num_rows"),
-                ]
+                original_table_clause,
+                group_count_query.c._num_rows.label("_num_rows"),
             )
             .select_from(
                 original_table_clause.join(
@@ -139,10 +146,12 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         """
 
         metrics = kwargs.get("_metrics")
-        compound_columns_count_query, _, _ = metrics["compound_columns.count.map"]
+        compound_columns_count_query, _, _ = metrics[
+            f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ]
 
         # noinspection PyProtectedMember
-        row_wise_cond = compound_columns_count_query.c._num_rows < 2
+        row_wise_cond = compound_columns_count_query.c._num_rows < 2  # noqa: PLR2004
 
         return row_wise_cond
 
@@ -150,7 +159,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(Window.partitionBy(F.struct(*column_names))) <= 1
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
+            <= 1
         )
         return row_wise_cond
 
@@ -175,12 +185,16 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            if metric.metric_name == "compound_columns.unique.condition":
-                dependencies["compound_columns.count.map"] = MetricConfiguration(
-                    metric_name="compound_columns.count.map",
+            if (
+                metric.metric_name
+                == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+            ):
+                dependencies[
+                    f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+                ] = MetricConfiguration(
+                    metric_name=f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=None,
-                    metric_dependencies=None,
                 )
 
         return dependencies

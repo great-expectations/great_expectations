@@ -1,5 +1,6 @@
 import copy
 import logging
+from typing import List
 
 from ruamel.yaml import YAML, yaml_object
 
@@ -18,8 +19,8 @@ class DotDict(dict):
     def __getattr__(self, item):
         return self.get(item)
 
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
+    __setattr__ = dict.__setitem__  # type: ignore[assignment]
+    __delattr__ = dict.__delitem__  # type: ignore[assignment]
 
     def __dir__(self):
         return self.keys()
@@ -34,7 +35,7 @@ class DotDict(dict):
     # The following are required to support yaml serialization, since we do not raise
     # AttributeError from __getattr__ in DotDict. We *do* raise that AttributeError when it is possible to know
     # a given attribute is not allowed (because it's not in _allowed_keys)
-    _yaml_merge = []
+    _yaml_merge: List = []
 
     @classmethod
     def yaml_anchor(cls):

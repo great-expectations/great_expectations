@@ -1,22 +1,40 @@
-import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+import logging
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
-    MetricComputationResult,
-    MetricValues,
-    ParameterBuilder,
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.types import (
-    PARAMETER_KEY,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -90,20 +108,18 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: Union[str, float] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
-        json_serialize: bool = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional[AbstractDataContext] = None,
+    ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
         Args:
@@ -114,16 +130,14 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
-            json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
 
@@ -136,14 +150,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = DEFAULT_CANDIDATE_STRINGS
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -169,16 +175,19 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        runtime_configuration: Optional[dict] = None,
+    ) -> Attributes:
         """
-        Check the percentage of values matching each string, and return the best fit, or None if no
-        string exceeds the configured threshold.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Check the percentage of values matching each string, and return the best fit, or None if no string exceeds the
+        configured threshold.
+
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         metric_computation_result: MetricComputationResult
 
@@ -186,27 +195,35 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
 
         # This should never happen.
-        if not (
-            isinstance(metric_computation_result.metric_values, list)
-            and len(metric_computation_result.metric_values) == 1
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
+
+        if metric_values is None:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
@@ -226,18 +243,18 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
-        fmt_string: str
+        format_string: str
         match_strftime_metric_value_kwargs_list: List[dict] = []
         match_strftime_metric_value_kwargs: dict
-        for fmt_string in candidate_strings:
+        for format_string in candidate_strings:
             if self.metric_value_kwargs:
                 match_strftime_metric_value_kwargs = {
                     **self.metric_value_kwargs,
-                    **{"strftime_format": fmt_string},
+                    **{"strftime_format": format_string},
                 }
             else:
                 match_strftime_metric_value_kwargs = {
-                    "strftime_format": fmt_string,
+                    "strftime_format": format_string,
                 }
 
             match_strftime_metric_value_kwargs_list.append(
@@ -246,9 +263,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name="column_values.match_strftime_format.unexpected_count",
+            metric_name=f"column_values.match_strftime_format.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_strftime_metric_value_kwargs_list,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -256,20 +277,19 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
 
-        for attributed_resolved_metrics in metric_computation_result.metric_values:
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
-            success_ratio: float = (
-                nonnull_count - match_strftime_unexpected_count
-            ) / nonnull_count
+            success_ratio: float = (nonnull_count - match_strftime_unexpected_count) / (
+                nonnull_count + NP_EPSILON
+            )
             format_string_success_ratios[
                 attributed_resolved_metrics.metric_attributes["strftime_format"]
             ] = success_ratio
-
-        best_fmt_string: Optional[str] = None
-        best_ratio: float = 0.0
 
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
@@ -280,17 +300,28 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        fmt_string: str
-        ratio: float
-        for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= threshold:
-                best_fmt_string = fmt_string
-                best_ratio = ratio
+        # get best-matching datetime string that matches greater than threshold
+        best_format_string: str
+        best_ratio: float
+        (
+            best_format_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
+            format_string_success_ratios, threshold
+        )
+        # dict of sorted datetime and ratios for all evaluated candidates
+        sorted_format_strings_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                format_string_success_ratios
+            )
+        )
 
-        return (
-            best_fmt_string,
+        return Attributes(
             {
-                "success_ratio": best_ratio,
-                "candidate_strings": sorted(candidate_strings),
-            },
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_format_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "candidate_strings": sorted_format_strings_and_ratios,
+                },
+            }
         )

@@ -1,22 +1,25 @@
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import numpy as np
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class ColumnMedian(ColumnAggregateMetricProvider):
@@ -27,16 +30,18 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Median Implementation"""
-        return column.median()
+        column_null_elements_cond: pd.Series = column.isnull()
+        column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
+        return column_nonnull_elements.median()
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    def _sqlalchemy(
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             selectable,
@@ -47,15 +52,15 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         )
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         """SqlAlchemy Median Implementation"""
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
-        element_values = sqlalchemy_engine.execute(
-            sa.select([column])
+
+        element_values = execution_engine.execute_query(
+            sa.select(column)
             .order_by(column)
-            .where(column != None)
+            .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
@@ -76,17 +81,21 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
+            if len(column_values) == 1:  # noqa: PLR5501
+                column_median = column_values[0][0]  # The only value
+            else:
+                column_median = column_values[1][0]  # True center value
+
         return column_median
 
-    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    def _spark(
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(  # noqa: PLR0913
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             df,

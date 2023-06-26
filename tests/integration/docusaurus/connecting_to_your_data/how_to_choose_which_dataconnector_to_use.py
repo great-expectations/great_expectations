@@ -1,11 +1,11 @@
-from ruamel import yaml
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-import great_expectations as ge
-
-context = ge.get_context()
+yaml = YAMLHandler()
+context = gx.get_context()
 
 # YAML
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -36,7 +36,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -91,7 +91,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml_2">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -128,7 +128,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

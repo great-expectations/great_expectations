@@ -11,6 +11,7 @@ from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import is_nan
 
 
@@ -100,7 +101,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cache_entry["type"] = column_type
             # remove the expectation
             # Does this change with different config format?
-            dataset.remove_expectation(
+            suite = dataset._expectation_suite
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
                     kwargs={"column": column_name},
@@ -121,13 +123,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cardinality = cls._get_column_cardinality(dataset, column_name)
             column_cache_entry["cardinality"] = column_cardinality
             # remove the expectations
-            dataset.remove_expectation(
+            suite = dataset._expectation_suite
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
                     kwargs={"column": column_name},
                 )
             )
-            dataset.remove_expectation(
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                     kwargs={"column": column_name},
@@ -138,14 +141,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return column_cardinality
 
     @classmethod
-    def _create_expectations_for_low_card_column(
+    def _create_expectations_for_low_card_column(  # noqa: PLR0913
         cls,
         dataset,
         column,
         column_cache,
         excluded_expectations=None,
         included_expectations=None,
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -192,7 +195,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_non_nullity_expectations(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         if (
             not excluded_expectations
             or "expect_column_values_to_not_be_null" not in excluded_expectations
@@ -210,9 +213,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
 
     @classmethod
-    def _create_expectations_for_numeric_column(
+    def _create_expectations_for_numeric_column(  # noqa: PLR0912
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -350,7 +353,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _create_expectations_for_string_column(
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -455,9 +458,9 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return None
 
     @classmethod
-    def _create_expectations_for_datetime_column(
+    def _create_expectations_for_datetime_column(  # noqa: PLR0912
         cls, dataset, column, excluded_expectations=None, included_expectations=None
-    ):
+    ) -> None:
         cls._create_non_nullity_expectations(
             dataset,
             column,
@@ -477,7 +480,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             ).result["observed_value"]
 
             if min_value is not None:
-                dataset.remove_expectation(
+                suite = dataset._expectation_suite
+                suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_min_to_be_between",
                         kwargs={"column": column},
@@ -505,7 +509,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if max_value is not None:
-                dataset.remove_expectation(
+                suite = dataset._expectation_suite
+                suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_max_to_be_between",
                         kwargs={"column": column},
@@ -535,7 +540,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 )
 
     @classmethod
-    def _profile(cls, dataset, configuration=None):
+    def _profile(cls, dataset, configuration=None):  # noqa: C901, PLR0912, PLR0915
         logger.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
@@ -672,7 +677,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
-                        dataset.remove_expectation(
+                        suite = dataset._expectation_suite
+                        suite.remove_expectation(
                             ExpectationConfiguration(
                                 expectation_type=expectation.expectation_type,
                                 kwargs=expectation.kwargs,
@@ -732,12 +738,12 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         expectation_suite = cls._build_column_description_metadata(dataset)
 
         expectation_suite.meta["notes"] = {
-            "format": "markdown",
+            "format": MetaNotesFormat.MARKDOWN,
             "content": [
                 """#### This is an _example_ suite
 
 - This suite was made by quickly glancing at 1000 rows of your data.
-- This is **not a production suite**. It is meant to show examples of expectations.
+- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.
 - Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
 """
             ],
@@ -814,14 +820,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
 
-def _check_that_expectations_are_available(dataset, expectations):
+def _check_that_expectations_are_available(dataset, expectations) -> None:
     if expectations:
         for expectation in expectations:
             if expectation not in dataset.list_available_expectation_types():
                 raise ProfilerError(f"Expectation {expectation} is not available.")
 
 
-def _check_that_columns_exist(dataset, columns):
+def _check_that_columns_exist(dataset, columns) -> None:
     if columns:
         for column in columns:
             if column not in dataset.get_table_columns():

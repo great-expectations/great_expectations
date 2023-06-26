@@ -1,49 +1,23 @@
-import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict
 
-import numpy as np
-import pandas as pd
-import scipy.stats as stats
+from scipy import stats
 
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics import column_aggregate_partial
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnKurtosis(ColumnMetricProvider):
+class ColumnKurtosis(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.kurtosis"
@@ -52,7 +26,7 @@ class ColumnKurtosis(ColumnMetricProvider):
     def _pandas(cls, column, **kwargs):
         return stats.kurtosis(column)
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -78,31 +52,11 @@ class ColumnKurtosis(ColumnMetricProvider):
     #     # TODO: compute the value and return it
     #
     #     return column_median
-    #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        return F.kurtosis(column)
+
     # @classmethod
     # def _get_evaluation_dependencies(
     #     cls,
@@ -146,8 +100,8 @@ class ColumnKurtosis(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
-    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)"""
+class ExpectColumnKurtosisToBeBetween(ColumnAggregateExpectation):
+    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -285,6 +239,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
             "@lodeous",
             "@bragleg",
             "@rexboyce",
+            "@mkopec87",
         ],
     }
 
@@ -303,7 +258,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -312,7 +267,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
     #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
     #     """
     #     super().validate_configuration(configuration)
     #     self.validate_metric_value_between_configuration(configuration=configuration)
@@ -324,15 +279,11 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

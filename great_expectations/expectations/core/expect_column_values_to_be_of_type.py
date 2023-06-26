@@ -1,12 +1,19 @@
 import inspect
 import logging
-import warnings
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -14,39 +21,37 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.util import get_pyathena_potential_type
+from great_expectations.util import (
+    get_clickhouse_sqlalchemy_potential_type,
+    get_pyathena_potential_type,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import (
+    ValidationDependencies,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -55,55 +60,18 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    GEOGRAPHY,
+    bigquery_types_tuple,
+)
+from great_expectations.compatibility.sqlalchemy_bigquery import (
+    sqlalchemy_bigquery as BigQueryDialect,
+)
 
-    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
-    bigquery_types_tuple = None
-    try:
-        from sqlalchemy_bigquery import GEOGRAPHY
-
-        BIGQUERY_GEO_SUPPORT = True
-    except ImportError:
-        BIGQUERY_GEO_SUPPORT = False
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-
-        # deprecated-v0.14.7
-        warnings.warn(
-            "The pybigquery package is obsolete and its usage within Great Expectations is deprecated as of v0.14.7. "
-            "As support will be removed in v0.17, please transition to sqlalchemy-bigquery",
-            DeprecationWarning,
-        )
-        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
-        ###
-        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-        # to define an attribute "dialect". A PR has been submitted to fix this upstream
-        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-        # fix isn't present, add this "dialect" attribute here:
-        if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
-
-        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
-        try:
-            getattr(sqla_bigquery, "INTEGER")
-            bigquery_types_tuple = None
-        except AttributeError:
-            # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
-                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-            )
-            from collections import namedtuple
-
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
-            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
-    except ImportError:
-        sqla_bigquery = None
-        bigquery_types_tuple = None
-        pybigquery = None
+if GEOGRAPHY:
+    BIGQUERY_GEO_SUPPORT = True
+else:
+    BIGQUERY_GEO_SUPPORT = False
 
 try:
     import teradatasqlalchemy.dialect
@@ -111,60 +79,70 @@ try:
 except ImportError:
     teradatasqlalchemy = None
 
+try:
+    import clickhouse_sqlalchemy
+    import clickhouse_sqlalchemy.types as ch_types
+except (ImportError, KeyError):
+    clickhouse_sqlalchemy = None
+    ch_types = None
+
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
 
-    expect_column_values_to_be_of_type is a :func:`column_aggregate_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends,
-    and also for PandasDataset where the column dtype and provided type_ are unambiguous constraints (any dtype
-    except 'object' or dtype of 'object' with type_ specified as 'object').
+    expect_column_values_to_be_of_type is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
+    for typed-column backends, and also for PandasDataset where the column dtype and provided \
+    type_ are unambiguous constraints (any dtype except 'object' or dtype of 'object' with \
+    type_ specified as 'object').
 
-    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
-    :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
+    For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type will
     independently check each row's type.
 
     Args:
         column (str): \
             The column name.
         type\\_ (str): \
-            A string representing the data type that each column should have as entries. Valid types are defined
-            by the current backend implementation and are dynamically loaded. For example, valid types for
-            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'),
-            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER'
-            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include
-            'StringType', 'BooleanType' and other pyspark-defined type names.
-
+            A string representing the data type that each column should have as entries. Valid types are defined \
+            by the current backend implementation and are dynamically loaded. For example, valid types for \
+            PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
+            whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
+            in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
+            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
+            fail the expectation, while `Timestamp` would pass with valid data.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See also:
-        :func:`expect_column_values_to_be_in_type_list \
-        <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_in_type_list>`
-
+        [expect_column_values_to_be_in_type_list](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -194,95 +172,79 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
     )
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_of_type` it is required that:
+
+        - `_type` has been provided.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert "type_" in configuration.kwargs, "type_ is required"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("type_", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "type_", "mostly", "row_condition", "condition_parser"],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "type_": {"schema": {"type": "string"}, "value": params.get("type_")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        params = renderer_configuration.params
 
-        if params["mostly"] is not None:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str = (
                 "values must be of type $type_, at least $mostly_pct % of the time."
             )
         else:
             template_str = "values must be of type $type_."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
 
@@ -291,7 +253,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             ["column", "type_", "mostly", "row_condition", "condition_parser"],
         )
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -383,7 +345,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 # bigquery geography requires installing an extra package
                 if (
                     expected_type.lower() == "geography"
-                    and execution_engine.engine.dialect.name.lower() == "bigquery"
+                    and execution_engine.engine.dialect.name.lower()
+                    == GXSqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(
@@ -402,6 +365,14 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     else:
                         real_type = potential_type
                     types.append(real_type)
+                elif type_module.__name__ == "clickhouse_sqlalchemy.drivers.base":
+                    actual_column_type = get_clickhouse_sqlalchemy_potential_type(
+                        type_module, actual_column_type
+                    )()
+                    potential_type = get_clickhouse_sqlalchemy_potential_type(
+                        type_module, expected_type
+                    )
+                    types.append(potential_type)
                 else:
                     potential_type = getattr(type_module, expected_type)
                     types.append(potential_type)
@@ -429,7 +400,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         else:
             types = []
             try:
-                type_class = getattr(sparktypes, expected_type)
+                type_class = getattr(pyspark.types, expected_type)
                 types.append(type_class)
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
@@ -447,14 +418,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
-        # This calls TableExpectation.get_validation_dependencies to set baseline dependencies for the aggregate version
+        **kwargs,
+    ) -> ValidationDependencies:
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
-        dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
+        validation_dependencies: ValidationDependencies = super(
+            ColumnMapExpectation, self
+        ).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
@@ -463,8 +437,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             column_name = configuration.kwargs.get("column")
             expected_type = configuration.kwargs.get("type_")
             metric_kwargs = get_metric_kwargs(
-                configuration=configuration,
                 metric_name="table.column_types",
+                configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
@@ -498,8 +472,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     None,
                 ]
             ):
-                # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
-                dependencies = super().get_validation_dependencies(
+                # this resets validation_dependencies using  ColumnMapExpectation.get_validation_dependencies
+                validation_dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
                 )
 
@@ -509,20 +483,23 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
-        dependencies["metrics"]["table.column_types"] = MetricConfiguration(
+        validation_dependencies.set_metric_configuration(
             metric_name="table.column_types",
-            metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            metric_configuration=MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs=column_types_metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=column_types_metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
-        return dependencies
+        return validation_dependencies
 
     def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         column_name = configuration.kwargs.get("column")
         expected_type = configuration.kwargs.get("type_")
@@ -561,7 +538,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(
+def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
@@ -581,10 +558,10 @@ def _get_dialect_type_module(
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
-        if (
+        if BigQueryDialect and (
             isinstance(
                 execution_engine.dialect_module,
-                sqla_bigquery.BigQueryDialect,
+                BigQueryDialect,
             )
             and bigquery_types_tuple is not None
         ):
@@ -605,10 +582,35 @@ def _get_dialect_type_module(
     except (TypeError, AttributeError):
         pass
 
+    try:
+        if (
+            issubclass(
+                execution_engine.dialect_module,
+                clickhouse_sqlalchemy.drivers.base.ClickHouseDialect,
+            )
+            and ch_types is not None
+        ):
+            return ch_types
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                execution_engine.dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
+    except (TypeError, AttributeError):
+        pass
+
     return execution_engine.dialect_module
 
 
-def _native_type_type_map(type_):
+def _native_type_type_map(type_):  # noqa: PLR0911
     # We allow native python types in cases where the underlying type is "object":
     if type_.lower() == "none":
         return (type(None),)

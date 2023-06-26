@@ -1,0 +1,1 @@
+Please note that the `great_expectations store list` command will specifically list your *active* Stores, which are the ones specified by `expectations_store_name`, `validations_store_name`, `evaluation_parameter_store_name`, and `checkpoint_store_name` in the file `great_expectations.yml`.  These are the Stores that your Data Context will use by default.

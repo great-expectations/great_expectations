@@ -6,11 +6,7 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.renderer.call_to_action_renderer import (
-    CallToActionRenderer,
-)
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBootstrapTableContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -18,6 +14,10 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTabsContent,
 )
+from great_expectations.render.renderer.call_to_action_renderer import (
+    CallToActionRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
@@ -322,7 +322,8 @@ class SiteIndexPageRenderer(Renderer):
     @classmethod
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
-            local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
+            local_zone = tzlocal.get_localzone()
+            local_datetime = _datetime.astimezone(tz=local_zone)
             return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         elif isinstance(_datetime, str):
             dt = parse(_datetime)

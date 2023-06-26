@@ -126,7 +126,7 @@ class LegacyDatasource:
         module_name="great_expectations.datasource",
         data_asset_type=None,
         batch_kwargs_generators=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Build a full configuration object for a datasource, potentially including batch kwargs generators with defaults.
@@ -147,7 +147,7 @@ class LegacyDatasource:
         configuration = class_.build_configuration(
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **kwargs
+            **kwargs,
         )
         return configuration
 
@@ -157,8 +157,8 @@ class LegacyDatasource:
         data_context=None,
         data_asset_type=None,
         batch_kwargs_generators=None,
-        **kwargs
-    ):
+        **kwargs,
+    ) -> None:
         """
         Build a new datasource.
 
@@ -179,11 +179,16 @@ class LegacyDatasource:
             )
         self._data_asset_type = data_asset_type
         self._datasource_config = kwargs
-        self._batch_kwargs_generators = {}
+        self._batch_kwargs_generators: dict = {}
 
         self._datasource_config["data_asset_type"] = data_asset_type
         if batch_kwargs_generators is not None:
             self._datasource_config["batch_kwargs_generators"] = batch_kwargs_generators
+
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
 
     @property
     def name(self):
@@ -203,7 +208,7 @@ class LegacyDatasource:
         """
         return self._data_context
 
-    def _build_generators(self):
+    def _build_generators(self) -> None:
         """
         Build batch kwargs generator objects from the datasource configuration.
 
@@ -273,8 +278,7 @@ class LegacyDatasource:
             )
         else:
             raise ValueError(
-                "Unable to load batch kwargs generator %s -- no configuration found or invalid configuration."
-                % name
+                f"Unable to load batch kwargs generator {name} -- no configuration found or invalid configuration."
             )
         generator = self._build_batch_kwargs_generator(**generator_config)
         self._batch_kwargs_generators[name] = generator
@@ -323,7 +327,7 @@ class LegacyDatasource:
         return batch_kwargs
 
     # TODO: move to execution engine or make a wrapper
-    def get_batch(self, batch_kwargs, batch_parameters=None):
+    def get_batch(self, batch_kwargs, batch_parameters=None) -> None:
         """Get a batch of data from the datasource.
 
         Args:
@@ -380,17 +384,6 @@ class LegacyDatasource:
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
         if partition_id is not None:
             kwargs["partition_id"] = partition_id

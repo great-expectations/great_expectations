@@ -2,27 +2,35 @@ import click
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
 @click.pass_context
-def store(ctx):
+def store(ctx: click.Context) -> None:
     """Store operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
-    usage_stats_prefix = f"cli.store.{ctx.invoked_subcommand}"
+    cli_event_noun: str = "store"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type]
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @store.command(name="list")
 @click.pass_context
-def store_list(ctx):
+def store_list(ctx: click.Context):
     """List active Stores."""
     context = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -40,7 +48,7 @@ def store_list(ctx):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )

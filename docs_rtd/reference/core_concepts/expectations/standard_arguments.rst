@@ -12,6 +12,10 @@ All Expectations return a json-serializable dictionary when evaluated, and share
    return success = False and provide an informative error message.
  - :ref:`meta`: allows user-supplied meta-data to be stored with an expectation.
 
+All `ColumnMapExpectations` and `MultiColumnMapExpectation` also have the following argument:
+
+:ref:`mostly`: A special argument that allows for *fuzzy* validation based on some percentage \
+(available for all `column_map_expectations` and `multicolumn_map_expectations`)
 
 `result_format`
 ------------------------------------------------------------------------------
@@ -106,9 +110,10 @@ Expectation Suite pages in Data Docs.
 `mostly`
 ------------------------------------------------------------------------------
 
-`mostly` is a special argument that is automatically available in all `column_map_expectations`. `mostly` must be a \
-float between 0 and 1. Great Expectations evaluates it as a percentage, allowing some wiggle room when evaluating \
-expectations: as long as `mostly` percent of rows evaluate to `True`, the expectation returns `"success": True`.
+`mostly` is a special argument that is automatically available in all `column_map_expectations` and \
+`multicolumn_map_expectations`. `mostly` must be a float between 0 and 1. Great Expectations evaluates it as a \
+percentage, allowing some wiggle room when evaluating expectations: as long as `mostly` percent of rows evaluate to \
+`True`, the expectation returns `"success": True`.
 
 .. code-block:: bash
 
@@ -177,5 +182,3 @@ In validation mode, they can be overridden using flags:
 .. code-block:: bash
 
     great_expectations validation csv my_dataset.csv my_expectations.json --result_format=BOOLEAN_ONLY --catch_exceptions=False --include_config=True
-
-

@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_values_to_be_of_type",
   "datasets": [
     {
+      "dataset_name": "expect_column_values_to_be_of_type_1",
       "data": {
         "x" : [1,2,4],
         "y" : [1.0,2.2,5.3],
@@ -65,6 +66,32 @@
           "b": "BIT",
           "s": "FLOAT",
           "s1": "BIGINT"
+        },
+        "trino": {
+          "x": "INTEGER",
+          "y": "DOUBLE",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "DOUBLE",
+          "s1": "BIGINT"
+        },
+        "snowflake": {
+          "x": "NUMBER",
+          "y": "DOUBLE",
+          "z": "STRING",
+          "n": "STRING",
+          "s": "DOUBLE",
+          "s1": "NUMBER"
+        },
+        "redshift": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
         }
       },
       "tests": [
@@ -92,7 +119,8 @@
           "out": {
             "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": ["sqlalchemy"],
+          "suppress_test_for": ["snowflake"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -135,7 +163,7 @@
           {
             "success":false
           },
-          "only_for": ["postgresql", "mysql", "mssql"]
+          "only_for": ["postgresql", "mysql", "mssql", "trino"]
         },
         {
           "_note": "type name here works for tested sqlalchemy types; for sqlalchemy note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -247,7 +275,7 @@
           "exact_match_out": false,
           "in":{"column":"z","type_":"VARCHAR"},
           "out":{"success":true},
-          "only_for": ["sqlite", "mssql"]
+          "only_for": ["sqlite", "mssql", "trino"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",
@@ -351,6 +379,7 @@
       ]
     },
     {
+      "dataset_name": "expect_column_values_to_be_of_type_2",
       "data": {
         "datetime" : ["2016-01-01T12:34:56", "2016-01-02T11:59:58", "2016-02-02T10:48:36", "2016-02-02T09:33:21", "2016-03-01T08:56:45", "2017-02-01T00:01:02", null, null, null, null],
         "datetime_tz" : ["2016-01-01T12:34:56Z", "2016-01-02T11:59:58Z", "2016-02-02T10:48:36Z", "2016-02-02T09:33:21Z", "2016-03-01T08:56:45Z", "2017-02-01T00:01:02Z", null, null, null, null]

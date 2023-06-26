@@ -1,0 +1,40 @@
+# PYTHON_VERSION in ["3.7", "3.8", "3.9", "3.10"]
+ARG PYTHON_VERSION=3.8
+# SOURCE in ["local", "github"]
+ARG SOURCE=local
+
+# Our base image is the official python image. If needed we can look into slimming this down.
+FROM python:${PYTHON_VERSION} AS base
+RUN apt update && apt install default-jre unixodbc unixodbc-dev default-mysql-client locales locales-all -y && apt clean
+RUN python -m pip install --no-cache-dir --upgrade pip
+
+FROM base as build_local
+WORKDIR /great_expectations
+COPY ./requirements.txt ./requirements-dev.txt ./constraints-dev.txt ./
+COPY ./reqs ./reqs
+
+FROM base AS build_github
+# BRANCH is the branch name you want to build
+ARG BRANCH=develop
+# We use --filter=tree:0 instead of --depth 1 because we really on git to get version information
+RUN git clone --filter=tree:0 --branch ${BRANCH} https://github.com/great-expectations/great_expectations.git
+WORKDIR /great_expectations
+
+FROM build_${SOURCE} AS dev
+ARG GE_USAGE_STATISTICS_URL="https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+env GE_USAGE_STATISTICS_URL="${GE_USAGE_STATISTICS_URL}"
+ENV SQLALCHEMY_WARN_20="true"
+RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
+CMD [ "python", "--version"]
+
+FROM dev as test
+RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
+    --constraint constraints-dev.txt
+COPY . .
+RUN pip install .
+
+FROM dev as dev-tools
+RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
+    --requirement reqs/requirements-dev-tools.txt --constraint constraints-dev.txt
+COPY . .
+RUN pip install .

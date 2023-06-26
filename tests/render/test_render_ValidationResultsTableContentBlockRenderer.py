@@ -7,13 +7,125 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.renderer.content_block import (
-    ValidationResultsTableContentBlockRenderer,
-)
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDiagnosticRendererType,
     RenderedComponentContent,
     RenderedStringTemplateContent,
 )
+from great_expectations.render.renderer.content_block import (
+    ValidationResultsTableContentBlockRenderer,
+)
+
+
+@pytest.fixture
+def evr_failed_with_exception():
+    return ExpectationValidationResult(
+        success=False,
+        exception_info={
+            "raised_exception": True,
+            "exception_message": "Invalid partition object.",
+            "exception_traceback": 'Traceback (most recent call last):\n  File "/great_expectations/great_expectations/data_asset/data_asset.py", line 216, in wrapper\n    return_obj = func(self, **evaluation_args)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 106, in inner_wrapper\n    evaluation_result = func(self, column, *args, **kwargs)\n  File "/great_expectations/great_expectations/dataset/dataset.py", line 3381, in expect_column_kl_divergence_to_be_less_than\n    raise ValueError("Invalid partition object.")\nValueError: Invalid partition object.\n',
+        },
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_kl_divergence_to_be_less_than",
+            kwargs={
+                "column": "live",
+                "partition_object": None,
+                "threshold": None,
+                "result_format": "SUMMARY",
+            },
+            meta={"BasicDatasetProfiler": {"confidence": "very low"}},
+        ),
+    )
+
+
+@pytest.fixture()
+def evr_id_pk_basic_sql() -> ExpectationValidationResult:
+    return ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_column_names": ["pk_1", "pk_2"],
+            "unexpected_index_list": [
+                {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+                {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+                {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+            ],
+            "unexpected_index_query": "SELECT animals, pk_1, pk_2 \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'))",
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
+
+
+@pytest.fixture()
+def evr_id_pk_basic_pandas() -> ExpectationValidationResult:
+    return ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_index_query": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+    )
 
 
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_with_errored_expectation(
@@ -22,7 +134,6 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_wit
     result = ValidationResultsTableContentBlockRenderer.render(
         [evr_failed_with_exception]
     ).to_json_dict()
-    print(result)
     expected_result = {
         "content_block_type": "table",
         "styling": {
@@ -196,8 +307,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "row_condition": None,
-                            "condition_parser": None,
                             "strict_max": None,
                             "strict_min": None,
                         },
@@ -248,8 +357,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "row_condition": None,
-                            "condition_parser": None,
                             "strict_max": None,
                             "strict_min": None,
                         },
@@ -317,8 +424,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "row_condition": None,
-                            "condition_parser": None,
                             "strict_max": None,
                             "strict_min": None,
                         },
@@ -382,8 +487,6 @@ def test_ValidationResultsTableContentBlockRenderer_get_content_block_fn(evr_suc
                             "min_value": 0,
                             "max_value": None,
                             "result_format": "SUMMARY",
-                            "row_condition": None,
-                            "condition_parser": None,
                             "strict_max": None,
                             "strict_min": None,
                         },
@@ -564,31 +667,31 @@ def test_ValidationResultsTableContentBlockRenderer_get_observed_value(evr_succe
     # test _get_observed_value when evr.result["observed_value"] exists
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_success)
     assert output_1 == "1,313"
     # test _get_observed_value when evr.result does not exist
     output_2 = get_renderer_impl(
         object_name=evr_no_result_key.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_no_result_key)
     assert output_2 == "--"
     # test _get_observed_value for expect_column_values_to_not_be_null expectation type
     output_3 = get_renderer_impl(
         object_name=evr_expect_column_values_to_not_be_null.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_not_be_null)
     assert output_3 == "≈20.03% not null"
     # test _get_observed_value for expect_column_values_to_be_null expectation type
     output_4 = get_renderer_impl(
         object_name=evr_expect_column_values_to_be_null.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_expect_column_values_to_be_null)
     assert output_4 == "100% null"
     # test _get_observed_value to be 0
     output_5 = get_renderer_impl(
         object_name=evr_success_zero.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.observed_value",
+        renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
     )[1](result=evr_success_zero)
     assert output_5 == "0"
 
@@ -646,14 +749,14 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for succeeded evr
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_success)
     assert output_1 == []
 
     # test for failed evr
     output_2 = get_renderer_impl(
         object_name=evr_failed.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed)
     assert output_2 == [
         RenderedStringTemplateContent(
@@ -676,7 +779,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for evr with no "result" key
     output_3 = get_renderer_impl(
         object_name=evr_no_result.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_no_result)
     print(json.dumps(output_3, indent=2))
     assert output_3 == []
@@ -684,7 +787,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
     # test for evr with no unexpected count
     output_4 = get_renderer_impl(
         object_name=evr_failed_no_unexpected_count.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_no_unexpected_count)
     print(output_4)
     assert output_4 == []
@@ -709,7 +812,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_statement(
 
     output_5 = get_renderer_impl(
         object_name=evr_failed_exception.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_statement",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
     )[1](result=evr_failed_exception)
     output_5 = [content.to_json_dict() for content in output_5]
     expected_output_5 = [
@@ -935,30 +1038,30 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     # test for succeeded evr
     output_1 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_success)
     assert output_1 is None
 
     # test for failed evr with no "result" key
     output_2 = get_renderer_impl(
         object_name=evr_failed_no_result.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_result)
     assert output_2 is None
 
     # test for failed evr with no unexpected list or unexpected counts
     output_3 = get_renderer_impl(
         object_name=evr_failed_no_unexpected_list_or_counts.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_no_unexpected_list_or_counts)
     assert output_3 is None
 
     # test for failed evr with partial unexpected list
     output_4 = get_renderer_impl(
         object_name=evr_failed_partial_unexpected_list.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_list)
-    assert output_4.to_json_dict() == {
+    assert output_4[0].to_json_dict() == {
         "content_block_type": "table",
         "table": [
             [1],
@@ -989,34 +1092,34 @@ def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table(evr_suc
     # test for failed evr with partial unexpected counts
     output_5 = get_renderer_impl(
         object_name=evr_failed_partial_unexpected_counts.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.unexpected_table",
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
     )[1](result=evr_failed_partial_unexpected_counts)
-    assert output_5.to_json_dict() == {
+    assert output_5[0].to_json_dict() == {
         "content_block_type": "table",
-        "table": [
-            [1],
-            [2],
-            [3],
-            [4],
-            [5],
-            [6],
-            [7],
-            [8],
-            [9],
-            [10],
-            [11],
-            [12],
-            [13],
-            [14],
-            [15],
-            [16],
-            [17],
-            [18],
-            [19],
-            [20],
-        ],
-        "header_row": ["Sampled Unexpected Values"],
+        "header_row": ["Sampled Unexpected Values", "Count"],
         "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            [1, 1],
+            [2, 1],
+            [3, 1],
+            [4, 1],
+            [5, 1],
+            [6, 1],
+            [7, 1],
+            [8, 1],
+            [9, 1],
+            [10, 1],
+            [11, 1],
+            [12, 1],
+            [13, 1],
+            [14, 1],
+            [15, 1],
+            [16, 1],
+            [17, 1],
+            [18, 1],
+            [19, 1],
+            [20, 1],
+        ],
     }
 
 
@@ -1026,7 +1129,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for failed evr with exception
     output_1 = get_renderer_impl(
         object_name=evr_failed_with_exception.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed_with_exception)
     assert output_1.to_json_dict() == {
         "content_block_type": "string_template",
@@ -1047,7 +1150,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for succeeded evr
     output_2 = get_renderer_impl(
         object_name=evr_success.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_success)
     assert output_2.to_json_dict() == {
         "content_block_type": "string_template",
@@ -1069,7 +1172,7 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
     # test for failed evr
     output_3 = get_renderer_impl(
         object_name=evr_failed.expectation_config.expectation_type,
-        renderer_type="renderer.diagnostic.status_icon",
+        renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
     )[1](result=evr_failed)
     assert output_3.to_json_dict() == {
         "content_block_type": "string_template",
@@ -1082,4 +1185,213 @@ def test_ValidationResultsTableContentBlockRenderer_get_status_cell(
                 }
             },
         },
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_no_id_pk_pandas():
+    evr_no_id_pk_pandas = ExpectationValidationResult(
+        success=False,
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "batch_id": "cb8e223838fcdb055f6cccad2af592ae",
+                "column": "animals",
+                "value_set": ["cat", "fish", "dog"],
+            },
+            meta={},
+        ),
+        result={
+            "element_count": 6,
+            "missing_count": 0,
+            "missing_percent": 0.0,
+            "partial_unexpected_counts": [
+                {"count": 1, "value": "giraffe"},
+                {"count": 1, "value": "lion"},
+                {"count": 1, "value": "zebra"},
+            ],
+            "partial_unexpected_index_list": [3, 4, 5],
+            "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_count": 3,
+            "unexpected_index_list": [3, 4, 5],
+            "unexpected_list": ["giraffe", "lion", "zebra"],
+            "unexpected_percent": 50.0,
+            "unexpected_percent_nonmissing": 50.0,
+            "unexpected_percent_total": 50.0,
+        },
+        exception_info={
+            "exception_message": None,
+            "exception_traceback": None,
+            "raised_exception": False,
+        },
+    )
+    rendered_value = get_renderer_impl(
+        object_name=evr_no_id_pk_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_no_id_pk_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+        "header_row": ["Unexpected Value", "Count", "Index"],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_and_query(
+    evr_id_pk_basic_pandas,
+):
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "Index"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [["giraffe", 1, "3"], ["lion", 1, "4"], ["zebra", 1, "5"]],
+    }
+    assert rendered_value[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {"tag": "code", "template": "[3, 4, 5]"},
+            }
+        ],
+        "collapse_toggle_link": "To retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_pandas_with_sampled_table(
+    evr_id_pk_basic_pandas,
+):
+    evr_id_pk_pandas = evr_id_pk_basic_pandas
+    new_index = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    new_unexpected_list = [
+        "giraffe",
+        "lion",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+    ]
+    evr_id_pk_pandas.result["partial_unexpected_index_list"] = new_index
+    evr_id_pk_pandas.result["partial_unexpected_list"] = new_unexpected_list
+    evr_id_pk_pandas.result["unexpected_count"] = 100
+    evr_id_pk_pandas.result["unexpected_index_list"] = new_index
+    evr_id_pk_pandas.result["unexpected_list"] = new_unexpected_list
+
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_pandas.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_pandas)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Sampled Unexpected Values", "Count", "Index"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3"],
+            ["lion", 1, "4"],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+        ],
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query(
+    evr_id_pk_basic_sql,
+):
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_sql.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_sql)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Unexpected Value", "Count", "pk_1", "pk_2"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3", "three"],
+            ["lion", 1, "4", "four"],
+            ["zebra", 1, "5", "five"],
+        ],
+    }
+    assert rendered_value[1].to_json_dict() == {
+        "collapse": [
+            {
+                "content_block_type": "string_template",
+                "string_template": {
+                    "tag": "code",
+                    "template": "SELECT animals, pk_1, pk_2 \n"
+                    "FROM animal_names \n"
+                    "WHERE animals IS NOT NULL AND "
+                    "(animals NOT IN ('cat', "
+                    "'fish', 'dog'))",
+                },
+            }
+        ],
+        "collapse_toggle_link": "To retrieve all unexpected values...",
+        "content_block_type": "collapse",
+        "inline_link": False,
+    }
+
+
+def test_ValidationResultsTableContentBlockRenderer_get_unexpected_table_with_id_pk_sql_with_query_with_sampled_table(
+    evr_id_pk_basic_sql,
+):
+    new_index = [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+        {"animals": "zebra", "pk_1": 6},
+        {"animals": "zebra", "pk_1": 7},
+        {"animals": "zebra", "pk_1": 8},
+        {"animals": "zebra", "pk_1": 9},
+        {"animals": "zebra", "pk_1": 10},
+        {"animals": "zebra", "pk_1": 11},
+        {"animals": "zebra", "pk_1": 12},
+        {"animals": "zebra", "pk_1": 13},
+        {"animals": "zebra", "pk_1": 14},
+        {"animals": "zebra", "pk_1": 15},
+    ]
+    new_unexpected_list = [
+        "giraffe",
+        "lion",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+        "zebra",
+    ]
+    evr_id_pk_basic_sql.result["unexpected_index_column_names"] = ["pk_1"]
+    evr_id_pk_basic_sql.result["partial_unexpected_index_list"] = new_index
+    evr_id_pk_basic_sql.result["partial_unexpected_list"] = new_unexpected_list
+    evr_id_pk_basic_sql.result["unexpected_count"] = 100
+    evr_id_pk_basic_sql.result["unexpected_index_list"] = new_index
+    evr_id_pk_basic_sql.result["unexpected_list"] = new_unexpected_list
+
+    rendered_value = get_renderer_impl(
+        object_name=evr_id_pk_basic_sql.expectation_config.expectation_type,
+        renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
+    )[1](result=evr_id_pk_basic_sql)
+    assert rendered_value[0].to_json_dict() == {
+        "content_block_type": "table",
+        "header_row": ["Sampled Unexpected Values", "Count", "pk_1"],
+        "styling": {"body": {"classes": ["table-bordered", "table-sm", "mt-3"]}},
+        "table": [
+            ["giraffe", 1, "3"],
+            ["lion", 1, "4"],
+            ["zebra", 11, "5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ..."],
+        ],
     }

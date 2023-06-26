@@ -1,22 +1,42 @@
-import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+import logging
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
+
+import pandas as pd
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
-    MetricComputationResult,
-    MetricValues,
-    ParameterBuilder,
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.types import (
-    PARAMETER_KEY,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
 )
+from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -32,33 +52,30 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     # source: https://regexland.com/most-common-regular-expressions/
     # source for UUID: https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid/13653180#13653180
     CANDIDATE_REGEX: Set[str] = {
-        r"/\d+/",  # whole number with 1 or more digits
-        r"/-?\d+/",  # negative whole numbers
-        r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
-        r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
-        r"^\s+/",  # leading space
-        r"\s+/$",  # trailing space
-        r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/",  #  Matching URL (including http(s) protocol)
-        r"/<\/?(?:p|a|b|img)(?: \/)?>/",  # HTML tags
-        r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/",  # IPv4 IP address
-        r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/",  # IPv6 IP address,
+        r"\d+",  # whole number with 1 or more digits
+        r"-?\d+",  # negative whole numbers
+        r"-?\d+(?:\.\d*)?",  # decimal numbers with . (period) separator
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",  # general text
+        r"^\s+",  # leading space
+        r"\s+$",  # trailing space
+        r"https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,255}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#()?&//=]*)",  # Matching URL (including http(s) protocol)
+        r"<\/?(?:p|a|b|img)(?: \/)?>",  # HTML tags
+        r"(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}",  # IPv4 IP address
         r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: Union[float, str] = 1.0,
-        candidate_regexes: Optional[Union[Iterable[str], str]] = None,
-        json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        threshold: Union[str, float] = 1.0,
+        candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional[AbstractDataContext] = None,
+    ) -> None:
         """
         Configure this RegexPatternStringParameterBuilder
         Args:
@@ -67,16 +84,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_regexes: a list of candidate regex strings that will REPLACE the default
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: Optional[List[Batch]] = None,
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
-            json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
 
@@ -86,14 +101,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         self._threshold = threshold
 
         self._candidate_regexes = candidate_regexes
-
-    @property
-    def fully_qualified_parameter_name(self) -> str:
-        return f"{PARAMETER_KEY}{self.name}"
-
-    """
-    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
-    """
 
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
@@ -119,16 +126,18 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        runtime_configuration: Optional[dict] = None,
+    ) -> Attributes:
         """
-        Check the percentage of values matching the REGEX string, and return the best fit, or None if no
-        string exceeds the configured threshold.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Check the percentage of values matching the REGEX string, and return the best fit, or None if no string exceeds
+        the configured threshold.
+
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
         """
         metric_computation_result: MetricComputationResult
 
@@ -136,32 +145,44 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
 
         # This should never happen.
-        if not (
-            isinstance(metric_computation_result.metric_values, list)
-            and len(metric_computation_result.metric_values) == 1
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.metric_values} found).'
+        if len(metric_computation_result.attributed_resolved_metrics) != 1:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
         attributed_resolved_metrics: AttributedResolvedMetrics
 
-        attributed_resolved_metrics = metric_computation_result.metric_values[0]
+        attributed_resolved_metrics = (
+            metric_computation_result.attributed_resolved_metrics[0]
+        )
 
         metric_values: MetricValues
 
-        metric_values = attributed_resolved_metrics.metric_values
+        metric_values = attributed_resolved_metrics.conditioned_metric_values
+
+        if metric_values is None:
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"Result of metric computations for {self.__class__.__name__} is empty."
+            )
 
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
-        nonnull_count: int = sum(metric_values)
+        nonnull_count: int
+        if pd.isnull(metric_values).any():
+            nonnull_count = 0
+        else:
+            nonnull_count = sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
@@ -198,9 +219,13 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name="column_values.match_regex.unexpected_count",
+            metric_name=f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_regex_metric_value_kwargs_list,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -208,14 +233,21 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        for attributed_resolved_metrics in metric_computation_result.metric_values:
+        for (
+            attributed_resolved_metrics
+        ) in metric_computation_result.attributed_resolved_metrics:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = attributed_resolved_metrics.metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
-            match_regex_unexpected_count: int = sum(metric_values)
-            success_ratio: float = (
-                nonnull_count - match_regex_unexpected_count
-            ) / nonnull_count
+            match_regex_unexpected_count: int
+            if pd.isnull(metric_values).any():
+                match_regex_unexpected_count = 0
+            else:
+                match_regex_unexpected_count = sum(metric_values)
+
+            success_ratio: float = (nonnull_count - match_regex_unexpected_count) / (
+                nonnull_count + NP_EPSILON
+            )
             regex_string_success_ratios[
                 attributed_resolved_metrics.metric_attributes["regex"]
             ] = success_ratio
@@ -229,63 +261,26 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        # get list of regex_strings that match greater than threshold
-        regex_string_success_list: List[
-            str
-        ] = self._get_regex_matched_greater_than_threshold(
+        # get best-matching regex_string that match greater than threshold
+        (
+            best_regex_string,
+            best_ratio,
+        ) = ParameterBuilder._get_best_candidate_above_threshold(
             regex_string_success_ratios, threshold
         )
-        # sorted regex and ratios for all evaluated candidates
-        sorted_ratio_list, sorted_regex_string_list = self._get_sorted_regex_and_ratios(
-            regex_string_success_ratios
+        # dict of sorted regex and ratios for all evaluated candidates
+        sorted_regex_candidates_and_ratios: dict = (
+            ParameterBuilder._get_sorted_candidates_and_ratios(
+                regex_string_success_ratios
+            )
         )
 
-        return (
-            regex_string_success_list,
+        return Attributes(
             {
-                "evaluated_regexes": dict(
-                    zip(sorted_regex_string_list, sorted_ratio_list)
-                ),
-                "threshold": threshold,
-            },
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: best_regex_string,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {
+                    "success_ratio": best_ratio,
+                    "evaluated_regexes": sorted_regex_candidates_and_ratios,
+                },
+            }
         )
-
-    @staticmethod
-    def _get_regex_matched_greater_than_threshold(
-        regex_string_success_ratio_dict: Dict[str, float],
-        threshold: float,
-    ) -> List[str]:
-        """
-        Helper method to calculate which regex_strings match greater than threshold
-        """
-        regex_string: str
-        ratio: float
-        regex_string_success_list: List[str] = [
-            regex_string
-            for regex_string, ratio in regex_string_success_ratio_dict.items()
-            if ratio >= threshold
-        ]
-
-        return regex_string_success_list
-
-    @staticmethod
-    def _get_sorted_regex_and_ratios(
-        regex_string_success_ratio_dict: Dict[str, float],
-    ) -> Tuple[List[float], List[str]]:
-        """
-        Helper method to sort all regexes that were evaluated by their success ratio.
-
-        Returns Tuple(ratio, sorted_strings)
-        """
-        regex_strings: List[str] = list(regex_string_success_ratio_dict.keys())
-        ratios: List[float] = list(regex_string_success_ratio_dict.values())
-
-        regex_string: str
-        ratio: float
-        sorted_regex_strings: List[str] = [
-            regex_string
-            for ratio, regex_string in sorted(zip(ratios, regex_strings), reverse=True)
-        ]
-        ratios.sort(reverse=True)
-
-        return ratios, sorted_regex_strings

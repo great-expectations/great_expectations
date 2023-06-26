@@ -1,31 +1,11 @@
-import json
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 class ColumnRuleFollowers(ColumnMapMetricProvider):
@@ -53,7 +33,6 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, rule, **kwargs):
-
         if rule["ranges"] is {}:
             raise ValueError("Ranges must contain at least 1 variable!")
 
@@ -99,7 +78,18 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
-    """This expectation compares all rows of a column against a given input expression."""
+    """Expect that all rows of a column satisfy a given input rule that specifies ranges and expressions.
+
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        rule (dict): Dict with keys "ranges" and "expr". \
+            ranges is a dict whos keys are variables in the expression (expr) and whos values are \
+            an empty list or two-item list of indicies. \
+            expr is a string in the form of a Python expression that uses the variable names in the \
+            ranges dict and will be parsed with exec(); each variable is passed in as a string
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -195,7 +185,7 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -207,7 +197,7 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -225,16 +215,12 @@ class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,

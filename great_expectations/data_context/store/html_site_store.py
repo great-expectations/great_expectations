@@ -9,6 +9,9 @@ from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.ge_cloud_store_backend import (
     GeCloudStoreBackend,
 )
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -100,7 +103,7 @@ class HtmlSiteStore:
 
     _key_class = SiteSectionIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(self, store_backend=None, runtime_environment=None) -> None:
         store_backend_module_name = store_backend.get(
             "module_name", "great_expectations.data_context.store"
         )
@@ -111,9 +114,9 @@ class HtmlSiteStore:
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
-        if not issubclass(store_class, (TupleStoreBackend, GeCloudStoreBackend)):
+        if not issubclass(store_class, (TupleStoreBackend, GXCloudStoreBackend)):
             raise DataContextError(
-                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend or GeCloudStoreBackend"
+                f"Invalid configuration: HtmlSiteStore needs a {TupleStoreBackend.__name__} or {GXCloudStoreBackend.__name__}"
             )
         if "filepath_template" in store_backend or (
             "fixed_length_key" in store_backend
@@ -128,14 +131,17 @@ class HtmlSiteStore:
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
         filepath_suffix = ".html"
-        is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
+        is_gx_cloud_store = store_backend["class_name"] in {
+            GeCloudStoreBackend.__name__,
+            GXCloudStoreBackend.__name__,
+        }
         expectation_config_defaults = {
             "module_name": module_name,
             "filepath_prefix": "expectations",
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             expectation_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -158,7 +164,7 @@ class HtmlSiteStore:
             "filepath_suffix": filepath_suffix,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             validation_result_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -182,7 +188,7 @@ class HtmlSiteStore:
             "filepath_template": filepath_template,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             index_page_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -205,7 +211,7 @@ class HtmlSiteStore:
             "filepath_template": None,
             "suppress_store_backend_id": True,
         }
-        if is_ge_cloud_store:
+        if is_gx_cloud_store:
             static_assets_config_defaults = {
                 "module_name": module_name,
                 "suppress_store_backend_id": True,
@@ -237,7 +243,7 @@ class HtmlSiteStore:
         # backends that write to the same directory structure.
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just have to remember that it
         # can't necessarily set and list_keys like most other Stores.
-        self.keys = set()
+        self.keys = set()  # type: ignore[var-annotated]
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
@@ -308,7 +314,7 @@ class HtmlSiteStore:
             else:
                 return store_backend.get_public_url_for_key(key)
         else:
-            if only_if_exists:
+            if only_if_exists:  # noqa: PLR5501
                 return (
                     store_backend.get_url_for_key(key)
                     if store_backend.has_key(key)
@@ -366,7 +372,7 @@ class HtmlSiteStore:
             content_type="text/html; " "charset=utf-8",
         )
 
-    def clean_site(self):
+    def clean_site(self) -> None:
         for _, target_store_backend in self.store_backends.items():
             keys = target_store_backend.list_keys()
             for key in keys:
@@ -382,7 +388,8 @@ class HtmlSiteStore:
 
         if not static_assets_source_dir:
             static_assets_source_dir = file_relative_path(
-                __file__, os.path.join("..", "..", "render", "view", "static")
+                __file__,
+                os.path.join("..", "..", "render", "view", "static"),  # noqa: PTH118
             )
 
         # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
@@ -396,18 +403,24 @@ class HtmlSiteStore:
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
-            if os.path.isdir(os.path.join(static_assets_source_dir, item)):
+            if os.path.isdir(  # noqa: PTH112
+                os.path.join(static_assets_source_dir, item)  # noqa: PTH118
+            ):
                 if item in dir_exclusions:
                     continue
                 # Recurse
-                new_source_dir = os.path.join(static_assets_source_dir, item)
+                new_source_dir = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
                 self.copy_static_assets(new_source_dir)
             # File
             else:
                 # Copy file over using static assets store backend
                 if item in file_exclusions:
                     continue
-                source_name = os.path.join(static_assets_source_dir, item)
+                source_name = os.path.join(  # noqa: PTH118
+                    static_assets_source_dir, item
+                )
                 with open(source_name, "rb") as f:
                     # Only use path elements starting from static/ for key
                     store_key = tuple(os.path.normpath(source_name).split(os.sep))
@@ -415,7 +428,7 @@ class HtmlSiteStore:
                     content_type, content_encoding = guess_type(item, strict=False)
 
                     if content_type is None:
-                        # Use GE-known content-type if possible
+                        # Use GX-known content-type if possible
                         if source_name.endswith(".otf"):
                             content_type = "font/opentype"
                         else:
@@ -428,7 +441,7 @@ class HtmlSiteStore:
                             content_type = "text/html; charset=utf8"
 
                     if not isinstance(
-                        self.store_backends["static_assets"], GeCloudStoreBackend
+                        self.store_backends["static_assets"], GXCloudStoreBackend
                     ):
                         self.store_backends["static_assets"].set(
                             store_key,
@@ -448,7 +461,7 @@ class HtmlSiteStore:
         Otherwise, this function returns False
         """
 
-        static_assets_source_absdir = os.path.abspath(assets_full_path)
+        static_assets_source_absdir = os.path.abspath(assets_full_path)  # noqa: PTH100
 
         zip_re = re.match(
             f"(.+[.]zip){re.escape(os.sep)}(.+)",

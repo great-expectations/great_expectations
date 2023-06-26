@@ -1,31 +1,34 @@
 import logging
 import traceback
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.alias_types import JSONValues
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
     _registered_renderers,
     get_renderer_impl,
 )
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
+    LegacyRendererType,
+    RenderedComponentContent,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
-    _rendered_component_type = TextContent
+    _rendered_component_type: Type[RenderedComponentContent] = TextContent
     _default_header = ""
 
-    _default_content_block_styling = {"classes": ["col-12"]}
+    _default_content_block_styling: Dict[str, JSONValues] = {"classes": ["col-12"]}
 
     _default_element_styling = {}
 
@@ -70,7 +73,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_list(
+    def _render_list(  # noqa: PLR0913, PLR0912
         cls,
         render_object: list,
         exception_list_content_block: bool,
@@ -84,7 +87,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
             False if isinstance(render_object[0], ExpectationValidationResult) else None
         )
         for obj_ in render_object:
-
             expectation_type = cls._get_expectation_type(obj_)
 
             content_block_fn = cls._get_content_block_fn(expectation_type)
@@ -135,7 +137,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             **kwargs,
                         )
             else:
-                if isinstance(obj_, ExpectationValidationResult):
+                if isinstance(obj_, ExpectationValidationResult):  # noqa: PLR5501
                     content_block_fn = (
                         cls._missing_content_block_fn
                         if exception_list_content_block
@@ -207,7 +209,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             return None
 
     @classmethod
-    def _render_other(
+    def _render_other(  # noqa: PLR0913
         cls,
         render_object: Any,
         exception_list_content_block: bool,
@@ -219,7 +221,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         expectation_type = cls._get_expectation_type(render_object)
 
         content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         content_block_fn = content_block_fn[1] if content_block_fn else None
         if content_block_fn is not None and not exception_list_content_block:
@@ -261,7 +263,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         **kwargs,
                     )
         else:
-            if isinstance(render_object, ExpectationValidationResult):
+            if isinstance(render_object, ExpectationValidationResult):  # noqa: PLR5501
                 content_block_fn = (
                     cls._missing_content_block_fn
                     if exception_list_content_block
@@ -289,7 +291,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         return result
 
     @classmethod
-    def _render_expectation_meta_notes(cls, expectation):
+    def _render_expectation_meta_notes(cls, expectation):  # noqa: PLR0912
         if not expectation.meta.get("notes"):
             return None
         else:
@@ -389,15 +391,17 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         header = cls._get_header()
-        if header != "":
+        if header != "":  # noqa: PLC1901
             content_block.header = header
 
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
         content_block_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         return content_block_fn[1] if content_block_fn else None
 
@@ -413,10 +417,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return []

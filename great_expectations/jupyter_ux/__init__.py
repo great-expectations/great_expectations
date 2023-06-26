@@ -4,6 +4,7 @@
 import logging
 import sys
 from datetime import datetime
+from typing import Final
 
 import pandas as pd
 import tzlocal
@@ -60,13 +61,12 @@ If you did not create the data source during init, here is how to add it now: <a
                     """
 <p>
 Found more than one data source in the great_expectations.yml of your project:
-<b>{1:s}</b>
+<b>{:s}</b>
 </p>
 <p>
 Uncomment the next cell and set data_source_name to one of these names.
 </p>
 """.format(
-                        data_source_type,
                         ",".join(
                             [
                                 datasource["name"]
@@ -137,14 +137,17 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 
+_LOCAL_TZ: Final = tzlocal.get_localzone()
+
+
 def setup_notebook_logging(logger=None, log_level=logging.INFO):
-    """Set up the provided logger for the GE default logging configuration.
+    """Set up the provided logger for the GX default logging configuration.
 
     Args:
         logger - the logger to configure
     """
 
-    def posix2local(timestamp, tz=tzlocal.get_localzone()):
+    def posix2local(timestamp, tz=_LOCAL_TZ):
         """Seconds since the epoch -> local time as an aware datetime object."""
         return datetime.fromtimestamp(timestamp, tz)
 
@@ -181,7 +184,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
     # warnings.filterwarnings('ignore')
 
 
-def show_available_data_asset_names(context, data_source_name=None):
+def show_available_data_asset_names(context, data_source_name=None) -> None:
     """List asset names found in the current context."""
     # TODO: Needs tests.
     styles = """

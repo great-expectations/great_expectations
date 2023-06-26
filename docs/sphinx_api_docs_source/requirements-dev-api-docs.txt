@@ -1,0 +1,4 @@
+docstring-parser==0.15
+myst-parser
+pydata-sphinx-theme==0.11.0  # Pinned to keep the css styling consistent.
+sphinx~=4.5.0

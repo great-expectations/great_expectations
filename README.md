@@ -1,27 +1,33 @@
-[![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
-![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
-[![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
+
+[![PyPI](https://img.shields.io/pypi/v/great_expectations)](https://pypi.org/project/great-expectations/#history)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/great-expectations)](https://pypistats.org/packages/great-expectations)
+[![Build Status](https://img.shields.io/azure-devops/build/great-expectations/bedaf2c2-4c4a-4b37-87b0-3877190e71f5/1)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5683574.svg)](https://doi.org/10.5281/zenodo.5683574)
+[![Twitter Follow](https://img.shields.io/twitter/follow/expectgreatdata?style=social)](https://twitter.com/expectgreatdata)
+[![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://greatexpectations.io/slack)
+[![Contributors](https://img.shields.io/github/contributors/great-expectations/great_expectations)](https://github.com/great-expectations/great_expectations/graphs/contributors)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json)](https://github.com/charliermarsh/ruff)
 
 <!-- <<<Super-quickstart links go here>>> -->
 
 
 
-<img align="right" src="./generic_dickens_protagonist.png">
+<img align="right" src="./docs/docusaurus/static/img/gx-mark-160.png">
 
 Great Expectations
 ================================================================================
 
 *Always know what to expect from your data.*
 
-Introduction
+What is GX?
 --------------------------------------------------------------------------------
 
-Great Expectations helps data teams eliminate pipeline debt, through data testing, documentation, and profiling.
+Great Expectations (GX) helps data teams build a shared understanding of their data through quality testing, documentation, and profiling.
 
-Software developers have long known that testing and documentation are essential for managing complex codebases. Great Expectations brings the same confidence, integrity, and acceleration to data science and data engineering teams.
+Data practitioners know that testing and documentation are essential for managing complex data pipelines. GX makes it possible for data science and engineering teams to quickly deploy extensible, flexible data quality testing into their data stacks. Its human-readable documentation makes the results accessible to technical and nontechnical users.
 
-See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pipeline-debt-introducing-great-expectations-862ddc46782a) for an introduction to the philosophy of pipeline testing.
+[See Down with Pipeline Debt!](https://greatexpectations.io/blog/down-with-pipeline-debt-introducing-great-expectations/) for an introduction to our philosophy of pipeline data quality testing.
+
 
 
 <!--
@@ -34,9 +40,22 @@ See [Down with Pipeline Debt!](https://medium.com/@expectgreatdata/down-with-pip
 Key features
 --------------------------------------------------
 
-### Expectations
+### Seamless operation
 
-Expectations are assertions for data. They are the workhorse abstraction in Great Expectations, covering all kinds of common data issues, including:
+GX fits into your existing tech stack, and can integrate with your CI/CD pipelines to add data quality exactly where you need it. Connect to and validate your data wherever it already is, so you can focus on honing your Expectation Suites to perfectly meet your data quality needs.
+
+### Start fast
+
+Get useful results quickly even for large data volumes. GX’s Data Assistants provide curated Expectations for different domains, so you can accelerate your data discovery to rapidly deploy data quality throughout your pipelines. Auto-generated Data Docs ensure your DQ documentation will always be up-to-date.
+
+
+
+![data_assistant_plot_expectations_and_metrics](./docs/readme_assets/data_assistant_plot_expectations_and_metrics.png)
+
+### Unified understanding
+
+Expectations are GX’s workhorse abstraction: each Expectation declares an expected state of the data. The Expectation library provides a flexible, extensible vocabulary for data quality—one that’s human-readable, meaningful for technical and nontechnical users alike. Bundled into Expectation Suites, Expectations are the ideal tool for characterizing exactly what you expect from your data.
+
 - `expect_column_values_to_not_be_null`
 - `expect_column_values_to_match_regex`
 - `expect_column_values_to_be_unique`
@@ -45,79 +64,21 @@ Expectations are assertions for data. They are the workhorse abstraction in Grea
 - `expect_column_median_to_be_between`
 - ...and [many more](https://greatexpectations.io/expectations)
 
-Expectations are <!--[declarative, flexible and extensible]()--> declarative, flexible and extensible.
-<!--To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().-->
+### Secure and transparent
 
-<!--
-<<animated gif showing typing an Expectation in a notebook cell, running it, and getting an informative result>>
--->
+GX doesn’t ask you to exchange security for your insight. It processes your data in place, on your systems, so your security and governance procedures can maintain control at all times. And because GX’s core is and always will be open source, its complete transparency is the opposite of a black box.
 
-### Batteries-included data validation
+### Data contracts support
 
-Expectations are a great start, but it takes more to get to production-ready data validation. Where are Expectations stored? How do they get updated? How do you securely connect to production data systems? How do you notify team members and triage when data validation fails?
+Checkpoints are a transparent, central, and automatable mechanism for testing Expectations and evaluating your data quality. Every Checkpoint run produces human-readable Data Docs reporting the results. You can also configure Checkpoints to take Actions based on the results of the evaluation, like sending alerts and preventing low-quality data from moving further in your pipelines.
 
-Great Expectations supports all of these use cases out of the box. Instead of building these components for yourself over weeks or months, you will be able to add production-ready validation to your pipeline in a day. This “Expectations on rails” framework plays nice with other data engineering tools, respects your existing name spaces, and is designed for extensibility.
+![Image of data contact support](./docs/readme_assets/data-contract-support.png)
 
-<!--
-Check out [The Era of DIY Data Validation is Over]() for more details.
--->
+### Readable for collaboration
 
-<!--
-<<animated gif showing slack message, plus click through to validation results, a la: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6b0ff79464_0_183>>
--->
-![ooooo ahhhh](./readme_assets/terminal.gif)
+Everyone stays on the same page about your data quality with GX’s inspectable, shareable, and human-readable Data Docs. You can publish Data Docs to the locations where you need them in a variety of formats, making it easy to integrate Data Docs into your existing data catalogs, dashboards, and other reporting and data governance tools.
 
-### Tests are docs and docs are tests
-
-Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation.
-
-Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
-
-<!--
-<<Pic, similar to slide 32: https://docs.google.com/presentation/d/1ZqFXsoOyW2KIkMBNij3c7KOM0RhajhAHKesdCL_BKHw/edit#slide=id.g6af8c4cd70_0_38>>
-
-<<Pic, showing an Expectation that renders a graph>>
-
-Check out [Down with Documentation Rot!]() for more details.
--->
-![Your tests are your docs and your docs are your tests](./readme_assets/test-are-docs.jpg)
-
-
-### Automated data profiling
-
-Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling, a beta feature of Great Expectations, provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
-
-<!--
-<<<pretty pics of profiled data>>>
-<<<esp. multi-batch profiling>>>
--->
-![ooooo ahhhh](./readme_assets/datadocs.gif)
-
-Automated profiling doesn't replace domain expertise&mdash;you will almost certainly tune and augment your auto-generated Expectations over time&mdash;but it's a great way to jump start the process of capturing and sharing domain knowledge across your team.
-
-<!--
-<<<Note: this feature is still in early beta. Expect changes.>>>
-
-Visit our gallery of expectations and documentation generated via automatic data profiling [here]().
-
-You can also test out profiling on your own data [here]().
--->
-
-### Pluggable and extensible
-
-Every component of the framework is designed to be extensible: Expectations, storage, profilers, renderers for documentation, actions taken after validation, etc.  This design choice gives a lot of creative freedom to developers working with Great Expectations.
-
-Recent extensions include:
-* [Renderers for data dictionaries](https://greatexpectations.io/blog/20200731_data_dictionary_plugin/)
-* [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
-* [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
-
-New deployment patterns include:
-* [How to Use Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery)
-* [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/)
-* [How to Use Great Expectations in Flyte](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte)
-
-We're very excited to see what other plugins the data community comes up with!
+![Image of data docs](./docs/readme_assets/datadocs-update.jpg)
 
 Quick start
 -------------------------------------------------------------
@@ -128,34 +89,24 @@ You can install it using pip
 ```
 pip install great_expectations
 ```
-or conda
-```
-conda install -c conda-forge great-expectations
-```
 and then run
 
 ```
 great_expectations init
 ```
 
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/reference/supporting_resources), which will teach you how to get up and running in minutes.)
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/terms/supporting_resource/), which will teach you how to get up and running in minutes.)
 
-For full documentation, visit [Great Expectations on readthedocs.io](https://docs.greatexpectations.io/docs/).
+For full documentation, visit [https://docs.greatexpectations.io/](https://docs.greatexpectations.io/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there. You can also use our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions)
 
-<!--
--------------------------------------------------------------
-<<<More social proof: pics and quotes of power users>>>
-
--------------------------------------------------------------
--->
 
 Integrations
 -------------------------------------------------------------------------------
 Great Expectations works with the tools and systems that you're already using with your data, including:
 
-<table>
+<table style="background-color: #fff;">
 	<thead>
 		<tr>
 			<th colspan="2">Integration</th>
@@ -163,73 +114,361 @@ Great Expectations works with the tools and systems that you're already using wi
 		</tr>
 	</thead>
 	<tbody>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://pandas.pydata.org/static/img/pandas.svg" />                                    </td><td style="width: 200px;">Pandas                   </td><td>Great for in-memory machine learning pipelines!</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://spark.apache.org/images/spark-logo-trademark.png" />                             </td><td style="width: 200px;">Spark                    </td><td>Good for really big data.</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://wiki.postgresql.org/images/3/30/PostgreSQL_logo.3colors.120x120.png" />          </td><td style="width: 200px;">Postgres                 </td><td>Leading open source database</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/gist/nelsonauner/be8160f2e576a327bfcde085b334f622/raw/b4ec25dd4d698abdc37e6c1887ec69ddcca1d27d/google_bigquery_logo.svg" /></td><td style="width: 200px;">BigQuery</td><td>Google serverless massive-scale SQL analytics platform</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://upload.wikimedia.org/wikipedia/commons/6/63/Databricks_Logo.png" /></td><td style="width: 200px;">Databricks</td><td>Managed Spark Analytics Platform</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.mysql.com/common/logos/powered-by-mysql-167x86.png" />                       </td><td style="width: 200px;">MySQL                    </td><td>Leading open source database</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.blazeclan.com/wp-content/uploads/2013/08/Amazon-Redshift-%E2%80%93-11-Key-Points-to-Remember.png" />                 </td><td style="width: 200px;">AWS Redshift             </td><td>Cloud-based data warehouse</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://braze-marketing-assets.s3.amazonaws.com/images/partner_logos/amazon-s3.png" />   </td><td style="width: 200px;">AWS S3                   </td><td>Cloud based blob storage</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.snowflake.com/wp-content/themes/snowflake/img/snowflake-logo-blue@2x.png" /> </td><td style="width: 200px;">Snowflake                </td><td>Cloud-based data warehouse</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/apache/airflow/master/docs/apache-airflow/img/logos/wordmark_1.png" /></td><td style="width: 200px;">Apache Airflow           </td><td>An open source orchestration engine</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://camo.githubusercontent.com/abeb8916a5c054f02e5b50bc10ba50717d56ad882e2ec1e5a8be93258e702204/68747470733a2f2f696d616765732e6374666173736574732e6e65742f676d3938777a716f746d6e782f335566636237795971635842446c41684a33306763652f63323337626233323534313930373935623330626637333466336362633164342f707265666563742d6c6f676f2d66756c6c2d6772616469656e742e737667" /></td><td style="width: 200px;">Prefect           </td><td>An open source workflow management system</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/datahub_logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/integrations/integration_datahub/">
+					DataHub
+				</a>
+			</td>
+			<td>
+				Data Catalog
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/aws-glue-logo__1_.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue/">
+					AWS Glue
+				</a>
+			</td>
+			<td>
+				Data Integration
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/Athena_logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena/">
+					Athena
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/datasource_redshift.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/redshift/">
+					AWS Redshift
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/awss3.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3/">
+					AWS S3
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/bigquery.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+					BigQuery
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/og-databricks.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/">
+					Databricks
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/deepnote_logo_400x.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_deepnote/">
+					Deepnote
+				</a>
+			</td>
+			<td>
+				Collaborative data notebook
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/Google_Cloud_logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery/">
+					Google Cloud Platform &#40;GCP&#41;
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/microsoft-azure-blob-storage-logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/">
+					Microsoft Azure Blob Storage
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/microsoft-sql-server-logo-96AF49E2B3-seeklogo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql">
+					Microsoft SQL Server
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/mysql.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/">
+					MySQL
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/pandas.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/pandas/">
+					Pandas
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/postgres.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres/">
+					PostgreSQL
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/snowflake.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/">
+					Snowflake
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/spark.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/">
+					Spark
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/SQLite370.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/sqlite/">
+					SQLite
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/trino-og.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/trino/">
+					Trino
+				</a>
+			</td>
+			<td>
+				Data Source
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/Apache_Airflow.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow/">
+					Apache Airflow
+				</a>
+			</td>
+			<td>
+				Orchestrator
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/flyte_logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte/">
+					Flyte
+				</a>
+			</td>
+			<td>
+				Orchestrator
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/meltano-logo.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_meltano/">
+					Meltano
+				</a>
+			</td>
+			<td>
+				Orchestrator
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/prefect-logo-gradient-navy.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_prefect/">
+					Prefect
+				</a>
+			</td>
+			<td>
+				Orchestrator
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/zenml.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/integrations/integration_zenml/">
+					ZenML
+				</a>
+			</td>
+			<td>
+				Orchestrator
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/slack.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/">
+					Slack
+				</a>
+			</td>
+			<td>
+				Plugin
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; height: 40px; background-color: #fff;">
+				<img height="40" src="./docs/readme_assets/jupyter.jpg" />
+			</td>
+			<td style="width: 200px;">
+				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations/#creating-expectations-in-jupyter-notebooks">
+					Jupyter Notebooks
+				</a>
+			</td>
+			<td>
+				Utility
+			</td>
+		</tr>
 	</tbody>
 </table>
 
 
-<!--
-Quick start
+What is GX _not_?
 -------------------------------------------------------------
 
-Still getting comfortable with the concept of Expectations? Try [our online browser]()
+Great Expectations is _not_ a pipeline execution framework. Instead, it integrates seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. GX carries out your data quality pipeline testing while these tools execute the pipelines.
 
-Ready to start working with Great Expectations?
+Great Expectations is _not_ a database or storage software. It processes your data in place, on your existing systems. Expectations and Validation Results that GX produces are metadata about your data.
 
-`great expectations init`
+Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
-Looking at production deployment? [Go here]()
+Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy), and Spark environments.
 
--------------------------------------------------------------
-<<<More social proof: pics and quotes of power users>>>
-
--------------------------------------------------------------
-Liking what you see? Show some love and give us a star!
--->
-
-
-What does Great Expectations _not_ do?
--------------------------------------------------------------
-
-**Great Expectations is _not_ a pipeline execution framework.**
-
-We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. We DON'T execute your pipelines for you.
-
-**Great Expectations is _not_ a data versioning tool.**
-
-Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, validation results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
-
-**Great Expectations currently works best in a python/bash environment.**
-
-Following the philosophy of "take the compute to the data," Great Expectations currently supports native execution of Expectations in three environments: pandas, SQL (through the SQLAlchemy core), and Spark. That said, all orchestration in Great Expectations is python-based. You can invoke it from the command line without using a python programming environment, but if you're working in another ecosystem, other tools might be a better choice. If you're running in a pure R environment, you might consider [assertR](https://github.com/ropensci/assertr) as an alternative. Within the Tensorflow ecosystem, [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) fulfills a similar function as Great Expectations.
+Great Expectations is _not_ exclusive to Python programming environments. It can be invoked from the command line without a Python environment. However, if you’re working into another ecosystem, you may want to explore ecosystem-specific alternatives such as [assertR](https://github.com/ropensci/assertr) (for R environments) or [TFDV](https://www.tensorflow.org/tfx/guide/tfdv) (for Tensorflow environments).
 
 
 Who maintains Great Expectations?
 -------------------------------------------------------------
 
-Great Expectations is under active development by James Campbell, Abe Gong, Eugene Mandel, Rob Lim, Taylor Miller, with help from many others.
+Great Expectations OSS is under active development by GX Labs and the Great Expectations community.
 
 What's the best way to get in touch with the Great Expectations team?
 --------------------------------------------------------------------------------
 
-If you have questions, comments, or just want to have a good old-fashioned chat about data pipelines, please hop on our public [Slack channel](https://greatexpectations.io/slack)
+If you have questions, comments, or just want to have a good old-fashioned chat about data quality, please hop on our public [Slack channel](https://greatexpectations.io/slack) channel or post in our [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions).
 
-If you'd like hands-on assistance setting up Great Expectations, establishing a healthy practice of data testing, or adding functionality to Great Expectations, please see options for consulting help [here](https://superconductive.com/).
 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.
+Absolutely. Yes, please. See [Contributing code](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), [Contributing Expectations](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md), [Contributing packages](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md), or [Contribute to Great Expectations documentation](https://github.com/great-expectations/great_expectations/tree/develop/docs), and please don't be shy with questions.

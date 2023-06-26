@@ -1,22 +1,27 @@
+from __future__ import annotations
+
 import os
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import jinja2
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
-    NotebookConfig,
-    NotebookTemplateConfig,
-    notebookConfigSchema,
+    NotebookConfig,  # noqa: TCH001
+    NotebookTemplateConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -28,7 +33,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     - Make it easy to edit a suite where only JSON exists.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         custom_templates_module: Optional[str] = None,
         header_markdown: Optional[NotebookTemplateConfig] = None,
@@ -43,8 +48,8 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[DataContext] = None,
-    ):
+        context: Optional[AbstractDataContext] = None,
+    ) -> None:
         super().__init__()
         custom_loader = []
 
@@ -90,9 +95,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def from_data_context(data_context):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         return instantiate_class_from_config(
             config=suite_edit_notebook_config.__dict__
@@ -193,7 +196,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         )
         self.add_code_cell(code)
 
-    def add_expectation_cells_from_suite(self, expectations):
+    def add_expectation_cells_from_suite(self, expectations) -> None:
         expectations_by_column = self._get_expectations_by_column(expectations)
         markdown = self.render_with_overwrite(
             self.table_expectations_header_markdown, "TABLE_EXPECTATIONS_HEADER.md"
@@ -306,7 +309,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.render(suite, batch_kwargs)
         self.write_notebook_to_disk(self._notebook, notebook_file_path)
 
-    def add_authoring_intro(self):
+    def add_authoring_intro(self) -> None:
         markdown = self.render_with_overwrite(
             self.authoring_intro_markdown, "AUTHORING_INTRO.md"
         )
@@ -338,7 +341,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             base_dir = batch_kwargs["path"]
             if base_dir[0:5] in ["s3://", "gs://"]:
                 return batch_kwargs
-            if not os.path.isabs(base_dir):
-                batch_kwargs["path"] = os.path.join("..", "..", base_dir)
+            if not os.path.isabs(base_dir):  # noqa: PTH117
+                batch_kwargs["path"] = os.path.join(  # noqa: PTH118
+                    "..", "..", base_dir
+                )
 
         return batch_kwargs

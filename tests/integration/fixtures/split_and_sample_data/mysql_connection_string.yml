@@ -1,0 +1,2 @@
+connection_string: mysql+pymysql://root@localhost/test_ci
+dialect: mysql

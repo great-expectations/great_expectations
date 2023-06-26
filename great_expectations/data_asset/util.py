@@ -19,7 +19,7 @@ def parse_result_format(result_format):
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:
-        if "partial_unexpected_count" not in result_format:
+        if "partial_unexpected_count" not in result_format:  # noqa: PLR5501
             result_format["partial_unexpected_count"] = 20
 
     return result_format
@@ -57,7 +57,7 @@ Usage::
 
 
 class DocInherit:
-    def __init__(self, mthd):
+    def __init__(self, mthd) -> None:
         self.mthd = mthd
         self.name = mthd.__name__
         self.mthd_doc = mthd.__doc__
@@ -79,7 +79,7 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):
+def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert a dict object to one that is serializable
 
@@ -168,7 +168,7 @@ def recursively_convert_to_json_serializable(test_obj):
                 index_name: recursively_convert_to_json_serializable(idx),
                 value_name: recursively_convert_to_json_serializable(val),
             }
-            for idx, val in test_obj.iteritems()
+            for idx, val in test_obj.items()
         ]
 
     elif isinstance(test_obj, pd.DataFrame):
@@ -188,12 +188,11 @@ def recursively_convert_to_json_serializable(test_obj):
 
     else:
         raise TypeError(
-            "%s is of type %s which cannot be serialized."
-            % (str(test_obj), type(test_obj).__name__)
+            f"{str(test_obj)} is of type {type(test_obj).__name__} which cannot be serialized."
         )
 
 
-def ensure_row_condition_is_correct(row_condition_string):
+def ensure_row_condition_is_correct(row_condition_string) -> None:
     """Ensure no quote nor \\\\n are introduced in row_condition string.
 
     Otherwise it may cause an issue at the reload of the expectation.

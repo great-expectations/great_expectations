@@ -22,11 +22,11 @@ class Backend(Enum):
 @dataclass
 class TestBackend:
     backend: str
-    dialects: Optional[List[str]]
+    dialects: List[str]
 
     __test__ = False  # Tell pytest not to try to collect this class as a test
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         allowed_backend_names = ("pandas", "spark", "sqlalchemy")
         allowed_sql_dialects = ("sqlite", "postgresql", "mysql", "mssql", "bigquery")
         assert (
@@ -78,9 +78,11 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         title,
         exact_match_out,
         out,
-        suppress_test_for=[],
+        suppress_test_for=None,
         **kwargs,
-    ):
+    ) -> None:
+        if not suppress_test_for:
+            suppress_test_for = []
         super().__init__(
             title=title,
             input=kwargs["in"],
@@ -88,6 +90,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             exact_match_out=exact_match_out,
             suppress_test_for=suppress_test_for,
             only_for=kwargs.get("only_for"),
+            include_in_gallery=kwargs.get("include_in_gallery", False),
         )
 
 
@@ -96,6 +99,8 @@ class ExpectationTestDataCases(SerializableDictDot):
     """Pairs a test dataset and a list of test cases to execute against that data."""
 
     data: TestData
+    dataset_name: str
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
+    data_alt: Optional[TestData] = None

@@ -1,12 +1,11 @@
 import copy
 import json
-import sys
 
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
+from scipy import stats
 
-import great_expectations as ge
+import great_expectations as gx
 
 """
 Use this file to generate random datasets for testing distributional expectations.
@@ -42,13 +41,13 @@ def generate_new_data(seed):
 def generate_new_partitions(df):
     test_partitions = {}
     for column in ["norm_0_1", "norm_1_1", "bimodal"]:
-        partition_object = ge.dataset.util.kde_partition_data(df[column])
+        partition_object = gx.dataset.util.kde_partition_data(df[column])
         # Print how close sum of weights is to one for a quick visual consistency check when data are generated
         # print(column + '_kde: '+ str(abs(1-np.sum(partition_object['weights']))))
         test_partitions[column + "_kde"] = partition_object
 
         for bin_type in ["uniform", "ntile", "auto"]:
-            partition_object = ge.dataset.util.continuous_partition_data(
+            partition_object = gx.dataset.util.continuous_partition_data(
                 df[column], bin_type
             )
             # Print how close sum of weights is to one for a quick visual consistency check when data are generated
@@ -61,11 +60,11 @@ def generate_new_partitions(df):
         inf_partition["tail_weights"] = [0.005, 0.005]
         test_partitions[column + "_auto_inf"] = inf_partition
 
-    partition_object = ge.dataset.util.categorical_partition_data(
+    partition_object = gx.dataset.util.categorical_partition_data(
         df["categorical_fixed"]
     )
     test_partitions["categorical_fixed"] = partition_object
-    alt_partition = ge.dataset.util.categorical_partition_data(df["categorical_fixed"])
+    alt_partition = gx.dataset.util.categorical_partition_data(df["categorical_fixed"])
     # overwrite weights with uniform weights to give a testing dataset
     alt_partition["weights"] = [1.0 / len(alt_partition["values"])] * len(
         alt_partition["values"]
@@ -81,7 +80,7 @@ if __name__ == "__main__":
     json.dump(d, open("../test_sets/distributional_expectations_data_base.json", "w"))
     test_partitions = generate_new_partitions(df)
 
-    test_partitions = ge.data_asset.util.recursively_convert_to_json_serializable(
+    test_partitions = gx.data_asset.util.recursively_convert_to_json_serializable(
         test_partitions
     )
     with open("../test_sets/test_partitions_definition_fixture.json", "w") as file:

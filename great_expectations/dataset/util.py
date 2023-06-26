@@ -2,22 +2,13 @@
 
 import logging
 import warnings
-from typing import Any, List
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.sql.elements import WithinGroup
-except ImportError:
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-    DefaultDialect = None
-    WithinGroup = None
 
 
 def is_valid_partition_object(partition_object):
@@ -61,7 +52,7 @@ def is_valid_continuous_partition_object(partition_object):
         return False
 
     if "tail_weights" in partition_object:
-        if len(partition_object["tail_weights"]) != 2:
+        if len(partition_object["tail_weights"]) != 2:  # noqa: PLR2004
             return False
         comb_weights = partition_object["tail_weights"] + partition_object["weights"]
     else:
@@ -209,7 +200,7 @@ def build_continuous_partition_object(
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
             (for automatically spaced bins)
@@ -252,7 +243,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     """Convenience method for building a partition object on categorical data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         sort (string): must be one of "value", "count", or "none".
             - if "value" then values in the resulting partition object will be sorted lexigraphically
@@ -275,7 +266,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):
+def infer_distribution_parameters(data, distribution, params=None):  # noqa: PLR0912
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -409,7 +400,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):
+def validate_distribution_parameters(distribution, params):  # noqa: PLR0912, PLR0915
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -479,32 +470,32 @@ def validate_distribution_parameters(distribution, params):
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError(f"Invalid parameters: {chi2_msg}:")
 
-    elif isinstance(params, tuple) or isinstance(params, list):
+    elif isinstance(params, tuple) or isinstance(params, list):  # noqa: PLR1701
         scale = None
 
         # `params` is a tuple or a list
         if distribution == "beta":
-            if len(params) < 2:
+            if len(params) < 2:  # noqa: PLR2004
                 raise ValueError(f"Missing required parameters: {beta_msg}")
             if params[0] <= 0 or params[1] <= 0:
                 raise ValueError(f"Invalid parameters: {beta_msg}")
-            if len(params) == 4:
+            if len(params) == 4:  # noqa: PLR2004
                 scale = params[3]
-            elif len(params) > 4:
+            elif len(params) > 4:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {beta_msg}")
 
         elif distribution == "norm":
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {norm_msg}")
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
 
         elif distribution == "gamma":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {gamma_msg}")
-            if len(params) == 3:
+            if len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            if len(params) > 3:
+            if len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many parameters provided: {gamma_msg}")
             elif params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {gamma_msg}")
@@ -518,26 +509,25 @@ def validate_distribution_parameters(distribution, params):
         #        raise ValueError("Invalid parameters: %s" %poisson_msg)
 
         elif distribution == "uniform":
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {uniform_msg}")
 
         elif distribution == "chi2":
             if len(params) < 1:
                 raise ValueError(f"Missing required parameters: {chi2_msg}")
-            elif len(params) == 3:
+            elif len(params) == 3:  # noqa: PLR2004
                 scale = params[2]
-            elif len(params) > 3:
+            elif len(params) > 3:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {chi2_msg}")
             if params[0] <= 0:
                 raise ValueError(f"Invalid parameters: {chi2_msg}")
 
         elif distribution == "expon":
-
-            if len(params) == 2:
+            if len(params) == 2:  # noqa: PLR2004
                 scale = params[1]
-            if len(params) > 2:
+            if len(params) > 2:  # noqa: PLR2004
                 raise ValueError(f"Too many arguments provided: {expon_msg}")
 
         if scale is not None and scale <= 0:
@@ -545,10 +535,8 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
-
-    return
 
 
 def create_multiple_expectations(df, columns, expectation_type, *args, **kwargs):
@@ -600,3 +588,21 @@ def check_sql_engine_dialect(
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False
+
+
+def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
+    """Validate mostly parameter is a number between 0 and 1 or None.
+
+    Args:
+        mostly: The mostly parameter for an expectation configuration.
+
+    Raises:
+        AssertionError: Raised is mostly is defined and not a number between 0 and 1.
+    """
+    if mostly is not None:
+        # Even though we type mostly as an int or float, we can't typecheck this whole project and
+        # need to verify the type.
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"

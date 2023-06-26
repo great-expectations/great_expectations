@@ -1,31 +1,41 @@
+from __future__ import annotations
+
 import enum
 import logging
 import os
 import sys
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.cli.cli_messages import (
+    DATASOURCE_NEW_WARNING,
+    FLUENT_DATASOURCE_DELETE_ERROR,
+    FLUENT_DATASOURCE_LIST_WARNING,
+)
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_dict,
+)
 from great_expectations.cli.util import verify_library_dependent_modules
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
+from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    from great_expectations.data_context import FileDataContext
+
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
 
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -38,22 +48,33 @@ class SupportedDatabaseBackends(enum.Enum):
     REDSHIFT = "Redshift"
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
+    TRINO = "Trino"
+    ATHENA = "Athena"
+    CLICKHOUSE = "Clickhouse"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
 
 @click.group()
 @click.pass_context
-def datasource(ctx):
+def datasource(ctx: click.Context) -> None:
     """Datasource operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
-    usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
+
+    cli_event_noun: str = "datasource"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type] # could be None
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @datasource.command(name="new")
@@ -65,12 +86,16 @@ def datasource(ctx):
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def datasource_new(ctx, name, jupyter):
+def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Add a new Datasource to the data context."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
+        if not ctx.obj.assume_yes:
+            if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
+                sys.exit(0)
+
         _datasource_new_flow(
             context,
             usage_event_end=usage_event_end,
@@ -89,10 +114,18 @@ def datasource_new(ctx, name, jupyter):
 @datasource.command(name="delete")
 @click.argument("datasource")
 @click.pass_context
-def delete_datasource(ctx, datasource):
+def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if datasource in context.fluent_datasources:
+        toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{FLUENT_DATASOURCE_DELETE_ERROR}</red>",
+        )
+        return
 
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
@@ -127,12 +160,21 @@ def delete_datasource(ctx, datasource):
 
 @datasource.command(name="list")
 @click.pass_context
-def datasource_list(ctx):
+def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
-    context = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if len(context.fluent_datasources) > 0:
+        cli_message(f"<yellow>{FLUENT_DATASOURCE_LIST_WARNING}</yellow>")
+
     try:
         datasources = context.list_datasources()
+        # The CLI does not support fluent Datasources. Omit them from the list.
+        datasources = [
+            d for d in datasources if d["name"] not in context.fluent_datasources
+        ]
+
         cli_message(_build_datasource_intro_string(datasources))
         for datasource in datasources:
             cli_message("")
@@ -157,21 +199,22 @@ def datasource_list(ctx):
         return
 
 
-def _build_datasource_intro_string(datasources):
+def _build_datasource_intro_string(datasources: List[dict]) -> str:
     datasource_count = len(datasources)
     if datasource_count == 0:
         return "No Datasources found"
     elif datasource_count == 1:
-        return "1 Datasource found:"
-    return f"{datasource_count} Datasources found:"
+        return "1 block config Datasource found:"
+    return f"{datasource_count} block config Datasources found:"
 
 
 def _datasource_new_flow(
-    context: DataContext,
+    context: FileDataContext,
     usage_event_end: str,
     datasource_name: Optional[str] = None,
     jupyter: bool = True,
 ) -> None:
+    helper: BaseDatasourceNewYamlHelper
     files_or_sql_selection = click.prompt(
         """
 What data would you like Great Expectations to connect to?
@@ -194,7 +237,11 @@ What data would you like Great Expectations to connect to?
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
     else:
-        helper = None
+        helper = None  # type: ignore[assignment] # causes error below
+        raise AttributeError(
+            "No `helper` selected"
+        )  # `None` has no `send_backend_choice_usage_message()`.
+        # Explicitly raised so that mypy understands that helper is not `None` below this line
 
     helper.send_backend_choice_usage_message(context)
     if not helper.verify_libraries_installed():
@@ -235,7 +282,7 @@ class BaseDatasourceNewYamlHelper:
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         self.datasource_type: DatasourceTypes = datasource_type
         self.datasource_name: Optional[str] = datasource_name
         self.usage_stats_payload: dict = usage_stats_payload
@@ -244,25 +291,27 @@ class BaseDatasourceNewYamlHelper:
         """Used in the interactive CLI to help users install dependencies."""
         raise NotImplementedError
 
-    def create_notebook(self, context: DataContext) -> str:
+    def create_notebook(self, context: FileDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
-        notebook_path = os.path.join(
+        notebook_path = os.path.join(  # noqa: PTH118
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",
         )
         renderer.render_to_disk(notebook_path)
         return notebook_path
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: FileDataContext
+    ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
-    def send_backend_choice_usage_message(self, context: DataContext) -> None:
+    def send_backend_choice_usage_message(self, context: FileDataContext) -> None:
         send_usage_message(
             data_context=context,
-            event="cli.new_ds_choice",
+            event=UsageStatsEvents.CLI_NEW_DS_CHOICE,
             event_payload={
                 "type": self.datasource_type.value,
                 **self.usage_stats_payload,
@@ -282,25 +331,27 @@ class BaseDatasourceNewYamlHelper:
 class FilesYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for pandas/spark helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
         class_name: str,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(datasource_type, usage_stats_payload, datasource_name)
         self.class_name: str = class_name
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: FileDataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
             datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
+            datasource_name=self.datasource_name,  # type: ignore[arg-type] # could be None
         )
 
     def yaml_snippet(self) -> str:
@@ -324,8 +375,10 @@ data_connectors:
       pattern: (.*)
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
+    assets:
+      my_runtime_asset_name:
+        batch_identifiers:
+          - runtime_batch_identifier_name
 """'''
 
     def prompt(self) -> None:
@@ -342,7 +395,7 @@ class PandasYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.PANDAS,
             usage_stats_payload={
@@ -363,7 +416,7 @@ class SparkYamlHelper(FilesYamlHelper):
         self,
         context_root_dir: str,
         datasource_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SPARK,
             usage_stats_payload={
@@ -384,7 +437,7 @@ class SparkYamlHelper(FilesYamlHelper):
 class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
     """The base class for SQL helpers used in the datasource new flow."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
@@ -395,7 +448,8 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
         schema_name: str = "YOUR_SCHEMA",
-    ):
+        table_name: str = "YOUR_TABLE_NAME",
+    ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
             usage_stats_payload=usage_stats_payload,
@@ -408,6 +462,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.password = password
         self.database = database
         self.schema_name = schema_name
+        self.table_name = table_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -416,7 +471,10 @@ port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
 database = "{self.database}"
-schema_name = "{self.schema_name}"'''
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -429,7 +487,7 @@ execution_engine:
             yaml_str += f"""
     drivername: {self.driver}"""
 
-        yaml_str += '''
+        yaml_str += f'''
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -437,7 +495,17 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    include_schema_name: True"""'''
+    include_schema_name: True
+    introspection_directives:
+      schema_name: {{schema_name}}
+  default_configured_data_connector_name:
+    class_name: ConfiguredAssetSqlDataConnector
+    assets:
+      {{table_name}}:
+        class_name: Asset
+        schema_name: {{schema_name}}
+"""'''  # noqa: F541 # need these placeholders
+
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -448,21 +516,22 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}
-    schema_name: {schema_name}"""
+    database: {database}"""
 
-    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+    def get_notebook_renderer(
+        self, context: FileDataContext
+    ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
             datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
+            datasource_name=self.datasource_name,  # type: ignore[arg-type] # could be None
             sql_credentials_snippet=self.credentials_snippet(),
         )
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on pymysql driver when adding a MySQL datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -486,7 +555,7 @@ class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -514,7 +583,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -566,7 +635,7 @@ class SnowflakeAuthMethod(enum.IntEnum):
 
 
 class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -593,9 +662,10 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
 database = ""  # The database name
-schema = ""  # The schema name
+schema_name = ""  # The schema name
 warehouse = ""  # The warehouse name
-role = ""  # The role name"""
+role = ""  # The role name
+table_name = ""  # A table that you would like to add initially as a Data Asset"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
@@ -617,7 +687,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
     username: {username}
     database: {database}
     query:
-      schema: {schema}
+      schema: {schema_name}
       warehouse: {warehouse}
       role: {role}
 """
@@ -635,7 +705,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
 
 class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -649,27 +719,117 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
 # (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
-connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
+connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"
+
+schema_name = ""  # or dataset name
+table_name = ""'''
 
     def verify_libraries_installed(self) -> bool:
-        pybigquery_ok = verify_library_dependent_modules(
-            python_import_name="pybigquery.sqlalchemy_bigquery",
-            pip_library_name="pybigquery",
-            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-        )
         sqlalchemy_bigquery_ok = verify_library_dependent_modules(
             python_import_name="sqlalchemy_bigquery",
             pip_library_name="sqlalchemy_bigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
-        return pybigquery_ok or sqlalchemy_bigquery_ok
+        return sqlalchemy_bigquery_ok
+
+    def _yaml_innards(self) -> str:
+        return "\n  connection_string: {connection_string}"
+
+
+class ClickhouseCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.CLICKHOUSE.value,
+                "api_version": "v3",
+            },
+            driver="clickhouse",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="clickhouse_sqlalchemy.drivers.base",
+            pip_library_name="clickhouse_sqlalchemy",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+
+class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            database="YOUR_TRINO_CATALOG",
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.TRINO.value,
+                "api_version": "v3",
+            },
+            driver="trino",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="trino.sqlalchemy.dialect",
+            pip_library_name="trino",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+    def credentials_snippet(self) -> str:
+        return f'''\
+host = "{self.host}"
+port = "{self.port}"
+username = "{self.username}"
+password = "{self.password}"
+
+# Trino has a concept of catalog which maps to database
+database = "{self.database}"
+schema_name = "{self.schema_name}"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "{self.table_name}"'''
+
+
+class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.ATHENA.value,
+                "api_version": "v3",
+            },
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        # noinspection SpellCheckingInspection
+        pyathena_success: bool = verify_library_dependent_modules(
+            python_import_name="pyathena",
+            pip_library_name="pyathena[SQLAlchemy]",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pyathena_success
+
+    def credentials_snippet(self) -> str:
+        return '''\
+# The SQLAlchemy url/connection string for the Athena connection
+# (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+
+schema_name = "YOUR_SCHEMA"  # or database name. It is optional
+table_name = "YOUR_TABLE_NAME"
+region = "YOUR_REGION"
+s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+            '''
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]):
+    def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -686,28 +846,44 @@ class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
         return '''\
 # The url/connection string for the sqlalchemy connection
 # (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-connection_string = "YOUR_CONNECTION_STRING"'''
+connection_string = "YOUR_CONNECTION_STRING"
+
+# If schema_name is not relevant to your SQL backend (i.e. SQLite),
+# please remove from the following line and the configuration below
+schema_name = "YOUR_SCHEMA"
+
+# A table that you would like to add initially as a Data Asset
+table_name = "YOUR_TABLE_NAME"'''
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
 
 
-def _get_sql_yaml_helper_class(
-    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
-) -> Union[
+SQLYAMLHelpers: TypeAlias = Union[
     MySQLCredentialYamlHelper,
     PostgresCredentialYamlHelper,
     RedshiftCredentialYamlHelper,
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
-]:
-    helper_class_by_backend = {
+    ClickhouseCredentialYamlHelper,
+    TrinoCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
+]
+
+
+def _get_sql_yaml_helper_class(
+    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
+) -> SQLYAMLHelpers:
+    helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
         SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
         SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
+        SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
+        SupportedDatabaseBackends.ATHENA: AthenaCredentialYamlHelper,
+        SupportedDatabaseBackends.CLICKHOUSE: ClickhouseCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]
@@ -732,7 +908,9 @@ What are you processing your files with?
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
 ) -> Union[PandasYamlHelper, SparkYamlHelper]:
-    helper_class_by_selection = {
+    helper_class_by_selection: Dict[
+        str, Union[Type[PandasYamlHelper], Type[SparkYamlHelper]]
+    ] = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,
     }
@@ -784,7 +962,7 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
 
 
 def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str, overwrite_existing: bool = False
+    context: FileDataContext, datasource_yaml: str, overwrite_existing: bool = False
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
     if not datasource_yaml:
@@ -824,7 +1002,9 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 ]
 
 
-def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> bool:
+def check_if_datasource_name_exists(
+    context: FileDataContext, datasource_name: str
+) -> bool:
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:
@@ -837,6 +1017,6 @@ def check_if_datasource_name_exists(context: DataContext, datasource_name: str) 
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk: DataContext = DataContext(context.root_directory)
+    context_on_disk = get_context(context_root_dir=context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

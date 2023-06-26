@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_values_to_be_increasing",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_increasing_1",
     "data" : {
       "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
@@ -42,7 +43,7 @@
       },
       "out": {
         "unexpected_list": [1,1,2,2,3,3],
-        "unexpected_index_list": [1,2,4,5,7,8],
+        "unexpected_index_list": [{"y": 1, "pk_index": 1}, {"y": 1, "pk_index": 2}, {"y": 2, "pk_index": 4}, {"y": 2, "pk_index": 5}, {"y": 3, "pk_index": 7}, {"y": 3, "pk_index": 8}],
         "success": false
       }
     },{
@@ -54,9 +55,12 @@
       },
       "out": {
         "unexpected_list": [4,3,2,1],
-        "unexpected_index_list": [6,7,8,9],
+        "unexpected_index_list": [{"w": 4, "pk_index": 6}, {"w": 3, "pk_index": 7}, {"w": 2, "pk_index": 8}, {"w": 1, "pk_index": 9}],
         "success": false
-      }
+      },
+      "only_for": [
+            "pandas"
+          ]
     },{
       "title" : "positive_test_with_parse_strings_as_datetimes",
       "exact_match_out" : false,
@@ -90,7 +94,7 @@
       },
       "out": {
         "unexpected_list": [1],
-        "unexpected_index_list": [7],
+        "unexpected_index_list": [{"b": 1.0, "pk_index": 7}],
         "success": false
       }
     }]

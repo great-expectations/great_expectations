@@ -1,15 +1,15 @@
-from ruamel import yaml
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py imports">
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-# <snippet>
-import great_expectations as ge
-
+yaml = YAMLHandler()
 # </snippet>
 
-# <snippet>
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_context">
+context = gx.get_context()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -27,11 +27,11 @@ CONNECTION_STRING = f"sqlite:///{data_dir_path}/yellow_tripdata.db"
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py buggy_datasource_yaml">
 datasource_yaml = f"""  # buggy datasource_yaml configuration
 name: mis_configured_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -44,11 +44,11 @@ introspecting:  # illegal top-level key name
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_2">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_introspection">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -69,11 +69,11 @@ datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRI
 
 context.test_yaml_config(datasource_yaml)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py get_available_data_asset_names">
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
@@ -81,7 +81,7 @@ available_data_asset_names = context.datasources[
 
 assert len(available_data_asset_names) == 2
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -96,11 +96,11 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_3">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py datasource_yaml_tables_partitioners">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: SimpleSqlalchemyDatasource
@@ -119,11 +119,11 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
 
 datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRING)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py test_yaml_config_4">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py add_datasource_2">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 

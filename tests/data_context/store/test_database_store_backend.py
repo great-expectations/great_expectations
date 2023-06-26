@@ -3,17 +3,15 @@ import os
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
+from tests import test_utils
 
-try:
-    sqlalchemy = pytest.importorskip("sqlalchemy")
-except ImportError:
-    sqlalchemy = None
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
+@pytest.mark.integration
 def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
@@ -39,9 +37,11 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     assert "hello" == store_backend.get(key)
 
     # clean up values
-    store_backend.engine.execute(f"DROP TABLE {store_backend._table};")
+    with store_backend.engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE {store_backend._table};"))
 
 
+@pytest.mark.integration
 def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
@@ -68,6 +68,7 @@ def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 
+@pytest.mark.integration
 def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip(
@@ -110,6 +111,7 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
     assert "Integrity error" in str(exc.value)
 
 
+@pytest.mark.integration
 def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
@@ -145,6 +147,7 @@ def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
 
+@pytest.mark.integration
 def test_database_store_backend_id_initialization(caplog, sa, test_backends):
     """
     What does this test and why?

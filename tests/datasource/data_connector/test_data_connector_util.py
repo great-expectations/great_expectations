@@ -2,7 +2,8 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
+from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
@@ -15,7 +16,6 @@ from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
-    storage,
 )
 
 
@@ -407,6 +407,11 @@ def test__invert_regex_to_data_reference_template():
     assert returned == "{name}-{type}.csv"
 
     returned = _invert_regex_to_data_reference_template(
+        regex_pattern="yellow_tripdata_sample_2019-01.csv", group_names=[]
+    )
+    assert returned == "yellow_tripdata_sample_2019-01.csv"
+
+    returned = _invert_regex_to_data_reference_template(
         regex_pattern=r"(.*)-[A|B|C]\.csv", group_names=["name"]
     )
     assert returned == "{name}-*.csv"
@@ -467,11 +472,21 @@ def test_build_sorters_from_config_good_config():
         }
     ]
     sorters = build_sorters_from_config(sorters_config)
-    assert sorters.__repr__() == str(
-        "{'price': {'name': 'price', 'reverse': True, 'type': 'NumericSorter'}}"
+    assert (
+        sorters.__repr__()
+        == """{'price': {
+  "name": "price",
+  "reverse": true,
+  "type": "NumericSorter"
+}}"""
     )
-    assert sorters["price"].__repr__() == str(
-        {"name": "price", "reverse": True, "type": "NumericSorter"}
+    assert (
+        sorters["price"].__repr__()
+        == """{
+  "name": "price",
+  "reverse": true,
+  "type": "NumericSorter"
+}"""
     )
     # no sorters by name of i_dont_exist
     with pytest.raises(KeyError):
@@ -487,7 +502,7 @@ def test_build_sorters_from_config_bad_config():
             "name": "price",
         }
     ]
-    with pytest.raises(ge_exceptions.PluginClassNotFoundError):
+    with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         build_sorters_from_config(sorters_config)
 
     # 2. orderby : not a real order
@@ -498,15 +513,15 @@ def test_build_sorters_from_config_bad_config():
             "name": "price",
         }
     ]
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         build_sorters_from_config(sorters_config)
 
 
 @pytest.mark.skipif(
-    storage is None,
-    reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud",
 )
-@mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
+@mock.patch("great_expectations.compatibility.google.Client")
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}

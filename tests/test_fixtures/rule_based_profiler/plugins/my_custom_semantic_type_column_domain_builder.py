@@ -1,13 +1,14 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -20,18 +21,12 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
-        super().__init__(
-            data_context=data_context,
-            batch_list=batch_list,
-            batch_request=batch_request,
-        )
+        super().__init__(data_context=data_context)
 
         if semantic_types is None:
             semantic_types = ["user_id"]
@@ -46,7 +41,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         self._column_name_suffixes = column_name_suffixes
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.COLUMN
 
     @property
@@ -63,7 +58,9 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
@@ -78,7 +75,6 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
                     "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
         )
 
@@ -93,14 +89,11 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         )
 
         column_name: str
-        domains: List[Domain] = [
-            Domain(
-                domain_type=MetricDomainTypes.COLUMN,
-                domain_kwargs={
-                    "column": column_name,
-                },
-            )
-            for column_name in candidate_column_names
-        ]
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=candidate_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=None,
+        )
 
         return domains

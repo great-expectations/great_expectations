@@ -1,12 +1,18 @@
 import os
 
-from ruamel import yaml
-
-import great_expectations as ge
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports">
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
-context = ge.get_context()
+yaml = YAMLHandler()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py get_context">
+context = gx.get_context()
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py datasource_yaml">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
@@ -46,6 +52,7 @@ data_connectors:
               - year
               - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -53,9 +60,13 @@ data_dir_path = os.path.join("..", "data")
 
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(
@@ -76,9 +87,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -155,6 +164,7 @@ assert batch_list[0].data.dataframe.shape[0] == 10000
 # This BatchRequest specifies one batch, which is useful for data analysis.
 # In addition, the resulting batch is split according to "passenger_count" column with the focus on two-passenger rides.
 # Moreover, a randomly sampled fraction of this subset of the batch data is obtained and returned as the final result.
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_request">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="configured_data_connector_name",
@@ -184,28 +194,37 @@ batch_request = BatchRequest(
         },
     },
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data_year_month"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters">
 batch_request.data_connector_query["batch_filter_parameters"] = {
     "year": "2020",
     "month": "01",
 }
-batch_request.batch_spec_passthrough["splitter_method"] = "_split_on_column_value"
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count">
+batch_request.batch_spec_passthrough["splitter_method"] = "split_on_column_value"
 batch_request.batch_spec_passthrough["splitter_kwargs"] = {
     "column_name": "passenger_count",
     "batch_identifiers": {"passenger_count": 2},
 }
-batch_request.batch_spec_passthrough["sampling_method"] = "_sample_using_random"
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sample_using_random 10 pct">
+batch_request.batch_spec_passthrough["sampling_method"] = "sample_using_random"
 batch_request.batch_spec_passthrough["sampling_kwargs"] = {"p": 1.0e-1}
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sampling batch size">
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 assert batch_list[0].data.dataframe.shape[0] < 200
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
 assert "yellow_tripdata_sample_2019-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][

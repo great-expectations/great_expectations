@@ -4,9 +4,10 @@ from typing import Set, Tuple
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.self_check.util import get_dataset
 
 
 @pytest.fixture
@@ -14,22 +15,28 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
-    data_path = os.path.join(context_path, "../data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "checkpoints"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "../data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     titanic_yml_path = file_relative_path(
         __file__, "./fixtures/great_expectations_titanic_0.13.yml"
     )
     shutil.copy(
-        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+        titanic_yml_path,
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(
-        titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
+        titanic_csv_path,
+        str(os.path.join(context_path, "../data/Titanic.csv")),  # noqa: PTH118
     )
-    return ge.data_context.DataContext(context_path)
+    return gx.get_context(context_root_dir=context_path)
 
 
 @pytest.fixture()
@@ -69,3 +76,48 @@ def get_set_of_columns_and_expectations_from_suite(
     expectations: Set[str] = {i.expectation_type for i in suite.expectations}
 
     return columns, expectations
+
+
+@pytest.fixture
+def non_numeric_low_card_dataset(test_backend):
+    """Provide dataset fixtures that have special values and/or are otherwise useful outside
+    the standard json testing framework"""
+
+    # fmt: off
+    data = {
+        "lowcardnonnum": [
+            "a", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b", "b", "b", "b", "b", "b",
+            "b", "b", "b", "b", "b",
+        ]
+    }
+    # fmt: on
+    schemas = {
+        "pandas": {
+            "lowcardnonnum": "str",
+        },
+        "postgresql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "lowcardnonnum": "StringType",
+        },
+    }
+    return get_dataset(test_backend, data, schemas=schemas)

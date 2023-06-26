@@ -1,6 +1,10 @@
 from typing import Optional
 
+import pandas as pd
+
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context import DataContext
 from great_expectations.expectations.core import ExpectColumnValuesToMatchRegex
 
 
@@ -9,16 +13,11 @@ class ExpectColumnValuesAsStringToBePositiveInteger(ExpectColumnValuesToMatchReg
         "regex": "^\\d+$",
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         super().validate_configuration(configuration)
         assert "regex" not in configuration.kwargs, "regex cannot be altered"
-
-
-import pandas as pd
-import pytest
-
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import DataContext
 
 
 def test_expect_column_values_as_string_to_be_positive_integers_pass(

@@ -1,6 +1,86 @@
 {
   "expectation_type" : "expect_compound_columns_to_be_unique",
   "datasets" : [{
+    "dataset_name": "expect_compound_columns_to_be_unique_1",
+    "data" : {
+      "a" : [1, 2, 3, 4],
+      "b" : [1, 2, 3, 1],
+      "c" : [1, 2, 3, 1]
+    },
+    "schemas": {
+      "spark": {
+        "a": "IntegerType",
+        "b": "IntegerType",
+        "c": "IntegerType"
+      }
+    },
+    "tests": [
+      {
+        "title": "mostly_default_successful_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["a", "b"]
+        },
+        "out": {
+          "unexpected_list": [],
+          "success": true
+        }
+      },
+      {
+        "title": "mostly_default_fails_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"]
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": false
+        }
+      },
+      {
+        "title": "mostly_set_successful_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"],
+          "mostly": 0.4
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": true
+        }
+      },
+      {
+        "title": "mostly_set_fails_expectation",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["b", "c"],
+          "mostly": 0.9
+        },
+        "out": {
+          "unexpected_list": [ {"b": 1.0, "c": 1.0 }, {"b": 1.0, "c": 1.0 } ],
+          "success": false
+        }
+      },
+      {
+        "title": "mostly_set_incorrectly",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column_list": ["a", "b"],
+          "mostly": 1.1,
+          "catch_exceptions": true
+        },
+        "out": {
+          "traceback_substring": "between 0 and 1"
+        }
+      }
+    ]
+  }, {
+    "dataset_name": "expect_compound_columns_to_be_unique_2",
     "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -110,7 +190,53 @@
             "b": 1.0
           }
         ],
-        "unexpected_index_list": [0,1,2,3,4,5,6,7,8],
+        "unexpected_index_list":[
+          {
+            "a": 1.0,
+            "pk_index": 0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 1,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 2,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 3,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 4,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 5,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 6,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 7,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 8,
+            "b": 1.0
+          }
+        ],
         "success": false
       }
     },{
@@ -161,9 +287,9 @@
         "success": false
       }
     },{
-      "title": "unexpected_values_exact_match_out_with_unexpected_index_list",
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list_pandas_v2_api",
       "exact_match_out" : true,
-      "only_for": ["pandas"],
+      "only_for": ["pandas_v2_api"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -261,6 +387,142 @@
         }
       }
     },{
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list_pandas_v3",
+      "exact_match_out" : true,
+      "only_for": ["pandas_v3_api"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
+          "unexpected_count": 9,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ],
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ],
+          "unexpected_index_list": [
+          {
+            "a": 1.0,
+            "pk_index": 0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 1,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 2,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 3,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "pk_index": 4,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 5,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 6,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 7,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "pk_index": 8,
+            "b": 1.0
+          }
+        ]
+      }
+      }
+    },{
       "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
       "exact_match_out" : true,
       "in": {
@@ -269,7 +531,6 @@
       "out": {
         "success": false,
         "result": {
-          "element_count": 10,
           "missing_count": 1,
           "missing_percent": 10.0,
           "unexpected_count": 9,

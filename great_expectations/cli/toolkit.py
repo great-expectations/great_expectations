@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -5,27 +7,41 @@ import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 
-from great_expectations import exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.datasource import BaseDatasource
-from great_expectations.validator.validator import Validator
+from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint
+    from great_expectations.checkpoint.types.checkpoint_result import (
+        CheckpointResult,
+    )
+    from great_expectations.core.batch import JSONValues
+    from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.fluent.interfaces import (
+        Datasource as FluentDatasource,
+    )
+    from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,10 +55,9 @@ EXIT_UPGRADE_CONTINUATION_MESSAGE = (
 
 
 def prompt_profile_to_create_a_suite(
-    data_context: DataContext,
+    data_context: FileDataContext,
     expectation_suite_name: str,
 ) -> None:
-
     cli_message(
         string="""
 Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
@@ -66,9 +81,9 @@ When you run this notebook, Great Expectations will store these expectations in 
     confirm_proceed_or_exit()
 
 
-def get_or_create_expectation_suite(
-    expectation_suite_name: str,
-    data_context: DataContext,
+def get_or_create_expectation_suite(  # noqa: PLR0913
+    expectation_suite_name: Optional[str],
+    data_context: FileDataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
@@ -83,9 +98,12 @@ def get_or_create_expectation_suite(
             batch_request=batch_request,
         )
         while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new Expectation Suite",
-                default=default_expectation_suite_name,
+            expectation_suite_name = cast(
+                str,  # click.prompt doesn't know the default type
+                click.prompt(
+                    "\nName the new Expectation Suite",
+                    default=default_expectation_suite_name,
+                ),
             )
             if (
                 expectation_suite_name
@@ -118,7 +136,7 @@ def get_or_create_expectation_suite(
 
 
 def get_default_expectation_suite_name(
-    data_asset_name: str,
+    data_asset_name: Optional[str],
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
@@ -127,16 +145,16 @@ def get_default_expectation_suite_name(
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
     elif batch_request:
-        suite_name = f"batch-{BatchRequest(**batch_request).id}"
+        suite_name = f"batch-{BatchRequest(**batch_request).id}"  # type: ignore[arg-type] # cannot unpack str
     else:
         suite_name = "warning"
     return suite_name
 
 
 def tell_user_suite_exists(
-    data_context: DataContext,
+    data_context: FileDataContext,
     expectation_suite_name: str,
-    usage_event: str,
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
 ) -> None:
     exit_with_failure_message_and_stats(
@@ -157,7 +175,7 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 
 def get_validator(
-    context: DataContext,
+    context: FileDataContext,
     batch_request: Union[dict, BatchRequest],
     suite: Union[str, ExpectationSuite],
 ) -> Validator:
@@ -180,13 +198,13 @@ def get_validator(
     return validator
 
 
-def load_expectation_suite(
-    data_context: DataContext,
+def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
+    data_context: FileDataContext,
     expectation_suite_name: str,
-    usage_event: str,
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
-) -> Optional[ExpectationSuite]:
+) -> ExpectationSuite:
     """
     Load an expectation suite from a given context.
 
@@ -200,32 +218,31 @@ def load_expectation_suite(
     if expectation_suite_name.endswith(".json"):
         expectation_suite_name = expectation_suite_name[:-5]
 
-    suite: Optional[ExpectationSuite]
+    suite: Optional[ExpectationSuite] = None
     try:
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
-        return suite
-    except ge_exceptions.DataContextError:
+    except gx_exceptions.DataContextError:
         if create_if_not_exist:
-            suite = data_context.create_expectation_suite(
+            suite = data_context.add_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
-            return suite
-        else:
-            suite = None
-            exit_with_failure_message_and_stats(
-                data_context=data_context,
-                usage_event=usage_event,
-                suppress_usage_message=suppress_usage_message,
-                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
-                "the name by running `great_expectations suite list` and try again.",
-            )
+
+    if suite:
+        return suite
+    exit_with_failure_message_and_stats(
+        data_context=data_context,
+        usage_event=usage_event,
+        suppress_usage_message=suppress_usage_message,
+        message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
+        "the name by running `great_expectations suite list` and try again.",
+    )
 
 
 def exit_with_failure_message_and_stats(
-    data_context: DataContext,
-    usage_event: str,
+    data_context: FileDataContext,
+    usage_event: Optional[str],
     suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ) -> None:
@@ -241,7 +258,7 @@ def exit_with_failure_message_and_stats(
 
 
 def delete_checkpoint(
-    context: DataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
     assume_yes: bool,
@@ -267,8 +284,8 @@ def delete_checkpoint(
     context.delete_checkpoint(name=checkpoint_name)
 
 
-def run_checkpoint(
-    context: DataContext,
+def run_checkpoint(  # type: ignore[return] # sys.exit if no result
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
 ) -> CheckpointResult:
@@ -285,7 +302,7 @@ def run_checkpoint(
             checkpoint_name=checkpoint_name
         )
         return result
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
             data_context=context,
@@ -295,17 +312,16 @@ def run_checkpoint(
 
 
 def validate_checkpoint(
-    context: DataContext,
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
     failure_message: Optional[str] = None,
 ) -> None:
     try:
-        # noinspection PyUnusedLocal
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+        _ = load_checkpoint(
             context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
         )
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         if failure_message:
             cli_message(string=failure_message)
         exit_with_failure_message_and_stats(
@@ -315,20 +331,18 @@ def validate_checkpoint(
         )
 
 
-def load_checkpoint(
-    context: DataContext,
+def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
+    context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
+) -> Checkpoint:
     """Load a Checkpoint or raise helpful errors."""
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            name=checkpoint_name
-        )
+        checkpoint: Checkpoint = context.get_checkpoint(name=checkpoint_name)
         return checkpoint
     except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
+        gx_exceptions.CheckpointNotFoundError,
+        gx_exceptions.InvalidCheckpointConfigError,
     ):
         exit_with_failure_message_and_stats(
             data_context=context,
@@ -341,19 +355,23 @@ def load_checkpoint(
 
 
 def select_datasource(
-    context: DataContext, datasource_name: str = None
-) -> BaseDatasource:
+    context: FileDataContext, datasource_name: Optional[str] = None
+) -> Union[BaseDatasource, LegacyDatasource, FluentDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Optional[BaseDatasource] = None
+    data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
 
     if datasource_name is None:
+        # exclude fluent datasources from options
+        block_style_datasources = [
+            x
+            for x in context.datasources.values()
+            if x.name not in context.fluent_datasources
+        ]
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
-                sorted(
-                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
-                ),
+                sorted(block_style_datasources, key=lambda x: (len(x.name), x.name)),
             ),
         )
         if len(data_sources) == 0:
@@ -384,29 +402,36 @@ def select_datasource(
     return data_source
 
 
-def load_data_context_with_error_handling(
-    directory: str, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+def load_data_context_with_error_handling(  # noqa: PLR0912
+    directory: Optional[str], from_cli_upgrade_command: bool = False
+) -> Optional[FileDataContext]:
     """Return a DataContext with good error handling and exit codes."""
-    context: Optional[DataContext]
+    context: Optional[FileDataContext]
     ge_config_version: float
     try:
-        directory = directory or DataContext.find_context_root_dir()
-        context = DataContext(context_root_dir=directory)
-        ge_config_version = context.get_config().config_version
+        if directory:
+            # Without this check, FileDataContext will possibly scaffold a project structure.
+            # As we want CLI users to follow the `init` workflow, we should exit early if we can't find a context YAML.
+            if not FileDataContext._find_context_yml_file(directory):
+                raise gx_exceptions.ConfigNotFoundError()
+        else:
+            directory = FileDataContext.find_context_root_dir()
+
+        context = get_context(context_root_dir=directory)
+        ge_config_version = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
 
         if from_cli_upgrade_command:
-            if ge_config_version < CURRENT_GE_CONFIG_VERSION:
+            if ge_config_version < CURRENT_GX_CONFIG_VERSION:
                 context = upgrade_project_one_or_multiple_versions_increment(
                     directory=directory,
                     context=context,
                     ge_config_version=ge_config_version,
                     from_cli_upgrade_command=from_cli_upgrade_command,
                 )
-            elif ge_config_version > CURRENT_GE_CONFIG_VERSION:
-                raise ge_exceptions.UnsupportedConfigVersionError(
+            elif ge_config_version > CURRENT_GX_CONFIG_VERSION:
+                raise gx_exceptions.UnsupportedConfigVersionError(
                     f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
-{CURRENT_GE_CONFIG_VERSION}.
+{CURRENT_GX_CONFIG_VERSION}.
 """
                 )
             else:
@@ -418,9 +443,9 @@ def load_data_context_with_error_handling(
                 )
 
         return context
-    except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+    except gx_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or FileDataContext.find_context_root_dir()
+        ge_config_version = FileDataContext.get_ge_config_version(  # type: ignore[assignment] # could be none
             context_root_dir=directory
         )
         context = upgrade_project_strictly_multiple_versions_increment(
@@ -434,43 +459,43 @@ def load_data_context_with_error_handling(
             cli_message(string=f"<red>{err.message}</red>")
             sys.exit(1)
     except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.ConfigNotFoundError,
+        gx_exceptions.InvalidConfigError,
     ) as err:
         cli_message(string=f"<red>{err.message}</red>")
         sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
+    except gx_exceptions.PluginModuleNotFoundError as err:
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
+    except gx_exceptions.PluginClassNotFoundError as err:
         cli_message(string=err.cli_colored_message)
         sys.exit(1)
-    except ge_exceptions.InvalidConfigurationYamlError as err:
+    except gx_exceptions.InvalidConfigurationYamlError as err:
         cli_message(string=f"<red>{str(err)}</red>")
         sys.exit(1)
 
 
 def upgrade_project_strictly_multiple_versions_increment(
     directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[DataContext]:
+) -> Optional[FileDataContext]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
         else None
     )
-    context: Optional[DataContext]
-    if upgrade_helper_class and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+    context: Optional[FileDataContext]
+    if upgrade_helper_class and int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
         upgrade_project(
             context_root_dir=directory,
             ge_config_version=ge_config_version,
             from_cli_upgrade_command=from_cli_upgrade_command,
         )
-        context = DataContext(context_root_dir=directory)
+        context = get_context(context_root_dir=directory)
         # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.end",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
                 success=True,
             )
         except Exception:
@@ -491,13 +516,13 @@ def upgrade_project(
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.</red>"
         )
     else:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.\nIn order to proceed, "
             f"your project must be upgraded.</red>"
         )
 
@@ -508,7 +533,7 @@ def upgrade_project(
     # This loading of DataContext is optional and just to track if someone exits here.
     # noinspection PyBroadException
     try:
-        data_context = DataContext(context_root_dir)
+        data_context = get_context(context_root_dir=context_root_dir)
     except Exception:
         # Do not raise error for usage stats
         data_context = None
@@ -517,12 +542,12 @@ def upgrade_project(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
         data_context=data_context,
-        usage_stats_event="cli.project.upgrade.end",
+        usage_stats_event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
     )
     cli_message(string=SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
-    while int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+    while int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
         (
             increment_version,
             exception_occurred,
@@ -549,17 +574,17 @@ To learn more about the upgrade process, visit \
 <cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api</cyan>
 """
 
-    if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+    if int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
         cli_message(string=upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
 
     # noinspection PyBroadException
     try:
-        data_context: DataContext = DataContext(context_root_dir=context_root_dir)
+        data_context = get_context(context_root_dir=context_root_dir)
         send_usage_message(
             data_context=data_context,
-            event="cli.project.upgrade.end",
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
             success=True,
         )
     except Exception:
@@ -569,17 +594,17 @@ To learn more about the upgrade process, visit \
     sys.exit(0)
 
 
-def upgrade_project_one_or_multiple_versions_increment(
+def upgrade_project_one_or_multiple_versions_increment(  # noqa: PLR0912
     directory: str,
-    context: DataContext,
+    context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+) -> Optional[FileDataContext]:
     # noinspection PyBroadException
     try:
         send_usage_message(
             data_context=context,
-            event="cli.project.upgrade.begin",
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN,
             success=True,
         )
     except Exception:
@@ -588,7 +613,7 @@ def upgrade_project_one_or_multiple_versions_increment(
 
     upgrade_successful: bool = False
 
-    if (CURRENT_GE_CONFIG_VERSION - int(ge_config_version)) == 1:
+    if (CURRENT_GX_CONFIG_VERSION - int(ge_config_version)) == 1:
         (
             increment_version,
             exception_occurred,
@@ -634,30 +659,30 @@ def upgrade_project_one_or_multiple_versions_increment(
             )
             cli_message(f"<green>{upgrade_message}</green>")
 
-        context = DataContext(context_root_dir=directory)
+        context = get_context(context_root_dir=directory)
 
         # noinspection PyBroadException
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.end",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
                 success=True,
             )
         except Exception:
             # Don't fail for usage stats
             pass
     else:
-        context = None
+        return None
 
     return context
 
 
 def upgrade_project_zero_versions_increment(
     directory: str,
-    context: DataContext,
+    context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[DataContext]:
+) -> Optional[FileDataContext]:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -681,7 +706,7 @@ def upgrade_project_zero_versions_increment(
         try:
             send_usage_message(
                 data_context=context,
-                event="cli.project.upgrade.begin",
+                event=UsageStatsEvents.CLI_PROJECT_UPGRADE_BEGIN,
                 success=True,
             )
         except Exception:
@@ -699,29 +724,31 @@ def upgrade_project_zero_versions_increment(
         from_cli_upgrade_command=from_cli_upgrade_command,
     )
     if exception_occurred or increment_version:
-        context = None
+        return None
+
+    if manual_steps_required:
+        upgrade_message = (
+            "Your project requires manual upgrade steps in order to be up-to-date.\n"
+        )
+        cli_message(f"<yellow>{upgrade_message}</yellow>")
     else:
-        if manual_steps_required:
-            upgrade_message = "Your project requires manual upgrade steps in order to be up-to-date.\n"
-            cli_message(f"<yellow>{upgrade_message}</yellow>")
-        else:
-            upgrade_message = (
-                "Your project is up-to-date - no further upgrade is necessary.\n"
-            )
-            cli_message(f"<green>{upgrade_message}</green>")
+        upgrade_message = (
+            "Your project is up-to-date - no further upgrade is necessary.\n"
+        )
+        cli_message(f"<green>{upgrade_message}</green>")
 
-        context = DataContext(context_root_dir=directory)
+    context = get_context(context_root_dir=directory)
 
-        # noinspection PyBroadException
-        try:
-            send_usage_message(
-                data_context=context,
-                event="cli.project.upgrade.end",
-                success=True,
-            )
-        except Exception:
-            # Don't fail for usage stats
-            pass
+    # noinspection PyBroadException
+    try:
+        send_usage_message(
+            data_context=context,
+            event=UsageStatsEvents.CLI_PROJECT_UPGRADE_END,
+            success=True,
+        )
+    except Exception:
+        # Don't fail for usage stats
+        pass
 
     return context
 
@@ -732,14 +759,14 @@ def upgrade_project_up_to_one_version_increment(
     continuation_message: str,
     update_version: bool,
     from_cli_upgrade_command: bool = False,
-) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred
+) -> Tuple[bool, bool]:  # Returns increment_version, exception_occurred:
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
         return False, False
 
-    # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
-    DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION,
+    # set version temporarily to CURRENT_GX_CONFIG_VERSION to get functional DataContext
+    FileDataContext.set_ge_config_version(
+        config_version=CURRENT_GX_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
 
@@ -778,39 +805,39 @@ def upgrade_project_up_to_one_version_increment(
         cli_message(string=upgrade_report)
         if exception_occurred:
             # restore version number to current number
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
             return False, True
         # set config version to target version
         if increment_version:
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 int(ge_config_version) + 1,
                 context_root_dir,
                 validate_config_version=False,
             )
             return True, False
         # restore version number to current number
-        DataContext.set_ge_config_version(
+        FileDataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
         return False, False
 
     # restore version number to current number
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
     cli_message(string=continuation_message)
     sys.exit(0)
 
 
-def confirm_proceed_or_exit(
+def confirm_proceed_or_exit(  # noqa: PLR0913
     confirm_prompt: str = "Would you like to proceed?",
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
-    data_context: Optional[DataContext] = None,
+    data_context: Optional[FileDataContext] = None,
     usage_stats_event: Optional[str] = None,
 ) -> bool:
     """
@@ -865,8 +892,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         }
     """
 
-    if config_file_location is not None and config_file_location != "":
-
+    if config_file_location is not None and config_file_location != "":  # noqa: PLC1901
         config_file_location_path = Path(config_file_location)
 
         # If the file or directory exists, treat it appropriately
@@ -881,7 +907,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
             directory = config_file_location
 
         else:
-            raise ge_exceptions.ConfigNotFoundError()
+            raise gx_exceptions.ConfigNotFoundError()
 
     else:
         # Return None if config_file_location is empty rather than default output of ""
@@ -925,7 +951,7 @@ def get_relative_path_from_config_file_to_base_path(
 
 def load_json_file_into_dict(
     filepath: str,
-    data_context: DataContext,
+    data_context: FileDataContext,
     usage_event: Optional[str] = None,
 ) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
@@ -1008,7 +1034,7 @@ def get_batch_request_from_citations(
 
 
 def add_citation_with_batch_request(
-    data_context: DataContext,
+    data_context: FileDataContext,
     expectation_suite: ExpectationSuite,
     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
 ) -> None:
@@ -1016,30 +1042,37 @@ def add_citation_with_batch_request(
         expectation_suite is not None
         and batch_request
         and isinstance(batch_request, dict)
-        and BatchRequest(**batch_request)
+        and BatchRequest(**batch_request)  # type: ignore[arg-type] # values union
     ):
         expectation_suite.add_citation(
             comment="Created suite added via CLI",
-            batch_request=batch_request,
+            batch_request=batch_request,  # type: ignore[arg-type] # values union
         )
-        data_context.save_expectation_suite(expectation_suite=expectation_suite)
+        data_context.update_expectation_suite(expectation_suite=expectation_suite)
 
 
 def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
-    data_context: DataContext,
+    data_context: FileDataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+) -> dict[str, JSONValues]:
+    batch_request_or_error_message: Optional[
+        str | dict[str, str | int | dict[str, Any]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
         usage_event=usage_event,
     )
     try:
-        batch_request = BatchRequest(**batch_request).to_json_dict()
+        if not batch_request_or_error_message or isinstance(
+            batch_request_or_error_message, str
+        ):
+            raise TypeError(batch_request_or_error_message)
+        else:
+            batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
+                **batch_request_or_error_message  # type: ignore[arg-type]
+            ).to_json_dict()
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
@@ -1053,23 +1086,23 @@ def get_batch_request_from_json_file(
             )
         sys.exit(1)
 
-    return batch_request
+    return batch_request_json_dict
 
 
 def get_batch_request_using_datasource_name(
-    data_context: DataContext,
+    data_context: FileDataContext,
     datasource_name: Optional[str] = None,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
     cli_message(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )
 
-    datasource: BaseDatasource = select_datasource(
+    datasource = select_datasource(
         context=data_context, datasource_name=datasource_name
     )
 
@@ -1083,11 +1116,12 @@ def get_batch_request_using_datasource_name(
             )
         sys.exit(1)
 
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = get_batch_request(
-        datasource=datasource,
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = get_batch_request(
+        datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )
+    if "data_asset_name" not in batch_request:
+        # Some datasources don't always provide this (`RuntimeDataConnector`)
+        batch_request["data_asset_name"] = "default_data_asset_name"
 
     return batch_request

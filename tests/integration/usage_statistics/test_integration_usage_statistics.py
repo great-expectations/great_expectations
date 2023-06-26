@@ -33,7 +33,7 @@ def aws_session():
 
 
 @pytest.fixture(scope="session")
-def valid_usage_statistics_message():
+def valid_usage_statistics_message() -> dict:
     return {
         "event_payload": {
             "platform.system": "Darwin",
@@ -98,7 +98,6 @@ def valid_usage_statistics_message():
                     },
                     "anonymized_site_index_builder": {
                         "parent_class": "DefaultSiteIndexBuilder",
-                        "show_cta_footer": True,
                     },
                 }
             ],
@@ -128,17 +127,28 @@ def valid_usage_statistics_message():
     }
 
 
-def test_send_malformed_data(valid_usage_statistics_message):
+# <WILL> This is being handled in GREAT-1117
+@pytest.mark.xfail
+@pytest.mark.slow  # 1.14s
+def test_send_malformed_data(
+    valid_usage_statistics_message: dict,
+    requests_session_with_retries: requests.Session,
+):
     # We should be able to successfully send a valid message, but find that
     # a malformed message is not accepted
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=valid_usage_statistics_message
+    )
     assert res.status_code == 201
     invalid_usage_statistics_message = copy.deepcopy(valid_usage_statistics_message)
     del invalid_usage_statistics_message["data_context_id"]
-    res = requests.post(USAGE_STATISTICS_QA_URL, json=invalid_usage_statistics_message)
+    res = requests_session_with_retries.post(
+        USAGE_STATISTICS_QA_URL, json=invalid_usage_statistics_message
+    )
     assert res.status_code == 400
 
 
+@pytest.mark.slow  # 4.21s
 def test_graceful_failure_with_no_internet():
     """Test that having usage statistics enabled does not negatively impact kill signals or cause loss of queued usage statistics."""
 

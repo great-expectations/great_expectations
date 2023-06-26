@@ -9,7 +9,7 @@ This guide will help you extend the Great Expectations execution layer to work o
 
    This guide is a working checklist. We improve it each time we add support for a new SQL dialect, but it still has rough edges. And adding support for a new database will probably never be a cookie-cutter operation.
 
-   If you're interested in extending Great Expectations in this way, please reach out on `Slack <greatexpectations.io/slack>`__ in the ``#contributors-contributing`` channel, and we'll work with you to get there.
+   If you're interested in extending Great Expectations in this way, submit a request on the `Slack <greatexpectations.io/slack>`__  ``#contributing`` channel, and a member of our team will work with you to create a solution.
 
 Steps
 -----
@@ -18,9 +18,9 @@ Steps
 ####################################
 
     * **Install the python dependencies for your dialect.**  While you're at it, please add a line(s) to ``requirements-dev-sqlalchemy.txt``. Examples:
-    
+
         .. code-block:: bash
-        
+
             pyhive[presto]>=0.6.2
             PyAthena[SQLAlchemy]>=1.1
             pybigquery>=0.4.15
@@ -78,7 +78,7 @@ The core team will not be able to merge your contribution until they're able to 
                 help="If set, suppress tests against presto",
             )
 
-    * **In build_test_backends_list, add a variable and if clause**
+    * **In build_test_backends_list_v2_api, add a variable and if clause**
 
         .. code-block:: python
 
@@ -180,11 +180,11 @@ The core team will not be able to merge your contribution until they're able to 
                 )
 
 
-    * **Add your dialect to candidate_test_is_on_temporary_notimplemented_list**.
+    * **Add your dialect to candidate_test_is_on_temporary_notimplemented_list_v2_api**.
 
         .. code-block:: python
 
-            def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
+            def candidate_test_is_on_temporary_notimplemented_list_v2_api(context, expectation_type):
                 if context in ["sqlite", "postgresql", "mysql", "presto"]:
 
 5. Use tests to verify consistency with other databases
@@ -215,6 +215,6 @@ Once Expectation tests pass, make sure all the remaining tests pass:
 .. warning::
 
    This guide covers steps to add support for a new SQL dialect to SqlAlchemyDataset, and make it testable. To fully enable this SQL dialect in the Great Expectations ecosystem, you may also want to:
-   
+
    - develop a Datasource for this dialect
    - develop a CLI integration for this dialect

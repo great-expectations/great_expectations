@@ -1,13 +1,15 @@
 import logging
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import jsonschema
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import Profiler
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +46,29 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.INTEGER.value: ProfilerTypeMapping.INT_TYPE_NAMES,
         JsonSchemaTypes.NUMBER.value: ProfilerTypeMapping.FLOAT_TYPE_NAMES,
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
+        JsonSchemaTypes.OBJECT.value: ProfilerTypeMapping.OBJECT_TYPE_NAMES,
     }
 
-    def __init__(self, configuration: dict = None):
+    def __init__(self, configuration: Optional[dict] = None) -> None:
         super().__init__(configuration)
 
-    def validate(self, schema: dict) -> bool:
+    @public_api
+    def validate(self, schema: dict) -> bool:  # type: ignore[override]
+        """
+        Check if `schema` can be profiled.
+
+        Args:
+            schema: A `dict` representing a JSON Schema.
+
+        Returns:
+            True if `schema` can be profiled.
+
+        Raises:
+            TypeError: If `schema` is not a `dict`.
+            KeyError: If `schema` does not have a top level `type` key.
+            TypeError: If the top level `type` is not a JSON object.
+        """
+
         if not isinstance(schema, dict):
             raise TypeError(
                 f"This profiler requires a schema of type dict and was passed a {type(schema)}"
@@ -66,7 +85,9 @@ class JsonSchemaProfiler(Profiler):
         validator.check_schema(schema)
         return True
 
-    def _profile(self, schema: Dict, suite_name: str = None) -> ExpectationSuite:
+    def _profile(
+        self, schema: Dict, suite_name: Optional[str] = None
+    ) -> ExpectationSuite:
         if not suite_name:
             raise ValueError("Please provide a suite name when using this profiler.")
         expectations = []
@@ -107,7 +128,7 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }
@@ -170,7 +191,7 @@ class JsonSchemaProfiler(Profiler):
         if description:
             meta = {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": [f"### Description:\n{description}"],
                 }
             }
@@ -218,7 +239,7 @@ class JsonSchemaProfiler(Profiler):
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/numeric.html#range"""
         object_types = self._get_object_types(details=details)
-        object_types = filter(
+        object_types = filter(  # type: ignore[assignment]
             lambda object_type: object_type != JsonSchemaTypes.NULL.value, object_types
         )
         range_types = [JsonSchemaTypes.INTEGER.value, JsonSchemaTypes.NUMBER.value]
@@ -340,7 +361,7 @@ class JsonSchemaProfiler(Profiler):
         self, key: str, details: dict
     ) -> Optional[ExpectationConfiguration]:
         """https://json-schema.org/understanding-json-schema/reference/null.html"""
-        object_types = self._get_object_types(details=details)
+        object_types: Union[list, set] = self._get_object_types(details=details)
         enum_list = self._get_enum_list(details=details)
         kwargs = {"column": key}
 

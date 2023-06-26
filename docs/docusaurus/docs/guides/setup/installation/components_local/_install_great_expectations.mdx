@@ -1,0 +1,35 @@
+<!--
+
+---Import---
+import InstallGreatExpectations from './_install_great_expectations.mdx'
+<InstallGreatExpectations />
+
+---Header---
+### 2. Install Great Expectations
+-->
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import InstallGeWithPip from "./_install_ge_with_pip.mdx"
+import InstallGeWithAnaconda from "./_install_ge_with_anaconda.mdx"
+
+Once you have your virtual environment created and activated, you will be able to use either pip or Anaconda to install Great Expectations.
+
+<Tabs
+  groupId="pip-or-conda"
+  defaultValue='pip'
+  values={[
+  {label: 'pip', value:'pip'},
+  {label: 'conda', value:'conda'},
+  ]}>
+<TabItem value="pip">
+
+<InstallGeWithPip />
+
+</TabItem>
+<TabItem value="conda">
+
+<InstallGeWithAnaconda />
+
+</TabItem>
+</Tabs>
+

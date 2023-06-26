@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 
-from great_expectations.data_context.data_context import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import PandasDataset
 
 
@@ -24,7 +24,7 @@ def test_save_expectation_suite_with_datetime_objects(
     test_df = pd.DataFrame(test_data)
     dataset_name = "test_pandas_source"
 
-    with TemporaryDirectory() as tempdir:
+    with TemporaryDirectory():
         context = data_context_parameterized_expectation_suite
         ge_path = context.root_directory
 
@@ -37,7 +37,7 @@ def test_save_expectation_suite_with_datetime_objects(
             "ge_batch_id": "test_id",
         }
 
-        empty_suite = context.create_expectation_suite("test_suite")
+        empty_suite = context.add_expectation_suite("test_suite")
 
         batch = context.get_batch(
             batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite

@@ -1,86 +1,107 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.expectations.expectation import (
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    LegacyRendererType,
+    RenderedStringTemplateContent,
+)
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+    PARAMETER_KEY,
+    VARIABLES_KEY,
+)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
 
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
-
-class ExpectColumnMaxToBeBetween(ColumnExpectation):
-    """Expect the column max to be between an min and max value
-
-           expect_column_max_to_be_between is a \
-           :func:`column_aggregate_expectation
-           <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
-
-           Args:
-               column (str): \
-                   The column name
-               min_value (comparable type or None): \
-                   The minimum number of unique values allowed.
-               max_value (comparable type or None): \
-                   The maximum number of unique values allowed.
-               strict_min (boolean):
-                   If True, the minimal column minimum must be strictly larger than min_value, default=False
-               strict_max (boolean):
-                   If True, the maximal column minimum must be strictly smaller than max_value, default=False
-
-           Keyword Args:
-               parse_strings_as_datetimes (Boolean or None): \
-                   If True, parse min_value, max_values, and all non-null column values to datetimes before making \
-                   comparisons.
-               output_strftime_format (str or None): \
-                   A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-
-           Other Parameters:
-               result_format (str or None): \
-                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                   For more detail, see :ref:`result_format <result_format>`.
-               include_config (boolean): \
-                   If True, then include the expectation config as part of the result object. \
-                   For more detail, see :ref:`include_config`.
-               catch_exceptions (boolean or None): \
-                   If True, then catch exceptions and include them as part of the result object. \
-                   For more detail, see :ref:`catch_exceptions`.
-               meta (dict or None): \
-                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                   modification. For more detail, see :ref:`meta`.
-
-           Returns:
-               An ExpectationSuiteValidationResult
-
-               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-           Notes:
-               These fields in the result object are customized for this expectation:
-               ::
-
-                   {
-                       "observed_value": (list) The actual column max
-                   }
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-               * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-               * If min_value is None, then max_value is treated as an upper bound
-               * If max_value is None, then min_value is treated as a lower bound
+class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
+    """Expect the column maximum to be between a minimum value and a maximum value.
 
-           """
+    expect_column_max_to_be_between is a \
+    [Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations)
+
+    Args:
+        column (str): \
+            The column name
+        min_value (comparable type or None): \
+            The minimum value of the acceptable range for the column maximum.
+        max_value (comparable type or None): \
+            The maximum value of the acceptable range for the column maximum.
+        strict_min (boolean): \
+            If True, the lower bound of the column maximum acceptable range must be strictly larger than min_value, default=False
+        strict_max (boolean): \
+            If True, the upper bound of the column maximum acceptable range must be strictly smaller than max_value, default=False
+
+    Keyword Args:
+        parse_strings_as_datetimes (Boolean or None): \
+            If True, parse min_value, max_values, and all non-null column values to datetimes before making \
+            comparisons.
+        output_strftime_format (str or None): \
+            A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+
+    Notes:
+        * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
+        * If min_value is None, then max_value is treated as an upper bound
+        * If max_value is None, then min_value is treated as a lower bound
+        * observed_value field in the result object is customized for this expectation to be a list \
+            representing the actual column max
+
+    See Also:
+        [expect_column_min_to_be_between](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
+    """
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -104,62 +125,66 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "profiler_config",
     )
 
-    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+    max_range_estimator_parameter_builder_config = ParameterBuilderConfig(
+        module_name="great_expectations.rule_based_profiler.parameter_builder",
+        class_name="NumericMetricRangeMultiBatchParameterBuilder",
+        name="max_range_estimator",
+        metric_name="column.max",
+        metric_multi_batch_parameter_builder_name=None,
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        enforce_numeric_metric=True,
+        replace_nan_with_zero=True,
+        reduce_scalar_metric=True,
+        false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        estimator=f"{VARIABLES_KEY}estimator",
+        n_resamples=f"{VARIABLES_KEY}n_resamples",
+        random_seed=f"{VARIABLES_KEY}random_seed",
+        quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        quantile_bias_correction=f"{VARIABLES_KEY}quantile_bias_correction",
+        quantile_bias_std_error_ratio_threshold=f"{VARIABLES_KEY}quantile_bias_std_error_ratio_threshold",
+        include_estimator_samples_histogram_in_details=f"{VARIABLES_KEY}include_estimator_samples_histogram_in_details",
+        truncate_values=f"{VARIABLES_KEY}truncate_values",
+        round_decimals=f"{VARIABLES_KEY}round_decimals",
+        evaluation_parameter_builder_configs=None,
+    )
+    validation_parameter_builder_configs: List[ParameterBuilderConfig] = [
+        max_range_estimator_parameter_builder_config,
+    ]
+    default_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_max_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
-        class_name="RuleBasedProfilerConfig",
-        module_name="great_expectations.rule_based_profiler",
-        variables={
-            "strict_min": False,
-            "strict_max": False,
-            "false_positive_rate": 0.05,
-            "estimator": "bootstrap",
-            "num_bootstrap_samples": 9999,
-            "bootstrap_random_seed": None,
-            "round_decimals": None,
-            "truncate_values": {
-                "lower_bound": None,
-                "upper_bound": None,
-            },
-        },
+        variables={},
         rules={
             "default_expect_column_max_to_be_between_rule": {
+                "variables": {
+                    "strict_min": False,
+                    "strict_max": False,
+                    "estimator": "exact",
+                    "include_estimator_samples_histogram_in_details": False,
+                    "truncate_values": {
+                        "lower_bound": None,
+                        "upper_bound": None,
+                    },
+                    "round_decimals": 1,
+                },
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
                     "module_name": "great_expectations.rule_based_profiler.domain_builder",
                 },
-                "parameter_builders": [
-                    {
-                        "name": "max_range_estimator",
-                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                        "metric_name": "column.max",
-                        "metric_domain_kwargs": "$domain.domain_kwargs",
-                        "metric_value_kwargs": None,
-                        "enforce_numeric_metric": True,
-                        "replace_nan_with_zero": True,
-                        "reduce_scalar_metric": True,
-                        "false_positive_rate": "$variables.false_positive_rate",
-                        "estimator": "$variables.estimator",
-                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                        "bootstrap_random_seed": "$variables.bootstrap_random_seed",
-                        "round_decimals": "$variables.round_decimals",
-                        "truncate_values": "$variables.truncate_values",
-                        "json_serialize": True,
-                    },
-                ],
                 "expectation_configuration_builders": [
                     {
                         "expectation_type": "expect_column_max_to_be_between",
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                        "column": "$domain.domain_kwargs.column",
-                        "min_value": "$parameter.max_range_estimator.value.value_range[0]",
-                        "max_value": "$parameter.max_range_estimator.value.value_range[1]",
-                        "strict_min": "$variables.strict_min",
-                        "strict_max": "$variables.strict_max",
+                        "validation_parameter_builder_configs": validation_parameter_builder_configs,
+                        "column": f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+                        "min_value": f"{PARAMETER_KEY}{max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[0]",
+                        "max_value": f"{PARAMETER_KEY}{max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}[1]",
+                        "strict_min": f"{VARIABLES_KEY}strict_min",
+                        "strict_max": f"{VARIABLES_KEY}strict_max",
                         "meta": {
-                            "profiler_details": "$parameter.max_range_estimator.details",
+                            "profiler_details": f"{PARAMETER_KEY}{max_range_estimator_parameter_builder_config.name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
                         },
                     },
                 ],
@@ -182,128 +207,90 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
-    """ A Column Map MetricProvider Decorator for the Maximum"""
-
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
+        a number or date.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+
+        Raises:
+            InvalidExpectationConfigurationError: if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
-        return True
-
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "parse_strings_as_datetimes",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if (params["min_value"] is None) and (params["max_value"] is None):
+        params = renderer_configuration.params
+
+        if not params.min_value and not params.max_value:
             template_str = "maximum value may have any numerical value."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
 
-            if params["min_value"] is not None and params["max_value"] is not None:
-                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
-            elif params["min_value"] is None:
+            if params.min_value and params.max_value:
+                if params.min_value == params.max_value:
+                    template_str = "maximum value must be $min_value"
+                else:
+                    template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif not params.min_value:
                 template_str = f"maximum value must be {at_most_str} $max_value."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"maximum value must be {at_least_str} $min_value."
 
-        if params.get("parse_strings_as_datetimes"):
+        if params.parse_strings_as_datetimes:
             template_str += " Values should be parsed as datetimes."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -362,13 +349,12 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         ]
 
     @classmethod
-    @renderer(renderer_type="renderer.descriptive.stats_table.max_row")
+    @renderer(renderer_type=LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW)
     def _descriptive_stats_table_max_row_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         assert result, "Must pass in result."
@@ -387,8 +373,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.max",

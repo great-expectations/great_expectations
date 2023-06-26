@@ -24,7 +24,6 @@ from great_expectations.expectations.metrics import (
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "METRIC NAME GOES HERE"
 
@@ -62,7 +61,9 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -71,12 +72,11 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
         Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
@@ -88,8 +88,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
         #     ), "message"
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {

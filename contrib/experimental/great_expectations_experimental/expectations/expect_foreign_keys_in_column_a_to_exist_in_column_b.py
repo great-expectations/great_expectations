@@ -1,37 +1,19 @@
-import json
-from typing import Optional
-
 import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
-)
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
 
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.foreign_key_in_other_col"
@@ -56,7 +38,10 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
-    """Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available."""
+    """Expect foreign keys in a column to exist in another specified column.
+
+    Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available.
+    """
 
     examples = [
         {
@@ -122,7 +107,7 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -134,7 +119,7 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -152,16 +137,12 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,

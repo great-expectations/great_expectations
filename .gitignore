@@ -64,6 +64,8 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+src/dgtest/
+type_cov/
 
 # Translations
 *.mo
@@ -105,6 +107,12 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
+ge_dev/
+gx_dev/
+.gx_dev/
+
+# direnv
+.envrc
 
 # Spyder project settings
 .spyderproject
@@ -118,6 +126,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+.dmypy.json
 
 # vim backup files
 *~
@@ -130,9 +139,15 @@ ENV/
 
 # Vim swap files
 *.swp
+tags
 
 # Special "scratchpad" directory for notes, code samples, experiments, etc.
 DO_NOT_COMMIT
 
 # Hive Metastore from Spark
 metastore_db
+
+# dependency management
+Pipfile
+Pipfile.lock
+

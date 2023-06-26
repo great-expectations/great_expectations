@@ -4,9 +4,8 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.data_context import BaseDataContext
+from great_expectations.util import get_context
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -15,7 +14,7 @@ from tests.cli.utils import (
 
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["--v3-api", "docs"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert "list   List known Data Docs sites." in result.stdout
@@ -26,86 +25,87 @@ def test_docs_help_output(caplog):
 @pytest.mark.parametrize(
     "invocation, cli_input, expected_stdout, expected_browser_call_count",
     [
-        ("--v3-api docs build", "\n", "Would you like to proceed? [Y/n]", 1),
-        ("--v3-api --assume-yes docs build", None, "", 1),
+        ("docs build", "\n", "Would you like to proceed? [Y/n]", 1),
+        ("--assume-yes docs build", None, "", 1),
         (
-            "--v3-api docs build --site-name local_site",
+            "docs build --site-name local_site",
             "\n",
             "Would you like to proceed? [Y/n]",
             1,
         ),
-        ("--v3-api --assume-yes docs build --site-name local_site", None, "", 1),
+        ("--assume-yes docs build --site-name local_site", None, "", 1),
         (
-            "--v3-api docs build -sn local_site",
+            "docs build -sn local_site",
             "\n",
             "Would you like to proceed? [Y/n]",
             1,
         ),
-        ("--v3-api --assume-yes docs build -sn local_site", None, "", 1),
+        ("--assume-yes docs build -sn local_site", None, "", 1),
         # Answer "n" to prompt
-        ("--v3-api docs build", "n\n", "Would you like to proceed? [Y/n]", 0),
+        ("docs build", "n\n", "Would you like to proceed? [Y/n]", 0),
         (
-            "--v3-api docs build --site-name local_site",
+            "docs build --site-name local_site",
             "n\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
         (
-            "--v3-api docs build -sn local_site",
+            "docs build -sn local_site",
             "n\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
         # All the same but with --no-view
-        ("--v3-api docs build --no-view", "\n", "Would you like to proceed? [Y/n]", 0),
-        ("--v3-api --assume-yes docs build --no-view", None, "", 0),
+        ("docs build --no-view", "\n", "Would you like to proceed? [Y/n]", 0),
+        ("--assume-yes docs build --no-view", None, "", 0),
         (
-            "--v3-api docs build --site-name local_site --no-view",
+            "docs build --site-name local_site --no-view",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
         (
-            "--v3-api --assume-yes docs build --site-name local_site --no-view",
+            "--assume-yes docs build --site-name local_site --no-view",
             None,
             "",
             0,
         ),
         (
-            "--v3-api docs build -sn local_site --no-view",
+            "docs build -sn local_site --no-view",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
-        ("--v3-api --assume-yes docs build -sn local_site --no-view", None, "", 0),
+        ("--assume-yes docs build -sn local_site --no-view", None, "", 0),
         # All the same but with --nv
-        ("--v3-api docs build -nv", "\n", "Would you like to proceed? [Y/n]", 0),
-        ("--v3-api --assume-yes docs build -nv", None, "", 0),
+        ("docs build -nv", "\n", "Would you like to proceed? [Y/n]", 0),
+        ("--assume-yes docs build -nv", None, "", 0),
         (
-            "--v3-api docs build --site-name local_site -nv",
+            "docs build --site-name local_site -nv",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
         (
-            "--v3-api --assume-yes docs build --site-name local_site -nv",
+            "--assume-yes docs build --site-name local_site -nv",
             None,
             "",
             0,
         ),
         (
-            "--v3-api docs build -sn local_site -nv",
+            "docs build -sn local_site -nv",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
         ),
-        ("--v3-api --assume-yes docs build -sn local_site -nv", None, "", 0),
+        ("--assume-yes docs build -sn local_site -nv", None, "", 0),
     ],
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 14.75s
 def test_docs_build_happy_paths_build_site_on_single_site_context(
     mock_webbrowser,
     mock_emit,
@@ -184,7 +184,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     )
     assert mock_emit.call_args_list == expected_usage_stats_messages
 
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_urls = context.get_docs_sites_urls()
 
     assert len(obs_urls) == 1
@@ -194,7 +194,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
             in obs_urls[0]["site_url"]
         )
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", "local_site"
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", "local_site"
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -218,8 +218,8 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
         },
         "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
     }
-    temp_context = BaseDataContext(config, context_root_dir=context.root_directory)
-    new_context = DataContext(context.root_directory)
+    temp_context = get_context(config, context_root_dir=context.root_directory)
+    new_context = get_context(context_root_dir=context.root_directory)
     new_context.set_config(temp_context.get_config_with_variables_substituted())
     new_context._save_project_config()
     assert new_context.get_site_names() == ["local_site", "team_site"]
@@ -230,52 +230,52 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
     "invocation, cli_input, expected_stdout, expected_browser_call_count, expected_built_site_names",
     [
         (
-            "--v3-api docs build",
+            "docs build",
             "\n",
             "Would you like to proceed? [Y/n]",
             2,
             ["local_site", "team_site"],
         ),
-        ("--v3-api --assume-yes docs build", None, "", 2, ["local_site", "team_site"]),
+        ("--assume-yes docs build", None, "", 2, ["local_site", "team_site"]),
         (
-            "--v3-api docs build --site-name team_site",
+            "docs build --site-name team_site",
             "\n",
             "Would you like to proceed? [Y/n]",
             1,
             ["team_site"],
         ),
         (
-            "--v3-api --assume-yes docs build --site-name team_site",
+            "--assume-yes docs build --site-name team_site",
             None,
             "",
             1,
             ["team_site"],
         ),
         (
-            "--v3-api docs build -sn team_site",
+            "docs build -sn team_site",
             "\n",
             "Would you like to proceed? [Y/n]",
             1,
             ["team_site"],
         ),
-        ("--v3-api --assume-yes docs build -sn team_site", None, "", 1, ["team_site"]),
+        ("--assume-yes docs build -sn team_site", None, "", 1, ["team_site"]),
         # Answer "n" to prompt
         (
-            "--v3-api docs build",
+            "docs build",
             "n\n",
             "Would you like to proceed? [Y/n]",
             0,
             [],
         ),
         (
-            "--v3-api docs build --site-name team_site",
+            "docs build --site-name team_site",
             "n\n",
             "Would you like to proceed? [Y/n]",
             0,
             [],
         ),
         (
-            "--v3-api docs build -sn team_site",
+            "docs build -sn team_site",
             "n\n",
             "Would you like to proceed? [Y/n]",
             0,
@@ -283,42 +283,42 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
         ),
         # All the same but with --no-view
         (
-            "--v3-api docs build --no-view",
+            "docs build --no-view",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
             ["local_site", "team_site"],
         ),
         (
-            "--v3-api --assume-yes docs build --no-view",
+            "--assume-yes docs build --no-view",
             None,
             "",
             0,
             ["local_site", "team_site"],
         ),
         (
-            "--v3-api docs build --site-name team_site --no-view",
+            "docs build --site-name team_site --no-view",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
             ["team_site"],
         ),
         (
-            "--v3-api --assume-yes docs build --site-name team_site --no-view",
+            "--assume-yes docs build --site-name team_site --no-view",
             None,
             "",
             0,
             ["team_site"],
         ),
         (
-            "--v3-api docs build -sn team_site --no-view",
+            "docs build -sn team_site --no-view",
             "\n",
             "Would you like to proceed? [Y/n]",
             0,
             ["team_site"],
         ),
         (
-            "--v3-api --assume-yes docs build -sn team_site --no-view",
+            "--assume-yes docs build -sn team_site --no-view",
             None,
             "",
             0,
@@ -330,6 +330,7 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 22.72s
 def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     mock_webbrowser,
     mock_emit,
@@ -412,11 +413,11 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     )
     assert mock_emit.call_args_list == expected_usage_stats_messages
 
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     for expected_site_name in expected_built_site_names:
         assert expected_site_name in stdout
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", expected_site_name
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", expected_site_name
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -437,7 +438,7 @@ def test_docs_list_with_no_sites(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api docs list",
+        "docs list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -462,7 +463,7 @@ def test_docs_list(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api docs list",
+        "docs list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -505,7 +506,7 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     assert len(obs_urls) == 1
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",
@@ -518,25 +519,25 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     "invocation,expected_error,expected_usage_event_begin,expected_usage_event_end",
     [
         (
-            "--v3-api docs clean",
+            "docs clean",
             "Please specify either --all to clean all sites or a specific site using --site-name",
             "cli.docs.clean.begin",
             "cli.docs.clean.end",
         ),
         (
-            "--v3-api docs clean --site-name local_site --all",
+            "docs clean --site-name local_site --all",
             "Please specify either --all to clean all sites or a specific site using --site-name",
             "cli.docs.clean.begin",
             "cli.docs.clean.end",
         ),
         (
-            "--v3-api docs clean --site-name fake_site",
+            "docs clean --site-name fake_site",
             "The specified site name `fake_site` does not exist in this project.",
             "cli.docs.clean.begin",
             "cli.docs.clean.end",
         ),
         (
-            "--v3-api docs build --site-name fake_site",
+            "docs build --site-name fake_site",
             "The specified site name `fake_site` does not exist in this project.",
             "cli.docs.build.begin",
             "cli.docs.build.end",
@@ -547,6 +548,7 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.74s
 def test_docs_clean_and_build_raises_helpful_errors(
     mock_emit,
     mock_webbrowser,
@@ -607,15 +609,16 @@ def test_docs_clean_and_build_raises_helpful_errors(
 @pytest.mark.parametrize(
     "invocation",
     [
-        "--v3-api docs clean --all",
-        "--v3-api docs clean -a",
-        "--v3-api docs clean --site-name local_site",
-        "--v3-api docs clean -s local_site",
+        "docs clean --all",
+        "docs clean -a",
+        "docs clean --site-name local_site",
+        "docs clean -s local_site",
     ],
 )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.77s
 def test_docs_clean_happy_paths_clean_expected_sites(
     mock_emit, invocation, caplog, monkeypatch, context_with_site_built
 ):
@@ -652,7 +655,7 @@ def test_docs_clean_happy_paths_clean_expected_sites(
     ]
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",

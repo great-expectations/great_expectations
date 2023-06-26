@@ -1,11 +1,17 @@
 import os
 
-from ruamel import yaml
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports">
+import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-import great_expectations as ge
+yaml = YAMLHandler()
+# </snippet>
 
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_context">
+context = gx.get_context()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
@@ -23,6 +29,7 @@ data_connectors:
           group_names:
             - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -30,8 +37,11 @@ data_dir_path = os.path.join("..", "data")
 
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml">
 buggy_data_connector_yaml = f"""
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
@@ -42,6 +52,7 @@ buggy_data_connector_yaml = f"""
           group_names:  # required "data_asset_name" reserved group name for "InferredAssetFilePathDataConnector" is absent
             - nonexistent_group_name
 """
+# </snippet>
 
 # noinspection PyRedeclaration
 buggy_datasource_yaml = f"""
@@ -76,6 +87,7 @@ buggy_datasource_yaml = buggy_datasource_yaml.replace(
 
 context.test_yaml_config(buggy_datasource_yaml)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml">
 another_buggy_data_connector_yaml = f"""
     buggy_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
@@ -86,6 +98,7 @@ another_buggy_data_connector_yaml = f"""
           group_names:
             - data_asset_name
 """
+# </snippet>
 
 # noinspection PyRedeclaration
 buggy_datasource_yaml = f"""
@@ -122,7 +135,10 @@ report = context.test_yaml_config(
     buggy_datasource_yaml, return_mode="report_object", shorten_tracebacks=True
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names">
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(
@@ -131,6 +147,7 @@ available_data_asset_names = context.datasources[
     "default_inferred_data_connector_name"
 ]
 assert len(available_data_asset_names) == 36
+# </snippet>
 
 bare_bones_configured_data_connector_yaml = f"""
    configured_data_connector_name:
@@ -144,6 +161,7 @@ bare_bones_configured_data_connector_yaml = f"""
         assets: {{}}
 """
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
@@ -162,11 +180,13 @@ data_connectors:
             - data_asset_name
         assets: {{}}
 """
+# </snippet>
 
 datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_path)
 
 context.test_yaml_config(datasource_yaml)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type">
 configured_data_connector_yaml = f"""
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
@@ -183,6 +203,7 @@ configured_data_connector_yaml = f"""
             group_names:
               - filename
 """
+# </snippet>
 
 datasource_yaml = f"""
 name: taxi_datasource
@@ -221,6 +242,7 @@ available_data_asset_names = context.datasources[
 assert len(available_data_asset_names) == 1
 
 # noinspection PyRedeclaration
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names">
 configured_data_connector_yaml = f"""
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
@@ -244,6 +266,7 @@ configured_data_connector_yaml = f"""
               - year
               - month
 """
+# </snippet>
 
 datasource_yaml = f"""
 name: taxi_datasource

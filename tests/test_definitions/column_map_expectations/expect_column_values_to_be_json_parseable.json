@@ -1,0 +1,138 @@
+{
+  "expectation_type": "expect_column_values_to_be_json_parseable",
+  "datasets": [
+    {
+      "dataset_name": "expect_column_values_to_be_json_parseable_1",
+      "data": {
+        "a": [
+          "{\"a\":1}",
+          "{\"a\":2}",
+          "{\"a\":3}",
+          "{\"a\":4}",
+          "{\"a\":5}",
+          "{\"a\":6}",
+          "{\"a\":7}",
+          "{\"a\":8}",
+          "{\"a\":9}",
+          "{\"a\":10}"
+        ],
+        "b": [
+          "{\"a\":1}",
+          "{\"a\":2}",
+          "{\"a\":3}",
+          "{\"a\":4}",
+          "{\"a\":5}",
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "c": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          null
+        ],
+        "d": [
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g",
+          "h",
+          "i",
+          null
+        ],
+        "e": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "schemas": {
+        "spark": {
+          "a": "StringType",
+          "b": "StringType",
+          "c": "IntegerType",
+          "d": "StringType",
+          "e": "StringType"
+        }
+      },
+      "tests": [
+        {
+          "title": "basic_positive_test",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a"
+          },
+          "out": {
+            "success": true,
+            "unexpected_list": []
+          }
+        },
+        {
+          "title": "positive_test_with_nulls",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "b",
+            "mostly": 0.75
+          },
+          "out": {
+            "success": true
+          }
+        },
+        {
+          "title": "negative_test_integers",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "c"
+          },
+          "out": {
+            "success": false
+          }
+        },
+        {
+          "title": "negative_test_string_only",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "d"
+          },
+          "out": {
+            "success": false
+          }
+        },
+        {
+          "title": "negative_test_null_only",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "d"
+          },
+          "out": {
+            "success": false
+          }
+        }
+      ]
+    }
+  ]
+}

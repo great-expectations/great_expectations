@@ -1,196 +1,23 @@
-import datetime
 import os
-import random
-from pathlib import Path
-from typing import List
+from typing import Dict, Tuple
 from unittest import mock
 
-import boto3
 import pandas as pd
 import pytest
-from moto import mock_s3
 
-try:
-    from azure.storage.blob import BlobServiceClient
-except:
-    azure = None
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws, azure, google
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 
-
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import (
-    AzureBatchSpec,
-    GCSBatchSpec,
-    PathBatchSpec,
-    RuntimeDataBatchSpec,
-    S3BatchSpec,
-)
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-)
+# noinspection PyBroadException
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
-    storage,
 )
 from great_expectations.util import is_library_loadable
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-
-
-@pytest.fixture(scope="function")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture
-def s3(aws_credentials):
-    with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
-
-
-@pytest.fixture
-def s3_bucket(s3):
-    bucket: str = "test_bucket"
-    s3.create_bucket(Bucket=bucket)
-    return bucket
-
-
-@pytest.fixture
-def test_df_small() -> pd.DataFrame:
-    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
-
-
-@pytest.fixture
-def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv.gz"
-    test_df_small.to_csv(path, index=False, compression="gzip")
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_df_small_csv(test_df_small, tmpdir) -> bytes:
-    path = Path(tmpdir) / "file.csv"
-    test_df_small.to_csv(path, index=False)
-    return path.read_bytes()
-
-
-@pytest.fixture
-def test_s3_files(s3, s3_bucket, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    for key in keys:
-        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_csv):
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.parquet",
-        "directory/B-2.parquet",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path)
-    for key in keys:
-        if key.endswith(".parquet"):
-            with open(path, "rb") as f:
-                s3.put_object(Bucket=s3_bucket, Body=f, Key=key)
-        else:
-            s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
-    bucket, keys = test_s3_files
-    path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
-
-    batch_spec = S3BatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
-
-
-@pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
-    keys: List[str] = [
-        "path/A-100.csv.gz",
-        "path/A-101.csv.gz",
-        "directory/B-1.csv.gz",
-        "directory/B-2.csv.gz",
-    ]
-
-    for key in keys:
-        s3.put_object(
-            Bucket=s3_bucket,
-            Body=test_df_small_csv_compressed,
-            Key=key,
-        )
-    return s3_bucket, keys
-
-
-@pytest.fixture
-def azure_batch_spec() -> AzureBatchSpec:
-    container = "test_container"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
-
-    batch_spec = AzureBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
-
-
-@pytest.fixture
-def gcs_batch_spec() -> GCSBatchSpec:
-    bucket = "test_bucket"
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-        "alpha-1.csv",
-        "alpha-2.csv",
-    ]
-    path = keys[0]
-    full_path = os.path.join("gs://", bucket, path)
-
-    batch_spec = GCSBatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-        splitter_method="_split_on_whole_table",
-    )
-    return batch_spec
 
 
 def test_constructor_with_boto3_options():
@@ -431,7 +258,6 @@ def test_get_compute_domain_with_no_domain_kwargs():
 def test_get_compute_domain_with_column_pair_domain():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]})
-    expected_column_pair_df = df.drop(columns=["c"])
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -538,30 +364,30 @@ def test_resolve_metric_bundle():
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    mean.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics
@@ -595,9 +421,10 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     )
     desired_metrics = (mean, stdev)
 
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    # noinspection PyUnusedLocal
+    with pytest.raises(gx_exceptions.MetricProviderError):
         # noinspection PyUnusedLocal
-        metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+        engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
 # Making sure dataframe property is functional
@@ -621,99 +448,18 @@ def test_get_batch_data(test_df):
     assert split_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
-    with pytest.raises(ge_exceptions.InvalidBatchSpecError):
+    with pytest.raises(gx_exceptions.InvalidBatchSpecError):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
-def test_get_batch_with_split_on_whole_table_runtime(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df, splitter_method="_split_on_whole_table"
-        )
-    )
-    assert split_df.dataframe.shape == (120, 10)
-
-
-def test_get_batch_with_split_on_whole_table_filesystem(
-    test_folder_connection_path_csv,
-):
-    test_df = PandasExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            reader_method="read_csv",
-            splitter_method="_split_on_whole_table",
-        )
-    )
-    assert test_df.dataframe.shape == (5, 2)
-
-
-def test_get_batch_with_split_on_whole_table_s3(
-    batch_with_split_on_whole_table_s3, test_df_small
-):
-    df = PandasExecutionEngine().get_batch_data(
-        batch_spec=batch_with_split_on_whole_table_s3
-    )
-    assert df.dataframe.shape == test_df_small.shape
-
-
-def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
-    test_s3_files, test_df_small
-):
-    bucket, _keys = test_s3_files
-    expected_df = test_df_small
-
-    execution_engine: ExecutionEngine = PandasExecutionEngine()
-
-    my_data_connector = ConfiguredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        bucket=bucket,
-        execution_engine=execution_engine,
-        prefix="",
-        assets={"alpha": {}},
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-    )
-    batch_def = BatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=1),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "splitter_method": "_split_on_whole_table",
-        },
-    )
-    test_df = execution_engine.get_batch_data(
-        batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
-    )
-    assert test_df.dataframe.shape == expected_df.shape
-
-    # if key does not exist
-    batch_def_no_key = BatchDefinition(
-        datasource_name="FAKE_DATASOURCE_NAME",
-        data_connector_name="my_data_connector",
-        data_asset_name="alpha",
-        batch_identifiers=IDDict(index=9),
-        batch_spec_passthrough={
-            "reader_method": "read_csv",
-            "splitter_method": "_split_on_whole_table",
-        },
-    )
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine.get_batch_data(
-            batch_spec=my_data_connector.build_batch_spec(
-                batch_definition=batch_def_no_key
-            )
-        )
-
-
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
@@ -721,20 +467,27 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
+    not aws.boto3
+    or (
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet")
+    ),
     reason="pyarrow and fastparquet are not installed",
 )
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
 
 
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
 def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",
@@ -744,227 +497,10 @@ def test_get_batch_with_no_s3_configured():
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
-def test_get_batch_with_split_on_column_value(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "batch_id",
-                "batch_identifiers": {"batch_id": 2},
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (12, 10)
-    assert (split_df.dataframe.batch_id == 2).all()
-
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "date",
-                "batch_identifiers": {"date": datetime.date(2020, 1, 30)},
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (3, 10)
-
-
-def test_get_batch_with_split_on_converted_datetime(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_converted_datetime",
-            splitter_kwargs={
-                "column_name": "timestamp",
-                "batch_identifiers": {"timestamp": "2020-01-30"},
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (3, 10)
-
-
-def test_get_batch_with_split_on_divided_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "divisor": 10,
-                "batch_identifiers": {"id": 5},
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (10, 10)
-    assert split_df.dataframe.id.min() == 50
-    assert split_df.dataframe.id.max() == 59
-
-
-def test_get_batch_with_split_on_mod_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_mod_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "mod": 10,
-                "batch_identifiers": {"id": 5},
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (12, 10)
-    assert split_df.dataframe.id.min() == 5
-    assert split_df.dataframe.id.max() == 115
-
-
-def test_get_batch_with_split_on_multi_column_values(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_multi_column_values",
-            splitter_kwargs={
-                "column_names": ["y", "m", "d"],
-                "batch_identifiers": {
-                    "y": 2020,
-                    "m": 1,
-                    "d": 5,
-                },
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (4, 10)
-    assert (split_df.dataframe.date == datetime.date(2020, 1, 5)).all()
-
-    with pytest.raises(ValueError):
-        # noinspection PyUnusedLocal
-        split_df = PandasExecutionEngine().get_batch_data(
-            RuntimeDataBatchSpec(
-                batch_data=test_df,
-                splitter_method="_split_on_multi_column_values",
-                splitter_kwargs={
-                    "column_names": ["I", "dont", "exist"],
-                    "batch_identifiers": {
-                        "y": 2020,
-                        "m": 1,
-                        "d": 5,
-                    },
-                },
-            )
-        )
-
-
-def test_get_batch_with_split_on_hashed_column(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
-        split_df = PandasExecutionEngine().get_batch_data(
-            RuntimeDataBatchSpec(
-                batch_data=test_df,
-                splitter_method="_split_on_hashed_column",
-                splitter_kwargs={
-                    "column_name": "favorite_color",
-                    "hash_digits": 1,
-                    "batch_identifiers": {
-                        "hash_value": "a",
-                    },
-                    "hash_function_name": "I_am_not_valid",
-                },
-            )
-        )
-
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_hashed_column",
-            splitter_kwargs={
-                "column_name": "favorite_color",
-                "hash_digits": 1,
-                "batch_identifiers": {
-                    "hash_value": "a",
-                },
-                "hash_function_name": "sha256",
-            },
-        )
-    )
-    assert split_df.dataframe.shape == (8, 10)
-
-
-### Sampling methods ###
-
-
-def test_sample_using_random(test_df):
-    random.seed(1)
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_df, sampling_method="_sample_using_random")
-    )
-    assert sampled_df.dataframe.shape == (13, 10)
-
-
-def test_sample_using_mod(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
-        )
-    )
-    assert sampled_df.dataframe.shape == (24, 10)
-
-
-def test_sample_using_a_list(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_a_list",
-            sampling_kwargs={
-                "column_name": "id",
-                "value_list": [3, 5, 7, 11],
-            },
-        )
-    )
-    assert sampled_df.dataframe.shape == (4, 10)
-
-
-def test_sample_using_md5(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        # noinspection PyUnusedLocal
-        sampled_df = PandasExecutionEngine().get_batch_data(
-            RuntimeDataBatchSpec(
-                batch_data=test_df,
-                sampling_method="_sample_using_hash",
-                sampling_kwargs={
-                    "column_name": "date",
-                    "hash_function_name": "I_am_not_valid",
-                },
-            )
-        )
-
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_hash",
-            sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
-        )
-    )
-    assert sampled_df.dataframe.shape == (10, 10)
-    assert sampled_df.dataframe.date.isin(
-        [
-            datetime.date(2020, 1, 15),
-            datetime.date(2020, 1, 29),
-        ]
-    ).all()
-
-
-### Splitting + Sampling methods ###
 def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -988,8 +524,13 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
     assert split_df.dataframe.id.max() == 59
 
 
+# noinspection PyUnusedLocal
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -1005,8 +546,12 @@ def test_constructor_with_azure_options(mock_azure_conn):
     assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
 def test_get_batch_data_with_azure_batch_spec(
     mock_azure_conn,
@@ -1034,19 +579,19 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     execution_engine_no_azure._azure = None
 
     # Raises error due the connection object not being set
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.service_account",
+    "great_expectations.execution_engine.pandas_execution_engine.google.service_account",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
@@ -1063,11 +608,11 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,
@@ -1090,23 +635,27 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.skipif(
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
     # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
-    with pytest.raises(Exception):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
 
 
 @pytest.mark.skipif(
-    storage is None,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
     execution_engine_no_gcs = PandasExecutionEngine()
     # Raises error if batch_spec causes ExecutionEngine error
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

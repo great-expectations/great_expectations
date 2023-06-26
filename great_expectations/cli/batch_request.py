@@ -1,44 +1,39 @@
+from __future__ import annotations
+
 import logging
-import os
 import re
-import uuid
-from typing import Any, Dict, List, Optional, Union, cast
-
-from great_expectations.util import get_sqlalchemy_inspector
-
-try:
-    from typing import Final
-except ImportError:
-    # Fallback for python < 3.8
-    from typing_extensions import Final
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
 
+from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.util import get_sqlalchemy_inspector
+
 try:
-    from pybigquery.parse_url import parse_url as parse_bigquery_url
+    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
+    DataConnector,
     Datasource,
     SimpleSqlalchemyDatasource,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
+)
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.reflection import Inspector
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
-    Inspector = None
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
@@ -49,7 +44,7 @@ DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
 def get_batch_request(
     datasource: BaseDatasource,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Union[str, Dict[str, Any]]]:
+) -> Dict[str, Union[str, int, Dict[str, Any]]]:
     """
     This method manages the interaction with user necessary to obtain batch_request for a batch of a data asset.
 
@@ -77,7 +72,7 @@ def get_batch_request(
 
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
         "datasource_name": datasource.name,
-        "data_connector_name": data_connector_name,
+        "data_connector_name": data_connector_name,  # type: ignore[dict-item] # name could be None
     }
 
     data_asset_name: Optional[str]
@@ -86,26 +81,30 @@ def get_batch_request(
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
         data_asset_name = _get_data_asset_name_from_data_connector(
             datasource=datasource,
-            data_connector_name=data_connector_name,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
-        msg_prompt_enter_data_asset_name: str = (
+        msg_prompt_enter_data_asset_name = (
             "\nWhich table would you like to use? (Choose one)\n"
         )
         data_asset_name = _get_data_asset_name_for_simple_sqlalchemy_datasource(
             datasource=datasource,
-            data_connector_name=data_connector_name,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
+        _print_configured_asset_sql_data_connector_message(
+            datasource=datasource,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
+        )
     else:
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
         )
 
     batch_request.update(
         {
-            "data_asset_name": data_asset_name,
+            "data_asset_name": data_asset_name,  # type: ignore[dict-item] # could be none
         }
     )
 
@@ -114,7 +113,9 @@ def get_batch_request(
     ):
         batch_request.update(additional_batch_request_args)
 
-    batch_spec_passthrough: Dict[str, Union[str, Dict[str, Any]]] = batch_request.get(
+    batch_spec_passthrough: Optional[
+        Dict[str, Union[str, Dict[str, Any]]]
+    ] = batch_request.get(  # type: ignore[assignment] # can't guarantee shape of 'batch_spec_passthrough'
         "batch_spec_passthrough"
     )
     if batch_spec_passthrough is None:
@@ -126,6 +127,42 @@ def get_batch_request(
     filter_properties_dict(properties=batch_request, clean_falsy=True, inplace=True)
 
     return batch_request
+
+
+def _print_configured_asset_sql_data_connector_message(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
+) -> None:
+    """Print a message if the data connector matches data connector type.
+
+    Args:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
+    """
+    if _is_data_connector_of_type(datasource, data_connector_name, data_connector_type):
+        configured_asset_data_connector_message = f"Need to configure a new Data Asset? See how to add a new DataAsset to your {data_connector_type.__name__} here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
+
+        cli_message(configured_asset_data_connector_message)
+
+
+def _is_data_connector_of_type(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
+) -> bool:
+    """Determine whether a data connector is a ConfiguredAssetSqlDataConnector.
+
+    Args:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
+    """
+    data_connector: DataConnector | None = datasource.data_connectors.get(
+        data_connector_name
+    )
+    return isinstance(data_connector, data_connector_type)
 
 
 def select_data_connector_name(
@@ -148,7 +185,7 @@ def select_data_connector_name(
     if num_available_data_asset_names_by_data_connector == 1:
         return list(available_data_asset_names_by_data_connector_dict.keys())[0]
 
-    elif num_available_data_asset_names_by_data_connector == 2:
+    elif num_available_data_asset_names_by_data_connector == 2:  # noqa: PLR2004
         # if only default data_connectors are configured, select default_inferred_asset_data_connector
         default_data_connector = _check_default_data_connectors(
             available_data_asset_names_by_data_connector_dict
@@ -213,7 +250,7 @@ def _get_data_asset_name_from_data_connector(
         return None
 
     # If we have a large number of assets, give the user the ability to paginate or search
-    if num_data_assets > 100:
+    if num_data_assets > 100:  # noqa: PLR2004
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
@@ -385,22 +422,20 @@ Would you like to continue?"""
                 )
 
     if (
-        datasource.execution_engine.engine.dialect.name.lower() == "bigquery"
+        datasource.execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
         and parse_bigquery_url is not None
     ):
         # bigquery table needs to contain the project id if it differs from the credentials project
-        if len(data_asset_name.split(".")) < 3:
-            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+        if len(data_asset_name.split(".")) < 3:  # noqa: PLR2004
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)  # type: ignore[attr-defined]
             data_asset_name = f"{project_id}.{data_asset_name}"
 
     return data_asset_name
 
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
-    execution_engine: SqlAlchemyExecutionEngine = cast(
-        SqlAlchemyExecutionEngine, datasource.execution_engine
-    )
-    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
+    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 
@@ -413,6 +448,7 @@ def _check_default_data_connectors(
     ):
         # return the default_inferred_asset_data_connector
         return DEFAULT_DATA_CONNECTOR_NAMES[1]
+    return None
 
 
 def _get_batch_spec_passthrough(
@@ -425,24 +461,9 @@ def _get_batch_spec_passthrough(
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
         # Some backends require named temporary table parameters.  We specifically elicit those and add them
         # where appropriate.
-        execution_engine: SqlAlchemyExecutionEngine = cast(
-            SqlAlchemyExecutionEngine, datasource.execution_engine
-        )
-        if execution_engine.engine.dialect.name.lower() == "bigquery":
-            # bigquery also requires special handling
-            bigquery_temp_table: str = click.prompt(
-                "Great Expectations will create a table to use for "
-                "validation." + os.linesep + "Please enter a name for this table: ",
-                default=f"SOME_PROJECT.SOME_DATASET.ge_tmp_{str(uuid.uuid4())[:8]}",
-            )
-            if bigquery_temp_table:
-                batch_spec_passthrough.update(
-                    {
-                        "bigquery_temp_table": bigquery_temp_table,
-                    }
-                )
+        _: SqlAlchemyExecutionEngine = datasource.execution_engine
     else:
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(
                 datasource.name, str(type(datasource))
             )

@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -12,22 +10,10 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
-    ExpectationRendererDiagnostics,
 )
-from great_expectations.execution_engine.pandas_execution_engine import (
-    PandasExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-)
-
-from .fixtures.expect_column_values_to_equal_three import (
+from great_expectations.expectations.expectation import ColumnMapExpectation
+from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
-    ExpectColumnValuesToEqualThree__BrokenIteration,
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
@@ -47,6 +33,7 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
         library_metadata_passed_checks=False,
         has_full_test_suite=False,
         manually_reviewed_code=False,
+        problems=["No library_metadata attribute found"],
     )
 
 
@@ -54,28 +41,6 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
     augmented_library_metadata = (
         ExpectColumnValuesToEqualThree__SecondIteration()._get_augmented_library_metadata()
     )
-    assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity="EXPERIMENTAL",
-        tags=["tag", "other_tag"],
-        contributors=["@abegong"],
-        requirements=[],
-        library_metadata_passed_checks=True,
-        has_full_test_suite=False,
-        manually_reviewed_code=False,
-    )
-
-
-def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_library_metadata_object():
-    class MyExpectation(ExpectColumnValuesToEqualThree__SecondIteration):
-        library_metadata = {
-            "maturity": "EXPERIMENTAL",
-            "tags": ["tag", "other_tag"],
-            "contributors": [
-                "@abegong",
-            ],
-        }
-
-    augmented_library_metadata = MyExpectation()._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
@@ -144,58 +109,12 @@ def test__get_description_diagnostics():
     )
 
 
-### Tests for _execute_test_examples
-
-
-def test__execute_test_examples__with_an_empty_list():
-    executed_test_examples = (
-        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-            expectation_type="expect_column_values_to_equal_three",
-            examples=[],
-        )
-    )
-    assert executed_test_examples == []
-
-
-def test__execute_test_examples__with_a_single_example():
-    example = ExpectationTestDataCases(
-        data=TestData(
-            **{
-                "mostly_threes": [3, 3, 3, 5, None],
-            }
-        ),
-        tests=[
-            ExpectationTestCase(
-                title="positive_test_with_mostly",
-                include_in_gallery=True,
-                exact_match_out=False,
-                input={"column": "mostly_threes", "mostly": 0.6},
-                output={
-                    "success": True,
-                    "unexpected_index_list": [6, 7],
-                    "unexpected_list": [2, -1],
-                },
-            )
-        ],
-    )
-
-    executed_test_cases = (
-        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-            expectation_type="expect_column_values_to_equal_three",
-            examples=[example],
-        )
-    )
-    assert len(executed_test_cases) == 1
-
-    # FIXME: Need more here?
-
-
 ### Tests for _get_metric_diagnostics_list
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
@@ -206,10 +125,10 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
 
 
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
-    executed_test_cases = []
+    _config = None
     metric_diagnostics_list = (
         ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
-            executed_test_cases=executed_test_cases
+            expectation_config=_config
         )
     )
     assert len(metric_diagnostics_list) == 0
@@ -228,7 +147,6 @@ Metrics could be used to make inferences, but they'd never provide comparably co
 """
 )
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
-
     assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
         metric_diagnostics_list=[],
         registered_metrics={},
@@ -267,6 +185,9 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
 
 
 ### Tests for _get_test_results
+@pytest.mark.skip(
+    reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
+)
 def test__get_test_results():
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",

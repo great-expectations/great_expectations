@@ -1,0 +1,51 @@
+{
+  "expectation_type": "expect_column_values_to_be_between",
+  "datasets": [{
+    "dataset_name": "expect_column_values_to_be_between_tz_informed_mssql_1",
+    "data": {
+      "ts": [
+        "1975-01-01T12:00:01.0000000",
+        "1985-12-31T12:00:01.0123456",
+        "2005-01-01T12:00:01.6789000"
+      ]
+    },
+    "schemas": {
+      "mssql": {
+        "ts": "DATETIME"
+      }
+    },
+    "tests": [
+      {
+        "title": "basic_positive_test_with_timestamps_tz_informed_mssql",
+        "only_for": ["mssql"],
+        "exact_match_out": false,
+        "out": {
+          "unexpected_list": [],
+          "unexpected_index_list": [],
+          "success": true
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "2020-09-01T15:27:05.3456789",
+          "min_value": "1970-01-01T12:00:01.0000000",
+          "parse_strings_as_datetimes": true
+        }
+      },
+      {
+        "title": "basic_negative_test_with_timestamps_tz_informed_mssql",
+        "only_for": ["mssql"],
+        "exact_match_out": false,
+        "out": {
+          "unexpected_index_list": [{"pk_index": 0, "ts": "1975-01-01T12:00:01"}, {"pk_index": 1, "ts": "1985-12-31T12:00:01.013000"}],
+          "success": false
+        },
+        "in": {
+          "column": "ts",
+          "max_value": "2015-02-01T12:00:01.0012345",
+          "min_value": "1995-01-01T12:00:00.0000000",
+          "parse_strings_as_datetimes": true
+        }
+      }
+    ]
+  }]
+}

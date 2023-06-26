@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -21,7 +21,7 @@ def test_get_and_save_expectation_suite(
     directory_name = str(
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )
-    df = ge.dataset.PandasDataset(
+    df = gx.dataset.PandasDataset(
         {
             "x": [1, 2, 4],
             "y": [1, 2, 5],
@@ -61,7 +61,7 @@ def test_get_and_save_expectation_suite(
         expectation_suite_name="default",
         data_asset_type="Dataset",
         data_context=context,
-        meta={"great_expectations_version": ge.__version__},
+        meta={"great_expectations_version": gx.__version__},
     )
 
     assert output_config == df.get_expectation_suite()
@@ -101,7 +101,7 @@ def test_get_and_save_expectation_suite(
         expectation_suite_name="default",
         data_asset_type="Dataset",
         data_context=context,
-        meta={"great_expectations_version": ge.__version__},
+        meta={"great_expectations_version": gx.__version__},
     )
 
     assert output_config == df.get_expectation_suite(discard_failed_expectations=False)
@@ -142,7 +142,7 @@ def test_get_and_save_expectation_suite(
         expectation_suite_name="default",
         data_asset_type="Dataset",
         data_context=context,
-        meta={"great_expectations_version": ge.__version__},
+        meta={"great_expectations_version": gx.__version__},
     )
     assert output_config == df.get_expectation_suite(
         discard_result_format_kwargs=False,
@@ -162,7 +162,7 @@ def test_get_and_save_expectation_suite(
 
 
 def test_expectation_meta():
-    df = ge.dataset.PandasDataset(
+    df = gx.dataset.PandasDataset(
         {
             "x": [1, 2, 4],
             "y": [1, 2, 5],
@@ -190,7 +190,7 @@ def test_expectation_meta():
 
 
 def test_set_default_expectation_argument():
-    df = ge.dataset.PandasDataset(
+    df = gx.dataset.PandasDataset(
         {
             "x": [1, 2, 4],
             "y": [1, 2, 5],
@@ -214,7 +214,7 @@ def test_set_default_expectation_argument():
 
 
 def test_test_column_map_expectation_function():
-    asset = ge.dataset.PandasDataset(
+    asset = gx.dataset.PandasDataset(
         {
             "x": [1, 3, 5, 7, 9],
             "y": [1, 2, None, 7, 9],
@@ -265,7 +265,7 @@ def test_test_column_map_expectation_function():
 
 
 def test_test_column_aggregate_expectation_function():
-    asset = ge.dataset.PandasDataset(
+    asset = gx.dataset.PandasDataset(
         {
             "x": [1, 3, 5, 7, 9],
             "y": [1, 2, None, 7, 9],
@@ -337,7 +337,7 @@ def test_test_column_aggregate_expectation_function():
 
 
 def test_format_map_output():
-    df = ge.dataset.PandasDataset(
+    df = gx.dataset.PandasDataset(
         {
             "x": list("abcdefghijklmnopqrstuvwxyz"),
         }
@@ -624,7 +624,7 @@ def test_format_map_output():
 
 
 def test_calc_map_expectation_success():
-    df = ge.dataset.PandasDataset({"x": list("abcdefghijklmnopqrstuvwxyz")})
+    df = gx.dataset.PandasDataset({"x": list("abcdefghijklmnopqrstuvwxyz")})
     assert df._calc_map_expectation_success(
         success_count=10, nonnull_count=10, mostly=None
     ) == (True, 1.0)
@@ -677,14 +677,14 @@ def test_calc_map_expectation_success():
 
 
 def test_discard_failing_expectations():
-    df = ge.dataset.PandasDataset(
+    df = gx.dataset.PandasDataset(
         {
             "A": [1, 2, 3, 4],
             "B": [5, 6, 7, 8],
             "C": ["a", "b", "c", "d"],
             "D": ["e", "f", "g", "h"],
         },
-        profiler=ge.profile.ColumnsExistProfiler,
+        profiler=gx.profile.ColumnsExistProfiler,
     )
 
     # Put some simple expectations on the data frame
@@ -827,13 +827,13 @@ def test_discard_failing_expectations():
 
 
 def test_test_expectation_function():
-    asset = ge.dataset.PandasDataset(
+    asset = gx.dataset.PandasDataset(
         {
             "x": [1, 3, 5, 7, 9],
             "y": [1, 2, None, 7, 9],
         }
     )
-    asset_2 = ge.dataset.PandasDataset(
+    asset_2 = gx.dataset.PandasDataset(
         {
             "x": [1, 3, 5, 6, 9],
             "y": [1, 2, None, 6, 9],

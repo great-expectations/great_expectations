@@ -1,0 +1,29 @@
+<!-- props.data_connector_type: string value of the data connector's class name. -->
+<!-- props.data_connector_name: string value of the name assigned to the data connector in previous examples. -->
+<!-- props.inferred: boolean value that determines if the base key list should be `class_name`, `splitter_method`, `splitter_kwargs`, `introspection_directives` (true) -->
+<!-- props.configured: boolean value that determines if the base key list should be `class_name`, `assets` (true) -->
+<!-- props.runtime: boolean value that determines if the base key list should be `class_name`, `batch_identifiers` (true) -->
+
+<div>
+    <p>
+        When defining { props.inferred && <span>an</span> || <span>a</span> } <code>{props.data_connector_type}</code> you will need to provide values for { props.inferred && <span>one required key</span> || <span>two required keys</span> } in the Data Connector's configuration dictionary (the currently empty dictionary that corresponds to <code>"{props.data_connector_name}"</code> in the example above).  { props.inferred && <span>This key/value pair consists of:</span> || <span>These key/value pairs consist of:</span> }
+    </p>
+    <ul>
+        <li>
+            <code>class_name</code>: The name of the Class that will be instantiated for this <code>DataConnector</code>.
+        </li>
+        { props.configured &&
+            <span>
+                <li>
+                    <code>assets</code>: A dictionary where the keys are the names of specific Data Assets and the values are the configurations for the corresponding Data Asset.
+                </li>
+            </span>
+        || props.runtime &&
+            <span>
+                <li>
+                    <code>batch_identifiers</code>: A list of strings that will be used as keys for identifying metadata that the user provides for the returned Batch.
+                </li>
+            </span>
+        }
+    </ul>
+</div>

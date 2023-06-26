@@ -1,27 +1,27 @@
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
+    RenderedTableContent,
+)
 from great_expectations.render.renderer.content_block.content_block import (
     ContentBlockRenderer,
-)
-from great_expectations.render.types import (
-    RenderedStringTemplateContent,
-    RenderedTableContent,
 )
 
 
 class ProfilingColumnPropertiesTableContentBlockRenderer(ContentBlockRenderer):
     expectation_renderers = {
         "expect_column_values_to_not_match_regex": [
-            "renderer.descriptive.column_properties_table.regex_count_row"
+            LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_REGEX_COUNT_ROW
         ],
         "expect_column_unique_value_count_to_be_between": [
-            "renderer.descriptive.column_properties_table.distinct_count_row"
+            LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_DISTINCT_COUNT_ROW
         ],
         "expect_column_proportion_of_unique_values_to_be_between": [
-            "renderer.descriptive.column_properties_table.distinct_percent_row"
+            LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_DISTINCT_PERCENT_ROW
         ],
         "expect_column_values_to_not_be_null": [
-            "renderer.descriptive.column_properties_table.missing_count_row",
-            "renderer.descriptive.column_properties_table.missing_percent_row",
+            LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_COUNT_ROW,
+            LegacyDescriptiveRendererType.COLUMN_PROPERTIES_TABLE_MISSING_PERCENT_ROW,
         ],
     }
 

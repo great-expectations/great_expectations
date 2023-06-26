@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <!-- DOCUMENTATION -->
+  <!-- Edit this file by setting WorkingDirectory -->
+  <!-- Put this file in ~/Library/LaunchAgents/ -->
+  <!-- Run `launchctl load ~/Library/LaunchAgents/io.greatexpectations.build_docker_dev_image.plist` -->
+  <dict>
+    <key>Label</key>
+      <string>io.great_expectations.build_docker_dev_image.plist</string>
+    <key>RunAtLoad</key>
+      <true/>
+    <key>StartCalendarInterval</key>
+      <dict>
+        <key>Hour</key>
+        <integer>18</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+      </dict>
+    <key>StandardErrorPath</key>
+      <string>/tmp/gx_docker_build_stderr.log</string>
+    <key>StandardOutPath</key>
+      <string>/tmp/gx_docker_build_stdout.log</string>
+
+    <!-- SET THIS TO THE PATH TO THE GX REPO -->
+    <key>WorkingDirectory</key>
+      <string>/full/path/to/great_expectations</string>
+
+    <key>ProgramArguments</key>
+      <array>
+        <string>/usr/local/bin/docker</string>
+        <string>buildx</string>
+        <string>build</string>
+        <string>-f</string>
+        <string>docker/Dockerfile.tests</string>
+        <string>--tag</string>
+        <string>gx38local:latest</string>
+        <string>--target</string>
+        <string>test</string>
+        <string>.</string>
+      </array>
+  </dict>
+</plist>

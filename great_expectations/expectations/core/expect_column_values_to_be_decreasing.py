@@ -1,29 +1,41 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
+
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
-    """Expect column values to be decreasing.
+    """Expect the column values to be decreasing.
 
-    By default, this expectation only works for numeric or datetime data.
-    When `parse_strings_as_datetimes=True`, it can also parse strings to datetimes.
+    By default, this expectation only works for numeric or datetime data. \
+    When 'parse_strings_as_datetimes=True', it can also parse strings to datetimes.
 
-    If `strictly=True`, then this expectation is only satisfied if each consecutive value
+    If 'strictly=True', then this expectation is only satisfied if each consecutive value \
     is strictly decreasing--equal values are treated as failures.
 
     expect_column_values_to_be_decreasing is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations)
 
     Args:
         column (str): \
@@ -32,37 +44,32 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     Keyword Args:
         strictly (Boolean or None): \
             If True, values must be strictly greater than previous values
-        parse_strings_as_datetimes (boolean or None) : \
+        parse_strings_as_datetimes (boolean or None): \
             If True, all non-null column values to datetimes before making comparisons
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        :func:`expect_column_values_to_be_increasing \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_be_increasing>`
-
+        [expect_column_values_to_be_increasing](https://greatexpectations.io/expectations/expect_column_values_to_be_increasing)
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -93,109 +100,77 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        return super().validate_configuration(configuration)
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
+        super().validate_configuration(configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("strictly", RendererValueType.BOOLEAN),
+            ("mostly", RendererValueType.NUMBER),
+            ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "strictly",
-                "mostly",
-                "parse_strings_as_datetimes",
-                "row_condition",
-                "condition_parser",
-            ],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "strictly": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strictly"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params.get("strictly"):
+        params = renderer_configuration.params
+
+        if params.strictly:
             template_str = "values must be strictly less than previous values"
         else:
             template_str = "values must be less than or equal to previous values"
 
-        if params["mostly"] is not None:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
             template_str += ", at least $mostly_pct % of the time."
         else:
             template_str += "."
 
-        if params.get("parse_strings_as_datetimes"):
+        if params.parse_strings_as_datetimes:
             template_str += " Values should be parsed as datetimes."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        renderer_configuration.template_str = template_str
 
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -215,7 +190,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         else:
             template_str = "values must be less than or equal to previous values"
 
-        if params["mostly"] is not None:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )

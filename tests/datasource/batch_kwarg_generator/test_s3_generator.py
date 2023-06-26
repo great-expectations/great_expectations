@@ -166,7 +166,7 @@ def test_s3_generator_limit(s3_generator):
     batch_kwargs_list = [
         kwargs for kwargs in s3_generator.get_iterator(data_asset_name="data", limit=10)
     ]
-    assert all(["limit" in batch_kwargs for batch_kwargs in batch_kwargs_list])
+    assert all("limit" in batch_kwargs for batch_kwargs in batch_kwargs_list)
 
 
 def test_s3_generator_reader_method_configuration(s3_generator):

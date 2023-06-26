@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_values_to_not_match_like_pattern_list",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_not_match_like_pattern_list_1",
     "data" : {
       "w" : ["111", "222", "333", "123", "321", "444", "456", "654", "555", null],
       "x" : ["man", "plan", "canal", "panama", "hat", "bat", "bit", "bot", "but", "bet"]
@@ -55,7 +56,7 @@
       },
       "out": {
         "unexpected_list": ["111", "222", "123", "321", "444", "456", "654", "555"],
-        "unexpected_index_list": [0,1,3,4,5,6,7,8],
+        "unexpected_index_list": [{"pk_index": 0, "w": "111"}, {"pk_index": 1, "w": "222"}, {"pk_index": 3, "w": "123"}, {"pk_index": 4, "w": "321"}, {"pk_index": 5, "w": "444"}, {"pk_index": 6, "w": "456"}, {"pk_index": 7, "w": "654"}, {"pk_index": 8, "w": "555"}],
         "success": false
       },
       "only_for": ["mssql"]
@@ -69,7 +70,7 @@
       },
       "out": {
         "unexpected_list": ["hat"],
-        "unexpected_index_list": [4],
+        "unexpected_index_list": [{"pk_index": 4, "x": "hat"}],
         "success": false
       },
       "only_for": ["sqlalchemy"]
@@ -83,10 +84,10 @@
       },
       "out": {
         "unexpected_list": ["111", "222", "123", "321", "444", "456", "654", "555"],
-        "unexpected_index_list": [0,1,3,4,5,6,7,8],
+        "unexpected_index_list": [{"pk_index": 0, "w": "111"}, {"pk_index": 1, "w": "222"}, {"pk_index": 3, "w": "123"}, {"pk_index": 4, "w": "321"}, {"pk_index": 5, "w": "444"}, {"pk_index": 6, "w": "456"}, {"pk_index": 7, "w": "654"}, {"pk_index": 8, "w": "555"}],
         "success": false
       },
-      "only_for": ["sqlite", "postgresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql", "trino", "bigquery", "snowflake", "redshift"]
     }
    ]
   }]

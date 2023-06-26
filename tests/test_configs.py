@@ -3,6 +3,7 @@ import pytest
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
+@pytest.mark.unit
 def test_instantiate_class_from_config():
     # This config structure feels very tidy to me.
     instantiate_class_from_config(
@@ -15,8 +16,8 @@ def test_instantiate_class_from_config():
     )
 
 
+@pytest.mark.unit
 def test_instantiate_class_from_config_with_overriden_defaults():
-
     # This config structure feels very tidy to me, even with nesting.
     fake_configurable_wrapper_object = instantiate_class_from_config(
         config={
@@ -54,6 +55,7 @@ def test_instantiate_class_from_config_with_overriden_defaults():
     )
 
 
+@pytest.mark.unit
 def test_instantiate_class_from_config_with_config_defaults():
     my_runtime_environment = {"x": 1}
 

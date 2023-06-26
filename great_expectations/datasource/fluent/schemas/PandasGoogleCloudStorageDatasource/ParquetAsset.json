@@ -1,0 +1,331 @@
+{
+    "title": "ParquetAsset",
+    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "parquet",
+            "enum": [
+                "parquet"
+            ],
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Sorter"
+            }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
+        "batching_regex": {
+            "title": "Batching Regex",
+            "default": ".*",
+            "type": "string",
+            "format": "regex"
+        },
+        "connect_options": {
+            "title": "Connect Options",
+            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+            "type": "object"
+        },
+        "splitter": {
+            "title": "Splitter",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/SplitterColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/SplitterMultiColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/SplitterDividedInteger"
+                },
+                {
+                    "$ref": "#/definitions/SplitterModInteger"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYear"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYearAndMonth"
+                },
+                {
+                    "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                },
+                {
+                    "$ref": "#/definitions/SplitterDatetimePart"
+                }
+            ]
+        },
+        "engine": {
+            "title": "Engine",
+            "default": "auto",
+            "type": "string"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        },
+        "use_nullable_dtypes": {
+            "title": "Use Nullable Dtypes",
+            "default": false,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "SplitterColumnValue": {
+            "title": "SplitterColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_column_value",
+                    "enum": [
+                        "split_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterMultiColumnValue": {
+            "title": "SplitterMultiColumnValue",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_multi_column_values",
+                    "enum": [
+                        "split_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDividedInteger": {
+            "title": "SplitterDividedInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_divided_integer",
+                    "enum": [
+                        "split_on_divided_integer"
+                    ],
+                    "type": "string"
+                },
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "divisor"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterModInteger": {
+            "title": "SplitterModInteger",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_mod_integer",
+                    "enum": [
+                        "split_on_mod_integer"
+                    ],
+                    "type": "string"
+                },
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "mod"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYear": {
+            "title": "SplitterYear",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year",
+                    "enum": [
+                        "split_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonth": {
+            "title": "SplitterYearAndMonth",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month",
+                    "enum": [
+                        "split_on_year_and_month"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterYearAndMonthAndDay": {
+            "title": "SplitterYearAndMonthAndDay",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month_and_day",
+                    "enum": [
+                        "split_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "SplitterDatetimePart": {
+            "title": "SplitterDatetimePart",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_date_parts",
+                    "enum": [
+                        "split_on_date_parts"
+                    ],
+                    "type": "string"
+                },
+                "datetime_parts": {
+                    "title": "Datetime Parts",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "column_name",
+                "datetime_parts"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

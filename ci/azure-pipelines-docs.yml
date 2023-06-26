@@ -1,0 +1,92 @@
+# This file configures the `docs` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# This pipeline configures tests that ensure our docs are built successfully.
+#
+# The pipeline is run under the following conditions:
+#   - On any PR
+
+variables:
+  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckDocsChanges
+            inputs:
+              verbose: true
+              rules: |
+                [DocsChanged]
+                docs/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
+
+          - bash: ./ci/checks/check_for_docs_deps_changes.sh
+            name: CheckDocsDependenciesChanges
+
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+    - job: link_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+      - bash: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
+        name: LinkChecker
+
+    - job: docs_snippet_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          yarn install
+          python ci/checks/validate_docs_snippets.py
+        name: DocsSnippetChecker
+
+    - job: line_number_snippet_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python ci/checks/check_no_line_number_snippets.py
+          name: LineNumberSnippetChecker
+
+
+    - job: name_tag_snippet_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python ci/checks/check_only_name_tag_snippets.py
+          name: NameTagSnippetChecker
+
+    - job: public_api_report
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
+          name: PublicAPIReport
+
+  - stage: test_build_docs
+    dependsOn: [ scope_check, custom_checks ]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_build_docs
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - script: cd docs/docusaurus && yarn install && bash ../build_docs
+            displayName: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096

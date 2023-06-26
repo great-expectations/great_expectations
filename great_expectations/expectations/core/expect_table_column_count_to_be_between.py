@@ -1,23 +1,35 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.expectation import (
+    BatchExpectation,
+    render_evaluation_parameter_string,
+)
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     handle_strict_min_max,
     substitute_none_for_missing,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectTableColumnCountToBeBetween(TableExpectation):
+
+class ExpectTableColumnCountToBeBetween(BatchExpectation):
     """Expect the number of columns to be between two values.
 
-    expect_table_column_count_to_be_between is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_column_count_to_be_between is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Keyword Args:
         min_value (int or None): \
@@ -27,23 +39,21 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     Notes:
         * min_value and max_value are both inclusive.
@@ -53,7 +63,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
           has no maximum.
 
     See Also:
-        expect_table_column_count_to_equal
+        [expect_table_column_count_to_equal](https://greatexpectations.io/expectations/expect_table_column_count_to_equal)
     """
 
     library_metadata = {
@@ -85,91 +95,79 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         "max_value",
     )
 
-    """ A Metric Decorator for the Column Count"""
-
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
         """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
+                it will be pulled from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required
+                by the Expectation.
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
-        return True
-
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
+            ("strict_min", RendererValueType.BOOLEAN),
+            ("strict_max", RendererValueType.BOOLEAN),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["min_value", "max_value", "strict_min", "strict_max"],
-        )
-        if params["min_value"] is None and params["max_value"] is None:
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
+
+        params = renderer_configuration.params
+
+        if not params.min_value and not params.max_value:
             template_str = "May have any number of columns."
         else:
-            at_least_str, at_most_str = handle_strict_min_max(params)
-            if params["min_value"] is not None and params["max_value"] is not None:
+            at_least_str = "greater than or equal to"
+            if params.strict_min:
+                at_least_str: str = cls._get_strict_min_string(
+                    renderer_configuration=renderer_configuration
+                )
+            at_most_str = "less than or equal to"
+            if params.strict_max:
+                at_most_str: str = cls._get_strict_max_string(
+                    renderer_configuration=renderer_configuration
+                )
+
+            if params.min_value and params.max_value:
                 template_str = f"Must have {at_least_str} $min_value and {at_most_str} $max_value columns."
-            elif params["min_value"] is None:
+            elif not params.min_value:
                 template_str = f"Must have {at_most_str} $max_value columns."
-            elif params["max_value"] is None:
+            else:
                 template_str = f"Must have {at_least_str} $min_value columns."
-        params_with_json_schema = {
-            "min_value": {
-                "schema": {"type": "number"},
-                "value": params.get("min_value"),
-            },
-            "max_value": {
-                "schema": {"type": "number"},
-                "value": params.get("max_value"),
-            },
-            "strict_min": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_min"),
-            },
-            "strict_max": {
-                "schema": {"type": "boolean"},
-                "value": params.get("strict_max"),
-            },
-        }
-        return (template_str, params_with_json_schema, styling)
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
@@ -203,8 +201,8 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         return self._validate_metric_value_between(
             metric_name="table.column_count",

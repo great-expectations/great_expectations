@@ -1,22 +1,45 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
+import json
 import logging
 import os
+import pathlib
 import re
 import sys
 import uuid
 from collections import OrderedDict
-from collections.abc import Mapping
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 from urllib.parse import urlparse
 
 import dateutil.parser
 import numpy as np
 import pandas as pd
+import pydantic
 from IPython import get_ipython
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+    LegacyRow,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -24,19 +47,26 @@ from great_expectations.types.base import SerializableDotDict
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+from great_expectations.util import convert_decimal_to_float
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
 
-
 try:
-    import sqlalchemy
-    from sqlalchemy.engine.row import LegacyRow
+    from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 except ImportError:
-    sqlalchemy = None
-    LegacyRow = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    Point = None
+    Polygon = None
+    MultiPolygon = None
+    LineString = None
 
+
+if not LegacyRow:
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -57,25 +87,21 @@ SCHEMAS = {
     },
 }
 
-
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
+if TYPE_CHECKING:
+    import numpy.typing as npt
+    from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
+M = TypeVar("M", bound=MutableMapping)
+
 
 def nested_update(
-    d: Union[Iterable, dict],
-    u: Union[Iterable, dict],
+    d: M,
+    u: Mapping,
     dedup: bool = False,
     concat_lists: bool = True,
-):
+) -> M:
     """
     Update d with items from u, recursively and joining elements. By default, list values are
     concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
@@ -130,19 +156,125 @@ def in_databricks() -> bool:
     return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
-def convert_to_json_serializable(data):
+def determine_progress_bar_method_by_environment() -> Callable:
     """
-    Helper function to convert an object to one that is json serializable
-    Args:
-        data: an object to attempt to convert a corresponding json-serializable object
-    Returns:
-        (dict) A converted test_object
-    Warning:
-        test_obj may also be converted in place.
-    """
+    As tqdm has specific methods for progress bar creation and iteration,
+    we require a utility to determine which method to use.
 
-    # If it's one of our types, we use our own conversion; this can move to full schema
-    # once nesting goes all the way down
+    If in a Jupyter notebook, we want to use `tqdm.notebook.tqdm`. Otherwise,
+    we default to the standard `tqdm.tqdm`. Please see the docs for more information: https://tqdm.github.io/
+
+    Returns:
+        The appropriate tqdm method for the environment in question.
+    """
+    from tqdm import tqdm
+    from tqdm.notebook import tqdm as tqdm_notebook
+
+    if in_jupyter_notebook():
+        return tqdm_notebook
+    return tqdm
+
+
+ToBool: TypeAlias = bool
+ToFloat: TypeAlias = Union[float, np.floating]
+ToInt: TypeAlias = Union[int, np.integer]
+ToStr: TypeAlias = Union[
+    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+]
+
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
+ToDict: TypeAlias = Union[
+    dict,
+    "CommentedMap",
+    pd.DataFrame,
+    SerializableDictDot,
+    SerializableDotDict,
+    pydantic.BaseModel,
+]
+
+JSONConvertable: TypeAlias = Union[
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+]
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+    data: ToDict,
+) -> dict:
+    ...
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+    data: ToList,
+) -> list:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToBool,
+) -> bool:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToFloat,
+) -> float:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToInt,
+) -> int:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToStr,
+) -> str:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: None,
+) -> None:
+    ...
+
+
+@public_api  # - complexity 32
+def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
+    data: JSONConvertable,
+) -> JSONValues:
+    """Converts an object to one that is JSON-serializable.
+
+    WARNING, data may be converted in place.
+
+    Args:
+        data: an object to convert to a JSON-serializable object
+
+    Returns:
+        A JSON-serializable object. For example:
+
+        >>> convert_to_json_serializable(1)
+        1
+
+        >>> convert_to_json_serializable("hello")
+        "hello"
+
+        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]))
+        "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+
+    Raises:
+        TypeError: A non-JSON-serializable field was found.
+    """
+    if isinstance(data, pydantic.BaseModel):
+        return json.loads(data.json())
+
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
@@ -154,6 +286,9 @@ def convert_to_json_serializable(data):
         # No problem to encode json
         return data
 
+    if isinstance(data, range):
+        return list(data)
+
     if isinstance(data, dict):
         new_dict = {}
         for key in data:
@@ -163,7 +298,7 @@ def convert_to_json_serializable(data):
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
-        new_list = []
+        new_list: List[JSONValues] = []
         for val in data:
             new_list.append(convert_to_json_serializable(val))
 
@@ -184,7 +319,23 @@ def convert_to_json_serializable(data):
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
+    if isinstance(data, (np.datetime64)):
+        return np.datetime_as_string(data)
+
     if isinstance(data, uuid.UUID):
+        return str(data)
+
+    if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, slice):
+        return str(data)
+
+    if isinstance(data, pathlib.PurePath):
+        return str(data)
+
+    # noinspection PyTypeChecker
+    if Polygon and isinstance(data, (Point, Polygon, MultiPolygon, LineString)):
         return str(data)
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -193,11 +344,11 @@ def convert_to_json_serializable(data):
         return bool(data)
 
     if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
-        return int(data)
+        return int(data)  # type: ignore[arg-type] # could be None
 
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
-        return float(round(data, sys.float_info.dig))
+        return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
@@ -225,13 +376,13 @@ def convert_to_json_serializable(data):
                 index_name: convert_to_json_serializable(idx),
                 value_name: convert_to_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
 
     if isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
-    if pyspark and isinstance(data, pyspark.sql.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return convert_to_json_serializable(
@@ -242,23 +393,30 @@ def convert_to_json_serializable(data):
     if LegacyRow and isinstance(data, LegacyRow):
         return dict(data)
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+        return str(data)
+
     if isinstance(data, decimal.Decimal):
-        if requires_lossy_conversion(data):
-            logger.warning(
-                f"Using lossy conversion for decimal {data} to float object to support serialization."
-            )
-        return float(data)
+        return convert_decimal_to_float(d=data)
 
     if isinstance(data, RunIdentifier):
         return data.to_json_dict()
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
+    # PySpark schema serialization
+    if pyspark.types and isinstance(data, pyspark.types.StructType):
+        return dict(data.jsonValue())
+
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+        # Connection is a module, which is non-serializable. Return module name instead.
+        return "sqlalchemy.engine.base.Connection"
+
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
-def ensure_json_serializable(data):
+def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert an object to one that is json serializable
     Args:
@@ -296,6 +454,9 @@ def ensure_json_serializable(data):
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
+        return
+
+    if isinstance(data, pathlib.PurePath):
         return
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -336,11 +497,11 @@ def ensure_json_serializable(data):
                 index_name: ensure_json_serializable(idx),
                 value_name: ensure_json_serializable(val),
             }
-            for idx, val in data.iteritems()
+            for idx, val in data.items()
         ]
         return
 
-    if pyspark and isinstance(data, pyspark.sql.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -356,15 +517,17 @@ def ensure_json_serializable(data):
     if isinstance(data, RunIdentifier):
         return
 
-    else:
-        raise InvalidExpectationConfigurationError(
-            "%s is of type %s which cannot be serialized to json"
-            % (str(data), type(data).__name__)
-        )
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
+        # TextClause is handled manually by convert_to_json_serializable()
+        return
 
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
+        # Connection module is handled manually by convert_to_json_serializable()
+        return
 
-def requires_lossy_conversion(d):
-    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
+    raise InvalidExpectationConfigurationError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+    )
 
 
 def substitute_all_strftime_format_strings(
@@ -375,8 +538,8 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
+    datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
+    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
             for k, v in data.items()
@@ -387,27 +550,16 @@ def substitute_all_strftime_format_strings(
             for el in data
         ]
     elif isinstance(data, str):
-        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+        return datetime_obj.strftime(data)
     else:
         return data
 
 
-def get_datetime_string_from_strftime_format(
-    format_str: str, datetime_obj: Optional[datetime.datetime] = None
-) -> str:
-    """
-    This utility function takes a string with strftime format elements and substitutes those elements using
-    either the provided datetime_obj or current datetime
-    """
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
-    return datetime_obj.strftime(format_str)
-
-
 def parse_string_to_datetime(
     datetime_string: str, datetime_format_string: Optional[str] = None
-) -> datetime.date:
+) -> datetime.datetime:
     if not isinstance(datetime_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             """
         )
@@ -416,13 +568,15 @@ def parse_string_to_datetime(
         return dateutil.parser.parse(timestr=datetime_string)
 
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             """
         )
 
-    return datetime.datetime.strptime(datetime_string, datetime_format_string)
+    return datetime.datetime.strptime(  # noqa: DTZ007
+        datetime_string, datetime_format_string
+    )
 
 
 def datetime_to_int(dt: datetime.date) -> int:
@@ -458,7 +612,7 @@ class AzureUrl:
         "wasbs://{container}@{account_name}.blob.core.windows.net/{path}"
     )
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(
             AzureUrl.AZURE_BLOB_STORAGE_PROTOCOL_DETECTION_REGEX_PATTERN, url
         )
@@ -512,7 +666,7 @@ class GCSUrl:
 
     OBJECT_URL_TEMPLATE: str = "gs://{bucket_or_name}/{path}"
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         search = re.search(GCSUrl.URL_REGEX_PATTERN, url)
         assert (
             search is not None
@@ -557,7 +711,7 @@ class S3Url:
     's3://bucket/hello/world#foo?bar=2'
     """
 
-    def __init__(self, url):
+    def __init__(self, url) -> None:
         self._parsed = urlparse(url, allow_fragments=False)
 
     @property
@@ -594,72 +748,77 @@ class DBFSPath:
     """
 
     @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+
+        if re.search("^/dbfs", path):
+            return path
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
     def convert_to_protocol_version(path: str) -> str:
         if re.search(r"^\/dbfs", path):
             candidate = path.replace("/dbfs", "dbfs:", 1)
             if candidate == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
-            else:
-                return candidate
-        elif re.search(r"^dbfs:", path):
+
+            return candidate
+
+        if re.search(r"^dbfs:", path):
             if path == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
+
             return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
 
-    @staticmethod
-    def convert_to_file_semantics_version(path: str) -> str:
-        if re.search(r"^dbfs:", path):
-            return path.replace("dbfs:", "/dbfs", 1)
-        elif re.search("^/dbfs", path):
-            return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
+        raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
-def sniff_s3_compression(s3_url: S3Url) -> str:
+def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     """Attempts to get read_csv compression from s3_url"""
-    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, str]] = None,
-    force_reuse_spark_context: bool = False,
-):
-    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
+    spark_config: Optional[Dict[str, Any]] = None,
+    force_reuse_spark_context: bool = True,
+) -> pyspark.SparkSession:
+    """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
+    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+
+    Args:
+        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+        force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
+
+    Returns: SparkSession (new or existing as per "isStopped()" status).
+    """
     if spark_config is None:
         spark_config = {}
     else:
         spark_config = copy.deepcopy(spark_config)
+
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
+
     spark_config.update({"spark.app.name": name})
 
-    spark_session: Optional[SparkSession] = get_or_create_spark_session(
+    spark_session: Optional[pyspark.SparkSession] = get_or_create_spark_session(
         spark_config=spark_config
     )
     if spark_session is None:
         raise ValueError("SparkContext could not be started.")
 
-    # noinspection PyProtectedMember
+    # noinspection PyUnresolvedReferences
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
@@ -677,7 +836,7 @@ def get_or_create_spark_application(
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
@@ -689,40 +848,43 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-):
-    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
+) -> pyspark.SparkSession | None:
+    """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
-    spark_session: Optional[SparkSession]
+    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+
+    Args:
+        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+
+    Returns:
+
+    """
+    spark_session: Optional[pyspark.SparkSession]
     try:
         if spark_config is None:
             spark_config = {}
         else:
             spark_config = copy.deepcopy(spark_config)
 
-        builder = SparkSession.builder
+        builder = pyspark.SparkSession.builder
 
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
+
         for k, v in spark_config.items():
             if k != "spark.app.name":
                 builder.config(k, v)
+
         spark_session = builder.getOrCreate()
-        # noinspection PyProtectedMember
+        # noinspection PyProtectedMember,PyUnresolvedReferences
         if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
+
     except AttributeError:
         logger.error(
             "Unable to load spark context; install optional spark dependency for support."
@@ -733,8 +895,18 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[tuple], desired_spark_config: dict
+    current_spark_config: List[Tuple[str, Any]], desired_spark_config: dict
 ) -> bool:
+    """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
+
+    Either new "App" name or configuration change necessitates Spark session restart.
+
+    Args:
+        current_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
+        desired_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
+
+    Returns: Boolean flag indicating (if True) that Spark session restart is required.
+    """
 
     # we can't change spark context config values within databricks runtimes
     if in_databricks():
@@ -764,7 +936,7 @@ def get_sql_dialect_floating_point_infinity_value(
         else:
             return np.inf
     else:
-        if negative:
+        if negative:  # noqa: PLR5501
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]

@@ -12,6 +12,7 @@ from great_expectations.core.util import (
 
 
 @freeze_time("11/05/1955")
+@pytest.mark.unit
 def test_substitute_all_strftime_format_strings():
     input_dict = {
         "month_no": "%m",
@@ -45,6 +46,7 @@ def test_substitute_all_strftime_format_strings():
         ("<scheme>://<netloc>/<path>.;<params>?<query>#<fragment>", None),
     ],
 )
+@pytest.mark.unit
 def test_s3_suffix(url, expected):
     _suffix = S3Url(url).suffix
     if expected is not None:
@@ -62,10 +64,12 @@ def test_s3_suffix(url, expected):
         ("s3://bucket/hello/world", None),
     ],
 )
+@pytest.mark.unit
 def test_sniff_s3_compression(url, expected):
     assert sniff_s3_compression(S3Url(url)) == expected
 
 
+@pytest.mark.unit
 def test_azure_pandas_url():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
@@ -73,6 +77,7 @@ def test_azure_pandas_url():
     assert url.blob == "my_blob"
 
 
+@pytest.mark.unit
 def test_azure_pandas_url_with_https():
     url = AzureUrl("https://my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
@@ -80,6 +85,7 @@ def test_azure_pandas_url_with_https():
     assert url.blob == "my_blob"
 
 
+@pytest.mark.unit
 def test_azure_pandas_url_with_nested_blob():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/a/b/c/d/e/my_blob")
     assert url.account_name == "my_account"
@@ -87,6 +93,7 @@ def test_azure_pandas_url_with_nested_blob():
     assert url.blob == "a/b/c/d/e/my_blob"
 
 
+@pytest.mark.unit
 def test_azure_pandas_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
@@ -99,6 +106,7 @@ def test_azure_pandas_url_with_special_chars():
     assert url.blob == "my-blob_`~!@#$%^&*()=+"
 
 
+@pytest.mark.unit
 def test_azure_spark_url():
     url = AzureUrl("my_container@my_account.blob.core.windows.net/my_blob")
     assert url.account_name == "my_account"
@@ -107,6 +115,7 @@ def test_azure_spark_url():
     assert url.blob == "my_blob"
 
 
+@pytest.mark.unit
 def test_azure_spark_url_with_wasbs():
     url = AzureUrl("wasbs://my_container@my_account.blob.core.windows.net/my_blob")
     assert url.account_name == "my_account"
@@ -115,6 +124,7 @@ def test_azure_spark_url_with_wasbs():
     assert url.blob == "my_blob"
 
 
+@pytest.mark.unit
 def test_azure_spark_url_with_nested_blob():
     url = AzureUrl("my_container@my_account.blob.core.windows.net/a/b/c/d/e/my_blob")
     assert url.account_name == "my_account"
@@ -123,6 +133,7 @@ def test_azure_spark_url_with_nested_blob():
     assert url.blob == "a/b/c/d/e/my_blob"
 
 
+@pytest.mark.unit
 def test_azure_spark_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
@@ -135,28 +146,33 @@ def test_azure_spark_url_with_special_chars():
     assert url.blob == "my-blob_`~!@#$%^&*()=+"
 
 
+@pytest.mark.unit
 def test_azure_url_with_invalid_url():
     with pytest.raises(AssertionError):
         AzureUrl("my_bucket/my_blob")
 
 
+@pytest.mark.unit
 def test_gcs_url():
     url = GCSUrl("gs://my_bucket/my_blob")
     assert url.bucket == "my_bucket"
     assert url.blob == "my_blob"
 
 
+@pytest.mark.unit
 def test_gcs_url_with_nested_blob():
     url = GCSUrl("gs://my_bucket/a/b/c/d/e/my_blob")
     assert url.bucket == "my_bucket"
     assert url.blob == "a/b/c/d/e/my_blob"
 
 
+@pytest.mark.unit
 def test_gcs_url_with_invalid_url():
     with pytest.raises(AssertionError):
         GCSUrl("my_bucket/my_blob")
 
 
+@pytest.mark.unit
 def test_gcs_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the GCS API
     # GCS bucket naming restrictions: https://cloud.google.com/storage/docs/naming-buckets
@@ -190,8 +206,8 @@ def test_gcs_url_with_special_chars():
         ("dbfs:", "dbfs:/"),
     ],
 )
+@pytest.mark.unit
 def test_dbfs_path_protocol_conversions(input_path, expected_path):
-
     observed_path = DBFSPath.convert_to_protocol_version(path=input_path)
     assert observed_path == expected_path
 
@@ -220,7 +236,7 @@ def test_dbfs_path_protocol_conversions(input_path, expected_path):
         ("dbfs:", "/dbfs"),
     ],
 )
+@pytest.mark.unit
 def test_dbfs_path_file_semantics_conversions(input_path, expected_path):
-
     observed_path = DBFSPath.convert_to_file_semantics_version(path=input_path)
     assert observed_path == expected_path

@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional, Set, Union
+from __future__ import annotations
 
-from pyparsing import Combine
-from pyparsing import Optional as ppOptional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Union
+
 from pyparsing import (
+    Combine,
     ParseException,
     ParseResults,
     Suppress,
@@ -14,23 +15,35 @@ from pyparsing import (
     oneOf,
     opAssoc,
 )
+from pyparsing import Optional as ppOptional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,  # noqa: TCH001
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
-binary_operator = oneOf("~ & |")
+binary_operator = oneOf("& |")
 operand = text | integer | var
 
 expr = infixNotation(
@@ -43,7 +56,7 @@ expr = infixNotation(
 
 
 class ExpectationConfigurationConditionParserError(
-    ge_exceptions.GreatExpectationsError
+    gx_exceptions.GreatExpectationsError
 ):
     pass
 
@@ -56,40 +69,39 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = ExpectationConfigurationBuilder.exclude_field_names | {
         "kwargs",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
         condition: Optional[str] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        validation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Args:
             expectation_type: the "expectation_type" argument of "ExpectationConfiguration" object to be emitted.
-            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted.
+            meta: the "meta" argument of "ExpectationConfiguration" object to be emitted
             condition: Boolean statement (expressed as string and following specified grammar), which controls whether
-            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            or not underlying logic should be executed and thus resulting "ExpectationConfiguration" emitted
+            validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
+            fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
+            These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
+            data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 
         super().__init__(
             expectation_type=expectation_type,
-            batch_list=batch_list,
-            batch_request=batch_request,
+            validation_parameter_builder_configs=validation_parameter_builder_configs,
             data_context=data_context,
             **kwargs,
         )
@@ -100,20 +112,24 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._meta = meta
 
         if not isinstance(meta, dict):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{str(type(meta))}" was encountered).
 """
             )
 
         if condition and (not isinstance(condition, str)):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{str(type(condition))}" was encountered).
 """
             )
 
         self._condition = condition
+
+        self._validation_parameter_builder_configs = (
+            validation_parameter_builder_configs
+        )
 
         self._kwargs = kwargs
 
@@ -124,6 +140,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     @property
     def condition(self) -> Optional[str]:
         return self._condition
+
+    @property
+    def validation_parameter_builder_configs(
+        self,
+    ) -> Optional[List[ParameterBuilderConfig]]:
+        return self._validation_parameter_builder_configs
 
     @property
     def kwargs(self) -> dict:
@@ -252,9 +274,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(substituted_term_list):
-            if (not any([isinstance(t, ParseResults) for t in token])) and len(
-                token
-            ) > 1:
+            if (not any(isinstance(t, ParseResults) for t in token)) and len(token) > 1:
                 substituted_term_list[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
                 self._build_binary_list(substituted_term_list=token)
@@ -291,7 +311,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         for idx, token in enumerate(binary_list):
             if (
                 (not isinstance(token, bool))
-                and (not any([isinstance(t, ParseResults) for t in token]))
+                and (not any(isinstance(t, ParseResults) for t in token))
                 and (len(token) > 1)
             ):
                 binary_list[idx] = eval("".join([str(t) for t in token]))
@@ -328,6 +348,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str

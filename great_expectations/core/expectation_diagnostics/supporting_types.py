@@ -1,23 +1,20 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, Union
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    TestData,
-)
+from typing_extensions import TypedDict
+
 from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot
 
-# from pydantic.dataclasses import dataclass
 
-
-class Maturity(Enum):
+class Maturity(str, Enum):
     """The four levels of maturity for features within Great Expectations"""
 
     CONCEPT_ONLY = "CONCEPT_ONLY"
@@ -37,6 +34,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     has_full_test_suite: bool
     manually_reviewed_code: bool
+    problems: List[str] = field(default_factory=list)
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
@@ -120,34 +118,38 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
 
 
 @dataclass
+class ExpectationErrorDiagnostics(SerializableDictDot):
+    error_msg: str
+    stack_trace: str
+    test_title: Optional[str] = None
+    test_backend: Optional[str] = None
+
+
+@dataclass
 class ExpectationTestDiagnostics(SerializableDictDot):
     """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object."""
 
     test_title: str
     backend: str
     test_passed: bool
-    error_message: Union[str, None] = None
-    stack_trace: Union[str, None] = None
+    include_in_gallery: bool
+    validation_result: Optional[ExpectationValidationResult]
+    error_diagnostics: Optional[ExpectationErrorDiagnostics]
 
 
 @dataclass
-class ExpectationErrorDiagnostics(SerializableDictDot):
-    error_msg: str
-    stack_trace: str
+class ExpectationBackendTestResultCounts(SerializableDictDot):
+    """Has each tested backend and the number of passing/failing tests"""
+
+    backend: str
+    num_passed: int
+    num_failed: int
+    failing_names: Optional[List[str]]
 
 
-@dataclass
-class ExecutedExpectationTestCase(SerializableDictDot):
-    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object.
-
-    This may turn out to be the same thing as ExpectationTestDiagnostics.
-    """
-
-    data: TestData
-    test_case: ExpectationTestCase
-    expectation_configuration: ExpectationConfiguration
-    validation_result: ExpectationValidationResult
-    error_diagnostics: ExpectationErrorDiagnostics
+class ExpectationDiagnosticCheckMessageDict(TypedDict):
+    message: str
+    passed: bool
 
 
 @dataclass
@@ -157,9 +159,9 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     message: str
     passed: bool
     doc_url: Optional[str] = None
-    sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
-        default_factory=list
-    )
+    sub_messages: Sequence[
+        ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict
+    ] = field(default_factory=list)
 
 
 @dataclass

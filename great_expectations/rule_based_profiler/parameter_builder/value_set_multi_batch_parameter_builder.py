@@ -1,21 +1,51 @@
-import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+import itertools
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Set,
+    TypeVar,
+    Union,
+)
+
+import numpy as np
+
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    AttributedResolvedMetrics,
-    MetricMultiBatchParameterBuilder,
-    MetricValues,
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,  # noqa: TCH001
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
     ParameterNode,
 )
+from great_expectations.types.attributes import Attributes
+from great_expectations.util import is_ndarray_datetime_dtype
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -37,27 +67,26 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        json_serialize: Union[str, bool] = True,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
+        evaluation_parameter_builder_configs: Optional[
+            List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional[AbstractDataContext] = None,
+    ) -> None:
         """
         Args:
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
@@ -65,10 +94,10 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_domain_kwargs: used in MetricConfiguration
             metric_value_kwargs: used in MetricConfiguration
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
-            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
-            data_context: DataContext
+            evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
+            ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
+            These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -78,63 +107,77 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             enforce_numeric_metric=False,
             replace_nan_with_zero=False,
             reduce_scalar_metric=False,
-            json_serialize=json_serialize,
-            batch_list=batch_list,
-            batch_request=batch_request,
+            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
 
     def _build_parameters(
         self,
-        parameter_container: ParameterContainer,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Tuple[Any, dict]:
+        runtime_configuration: Optional[dict] = None,
+    ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
 
-        return: Tuple containing computed_parameter_value and parameter_computation_details metadata.
+        Returns:
+            Attributes object, containing computed parameter values and parameter computation details metadata.
         """
         # Build the list of unique values for each Batch object.
         super().build_parameters(
-            parameter_container=parameter_container,
             domain=domain,
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
+        metric_values: MetricValues = AttributedResolvedMetrics.get_conditioned_metric_values_from_attributed_metric_values(
+            attributed_metric_values=parameter_node[
+                FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY
+            ]
+        )
+        details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
-        # This should never happen.
-        if not (
-            isinstance(parameter_node.value, list) and len(parameter_node.value) == 1
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({parameter_node.value} found).'
-            )
+        unique_values: set = _get_unique_values_from_nested_collection_of_sets(
+            collection=metric_values  # type: ignore[arg-type] # could be None
+        )
 
-        attributed_resolved_metrics: AttributedResolvedMetrics = parameter_node.value[0]
-        metric_values: MetricValues = attributed_resolved_metrics.metric_values
+        unique_values_as_array: np.ndarray = np.asarray(unique_values)
+        if unique_values_as_array.ndim == 0:
+            unique_values_as_array = np.asarray([unique_values])
 
-        return (
-            _get_unique_values_from_nested_collection_of_sets(collection=metric_values),
-            parameter_node.details,
+        details["parse_strings_as_datetimes"] = datetime_semantic_domain_type(
+            domain=domain
+        ) or is_ndarray_datetime_dtype(
+            data=unique_values_as_array,
+            parse_strings_as_datetimes=False,
+            fuzzy=False,
+        )
+
+        return Attributes(
+            {
+                FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: unique_values,
+                FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
+            }
         )
 
 
+V = TypeVar("V")
+
+
 def _get_unique_values_from_nested_collection_of_sets(
-    collection: Collection[Collection[Set[Any]]],
-) -> Set[Any]:
+    collection: Collection[Collection[Set[V]]],
+) -> Set[V]:
     """Get unique values from a collection of sets e.g. a list of sets.
 
     Args:
@@ -145,18 +188,26 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: List[Set[Any]] = list(itertools.chain.from_iterable(collection))
+    flattened: Union[List[Set[V]], Set[V]] = list(
+        itertools.chain.from_iterable(collection)
+    )
+    element: V
+    if all(isinstance(element, set) for element in flattened):
+        flattened = set().union(*flattened)
 
     """
-    In multi-batch data analysis, values can be empty and missin, resulting in "None" added to set.  However, due to
+    In multi-batch data analysis, values can be empty and missing, resulting in "None" added to set.  However, due to
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
-    unique_values: Set[Any] = set(
-        sorted(
+    unique_values: Set[V] = set(
+        sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(
-                lambda element: element is not None,
-                set().union(*flattened),
+                lambda element: not (
+                    (element is None)
+                    or (isinstance(element, float) and np.isnan(element))
+                ),
+                set(flattened),
             )
         )
     )

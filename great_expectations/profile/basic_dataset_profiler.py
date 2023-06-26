@@ -1,5 +1,6 @@
 import logging
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import (
     DatasetProfiler,
@@ -7,9 +8,8 @@ from great_expectations.profile.base import (
     ProfilerDataType,
 )
 
-try:
-    from sqlalchemy.exc import OperationalError
-except ModuleNotFoundError:
+OperationalError = sqlalchemy.OperationalError
+if not OperationalError:
     OperationalError = RuntimeError
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,6 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
     @classmethod
     def _get_column_type(cls, df, column):
-
         # list of types is used to support pandas and sqlalchemy
         df.set_config_value("interactive_evaluation", True)
         try:
@@ -90,20 +89,20 @@ class BasicDatasetProfilerBase(DatasetProfiler):
 
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = ProfilerCardinality.NONE
-        elif pct_unique == 1.0:
+        elif pct_unique == 1.0:  # noqa: PLR2004
             cardinality = ProfilerCardinality.UNIQUE
-        elif pct_unique > 0.1:
+        elif pct_unique > 0.1:  # noqa: PLR2004
             cardinality = ProfilerCardinality.VERY_MANY
-        elif pct_unique > 0.02:
+        elif pct_unique > 0.02:  # noqa: PLR2004
             cardinality = ProfilerCardinality.MANY
         else:
-            if num_unique == 1:
+            if num_unique == 1:  # noqa: PLR5501
                 cardinality = ProfilerCardinality.ONE
-            elif num_unique == 2:
+            elif num_unique == 2:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.TWO
-            elif num_unique < 60:
+            elif num_unique < 60:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.VERY_FEW
-            elif num_unique < 1000:
+            elif num_unique < 1000:  # noqa: PLR2004
                 cardinality = ProfilerCardinality.FEW
             else:
                 cardinality = ProfilerCardinality.MANY
@@ -124,7 +123,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
     """
 
     @classmethod
-    def _profile(cls, dataset, configuration=None):
+    def _profile(cls, dataset, configuration=None):  # noqa: C901, PLR0912, PLR0915
         df = dataset
 
         df.set_default_expectation_argument("catch_exceptions", True)
@@ -264,8 +263,8 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
 
             elif type_ == ProfilerDataType.STRING:
                 # Check for leading and trailing whitespace.
-                #!!! It would be nice to build additional Expectations here, but
-                #!!! the default logic for remove_expectations prevents us.
+                # !!! It would be nice to build additional Expectations here, but
+                # !!! the default logic for remove_expectations prevents us.
                 df.expect_column_values_to_not_match_regex(column, r"^\s+|\s+$")
 
                 if cardinality == ProfilerCardinality.UNIQUE:
@@ -307,7 +306,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     )
 
             else:
-                if cardinality == ProfilerCardinality.UNIQUE:
+                if cardinality == ProfilerCardinality.UNIQUE:  # noqa: PLR5501
                     df.expect_column_values_to_be_unique(column)
 
                 elif cardinality in [

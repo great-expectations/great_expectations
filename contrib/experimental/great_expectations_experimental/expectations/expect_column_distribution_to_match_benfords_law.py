@@ -1,45 +1,15 @@
-import json
 import math
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-import great_expectations
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
-)
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -66,7 +36,7 @@ def matchFirstDigit(value, digit):
         return 0.0
 
 
-class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
+class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
     """
     MetricProvider tests whether data matches Benford's Law Fraud Detection
     Algorithm.
@@ -137,7 +107,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
         else:
             return True
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -164,7 +134,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
 
     #     return column_median
 
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -231,10 +201,10 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
         return dependencies
 
 
-class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
-    """
-    Tests whether data matches Benford's Law Fraud Detection Algorithm.
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
+    """Expect column distribution to match Benford's Law.
+
+    Tests whether data matches Benford's Law Fraud Detection Algorithm. Uses a Chi-Square Goodness of Fit test with an 80@ p-value.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -290,7 +260,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     "catch_exceptions": False,
     # }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -299,7 +269,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
     #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
     #     """
     #     super().validate_configuration(configuration)
     #     # self.validate_metric_value_between_configuration(configuration=configuration)
@@ -311,15 +281,11 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

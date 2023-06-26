@@ -1,0 +1,6 @@
+--requirement requirements.txt
+--requirement reqs/requirements-dev-spark.txt
+--requirement reqs/requirements-dev-sqlalchemy.txt
+--requirement reqs/requirements-dev-azure.txt
+--requirement reqs/requirements-dev-contrib.txt
+--requirement reqs/requirements-dev-cloud.txt

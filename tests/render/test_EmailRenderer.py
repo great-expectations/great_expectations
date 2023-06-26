@@ -6,7 +6,6 @@ from great_expectations.render.renderer import EmailRenderer
 
 
 def test_EmailRenderer_validation_results_with_datadocs():
-
     validation_result_suite = ExpectationSuiteValidationResult(
         results=[],
         success=True,
@@ -33,7 +32,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
     assert rendered_output == expected_output
 
@@ -45,7 +44,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
     assert rendered_output == expected_output
 
@@ -57,7 +56,7 @@ def test_EmailRenderer_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: x/y/z</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: data_asset_name=x/y/z</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
 
     assert rendered_output == expected_output
@@ -92,7 +91,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
     assert rendered_output == expected_output
 
@@ -104,7 +103,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><p><strong>DataDocs</strong> can be found here: <a href="file:///localsite/index.html">file:///localsite/index.html</a>.</br>(Please copy and paste link into a browser to view)</p><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
     assert rendered_output == expected_output
 
@@ -116,7 +115,7 @@ def test_EmailRenderer_checkpoint_validation_results_with_datadocs():
 
     expected_output = (
         "default: Success 🎉",
-        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html">here</a> how to review validation results in Data Docs</p>',
+        '<p><strong>Batch Validation Status</strong>: Success 🎉</p>\n<p><strong>Expectation suite name</strong>: default</p>\n<p><strong>Data asset name</strong>: test_data_asset</p>\n<p><strong>Run ID</strong>: 2019-09-25T060538.829112Z</p>\n<p><strong>Batch ID</strong>: ()</p>\n<p><strong>Summary</strong>: <strong>0</strong> of <strong>0</strong> expectations were met</p><strong>ERROR</strong>: The email is trying to provide a link to the following DataDocs: `fake_site`, but it is not configured under data_docs_sites in the great_expectations.yml</br><p>Learn <a href="https://docs.greatexpectations.io/docs/terms/data_docs">here</a> how to review validation results in Data Docs</p>',
     )
 
     assert rendered_output == expected_output

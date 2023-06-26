@@ -1,23 +1,33 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import ordinal, substitute_none_for_missing
 
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
-class ExpectColumnToExist(TableExpectation):
+
+class ExpectColumnToExist(BatchExpectation):
     """Expect the specified column to exist.
 
-    expect_column_to_exist is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_column_to_exist is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Args:
         column (str): \
@@ -28,24 +38,21 @@ class ExpectColumnToExist(TableExpectation):
             If not None, checks the order of the columns. The expectation will fail if the \
             column is not in location column_index (zero-indexed).
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without modification. \
-            For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -73,22 +80,30 @@ class ExpectColumnToExist(TableExpectation):
     }
     args_keys = ("column", "column_index")
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_to_exist` it is required that the `configuration.kwargs` contain a `column` key that is a
+        string (the name of the column). Also, if `configuration.kwargs` contains `column_index`, then `column_index`
+        must be an `int` or `dict`; if a `dict`, then `column_index` must contain the `$PARAMETER` key.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
 
         # Ensuring that a proper value has been provided
         try:
@@ -99,72 +114,61 @@ class ExpectColumnToExist(TableExpectation):
             assert (
                 isinstance(configuration.kwargs.get("column_index"), (int, dict))
                 or configuration.kwargs.get("column_index") is None
-            ), "column_index must be an integer or None"
+            ), "column_index must be an integer, dict, or None"
             if isinstance(configuration.kwargs.get("column_index"), dict):
                 assert "$PARAMETER" in configuration.kwargs.get(
                     "column_index"
                 ), 'Evaluation Parameter dict for column_index kwarg must have "$PARAMETER" key.'
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-        return True
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("column_index", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "column_index"],
-        )
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["column_index"] is None:
-            if include_column_name:
+        params = renderer_configuration.params
+
+        if not params.column_index:
+            if renderer_configuration.include_column_name:
                 template_str = "$column is a required field."
             else:
                 template_str = "is a required field."
         else:
-            params["column_indexth"] = ordinal(params["column_index"])
-            if include_column_name:
+            renderer_configuration.add_param(
+                name="column_indexth",
+                param_type=RendererValueType.STRING,
+                value=ordinal(params.column_index.value),
+            )
+            if renderer_configuration.include_column_name:
                 template_str = "$column must be the $column_indexth field."
             else:
                 template_str = "must be the $column_indexth field."
 
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "column_index": {
-                "schema": {"type": "number"},
-                "value": params.get("column_index"),
-            },
-        }
+        renderer_configuration.template_str = template_str
 
-        return (template_str, params_with_json_schema, styling)
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
@@ -201,8 +205,8 @@ class ExpectColumnToExist(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         actual_columns = metrics.get("table.columns")
         expected_column_name = self.get_success_kwargs().get("column")

@@ -1,24 +1,27 @@
+from __future__ import annotations
+
 import logging
-import warnings
-from typing import Optional, Union
-from uuid import UUID
+from typing import TYPE_CHECKING, Optional, Union
 
-from dateutil.parser import parse
+from marshmallow import Schema, fields, post_load
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
-from great_expectations.exceptions import DataContextError, InvalidDataContextKeyError
-from great_expectations.marshmallow__shade import Schema, fields, post_load
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
 logger = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):
-    def __init__(self, expectation_suite_name: str):
+    def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
-            raise InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
             )
         self._expectation_suite_name = expectation_suite_name
@@ -60,8 +63,8 @@ class BatchIdentifier(DataContextKey):
     def __init__(
         self,
         batch_identifier: Union[BatchKwargs, dict, str],
-        data_asset_name: str = None,
-    ):
+        data_asset_name: Optional[str] = None,
+    ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
         #     self._batch_identifier = batch_identifier.batch_fingerprint
@@ -95,12 +98,11 @@ class BatchIdentifierSchema(Schema):
         return BatchIdentifier(**data)
 
 
+@public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
-    and run_id.
-    """
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
 
-    def __init__(self, expectation_suite_identifier, run_id, batch_identifier):
+    def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
 
         Args:
@@ -110,20 +112,7 @@ class ValidationResultIdentifier(DataContextKey):
         """
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
-        if isinstance(run_id, str):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                run_time = None
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif run_id is None:
             run_id = RunIdentifier()
@@ -183,7 +172,7 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Unable to construct ValidationResultIdentifier from provided object."
             )
         return cls(
@@ -195,45 +184,217 @@ class ValidationResultIdentifier(DataContextKey):
         )
 
 
-class GeCloudIdentifier(DataContextKey):
-    def __init__(self, resource_type: str, ge_cloud_id: Optional[str] = None):
+class MetricIdentifier(DataContextKey):
+    """A MetricIdentifier serves as a key to store and retrieve Metrics."""
+
+    def __init__(self, metric_name, metric_kwargs_id) -> None:
+        self._metric_name = metric_name
+        self._metric_kwargs_id = metric_kwargs_id
+
+    @property
+    def metric_name(self):
+        return self._metric_name
+
+    @property
+    def metric_kwargs_id(self):
+        return self._metric_kwargs_id
+
+    def to_fixed_length_tuple(self):
+        return self.to_tuple()
+
+    def to_tuple(self):
+        if self._metric_kwargs_id is None:
+            tuple_metric_kwargs_id = "__"
+        else:
+            tuple_metric_kwargs_id = self._metric_kwargs_id
+        return tuple(
+            (self.metric_name, tuple_metric_kwargs_id)
+        )  # We use the placeholder in to_tuple
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        if tuple_[-1] == "__":
+            return cls(*tuple_[:-1], None)
+        return cls(*tuple_)
+
+
+class ValidationMetricIdentifier(MetricIdentifier):
+    def __init__(  # noqa: PLR0913
+        self,
+        run_id,
+        data_asset_name,
+        expectation_suite_identifier,
+        metric_name,
+        metric_kwargs_id,
+    ) -> None:
+        super().__init__(metric_name, metric_kwargs_id)
+        if not isinstance(expectation_suite_identifier, ExpectationSuiteIdentifier):
+            expectation_suite_identifier = ExpectationSuiteIdentifier(
+                expectation_suite_name=expectation_suite_identifier
+            )
+
+        if isinstance(run_id, dict):
+            run_id = RunIdentifier(**run_id)
+        elif run_id is None:
+            run_id = RunIdentifier()
+        elif not isinstance(run_id, RunIdentifier):
+            run_id = RunIdentifier(run_name=str(run_id))
+
+        self._run_id = run_id
+        self._data_asset_name = data_asset_name
+        self._expectation_suite_identifier = expectation_suite_identifier
+
+    @property
+    def run_id(self):
+        return self._run_id
+
+    @property
+    def data_asset_name(self):
+        return self._data_asset_name
+
+    @property
+    def expectation_suite_identifier(self):
+        return self._expectation_suite_identifier
+
+    def to_tuple(self):
+        if self.data_asset_name is None:
+            tuple_data_asset_name = "__"
+        else:
+            tuple_data_asset_name = self.data_asset_name
+        return tuple(
+            list(self.run_id.to_tuple())
+            + [tuple_data_asset_name]
+            + list(self.expectation_suite_identifier.to_tuple())
+            + [self.metric_name, self.metric_kwargs_id or "__"]
+        )
+
+    def to_fixed_length_tuple(self):
+        if self.data_asset_name is None:
+            tuple_data_asset_name = "__"
+        else:
+            tuple_data_asset_name = self.data_asset_name
+        return tuple(
+            list(self.run_id.to_tuple())
+            + [tuple_data_asset_name]
+            + list(self.expectation_suite_identifier.to_fixed_length_tuple())
+            + [self.metric_name, self.metric_kwargs_id or "__"]
+        )
+
+    def to_evaluation_parameter_urn(self):
+        if self._metric_kwargs_id is None:
+            return "urn:great_expectations:validations:" + ":".join(
+                list(self.expectation_suite_identifier.to_fixed_length_tuple())
+                + [self.metric_name]
+            )
+        else:
+            return "urn:great_expectations:validations:" + ":".join(
+                list(self.expectation_suite_identifier.to_fixed_length_tuple())
+                + [self.metric_name, self._metric_kwargs_id]
+            )
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        if len(tuple_) < 6:  # noqa: PLR2004
+            raise gx_exceptions.GreatExpectationsError(
+                "ValidationMetricIdentifier tuple must have at least six components."
+            )
+        if tuple_[2] == "__":
+            tuple_data_asset_name = None
+        else:
+            tuple_data_asset_name = tuple_[2]
+        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        return cls(
+            run_id=RunIdentifier.from_tuple((tuple_[0], tuple_[1])),
+            data_asset_name=tuple_data_asset_name,
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_tuple(
+                tuple_[3:-2]
+            ),
+            metric_name=metric_id.metric_name,
+            metric_kwargs_id=metric_id.metric_kwargs_id,
+        )
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        if len(tuple_) != 6:  # noqa: PLR2004
+            raise gx_exceptions.GreatExpectationsError(
+                "ValidationMetricIdentifier fixed length tuple must have exactly six "
+                "components."
+            )
+        if tuple_[2] == "__":
+            tuple_data_asset_name = None
+        else:
+            tuple_data_asset_name = tuple_[2]
+        metric_id = MetricIdentifier.from_tuple(tuple_[-2:])
+        return cls(
+            run_id=RunIdentifier.from_fixed_length_tuple((tuple_[0], tuple_[1])),
+            data_asset_name=tuple_data_asset_name,
+            expectation_suite_identifier=ExpectationSuiteIdentifier.from_fixed_length_tuple(
+                tuple((tuple_[3],))
+            ),
+            metric_name=metric_id.metric_name,
+            metric_kwargs_id=metric_id.metric_kwargs_id,
+        )
+
+
+class GXCloudIdentifier(DataContextKey):
+    def __init__(
+        self,
+        resource_type: GXCloudRESTResource,
+        id: str | None = None,
+        resource_name: str | None = None,
+    ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._ge_cloud_id = ge_cloud_id if ge_cloud_id is not None else ""
+        self._id = id
+        self._resource_name = resource_name
 
     @property
-    def resource_type(self):
+    def resource_type(self) -> GXCloudRESTResource:
         return self._resource_type
 
     @resource_type.setter
-    def resource_type(self, value):
+    def resource_type(self, value: GXCloudRESTResource) -> None:
         self._resource_type = value
 
     @property
-    def ge_cloud_id(self):
-        return self._ge_cloud_id
+    def id(self) -> str | None:
+        return self._id
 
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value):
-        self._ge_cloud_id = value
+    @id.setter
+    def id(self, value: str) -> None:
+        self._id = value
+
+    @property
+    def resource_name(self) -> str | None:
+        return self._resource_name
 
     def to_tuple(self):
-        return (self.resource_type, self.ge_cloud_id)
+        return (self.resource_type, self.id, self.resource_name)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
 
     @classmethod
     def from_tuple(cls, tuple_):
-        return cls(resource_type=tuple_[0], ge_cloud_id=tuple_[1])
+        # Only add resource name if it exists in the tuple_
+        if len(tuple_) == 3:  # noqa: PLR2004
+            return cls(resource_type=tuple_[0], id=tuple_[1], resource_name=tuple_[2])
+        return cls(resource_type=tuple_[0], id=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}::{self.resource_type}::{self.ge_cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.id}"
+        if self.resource_name:
+            repr += f"::{self.resource_name}"
+        return repr
 
 
 class ValidationResultIdentifierSchema(Schema):
@@ -260,7 +421,7 @@ class ValidationResultIdentifierSchema(Schema):
 
 
 class SiteSectionIdentifier(DataContextKey):
-    def __init__(self, site_section_name, resource_identifier):
+    def __init__(self, site_section_name, resource_identifier) -> None:
         self._site_section_name = site_section_name
         if site_section_name in ["validations", "profiling"]:
             if isinstance(resource_identifier, ValidationResultIdentifier):
@@ -275,17 +436,17 @@ class SiteSectionIdentifier(DataContextKey):
                 )
         elif site_section_name == "expectations":
             if isinstance(resource_identifier, ExpectationSuiteIdentifier):
-                self._resource_identifier = resource_identifier
+                self._resource_identifier = resource_identifier  # type: ignore[assignment]
             elif isinstance(resource_identifier, (tuple, list)):
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     *resource_identifier
                 )
             else:
-                self._resource_identifier = ExpectationSuiteIdentifier(
+                self._resource_identifier = ExpectationSuiteIdentifier(  # type: ignore[assignment]
                     **resource_identifier
                 )
         else:
-            raise InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -316,18 +477,16 @@ class SiteSectionIdentifier(DataContextKey):
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
-            raise InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: Union[str, UUID]):
+    def __init__(self, configuration_key: str) -> None:
         super().__init__()
-        if isinstance(configuration_key, UUID):
-            configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
-            raise InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
         self._configuration_key = configuration_key

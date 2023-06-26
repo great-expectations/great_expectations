@@ -2,7 +2,7 @@ import warnings
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -14,10 +14,10 @@ def test_autoinspect_filedata_asset():
     # Expect an error to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter("always", UserWarning)
     file_path = file_relative_path(__file__, "../test_sets/toy_data_complete.csv")
-    my_file_data = ge.data_asset.FileDataAsset(file_path)
+    my_file_data = gx.data_asset.FileDataAsset(file_path)
 
-    with pytest.raises(ge.exceptions.GreatExpectationsError) as exc:
-        my_file_data.profile(ge.profile.ColumnsExistProfiler)
+    with pytest.raises(gx.exceptions.GreatExpectationsError) as exc:
+        my_file_data.profile(gx.profile.ColumnsExistProfiler)
     assert "Invalid data_asset for profiler; aborting" in exc.value.message
 
     # with warnings.catch_warnings(record=True):
@@ -33,7 +33,7 @@ def test_expectation_suite_filedata_asset():
     file_path = file_relative_path(__file__, "../test_sets/toy_data_complete.csv")
 
     # Create FileDataAsset objects
-    f_dat = ge.data_asset.FileDataAsset(file_path)
+    f_dat = gx.data_asset.FileDataAsset(file_path)
 
     # Set up expectations
     f_dat.expect_file_line_regex_match_count_to_equal(
@@ -108,11 +108,11 @@ def test_file_format_map_output():
     incomplete_file_path = file_relative_path(
         __file__, "../test_sets/toy_data_incomplete.csv"
     )
-    incomplete_file_dat = ge.data_asset.FileDataAsset(incomplete_file_path)
+    incomplete_file_dat = gx.data_asset.FileDataAsset(incomplete_file_path)
     null_file_path = file_relative_path(__file__, "../test_sets/null_file.csv")
-    null_file_dat = ge.data_asset.FileDataAsset(null_file_path)
+    null_file_dat = gx.data_asset.FileDataAsset(null_file_path)
     white_space_path = file_relative_path(__file__, "../test_sets/white_space.txt")
-    white_space_dat = ge.data_asset.FileDataAsset(white_space_path)
+    white_space_dat = gx.data_asset.FileDataAsset(white_space_path)
 
     # Boolean Expectation Output
     expectation = incomplete_file_dat.expect_file_line_regex_match_count_to_equal(

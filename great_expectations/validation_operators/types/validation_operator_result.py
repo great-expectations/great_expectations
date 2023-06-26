@@ -2,6 +2,8 @@ import json
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
+from marshmallow import Schema, fields, post_load, pre_dump
+
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -11,7 +13,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.types import DictDot
 
 
@@ -34,7 +35,7 @@ class ValidationOperatorResult(DictDot):
     }
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         run_id: RunIdentifier,
         run_results: Dict[
@@ -42,7 +43,7 @@ class ValidationOperatorResult(DictDot):
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         validation_operator_config: dict,
-        evaluation_parameters: dict = None,
+        evaluation_parameters: Optional[dict] = None,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -51,10 +52,8 @@ class ValidationOperatorResult(DictDot):
         self._validation_operator_config = validation_operator_config
         if success is None:
             self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in run_results.values()
-                ]
+                run_result["validation_result"].success
+                for run_result in run_results.values()
             )
         else:
             self._success = success
@@ -193,7 +192,7 @@ class ValidationOperatorResult(DictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: str = None
+        self, group_by: Optional[str] = None
     ) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:

@@ -1,6 +1,8 @@
 import logging
 from typing import List, Optional
 
+from great_expectations.compatibility import google
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -12,28 +14,10 @@ from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
-try:
-    from google.cloud import storage
-    from google.oauth2 import service_account
-except ImportError:
-    storage = None
-    service_account = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
-    )
 
-
+@public_api
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS
-
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, splitting and sampling, or other techniques appropriate
-    for obtaining batches of data.
-
-    The ConfiguredAssetGCSDataConnector is one of two classes (InferredAssetGCSDataConnector being the
-    other one) designed for connecting to data on GCS.
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS.
 
     A ConfiguredAssetGCSDataConnector requires an explicit specification of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
@@ -45,12 +29,22 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         2. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_file
         3. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_info
 
-    As much of the interaction with the SDK is done through a GCS Storage Client, please refer to the official
-    docs if a greater understanding of the supported authentication methods and general functionality is desired.
-    Source: https://googleapis.dev/python/google-api-core/latest/auth.html
+    Args:
+        name (str): required name for DataConnector
+        datasource_name (str): required name for datasource
+        bucket_or_name (str): bucket name for Google Cloud Storage
+        assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+        execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+        default_regex (dict): optional regex configuration for filtering data_references
+        sorters (list): optional list of sorters for sorting data_references
+        prefix (str): GCS prefix
+        delimiter (str): GCS delimiter
+        max_results (int): max blob filepaths to return
+        gcs_options (dict): wrapper object for optional GCS `**kwargs`
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         datasource_name: str,
@@ -64,28 +58,13 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         max_results: Optional[int] = None,
         gcs_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
-    ):
-        """
-        ConfiguredAssetDataConnector for connecting to GCS.
-
-        Args:
-            name (str): required name for DataConnector
-            datasource_name (str): required name for datasource
-            bucket_or_name (str): bucket name for Google Cloud Storage
-            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-            default_regex (dict): optional regex configuration for filtering data_references
-            sorters (list): optional list of sorters for sorting data_references
-            prefix (str): GCS prefix
-            delimiter (str): GCS delimiter
-            max_results (int): max blob filepaths to return
-            gcs_options (dict): wrapper object for optional GCS **kwargs
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
+        id: Optional[str] = None,
+    ) -> None:
         logger.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             assets=assets,
@@ -93,28 +72,32 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             sorters=sorters,
             batch_spec_passthrough=batch_spec_passthrough,
         )
+        if gcs_options is None:
+            gcs_options = {}
+
         self._bucket_or_name = bucket_or_name
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
 
-        if gcs_options is None:
-            gcs_options = {}
-
         try:
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google.service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google.service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError):
+            self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."
             )
@@ -155,7 +138,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         path_list: List[str] = [
             key
             for key in list_gcs_keys(
-                gcs=self._gcs,
+                gcs_client=self._gcs,
                 query_options=query_options,
                 recursive=False,
             )
@@ -171,7 +154,4 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

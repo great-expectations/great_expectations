@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_in_set",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_in_set_1",
     "data" : {
       "x" : [1,2,4],
       "y" : [1.1,2.2,5.5],
@@ -40,7 +41,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0],
+          "unexpected_index_list":[{"x": 1, "pk_index": 0}],
           "unexpected_list": [1]
         }
       },
@@ -53,7 +54,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1, 2],
+          "unexpected_index_list": [{"x": 1, "pk_index": 0}, {"x": 2, "pk_index": 1}, {"x": 4, "pk_index": 2}],
           "unexpected_list": [1, 2, 4]
         }
       },
@@ -77,7 +78,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [2],
+          "unexpected_index_list": [{"z": "mello", "pk_index": 2}],
           "unexpected_list": ["mello"]
         }
       },
@@ -90,7 +91,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1, 2],
+          "unexpected_index_list": [{"x": 1, "pk_index": 0}, {"x": 2, "pk_index": 1}, {"x": 4, "pk_index": 2}],
           "unexpected_list": [1, 2, 4]
         }
       },
@@ -114,7 +115,7 @@
         },
         "out": {
           "success": false,
-          "unexpected_index_list": [0, 1, 2],
+          "unexpected_index_list": [{"y": 1.1, "pk_index": 0}, {"y": 2.2, "pk_index": 1}, {"y": 5.5, "pk_index": 2}],
           "unexpected_list": [1.1, 2.2, 5.5]
         }
       },
@@ -148,7 +149,7 @@
       },
       "out": {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [{"z": "hello", "pk_index": 0}],
         "unexpected_list": ["hello"]
       }
     },
@@ -169,6 +170,7 @@
     }
     ]},
     {
+      "dataset_name": "expect_column_values_to_be_in_set_2",
       "data": {
         "empty_column": []
       },
@@ -181,6 +183,12 @@
         },
         "bigquery": {
           "empty_column": "STRING"
+        },
+        "redshift": {
+          "empty_column": "VARCHAR"
+        },
+        "trino": {
+          "empty_column": "VARCHAR"
         }
       },
       "tests": [{
@@ -197,6 +205,7 @@
       }]
   },
   {
+    "dataset_name": "expect_column_values_to_be_in_set_3",
     "data" : {
       "dates" : ["2018-01-01", "2018-01-02", "2018-01-02 00:34:01"]
     },
@@ -215,6 +224,12 @@
       },
       "mssql": {
         "dates": "DATETIME"
+      },
+      "redshift": {
+        "dates": "TIMESTAMP"
+      },
+      "snowflake": {
+        "dates": "TIMESTAMP_NTZ"
       }
     },
     "tests" : [
@@ -233,7 +248,23 @@
     },
     {
       "title": "basic_negative_test_case_datetime_set",
-      "suppress_test_for": ["sqlite", "bigquery"],
+      "suppress_test_for": ["sqlite", "bigquery", "spark", "trino"],
+      "exact_match_out": false,
+      "in": {
+        "column": "dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [{"dates": "2018-01-01T00:00:00", "pk_index": 0}],
+        "unexpected_list": ["2018-01-01T00:00:00"]
+      }
+    },
+    {
+      "title": "basic_negative_test_case_datetime_set_spark",
+      "only_for": ["spark"],
+      "suppress_test_for": ["spark_v2_api"],
       "exact_match_out": false,
       "in": {
         "column": "dates",
@@ -243,7 +274,22 @@
       "out": {
         "success": false,
         "unexpected_index_list": [0],
-        "unexpected_list": ["2018-01-01T00:00:00"]
+        "unexpected_list": ["2018-01-01"]
+      }
+    },
+    {
+      "title": "basic_negative_test_case_datetime_set_trino",
+      "only_for": ["trino"],
+      "exact_match_out": false,
+      "in": {
+        "column": "dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["2018-01-01"]
       }
     },
     {
@@ -257,7 +303,12 @@
       },
       "out": {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [
+          {
+            "pk_index": 0,
+            "dates": "2018-01-01"
+          }
+        ],
         "unexpected_list": ["2018-01-01"]
       }
     }

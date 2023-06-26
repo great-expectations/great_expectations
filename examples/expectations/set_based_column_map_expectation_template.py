@@ -1,15 +1,14 @@
 """
 This is a template for creating custom SetBasedColumnMapExpectations.
 For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_seet_based_column_map_expectations
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
 """
 
-from great_expectations.expectations.regex_based_column_map_expectation import (
+from great_expectations.expectations.set_based_column_map_expectation import (
     SetBasedColumnMapExpectation,
 )
 
 
-# <snippet>
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
@@ -24,7 +23,7 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     # They will also be executed as unit tests for your Expectation.
     examples = []
 
-    # Here your regex is used to create a custom metric for this expectation
+    # Here your set is used to create a custom metric for this expectation
     map_metric = SetBasedColumnMapExpectation.register_metric(
         set_camel_name=set_camel_name,
         set_=set_,
@@ -39,6 +38,5 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToBeInSomeSet().print_diagnostic_checklist()

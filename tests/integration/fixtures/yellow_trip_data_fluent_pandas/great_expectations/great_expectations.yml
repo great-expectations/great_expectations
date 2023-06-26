@@ -1,0 +1,74 @@
+config_version: 3.0
+datasources: {}
+config_variables_file_path: uncommitted/config_variables.yml
+plugins_directory: plugins/
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
+      base_directory: checkpoints/
+  profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
+      base_directory: profilers/
+expectations_store_name: expectations_store
+validations_store_name: validations_store
+evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+  new_site_name:
+    class_name: SiteBuilder
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+notebooks:
+include_rendered_content:
+  expectation_validation_result: false
+  globally: false
+  expectation_suite: false
+fluent_datasources:
+  taxi_datasource:
+    type: pandas_filesystem
+    assets:
+      yellow_tripdata:
+        type: csv
+        order_by:
+          - key: year
+            reverse: true
+          - key: month
+            reverse: false
+        batching_regex: yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv
+    base_directory: data
+  taxi_frame_source:
+    type: pandas
+    assets:
+      taxi_file_asset:
+        type: csv
+        filepath_or_buffer: data/yellow_tripdata_sample_2019-01.csv

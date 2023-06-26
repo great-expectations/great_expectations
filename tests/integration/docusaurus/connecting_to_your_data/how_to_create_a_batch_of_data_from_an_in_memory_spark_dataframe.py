@@ -1,29 +1,36 @@
-import pyspark
-from ruamel import yaml
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py imports">
+from great_expectations.compatibility import pyspark
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.validator.validator import Validator
 
-context: DataContext = ge.get_context()
+yaml = YAMLHandler()
+# </snippet>
 
-yaml = yaml.YAML(typ="safe")
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context">
+context: DataContext = gx.get_context()
+# </snippet>
 
-spark_session: pyspark.sql.session.SparkSession = (
-    ge.core.util.get_or_create_spark_application()
-)
+spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_application()
 
 # create and load Expectation Suite
-context.create_expectation_suite(
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py create_expectation_suite">
+context.add_expectation_suite(
     expectation_suite_name="insert_your_expectation_suite_name_here"
 )
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_expectation_suite">
 suite: ExpectationSuite = context.get_expectation_suite(
     expectation_suite_name="insert_your_expectation_suite_name_here"
 )
-
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py datasource_yaml">
 datasource_yaml = f"""
 name: my_spark_datasource
 class_name: Datasource
@@ -38,18 +45,22 @@ data_connectors:
             - some_key_maybe_pipeline_stage
             - some_other_key_maybe_airflow_run_id
 """
-
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
-
+# </snippet>
 # RuntimeBatchRequest with batch_data as Spark Dataframe
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py path_to_file">
 path_to_file: str = "some_path.csv"
-
+# </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 path_to_file: str = file_relative_path(
     __file__, "data/yellow_tripdata_sample_2019-01.csv"
 )
-
-df: pyspark.sql.dataframe.DataFrame = spark_session.read.csv(path_to_file)
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py pyspark_df">
+df: pyspark.DataFrame = spark_session.read.csv(path_to_file)
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request">
 runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_spark_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -60,6 +71,7 @@ runtime_batch_request = RuntimeBatchRequest(
         "some_other_key_maybe_airflow_run_id": "run 18",
     },
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 path_to_file: str = file_relative_path(
@@ -67,6 +79,7 @@ path_to_file: str = file_relative_path(
 )
 
 # RuntimeBatchRequest with path
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request_2">
 runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_spark_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -77,16 +90,19 @@ runtime_batch_request = RuntimeBatchRequest(
         "some_other_key_maybe_airflow_run_id": "run 18",
     },
 )
-
+# </snippet>
 # Constructing Validator by passing in RuntimeBatchRequest
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_validator">
 my_validator: Validator = context.get_validator(
     batch_request=runtime_batch_request,
     expectation_suite=suite,  # OR
     # expectation_suite_name=suite_name
 )
+# </snippet>
 my_validator.head()
 
 # Constructing Validator by passing in arguments
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_validator_2">
 my_validator: Validator = context.get_validator(
     datasource_name="my_spark_datasource",
     data_connector_name="my_runtime_data_connector",
@@ -103,4 +119,7 @@ my_validator: Validator = context.get_validator(
     expectation_suite=suite,  # OR
     # expectation_suite_name=suite_name
 )
+# </snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py validator_head">
 my_validator.head()
+# </snippet>

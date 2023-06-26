@@ -1,0 +1,19 @@
+boto3>=1.17.106
+flask>=1.0.0 # for s3 test only (with moto)
+freezegun>=0.3.15
+ipykernel<=6.17.1 # Newest version (6.19.0 released on 12/7/2022) causes "WARNING  traitlets:client.py:1181 No handler found for comm target 'comm'" by "https://github.com/jupyter/nbclient/blob/main/nbclient/client.py" (version 0.7.2) to be emitted.
+moto>=2.0.0,<3.0.0
+nbconvert>=5
+pyfakefs>=4.5.1
+pytest>=6.2.0
+pytest-benchmark>=3.4.1
+pytest-cov>=2.8.1
+pytest-icdiff>=0.6
+pytest-mock>=3.8.2
+pytest-order>=0.9.5
+pytest-random-order>=1.0.4
+pytest-timeout>=2.1.0
+requirements-parser>=0.2.0
+responses>=0.23.1 # requests mocking
+snapshottest==0.6.0 # GX Cloud atomic renderer tests
+sqlalchemy>=1.4.0

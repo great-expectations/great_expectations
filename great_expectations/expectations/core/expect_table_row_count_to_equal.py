@@ -1,53 +1,55 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
+    render_evaluation_parameter_string,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import (
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
 )
+from great_expectations.render.util import substitute_none_for_missing
 
 
-class ExpectTableRowCountToEqual(TableExpectation):
+class ExpectTableRowCountToEqual(BatchExpectation):
     """Expect the number of rows to equal a value.
 
-    expect_table_row_count_to_equal is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_row_count_to_equal is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Args:
         value (int): \
             The expected number of rows.
 
     Other Parameters:
-        result_format (string or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        expect_table_row_count_to_be_between
+        [expect_table_row_count_to_be_between](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
     """
 
     library_metadata = {
@@ -72,24 +74,35 @@ class ExpectTableRowCountToEqual(TableExpectation):
     }
     args_keys = ("value",)
 
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
-    ) -> bool:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ) -> None:
+        """Validate the configuration of an Expectation.
+
+        For `expect_table_row_count_to_equal` we require that the `configuraton.kwargs` contain
+        a `value` key that is either an `int` or a `dict` with an Evaluation Parameter.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required
+                by the Expectation.
         """
 
         # Setting up a configuration
         super().validate_configuration(configuration)
 
-        value = configuration.kwargs.get("value")
+        value: Optional[int] = (
+            configuration.kwargs.get("value")
+            if configuration and configuration.kwargs
+            else None
+        )
 
         try:
             assert value is not None, "An expected row count must be provided"
@@ -104,99 +117,44 @@ class ExpectTableRowCountToEqual(TableExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-        return True
-
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="value", param_type=RendererValueType.NUMBER
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value", "row_condition", "condition_parser"],
-        )
-        params_with_json_schema = {
-            "value": {
-                "schema": {"type": "number"},
-                "value": params.get("value"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
-        template_str = "Must have exactly $value rows."
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params_with_json_schema.update(conditional_params)
-
-        return (template_str, params_with_json_schema, styling)
+        renderer_configuration.template_str = "Must have exactly $value rows."
+        return renderer_configuration
 
     @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
+    @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> List[RenderedStringTemplateContent]:
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["value", "row_condition", "condition_parser"],
+            renderer_configuration.kwargs,
+            ["value"],
         )
         template_str = "Must have exactly $value rows."
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
+        styling = (
+            runtime_configuration.get("styling", {}) if runtime_configuration else {}
+        )
 
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
@@ -211,8 +169,8 @@ class ExpectTableRowCountToEqual(TableExpectation):
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+        runtime_configuration: Optional[dict] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
     ):
         expected_table_row_count = self.get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")

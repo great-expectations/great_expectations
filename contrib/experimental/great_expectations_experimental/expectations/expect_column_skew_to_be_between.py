@@ -1,79 +1,35 @@
-import json
 import logging
 import traceback
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import numpy as np
-import pandas as pd
-import scipy.stats as stats
+from scipy import stats
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_value,
-)
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
-try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
 
-try:
-    from sqlalchemy.engine.row import Row
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy
-
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        RowProxy = None
-        Row = None
-
-
-class ColumnSkew(ColumnMetricProvider):
+class ColumnSkew(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.skew"
@@ -84,6 +40,12 @@ class ColumnSkew(ColumnMetricProvider):
         if abs:
             return np.abs(stats.skew(column))
         return stats.skew(column)
+
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, abs=False, **kwargs):
+        if abs:
+            return F.abs(F.skewness(column))
+        return F.skewness(column)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -104,19 +66,18 @@ class ColumnSkew(ColumnMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
-        dialect = sqlalchemy_engine.dialect
+        dialect = execution_engine.dialect
 
         column_mean = _get_query_result(
             func=sa.func.avg(column * 1.0),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_count = _get_query_result(
             func=sa.func.count(column),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         if dialect.name.lower() == "mssql":
@@ -127,13 +88,13 @@ class ColumnSkew(ColumnMetricProvider):
         column_std = _get_query_result(
             func=standard_deviation,
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_third_moment = _get_query_result(
             func=sa.func.sum(sa.func.pow(column - column_mean, 3)),
             selectable=selectable,
-            sqlalchemy_engine=sqlalchemy_engine,
+            execution_engine=execution_engine,
         )
 
         column_skew = column_third_moment / (column_std**3) / (column_count - 1)
@@ -143,46 +104,23 @@ class ColumnSkew(ColumnMetricProvider):
             return column_skew
 
 
-def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEngine):
+    simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy.Row = execution_engine.execute_query(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe()
+        raise pe
 
-        #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
     # @classmethod
     # def _get_evaluation_dependencies(
     #     cls,
@@ -226,8 +164,8 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
     #     return dependencies
 
 
-class ExpectColumnSkewToBeBetween(ColumnExpectation):
-    """Expect column skew to be between. Currently tests against Gamma and Beta distributions"""
+class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
+    """Expect column skew to be between. Currently tests against Gamma and Beta distributions."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -300,6 +238,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     93.23978285,
                 ],  # sampled from Beta(20, 2)
             },
+            "suppress_test_for": ["sqlite", "mssql"],
             "tests": [
                 {
                     "title": "positive_test_positive_skew",
@@ -352,16 +291,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "out": {"success": True, "observed_value": 0.9979514313860596},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["mysql", "postgresql"],
-                },
-            ],
         }
     ]
 
@@ -375,6 +304,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "@lodeous",
             "@rexboyce",
             "@bragleg",
+            "@mkopec87",
         ],
     }
 
@@ -394,7 +324,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -403,7 +333,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
     #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #         None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
     #     """
     #     super().validate_configuration(configuration)
     #     self.validate_metric_value_between_configuration(configuration=configuration)
@@ -415,15 +345,11 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

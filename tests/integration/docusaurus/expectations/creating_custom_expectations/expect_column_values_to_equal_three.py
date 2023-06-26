@@ -1,55 +1,49 @@
-import json
-from typing import Callable, Dict, Optional
-
-from numpy import array
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationValidationResult,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    metric_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.expectations.metrics.metric_provider import metric_partial
+from great_expectations.render import CollapseContent, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedStringTemplateContent,
-)
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py ColumnValuesEqualThree class_def">
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
+    # </snippet>
 
     # This is the id string that will be used to reference your metric.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py metric_name">
     condition_metric_name = "column_values.equal_three"
+    # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py pandas">
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
+        # </snippet>
 
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_definition">
     @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -63,6 +57,8 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        # </snippet>
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -73,14 +69,18 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
-
+        # </snippet>
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_query">
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
+        # </snippet>
 
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py sqlalchemy">
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return column.in_([3])
+        # </snippet>
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -108,18 +108,21 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
 
         return dependencies
 
 
 # This class defines the Expectation itself
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py ExpectColumnValuesToEqualThree class_def">
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py docstring">
     """Expect values in this column to equal 3."""
-
+    # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py examples">
     examples = [
         {
             "data": {
@@ -148,10 +151,13 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             ],
         }
     ]
+    # </snippet>
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py map_metric">
     map_metric = "column_values.equal_three"
+    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
@@ -167,7 +173,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -198,7 +203,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -300,7 +304,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -366,14 +369,18 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py library_metadata">
     library_metadata = {
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
 if __name__ == "__main__":
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py diagnostics">
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
@@ -381,8 +388,7 @@ diagnostics = ExpectColumnValuesToEqualThree().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None

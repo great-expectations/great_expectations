@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import json
 import logging
@@ -9,14 +11,17 @@ from typing import List, Optional, Union
 
 import requests
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
+    BatchRequestBase,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
     materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointValidationConfig
+from great_expectations.types import DictDot
 
 try:
     import boto3
@@ -34,19 +39,28 @@ def send_slack_notification(
     query = query
     headers = None
 
+    # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
+    # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
+    # ** Since it is legacy, it could be deprecated or removed in the future **
+    if slack_channel:
+        query["channel"] = slack_channel
+
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
-        query["channel"] = slack_channel
 
     try:
         response = session.post(url=url, headers=headers, json=query)
+        if slack_webhook:
+            ok_status = response.text == "ok"
+        else:
+            ok_status = response.json()["ok"]
     except requests.ConnectionError:
         logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200 or not ok_status:  # noqa: PLR2004
             logger.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -69,6 +83,7 @@ def send_opsgenie_alert(query, suite_name, settings):
         "message": f"Great Expectations suite {suite_name} failed",
         "description": query,
         "priority": settings["priority"],  # allow this to be modified in settings
+        "tags": settings["tags"],
     }
 
     session = requests.Session()
@@ -80,7 +95,7 @@ def send_opsgenie_alert(query, suite_name, settings):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 202:
+        if response.status_code != 202:  # noqa: PLR2004
             logger.warning(
                 "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
@@ -100,7 +115,7 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 "Request to Microsoft Teams webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -121,7 +136,7 @@ def send_webhook_notifications(query, webhook, target_platform):
     except Exception as e:
         logger.error(str(e))
     else:
-        if response.status_code != 200:
+        if response.status_code != 200:  # noqa: PLR2004
             logger.warning(
                 f"Request to {target_platform} webhook "
                 f"returned error {response.status_code}: {response.text}"
@@ -131,7 +146,7 @@ def send_webhook_notifications(query, webhook, target_platform):
 
 
 # noinspection SpellCheckingInspection
-def send_email(
+def send_email(  # noqa: PLR0913
     title,
     html,
     smtp_address,
@@ -191,7 +206,7 @@ def get_substituted_validation_dict(
         )
         or substituted_runtime_config.get("expectation_suite_ge_cloud_id"),
         "action_list": get_updated_action_list(
-            base_action_list=substituted_runtime_config.get("action_list"),
+            base_action_list=substituted_runtime_config.get("action_list", []),
             other_action_list=validation_dict.get("action_list", {}),
         ),
         "evaluation_parameters": nested_update(
@@ -204,19 +219,22 @@ def get_substituted_validation_dict(
             validation_dict.get("runtime_configuration", {}),
             dedup=True,
         ),
+        "include_rendered_content": validation_dict.get("include_rendered_content")
+        or substituted_runtime_config.get("include_rendered_content")
+        or None,
     }
-    if validation_dict.get("name") is not None:
-        substituted_validation_dict["name"] = validation_dict["name"]
-    validate_validation_dict(substituted_validation_dict)
+
+    for attr in ("name", "id"):
+        if validation_dict.get(attr) is not None:
+            substituted_validation_dict[attr] = validation_dict[attr]
+
     return substituted_validation_dict
 
 
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest, dict]
-    ] = None,
+    validation_batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -239,7 +257,7 @@ def get_substituted_batch_request(
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None:
-            raise ge_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
 
@@ -247,10 +265,12 @@ def get_substituted_batch_request(
         **substituted_runtime_batch_request, **validation_batch_request
     )
 
-    return materialize_batch_request(batch_request=effective_batch_request)
+    return materialize_batch_request(batch_request=effective_batch_request)  # type: ignore[return-value] # see materialize_batch_request
 
 
-def substitute_template_config(source_config: dict, template_config: dict) -> dict:
+def substitute_template_config(  # noqa: PLR0912
+    source_config: dict, template_config: dict
+) -> dict:
     if not (template_config and any(template_config.values())):
         return source_config
 
@@ -347,8 +367,14 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         batch_request_from_runtime_kwargs = get_batch_request_as_dict(
             batch_request=batch_request_from_runtime_kwargs
         )
+
+        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
+        updated_batch_request = copy.deepcopy(batch_request)
+        if batch_request_from_runtime_kwargs and "options" in updated_batch_request:
+            updated_batch_request["options"] = {}
+
         updated_batch_request = nested_update(
-            batch_request,
+            updated_batch_request,
             batch_request_from_runtime_kwargs,
             dedup=True,
         )
@@ -427,13 +453,14 @@ def get_updated_action_list(
     return list(base_action_list_dict.values())
 
 
-def batch_request_in_validations_contains_batch_data(
+def does_batch_request_in_validations_contain_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:
     if validations is not None:
-        for idx, val in enumerate(validations):
+        for val in validations:
             if (
                 val.get("batch_request") is not None
+                and isinstance(val.get("batch_request"), (dict, DictDot))
                 and val["batch_request"].get("runtime_parameters") is not None
                 and val["batch_request"]["runtime_parameters"].get("batch_data")
                 is not None
@@ -444,48 +471,37 @@ def batch_request_in_validations_contains_batch_data(
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: Optional[list] = None,
-) -> Optional[list]:
-    if validations:
-        for value in validations:
-            if "batch_request" in value:
-                value["batch_request"] = get_batch_request_as_dict(
-                    batch_request=value["batch_request"]
-                )
+    validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+) -> list[dict] | None:
+    if not validations:
+        return None
+
+    validations = [
+        v.to_dict() if isinstance(v, CheckpointValidationConfig) else v
+        for v in validations
+    ]
+    for value in validations:
+        if "batch_request" in value:
+            value["batch_request"] = get_batch_request_as_dict(
+                batch_request=value["batch_request"]
+            )
 
     return validations
 
 
-def validate_validation_dict(validation_dict: dict):
-    if validation_dict.get("batch_request") is None:
-        raise ge_exceptions.CheckpointError("validation batch_request cannot be None")
+def validate_validation_dict(
+    validation_dict: dict, batch_request_required: bool = True
+) -> None:
+    if batch_request_required and validation_dict.get("batch_request") is None:
+        raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
+
     if not validation_dict.get("expectation_suite_name"):
-        raise ge_exceptions.CheckpointError(
+        raise gx_exceptions.CheckpointError(
             "validation expectation_suite_name must be specified"
         )
+
     if not validation_dict.get("action_list"):
-        raise ge_exceptions.CheckpointError("validation action_list cannot be empty")
-
-
-def send_cloud_notification(url: str, headers: dict):
-    """
-    Post a CloudNotificationAction to GE Cloud Backend for processing.
-    """
-    session = requests.Session()
-
-    try:
-        response = session.post(url=url, headers=headers)
-    except requests.ConnectionError:
-        logger.error(f"Failed to connect to Cloud backend after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        if response.status_code != 200:
-            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
-            logger.error(message)
-            return {"cloud_notification_result": message}
-        else:
-            return {"cloud_notification_result": "Cloud notification succeeded."}
+        raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
 def send_sns_notification(
@@ -499,7 +515,7 @@ def send_sns_notification(
     :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
-    :return:  Message ID that was published
+    :return:  Message ID that was published or error message
 
     """
     if not boto3:
@@ -520,6 +536,8 @@ def send_sns_notification(
     try:
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
-        logger.error(f"Received invalid for message: {validation_results}")
+        error_msg = f"Received invalid for message: {validation_results}"
+        logger.error(error_msg)
+        return error_msg
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

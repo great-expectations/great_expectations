@@ -1,9 +1,7 @@
-Using v3 (Batch Request) API[0m
-
-Checking project...[0m
+Checking project...
 
 ================================================================================
-[0m
+
 ++====================================++
 || UpgradeHelperV13: Upgrade Overview ||
 ++====================================++
@@ -23,9 +21,7 @@ The following Stores and/or Store Names will be upgraded:
 Manual Steps
 =============
 
-The following Checkpoints must be upgraded manually, due to using the old Checkpoint format, which is being deprecated:
-
-    - Checkpoints: my_checkpoint, titanic_checkpoint_0, titanic_checkpoint_1, titanic_checkpoint_2
+No manual upgrade steps are required.
 
 Upgrade Confirmation
 =====================
@@ -36,18 +32,17 @@ Please consult the V3 API migration guide for instructions on how to complete an
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
-Upgrading project...[0m
+Upgrading project...
 
 ================================================================================
-[0m
-[36m++================++
-|| Upgrade Report ||
-++================++[0m
 
-[33mThe Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations V3 API, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully.
+++================++
+|| Upgrade Report ||
+++================++
+
+Your project was successfully upgraded to be compatible with Great Expectations V3 API.  The config_version of your great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json[0m[0m
-[33mYour project requires manual upgrade steps in order to be up-to-date.
-[0m[0m
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json
+Your project is up-to-date - no further upgrade is necessary.

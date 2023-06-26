@@ -1,10 +1,9 @@
 # Test File Expectations
 import os
-import platform
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
 
@@ -12,7 +11,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     #####Invalid File Path######
     joke_file_path = "joke.txt"
     assert not os.path.isfile(joke_file_path)
-    joke_dat = ge.data_asset.FileDataAsset(joke_file_path)
+    joke_dat = gx.data_asset.FileDataAsset(joke_file_path)
 
     with pytest.raises(IOError):
         joke_dat.expect_file_line_regex_match_count_to_be_between(
@@ -22,7 +21,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     complete_file_path = file_relative_path(
         __file__, "../test_sets/toy_data_complete.csv"
     )
-    file_dat = ge.data_asset.FileDataAsset(complete_file_path)
+    file_dat = gx.data_asset.FileDataAsset(complete_file_path)
 
     # Invalid Skip Parameter
     with pytest.raises(ValueError):
@@ -92,8 +91,8 @@ def test_expect_file_line_regex_match_count_to_equal():
     incomplete_file_path = file_relative_path(
         __file__, "../test_sets/toy_data_incomplete.csv"
     )
-    file_dat = ge.data_asset.FileDataAsset(complete_file_path)
-    file_incomplete_dat = ge.data_asset.FileDataAsset(incomplete_file_path)
+    file_dat = gx.data_asset.FileDataAsset(complete_file_path)
+    file_incomplete_dat = gx.data_asset.FileDataAsset(incomplete_file_path)
 
     # Invalid Regex Value
     with pytest.raises(ValueError):
@@ -144,14 +143,14 @@ def test_expect_file_line_regex_match_count_to_equal():
 
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
-    fake_file = ge.data_asset.FileDataAsset(file_path="abc")
+    fake_file = gx.data_asset.FileDataAsset(file_path="abc")
 
     with pytest.raises(IOError):
         fake_file.expect_file_hash_to_equal(value="abc")
 
     # Test for non-existent hash algorithm
     titanic_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    titanic_file = ge.data_asset.FileDataAsset(titanic_path)
+    titanic_file = gx.data_asset.FileDataAsset(titanic_path)
 
     with pytest.raises(ValueError):
         titanic_file.expect_file_hash_to_equal(hash_alg="md51", value="abc")
@@ -174,14 +173,14 @@ def test_expect_file_hash_to_equal():
 
 
 def test_expect_file_size_to_be_between():
-    fake_file = ge.data_asset.FileDataAsset("abc")
+    fake_file = gx.data_asset.FileDataAsset("abc")
 
     # Test for non-existent file
     with pytest.raises(OSError):
         fake_file.expect_file_size_to_be_between(0, 10000)
 
     titanic_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    titanic_file = ge.data_asset.FileDataAsset(titanic_path)
+    titanic_file = gx.data_asset.FileDataAsset(titanic_path)
 
     # Test minsize not an integer
     with pytest.raises(ValueError):
@@ -215,12 +214,12 @@ def test_expect_file_size_to_be_between():
 
 def test_expect_file_to_exist():
     # Test for non-existent file
-    fake_file = ge.data_asset.FileDataAsset("abc")
+    fake_file = gx.data_asset.FileDataAsset("abc")
     fake_file_existence = fake_file.expect_file_to_exist()
     assert not fake_file_existence.success
 
     # Test for existing file
-    real_file = ge.data_asset.FileDataAsset(
+    real_file = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/Titanic.csv")
     )
     real_file_existence = real_file.expect_file_to_exist()
@@ -229,12 +228,12 @@ def test_expect_file_to_exist():
 
 def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
-    fake_file = ge.data_asset.FileDataAsset("abc")
+    fake_file = gx.data_asset.FileDataAsset("abc")
     with pytest.raises(IOError):
         fake_file.expect_file_to_have_valid_table_header(regex="")
 
     # Test for non-unique column names
-    invalid_header_dat = ge.data_asset.FileDataAsset(
+    invalid_header_dat = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/same_column_names.csv")
     )
     invalid_header_dat_expectation = (
@@ -243,7 +242,7 @@ def test_expect_file_to_have_valid_table_header():
     assert not invalid_header_dat_expectation.success
 
     # Test for unique column names
-    valid_header_dat = ge.data_asset.FileDataAsset(
+    valid_header_dat = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/Titanic.csv")
     )
     valid_header_dat_expectation = (
@@ -254,19 +253,19 @@ def test_expect_file_to_have_valid_table_header():
 
 def test_expect_file_to_be_valid_json():
     # Test for non-existent file
-    fake_file = ge.data_asset.FileDataAsset("abc")
+    fake_file = gx.data_asset.FileDataAsset("abc")
     with pytest.raises(IOError):
         fake_file.expect_file_to_be_valid_json()
 
     # Test invalid JSON file
-    invalid_JSON_file = ge.data_asset.FileDataAsset(
+    invalid_JSON_file = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/invalid_json_file.json")
     )
     invalid_JSON_expectation = invalid_JSON_file.expect_file_to_be_valid_json()
     assert not invalid_JSON_expectation.success
 
     # Test valid JSON file
-    valid_JSON_file = ge.data_asset.FileDataAsset(
+    valid_JSON_file = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     )
     valid_JSON_expectation = valid_JSON_file.expect_file_to_be_valid_json()
@@ -274,14 +273,14 @@ def test_expect_file_to_be_valid_json():
 
     # Test valid JSON file with non-matching schema
     schema_file = file_relative_path(__file__, "../test_sets/sample_schema.json")
-    test_file = ge.data_asset.FileDataAsset(
+    test_file = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/json_test1_against_schema.json")
     )
     test_file_expectation = test_file.expect_file_to_be_valid_json(schema=schema_file)
     assert not test_file_expectation.success
 
     # Test valid JSON file with valid schema
-    test_file = ge.data_asset.FileDataAsset(
+    test_file = gx.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/json_test2_against_schema.json")
     )
     schema_file = file_relative_path(__file__, "../test_sets/sample_schema.json")

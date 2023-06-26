@@ -35,7 +35,7 @@ We are not asking you to assign copyright to us, but to give us the right to dis
 Release checklist
 -----------------------------------------
 
-GE core team members use this checklist to ship releases.
+GX core team members use this checklist to ship releases.
 
 1. If this is a major release (incrementing either the first or second version number) the manual acceptance testing must be completed.
 
@@ -68,17 +68,17 @@ GE core team members use this checklist to ship releases.
 
   * The deploy step will automatically create a draft for the release.
   * Generally, we use the name of the tag (Ex: "0.11.2") as the release title.
-  
+
 14. Notify kyle@superconductive.com about any community-contributed PRs that should be celebrated.
-15. Socialize the release on GE slack by copying the changelog with an optional nice personal message (thank people if you can)
+15. Socialize the release on GX slack by copying the changelog with an optional nice personal message (thank people if you can)
 16. Review and merge the automatically-generated PR for `conda-forge/great-expectations-feedstock <https://github.com/conda-forge/great-expectations-feedstock/pulls>`__, updating requirements as necessary and verifying the build status.
 
-  * To list requirements changed since a previous version of GE, you can run ``git diff <<old_tag_e.g._0.12.6>>..<<new_tag_e.g._0.12.7>> -- requirements.txt``. If there are differences, update the requirements section of ``recipe/meta.yaml``. This is an important step as this is not done automatically when the PR is generated.
+  * To list requirements changed since a previous version of GX, you can run ``git diff <<old_tag_e.g._0.12.6>>..<<new_tag_e.g._0.12.7>> -- requirements.txt``. If there are differences, update the requirements section of ``recipe/meta.yaml``. This is an important step as this is not done automatically when the PR is generated.
   * In most cases, the PR will change the SHA and version number. Check the commits for other changes, they may be maintenance changes from the Conda dev team which are OK to merge.
   * Review all items on the conda-forge CI system and PR checklist. The active conda-forge community frequently updates build processes and testing, and may help discover issues not observed in our pypi deployment process.
   * If you need to re-run a failing build and don't have appropriate permissions or you don't have permissions to merge please refer to the Account Permissions Overview on the superconductive `internal wikiwiki <https://github.com/superconductive/wiki/wiki>`__ for who to ask. Other conda-forge community partners are extremely responsive and may be able to help resolve issues quickly.
 
-17. Check for open issues in the `GE conda-forge repository <https://github.com/conda-forge/great-expectations-feedstock/issues>`__. If there are open issues that do not have a corresponding issue in the main `GE repo <https://github.com/great-expectations/great_expectations/issues>`__, please create an issue in the GE repo with a link to the corresponding conda issue (e.g. issue `#2021 <https://github.com/great-expectations/great_expectations/issues/2021>`__). This allows us to internally triage and track the issue.
+17. Check for open issues in the `GX conda-forge repository <https://github.com/conda-forge/great-expectations-feedstock/issues>`__. If there are open issues that do not have a corresponding issue in the main `GX repo <https://github.com/great-expectations/great_expectations/issues>`__, please create an issue in the GX repo with a link to the corresponding conda issue (e.g. issue `#2021 <https://github.com/great-expectations/great_expectations/issues/2021>`__). This allows us to internally triage and track the issue.
 18. Celebrate! You have successfully released a new version of Great Expectations!!
 
 Beta Release Notes

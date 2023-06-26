@@ -12,14 +12,20 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
-from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import (
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
+)
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -27,11 +33,10 @@ from great_expectations.datasource import (
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
+from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +48,7 @@ def titanic_data_context_with_sql_datasource(
     titanic_data_context_stats_enabled_config_version_3,
     test_df,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_3
+    context = titanic_data_context_stats_enabled_config_version_3
 
     db_file_path: str = file_relative_path(
         __file__,
@@ -57,10 +62,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql(name="titanic", con=sqlite_engine)
+        add_dataframe_to_db(df=df, name="titanic", con=conn)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql(name="incomplete", con=sqlite_engine)
-        test_df.to_sql(name="wrong", con=sqlite_engine)
+        add_dataframe_to_db(df=df, name="incomplete", con=conn)
+        add_dataframe_to_db(df=test_df, name="wrong", con=conn)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
@@ -128,7 +133,7 @@ def titanic_data_context_with_spark_datasource(
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context: DataContext = DataContext(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
@@ -215,7 +220,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     monkeypatch,
     empty_data_context_stats_enabled,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -223,7 +228,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_checkpoint",
+        "checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -273,7 +278,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -281,7 +286,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_v1_checkpoint",
+        "checkpoint delete my_v1_checkpoint",
         input="\n",
         catch_exceptions=False,
     )
@@ -325,7 +330,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -343,14 +348,14 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        f"--assume-yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -400,7 +405,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -417,7 +422,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -425,7 +430,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint delete my_v1_checkpoint",
+        "checkpoint delete my_v1_checkpoint",
         input="n\n",
         catch_exceptions=False,
     )
@@ -469,7 +474,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -485,7 +490,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 def test_checkpoint_list_with_no_checkpoints(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -493,7 +498,7 @@ def test_checkpoint_list_with_no_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -541,7 +546,7 @@ def test_checkpoint_list_with_single_checkpoint(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -549,7 +554,7 @@ def test_checkpoint_list_with_single_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -600,7 +605,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -608,7 +613,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -674,7 +679,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     What does this test and why?
     The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -682,7 +687,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new my_minimal_simple_checkpoint",
+        "checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -731,13 +736,120 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_no_fluent_datasource_messages(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_block_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should not print warnings/errors if all of the Datasources in the DataContext are configured with the block config style API.
+    """
+    context = data_context_with_block_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 0
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY not in stdout
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES not in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_raises_error_on_fluent_datasources_only(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should raise an error if all of the Datasources in the DataContext are configured with the fluent API.
+    """
+    context = data_context_with_fluent_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 1
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should print a warning if some of the Datasources in the DataContext are configured with the fluent API.
+    """
+    context = data_context_with_fluent_datasource_and_block_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 0
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 6.69s
 def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
     caplog,
     monkeypatch,
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
 ):
     """
@@ -746,7 +858,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
     The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
-    context: DataContext = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
 
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(root_dir))
@@ -762,7 +874,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new passengers",
+        "checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -828,7 +940,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: Checkpoint
+class_name: SimpleCheckpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request: {}
@@ -842,7 +954,6 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names: []
 evaluation_parameters: {}
 runtime_configuration: {}
 validations:
@@ -871,7 +982,7 @@ expectation_suite_ge_cloud_id:
 def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -879,7 +990,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_checkpoint",
+        "checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -937,7 +1048,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -945,7 +1056,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_nested_checkpoint_template_1",
+        "checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1065,9 +1176,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="bar"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -1079,7 +1190,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         "bad_batch.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: bad_batch
     config_version: 1
     class_name: Checkpoint
@@ -1123,7 +1234,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run bad_batch",
+        "checkpoint run bad_batch",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1274,7 +1385,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
     checkpoint_file_path: str = os.path.join(
@@ -1283,7 +1394,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         "no_suite.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1323,7 +1434,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run no_suite",
+        "checkpoint run no_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1389,7 +1500,7 @@ def test_checkpoint_run_on_non_existent_validations(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
     checkpoint_file_path: str = os.path.join(
@@ -1398,7 +1509,7 @@ def test_checkpoint_run_on_non_existent_validations(
         "no_validations.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_base_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1431,14 +1542,14 @@ def test_checkpoint_run_on_non_existent_validations(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run no_validations",
+        "checkpoint run no_validations",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
 
     stdout: str = result.stdout
     assert (
-        'Checkpoint "no_validations" must contain either a batch_request or validations.'
+        'Checkpoint "no_validations" must be called with a validator or contain either a batch_request or validations.'
         in stdout
     )
 
@@ -1486,6 +1597,7 @@ def test_checkpoint_run_on_non_existent_validations(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.48s
 def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     mock_emit,
     caplog,
@@ -1497,7 +1609,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -1510,7 +1622,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1551,7 +1663,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1703,6 +1815,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.44s
 def test_checkpoint_run_happy_path_with_successful_validation_sql(
     mock_emit,
     caplog,
@@ -1714,7 +1827,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -1727,7 +1840,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -1766,7 +1879,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1924,7 +2037,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -1979,7 +2092,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2131,6 +2244,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.52s
 def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     mock_emit,
     caplog,
@@ -2142,7 +2256,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2166,7 +2280,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2206,7 +2320,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2348,6 +2462,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.44s
 def test_checkpoint_run_happy_path_with_failed_validation_sql(
     mock_emit,
     caplog,
@@ -2359,7 +2474,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2372,7 +2487,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2411,7 +2526,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2558,7 +2673,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2615,7 +2730,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2763,6 +2878,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.11s
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas(
     mock_emit,
     caplog,
@@ -2774,7 +2890,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2796,7 +2912,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -2837,7 +2953,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2973,6 +3089,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.05s
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     mock_emit,
     caplog,
@@ -2984,7 +3101,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2999,7 +3116,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3038,7 +3155,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3179,7 +3296,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3244,7 +3361,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3389,7 +3506,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
 def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -3398,7 +3515,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script not_a_checkpoint",
+        "checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3443,12 +3560,12 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
 def test_checkpoint_script_raises_error_if_python_file_exists(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
@@ -3459,7 +3576,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_v1_checkpoint",
+        "checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3504,10 +3621,11 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.34s
 def test_checkpoint_script_happy_path_generates_script_pandas(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -3515,7 +3633,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_v1_checkpoint",
+        "checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3555,7 +3673,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
         ),
     ]
     expected_script: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -3565,6 +3683,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
     )
 
 
+@pytest.mark.slow  # 7.49s
 def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     caplog,
     monkeypatch,
@@ -3585,8 +3704,8 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    suite: ExpectationSuite = context.create_expectation_suite(
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="users.delivery"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -3600,7 +3719,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3640,7 +3759,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3653,7 +3772,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3679,6 +3798,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     assert "Validation succeeded!" in output
 
 
+@pytest.mark.slow  # 7.51s
 def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     caplog,
     monkeypatch,
@@ -3700,7 +3820,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3724,7 +3844,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3764,7 +3884,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3777,7 +3897,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3802,6 +3922,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     assert "Validation failed!" in output
 
 
+@pytest.mark.slow  # 7.69s
 def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas(
     caplog,
     monkeypatch,
@@ -3823,7 +3944,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3845,7 +3966,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         "my_fancy_checkpoint.yml",
     )
 
-    checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = """
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
@@ -3886,7 +4007,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3899,7 +4020,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3928,6 +4049,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
-    yaml_obj: YAML = YAML()
+    yaml_obj = YAMLHandler()
     with open(checkpoint_file_path, "w") as f:
         yaml_obj.dump(config, f)

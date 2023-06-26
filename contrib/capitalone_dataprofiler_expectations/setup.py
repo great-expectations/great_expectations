@@ -1,6 +1,7 @@
 from typing import List
 
 import setuptools
+from setuptools import find_packages
 
 
 def get_requirements() -> List[str]:
@@ -10,7 +11,8 @@ def get_requirements() -> List[str]:
 
 
 setuptools.setup(
-    name="capitalone_dataprofiler_expectations",
+    name="capitalone-dataprofiler-expectations",
     version="0.1.0",
     install_requires=get_requirements(),
+    packages=find_packages(exclude=["assets", "tests"]),
 )

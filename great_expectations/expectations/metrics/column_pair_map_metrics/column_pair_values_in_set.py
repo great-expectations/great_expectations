@@ -3,12 +3,13 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -60,7 +61,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         if value_pairs_set is None:
             # vacuously true
-            return sa.case([(column_A == column_B, True)], else_=True)
+            return sa.case((column_A == column_B, True), else_=True)
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
 

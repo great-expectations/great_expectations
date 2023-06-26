@@ -1,0 +1,42 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import PartIntroForSingleOrMultiBatchConfiguration from '../components/_part_intro_for_single_or_multi_batch_configuration.mdx'
+import PartAssetKeysOverviewInferred from '../filesystem_components/_part_asset_keys_overview_inferred.mdx'
+import PartAssetKeysOverviewConfigured from '../filesystem_components/_part_asset_keys_overview_configured.mdx'
+import PartAssetsConfigured from './_part_assets_configured.mdx'
+import PartAssetsInferred from './_part_assets_inferred.mdx'
+import PartAssetsRuntime from './_part_assets_runtime.mdx'
+
+<Tabs
+  groupId="data-asset-type"
+  defaultValue='inferred'
+  values={[
+  {label: 'InferredAssetFilesystemDataConnector', value:'inferred'},
+  {label: 'ConfiguredAssetDataConnector', value:'configured'},
+  {label: 'RuntimeDataConnector', value:'runtime'},
+  ]}>
+
+  <TabItem value="inferred">
+
+<PartAssetKeysOverviewInferred />
+
+<PartIntroForSingleOrMultiBatchConfiguration />
+
+<PartAssetsInferred />
+
+  </TabItem>
+  <TabItem value="configured">
+
+<PartAssetKeysOverviewConfigured />
+
+<PartIntroForSingleOrMultiBatchConfiguration />
+
+<PartAssetsConfigured />
+
+  </TabItem>
+  <TabItem value="runtime">
+
+<PartAssetsRuntime />
+
+  </TabItem>
+  </Tabs>

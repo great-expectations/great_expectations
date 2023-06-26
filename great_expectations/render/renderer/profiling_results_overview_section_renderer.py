@@ -2,8 +2,7 @@ import warnings
 from collections import Counter, defaultdict
 
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     CollapseContent,
     RenderedBulletListContent,
     RenderedHeaderContent,
@@ -11,12 +10,12 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
     @classmethod
     def render(cls, evrs, section_name=None):
-
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
         # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
@@ -33,7 +32,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_header(cls, evrs, content_blocks):
+    def _render_header(cls, evrs, content_blocks) -> None:
         content_blocks.append(
             RenderedHeaderContent(
                 **{
@@ -57,7 +56,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_dataset_info(cls, evrs, content_blocks):
+    def _render_dataset_info(cls, evrs, content_blocks) -> None:
         expect_table_row_count_to_be_between_evr = cls._find_evr_by_type(
             evrs["results"], "expect_table_row_count_to_be_between"
         )
@@ -121,8 +120,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_variable_types(cls, evrs, content_blocks):
-
+    def _render_variable_types(cls, evrs, content_blocks) -> None:
         column_types = cls._get_column_types(evrs)
         # TODO: check if we have the information to make this statement. Do all columns have type expectations?
         column_type_counter = Counter(column_types.values())
@@ -154,8 +152,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
     @classmethod
-    def _render_expectation_types(cls, evrs, content_blocks):
-
+    def _render_expectation_types(cls, evrs, content_blocks) -> None:
         type_counts = defaultdict(int)
 
         for evr in evrs.results:
@@ -285,7 +282,6 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
     @classmethod
     def _get_percentage_missing_cells_str(cls, evrs):
-
         columns = cls._get_column_list_from_evrs(evrs)
         if not columns or len(columns) == 0:
             warnings.warn("Cannot get % of missing cells - column list is empty")

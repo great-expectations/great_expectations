@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from abc import ABCMeta, abstractmethod
+from typing import Optional, Tuple, Union
 
 
 class DataContextKey(metaclass=ABCMeta):
@@ -9,18 +12,18 @@ class DataContextKey(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def to_tuple(self):
-        pass
+    def to_tuple(self) -> tuple:
+        raise NotImplementedError
 
     @classmethod
     def from_tuple(cls, tuple_):
         return cls(*tuple_)
 
-    def to_fixed_length_tuple(self):
+    def to_fixed_length_tuple(self) -> tuple:
         raise NotImplementedError
 
     @classmethod
-    def from_fixed_length_tuple(cls, tuple_):
+    def from_fixed_length_tuple(cls, tuple_) -> DataContextKey:
         raise NotImplementedError
 
     def __eq__(self, other):
@@ -62,7 +65,7 @@ class DataContextKey(metaclass=ABCMeta):
 class StringKey(DataContextKey):
     """A simple DataContextKey with just a single string value"""
 
-    def __init__(self, key):
+    def __init__(self, key) -> None:
         self._key = key
 
     def to_tuple(self):
@@ -73,4 +76,35 @@ class StringKey(DataContextKey):
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
+        return cls.from_tuple(tuple_)
+
+
+class DataContextVariableKey(DataContextKey):
+    def __init__(
+        self,
+        resource_name: Optional[str] = None,
+    ) -> None:
+        self._resource_name = resource_name
+
+    @property
+    def resource_name(self) -> Union[str, None]:
+        return self._resource_name
+
+    def to_tuple(self) -> Tuple[str]:
+        """
+        See parent `DataContextKey.to_tuple` for more information.
+        """
+        return (self._resource_name or "",)
+
+    def to_fixed_length_tuple(self) -> Tuple[str]:
+        """
+        See parent `DataContextKey.to_fixed_length_tuple` for more information.
+        """
+        return self.to_tuple()
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_: tuple) -> DataContextVariableKey:
+        """
+        See parent `DataContextKey.from_fixed_length_tuple` for more information.
+        """
         return cls.from_tuple(tuple_)

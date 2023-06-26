@@ -2,14 +2,14 @@ from typing import Any, Dict
 
 import numpy as np
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
@@ -28,13 +28,13 @@ class ColumnValuesBetweenCount(MetricProvider):
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: PLR0913, PLR0912
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
@@ -82,13 +82,13 @@ class ColumnValuesBetweenCount(MetricProvider):
         return np.count_nonzero(series)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0913, PLR0912
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
@@ -183,7 +183,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = column >= min_value
 
         else:
-            if strict_min and strict_max:
+            if strict_min and strict_max:  # noqa: PLR5501
                 condition = sa.and_(column > min_value, column < max_value)
             elif strict_min:
                 condition = sa.and_(column > min_value, column <= max_value)
@@ -192,18 +192,18 @@ class ColumnValuesBetweenCount(MetricProvider):
             else:
                 condition = sa.and_(column >= min_value, column <= max_value)
 
-        return execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(selectable).where(condition)
+        return execution_engine.execute_query(
+            sa.select(sa.func.count()).select_from(selectable).where(condition)
         ).scalar()
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913, PLR0912
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
@@ -243,7 +243,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = column >= min_value
 
         else:
-            if strict_min and strict_max:
+            if strict_min and strict_max:  # noqa: PLR5501
                 condition = (column > min_value) & (column < max_value)
             elif strict_min:
                 condition = (column > min_value) & (column <= max_value)

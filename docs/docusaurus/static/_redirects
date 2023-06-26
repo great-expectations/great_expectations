@@ -1,0 +1,370 @@
+# Redirect from what the browser serves
+/v2 https://legacy.docs.greatexpectations.io/en/latest/
+/latest https://docs.greatexpectations.io/docs/
+/v3 https://docs.greatexpectations.io/docs/
+/en/latest/ https://docs.greatexpectations.io/docs/
+/en/latest/index.html https://docs.greatexpectations.io/docs/
+/en/latest/contributing.html https://legacy.docs.greatexpectations.io/docs/contributing/contributing
+/en/latest/reference.html https://greatexpectations.io/expectations
+/en/latest/intro.html https://docs.greatexpectations.io/docs/
+/en/latest/contributing/levels_of_maturity.html https://legacy.docs.greatexpectations.io/en/latest/contributing/levels_of_maturity.html
+/en/latest/contributing/testing.html https://legacy.docs.greatexpectations.io/en/latest/contributing/testing.html
+/en/latest/contributing/make_changes_through_github.html https://legacy.docs.greatexpectations.io/en/latest/contributing/make_changes_through_github.html
+/en/latest/contributing/contribution_checklist.html https://legacy.docs.greatexpectations.io/en/latest/contributing/contribution_checklist.html
+/en/latest/contributing/contrib_pull_request_acceptance_checklist.html https://legacy.docs.greatexpectations.io/en/latest/contributing/contrib_pull_request_acceptance_checklist.html
+/en/latest/contributing/setting_up_your_dev_environment.html https://legacy.docs.greatexpectations.io/en/latest/contributing/setting_up_your_dev_environment.html
+/en/latest/contributing/style_guide.html https://legacy.docs.greatexpectations.io/en/latest/contributing/style_guide.html
+/en/latest/contributing/miscellaneous.html https://legacy.docs.greatexpectations.io/en/latest/contributing/miscellaneous.html
+/en/latest/community.html https://legacy.docs.greatexpectations.io/en/latest/community.html
+/en/latest/guides/workflows_patterns.html https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns.html
+/en/latest/guides/how_to_guides.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides.html
+/en/latest/guides/how_to_guides/creating_batches.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_add_comments_to_expectations_and_display_them_in_data_legacy.docs.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_add_comments_to_expectations_and_display_them_in_data_legacy.docs.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html
+/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_the_cli.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_spark.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_spark.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_parameterized_expectations_super_fast.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_parameterized_expectations_super_fast.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_contribute_a_new_expectation_to_great_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_contribute_a_new_expectation_to_great_expectations.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_pandas.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_pandas.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_sqlalchemy.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_custom_expectations_for_sqlalchemy.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_evaluation_parameters_from_a_database.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_dynamically_load_evaluation_parameters_from_a_database.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
+/en/latest/guides/how_to_guides/configuring_data_contexts.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_save_metrics.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_save_metrics.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_s3.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_s3.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.html
+/en/latest/guides/how_to_guides/creating_batches/how_to_create_a_batch_request_using_an_active_data_connector.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_create_a_batch_request_using_an_active_data_connector.html
+/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html
+/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_database_table_view_or_query_result_as_a_batch.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_database_table_view_or_query_result_as_a_batch.html
+/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_pandas_dataframe_as_a_batch.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_load_a_pandas_dataframe_as_a_batch.html
+/en/latest/guides/how_to_guides/spare_parts/how_to_create_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/spare_parts/how_to_create_expectations.html
+/en/latest/guides/how_to_guides/spare_parts/how_to_create_a_new_expectation_suite_using_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/spare_parts/how_to_create_a_new_expectation_suite_using_the_cli.html
+/en/latest/guides/how_to_guides/configuring_data_legacy.docs.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_legacy.docs.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_write_a_how_to_guide.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_write_a_how_to_guide.html
+/en/latest/guides/how_to_guides/miscellaneous/command_line.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/command_line.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_stub.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_stub.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_add_comments_to_a_page_in_documentation.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_add_comments_to_a_page_in_documentation.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_template.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_template.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_add_and_test_a_new_sqlalchemydataset_class.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_add_and_test_a_new_sqlalchemydataset_class.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_use_official_docker_images.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_use_official_docker_images.html
+/en/latest/guides/how_to_guides/miscellaneous/how_to_setup_opsgenie_alert_notifications.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous/how_to_setup_opsgenie_alert_notifications.html
+/en/latest/guides/how_to_guides/configuring_metadata_stores.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_metadata_stores.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_athena_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_athena_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_configuredassetdataconnector.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_configuredassetdataconnector.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_mssql_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_mssql_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_databricks_aws_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_databricks_aws_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_snowflake_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_choose_which_data_connector_to_use.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_choose_which_data_connector_to_use.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_emr_spark_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_emr_spark_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_spark_filesystem_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_spark_filesystem_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_self_managed_spark_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_self_managed_spark_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_pandas_s3_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_pandas_s3_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_mysql_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_mysql_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_databricks_azure_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_databricks_azure_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_bigquery_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_pandas_filesystem_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_pandas_filesystem_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_sorting_in_data_connectors.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_sorting_in_data_connectors.html
+/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_a_redshift_datasource.html
+/en/latest/guides/how_to_guides/configuring_datasources.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html
+/en/latest/guides/how_to_guides/creating_and_editing_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html
+/en/latest/guides/how_to_guides/migrating_versions.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_configure_data_context_components_using_test_yaml_config.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_configure_data_context_components_using_test_yaml_config.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_create_a_new_data_context_with_the_cli.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_a_databricks_spark_cluster.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_instantiate_a_data_context_on_a_databricks_spark_cluster.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
+/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_populate_credentials_from_a_secrets_store.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_populate_credentials_from_a_secrets_store.html
+/en/latest/guides/how_to_guides/validation.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html
+/en/latest/guides/how_to_guides/configuring_generated_notebooks/how_to_configure_suite_edit_generated_notebooks.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_generated_notebooks/how_to_configure_suite_edit_generated_notebooks.html
+/en/latest/guides/how_to_guides/validation/how_to_trigger_email_as_a_validation_action.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_trigger_email_as_a_validation_action.html
+/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
+/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
+/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
+/en/latest/guides/how_to_guides/validation/how_to_update_data_docs_as_a_validation_action.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_update_data_docs_as_a_validation_action.html
+/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
+/en/latest/guides/how_to_guides/validation/how_to_validate_data_without_a_checkpoint.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_validate_data_without_a_checkpoint.html
+/en/latest/guides/how_to_guides/validation/how_to_implement_a_custom_validation_operator.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_implement_a_custom_validation_operator.html
+/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
+/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html
+/en/latest/guides/how_to_guides/validation/how_to_add_a_validation_operator.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_a_validation_operator.html
+/en/latest/guides/how_to_guides/validation/how_to_implement_custom_notifications.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_implement_custom_notifications.html
+/en/latest/guides/how_to_guides/validation/how_to_store_validation_results_as_a_validation_action.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_store_validation_results_as_a_validation_action.html
+/en/latest/guides/how_to_guides/validation/how_to_trigger_slack_notifications_as_a_validation_action.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_trigger_slack_notifications_as_a_validation_action.html
+/en/latest/guides/how_to_guides/configuring_generated_notebooks.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_generated_notebooks.html
+/en/latest/guides/how_to_guides/miscellaneous.html https://legacy.docs.greatexpectations.io/en/latest/guides/how_to_guides/miscellaneous.html
+/en/latest/guides/tutorials/explore_expectations_in_a_notebook.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/explore_expectations_in_a_notebook.html
+/en/latest/guides/tutorials/getting_started.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started.html
+/en/latest/guides/tutorials/getting_started_v3_api/customize_your_deployment.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/customize_your_deployment.html
+/en/latest/guides/tutorials/getting_started_v3_api/connect_to_data.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/connect_to_data.html
+/en/latest/guides/tutorials/getting_started_v3_api/create_your_first_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/create_your_first_expectations.html
+/en/latest/guides/tutorials/getting_started_v3_api/validate_your_data.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/validate_your_data.html
+/en/latest/guides/tutorials/getting_started_v3_api/set_up_data_legacy.docs.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/set_up_data_legacy.docs.html
+/en/latest/guides/tutorials/getting_started_v3_api/initialize_a_data_context.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api/initialize_a_data_context.html
+/en/latest/guides/tutorials/quick_start.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/quick_start.html
+/en/latest/guides/tutorials/how_to_create_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/how_to_create_expectations.html
+/en/latest/guides/tutorials/getting_started_v3_api.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started_v3_api.html
+/en/latest/guides/tutorials/getting_started/customize_your_deployment.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/customize_your_deployment.html
+/en/latest/guides/tutorials/getting_started/connect_to_data.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/connect_to_data.html
+/en/latest/guides/tutorials/getting_started/create_your_first_expectations.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/create_your_first_expectations.html
+/en/latest/guides/tutorials/getting_started/validate_your_data.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/validate_your_data.html
+/en/latest/guides/tutorials/getting_started/set_up_data_legacy.docs.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_legacy.docs.html
+/en/latest/guides/tutorials/getting_started/initialize_a_data_context.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/initialize_a_data_context.html
+/en/latest/guides/workflows_patterns/deployment_astronomer.html https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html
+/en/latest/guides/workflows_patterns/deployment_google_cloud_composer.html https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_google_cloud_composer.html
+/en/latest/guides/workflows_patterns/deployment_airflow.html https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_airflow.html
+/en/latest/guides/workflows_patterns/deployment_hosted_environments.html https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_hosted_environments.html
+/en/latest/guides/tutorials.html https://legacy.docs.greatexpectations.io/en/latest/guides/tutorials.html
+/en/latest/changelog.html https://legacy.docs.greatexpectations.io/en/latest/changelog.html
+/en/latest/releasing.html https://legacy.docs.greatexpectations.io/en/latest/releasing.html
+/en/latest/guides.html https://legacy.docs.greatexpectations.io/en/latest/guides.html
+/en/latest/releasing/docker_release_process.html https://legacy.docs.greatexpectations.io/en/latest/releasing/docker_release_process.html
+/en/latest/reference/spare_parts.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts.html
+/en/latest/reference/conditional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/conditional_expectations.html
+/en/latest/reference/core_concepts/evaluation_parameters.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
+/en/latest/reference/core_concepts/execution_engine.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/execution_engine.html
+/en/latest/reference/core_concepts/conditional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/conditional_expectations.html
+/en/latest/reference/core_concepts/data_context.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_context.html
+/en/latest/reference/core_concepts/profilers.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/profilers.html
+/en/latest/reference/core_concepts/expectations/result_format.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/result_format.html
+/en/latest/reference/core_concepts/expectations/standard_arguments.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/standard_arguments.html
+/en/latest/reference/core_concepts/expectations/distributional_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/distributional_expectations.html
+/en/latest/reference/core_concepts/expectations/implemented_expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/implemented_expectations.html
+/en/latest/reference/core_concepts/expectations/expectations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html
+/en/latest/reference/core_concepts/checkpoints_and_actions.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
+/en/latest/reference/core_concepts/expectation_suite_operations.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/expectation_suite_operations.html
+/en/latest/reference/core_concepts/data_legacy.docs.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_legacy.docs.html
+/en/latest/reference/core_concepts/metrics.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html
+/en/latest/reference/core_concepts/dividing_data_assets_into_batches.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/dividing_data_assets_into_batches.html
+/en/latest/reference/core_concepts/data_discovery.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_discovery.html
+/en/latest/reference/core_concepts/datasource.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+/en/latest/reference/core_concepts/validation.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/validation.html
+/en/latest/reference/core_concepts/data_docs.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts/data_docs.html
+/en/latest/reference/glossary_of_expectations.html https://greatexpectations.io/expectations
+/en/latest/reference/supporting_resources.html https://legacy.docs.greatexpectations.io/en/latest/reference/supporting_resources.html
+/en/latest/reference/spare_parts/__doctest_example.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/__doctest_example.html
+/en/latest/reference/spare_parts/data_docs_reference.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/data_docs_reference.html
+/en/latest/reference/spare_parts/data_context_reference.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/data_context_reference.html
+/en/latest/reference/spare_parts/profiling_reference.html https://legacy.docs.greatexpectations.io/en/latest/reference/spare_parts/profiling_reference.html
+/en/latest/reference/core_concepts.html https://legacy.docs.greatexpectations.io/en/latest/reference/core_concepts.html
+
+
+# Redirects for old style guides
+/docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
+
+# Redirects for consolidated pages
+/docs/why_use_ge https://docs.greatexpectations.io/docs
+/docs/community https://docs.greatexpectations.io/docs
+/docs/guides/setup/installation/spark_emr https://docs.greatexpectations.io/docs/guides/setup/installation/hosted_environment
+
+# Redirects for integrations And How-Tos
+/docs/deployment_patterns/reference_architecture_overview /docs/deployment_patterns/integrations_and_howtos_overview
+# Redirects for Universal Map getting started tutorial
+/docs/tutorials/getting_started/intro /docs/tutorials/getting_started/tutorial_overview
+/docs/tutorials/getting_started/initialize_a_data_context /docs/tutorials/getting_started/tutorial_setup
+/docs/tutorials/getting_started/connect_to_data /docs/tutorials/getting_started/tutorial_connect_to_data
+/docs/tutorials/getting_started/create_your_first_expectations /docs/tutorials/getting_started/tutorial_create_expectations
+/docs/tutorials/getting_started/check_out_data_docs /docs/terms/data_docs
+/docs/tutorials/getting_started/validate_your_data /docs/tutorials/getting_started/tutorial_validate_data
+/docs/tutorials/getting_started/customize_your_deployment /docs/tutorials/getting_started/tutorial_review
+
+/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+/docs/guides/connecting_to_your_data/advanced/database_credentials https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource
+
+/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow
+
+/docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file
+
+# Redirects for deprecated workflows and codepaths
+/docs/reference/data_discovery/ https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/
+/docs/reference/evaluation_parameters/ https://docs.greatexpectations.io/docs/terms/evaluation_parameter
+/docs/guides/validation/advanced/how_to_implement_custom_notifications https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions
+/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_metrics https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+/docs/reference/expectations/expectations https://docs.greatexpectations.io/docs/terms/expectation/
+/docs/reference/expectations/expectation_suite_operations https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/
+/docs/reference/checkpoints_and_actions https://docs.greatexpectations.io/docs/terms/checkpoint
+/docs/reference/core_concepts https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
+/docs/reference/data_context https://docs.greatexpectations.io/docs/terms/data_context/
+/docs/reference/data_docs https://docs.greatexpectations.io/docs/terms/data_docs/
+/docs/reference/datasources https://docs.greatexpectations.io/docs/terms/datasource
+/docs/reference/dividing_data_assets_into_batches /docs/0.15.50/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store
+/docs/reference/execution_engine https://docs.greatexpectations.io/docs/terms/execution_engine/
+/docs/reference/metrics https://docs.greatexpectations.io/docs/terms/metric
+/docs/reference/profilers https://docs.greatexpectations.io/docs/terms/profiler
+/docs/reference/supporting_resources https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
+/docs/reference/validation https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
+/docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
+/docs/guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler /docs/guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant
+
+# Redirects for deprecated API docs
+/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create /docs/reference/api/great_expectations.util
+
+/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-datacontext /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
+
+# Redirects for renamed reference docs
+/docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
+
+# Redirect from Getting Started Tutorial to Quickstart
+/docs/docusaurus/docs/tutorials/getting_started/ /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_connect_to_data /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_create_expectations /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_overview /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_review /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_setup /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_validate_data /docs/tutorials/quickstart
+
+# removing CLI-based guide
+/docs/guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit /docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
+
+# Redirect for defunct JSON profiler
+/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file /docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
+
+# removing yml-driven datacontext in favor of ephemeral
+/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context
+
+# Redirects for Contributing docs
+
+/docs/contributing/contributing_setup https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md
+/docs/contributing/contributing_checklist /docs/contributing/contributing
+/docs/contributing/contributing_github https://github.com/great-expectations/great_expectations/tree/develop/docs
+/docs/contributing/contributing_test https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md
+/docs/contributing/contributing_misc https://github.com/great-expectations/great_expectations/tree/develop/docs
+/docs/guides/miscellaneous/how_to_write_a_how_to_guide https://github.com/great-expectations/great_expectations/tree/develop/docs
+/docs/guides/miscellaneous/how_to_template https://github.com/great-expectations/great_expectations/tree/develop/docs
+/docs/integrations/contributing_integration https://github.com/great-expectations/great_expectations/tree/develop/docs
+/docs/integrations/integration_template https://github.com/great-expectations/great_expectations/tree/develop/docs
+docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md
+/docs/contributing/contributing_package https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md
+
+# removing How to Validate data with an in-memory Checkpoint
+/docs/guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint.md /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md
+
+# Getting rid of the test_yaml_config doc, which was focused on datasources
+/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config /docs/docusaurus/docs/guides/connecting_to_your_data/connect_to_data_overview.md
+
+
+# Redirecting the remaining Block-config Datsource guides
+
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource
+
+/docs/guides/connecting_to_your_data/in_memory/pandas /docs/0.15.50/guides/connecting_to_your_data/in_memory/pandas
+/docs/guides/connecting_to_your_data/in_memory/spark /docs/0.15.50/guides/connecting_to_your_data/in_memory/spark
+
+/docs/guides/connecting_to_your_data/cloud/s3/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/s3/pandas
+/docs/guides/connecting_to_your_data/cloud/s3/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/s3/spark
+
+/docs/guides/connecting_to_your_data/cloud/gcs/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas
+/docs/guides/connecting_to_your_data/cloud/gcs/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/spark
+
+/docs/guides/connecting_to_your_data/cloud/azure/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/azure/pandas
+/docs/guides/connecting_to_your_data/cloud/azure/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/azure/spark
+
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource
+/docs/guides/connecting_to_your_data/database/athena /docs/0.15.50/guides/connecting_to_your_data/database/athena
+/docs/guides/connecting_to_your_data/database/bigquery /docs/0.15.50/guides/connecting_to_your_data/database/bigquery
+/docs/guides/connecting_to_your_data/database/mssql /docs/0.15.50/guides/connecting_to_your_data/database/mssql
+/docs/guides/connecting_to_your_data/database/mysql /docs/0.15.50/guides/connecting_to_your_data/database/mysql
+/docs/guides/connecting_to_your_data/database/postgres /docs/0.15.50/guides/connecting_to_your_data/database/postgres
+/docs/guides/connecting_to_your_data/database/redshift /docs/0.15.50/guides/connecting_to_your_data/database/redshift
+/docs/guides/connecting_to_your_data/database/snowflake /docs/0.15.50/guides/connecting_to_your_data/database/snowflake
+/docs/guides/connecting_to_your_data/database/sqlite /docs/0.15.50/guides/connecting_to_your_data/database/sqlite
+/docs/guides/connecting_to_your_data/database/trino /docs/0.15.50/guides/connecting_to_your_data/database/trino
+
+/docs/guides/connecting_to_your_data/filesystem/pandas /docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas
+/docs/guides/connecting_to_your_data/filesystem/spark /docs/0.15.50/guides/connecting_to_your_data/filesystem/spark
+
+/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use /docs/0.15.50/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use
+/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector /docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector
+/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector /docs/0.15.50/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector
+/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector /docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector
+/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql /docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql
+/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store /docs/0.15.50/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store
+/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource /docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource
+/docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe /docs/0.15.50/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe
+/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store /docs/0.15.50/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store
+/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql /docs/0.15.50/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql
+
+
+## Redirects for deleted CLI guides back to the last version of the docs to include them
+/docs/contributing/style_guides/cli_and_notebooks_style /docs/0.15.50/contributing/style_guides/cli_and_notebooks_style
+/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli /docs/0.15.50/guides/miscellaneous/how_to_use_the_great_expectations_cli
+/docs/guides/miscellaneous/how_to_use_the_project_check_config_command /docs/0.15.50/guides/miscellaneous/how_to_use_the_project_check_config_command
+/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli 
+/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python
+
+## Redircet UserConfigurableProfiler doc to v 0.15.50 docs
+/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler /docs/0.15.50/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler
+
+## Redirects for content reorg
+
+/docs/guides/setup/installation/local /docs/guides/setup/installation/install_gx
+/docs/guides/setup/installation/hosted_environment /docs/guides/setup/installation/install_gx
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3 /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases /docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context
+docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_expectation_stores
+docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3 /docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql /docs/guides/setup/configuring_metadata_stores/configure_result_stores
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3 /docs/guides/setup/configuring_data_docs/host_and_share_data_docs
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark /docs/guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data /docs/guides/connecting_to_your_data/fluent/database/connect_sql_source_data
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
+

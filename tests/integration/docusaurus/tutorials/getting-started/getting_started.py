@@ -1,8 +1,7 @@
-from ruamel import yaml
-
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
@@ -14,23 +13,20 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (  #
     GETTING_STARTED_CHECKPOINT_NAME,
 )
 
-context = ge.get_context()
+yaml = YAMLHandler()
+context = gx.get_context()
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert context
 
 # First configure a new Datasource and add to DataContext
+
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml">
 datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
-module_name: great_expectations.datasource
 execution_engine:
-  module_name: great_expectations.execution_engine
   class_name: PandasExecutionEngine
 data_connectors:
-    default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
     default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: ../data/
@@ -38,9 +34,16 @@ data_connectors:
           group_names:
             - data_asset_name
           pattern: (.*)
+    default_runtime_data_connector_name:
+        class_name: RuntimeDataConnector
+        assets:
+            my_runtime_asset_name:
+              batch_identifiers:
+                - runtime_batch_identifier_name
 """
+# </snippet>
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 datasource_yaml = datasource_yaml.replace(
     "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
@@ -57,7 +60,7 @@ batch_request = BatchRequest(
     limit=1000,
 )
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 batch_request = BatchRequest(
     datasource_name=GETTING_STARTED_DATASOURCE_NAME,
@@ -68,11 +71,11 @@ batch_request = BatchRequest(
 
 expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 expectation_suite_name = GETTING_STARTED_EXPECTATION_SUITE_NAME
 
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name
@@ -82,13 +85,12 @@ validator = context.get_validator(
 assert isinstance(validator, Validator)
 
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
-# <snippet>
-ignored_columns = [
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py exclude_column_names no comment">
+exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
     "dropoff_datetime",
     # "passenger_count",
-    # </snippet>
     "trip_distance",
     "rate_code_id",
     "store_and_fwd_flag",
@@ -104,18 +106,20 @@ ignored_columns = [
     "total_amount",
     "congestion_surcharge",
 ]
+# </snippet>
 
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,
-    ignored_columns=ignored_columns,
+    ignored_columns=exclude_column_names,
     not_null_only=False,
-    primary_or_compound_key=False,
+    primary_or_compound_key=None,
     semantic_types_dict=None,
     table_expectations_only=False,
     value_set_threshold="MANY",
 )
 suite = profiler.build_suite()
+validator.expectation_suite = suite
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 # Create first checkpoint on yellow_tripdata_sample_2019-01.csv
@@ -133,7 +137,7 @@ validations:
         index: -1
     expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
-# Note : these overrides are for internal GE purposes, and are intended to helps us better understand how the
+# Note : these overrides are for internal GX purposes, and are intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
@@ -160,7 +164,7 @@ assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
-# <snippet>
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
 yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0
@@ -176,7 +180,7 @@ validations:
     expectation_suite_name: getting_started_expectation_suite_taxi.demo
 """
 # </snippet>
-# Note : this override is for internal GE purposes, and is intended to helps us better understand how the
+# Note : this override is for internal GX purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 yaml_config = yaml_config.replace(
     "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME

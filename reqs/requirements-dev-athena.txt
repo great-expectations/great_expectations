@@ -1,0 +1,1 @@
+pyathena[SQLAlchemy]>=2.0.0,<3 # v3 breaks on `from pyathena import sqlalchemy_athena`

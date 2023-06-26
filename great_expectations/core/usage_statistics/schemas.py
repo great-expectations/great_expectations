@@ -2,14 +2,20 @@
 # These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
 # about usage statistics. Please reach out to the Great Expectations with any questions!
 ###
+from typing import List
 
-
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
 
-SCHEMA: str = "http://json-schema.org/draft-04/schema#"
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.execution_environment import (
+    InstallEnvironment,
+)
+
+SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
+ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1", "2"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,
@@ -260,6 +266,21 @@ anonymized_expectation_suite_schema = {
     ],
 }
 
+package_info_schema = {
+    "$schema": SCHEMA,
+    "title": "package-info",
+    "type": "object",
+    "properties": {
+        "package_name": {"type": "string", "maxLength": 256},
+        "installed": {"type": "boolean"},
+        "install_environment": {
+            "enum": [ie.value for ie in InstallEnvironment],
+        },
+        "version": {"anyOf": [{"type": "string", "maxLength": 256}, {"type": "null"}]},
+    },
+    "additionalProperties": False,
+}
+
 anonymized_init_payload_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-init-payload",
@@ -273,10 +294,11 @@ anonymized_init_payload_schema = {
         "anonymized_action": anonymized_action_schema,
         "anonymized_action_list": anonymized_action_list_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
+        "package_info": package_info_schema,
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "platform.system": {"type": "string", "maxLength": 256},
         "platform.release": {"type": "string", "maxLength": 256},
         "version_info": {"type": "string", "maxLength": 256},
@@ -303,6 +325,11 @@ anonymized_init_payload_schema = {
         "anonymized_expectation_suites": {
             "type": "array",
             "items": {"$ref": "#/definitions/anonymized_expectation_suite"},
+        },
+        "dependencies": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/package_info"},
         },
     },
     "required": [
@@ -449,6 +476,7 @@ anonymized_run_validation_operator_payload_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
     },
     "type": "object",
     "properties": {
@@ -491,9 +519,9 @@ anonymized_validations_list_schema = {
     "items": {"$ref": "#/definitions/anonymized_validation"},
 }
 
-anonymized_save_or_edit_expectation_suite_payload_schema = {
+anonymized_get_or_edit_or_save_expectation_suite_payload_schema = {
     "$schema": SCHEMA,
-    "title": "anonymized-save-or-edit-expectation-suite-payload",
+    "title": "anonymized-get-or-edit-or-save-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -881,6 +909,17 @@ anonymized_rule_based_profiler_run_schema = {
     ],
 }
 
+cloud_migrate_schema = {
+    "$schema": SCHEMA,
+    "title": "cloud-migrate",
+    "type": "object",
+    "properties": {
+        "organization_id": {"type": "string", "maxLength": 256},
+    },
+    "required": ["organization_id"],
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -900,7 +939,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
-        "anonymized_save_or_edit_expectation_suite_payload": anonymized_save_or_edit_expectation_suite_payload_schema,
+        "anonymized_get_or_edit_or_save_expectation_suite_payload": anonymized_get_or_edit_or_save_expectation_suite_payload_schema,
         "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
         "anonymized_cli_suite_new_expectation_suite_payload": anonymized_cli_suite_new_expectation_suite_payload_schema,
         "anonymized_cli_suite_edit_expectation_suite_payload": anonymized_cli_suite_edit_expectation_suite_payload_schema,
@@ -917,13 +956,17 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_expectation_configuration_builder": anonymized_expectation_configuration_builder_schema,
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
+        "package_info": package_info_schema,
+        "cloud_migrate": cloud_migrate_schema,
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
+        "mac_address": {"type": "string"},
+        "oss_id": {"type": ["string", "null"], "format": "uuid"},
         "event_time": {"type": "string", "format": "date-time"},
         "event_duration": {"type": "number"},
         "x-forwarded-for": {"type": "string"},
@@ -935,15 +978,6 @@ anonymized_usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_context.__init__"]},
                 "event_payload": {"$ref": "#/definitions/anonymized_init_payload"},
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {"enum": ["data_context.save_expectation_suite"]},
-                "event_payload": {
-                    "$ref": "#/definitions/anonymized_save_or_edit_expectation_suite_payload"
-                },
             },
         },
         {
@@ -988,7 +1022,12 @@ anonymized_usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {"enum": ["datasource.sqlalchemy.connect"]},
+                "event": {
+                    "enum": [
+                        "datasource.sqlalchemy.connect",
+                        "execution_engine.sqlalchemy.connect",
+                    ]
+                },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_datasource_sqlalchemy_connect_payload"
                 },
@@ -1003,9 +1042,26 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.open_data_docs",
                         "data_context.run_checkpoint",
                         "expectation_suite.add_expectation",
+                        "data_context.run_profiler_with_dynamic_arguments",
+                        "data_context.run_profiler_on_data",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
+                        "data_context.save_expectation_suite",
+                        "profiler.result.get_expectation_suite",
+                        "data_assistant.result.get_expectation_suite",
+                    ],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_get_or_edit_or_save_expectation_suite_payload"
+                },
             },
         },
         {
@@ -1078,6 +1134,13 @@ anonymized_usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE]},
+                "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },
         {
@@ -1156,8 +1219,27 @@ anonymized_usage_statistics_record_schema = {
     ],
 }
 
-if __name__ == "__main__":
-    import json
 
-    with open("usage_statistics_record_schema.json", "w") as outfile:
+def write_schema_to_file(target_dir: str) -> None:
+    """Utility to write schema to disk.
+
+    The file name will always be "usage_statistics_record_schema.json" but the target directory can be specified.
+
+    Args:
+        target_dir (str): The dir you wish to write the schema to.
+    """
+    import json
+    import os
+
+    file: str = "usage_statistics_record_schema.json"
+    out: str = os.path.join(target_dir, file)  # noqa: PTH118
+
+    with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)
+
+
+if __name__ == "__main__":
+    import sys
+
+    target_dir = sys.argv[1] if len(sys.argv) >= 2 else "."  # noqa: PLR2004
+    write_schema_to_file(target_dir)

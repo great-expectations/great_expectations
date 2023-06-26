@@ -1,8 +1,9 @@
 import datetime
+import json
 import logging
 from typing import Any
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import datetime_to_int, parse_string_to_datetime
 from great_expectations.datasource.data_connector.sorter import Sorter
@@ -11,11 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 class DateTimeSorter(Sorter):
-    def __init__(self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"):
+    def __init__(
+        self, name: str, orderby: str = "asc", datetime_format="%Y%m%d"
+    ) -> None:
         super().__init__(name=name, orderby=orderby)
 
         if datetime_format and not isinstance(datetime_format, str):
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
         "{str(type(datetime_format))}").
                     """
@@ -39,4 +42,4 @@ class DateTimeSorter(Sorter):
             "type": "DateTimeSorter",
             "date_time_format": self._datetime_format,
         }
-        return str(doc_fields_dict)
+        return json.dumps(doc_fields_dict, indent=2)

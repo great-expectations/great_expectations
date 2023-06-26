@@ -1,42 +1,38 @@
-import json
 import string
+from typing import Optional
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 # This class defines a Metric to support your Expectation
 # The main business logic for calculation lives here.
 
 
 class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
-
     # This is the id string that will be used to reference the metric.
     condition_metric_name = "column_values.not_contain_special_character"
 
     # condition_value_keys are arguments used to determine the value of the metric.
     condition_value_keys = ("",)
+
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -53,15 +49,19 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
-    """Expect column entries to not contain special characters
+    """Expect column entries to not contain special characters.
+
     Args:
         column (str): \
             The column name
+
     Keyword Args:
         mostly (None or a float value between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation \
+            Successful if at least mostly fraction of values match the expectation \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for the Expectation
@@ -79,7 +79,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "positive_test_with_no_special_character",
+                    "title": "negative_test_with_no_special_character",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "mostly_no_special_character", "mostly": 1},
@@ -88,7 +88,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
-                    "exact_match_out": False,
                 }
             ],
         }
@@ -121,17 +120,14 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

@@ -1,0 +1,15 @@
+--requirement requirements-dev-lite.txt
+
+--requirement requirements-dev-athena.txt
+--requirement requirements-dev-bigquery.txt
+--requirement requirements-dev-dremio.txt
+--requirement requirements-dev-mssql.txt
+--requirement requirements-dev-mysql.txt
+--requirement requirements-dev-postgresql.txt
+--requirement requirements-dev-redshift.txt
+--requirement requirements-dev-snowflake.txt
+--requirement requirements-dev-teradata.txt
+--requirement requirements-dev-trino.txt
+--requirement requirements-dev-hive.txt
+--requirement requirements-dev-vertica.txt
+--requirement requirements-dev-clickhouse.txt

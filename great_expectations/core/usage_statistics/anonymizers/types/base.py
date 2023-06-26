@@ -15,6 +15,7 @@ BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS: Set[str] = {
 BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS: Set[str] = {
     "data_connector_query",
     "runtime_parameters",
+    "options",
     "batch_identifiers",
     "batch_spec_passthrough",
 }

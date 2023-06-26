@@ -3,21 +3,18 @@ import traceback
 import warnings
 from copy import deepcopy
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
 )
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.render import (
+    LegacyDiagnosticRendererType,
+    LegacyRendererType,
+    RenderedTableContent,
+)
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedContentBlockContainer,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
-from great_expectations.render.util import num_to_str
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +58,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         return sorted(custom_columns)
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
+    def _process_content_block(
+        cls, content_block, has_failed_evr, render_object=None
+    ) -> None:
         super()._process_content_block(content_block, has_failed_evr)
         content_block.header_row = ["Status", "Expectation", "Observed Value"]
         content_block.header_row_options = {"Status": {"sortable": True}}
@@ -89,7 +88,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     @classmethod
     def _get_content_block_fn(cls, expectation_type):
         expectation_string_fn = get_renderer_impl(
-            object_name=expectation_type, renderer_type="renderer.prescriptive"
+            object_name=expectation_type, renderer_type=LegacyRendererType.PRESCRIPTIVE
         )
         expectation_string_fn = (
             expectation_string_fn[1] if expectation_string_fn else None
@@ -105,7 +104,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         def row_generator_fn(
             configuration=None,
             result=None,
-            language=None,
             runtime_configuration=None,
             **kwargs,
         ):
@@ -121,7 +119,7 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
 
             status_icon_renderer = get_renderer_impl(
                 object_name=expectation_type,
-                renderer_type="renderer.diagnostic.status_icon",
+                renderer_type=LegacyDiagnosticRendererType.STATUS_ICON,
             )
             status_cell = (
                 [status_icon_renderer[1](result=result)]
@@ -140,7 +138,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 unexpected_statement_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.unexpected_statement",
+                    renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_STATEMENT,
                 )
                 unexpected_statement = (
                     unexpected_statement_renderer[1](result=result)
@@ -157,7 +155,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 unexpected_table_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.unexpected_table",
+                    renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE,
                 )
                 unexpected_table = (
                     unexpected_table_renderer[1](result=result)
@@ -174,7 +172,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             try:
                 observed_value_renderer = get_renderer_impl(
                     object_name=expectation_type,
-                    renderer_type="renderer.diagnostic.observed_value",
+                    renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE,
                 )
                 observed_value = [
                     observed_value_renderer[1](result=result)
@@ -198,7 +196,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             if unexpected_statement:
                 expectation_string_cell += unexpected_statement
             if unexpected_table:
-                expectation_string_cell.append(unexpected_table)
+                expectation_string_cell += unexpected_table
             if len(expectation_string_cell) > 1:
                 output_row = [status_cell + [expectation_string_cell] + observed_value]
             else:
@@ -206,7 +204,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
             meta_properties_renderer = get_renderer_impl(
                 object_name=expectation_type,
-                renderer_type="renderer.diagnostic.meta_properties",
+                renderer_type=LegacyDiagnosticRendererType.META_PROPERTIES,
             )
             if meta_properties_renderer:
                 output_row[0] += meta_properties_renderer[1](result=result)

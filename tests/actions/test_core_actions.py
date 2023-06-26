@@ -1,13 +1,15 @@
 import json
 import logging
 from unittest import mock
-from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
 from requests import Session
 
-from great_expectations.checkpoint.actions import SNSNotificationAction
+from great_expectations.checkpoint.actions import (
+    APINotificationAction,
+    SNSNotificationAction,
+)
 from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -20,7 +22,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validation_operators import (
-    CloudNotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -28,6 +29,7 @@ from great_expectations.validation_operators import (
     SlackNotificationAction,
     StoreValidationResultAction,
 )
+from tests.test_ge_utils import file_data_asset
 
 logger = logging.getLogger(__name__)
 
@@ -41,8 +43,11 @@ class MockTeamsResponse:
 class MockSlackResponse:
     def __init__(self, status_code):
         self.status_code = status_code
-        self.text = "test_text"
+        self.text = "ok"
         self.content = json.dumps({"ok": "True"})
+
+    def json(self):
+        return {"ok": "True"}
 
 
 class MockCloudResponse:
@@ -62,7 +67,7 @@ def test_StoreAction():
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
     class Object:
-        ge_cloud_mode = False
+        cloud_mode = False
 
     data_context = Object()
     data_context.stores = stores
@@ -273,7 +278,6 @@ def test_OpsgenieAlertAction(
     validation_result_suite,
     validation_result_suite_id,
 ):
-
     renderer = {
         "module_name": "great_expectations.render.renderer.opsgenie_renderer",
         "class_name": "OpsgenieRenderer",
@@ -460,22 +464,18 @@ class MockSMTPServer:
     def starttls(self, *args, **kwargs):
         if self.raise_on == "starttls":
             raise self.exception
-        return None
 
     def login(self, *args, **kwargs):
         if self.raise_on == "login":
             raise self.exception
-        return None
 
     def sendmail(self, *args, **kwargs):
         if self.raise_on == "sendmail":
             raise self.exception
-        return None
 
     def quit(self, *args, **kwargs):
         if self.raise_on == "quit":
             raise self.exception
-        return None
 
 
 @pytest.mark.parametrize(
@@ -578,6 +578,38 @@ def test_EmailAction(
         ) == {"email_result": expected}
 
 
+def test_api_action_create_payload():
+    mock_data_context = ""
+    mock_validation_results = []
+    expected_payload = '{"test_suite_name": "my_suite", "data_asset_name": "my_schema.my_table", "validation_results": []}'
+    api_notification_action = APINotificationAction(
+        mock_data_context, "http://www.example.com"
+    )
+    payload = api_notification_action.create_payload(
+        "my_schema.my_table", "my_suite", mock_validation_results
+    )
+    assert payload == expected_payload
+
+
+@mock.patch("great_expectations.checkpoint.actions.requests")
+def test_api_action_run(
+    mock_requests,
+    validation_result_suite,
+    validation_result_suite_id,
+    data_context_simple_expectation_suite,
+):
+    mock_response = mock.MagicMock()
+    mock_response.status_code = 200
+    mock_requests.post.return_value = mock_response
+    api_notification_action = APINotificationAction(
+        data_context_simple_expectation_suite, "http://www.example.com"
+    )
+    response = api_notification_action.run(
+        validation_result_suite, validation_result_suite_id, file_data_asset
+    )
+    assert response == "Successfully Posted results to API, status code - 200"
+
+
 # def test_ExtractAndStoreEvaluationParamsAction():
 #     fake_in_memory_store = ValidationsStore(
 #         root_directory = None,
@@ -617,78 +649,7 @@ def test_EmailAction(
 #
 
 
-@mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
-def test_cloud_notification_action(
-    mock_post_method,
-    cloud_data_context_with_datasource_pandas_engine,
-    validation_result_suite_with_ge_cloud_id,
-    validation_result_suite_ge_cloud_identifier,
-    checkpoint_ge_cloud_id,
-    ge_cloud_access_token,
-):
-    cloud_action: CloudNotificationAction = CloudNotificationAction(
-        data_context=cloud_data_context_with_datasource_pandas_engine,
-        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
-    )
-    expected_ge_cloud_url = urljoin(
-        cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
-    )
-    expected_headers = {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {ge_cloud_access_token}",
-    }
-
-    assert cloud_action.run(
-        validation_result_suite=validation_result_suite_with_ge_cloud_id,
-        validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
-        data_asset=None,
-    ) == {"cloud_notification_result": "Cloud notification succeeded."}
-    mock_post_method.assert_called_with(
-        url=expected_ge_cloud_url, headers=expected_headers
-    )
-
-
-@mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
-def test_cloud_notification_action_bad_response(
-    mock_post_method,
-    cloud_data_context_with_datasource_pandas_engine,
-    validation_result_suite_with_ge_cloud_id,
-    validation_result_suite_ge_cloud_identifier,
-    checkpoint_ge_cloud_id,
-    ge_cloud_access_token,
-):
-    cloud_action: CloudNotificationAction = CloudNotificationAction(
-        data_context=cloud_data_context_with_datasource_pandas_engine,
-        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
-    )
-    expected_ge_cloud_url = urljoin(
-        cloud_action.data_context.ge_cloud_config.base_url,
-        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
-    )
-    expected_headers = {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {ge_cloud_access_token}",
-    }
-    expected_result = {
-        "cloud_notification_result": "Cloud Notification request returned error 418: test_text"
-    }
-
-    assert (
-        cloud_action.run(
-            validation_result_suite=validation_result_suite_with_ge_cloud_id,
-            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
-            data_asset=None,
-        )
-        == expected_result
-    )
-    mock_post_method.assert_called_with(
-        url=expected_ge_cloud_url, headers=expected_headers
-    )
-
-
+@pytest.mark.cloud
 def test_cloud_sns_notification_action(
     sns,
     validation_result_suite,

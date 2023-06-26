@@ -1,5 +1,4 @@
 import logging
-import warnings
 from copy import deepcopy
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -38,7 +37,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
 
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
-    def __init__(self, name="default", datasource=None, assets=None):
+    def __init__(self, name="default", datasource=None, assets=None) -> None:
         logger.debug(f"Constructing ManualBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
 
@@ -76,20 +75,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
             asset_definition.update(datasource_batch_kwargs)
             return iter([asset_definition])
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def get_available_partition_ids(self, data_asset_name=None):
         partition_ids = []
         asset_definition = self._get_data_asset_config(data_asset_name=data_asset_name)
         if isinstance(asset_definition, list):
@@ -105,7 +91,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
                 pass
         return partition_ids
 
-    def _build_batch_kwargs(self, batch_parameters):
+    def _build_batch_kwargs(self, batch_parameters):  # noqa: PLR0912
         """Build batch kwargs from a partition id."""
         partition_id = batch_parameters.pop("partition_id", None)
         batch_kwargs = self._datasource.process_batch_parameters(batch_parameters)

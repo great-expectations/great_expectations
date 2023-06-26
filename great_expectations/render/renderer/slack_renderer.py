@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -7,19 +9,26 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 class SlackRenderer(Renderer):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901, PLR0912, PLR0913, PLR0915
         self,
         validation_result=None,
         data_docs_pages=None,
         notify_with=None,
+        show_failed_expectations: bool = False,
+        validation_result_urls: list[str] | None = None,
     ):
+        if validation_result_urls is None:
+            validation_result_urls = []
+
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
         status = "Failed :x:"
+
+        failed_expectations_text = ""
 
         title_block = {
             "type": "section",
@@ -66,12 +75,38 @@ class SlackRenderer(Renderer):
             if validation_result.success:
                 status = "Success :tada:"
 
-            summary_text = f"""*Batch Validation Status*: {status}
+            else:
+                if show_failed_expectations:  # noqa: PLR5501
+                    failed_expectations_text = self.create_failed_expectations_text(
+                        validation_result["results"]
+                    )
+            summary_text = ""
+            if validation_result_urls:
+                # This adds hyperlinks for defined URL
+                if len(validation_result_urls) == 1:
+                    title_hlink = f"*<{validation_result_urls[0]} | Validation Result>*"
+                else:
+                    title_hlink = "*Validation Result*"
+                batch_validation_status_hlinks = "".join(
+                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
+                    for validation_result_url in validation_result_urls
+                )
+                summary_text += f"""{title_hlink}
+{batch_validation_status_hlinks}
+                """
+            else:
+                summary_text += f"*Batch Validation Status*: {status}"
+
+            summary_text += f"""
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
 *Run ID*: `{run_id}`
 *Batch ID*: `{batch_id}`
 *Summary*: {check_details_text}"""
+
+            if failed_expectations_text:
+                summary_text += failed_expectations_text
+
             query["blocks"][0]["text"]["text"] = summary_text
             # this abbreviated root level "text" will show up in the notification and not the message
             query["text"] = f"{expectation_suite_name}: {status}"
@@ -84,13 +119,17 @@ class SlackRenderer(Renderer):
                             report_element = self._get_report_element(docs_link)
                         else:
                             logger.critical(
-                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n"
+                                f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
+                                f"{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the "
+                                f"`great_expectations.yml`\n"
                             )
                             report_element = {
                                 "type": "section",
                                 "text": {
                                     "type": "mrkdwn",
-                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the `great_expectations.yml`\n",
+                                    "text": f"*ERROR*: Slack is trying to provide a link to the following DataDocs: "
+                                    f"`{str(docs_link_key)}`, but it is not configured under "
+                                    f"`data_docs_sites` in the `great_expectations.yml`\n",
                                 },
                             }
                         if report_element:
@@ -126,7 +165,7 @@ class SlackRenderer(Renderer):
                 }
                 query["blocks"].append(dataset_element)
 
-        documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
+        documentation_url = "https://docs.greatexpectations.io/docs/terms/data_docs"
         footer_section = {
             "type": "context",
             "elements": [
@@ -152,7 +191,8 @@ class SlackRenderer(Renderer):
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
+                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into "
+                            f"a browser to view)\n",
                         },
                     }
                 else:
@@ -175,3 +215,44 @@ class SlackRenderer(Renderer):
                 "No docs link found. Skipping data docs link in Slack message."
             )
         return report_element
+
+    def create_failed_expectations_text(self, validation_results: list[dict]) -> str:
+        failed_expectations_str = "\n*Failed Expectations*:\n"
+        for expectation in validation_results:
+            if not expectation["success"]:
+                expectation_name = expectation["expectation_config"]["expectation_type"]
+                expectation_kwargs = expectation["expectation_config"]["kwargs"]
+                failed_expectations_str += self.create_failed_expectation_text(
+                    expectation_kwargs, expectation_name
+                )
+        return failed_expectations_str
+
+    def create_failed_expectation_text(
+        self, expectation_kwargs, expectation_name
+    ) -> str:
+        expectation_entity = self.get_failed_expectation_domain(
+            expectation_name, expectation_kwargs
+        )
+        if expectation_entity:
+            return f":x:{expectation_name} ({expectation_entity})\n"
+        return f":x:{expectation_name}\n"
+
+    @staticmethod
+    def get_failed_expectation_domain(
+        expectation_name, expectation_config_kwargs: dict
+    ) -> str:
+        if "expect_table_" in expectation_name:
+            return "Table"
+
+        column_name, column_a, column_b, column_list = (
+            expectation_config_kwargs.get("column"),
+            expectation_config_kwargs.get("column_A"),
+            expectation_config_kwargs.get("column_B"),
+            expectation_config_kwargs.get("column_list"),
+        )
+        if column_name:
+            return column_name
+        elif column_a and column_b:
+            return f"{column_a}, {column_b}"
+        elif column_list:
+            return str(column_list)

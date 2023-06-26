@@ -2,12 +2,13 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
+import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 
 
 @pytest.fixture
@@ -181,7 +182,9 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
+    res["value"]["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
+    )
 
     snapshot.assert_match(res)
 
@@ -226,7 +229,55 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
+    res["value"]["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
+    )
+    snapshot.assert_match(res)
+
+
+def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
+    snapshot, get_diagnostic_rendered_content
+):
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    expectation_config = {
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+            "column": "boolean_event",
+            "partition_object": {
+                "bins": [True, False],
+                "weights": [0.5, 0.5],
+            },
+            "threshold": 0.1,
+        },
+        "meta": {},
+        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+    }
+    update_dict = {
+        "expectation_config": ExpectationConfiguration(**expectation_config),
+        "result": {
+            "observed_value": 0.0,
+            "details": {
+                "observed_partition": {
+                    "values": [True, False],
+                    "weights": [0.5, 0.5],
+                },
+                "expected_partition": {
+                    "values": [True, False],
+                    "weights": [0.5, 0.5],
+                },
+            },
+        },
+    }
+    rendered_content = get_diagnostic_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+
+    # replace version of vega-lite in res to match snapshot test
+    res["value"]["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
+    )
     snapshot.assert_match(res)
 
 
@@ -660,7 +711,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_decreasing(
             "column": "my_column",
             "mostly": 0.8,
             "parse_strings_as_datetimes": True,
-            "strictly": 50,
+            "strictly": True,
         },
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)
@@ -718,7 +769,7 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_increasing(
         "expectation_type": "expect_column_values_to_be_increasing",
         "kwargs": {
             "column": "my_column",
-            "strictly": 10,
+            "strictly": True,
             "mostly": 0.8,
             "parse_strings_as_datetimes": True,
         },
@@ -756,6 +807,23 @@ def test_atomic_prescriptive_summary_expect_column_values_to_be_null(
         "kwargs": {
             "column": "my_column",
             "mostly": 0.8,
+        },
+    }
+    rendered_content = get_prescriptive_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+    snapshot.assert_match(res)
+
+
+def test_atomic_prescriptive_summary_expect_column_values_to_be_null_with_mostly_equals_1(
+    snapshot, get_prescriptive_rendered_content
+):
+    update_dict = {
+        "expectation_type": "expect_column_values_to_be_null",
+        "kwargs": {
+            "column": "my_column",
+            "mostly": 1.0,
         },
     }
     rendered_content = get_prescriptive_rendered_content(update_dict)

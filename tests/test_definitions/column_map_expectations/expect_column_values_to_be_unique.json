@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_unique",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_unique_1",
     "data" : {
       "a" : ["2", "2", "2", null],
       "b" : [1, "2", 2, null],
@@ -51,6 +52,16 @@
         "unique": "NUMERIC",
         "null": "STRING",
         "mult_dup": "STRING"
+      },
+      "trino": {
+        "a": "VARCHAR",
+        "b": "VARCHAR",
+        "c": "INTEGER",
+        "d": "VARCHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "VARCHAR",
+        "mult_dup": "VARCHAR"
       }
     },
     "tests" : [
@@ -76,7 +87,7 @@
         "out": {
           "success": false,
           "unexpected_list": ["2", "2", "2"],
-          "unexpected_index_list": [0, 1, 2]
+          "unexpected_index_list":[{"a": "2", "pk_index": 0}, {"a": "2", "pk_index": 1}, {"a": "2", "pk_index": 2}]
         }
       },{
         "title": "multi_type_column_contains_2_and_quoted_2_suppressed_for_sqalchemy",
@@ -89,7 +100,7 @@
         "out": {
           "success": true,
           "unexpected_list": [1, 1],
-          "unexpected_index_list": [0, 1]
+          "unexpected_index_list": [{"c": 1.0, "pk_index": 0}, {"c": 1.0, "pk_index": 1}]
         }
       },{
         "title": "positive_case_using_mostly",
@@ -101,7 +112,7 @@
         "out": {
           "success": true,
           "unexpected_list": [1, 1],
-          "unexpected_index_list": [0, 1]
+          "unexpected_index_list": [{"c": 1.0, "pk_index": 0}, {"c": 1.0, "pk_index": 1}]
         }
       },{
         "title": "negative_case_using_mostly",
@@ -113,7 +124,7 @@
         "out": {
           "success": false,
           "unexpected_list": [1, 1],
-          "unexpected_index_list": [0, 1]
+          "unexpected_index_list": [{"c": 1.0, "pk_index": 0}, {"c": 1.0, "pk_index": 1}]
         }
       },{
         "title": "positive_case_multiple_null_values",
@@ -135,11 +146,43 @@
         "out": {
           "success": false,
           "unexpected_list": [1, 1],
-          "unexpected_index_list": [0, 1]
+          "unexpected_index_list": [{"c": 1.0, "pk_index": 0}, {"c": 1.0, "pk_index": 1}]
         }
-      },{
+      },
+      {
+        "title": "negative_case_all_null_values_bigquery_nones",
+        "exact_match_out": false,
+        "only_for": ["bigquery_v3_api"],
+        "in": {
+          "column": "null"
+        },
+        "out": {
+          "success": false,
+          "unexpected_list": ["None", "None", "None", "None"],
+          "unexpected_index_list": [
+            {
+              "pk_index": 0,
+              "null": "None"
+            },
+            {
+              "pk_index": 1,
+              "null": "None"
+            },
+            {
+              "pk_index": 2,
+              "null": "None"
+            },
+            {
+              "pk_index": 3,
+              "null": "None"
+            }
+          ]
+        }
+      },
+      {
         "title": "positive_case_all_null_values",
         "exact_match_out": false,
+        "suppress_test_for": ["trino", "bigquery"],
         "in": {
           "column": "null"
         },
@@ -157,12 +200,13 @@
         "out": {
           "success": false,
           "unexpected_list": ["1", "1", "2", "2"],
-          "unexpected_index_list": [0, 1, 2, 3]
+          "unexpected_index_list": [{"mult_dup": "1", "pk_index": 0}, {"mult_dup": "1", "pk_index": 1}, {"mult_dup": "2", "pk_index": 2}, {"mult_dup": "2", "pk_index": 3}]
         }
       }
     ]
   },
    {
+    "dataset_name": "expect_column_values_to_be_unique_2",
     "data" : {
       "0": [1, 2, 3, 4],
       "_c0": [1, 2, 3, 4]

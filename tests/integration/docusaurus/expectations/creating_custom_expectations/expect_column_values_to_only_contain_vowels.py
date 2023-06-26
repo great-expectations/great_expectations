@@ -1,23 +1,22 @@
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def">
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring">
     """Values in this column should only contain vowels"""
-
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition">
     regex_camel_name = "Vowel"
     regex = "^[aeiouyAEIOUY]*$"
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural">
     semantic_type_name_plural = "vowels"
-
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
     examples = [
         {
             "data": {
@@ -34,6 +33,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                     "*",
                 ],
             },
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -92,37 +92,25 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
                     "include_in_gallery": True,
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
         }
     ]
-
+    # </snippet>
     map_metric = RegexBasedColumnMapExpectation.register_metric(
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )
-
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata">
     library_metadata = {
         "tags": ["regex"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
-# </snippet>
 if __name__ == "__main__":
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
     ExpectColumnValuesToOnlyContainVowels().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
@@ -130,11 +118,12 @@ diagnostics = ExpectColumnValuesToOnlyContainVowels().run_diagnostics()
 
 for check in diagnostics["tests"]:
     assert check["test_passed"] is True
-    assert check["error_message"] is None
-    assert check["stack_trace"] is None
+    assert check["error_diagnostics"] is None
 
 for check in diagnostics["errors"]:
     assert check is None
 
 for check in diagnostics["maturity_checklist"]["experimental"]:
+    if check["message"] == "Passes all linting checks":
+        continue
     assert check["passed"] is True

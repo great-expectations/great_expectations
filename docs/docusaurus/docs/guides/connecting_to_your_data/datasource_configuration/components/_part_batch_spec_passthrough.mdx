@@ -1,0 +1,38 @@
+The parameter `batch_spec_passthrough` is used to access some native capabilities of your Execution Engine.  If you do not specify it, your Execution Engine will attempt to determine the values based off of file extensions and defaults.  If you do define it, it will contain two keys: `reader_method` and `reader_options`.  These will correspond to a string and a dictionary, respectively.
+
+```python name="empty batch_spec_passthrough"
+```
+
+#### Configuring your `reader_method`:
+
+The `reader_method` is used to specify which of Spark's `spark.read.*`  methods will be used to read your data.  For our example, we are using `.csv` files as our source data, so we will specify the `csv` method of `spark.reader` as our `reader_method`, like so:
+
+```python name="set reader_method to csv"
+```
+
+#### Configuring your `reader_options`:
+
+Start by adding a blank dictionary as the value of the `reader_options` parameter.  This dictionary will hold two key/value pairs: `header` and `inferSchema`.
+
+```python name="empty keys for reader_options"
+```
+
+The first key is `header`, and the value should be either `True` or `False`.  This will indicate to the Data Connector whether or not the first row of each source data file is a header row.  For our example, we will set this to `True`.
+
+```python name="populate header for reader_options as True"
+```
+
+The second key to include is `inferSchema`.  Again, the value should be either `True` or `False`.  This will indicate to the Data Connector whether or not the Execution Engine should attempt to infer the data type contained by each column in the source data files.  Again, we will set this to `True` for the purpose of this guide's example.
+
+```python name="populate inferSchema for reader_options as True"
+```
+
+:::caution
+- `inferSchema` will read datetime columns in as text columns.
+
+:::
+
+At this point, your `batch_spec_passthrough` configuration should look like:
+
+```python name="fully populated batch_spec_passthrough configuration"
+```

@@ -1,27 +1,66 @@
 {
   "expectation_type" : "expect_column_max_to_be_between",
   "datasets" : [{
+    "dataset_name": "expect_column_max_to_be_between_1",
     "data" : {
       "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
       "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
       "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
       "a" : [null, 0, null, null, 1, null, null, 2, null, null],
-      "b" : [null, 0, null, null, 2, null, null, 1, null, null]
+      "b" : [null, 0, null, null, 2, null, null, 1, null, null],
+      "ts": [
+          "1970-01-01T12:00:01",
+          "1999-12-31T12:00:01",
+          "2000-01-01T12:00:01",
+          "2000-02-01T12:00:01",
+          "2000-03-01T12:00:01",
+          "2000-04-01T12:00:01",
+          "2000-05-01T12:00:01",
+          "2000-06-01T12:00:01",
+          null,
+          "2001-01-01T12:00:01"
+        ]
     },
     "schemas": {
+      "pandas": {
+        "w" : "int",
+        "x" : "float",
+        "y" : "float",
+        "a" : "float",
+        "b" : "float",
+        "ts": "datetime64"
+      },
+      "spark": {
+        "w" : "IntegerType",
+        "x" : "IntegerType",
+        "y" : "IntegerType",
+        "a" : "IntegerType",
+        "b" : "IntegerType",
+        "ts": "TimestampType"
+      },
       "sqlite": {
         "w" : "INTEGER",
         "x" : "INTEGER",
         "y" : "INTEGER",
         "a" : "INTEGER",
-        "b" : "INTEGER"
+        "b" : "INTEGER",
+        "ts": "DATETIME"
       },
       "postgresql": {
         "w" : "INTEGER",
         "x" : "INTEGER",
         "y" : "INTEGER",
         "a" : "INTEGER",
-        "b" : "INTEGER"
+        "b" : "INTEGER",
+        "ts": "TIMESTAMP"
+      },
+      "snowflake": {
+        "w" : "NUMBER",
+        "x" : "NUMBER",
+        "y" : "NUMBER",
+        "a" : "NUMBER",
+        "b" : "NUMBER",
+        "ts": "TIMESTAMP_NTZ"
       }
     },
     "tests" : [{
@@ -87,8 +126,66 @@
         "success": false,
         "observed_value": 5
       }
-    }]},
+    },{
+      "title": "datetime_except_sqlite",
+      "suppress_test_for": ["sqlite"],
+      "exact_match_out": false,
+      "in": {
+        "column": "ts",
+        "min_value": "2001-01-01T12:00:01",
+        "max_value": "2001-01-01T12:00:01"
+      },
+      "out": {
+        "success": true,
+        "observed_value": "2001-01-01T12:00:01"
+      }
+    },{
+      "title": "datetime_sqlite",
+      "only_for": ["sqlite"],
+      "exact_match_out": false,
+      "in": {
+        "column": "ts",
+        "min_value": "2001-01-01 12:00:01",
+        "max_value": "2001-01-01 12:00:01"
+      },
+      "out": {
+        "success": true,
+        "observed_value": "2001-01-01 12:00:01"
+      }
+    },{
+      "title": "datetime_with_evaluation_parameter_except_sqlite",
+      "suppress_test_for": ["sqlite"],
+      "exact_match_out": false,
+      "in": {
+        "column": "ts",
+        "min_value": {
+          "$PARAMETER": "now() - timedelta(weeks=52)"
+        }
+      },
+      "out": {
+        "success": false,
+        "observed_value": "2001-01-01T12:00:01"
+      }
+    },{
+      "title": "datetime_with_evaluation_parameter_sqlite",
+      "only_for": [
+        "sqlite"
+      ],
+      "exact_match_out": false,
+      "in": {
+        "column": "ts",
+        "min_value": {
+          "$PARAMETER": "now() - timedelta(weeks=52)"
+        }
+      },
+      "out": {
+        "success": false,
+        "observed_value": "2001-01-01 12:00:01"
+      }
+    }
+    ]},
     {
+      "dataset_name": "expect_column_max_to_be_between_2",
       "data": {
         "empty_column": []
       },

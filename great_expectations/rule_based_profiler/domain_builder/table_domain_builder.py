@@ -1,34 +1,37 @@
-from typing import List, Optional, Union
+from __future__ import annotations
 
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from typing import TYPE_CHECKING, List, Optional
+
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    VARIABLES_KEY,
+    ParameterContainer,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[
-            Union[str, BatchRequest, RuntimeBatchRequest, dict]
-        ] = None,
-        data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+        data_context: Optional[AbstractDataContext] = None,
+    ) -> None:
         """
         Args:
-            batch_list: explicitly specified Batch objects for use in DomainBuilder
-            batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
-            data_context: DataContext
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
-        super().__init__(
-            batch_list=batch_list,
-            batch_request=batch_request,
-            data_context=data_context,
-        )
+        super().__init__(data_context=data_context)
 
     @property
-    def domain_type(self) -> Union[str, MetricDomainTypes]:
+    def domain_type(self) -> MetricDomainTypes:
         return MetricDomainTypes.TABLE
 
     """
@@ -40,12 +43,40 @@ class TableDomainBuilder(DomainBuilder):
 
     def _get_domains(
         self,
+        rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        domains: List[Domain] = [
-            Domain(
-                domain_type=self.domain_type,
+        other_table_name: Optional[str]
+        try:
+            # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+            other_table_name = get_parameter_value_and_validate_return_type(
+                domain=None,
+                parameter_reference=f"{VARIABLES_KEY}table",
+                expected_return_type=None,
+                variables=variables,
+                parameters=None,
             )
-        ]
+        except KeyError:
+            other_table_name = None
+
+        domains: List[Domain]
+        if other_table_name:
+            domains = [
+                Domain(
+                    domain_type=self.domain_type,
+                    domain_kwargs={
+                        "table": other_table_name,
+                    },
+                    rule_name=rule_name,
+                ),
+            ]
+        else:
+            domains = [
+                Domain(
+                    domain_type=self.domain_type,
+                    rule_name=rule_name,
+                ),
+            ]
 
         return domains

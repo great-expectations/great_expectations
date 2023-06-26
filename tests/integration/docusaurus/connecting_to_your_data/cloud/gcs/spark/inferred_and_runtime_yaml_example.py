@@ -1,16 +1,16 @@
 from typing import List
 
-from ruamel import yaml
-
-# <snippet>
-import great_expectations as ge
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py imports">
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
+yaml = YAMLHandler()
 # </snippet>
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
@@ -21,9 +21,9 @@ data_context_config = DataContextConfig(
     store_backend_defaults=store_backend_defaults,
     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -52,16 +52,16 @@ datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py runtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -77,10 +77,8 @@ batch_request.runtime_parameters[
     "path"
 ] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet>
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation">
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -88,11 +86,11 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 
 # Here is a BatchRequest naming a data_asset
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -107,10 +105,8 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-# <snippet>
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2">
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -118,7 +114,7 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pandas as pd
 import pytest
 
@@ -11,7 +9,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 )
 
 
-# <snippet>
+# <snippet name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def">
 class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
     default_kwarg_values = {
         "value_set": ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"],

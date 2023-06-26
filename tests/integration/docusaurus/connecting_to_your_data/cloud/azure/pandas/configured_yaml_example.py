@@ -1,15 +1,17 @@
 import os
 from typing import List
 
-from ruamel import yaml
-
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
-context = ge.get_context()
+context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py datasource config">
 datasource_yaml = f"""
 name: my_azure_datasource
 class_name: Datasource
@@ -34,6 +36,7 @@ data_connectors:
         assets:
             taxi_data:
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -48,7 +51,9 @@ datasource_yaml = datasource_yaml.replace(
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py test datasource">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
@@ -63,9 +68,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -73,7 +76,7 @@ print(validator.head())
 
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_azure_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_azure_datasource"][

@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -6,10 +8,19 @@ from great_expectations.render.renderer.renderer import Renderer
 
 
 def test_render():
-    # ??? Should this really return the input object?
-    # Seems like raising NotImplementedError might be preferable.
-    assert Renderer().render({}) == {}
-    assert Renderer().render("wowza") == "wowza"
+    # noinspection PyUnusedLocal
+    with pytest.raises(NotImplementedError):
+        Renderer().render(**{})
+
+    # noinspection PyUnusedLocal
+    with pytest.raises(TypeError):
+        # noinspection PyArgumentList
+        Renderer().render({})
+
+    # noinspection PyUnusedLocal
+    with pytest.raises(TypeError):
+        # noinspection PyArgumentList
+        Renderer().render("wowza")
 
 
 # TODO: Implement this test thoughtfully

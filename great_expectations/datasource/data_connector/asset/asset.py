@@ -6,11 +6,11 @@ logger = logging.getLogger(__name__)
 
 class Asset:
     """
-    A typed data asset class that maintains data asset specific properties (to override data connector level proprties with
+    A typed data asset class that maintains data asset specific properties (to override data connector level properties with
     the same name and/or semantics, such as "partitioner_name", "base_directory", and "glob_directive").
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         base_directory: Optional[str] = None,
@@ -18,6 +18,7 @@ class Asset:
         pattern: Optional[str] = None,
         group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_identifiers: Optional[List[str]] = None,
         # S3
         bucket: Optional[str] = None,
         max_keys: Optional[int] = None,
@@ -31,7 +32,8 @@ class Asset:
         prefix: Optional[str] = None,
         # Both S3/Azure
         delimiter: Optional[str] = None,
-    ):
+        reader_options: Optional[dict] = None,
+    ) -> None:
         self._name = name
         self._base_directory = base_directory
         self._glob_directive = glob_directive
@@ -39,6 +41,7 @@ class Asset:
         # Note: this may need to become a nested object to accommodate sorters
         self._group_names = group_names
         self._batch_spec_passthrough = batch_spec_passthrough or {}
+        self._batch_identifiers = batch_identifiers
 
         # S3
         self._bucket = bucket
@@ -57,6 +60,8 @@ class Asset:
 
         # Both S3/Azure
         self._delimiter = delimiter
+
+        self._reader_options = reader_options
 
     @property
     def name(self) -> str:
@@ -113,3 +118,7 @@ class Asset:
     @property
     def delimiter(self) -> Optional[str]:
         return self._delimiter
+
+    @property
+    def batch_identifiers(self) -> Optional[List[str]]:
+        return self._batch_identifiers

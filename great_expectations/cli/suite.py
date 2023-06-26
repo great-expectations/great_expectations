@@ -6,21 +6,32 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
 # noinspection PyPep8Naming
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.core import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.render.renderer.notebook_renderer import (
+    BaseNotebookRenderer,  # noqa: TCH001
+)
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -28,27 +39,40 @@ from great_expectations.render.renderer.v3.suite_profile_notebook_renderer impor
     SuiteProfileNotebookRenderer,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
+
+
+MESSAGE_USER_CONFIGURABLE_PROFILER: str = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+MESSAGE_ONBOARDING_DATA_ASSISTANT: str = "Since you did not supply a profiler name, defaulting to the OnboardingDataAssistant"
+MESSAGE_RULE_BASED_PROFILER: str = (
+    "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+)
 
 
 @click.group()
 @click.pass_context
-def suite(ctx):
+def suite(ctx: click.Context) -> None:
     """Expectation Suite operations"""
     ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
-    usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
+    cli_event_noun: str = "suite"
+    (
+        begin_event_name,
+        end_event_name,
+    ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
+        noun=cli_event_noun,
+        verb=ctx.invoked_subcommand,
+    )
     send_usage_message(
         data_context=ctx.obj.data_context,
-        event=f"{usage_stats_prefix}.begin",
+        event=begin_event_name,
         success=True,
     )
-    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+    ctx.obj.usage_event_end = end_event_name
 
 
 @suite.command(name="new")
@@ -104,7 +128,7 @@ Assumes --interactive flag.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_new(
+def suite_new(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: Optional[str],
     interactive_flag: bool,
@@ -119,6 +143,16 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_NEW_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_NEW_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
     profile: bool = _determine_profile(profiler_name)
@@ -148,15 +182,16 @@ def _determine_profile(profiler_name: Optional[str]) -> bool:
     profile: bool = profiler_name is not None
     if profile:
         if profiler_name:
-            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+            msg = MESSAGE_RULE_BASED_PROFILER
         else:
-            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+            # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
+            msg = MESSAGE_USER_CONFIGURABLE_PROFILER
         cli_message(string=f"<yellow>{msg}</yellow>")
 
     return profile
 
 
-def _process_suite_new_flags_and_prompt(
+def _process_suite_new_flags_and_prompt(  # noqa: PLR0913
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -203,7 +238,7 @@ def _process_suite_new_flags_and_prompt(
     return interactive_mode, profile
 
 
-def _suite_new_workflow(
+def _suite_new_workflow(  # noqa: PLR0913
     context: DataContext,
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
@@ -294,8 +329,8 @@ def _suite_new_workflow(
             assume_yes=False,
         )
     except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.ProfilerError,
         ValueError,
         OSError,
         SQLAlchemyError,
@@ -348,7 +383,6 @@ def _suite_new_process_profile_and_batch_request_flags(
     profile: bool,
     batch_request: Optional[str],
 ) -> CLISuiteInteractiveFlagCombinations:
-
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     interactive_flag = interactive_mode.value["interactive_flag"]
 
@@ -430,9 +464,9 @@ def _suite_new_mode_from_prompt(
     suite_create_method: str = click.prompt(
         """
 How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
+    1. Manually, without interacting with a sample Batch of data (default)
+    2. Interactively, with a sample Batch of data
+    3. Automatically, using a Data Assistant
 """,
         type=click.Choice(["1", "2", "3"]),
         show_choices=False,
@@ -440,7 +474,7 @@ How would you like to create your Expectation Suite?
         show_default=False,
     )
     # Default option
-    if suite_create_method == "":
+    if suite_create_method == "":  # noqa: PLC1901
         profile = False
         interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
     elif suite_create_method == "1":
@@ -507,7 +541,7 @@ Assumes --interactive flag.  Incompatible with --datasource-name option.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_edit(
+def suite_edit(  # noqa: PLR0913
     ctx: click.Context,
     expectation_suite: str,
     interactive_flag: bool,
@@ -529,6 +563,16 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_EDIT_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_EDIT_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     interactive_mode: CLISuiteInteractiveFlagCombinations = (
         _process_suite_edit_flags_and_prompt(
@@ -562,7 +606,7 @@ def suite_edit(
     )
 
 
-def _process_suite_edit_flags_and_prompt(
+def _process_suite_edit_flags_and_prompt(  # noqa: PLR0913, PLR0912
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
@@ -673,7 +717,7 @@ How would you like to edit your Expectation Suite?
             show_default=False,
         )
         # Default option
-        if suite_edit_method == "":
+        if suite_edit_method == "":  # noqa: PLC1901
             interactive_mode = (
                 CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
             )
@@ -685,7 +729,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(
+def _suite_edit_workflow(  # noqa: C901, PLR0912, PLR0913
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,
@@ -767,7 +811,7 @@ def _suite_edit_workflow(
         notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
-        renderer: SuiteProfileNotebookRenderer
+        renderer: BaseNotebookRenderer
         if profile:
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
@@ -783,9 +827,10 @@ def _suite_edit_workflow(
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
             renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
+            # noinspection PyTypeChecker
             renderer.render_to_disk(
-                suite=suite,
                 notebook_file_path=notebook_path,
+                suite=suite,
                 batch_request=batch_request,
             )
 
@@ -817,8 +862,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             toolkit.launch_jupyter_notebook(notebook_path=notebook_path)
 
     except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.ProfilerError,
         ValueError,
         OSError,
         SQLAlchemyError,
@@ -957,9 +1002,9 @@ def suite_list(ctx: click.Context) -> None:
     )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str):
-    return os.path.abspath(
-        os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

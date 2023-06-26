@@ -1,7 +1,5 @@
 import pandas as pd
-import pytest
 
-import great_expectations.exceptions.exceptions
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.expectations.core.expect_column_mean_to_be_between import (
@@ -9,7 +7,7 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 )
 
 
-# <snippet>
+# <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     """Expects the mean of values in this column to be positive"""
 
@@ -18,6 +16,8 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
         "strict_min": True,
     }
 
+    # </snippet>
+    # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config">
     def validate_configuration(self, configuration):
         super().validate_configuration(configuration)
         assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
@@ -25,10 +25,14 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
         assert "strict_min" not in configuration.kwargs, "strict_min cannot be altered"
         assert "strict_max" not in configuration.kwargs, "strict_max cannot be altered"
 
+    # </snippet>
+    # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py library_metadata">
     library_metadata = {"tags": ["basic stats"], "contributors": ["@joegargery"]}
 
 
-# </snippet>
+#     </snippet>
+
+
 def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
 
