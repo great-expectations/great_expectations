@@ -108,8 +108,6 @@ module.exports = {
       link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
         'guides/validation/validate_data_overview',
-        'guides/validation/how_to_validate_data_by_running_a_checkpoint',
-        'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
         'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
         {
           type: 'category',
@@ -119,7 +117,8 @@ module.exports = {
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
-            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
+            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
           ]
         },
         {

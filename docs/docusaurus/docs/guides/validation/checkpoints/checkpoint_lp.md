@@ -15,4 +15,6 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Configure a Checkpoint" description="Configure a Checkpoint using test_yaml_config" href="/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config" icon="/img/configure_icon.svg" />
   <LinkCard topIcon label="Add validation data or Expectation Suites to a Checkpoint" description="Add validation data or Expectation Suites to an existing Checkpoint" href="/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint" icon="/img/validate_icon.svg" />
   <LinkCard topIcon label="Pass an in-memory DataFrame to a Checkpoint" description="Pass an in-memory DataFrame to an existing Checkpoint" href="/docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint" icon="/img/dataframe_checkpoint_icon.svg" />
+  <LinkCard topIcon label="Deploy a scheduled Checkpoint with cron" description="Deploy a scheduled Checkpoint with cron" href="/docs/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron" icon="/img/deploy_icon.svg" />
+  <LinkCard topIcon label="Run a Checkpoint to validate Data" description="Use a Checkpoint to validate Data" href="/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint" icon="/img/validate_icon.svg" />
 </LinkCardGrid>

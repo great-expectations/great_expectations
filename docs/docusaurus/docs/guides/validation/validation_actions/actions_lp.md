@@ -16,4 +16,5 @@ import LinkCard from '/docs/components/LinkCard';
   <LinkCard topIcon label="Trigger Opsgenie notifications" description="Use an Action to create Opsgenie alert notifications" href="/docs/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action" icon="/img/opsgenie_icon.svg" />
   <LinkCard topIcon label="Trigger Slack notifications" description="Use an Action to create Slack notifications for Validation Results" href="/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action" icon="/img/slack_icon.svg" />
   <LinkCard topIcon label="Update Data Docs" description="Use an Action to update Data Docs sites with new Validation Results" href="/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action" icon="/img/update_data_docs_icon.svg" />
+  <LinkCard topIcon label="Get Data Docs URLs for use in custom Validation Actions" description="Create a custom Validation Action that includes a link to Data Docs" href="/docs/guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions" icon="/img/data_doc_link_icon.svg" />
 </LinkCardGrid>
