@@ -193,6 +193,9 @@ class DataAssistantRunner:
             )
             return data_assistant_result
 
+        # Construct arguments to "DataAssistantRunner.run()" method, implemented using "DataAssistantRunner.run_impl()".
+
+        # 1. The signature includes "batch_request" and "estimation" arguments for all "DataAssistant" implementations.
         parameters: List[Parameter] = [
             Parameter(
                 name="batch_request",
@@ -207,19 +210,23 @@ class DataAssistantRunner:
             ),
         ]
 
+        # 2. Extend the signature to include "DataAssistant"-specific "Domain"-level arguments/directives.
         parameters.extend(
             self._get_method_signature_parameters_for_domain_type_directives()
         )
-        # Use separate loop for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.
+        # 3. Extend the signature to include "DataAssistant"-specific "variables"-level arguments/directives.
+        # Use separate call for "variables" so as to organize "domain_type_attributes" and "variables" arguments neatly.
         parameters.extend(
             self._get_method_signature_parameters_for_variables_directives()
         )
 
+        # 4. Encapsulate all arguments/directives into "DataAssistant"-specific "DataAssistantRunner.run()" signature.
         func_sig = Signature(
             parameters=parameters, return_annotation=DataAssistantResult
         )
-        # override the runner docstring with the docstring defined in the implemented DataAssistant child-class
+        # 5. Override the runner docstring with the docstring defined in the implemented DataAssistant child-class.
         run.__doc__ = self._data_assistant_cls.__doc__
+        # 6. Create "DataAssistant"-specific "DataAssistantRunner.run()" method and parametrized implementation closure.
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
