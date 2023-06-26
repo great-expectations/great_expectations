@@ -310,16 +310,16 @@ class DataAssistantRunner:
         domain_type_attribute_name_to_parameter_map: Dict[str, Parameter] = {}
         conflicting_domain_type_attribute_names: List[str] = []
 
-        rule: Rule
-        domain_builder: DomainBuilder | None
+        rule: Rule  # one "Rule" object of underlying "RuleBasedProfiler"
+        domain_builder: DomainBuilder | None  # "DomainBuilder" of "Rule"
         domain_builder_attributes: List[
             str
-        ]  # list of specific "DomainBuilder" arguments/directives
-        key: str  # one argument/directive of specific "DomainBuilder"
-        accessor_method: Callable  # property accessor method for one argument/directive of specific "DomainBuilder"
-        accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of specific "DomainBuilder"
-        property_value: Any  # default return value of property accessor method for one argument/directive of specific "DomainBuilder"
-        parameter: Parameter | None
+        ]  # list of specific "DomainBuilder" arguments/directives of "Rule"
+        key: str  # one argument/directive of "DomainBuilder" of "Rule"
+        property_accessor_method: Callable  # property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        property_accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        property_value: Any  # default return value of property accessor method for one argument/directive of "DomainBuilder" of "Rule"
+        parameter: Parameter | None  #  "Parameter" signature component containing one argument/directive of "DomainBuilder" of "Rule"
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
             assert (
@@ -327,36 +327,52 @@ class DataAssistantRunner:
             ), "Must have a non-null domain_builder attr on the underlying RuleBasedProfiler"
             domain_builder_attributes = self._get_rule_domain_type_attributes(rule=rule)
             for key in domain_builder_attributes:
-                accessor_method = getattr_static(domain_builder, key, None).fget
-                accessor_method_return_type = signature(
-                    obj=accessor_method, follow_wrapped=False
+                """
+                "getattr_static()" returns "getter" "property" definition object, and "fget" on it gives its "Callable"
+                """
+                property_accessor_method = getattr_static(
+                    domain_builder, key, None
+                ).fget
+                property_accessor_method_return_type = signature(
+                    obj=property_accessor_method, follow_wrapped=False
                 ).return_annotation
                 property_value = getattr(domain_builder, key, None)
                 parameter = domain_type_attribute_name_to_parameter_map.get(key)
-                if parameter is None:
+                if (key not in conflicting_domain_type_attribute_names) and (
+                    (parameter is None)
+                    or ((parameter.default is None) and (property_value is not None))
+                ):
+                    """
+                    Condition for incorporating new default value of given "Domain" type argument/directive of
+                    "DomainBuilder" of "Rule" consists of two checks:
+                    1. Given "Domain" type argument/directive name of "DomainBuilder" of "Rule" is not in conflict with
+                    same "Domain" type argument/directive name of "DomainBuilder" of another (already processed) "Rule".
+                    2. Either default value of given "Domain" type argument/directive of "DomainBuilder" of "Rule" has
+                    not yet been incorporated, or it has already been incorporated, but its previous (processed) default
+                    value is None, while configured default value in "DomainBuilder" of current "Rule" is not None (in
+                    other words, if not None is encountered during "Rule" processing, not None value overrites None).
+                    """
                     if key not in conflicting_domain_type_attribute_names:
                         parameter = Parameter(
                             name=key,
                             kind=Parameter.POSITIONAL_OR_KEYWORD,
                             default=property_value,
-                            annotation=accessor_method_return_type,
+                            annotation=property_accessor_method_return_type,
                         )
                         domain_type_attribute_name_to_parameter_map[key] = parameter
                 elif (
-                    parameter.default is None
+                    parameter is not None
                     and property_value is not None
-                    and key not in conflicting_domain_type_attribute_names
+                    and parameter.default != property_value
                 ):
-                    parameter = Parameter(
-                        name=key,
-                        kind=Parameter.POSITIONAL_OR_KEYWORD,
-                        default=property_value,
-                        annotation=accessor_method_return_type,
-                    )
-                    domain_type_attribute_name_to_parameter_map[key] = parameter
-                elif parameter.default != property_value and property_value is not None:
-                    # For now, prevent customization if default values conflict unless the default DomainBuilder value
-                    # is None. In the future, enable at "Rule" level.
+                    """
+                    Handling conflict involves detection of already successful incorporation of "Parameter" for
+                    argument/directive name of "DomainBuilder" of "Rule", but with previous (processed) default value
+                    being different from configured default value of same-named argument/directive in "DomainBuilder" of
+                    current "Rule" being processed.  For now, customization is prevented/disabled if default values
+                    conflict, unless configured default value of argument/directive in "DomainBuilder" of current "Rule"
+                    being processed is None.  In the future, enable argument/directive customization at "Rule" level.
+                    """
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
