@@ -305,8 +305,6 @@ class DataAssistantRunner:
         customization if default values conflict, unless default "DomainBuilder" argument/directive value is None.
         Enabling per-"Rule" customization can be added as well (in addition to having this capability at common level).
         """
-        parameters: List[Parameter] = []
-
         domain_type_attribute_name_to_parameter_map: Dict[str, Parameter] = {}
         conflicting_domain_type_attribute_names: List[str] = []
 
@@ -376,9 +374,7 @@ class DataAssistantRunner:
                     domain_type_attribute_name_to_parameter_map.pop(key)
                     conflicting_domain_type_attribute_names.append(key)
 
-        parameters.extend(domain_type_attribute_name_to_parameter_map.values())
-
-        return parameters
+        return list(domain_type_attribute_name_to_parameter_map.values())
 
     def _get_rule_based_profiler_domain_type_attributes(
         self, rule: Optional[Rule] = None
