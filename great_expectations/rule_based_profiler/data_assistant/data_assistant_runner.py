@@ -273,24 +273,38 @@ class DataAssistantRunner:
     def _get_method_signature_parameters_for_variables_directives(
         self,
     ) -> List[Parameter]:
-        parameters: List[Parameter] = []
-
+        """
+        Using "DataAssistant"-specific configured "Rule" objects of underlying "RuleBasedProfiler", return "Parameter"
+        signature components containing "Rule" "variables" (converted to "dictionary" representation) as default values.
+        """
         rule: Rule
-        for rule in self._profiler.rules:
-            parameters.append(
-                Parameter(
-                    name=rule.name,
-                    kind=Parameter.POSITIONAL_OR_KEYWORD,
-                    default=convert_variables_to_dict(variables=rule.variables),
-                    annotation=dict,
-                )
+        parameters: List[Parameter] = [
+            Parameter(
+                name=rule.name,
+                kind=Parameter.POSITIONAL_OR_KEYWORD,
+                default=convert_variables_to_dict(variables=rule.variables),
+                annotation=dict,
             )
-
+            for rule in self._profiler.rules
+        ]
         return parameters
 
     def _get_method_signature_parameters_for_domain_type_directives(
         self,
     ) -> List[Parameter]:
+        """
+        Using "DataAssistant"-specific configured "Rule" objects of underlying "RuleBasedProfiler", return "Parameter"
+        signature components containing pre-configured "Rule" "DomainBuilder" arguments/directives as default values.
+
+        Each "Rule" in actual "RuleBasedProfiler" architecture includes its own "DomainBuilder", meaning that "Domain"
+        type arguments/directives can differ among "Rule" objects within "RuleBasedProfiler" configuration.  However,
+        this capability is not currently utilized in "DataAssistantRunner.run()" signature -- only common "Domain"
+        type arguments/directives are specified (i.e., not for individual "Rule" objects).  Hence, reconciliation among
+        common "Domain" type arguments/directives with those of individual "Rule" objects must be provided.  The logic
+        maintains list of arguments/directives that are conflicting among "Rule" configurations and (for now) prevents
+        customization if default values conflict, unless default "DomainBuilder" argument/directive value is None.
+        Enabling per-"Rule" customization can be added as well (in addition to having this capability at common level).
+        """
         parameters: List[Parameter] = []
 
         domain_type_attribute_name_to_parameter_map: Dict[str, Parameter] = {}
@@ -298,11 +312,13 @@ class DataAssistantRunner:
 
         rule: Rule
         domain_builder: DomainBuilder | None
-        domain_builder_attributes: List[str]
-        key: str
-        accessor_method: Callable
-        accessor_method_return_type: Type
-        property_value: Any
+        domain_builder_attributes: List[
+            str
+        ]  # list of specific "DomainBuilder" arguments/directives
+        key: str  # one argument/directive of specific "DomainBuilder"
+        accessor_method: Callable  # property accessor method for one argument/directive of specific "DomainBuilder"
+        accessor_method_return_type: Type  # return type of property accessor method for one argument/directive of specific "DomainBuilder"
+        property_value: Any  # default return value of property accessor method for one argument/directive of specific "DomainBuilder"
         parameter: Parameter | None
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
