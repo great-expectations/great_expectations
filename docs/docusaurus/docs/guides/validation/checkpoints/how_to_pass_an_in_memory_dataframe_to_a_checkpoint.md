@@ -1,5 +1,5 @@
 ---
-title: Validate Checkpoints with Expectations and data
+title: Validate data with Expectations and Checkpoints
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
