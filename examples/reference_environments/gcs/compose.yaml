@@ -1,0 +1,13 @@
+services:
+  jupyter:
+    image: gx/gcs_example_jupyter
+    container_name: gx_gcs_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
+    ports:
+      - "8888:8888"
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/creds.json
