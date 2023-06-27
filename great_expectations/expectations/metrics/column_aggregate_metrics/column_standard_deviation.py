@@ -1,7 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Optional
-
-import pandas as pd
+from typing import Optional
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -21,14 +19,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.util import (
-    convert_ndarray_decimal_to_float_dtype,
-    does_ndarray_contain_decimal_dtype,
-)
+from great_expectations.util import convert_pandas_series_decimal_to_float_dtype
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-if TYPE_CHECKING:
-    import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +33,7 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Standard Deviation implementation"""
-        column_data: np.ndarray = column.to_numpy()
-        column_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=column_data)
-        if column_has_decimal:
-            column_data = convert_ndarray_decimal_to_float_dtype(data=column_data)
-            column.update(pd.Series(column_data))
-
+        convert_pandas_series_decimal_to_float_dtype(data=column, inplace=True)
         return column.std()
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
