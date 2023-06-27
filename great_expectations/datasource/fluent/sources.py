@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import inspect
 import logging
 import uuid
 from enum import Enum
@@ -584,7 +583,7 @@ class _SourceFactories:
             return_type=datasource_type,
         )
         return add_or_update_datasource
-        
+
     def delete_datasource(self, name: str) -> None:
         self._data_context._delete_fluent_datasource(datasource_name=name)
         self._data_context._save_project_config()
