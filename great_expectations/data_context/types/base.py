@@ -778,11 +778,13 @@ configuration to continue.
                 "ConfiguredAssetS3DataConnector",
                 "InferredAssetAzureDataConnector",
                 "ConfiguredAssetAzureDataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
+S3/Azure/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
 to continue.
 """
             )
