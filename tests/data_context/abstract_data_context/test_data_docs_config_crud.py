@@ -1,4 +1,5 @@
 import copy
+from unittest import mock
 
 import pytest
 
@@ -28,6 +29,31 @@ class TestAddDataDocsSite:
 
         # Check that the new site is present
         assert new_site_name in ephemeral_context_with_defaults.get_site_names()
+
+    @pytest.mark.unit
+    def test_add_data_docs_site_persists(
+        self, ephemeral_context_with_defaults: EphemeralDataContext
+    ):
+        # Add a new site
+        new_site_name = "my_new_site"
+        new_site_config = {
+            "class_name": "SiteBuilder",
+            "module_name": "great_expectations.render.renderer.site_builder",
+            "store_backend": {
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "/my_new_site/",
+            },
+            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+        }
+        with mock.patch(
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
+        ) as mock_save_project_config:
+            ephemeral_context_with_defaults.add_data_docs_site(
+                site_name=new_site_name, site_config=new_site_config
+            )
+
+        mock_save_project_config.assert_called_once()
 
     @pytest.mark.unit
     def test_add_data_docs_site_already_existing_site_raises_exception(
@@ -105,6 +131,39 @@ class TestUpdateDataDocsSite:
         )
 
     @pytest.mark.unit
+    def test_update_data_docs_site_persists(
+        self, ephemeral_context_with_defaults: EphemeralDataContext
+    ):
+        # Add a new site
+        new_site_name = "my_new_site"
+        new_site_config = {
+            "class_name": "SiteBuilder",
+            "module_name": "great_expectations.render.renderer.site_builder",
+            "store_backend": {
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "/my_new_site/",
+            },
+            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+        }
+        ephemeral_context_with_defaults.add_data_docs_site(
+            site_name=new_site_name, site_config=new_site_config
+        )
+
+        # Update the new site
+        updated_site_config = copy.deepcopy(new_site_config)
+        updated_site_config["store_backend"]["base_directory"] = "/my_updated_site/"
+
+        with mock.patch(
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
+        ) as mock_save_project_config:
+            ephemeral_context_with_defaults.update_data_docs_site(
+                new_site_name, updated_site_config
+            )
+
+        mock_save_project_config.assert_called_once()
+
+    @pytest.mark.unit
     def test_update_data_docs_site_missing_site_raises_exception(
         self,
         ephemeral_context_with_defaults: EphemeralDataContext,
@@ -148,6 +207,21 @@ class TestDeleteDataDocsSite:
         assert (
             existing_site_name not in ephemeral_context_with_defaults.get_site_names()
         )
+
+    @pytest.mark.unit
+    def test_delete_data_docs_site_persists(
+        self, ephemeral_context_with_defaults: EphemeralDataContext
+    ):
+        # Check fixture configuration
+        existing_site_name = "local_site"
+        assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
+
+        with mock.patch(
+            "great_expectations.data_context.EphemeralDataContext._save_project_config"
+        ) as mock_save_project_config:
+            ephemeral_context_with_defaults.delete_data_docs_site(existing_site_name)
+
+        mock_save_project_config.assert_called_once()
 
     @pytest.mark.unit
     def test_delete_data_docs_site_missing_site_raises_exception(
