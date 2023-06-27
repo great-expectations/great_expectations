@@ -68,9 +68,10 @@ def _get_field_details(
     )
 
 
-class CrudMethodType(str, Enum):
+class CrudMethodType(
+    str, Enum
+):  # DELETE is ignored as we don't care for backend-specific deletion
     ADD = "ADD"
-    # DELETE = "DELETE"
     UPDATE = "UPDATE"
     ADD_OR_UPDATE = "ADD_OR_UPDATE"
 
