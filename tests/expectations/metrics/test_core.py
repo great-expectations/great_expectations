@@ -164,11 +164,20 @@ def test_mean_metric_spark(spark_session, dataframe, expected_result):
 @pytest.mark.parametrize(
     "build_engine,dataframe,expected_result",
     [
-        [build_pandas_engine, pd.DataFrame({"a": [1, 2, 3, None]}), 1],
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [1, 2, 3, None]}),
+            1,
+        ],
+        [
+            build_pandas_engine,
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.2814118377984496,
+        ],
     ],
 )
 def test_stdev_metric_pd(build_engine, dataframe, expected_result):
-    engine = build_engine(dataframe)
+    engine = build_engine(df=dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
