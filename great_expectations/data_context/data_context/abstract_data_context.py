@@ -1688,7 +1688,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @new_method_or_class(version="0.17.2")
     def list_data_docs_sites(
         self,
-    ) -> dict:
+    ) -> dict[str, DataDocsSiteConfigTypedDict]:
         """List all Data Docs Sites with configurations."""
 
         if self.config.data_docs_sites is None:
