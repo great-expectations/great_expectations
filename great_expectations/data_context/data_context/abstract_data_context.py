@@ -1674,7 +1674,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_config: Config dict for the new site.
         """
         if site_name in self.config.data_docs_sites:
-            raise ValueError(
+            raise gx_exceptions.InvalidKeyError(
                 f"Data Docs Site `{site_name}` already exists in the Data Context."
             )
 
@@ -1706,7 +1706,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_config: Config dict that replaces the existing.
         """
         if site_name not in self.config.data_docs_sites:
-            raise ValueError(
+            raise gx_exceptions.InvalidKeyError(
                 f"Data Docs Site `{site_name}` does not already exist in the Data Context."
             )
 

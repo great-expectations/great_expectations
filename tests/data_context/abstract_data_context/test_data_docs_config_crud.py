@@ -63,7 +63,7 @@ class TestAddDataDocsSite:
         existing_site_name = "local_site"
         assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(gx_exceptions.InvalidKeyError) as e:
             new_site_name = existing_site_name
             ephemeral_context_with_defaults.add_data_docs_site(
                 site_name=new_site_name, site_config=new_site_config
@@ -145,7 +145,7 @@ class TestUpdateDataDocsSite:
         # Check fixture configuration
         assert "missing" not in ephemeral_context_with_defaults.get_site_names()
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(gx_exceptions.InvalidKeyError) as e:
             ephemeral_context_with_defaults.update_data_docs_site(
                 site_name="missing", site_config=new_site_config
             )
