@@ -16,7 +16,7 @@ from great_expectations.core.batch import (
 if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.core.batch import BatchDataType
+    from great_expectations.core.batch import BatchDataType, AnyBatch
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -38,14 +38,14 @@ class BatchManager:
         self._active_batch_id: Optional[str] = None
         self._active_batch_data_id: Optional[str] = None
 
-        self._batch_cache: Dict[str, Batch] = OrderedDict()
-        self._batch_data_cache: Dict[str, BatchDataType] = {}
+        self._batch_cache: Dict[str, AnyBatch] = OrderedDict()
+        self._batch_data_cache: Dict[str, AnyBatch] = {}
 
         if batch_list:
             self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, BatchDataType]:
+    def batch_data_cache(self) -> Dict[str, AnyBatch]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
@@ -83,7 +83,7 @@ class BatchManager:
         return self._batch_data_cache.get(self.active_batch_data_id)
 
     @property
-    def batch_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> Dict[str, AnyBatch]:
         """Getter for ordered dictionary (cache) of "Batch" objects in use (with batch_id as key)."""
         return self._batch_cache
 

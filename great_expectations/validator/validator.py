@@ -80,6 +80,7 @@ logging.captureWarnings(True)
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (
+        AnyBatch,
         Batch,
         BatchData,
         BatchDefinition,
@@ -263,12 +264,12 @@ class Validator:
         return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def batch_cache(self) -> Dict[str, Union[Batch, FluentBatch]]:
+    def batch_cache(self) -> Dict[str, AnyBatch]:
         """Getter for dictionary of Batch objects (convenience property)"""
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Union[Batch, FluentBatch]]:
+    def batches(self) -> Dict[str, AnyBatch]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 
@@ -443,9 +444,9 @@ class Validator:
             # If progress_bars are not present, assume we want them enabled
             if progress_bars is not None:
                 if "globally" in progress_bars:
-                    enable = progress_bars["globally"]
+                    enable = bool(progress_bars["globally"])
                 if "metric_calculations" in progress_bars:
-                    enable = progress_bars["metric_calculations"]
+                    enable = bool(progress_bars["metric_calculations"])
 
         return enable
 
