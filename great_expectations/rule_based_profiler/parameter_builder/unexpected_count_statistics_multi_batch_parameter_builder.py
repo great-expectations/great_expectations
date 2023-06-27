@@ -3,12 +3,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 # TODO: <Alex>ALEX</Alex>
-# import distfit
-# TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
 import diptest
+
+# TODO: <Alex>ALEX</Alex>
+import distfit
 import numpy as np
 
+# TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
@@ -56,6 +58,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "noop",
+        # TODO: <Alex>ALEX</Alex>
+        "diptest",
+        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         "distfit",
         # TODO: <Alex>ALEX</Alex>
@@ -148,7 +153,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     def round_decimals(self) -> Optional[Union[str, int]]:
         return self._round_decimals
 
-    def _build_parameters(
+    def _build_parameters(  # noqa PLR0915
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -252,36 +257,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         if aggregation_method == "noop":
             result = unexpected_count_fraction_values
             # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-NOOP:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}')
-        elif aggregation_method == "distfit":
-            # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # dfit = distfit.distfit(distr="full")
-            # dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
-            # # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # # dfit = distfit.distfit(method="parametric", todf=True)
-            # # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # # dfit = distfit.distfit(method="parametric", n_boots=100)
-            # # TODO: <Alex>ALEX</Alex>
-            # # dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
-            # # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # # dfit = distfit.distfit(method="quantile")
-            # # dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
-            # # TODO: <Alex>ALEX</Alex>
-            # # TODO: <Alex>ALEX</Alex>
-            # # dfit = distfit.distfit(method="discrete")
-            # # dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
-            # # TODO: <Alex>ALEX</Alex>
-            # # print(
-            # #     f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.SUMMARY-DISTFIT:\n{dfit.summary} ; TYPE: {str(type(dfit.summary))} ; DOMAIN: {domain}"
-            # # )
-            # print(
-            #     f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.MODEL-DISTFIT:\n{dfit.model} ; TYPE: {str(type(dfit.model))} ; DOMAIN: {domain}"
-            # )
-            # TODO: <Alex>ALEX</Alex>
+        elif aggregation_method == "diptest":
             # TODO: <Alex>ALEX</Alex>
             dip, pval = diptest.diptest(unexpected_count_fraction_values)
             print(
@@ -290,8 +266,18 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             print(
                 f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DIPTEST-P_VALUE:\n{pval} ; TYPE: {str(type(pval))} ; DOMAIN: {domain}"
             )
+            result = unexpected_count_fraction_values
             # TODO: <Alex>ALEX</Alex>
+        elif aggregation_method == "distfit":
             # TODO: <Alex>ALEX</Alex>
+            dfit = distfit.distfit(distr="popular")
+            dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
+            # print(
+            #     f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.SUMMARY-DISTFIT:\n{dfit.summary} ; TYPE: {str(type(dfit.summary))} ; DOMAIN: {domain}"
+            # )
+            print(
+                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.MODEL-DISTFIT:\n{dfit.model} ; TYPE: {str(type(dfit.model))} ; DOMAIN: {domain}"
+            )
             result = unexpected_count_fraction_values
             # TODO: <Alex>ALEX</Alex>
         elif aggregation_method == "mean":
