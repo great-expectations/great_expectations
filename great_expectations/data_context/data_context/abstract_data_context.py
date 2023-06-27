@@ -1678,7 +1678,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         if site_name in self.config.data_docs_sites:
             raise ValueError(
-                f"Data Docs Site {site_name} already exists in the DataContext."
+                f"Data Docs Site `{site_name}` already exists in the Data Context."
             )
 
         sites = self.config.data_docs_sites

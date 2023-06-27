@@ -1,0 +1,54 @@
+import pytest
+
+from great_expectations.data_context import EphemeralDataContext
+
+
+@pytest.mark.unit
+def test_add_data_docs_site(ephemeral_context_with_defaults: EphemeralDataContext):
+    # Add a new site
+    new_site_name = "my_new_site"
+    new_site_config = {
+        "class_name": "SiteBuilder",
+        "module_name": "great_expectations.render.renderer.site_builder",
+        "store_backend": {
+            "module_name": "great_expectations.data_context.store.tuple_store_backend",
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": "/my_new_site/",
+        },
+        "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+    }
+    ephemeral_context_with_defaults.add_data_docs_site(
+        site_name=new_site_name, site_config=new_site_config
+    )
+
+    # Check that the new site is present
+    assert new_site_name in ephemeral_context_with_defaults.get_site_names()
+
+
+@pytest.mark.unit
+def test_add_data_docs_site_already_existing_site_raises_exception(
+    ephemeral_context_with_defaults: EphemeralDataContext,
+):
+    # Check fixture configuration
+    existing_site_name = "local_site"
+    assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
+
+    with pytest.raises(ValueError) as e:
+        new_site_name = existing_site_name
+        new_site_config = {
+            "class_name": "SiteBuilder",
+            "module_name": "great_expectations.render.renderer.site_builder",
+            "store_backend": {
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "/my_new_site/",
+            },
+            "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+        }
+        ephemeral_context_with_defaults.add_data_docs_site(
+            site_name=new_site_name, site_config=new_site_config
+        )
+
+    assert "Data Docs Site `local_site` already exists in the Data Context." in str(
+        e.value
+    )
