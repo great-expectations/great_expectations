@@ -1,5 +1,5 @@
 """
-Purpose: To ensure that all integration test files within `tests/integration/docusaurus/` 
+Purpose: To ensure that all integration test files within `tests/integration/docusaurus/`
 are included in the integration test suite.
 
 Example test file:
@@ -23,7 +23,6 @@ import shutil
 import subprocess
 import sys
 from typing import Set
-from importlib import import_module
 
 
 def check_dependencies(*deps: str) -> None:
@@ -110,12 +109,10 @@ def get_test_files_in_test_suite(target_dir: pathlib.Path) -> Set[str]:
             input=res_test_fixture_definitions.stdout,
             capture_output=True,
         )
-        return set(
-            [
-                s.strip()
+        return {
+            s.strip()
                 for s in res_test_files_with_fixture_definitions.stdout.splitlines()
-            ]
-        )
+        }
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
