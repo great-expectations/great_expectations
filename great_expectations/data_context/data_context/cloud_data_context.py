@@ -63,7 +63,9 @@ if TYPE_CHECKING:
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
+    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent import Datasource as FluentDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validator.validator import Validator
 
@@ -919,3 +921,26 @@ class CloudDataContext(SerializableDataContext):
             url
         ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
+
+    def _add_datasource(
+        self,
+        name: str | None = None,
+        initialize: bool = True,
+        save_changes: bool | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        **kwargs,
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+        result = super()._add_datasource(
+            name=name,
+            initialize=initialize,
+            save_changes=save_changes,
+            datasource=datasource,
+        )
+        if result and not isinstance(result, FluentDatasource):
+            # deprecated-v0.17.2
+            warnings.warn(
+                "Adding block-style or legacy datasources in a Cloud-backed environment is deprecated as of v0.17.2 and will be removed in v0.19. "
+                "Please migrate to fluent-style datasources moving forward.",
+                DeprecationWarning,
+            )
+        return result
