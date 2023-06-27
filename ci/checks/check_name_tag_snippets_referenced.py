@@ -32,7 +32,7 @@ def check_dependencies(*deps: str) -> None:
             raise Exception(f"Must have `{dep}` installed in PATH to run {__file__}")
 
 
-def run_grep(target_dir: pathlib.Path) -> List[str]:
+def get_snippet_definitions(target_dir: pathlib.Path) -> List[str]:
     try:
         res_snippets = subprocess.run(
             [
@@ -55,13 +55,22 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             input=res_snippets.stdout,
             capture_output=True,
         )
+        return res_snippet_names.stdout.splitlines()
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(
+            f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
+        ) from e
 
+
+def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
+    try:
         res_snippet_usages = subprocess.run(
             [
                 "grep",
                 "--recursive",
                 "--binary-files=without-match",
                 "--no-filename",
+                "--exclude-dir=versioned_code",
                 "--ignore-case",
                 "-E",
                 "--regexp",
@@ -77,14 +86,7 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
             input=res_snippet_usages.stdout,
             capture_output=True,
         )
-        unused_snippet_names = sorted(
-            list(
-                set(res_snippet_names.stdout.splitlines()).difference(
-                    set(res_snippet_used_names.stdout.splitlines())
-                )
-            )
-        )
-        return unused_snippet_names
+        return res_snippet_used_names.stdout.splitlines()
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
             f"Command {e.cmd} returned with error (code {e.returncode}): {e.output}"
@@ -92,18 +94,24 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
 
 
 def main() -> None:
-    check_dependencies("grep")
-    check_dependencies("sed")
+    check_dependencies("grep", "sed")
     project_root = pathlib.Path(__file__).parent.parent.parent
     docs_dir = project_root / "docs"
     assert docs_dir.exists()
-    new_violations = run_grep(docs_dir)
+    tests_dir = project_root / "tests"
+    assert tests_dir.exists()
+    new_violations = set(get_snippet_definitions(tests_dir)).difference(
+        set(get_snippets_used(docs_dir))
+    )
     if new_violations:
         print(
             f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file."
         )
         for line in new_violations:
             print(line)
+        print(
+            f"[ERROR] Found {len(new_violations)} snippets which are not used within a doc file."
+        )
         sys.exit(1)
 
 
