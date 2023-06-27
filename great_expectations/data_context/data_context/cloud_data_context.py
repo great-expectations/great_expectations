@@ -935,6 +935,7 @@ class CloudDataContext(SerializableDataContext):
             initialize=initialize,
             save_changes=save_changes,
             datasource=datasource,
+            **kwargs,
         )
         if result and not isinstance(result, FluentDatasource):
             # deprecated-v0.17.2
