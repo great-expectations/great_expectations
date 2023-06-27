@@ -17,6 +17,7 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.compatibility import trino
 from great_expectations.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
@@ -27,7 +28,6 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     pgDialect,
     snowflakeDialect,
-    trinoDialect,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
@@ -240,7 +240,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         generate_test = True
                                     elif (
                                         "trino" in test["only_for"]
-                                        and trinoDialect is not None
+                                        and trino.trino
+                                        and trino.trinodialect.TrinoDialect
                                         and hasattr(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
@@ -395,7 +396,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     or (
                                         "trino" in suppress_test_for
-                                        and trinoDialect is not None
+                                        and trino.trinodialect.TrinoDialect
                                         and validator_with_data
                                         and isinstance(
                                             validator_with_data.active_batch_data,

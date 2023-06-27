@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -50,10 +50,6 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-try:
-    import trino
-except ImportError:
-    trino = None
 try:
     import clickhouse_sqlalchemy
 except ImportError:
@@ -172,7 +168,7 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         # Trino
         # noinspection PyUnresolvedReferences
         if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.sqlalchemy.dialect.TrinoDialect
+            dialect, trino.trinodialect.TrinoDialect
         ):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -801,7 +797,7 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
+        if isinstance(dialect, trino.trinodialect.TrinoDialect) or hasattr(
             dialect, "TrinoDialect"
         ):
             dialect_supported = True

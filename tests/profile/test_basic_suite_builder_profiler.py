@@ -12,6 +12,7 @@ from numpy import Infinity
 
 import great_expectations as gx
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.compatibility import trino
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.exceptions import ProfilerError
@@ -75,7 +76,7 @@ def datetime_dataset(test_backend):
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(
-    is_library_loadable(library_name="trino"),
+    trino.trino and is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
 )
 @pytest.mark.xfail(
@@ -113,7 +114,7 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(
-    is_library_loadable(library_name="trino"),
+    trino.trino and is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
 )
 @pytest.mark.xfail(
