@@ -96,7 +96,7 @@ If you're ready to continue your Great Expectations journey, the following topic
     - [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
     - [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
     - [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-    - [How to use Great Expectations in Databricks](../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+    - [How to use Great Expectations in Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md)
 
 - Initialize, instantiate, and save a Data Contex:
     - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
