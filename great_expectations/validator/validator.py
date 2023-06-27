@@ -215,7 +215,7 @@ class Validator:
         )
         self._default_expectation_args: Dict[str, Union[bool, str]] = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
-        )
+        )  # type: ignore[arg-type]
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -451,6 +451,8 @@ class Validator:
         return enable
 
     def __getattr__(self, name):
+        if self.active_batch is None:
+            raise TypeError("active_batch cannot be None")
         name = name.lower()
         if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
@@ -478,15 +480,15 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(name)
 
-        def inst_expectation(*args, **kwargs):  # noqa: PLR0912
+        def inst_expectation(*args: dict, **kwargs):  # noqa: PLR0912
             # this is used so that exceptions are caught appropriately when they occur in expectation config
 
             # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
             # DEVREL has action to develop a new plan in coordination with MarioPod
 
-            expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
+            expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
 
-            meta: dict = expectation_kwargs.pop("meta", None)
+            meta: Optional[dict] = expectation_kwargs.pop("meta", None)
 
             basic_default_expectation_args: dict = {
                 k: v
@@ -500,14 +502,14 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[str, ...] = expectation_impl.get_allowed_config_keys()
 
-            args_keys: Tuple[str] = expectation_impl.args_keys or tuple()
+            args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
             arg_name: str
 
             idx: int
-            arg: Any
+            # arg: dict
             for idx, arg in enumerate(args):
                 try:
                     arg_name = args_keys[idx]

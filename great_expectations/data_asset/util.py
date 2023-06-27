@@ -1,9 +1,11 @@
 # Utility methods for dealing with DataAsset objects
+from __future__ import annotations
 
 import datetime
 import decimal
 import sys
 from functools import wraps
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -79,9 +81,9 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, PLR0912
+def recursively_convert_to_json_serializable(test_obj: dict) -> dict:  # noqa: C901, PLR0911, PLR0912
     """
-    Helper function to convert a dict object to one that is serializable
+    Helper function to convert an object to one that is serializable
 
     Args:
         test_obj: an object to attempt to convert a corresponding json-serializable object
@@ -93,6 +95,9 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901, PLR0911, 
         test_obj may also be converted in place.
 
     """
+    return _recursively_convert_to_json_serializable(test_obj)
+
+def _recursively_convert_to_json_serializable(test_obj) -> Any:  # noqa: C901, PLR0911, PLR0912
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj
