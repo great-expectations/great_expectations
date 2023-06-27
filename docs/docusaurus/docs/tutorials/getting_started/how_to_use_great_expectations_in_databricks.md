@@ -61,10 +61,12 @@ In this guide, we will be using the [Databricks File System (DBFS)](https://docs
     Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
   </details>
 
-Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> in code using the appropriate defaults:
+Run the following code to set the root directory for your <TechnicalTag tag="data_context" text="Data Context"/>:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
 ```
+
+Then, instantiate your Data Context in code:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
 ```
@@ -118,19 +120,28 @@ df = spark.read.format("csv")\
   ]}>
   <TabItem value="file">
 
-Add the Datasource:
+Set the base directory containing our data:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory"
 ```
+
+And create our <TechnicalTag tag="datasource" text="Datasource" />:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
 ```
 
-Add the Data Asset:
+Then we'll set the [batching regex](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
 ```
+
+And create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset"
 ```
 
 Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> we configured earlier to use as a sample of data when creating Expectations:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
 ```
 
@@ -138,15 +149,18 @@ Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using 
 
   <TabItem value="dataframe">
 
-Add the Datasource:
+Create our <TechnicalTag tag="datasource" text="Datasource" />:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
 ```
 
-Add the Data Asset:
+And create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
 ```
 
 Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> we configured earlier to use as a sample of data when creating Expectations:
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py build batch request"
 ```
 
