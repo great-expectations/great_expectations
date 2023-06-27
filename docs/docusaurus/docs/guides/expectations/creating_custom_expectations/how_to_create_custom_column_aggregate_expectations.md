@@ -1,5 +1,5 @@
 ---
-title: How to create a Custom Column Aggregate Expectation
+title: Create a Custom Column Aggregate Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

@@ -1,11 +1,11 @@
 ---
-title: How to add validations data or suites to a Checkpoint
+title: Add validation data or Expectation suites to a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is useful if you want to aggregate individual validations (across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" />) into a single Checkpoint.
+Add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" /> to aggregate individual validations across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" /> into a single Checkpoint. You can also use this process to <TechnicalTag tag="validation" text="Validate" /> multiple source files before and after their ingestion into your data lake.
 
 ## Prerequisites
 
@@ -17,11 +17,9 @@ This guide will help you add validation data or <TechnicalTag tag="expectation_s
 
 </Prerequisites>
 
-## Steps
+## Open your existing Checkpoint
 
-### 1. Open your existing Checkpoint in a text editor
-
-It will look similar to this:
+Open your Checkpoint in a text editor. Your Checkpoint should appear similar to the following example:
 
 ```yaml
 name: my_checkpoint
@@ -52,7 +50,7 @@ validations:
         partial_unexpected_count: 20
 ```
 
-### 2. Edit the existing Checkpoint configuration to add an Expectation Suite 
+## Add an Expectation Suite to the Checkpoint
 
 To add a second Expectation Suite (in this example we add ``users.error``) to your Checkpoint configuration, modify the file to add an additional `batch_request` key and corresponding information, including `evaluation_parameters`, `action_list`, `runtime_configuration`, and `expectation_suite_name`.  In fact, the simplest way to run a different Expectation Suite on the same <TechnicalTag tag="batch" text="Batch" /> of data is to make a copy of the original `batch_request` entry and then edit the `expectation_suite_name` value to correspond to a different Expectation Suite.  The resulting configuration will look like this:
 
@@ -109,9 +107,9 @@ validations:
         partial_unexpected_count: 20
 ```
 
-### 3. Edit the existing Checkpoint configuration to add new validation data
+## Add validation data to the Checkpoint
 
-In the above example, the entry we added with our Expectation Suite was paired with the same Batch of data as the original Expectation Suite.  However, you may also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> (and thus different Batches of data) when you add an Expectation Suite.  The flexibility of easily adding multiple Validations of Batches of data with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> can be demonstrated using the following example of a Checkpoint configuration file:
+In the prvious example, the entry you added with your Expectation Suite was paired with the same Batch of data as the original Expectation Suite.  However, you may also specify different <TechnicalTag tag="batch_request" text="Batch Requests" /> (and thus different Batches of data) when you add an Expectation Suite.  The flexibility of easily adding multiple Validations of Batches of data with different Expectation Suites and specific <TechnicalTag tag="action" text="Actions" /> can be demonstrated using the following example of a Checkpoint configuration file:
 
 ```yaml
 name: my_fancy_checkpoint
@@ -161,12 +159,4 @@ runtime_configuration:
 
 According to this configuration, the locally-specified Expectation Suite ``users.warning`` is run against the ``batch_request`` that employs ``my_data_connector`` with the results processed by the Actions specified in the top-level ``action_list``. Similarly, the locally-specified Expectation Suite ``users.error`` is run against the ``batch_request`` that employs ``my_special_data_connector`` with the results also processed by the actions specified in the top-level ``action_list``. In addition, the top-level Expectation Suite ``users.delivery`` is run against the ``batch_request`` that employs ``my_other_data_connector`` with the results processed by the union of actions in the locally-specified ``action_list`` and in the top-level ``action_list``.
 
-Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for additional Checkpoint configuration examples (including the convenient templating mechanism).
-
-
-## Additional notes
-
-:::tip
-This is a good way to aggregate Validations in a complex pipeline. You could use this feature to **<TechnicalTag tag="validation" text="Validate" /> multiple source files before and after their ingestion into your data lake**.
-:::
-
+See [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for additional Checkpoint configuration examples including the convenient templating mechanism.
