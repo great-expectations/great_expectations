@@ -4,7 +4,6 @@ import pytest
 
 from great_expectations.data_context import EphemeralDataContext
 
-
 SETTER_METHOD_NAMES = [
     "expectations_store_name",
     "validations_store_name",
