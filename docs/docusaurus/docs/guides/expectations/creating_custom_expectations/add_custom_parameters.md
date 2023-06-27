@@ -24,6 +24,8 @@ The tuple in the example includes the two columns being evaluated and the `mostl
 
 In this use case, a `condition_value_keys` tuple and a `condition_domain_keys` tuple are added to ColumnPairMapMetrics, MulticolumnMapMetrics, and ColumnMapMetrics. The `condition_value_keys` tuple supplies the arguments needed to compute your Metric, and the `condition_domain_keys` tuple defines the domain on which the Metric operates.
 
+All parameters being passed to a Metric for use in value or domain keys must also be passed as success_keys in the Expectation class.
+
 This is how the tuples appear in the MulticolumnMapMetrics Metric:
 
 ```python
@@ -74,6 +76,8 @@ To view the full code that you would use to pass custom parameters in a Custom E
 ## kwarg-based access
 
 GX recommends using custom parameters to create validations and optimize workflows. However, you can also use `kwarg` syntax to define Metrics for your Expectations. An example `kwarg` implementation is provided in [expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py](https://github.com/great-expectations/great_expectations/blob/develop/contrib/great_expectations_geospatial_expectations/great_expectations_geospatial_expectations/expectations/expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point.py).
+
+To use `kwarg` syntax to define Metrics for your Expectations, you need to set the `kwargs` with a value_keys tuple first.
 
 ## Allowable parameters
 
