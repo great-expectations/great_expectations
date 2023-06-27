@@ -939,7 +939,7 @@ class CloudDataContext(SerializableDataContext):
         if result and not isinstance(result, FluentDatasource):
             # deprecated-v0.17.2
             warnings.warn(
-                "Adding block-style or legacy datasources in a Cloud-backed environment is deprecated as of v0.17.2 and will be removed in v0.19. "
+                "Adding block-style or legacy datasources in a Cloud-backed environment is deprecated as of v0.17.2 and will be removed in a future version. "
                 "Please migrate to fluent-style datasources moving forward.",
                 DeprecationWarning,
             )
