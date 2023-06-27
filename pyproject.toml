@@ -345,6 +345,7 @@ convention = "google"
 [tool.ruff.flake8-tidy-imports.banned-api]
 "sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 "pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
+"boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
