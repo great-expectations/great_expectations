@@ -9,7 +9,6 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 
 try:
     import sqlalchemy
-
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
