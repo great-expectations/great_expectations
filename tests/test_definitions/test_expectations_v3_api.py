@@ -8,7 +8,7 @@ import pytest
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations import DataContext
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
 )
@@ -17,7 +17,6 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.compatibility import trino
 from great_expectations.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,

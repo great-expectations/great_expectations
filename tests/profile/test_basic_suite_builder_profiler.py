@@ -11,8 +11,8 @@ from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as gx
-from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.compatibility import trino
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.exceptions import ProfilerError

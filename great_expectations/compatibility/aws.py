@@ -12,9 +12,14 @@ except ImportError:
     boto3 = AWS_NOT_IMPORTED
 
 try:
-    import botocore  # TID251
+    import botocore
 except ImportError:
     botocore = AWS_NOT_IMPORTED
+
+try:
+    from botocore.client import Config
+except ImportError:
+    Config = AWS_NOT_IMPORTED
 
 try:
     from botocore import exceptions
