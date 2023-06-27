@@ -1,8 +1,5 @@
 ---
-title: How to Use Great Expectations in Databricks
-sidebar_label: "Databricks"
-description: "Use Great Expectations in Databricks"
-sidebar_custom_props: { icon: 'img/integrations/databricks_icon.png' }
+title: Getting Started with GX and Databricks
 ---
 
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'
