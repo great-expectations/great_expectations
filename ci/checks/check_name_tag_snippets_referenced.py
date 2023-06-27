@@ -71,6 +71,7 @@ def get_snippets_used(target_dir: pathlib.Path) -> List[str]:
                 "--binary-files=without-match",
                 "--no-filename",
                 "--exclude-dir=versioned_code",
+                "--exclude-dir=versioned_docs",
                 "--ignore-case",
                 "-E",
                 "--regexp",
@@ -100,8 +101,10 @@ def main() -> None:
     assert docs_dir.exists()
     tests_dir = project_root / "tests"
     assert tests_dir.exists()
-    new_violations = set(get_snippet_definitions(tests_dir)).difference(
-        set(get_snippets_used(docs_dir))
+    new_violations = sorted(
+        set(get_snippet_definitions(tests_dir)).difference(
+            set(get_snippets_used(docs_dir))
+        )
     )
     if new_violations:
         print(
