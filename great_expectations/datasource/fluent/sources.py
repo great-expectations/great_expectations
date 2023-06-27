@@ -71,7 +71,7 @@ def _get_field_details(
 
 class CrudMethodType(str, Enum):
     ADD = "ADD"
-    DELETE = "DELETE"
+    # DELETE = "DELETE"
     UPDATE = "UPDATE"
     ADD_OR_UPDATE = "ADD_OR_UPDATE"
 
@@ -99,7 +99,7 @@ class _SourceFactories:
     def register_datasource(cls, ds_type: Type[Datasource]) -> None:
         """
         Add/Register a datasource. This registers all the crud datasource methods:
-        add_<datasource>, delete_<datasource>, update_<datasource>, add_or_update_<datasource>
+        add_<datasource>, update_<datasource>, add_or_update_<datasource>
         and all related `Datasource`, `DataAsset` and `ExecutionEngine` types.
 
         Creates mapping table between the `DataSource`/`DataAsset` classes and their
@@ -156,7 +156,6 @@ class _SourceFactories:
         cls._register_add_datasource(ds_type, ds_type_name)
         cls._register_update_datasource(ds_type, ds_type_name)
         cls._register_add_or_update_datasource(ds_type, ds_type_name)
-        cls._register_delete_datasource(ds_type, ds_type_name)
 
         return ds_type_name
 
@@ -193,17 +192,6 @@ class _SourceFactories:
             method_name,
             f"Adds or updates a {ds_type_name} data source.",
             crud_method_info,
-        )
-
-    @classmethod
-    def _register_delete_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
-        method_name = f"delete_{ds_type_name}"
-
-        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
-            return CrudMethodType.DELETE, ds_type
-
-        cls._register_crud_method(
-            method_name, f"Deletes a {ds_type_name} data source.", crud_method_info
         )
 
     @classmethod
@@ -596,22 +584,10 @@ class _SourceFactories:
             return_type=datasource_type,
         )
         return add_or_update_datasource
-
-    def create_delete_crud_method(
-        self,
-        datasource_type: Type[Datasource],
-        doc_string: str = "",
-    ) -> Callable[[str], None]:
-        def delete_datasource(name: str) -> None:
-            logger.debug(f"Delete {datasource_type} with {name}")
-            self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
-            self._data_context._save_project_config()
-
-        delete_datasource.__doc__ = doc_string
-        # attr-defined issue https://github.com/python/mypy/issues/12472
-        delete_datasource.__signature__ = inspect.signature(delete_datasource)  # type: ignore[attr-defined]
-        return delete_datasource
+        
+    def delete_datasource(self, name: str) -> None:
+        self._data_context._delete_fluent_datasource(datasource_name=name)
+        self._data_context._save_project_config()
 
     def __getattr__(self, attr_name: str):
         try:
@@ -624,8 +600,6 @@ class _SourceFactories:
                 return self.create_update_crud_method(datasource_type, docstring)
             elif crud_method_type == CrudMethodType.ADD_OR_UPDATE:
                 return self.create_add_or_update_crud_method(datasource_type, docstring)
-            elif crud_method_type == CrudMethodType.DELETE:
-                return self.create_delete_crud_method(datasource_type, docstring)
             else:
                 raise TypeRegistrationError(
                     f"Unknown crud method registered for {attr_name} with type {crud_method_type}"
