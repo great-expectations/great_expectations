@@ -65,6 +65,13 @@ stages:
             python ci/checks/check_only_name_tag_snippets.py
           name: NameTagSnippetChecker
 
+    - job: integration_test_gets_run_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+        - script: |
+            python ci/checks/check_integration_test_gets_run.py
+          name: IntegrationTestGetsRunChecker
+
     - job: public_api_report
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
