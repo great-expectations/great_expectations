@@ -23,6 +23,7 @@ def files_with_deprecation_warnings() -> List[str]:
         "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
         "great_expectations/compatibility/sqlalchemy_and_pandas.py",
         "great_expectations/compatibility/google.py",
+        "great_expectations/compatibility/pyspark.py",
     ]
     for file_to_exclude in files_to_exclude:
         if file_to_exclude in files:
