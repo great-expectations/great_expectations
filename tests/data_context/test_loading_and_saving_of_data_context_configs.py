@@ -25,6 +25,31 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     assert "my_new_store" in read_config_from_file(config_filename)
 
 
+@pytest.mark.integration
+def test_add_data_docs_site_immediately_adds_to_config(empty_data_context):
+    context = empty_data_context
+    config_filename = context.root_directory + "/great_expectations.yml"
+
+    new_site_name = "my_new_site"
+    new_site_config = {
+        "class_name": "SiteBuilder",
+        "module_name": "great_expectations.render.renderer.site_builder",
+        "store_backend": {
+            "module_name": "great_expectations.data_context.store.tuple_store_backend",
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": context.root_directory + "/my_new_site/",
+        },
+        "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+    }
+
+    assert new_site_name not in read_config_from_file(config_filename)
+    context.add_data_docs_site(
+        new_site_name,
+        new_site_config,
+    )
+    assert new_site_name in read_config_from_file(config_filename)
+
+
 def test_add_datasource(empty_data_context):
     context = empty_data_context
     config_filename = context.root_directory + "/great_expectations.yml"
