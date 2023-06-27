@@ -561,6 +561,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
 
         self.variables.expectations_store_name = value
+        self.variables.save_config()
 
     @property
     def expectations_store(self) -> ExpectationsStore:
@@ -588,6 +589,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             value: New value for the validations store name.
         """
         self.variables.validations_store_name = value
+        self.variables.save_config()
 
     @property
     def validations_store(self) -> ValidationsStore:
@@ -643,6 +645,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             value: New value for the checkpoint store name.
         """
         self.variables.checkpoint_store_name = value
+        self.variables.save_config()
 
     @property
     def checkpoint_store(self) -> CheckpointStore:
@@ -721,6 +724,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             value: New value for the profiler store name.
         """
         self.variables.profiler_store_name = value
+        self.variables.save_config()
 
     @property
     def profiler_store(self) -> ProfilerStore:
@@ -1680,6 +1684,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         sites = self.config.data_docs_sites
         sites[site_name] = site_config
         self.variables.data_docs_sites = sites
+        self.variables.save_config()
 
     @public_api
     @new_method_or_class(version="0.15.48")
