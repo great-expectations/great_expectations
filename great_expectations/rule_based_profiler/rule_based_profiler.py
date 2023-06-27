@@ -932,7 +932,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     ) -> None:
         """
         rules: name/(configuration-dictionary) to modify using "runtime_environment"
-        variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
+        variables_directives_list: additional/override runtime "variables" directives (modify "BaseRuleBasedProfiler")
         """
         if rules is None:
             rules = []
@@ -944,6 +944,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if variables_directives_list is None:
             variables_directives_list = []
 
+        # 1. Ensure that "variables_directives_list" pertains to "Rule" objects (no spurrious "Rule" names).
         variables_directives_list = list(
             filter(
                 lambda element: element.rule_name in rule_names,
@@ -953,11 +954,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         variables_directives: RuntimeEnvironmentVariablesDirectives
 
+        # 2. Now obtain "Rule" names solely pertaining to additional/override runtime "variables" directives.
         rule_names = [
             variables_directives.rule_name
             for variables_directives in variables_directives_list
         ]
 
+        # 3. Filter "Rule" objects to contain only those subject to additional/override runtime "variables" directives.
         rules = list(
             filter(
                 lambda element: element.name in rule_names,
@@ -967,12 +970,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         rules_as_dict: Dict[str, Rule] = {rule.name: rule for rule in rules}
 
+        # 4. Update "variables" of pertinent "Rule" objects, according to corresponding additional/override directives.
         variables: Optional[Dict[str, Any]]
         rule_variables_configs: Optional[Dict[str, Any]]
         for variables_directives in variables_directives_list:
             variables = variables_directives.variables or {}
             rule = rules_as_dict[variables_directives.rule_name]
             rule_variables_configs = convert_variables_to_dict(variables=rule.variables)
+            # Filter only those additional/override directives that correspond to keys in "Rule" "variables" settings.
             # noinspection PyTypeChecker
             variables = dict(
                 filter(
@@ -980,7 +985,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
                     variables.items(),
                 )
             )
+            # Update "Rule" "variables" settings with corresponding values specified by additional/override directives.
             rule_variables_configs.update(variables)
+            # Restore "ParameterContainer" typed object satus of "Rule" "variables" field.
             rule.variables = build_parameter_container_for_variables(
                 variables_configs=rule_variables_configs
             )
@@ -1006,29 +1013,36 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_rules: List[Rule]
         rule: Rule
         for domain_type_directives in domain_type_directives_list:
+            # 1. Ensure that Domain directives pertain to "Rule" objects with "DomainBuilder" of correct "Domain" type.
             domain_rules = [
                 rule
                 for rule in rules
                 if rule.domain_builder.domain_type == domain_type_directives.domain_type
             ]
-            property_key: str
-            property_value: Any
-            existing_property_value: Any
+            domain_property_key: str
+            domain_property_value: Any
+            existing_domain_property_value: Any
+            # 2. Update Domain properties of pertinent "Rule" objects, according to corresponding Domain directives.
             for rule in domain_rules:
                 for (
-                    property_key,
-                    property_value,
+                    domain_property_key,
+                    domain_property_value,
                 ) in domain_type_directives.directives.items():
+                    # Use property getter/setter methods on "DomainBuilder" of "Rule" to affect override directives.
                     try:
-                        # Insure that new directives augment (not eliminate) existing directives.
-                        existing_property_value = getattr(
-                            rule.domain_builder, property_key
+                        # Ensure that new directives augment (not eliminate) existing directives.
+                        existing_domain_property_value = getattr(
+                            rule.domain_builder, domain_property_key
                         )
-                        property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(  # noqa: PLW2901
-                            dest_property_value=property_value,
-                            source_property_value=existing_property_value,
+                        domain_property_value = BaseRuleBasedProfiler._get_effective_domain_builder_property_value(  # noqa: PLW2901
+                            dest_property_value=domain_property_value,
+                            source_property_value=existing_domain_property_value,
                         )
-                        setattr(rule.domain_builder, property_key, property_value)
+                        setattr(
+                            rule.domain_builder,
+                            domain_property_key,
+                            domain_property_value,
+                        )
                     except AttributeError:
                         # Skip every directive that is not defined property of "DomainBuilder" object of "domain_type".
                         pass
@@ -1039,7 +1053,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         source_property_value: Optional[Any] = None,
     ) -> Optional[Any]:
         # Property values of collections types must be unique (use set for "list"/"tuple" and "update" for dictionary).
-
         if isinstance(dest_property_value, list) and isinstance(
             source_property_value, list
         ):
