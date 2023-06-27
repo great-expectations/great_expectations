@@ -68,12 +68,11 @@ def _get_field_details(
     )
 
 
-class CrudMethodType(
-    str, Enum
-):  # DELETE is ignored as we don't care for backend-specific deletion
+class CrudMethodType(str, Enum):
     ADD = "ADD"
     UPDATE = "UPDATE"
     ADD_OR_UPDATE = "ADD_OR_UPDATE"
+    # DELETE is ignored as we don't care for backend-specific deletion
 
 
 CrudMethodInfoFn: TypeAlias = Callable[..., Tuple[CrudMethodType, Type["Datasource"]]]
