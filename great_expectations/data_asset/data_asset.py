@@ -68,6 +68,12 @@ class DataAsset:
         batch_parameters = kwargs.pop("batch_parameters", {})
         batch_markers = kwargs.pop("batch_markers", {})
 
+        if "autoinspect_func" in kwargs:
+            # deprecated-v0.10.10
+            warnings.warn(
+                "Autoinspect_func is deprecated as of v0.10.10 and will be removed in v0.16; use a profiler instead (migration is easy!).",
+                category=DeprecationWarning,
+            )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
         self._data_context = data_context
@@ -92,6 +98,26 @@ class DataAsset:
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
+
+    def autoinspect(self, profiler):
+        """Deprecated: use profile instead.
+
+        Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
+
+        Args:
+            profiler: The profiler to use
+
+        Returns:
+            tuple(expectation_suite, validation_results)
+        """
+        # deprecated-v0.10.10
+        warnings.warn(
+            "The term autoinspect is deprecated as of v0.10.10 and will be removed in v0.16. Please use 'profile'\
+        instead.",
+            DeprecationWarning,
+        )
+        expectation_suite, validation_results = profiler.profile(self)
+        return expectation_suite, validation_results
 
     def profile(self, profiler, profiler_configuration=None):
         """Use the provided profiler to evaluate this data_asset and assign the resulting expectation suite as its own.
