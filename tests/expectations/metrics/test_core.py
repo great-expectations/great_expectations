@@ -121,6 +121,57 @@ def test_column_sum_metric_pd(build_engine, dataframe, expected_result):
 @pytest.mark.parametrize(
     "dataframe,expected_result",
     [
+        [
+            pd.DataFrame({"a": [1, 2, 3, None]}),
+            6,
+        ],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            2.18781,
+        ],
+    ],
+)
+def test_column_sum_metric_spark(spark_session, dataframe, expected_result):
+    engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.sum.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.sum",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: expected_result}
+
+
+@pytest.mark.parametrize(
+    "dataframe,expected_result",
+    [
         [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
         [
             pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
