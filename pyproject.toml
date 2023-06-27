@@ -348,6 +348,7 @@ convention = "google"
 "boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
+"trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
 [tool.pytest.ini_options]
