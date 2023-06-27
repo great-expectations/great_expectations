@@ -7,6 +7,7 @@ services:
       dockerfile: jupyter.Dockerfile
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
+      GCP_PROJECT_NAME: ${GCP_PROJECT_NAME}
     ports:
       - "8888:8888"
     volumes:
