@@ -5,7 +5,7 @@ import logging
 import pathlib
 import random
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
