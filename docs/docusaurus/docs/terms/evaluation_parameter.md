@@ -131,7 +131,7 @@ This returns `{'success': True}`.
 We can also use the temporal expressions "now" and "timedelta". This example states that we expect values for the "load_date" column to be within the last week.
 
 ```python title="Python code"
-validator.expect_column_values_to_be_greater_than(
+validator.expect_column_values_to_be_between(
     column="load_date",
     min_value={"$PARAMETER": "now() - timedelta(weeks=1)"}
 )
