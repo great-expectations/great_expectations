@@ -166,7 +166,11 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ),
         ]
 
-        aggregation_method = "noop"
+        # TODO: <Alex>ALEX</Alex>
+        # aggregation_method = "noop"
+        # TODO: <Alex>ALEX</Alex>
+        aggregation_method = "distfit"
+        # TODO: <Alex>ALEX</Alex>
 
         # TODO: <Alex>ALEX</Alex>
         # column_values_nonnull_unexpected_count_fraction_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedMapMetricMultiBatchParameterBuilder(
@@ -348,7 +352,12 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ),
         ]
 
-        aggregation_method = "noop"
+        # TODO: <Alex>ALEX</Alex>
+        # aggregation_method = "noop"
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        aggregation_method = "distfit"
+        # TODO: <Alex>ALEX</Alex>
 
         # TODO: <Alex>ALEX</Alex>
         # column_values_null_unexpected_count_fraction_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedMapMetricMultiBatchParameterBuilder(
