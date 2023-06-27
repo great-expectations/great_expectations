@@ -199,7 +199,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
 
     This test now adds a simple ParameterBuilder to our Rule. More specifically,
     we use a MetricMultiBatchParameterBuilder to pass in the min_value parameter to
-    expect_column_values_to_be_greater_than.
+    "expect_column_values_to_be_between".
     """
     context: DataContext = data_context_with_taxi_data
     batch_request: BatchRequest = BatchRequest(
@@ -223,7 +223,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     )
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_greater_than",
+            expectation_type="expect_column_values_to_be_between",
             value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
@@ -273,7 +273,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
     )
     config_builder: DefaultExpectationConfigurationBuilder = (
         DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_greater_than",
+            expectation_type="expect_column_values_to_be_between",
             value="$parameter.my_column_min.value[-1]",
             column="$domain.domain_kwargs.column",
         )
@@ -347,7 +347,7 @@ def test_profiler_save_and_load(data_context_with_taxi_data):
                     {
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_values_to_be_greater_than",
+                        "expectation_type": "expect_column_values_to_be_between",
                         "meta": {},
                         "column": "$domain.domain_kwargs.column",
                         "validation_parameter_builder_configs": None,
