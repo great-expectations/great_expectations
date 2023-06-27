@@ -1664,7 +1664,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @new_method_or_class(version="0.17.2")
     def add_data_docs_site(
         self, site_name: str, site_config: DataDocsSiteConfigTypedDict
-    ):
+    ) -> None:
         """Add a new Data Docs Site to the DataContext.
 
         Example site config dicts can be found in our "Host and share Data Docs" guides.
@@ -1672,9 +1672,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             site_name: New site name to add.
             site_config: Config dict for the new site.
-
-        Returns:
-            The instantiated Data Docs Site.
         """
         if site_name in self.config.data_docs_sites:
             raise ValueError(
@@ -1683,6 +1680,47 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         sites = self.config.data_docs_sites
         sites[site_name] = site_config
+        self.variables.data_docs_sites = sites
+        self._save_project_config()
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def update_data_docs_site(
+        self, site_name: str, site_config: DataDocsSiteConfigTypedDict
+    ) -> None:
+        """Update an existing Data Docs Site.
+
+        Example site config dicts can be found in our "Host and share Data Docs" guides.
+
+        Args:
+            site_name: Site name to update.
+            site_config: Config dict that replaces the existing.
+        """
+        if site_name not in self.config.data_docs_sites:
+            raise ValueError(
+                f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+            )
+
+        sites = self.config.data_docs_sites
+        sites[site_name] = site_config
+        self.variables.data_docs_sites = sites
+        self._save_project_config()
+
+    @public_api
+    @new_method_or_class(version="0.17.2")
+    def delete_data_docs_site(self, site_name: str):
+        """Delete an existing Data Docs Site.
+
+        Args:
+            site_name: Site name to delete.
+        """
+        if site_name not in self.config.data_docs_sites:
+            raise ValueError(
+                f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+            )
+
+        sites = self.config.data_docs_sites
+        sites.pop(site_name)
         self.variables.data_docs_sites = sites
         self._save_project_config()
 
