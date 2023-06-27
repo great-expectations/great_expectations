@@ -172,8 +172,8 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        # One for each crud method: add, update, add_or_update, delete
-        assert len(empty_sources.factories) == 4
+        # One for each crud method: add, update, add_or_update
+        assert len(empty_sources.factories) == 3
         # type_lookup maps the MyTestDatasource.type str to the class and vis versa
         assert len(empty_sources.type_lookup) == 2
         assert "my_test" in empty_sources.type_lookup
