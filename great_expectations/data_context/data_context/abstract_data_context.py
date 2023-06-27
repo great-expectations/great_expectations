@@ -1724,7 +1724,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_name: Site name to delete.
         """
         if site_name not in self.config.data_docs_sites:
-            raise ValueError(
+            raise gx_exceptions.InvalidKeyError(
                 f"Data Docs Site `{site_name}` does not already exist in the Data Context."
             )
 

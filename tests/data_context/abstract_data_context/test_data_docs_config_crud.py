@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context import EphemeralDataContext
 
 
@@ -194,7 +195,7 @@ class TestDeleteDataDocsSite:
         # Check fixture configuration
         assert "missing" not in ephemeral_context_with_defaults.get_site_names()
 
-        with pytest.raises(ValueError) as e:
+        with pytest.raises(gx_exceptions.InvalidKeyError) as e:
             ephemeral_context_with_defaults.delete_data_docs_site("missing")
 
         assert (
