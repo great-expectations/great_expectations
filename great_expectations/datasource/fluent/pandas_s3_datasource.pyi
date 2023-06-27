@@ -65,7 +65,6 @@ if TYPE_CHECKING:
     )
 
 logger: Logger
-BOTO3_IMPORTED: bool
 
 class PandasS3DatasourceError(PandasDatasourceError): ...
 
