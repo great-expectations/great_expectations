@@ -1673,24 +1673,28 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_name: New site name to add.
             site_config: Config dict for the new site.
         """
-        if site_name in self.config.data_docs_sites:
-            raise gx_exceptions.InvalidKeyError(
-                f"Data Docs Site `{site_name}` already exists in the Data Context."
-            )
+        if self.config.data_docs_sites is not None:
+            if site_name in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` already exists in the Data Context."
+                )
 
-        sites = self.config.data_docs_sites
-        sites[site_name] = site_config
-        self.variables.data_docs_sites = sites
-        self._save_project_config()
+            sites = self.config.data_docs_sites
+            sites[site_name] = site_config
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
 
     @public_api
     @new_method_or_class(version="0.17.2")
     def list_data_docs_sites(
         self,
-    ) -> list[dict]:
+    ) -> dict:
         """List all Data Docs Sites with configurations."""
 
-        return self.config.data_docs_sites
+        if self.config.data_docs_sites is None:
+            return {}
+        else:
+            return self.config.data_docs_sites
 
     @public_api
     @new_method_or_class(version="0.17.2")
@@ -1705,15 +1709,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             site_name: Site name to update.
             site_config: Config dict that replaces the existing.
         """
-        if site_name not in self.config.data_docs_sites:
-            raise gx_exceptions.InvalidKeyError(
-                f"Data Docs Site `{site_name}` does not already exist in the Data Context."
-            )
+        if self.config.data_docs_sites is not None:
+            if site_name not in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+                )
 
-        sites = self.config.data_docs_sites
-        sites[site_name] = site_config
-        self.variables.data_docs_sites = sites
-        self._save_project_config()
+            sites = self.config.data_docs_sites
+            sites[site_name] = site_config
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
 
     @public_api
     @new_method_or_class(version="0.17.2")
@@ -1723,15 +1728,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             site_name: Site name to delete.
         """
-        if site_name not in self.config.data_docs_sites:
-            raise gx_exceptions.InvalidKeyError(
-                f"Data Docs Site `{site_name}` does not already exist in the Data Context."
-            )
+        if self.config.data_docs_sites is not None:
+            if site_name not in self.config.data_docs_sites:
+                raise gx_exceptions.InvalidKeyError(
+                    f"Data Docs Site `{site_name}` does not already exist in the Data Context."
+                )
 
-        sites = self.config.data_docs_sites
-        sites.pop(site_name)
-        self.variables.data_docs_sites = sites
-        self._save_project_config()
+            sites = self.config.data_docs_sites
+            sites.pop(site_name)
+            self.variables.data_docs_sites = sites
+            self._save_project_config()
 
     @public_api
     @new_method_or_class(version="0.15.48")
