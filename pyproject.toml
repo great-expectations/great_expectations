@@ -186,7 +186,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/validator\.py', # 54
     # tests
     'tests/datasource/fluent/tasks\.py',
 ]

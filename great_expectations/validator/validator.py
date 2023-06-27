@@ -29,6 +29,7 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core.batch import BatchDataType, BatchDataUnion
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -185,12 +186,10 @@ class Validator:
         self,
         execution_engine: ExecutionEngine,
         interactive_evaluation: bool = True,
-        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite: ExpectationSuite | None = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[
-            Union[List[Batch], Sequence[Union[Batch, FluentBatch]]]
-        ] = None,
+        batches: List[Batch] | Sequence[Batch | FluentBatch] = tuple(),
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -259,12 +258,12 @@ class Validator:
         return self._execution_engine.batch_manager.loaded_batch_ids
 
     @property
-    def active_batch_data(self) -> Optional[BatchData]:
+    def active_batch_data(self) -> Optional[BatchDataUnion]:
         """Getter for BatchData object from the currently-active Batch object (convenience property)."""
         return self._execution_engine.batch_manager.active_batch_data
 
     @property
-    def batch_cache(self) -> Dict[str, Batch]:
+    def batch_cache(self) -> Dict[str, Union[Batch, FluentBatch]]:
         """Getter for dictionary of Batch objects (convenience property)"""
         return self._execution_engine.batch_manager.batch_cache
 
@@ -319,7 +318,7 @@ class Validator:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
+    def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
     @public_api

@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import logging
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
+from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 
 from great_expectations.core.batch import (
     Batch,
-    BatchDataType,
+    BatchDataUnion,
     BatchDefinition,
     BatchMarkers,
     _get_fluent_batch_class,
@@ -15,6 +16,7 @@ from great_expectations.core.batch import (
 if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.core.batch import BatchDataType
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -73,7 +75,7 @@ class BatchManager:
         return None
 
     @property
-    def active_batch_data(self) -> Optional[BatchDataType]:
+    def active_batch_data(self) -> Optional[BatchDataUnion]:
         """The BatchData object from the currently-active Batch object."""
         if self.active_batch_data_id is None:
             return None
@@ -142,7 +144,7 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: List[Batch]) -> None:
+    def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
         batch: Batch
         for batch in batch_list:
             try:
