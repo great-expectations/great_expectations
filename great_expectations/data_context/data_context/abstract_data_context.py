@@ -550,9 +550,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def expectations_store_name(self) -> Optional[str]:
         return self.variables.expectations_store_name
 
+    @expectations_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    @expectations_store_name.setter
     def expectations_store_name(self, value: str) -> None:
         """Set the name of the expectations store.
 
@@ -579,9 +579,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def validations_store_name(self) -> Optional[str]:
         return self.variables.validations_store_name
 
+    @validations_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    @validations_store_name.setter
     def validations_store_name(self, value: str) -> None:
         """Set the name of the validations store.
 
@@ -635,9 +635,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
+    @checkpoint_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    @checkpoint_store_name.setter
     def checkpoint_store_name(self, value: str) -> None:
         """Set the name of the checkpoint store.
 
@@ -714,9 +714,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             raise gx_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
+    @profiler_store_name.setter
     @public_api
     @new_method_or_class(version="0.17.2")
-    @profiler_store_name.setter
     def profiler_store_name(self, value: str) -> None:
         """Set the name of the profiler store.
 
