@@ -122,3 +122,36 @@ class TestUpdateDataDocsSite:
             "Data Docs Site `missing` does not already exist in the Data Context."
             in str(e.value)
         )
+
+
+class TestDeleteDataDocsSite:
+    @pytest.mark.unit
+    def test_delete_data_docs_site(
+        self, ephemeral_context_with_defaults: EphemeralDataContext
+    ):
+        # Check fixture configuration
+        existing_site_name = "local_site"
+        assert existing_site_name in ephemeral_context_with_defaults.get_site_names()
+
+        ephemeral_context_with_defaults.delete_data_docs_site(existing_site_name)
+
+        # Check that the site is no longer present
+        assert (
+            existing_site_name not in ephemeral_context_with_defaults.get_site_names()
+        )
+
+    @pytest.mark.unit
+    def test_delete_data_docs_site_missing_site_raises_exception(
+        self,
+        ephemeral_context_with_defaults: EphemeralDataContext,
+    ):
+        # Check fixture configuration
+        assert "missing" not in ephemeral_context_with_defaults.get_site_names()
+
+        with pytest.raises(ValueError) as e:
+            ephemeral_context_with_defaults.delete_data_docs_site("missing")
+
+        assert (
+            "Data Docs Site `missing` does not already exist in the Data Context."
+            in str(e.value)
+        )
