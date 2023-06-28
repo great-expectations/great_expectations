@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -50,10 +50,6 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-try:
-    import trino
-except ImportError:
-    trino = None
 try:
     import clickhouse_sqlalchemy
 except ImportError:
@@ -171,8 +167,8 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.sqlalchemy.dialect.TrinoDialect
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -801,8 +797,8 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
-            dialect, "TrinoDialect"
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
@@ -810,8 +806,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.drivers.base.ClickhouseDialect) or hasattr(
-            dialect, "ClickhouseDialect"
+        if hasattr(dialect, "ClickhouseDialect") or (
+            trino.trinodrivers
+            and isinstance(dialect, trino.trinodrivers.base.ClickhouseDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
