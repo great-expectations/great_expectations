@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pyspark, trino
+from great_expectations.compatibility import aws, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -52,11 +52,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
-try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
@@ -540,14 +535,14 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        if isinstance(
-            execution_engine.dialect_module,
-            sqlalchemy_redshift.dialect.RedshiftDialect,
-        ):
-            return execution_engine.dialect_module.sa
-    except (TypeError, AttributeError):
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    if aws.redshiftdialect and isinstance(
+        execution_engine.dialect_module,
+        aws.redshiftdialect.RedshiftDialect,
+    ):
+        return execution_engine.dialect_module.sa
+    else:
         pass
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
