@@ -50,7 +50,7 @@ Windows support for the open source Python version of GX is currently unavailabl
   defaultValue='local'
   values={[
   {label: 'Local', value:'local'},
-  {label: 'Hosted environment', value:'hosted'},
+  {label: 'Hosted', value:'hosted'},
   {label: 'Amazon S3', value:'amazon'},
   {label: 'Microsoft Azure Blob Storage', value:'azure'},
   {label: 'Google Cloud Storage', value:'gcs'},
