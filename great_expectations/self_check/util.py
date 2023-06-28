@@ -323,7 +323,11 @@ REDSHIFT_TYPES: Dict[str, Any] = (
 )
 
 SNOWFLAKE_TYPES: Dict[str, Any]
-if snowflake.sqlalchemy and snowflake.snowflakedialect and snowflake.snowflaketypes:
+if (
+    snowflake.snowflakesqlalchemy
+    and snowflake.snowflakedialect
+    and snowflake.snowflaketypes
+):
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sqlalchemy.dialects.registry.register(
