@@ -211,9 +211,9 @@ stages:
       steps:
         - task: PythonScript@0
           inputs:
-            scriptSource: 'filePath' # 'filePath' | 'inline'. Required. Script source. Default: filePath.
-            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py' # Required when scriptSource == FilePath
-            failOnStderr: false # boolean. Fail on standard error. Default: false.
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py'
+            failOnStderr: true
           name: NameTagSnippetReferencedChecker
 
     - job: public_api_report
