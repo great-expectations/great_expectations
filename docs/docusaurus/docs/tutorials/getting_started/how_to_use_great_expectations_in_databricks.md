@@ -35,7 +35,7 @@ The full code used in the following examples is available on GitHub:
 </Prerequisites>
 
 
-## 1. Install GX
+## Install GX
 
 1. Run the following command in your notebook to install GX as a notebook-scoped library:
 
@@ -50,7 +50,7 @@ The full code used in the following examples is available on GitHub:
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
   ```
 
-## 2. Set up GX
+## Set up GX
 
 To avoid configuring external resources, you'll use the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store.
 
@@ -65,7 +65,7 @@ DBFS is a distributed file system mounted in a Databricks workspace and availabl
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
   ```
 
-## 3. Prepare your data
+## Prepare your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -103,7 +103,7 @@ df = spark.read.format("csv")\
   </TabItem>
 </Tabs>
 
-## 4. Connect to your data
+## Connect to your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -160,7 +160,7 @@ df = spark.read.format("csv")\
 </TabItem>
 </Tabs>
 
-## 5. Create Expectations
+## Create Expectations
 
 You'll use a <TechnicalTag tag="validator" text="Validator" /> to interact with your batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
 
@@ -181,7 +181,7 @@ Every time you evaluate an Expectation with `validator.expect_*`, it is immediat
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py save suite"
   ```
 
-## 6. Validate your data
+## Validate your data
 
 You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your batch, which you can use to validate and run post-validation actions.
 
@@ -206,7 +206,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
   To view the full Checkpoint configuration, run: `print(my_checkpoint.get_substituted_config().to_yaml_str())`.
 
-## 7. Build and view Data Docs
+## Build and view Data Docs
 
 Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation you ran and your Data Docs store contains a new rendered validation result.
 

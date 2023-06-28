@@ -30,7 +30,7 @@ The full code used in the following examples is available on GitHub:
 
 </Prerequisites>
 
-## 1. Install GX
+## Install GX
 
 1. Run the following command to install GX in your Python environment:
 
@@ -43,7 +43,7 @@ The full code used in the following examples is available on GitHub:
   ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py imports"
   ```
 
-## 2. Set up GX
+## Set up GX
 
 To avoid configuring external resources, you'll use your local filesystem for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store.
 
@@ -52,7 +52,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
 ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py set up context"
 ```
 
-## 3. Connect to your data
+## Connect to your data
 
 1. Use a `connection_string` to securely connect to your PostgreSQL instance. For example
 
@@ -79,7 +79,7 @@ Run the following code to create a <TechnicalTag tag="data_context" text="Data C
   ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
   ```
 
-## 4. Create Expectations
+## Create Expectations
 
 You'll use a <TechnicalTag tag="validator" text="Validator" /> to interact with your batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
 
@@ -99,7 +99,7 @@ Every time you evaluate an Expectation with `validator.expect_*`, it is immediat
 
   ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py save suite"
   ```
-## 5. Validate your data
+## Validate your data
 
 You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your batch, which you can use to validate and run post-validation actions.
 
@@ -124,7 +124,7 @@ You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for
 
   To view the full Checkpoint configuration, run `print(my_checkpoint.get_substituted_config().to_yaml_str())`.
 
-## 6. Build and view Data Docs
+## Build and view Data Docs
 
 Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation you ran and your Data Docs store contains a new rendered validation result.
 
