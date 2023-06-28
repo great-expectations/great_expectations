@@ -423,6 +423,16 @@ IGNORED_VIOLATIONS = [
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site",
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store",
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py choose context_root_dir",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py run checkpoint",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add expectations",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py get validator",
+    "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py save suite",
+    "tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py pg_batch_request",
+    "tests/integration/docusaurus/setup/setup_overview.py setup",
+    "tests/integration/docusaurus/template/script_example.py full",
 ]
 
 
