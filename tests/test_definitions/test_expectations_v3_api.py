@@ -239,7 +239,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         generate_test = True
                                     elif (
                                         "trino" in test["only_for"]
-                                        and trino.trino
+                                        and trino.trinodialect
                                         and trino.trinodialect.TrinoDialect
                                         and hasattr(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
@@ -395,6 +395,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     or (
                                         "trino" in suppress_test_for
+                                        and trino.trinodialect
                                         and trino.trinodialect.TrinoDialect
                                         and validator_with_data
                                         and isinstance(
