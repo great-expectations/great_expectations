@@ -953,13 +953,13 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_classes["redshift"] = aws.redshiftdialect.RedshiftDialect
         dialect_types["redshift"] = REDSHIFT_TYPES
 
-    if snowflake.snowflakedialect:
-        dialect_classes["snowflake"] = snowflake.snowflakedialect.dialect
-        dialect_types["snowflake"] = SNOWFLAKE_TYPES
-
     if aws.sqlalchemy_athena:
         dialect_classes["athena"] = aws.sqlalchemy_athena.AthenaDialect
         dialect_types["athena"] = ATHENA_TYPES
+
+    if snowflake.snowflakedialect:
+        dialect_classes["snowflake"] = snowflake.snowflakedialect.dialect
+        dialect_types["snowflake"] = SNOWFLAKE_TYPES
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
