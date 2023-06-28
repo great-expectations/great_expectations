@@ -3,7 +3,7 @@
 This reference environment spins up one container which contains a jupyter notebook server and some example code.
 
 The example code demonstrates how to use Great Expectations with data stored in Google Cloud Storage and by default uses data in the `taxi_reference_data` 
-that is hosted in the project defined by `GE_TEST_GCP_PROJECT` env variable.
+that is hosted in the project defined by `GCP_PROJECT_NAME` env variable.
 
 You can connect to GCS by setting up 2 environment variables:
 
