@@ -296,7 +296,7 @@ TRINO_TYPES: Dict[str, Any] = (
         "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
     }
     if trino.trinotypes
-    else None
+    else {}
 )
 
 try:
