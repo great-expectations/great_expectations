@@ -8,7 +8,7 @@ import pytest
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
 from great_expectations import DataContext
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
 )
@@ -27,7 +27,6 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     pgDialect,
     snowflakeDialect,
-    trinoDialect,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
@@ -240,7 +239,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         generate_test = True
                                     elif (
                                         "trino" in test["only_for"]
-                                        and trinoDialect is not None
+                                        and trino.trinodialect
+                                        and trino.trinodialect.TrinoDialect
                                         and hasattr(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             "name",
@@ -395,7 +395,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     or (
                                         "trino" in suppress_test_for
-                                        and trinoDialect is not None
+                                        and trino.trinodialect
+                                        and trino.trinodialect.TrinoDialect
                                         and validator_with_data
                                         and isinstance(
                                             validator_with_data.active_batch_data,
