@@ -435,7 +435,7 @@ def _check_bigquery_env_vars() -> set[str]:
 
 def _check_gcs_env_vars() -> set[str]:
     """Return list of env var names that are not set."""
-    env_vars_to_check = ("GOOGLE_APPLICATION_CREDENTIALS", "GE_TEST_GCP_PROJECT")
+    env_vars_to_check = ("GOOGLE_APPLICATION_CREDENTIALS", "GCP_PROJECT_NAME")
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
