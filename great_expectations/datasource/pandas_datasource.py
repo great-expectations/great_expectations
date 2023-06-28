@@ -215,9 +215,9 @@ class PandasDatasource(LegacyDatasource):
                 DeprecationWarning,
             )
             try:
-                import boto3
+                from great_expectations.compatibility import aws
 
-                s3 = boto3.client("s3", **self._boto3_options)
+                s3 = aws.boto3.client("s3", **self._boto3_options)
             except ImportError:
                 raise BatchKwargsError(
                     "Unable to load boto3 client to read s3 asset.", batch_kwargs

@@ -87,24 +87,27 @@ def test_base_data_context_in_cloud_mode_add_datasource(
             expected_datasource_config = datasourceConfigSchema.dump(
                 block_config_datasource_config
             )
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **expected_datasource_config,
-                save_changes=save_changes,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **expected_datasource_config,
+                    save_changes=save_changes,
+                )
         elif config_includes_name_setting == "config_includes_name":
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict(), save_changes=save_changes
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    **datasource_config_with_name.to_dict(), save_changes=save_changes
+                )
         elif (
             config_includes_name_setting
             == "name_supplied_separately_and_included_in_config"
         ):
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-                save_changes=save_changes,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **datasource_config_with_name.to_dict(),
+                    save_changes=save_changes,
+                )
         else:
             raise ValueError(
                 "Invalid value provided for 'config_includes_name_setting'"

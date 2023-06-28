@@ -49,7 +49,7 @@ def test_datasource_delete_removes_from_cache_and_config_cloud_data_context(
     assert len(context.datasources) == 0
     block_config_datasource_config["name"] = datasource_name
 
-    with pytest.deprecated_call():
+    with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
         context.add_datasource(
             **block_config_datasource_config.to_dict(), save_changes=False
         )

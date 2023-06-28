@@ -896,7 +896,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             Datasource instance added.
         """
-        self._validate_add_datasource_args(name=name, datasource=datasource)
         return self._add_datasource(
             name=name,
             initialize=initialize,
@@ -923,6 +922,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
     ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+        self._validate_add_datasource_args(name=name, datasource=datasource)
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
                 datasource=datasource,
