@@ -18,7 +18,6 @@ module.exports = {
       items: [
         'guides/setup/setup_overview',
         'guides/setup/installation/install_gx',
-        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
           label: 'Configure Data Contexts',
@@ -37,7 +36,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to data',
+      label: 'Connect to Source Data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
