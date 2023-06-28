@@ -390,7 +390,6 @@ def example_abs(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
-
 def _execute_standard_functions(
     command_options: CommandOptions,
     example_directory: pathlib.Path,
@@ -506,6 +505,7 @@ def _check_snowflake_env_vars() -> set[str]:
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
+
 
 def _check_abs_env_vars() -> set[str]:
     """Return list of env var names that are not set."""

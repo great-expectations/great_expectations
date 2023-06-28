@@ -872,7 +872,7 @@ class Expectation(metaclass=MetaExpectation):
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
                         string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
+                    elif unexpected_value == "":  # noqa: PLC1901
                         string_unexpected_value = "EMPTY"
                     else:
                         string_unexpected_value = "null"

@@ -892,7 +892,7 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         }
     """
 
-    if config_file_location is not None and config_file_location != "":
+    if config_file_location is not None and config_file_location != "":  # noqa: PLC1901
         config_file_location_path = Path(config_file_location)
 
         # If the file or directory exists, treat it appropriately
