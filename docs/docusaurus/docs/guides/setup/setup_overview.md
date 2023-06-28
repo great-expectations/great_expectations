@@ -8,9 +8,9 @@ import GxData from '/docs/components/_data.jsx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
-Setting up Great Expectations includes installing Great Expectations and initializing your deployment. Optionally, you can customize the configuration of some components, such as Stores, Data Docs, and Plugins.
+Setting up Great Expectations (GX) includes installing GX and initializing your deployment. Optionally, you can customize the configuration of some components, such as Stores, Data Docs, and Plugins.
 
-After you've completed the setup for your production deployment, you can access all Great Expectations features from your <TechnicalTag relative="../" tag="data_context" text="Data Context" />. Also, your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> will be optimized for your business requirements.
+After you've completed the setup for your production deployment, you can access all GX features from your <TechnicalTag relative="../" tag="data_context" text="Data Context" />. Also, your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> will be optimized for your business requirements.
 
 To set up <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> see the specific topics for these components. 
 
@@ -22,9 +22,10 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 :::
 
-## Prerequisites
+## Before you start
 
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md).
+Before you start installing and configuring GX, you should complete the [Quickstart guide](tutorials/quickstart/quickstart.md) and have the following items installed:
+
 - <span>A supported version of Python. GX supports Python versions {GxData.min_python} to {GxData.max_python}.</span>
 - pip (the package installer for Python).
 - An internet connection.
@@ -33,13 +34,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Install Great Expectations
 
-Run the following pip command in a terminal to install Great Expectations and its dependencies:
-
-```markup title="Terminal command:"
-pip install great_expectations
-```
-
-If you experience difficulty with the installation, see <TechnicalTag relative="../" tag="supporting_resource" text="Supporting Resources" />.
+See [Install Great Expectations](./installation/install_gx.md).
 
 ## Initialize a Data Context
 
@@ -47,12 +42,7 @@ Your Data Context contains your Great Expectations project, and it is the entry 
 
 ![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
 
-Run the following command to retrieve your Data Context:
-
-```python name="tests/integration/docusaurus/setup/setup_overview.py setup"
-```
-
-To configure your Data Context, see [Data Context](./index.md#data-contexts).
+See [Configure Data Contexts](./configure_data_contexts_lp.md).
 
 ## Optional configurations
 
@@ -60,11 +50,11 @@ After you've initialized your Data Context, you can start using Great Expectatio
 
 ### Stores
 
-Stores are the locations where your Data Context stores information about your <TechnicalTag relative="../" tag="expectation" text="Expectations" />, your <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and your <TechnicalTag relative="../" tag="metric" text="Metrics" />.  By default, these are stored locally. To reconfigure a Store to work with a specific backend, see [Stores](./index.md#stores) for more information.
+Stores are the locations where your Data Context stores information about your <TechnicalTag relative="../" tag="expectation" text="Expectations" />, your <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, and your <TechnicalTag relative="../" tag="metric" text="Metrics" />.  By default, these are stored locally. To reconfigure a Store to work with a specific backend, see [Configure Expectation Stores](./configuring_metadata_stores/configure_expectation_stores.md), [Configure Validation Result Stores](./configuring_metadata_stores/configure_result_stores.md), and [Configure a MetricStore](./configuring_metadata_stores/how_to_configure_a_metricsstore.md).
 
 ### Data Docs
 
-Data Docs provide human-readable renderings of your Expectation Suites and Validation Results, and they are built locally by default. To host and share Data Docs differently, see [Data Docs](./index.md#data-docs).
+Data Docs provide human-readable renderings of your Expectation Suites and Validation Results, and they are built locally by default. To host and share Data Docs differently, see [Host and share Data Docs](./configuring_data_docs/host_and_share_data_docs.md).
 
 ### Plugins
 
@@ -72,4 +62,4 @@ Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plug
 
 ## Next steps
 
-- [Connect to Data](../connecting_to_your_data/connect_to_data_overview.md)
+- [Install Great Expectations](./installation/install_gx.md)

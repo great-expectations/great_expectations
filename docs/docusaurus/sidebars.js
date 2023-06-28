@@ -3,7 +3,7 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Get Started with GX',
+      label: 'Get started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp'},
       items: [
         'tutorials/quickstart/quickstart',

@@ -1,4 +1,5 @@
 ---
+sidebar_label: 'Get started with GX and Databricks'
 title: Get started with Great Expectations and Databricks
 ---
 

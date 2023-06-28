@@ -1,6 +1,6 @@
 ---
-sidebar_label: 'Test GX features and functionality'
-title: Test Great Expectations features and functionality
+sidebar_label: 'Quickstart'
+title: Quickstart
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
