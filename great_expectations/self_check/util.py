@@ -276,7 +276,7 @@ except (ImportError, KeyError):
     CLICKHOUSE_TYPES = {}
 
 
-TRINO_TYPES = (
+TRINO_TYPES: dict | None = (
     {
         "BOOLEAN": trino.trinotypes._type_map["boolean"],
         "TINYINT": trino.trinotypes._type_map["tinyint"],
@@ -296,7 +296,7 @@ TRINO_TYPES = (
         "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
     }
     if trino.trinotypes
-    else {}
+    else None
 )
 
 try:
@@ -951,11 +951,10 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["clickhouse"] = CLICKHOUSE_TYPES
     except AttributeError:
         pass
-    try:
+
+    if trino.trinodialect:
         dialect_classes["trino"] = trino.trinodialect.TrinoDialect
         dialect_types["trino"] = TRINO_TYPES
-    except AttributeError:
-        pass
     try:
         dialect_classes["snowflake"] = snowflakeDialect.dialect
         dialect_types["snowflake"] = SNOWFLAKE_TYPES
