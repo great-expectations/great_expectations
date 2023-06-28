@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -27,11 +27,6 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
-
-try:
-    from trino.exceptions import TrinoUserError
-except ImportError:
-    TrinoUserError = None
 
 
 if sqlalchemy.Row:
@@ -313,7 +308,7 @@ def _get_column_quantiles_trino(
             quantiles_query
         ).fetchone()
         return list(quantiles_results)[0]
-    except (sqlalchemy.ProgrammingError, TrinoUserError) as pe:
+    except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
