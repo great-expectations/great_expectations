@@ -375,9 +375,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_s3_store_backend_run_time(
         self, source_key: tuple, store_backend: Type[StoreBackend]
     ) -> None:
-        import boto3
+        from great_expectations.compatibility import aws
 
-        s3 = boto3.resource("s3")
+        s3 = aws.boto3.resource("s3")
         run_name = source_key[-2]
 
         try:
