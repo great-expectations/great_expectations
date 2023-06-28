@@ -167,8 +167,8 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.trinodialect.TrinoDialect
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -797,8 +797,8 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.trinodialect.TrinoDialect) or hasattr(
-            dialect, "TrinoDialect"
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
@@ -806,8 +806,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.drivers.base.ClickhouseDialect) or hasattr(
-            dialect, "ClickhouseDialect"
+        if hasattr(dialect, "ClickhouseDialect") or (
+            trino.trinodrivers
+            and isinstance(dialect, trino.trinodrivers.base.ClickhouseDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):

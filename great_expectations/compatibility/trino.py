@@ -22,6 +22,11 @@ except (ImportError, AttributeError):
     trinodialect = TRINO_NOT_IMPORTED
 
 try:
+    import trino.drivers as trinodrivers  # noqa TID251
+except (ImportError, AttributeError):
+    trinodrivers = TRINO_NOT_IMPORTED
+
+try:
     import trino.exceptions as trinoexceptions  # noqa TID251
 except (ImportError, AttributeError):
     trinoexceptions = TRINO_NOT_IMPORTED
