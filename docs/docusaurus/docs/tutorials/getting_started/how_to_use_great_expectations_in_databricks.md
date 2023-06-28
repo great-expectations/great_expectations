@@ -1,5 +1,5 @@
 ---
-title: Getting Started with GX and Databricks
+title: Get Started with GX and Databricks
 ---
 
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'

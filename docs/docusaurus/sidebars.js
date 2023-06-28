@@ -3,8 +3,8 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started',
-      link: { type: 'doc', id: 'guides/setup/setup_overview'},
+      label: 'Get Started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
       items: [
         {
           type: 'doc', id: 'guides/setup/installation/install_gx', label: 'Install Great Expectations'
@@ -12,19 +12,6 @@ module.exports = {
         {
           type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
         },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_with_sql'
-        }
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Getting Started with Great Expectations',
-      link: { type: 'doc', id: 'guides/setup/setup_overview'},
-      items: [
         {
           type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
         },
