@@ -68,8 +68,11 @@ stages:
     - job: integration_test_gets_run_checker
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
-        - script: |
-            python ci/checks/check_integration_test_gets_run.py
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/check_integration_test_gets_run.py'
+            failOnStderr: true
           name: IntegrationTestGetsRunChecker
 
     - job: public_api_report
