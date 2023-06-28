@@ -1,150 +1,141 @@
 ---
-title: How to Use Great Expectations with SQL
+sidebar_label: 'Get started with GX and SQL'
+title: Get started with Great Expectations and SQL
 ---
 
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from '../../guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you run an end-to-end workflow with Great Expectations with a SQL Datasource. 
+Use the information provided here to learn how you can use Great Expectations (GX) with a SQL Datasource. The following examples use a [PostgreSQL Database](https://www.postgresql.org/).
 
-For this guide, we will use a [PostgreSQL Database](https://www.postgresql.org/).
+To use GX with PostgreSQL Database, you'll complete the following tasks:
 
-You will:
-  - Load data
-  - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
-  - Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
-  - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
-  - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
+- Load data
+- Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
+- Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
+- Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
+- Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
+
+The full code used in the following examples is available on GitHub:
+
+- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py)
 
 ## Prerequisites
 
 <Prerequisites>
 
-- Have a working PostgreSQL Database
-- Have a working Python environment
+- A working PostgreSQL Database
+- A working Python environment
 
 </Prerequisites>
 
-### 1. Install Great Expectations
+## Install GX
 
-Install Great Expectations in your Python environment:
-```bash
-pip install great-expectations
-```
+1. Run the following command to install GX in your Python environment:
 
-After that we will take care of some imports that will be used later:
+  ```bash
+  pip install great-expectations
+  ```
 
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py imports"
-```
+2. Run the following command to import configuration information that you'll use in the following steps:
 
-### 2. Set up Great Expectations
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py imports"
+  ```
 
-In this guide, we will be using your local filesystem for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store. This is a simple way to get up and running without configuring external resources. For other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
+## Set up GX
 
-Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> in code using the appropriate defaults:
+To avoid configuring external resources, you'll use your local filesystem for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store.
+
+Run the following code to create a <TechnicalTag tag="data_context" text="Data Context"/> with the default settings:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py set up context"
 ```
 
-### 3. Connect to your data
+## Connect to your data
 
-We will use a `connection_string` to securely connect to our PostgreSQL instance. Replace the following connection string 
-with the correct connection string for your database. For more on other methods of connecting GX to your database, see [our guide on configuring credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
+1. Use a `connection_string` to securely connect to your PostgreSQL instance. For example
 
-```python
-PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/taxi_db"
-```
+  ```python
+  PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/taxi_db"
+  ```
 
-For this guide, we will be using using our familiar NYC taxi yellow cab data.
+  Replace the connection string with the connection string for your database. For additional information about other connection methods, see [How to configure credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/). In this example, existing New York City taxi cab data is being used.
 
-First, we create a <TechnicalTag tag='datasource' text='Datasource' />, representing the data available in our PostgreSQL database:
+2. Run the following command to create a <TechnicalTag tag='datasource' text='Datasource' /> to represent the data available in your PostgreSQL database:
 
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_datasource"
+  ```
 
-Then, we create a <TechnicalTag tag="data_asset" text="Data Asset" />, representing the discrete set of data we will be using. 
+3. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> to represent a discrete set of data: 
 
-In this case, we are giving the name of a specific table within our database:
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_asset"
+  ```
 
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add_asset"
-```
+  In this example, the name of a specific table within your database is used.
 
-Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> we configured earlier to use as a sample of data when creating Expectations:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
-```
+4. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured previously:
 
-<Congratulations />
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
+  ```
 
-Now let's keep going to create an Expectation Suite and validate our data.
+## Create Expectations
 
-### 5. Create Expectations
+You'll use a <TechnicalTag tag="validator" text="Validator" /> to interact with your batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
 
-Here we will use a <TechnicalTag tag="validator" text="Validator" /> to interact with our batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
+Every time you evaluate an Expectation with `validator.expect_*`, it is immediately Validated against your data. This instant feedback helps you identify unexpected data and removes the guesswork from data exploration. The Expectation configuration is stored in the Validator. When you are finished running the Expectations on the dataset, you can use `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
 
-Each time we evaluate an Expectation (e.g. via `validator.expect_*`), it will immediately be Validated against your data. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration. Also, the Expectation configuration will be stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
+1. Run the following command to create the suite and get a `Validator`:
 
-First we create the suite and get a `Validator`:
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py get validator"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py get validator"
+  ```
 
-Then we use the `Validator` to add a few Expectations:
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add expectations"
-```
+2. Run the following command to use the `Validator` to add a few Expectations:
 
-Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py save suite"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add expectations"
+  ```
 
-### 6. Validate your data
+3. Run the following command to save your Expectation Suite (all the unique Expectation Configurations from each run of `validator.expect_*`) to your Expectation Store:
 
-Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py save suite"
+  ```
+## Validate your data
 
-First, we create the Checkpoint configuration utilizing our data context, passing in our Batch Request (our data) and our Expectation Suite (our tests):
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py checkpoint config"
-```
+You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your batch, which you can use to validate and run post-validation actions.
 
-Next, we save the Checkpoint:
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config"
-```
+1. Run the following command to create the Checkpoint configuration that uses your Data Context:
 
-Finally, we run the Checkpoint:
-```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py checkpoint config"
+  ```
 
-<details>
-<summary>Checkpoint actions?</summary>
+2. Run the following command to save the Checkpoint:
 
-  In our Checkpoint configuration, we've included two important actions: `store_validation_result` & `update_data_docs`.
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py add checkpoint config"
+  ```
 
-  `store_validation_result` saves your validation results from this Checkpoint run, allowing these results to be persisted for further use.
+3. Run the following command to run the Checkpoint and pass in your Batch Request (your data) and your Expectation Suite (your tests):
 
-  `update_data_docs` builds Data Docs files for the validations run in this Checkpoint.
+  ```python name="tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py run checkpoint"
+  ```
 
-  Check out [our docs on Validating your data](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview) for more info on how to customize your Checkpoints.
+  Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.
 
-  Also, to see the full Checkpoint configuration, you can run: <code>print(my_checkpoint.get_substituted_config().to_yaml_str())</code>
-</details>
+  To learn more about Data validation and customizing Checkpoints, see [Validate Data: Overview ](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview).
 
-### 7. Build and view Data Docs
+  To view the full Checkpoint configuration, run `print(my_checkpoint.get_substituted_config().to_yaml_str())`.
 
-Since our Checkpoint contained an `UpdateDataDocsAction`, our <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation we just ran. That means our Data Docs store will contain a new rendered validation result.
+## Build and view Data Docs
 
-We can now open our Data Docs and review the results of our Checkpoint run:
+Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation you ran and your Data Docs store contains a new rendered validation result.
+
+Run the following command to open your Data Docs and review the results of your Checkpoint run:
 
 ```python
 context.open_data_docs()
 ```
 
-You've successfully validated your data with Great Expectations using SQL and viewed the resulting Data Docs. Check out our other guides for more customization options and happy validating!
+## Next steps
 
-### 8. What's next?
-
-Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, you can follow [our documentation on Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
-to create a script to run this checkpoint without having to re-create your Assets & Expectations.
-
-View the full script used in this page on GitHub:
-
-- [postgres_deployment_patterns.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/postgres_deployment_patterns.py)
+Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations.

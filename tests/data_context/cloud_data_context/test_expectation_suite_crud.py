@@ -456,11 +456,13 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
     suite_id = "abc123"
 
-    with pytest.raises(StoreBackendError):
+    with pytest.raises(ValueError) as e:
         with mock.patch(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
             context.get_expectation_suite(ge_cloud_id=suite_id)
+
+    assert "abc123" in str(e.value)
 
 
 @pytest.mark.unit
