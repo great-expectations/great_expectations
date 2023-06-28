@@ -1,5 +1,5 @@
 ---
-title: How to add SQLAlchemy support for Custom Expectations
+title: Add SQLAlchemy support for Custom Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -24,9 +24,7 @@ If you decide to contribute your <TechnicalTag tag="expectation" text="Expectati
 We will add SQLAlchemy support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
 and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
-## Steps
-
-### 1. Specify your backends and dialects
+## Specify your backends and dialects
 
 While SQLAlchemy is able to provide a common interface to a variety of SQL dialects, some functions may not work in a particular dialect, or in some cases they may return different values. 
 To avoid surprises, it can be helpful to determine beforehand what backends and dialects you plan to support, and test them along the way. 
@@ -42,7 +40,7 @@ The optional `only_for` and `suppress_test_for` keys can be specified at the top
 Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
-### 2. Implement the SQLAlchemy logic for your Custom Expectation
+## Implement the SQLAlchemy logic for your Custom Expectation
 
 Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include:  
 
@@ -140,7 +138,7 @@ For more on <code>func</code> and the <code>func</code>-tionality it provides, s
 </TabItem>
 </Tabs>
 
-### 3. Verifying your implementation
+## Verify your implementation
 
 If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
@@ -165,7 +163,7 @@ Congratulations!<br/>&#127881; You've successfully implemented SQLAlchemy suppor
 </b></p>
 </div>
 
-### 4. Contribution (Optional)
+## Contribution (Optional)
 
 This guide will leave you with core functionality sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

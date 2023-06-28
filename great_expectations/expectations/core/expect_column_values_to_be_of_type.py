@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import pyspark, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -85,12 +85,6 @@ try:
 except (ImportError, KeyError):
     clickhouse_sqlalchemy = None
     ch_types = None
-
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
 
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
@@ -597,13 +591,14 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     # Trino types module
     try:
         if (
-            isinstance(
+            trino.trinodialect
+            and trino.trinotypes
+            and isinstance(
                 execution_engine.dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 

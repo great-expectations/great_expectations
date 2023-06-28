@@ -1,5 +1,5 @@
 ---
-title: How to create Custom Parameterized Expectations
+title: Create Custom Parameterized Expectations
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

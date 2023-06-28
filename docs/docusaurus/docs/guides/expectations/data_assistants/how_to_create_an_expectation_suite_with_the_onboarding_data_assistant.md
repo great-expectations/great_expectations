@@ -1,5 +1,5 @@
 ---
-title: How to create an Expectation Suite with the Onboarding Data Assistant
+title: Create an Expectation Suite with the Onboarding Data Assistant
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
@@ -18,9 +18,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 
 </Prerequisites>
 
-## Steps
-
-### 1. Prepare your Batch Request
+## Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
  be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
@@ -42,7 +40,7 @@ The Onboarding Data Assistant will run a high volume of queries against your `Da
   recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::
 
-### 2. Prepare a new Expectation Suite
+## Prepare a new Expectation Suite
 
 Preparing a new Expectation Suite is done with the Data Context's `add_expectation_suite(...)` method, as seen in
 this code example:
@@ -50,7 +48,7 @@ this code example:
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite"
 ```
 
-### 3. Run the Onboarding Data Assistant
+## Run the Onboarding Data Assistant
 
 Running a Data Assistant is as simple as calling the `run(...)` method for the appropriate assistant.
 
@@ -82,7 +80,7 @@ The Onboarding Data Assistant `run(...)` method can accept other parameters in a
 If you would like to learn how to edit the Expectation Suite, please refer to [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
 :::
 
-### 4. Save your Expectation Suite
+## Save your Expectation Suite
 
 Once you have executed the Onboarding Data Assistant's `run(...)` method and generated Expectations for your data, you
  need to load them into your Expectation Suite and save them. You will do this by using the Data Assistant result:
@@ -95,7 +93,7 @@ And once the Expectation Suite has been retrieved from the Data Assistant result
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite"
 ```
 
-### 5. Test your Expectation Suite with a `SimpleCheckpoint`
+## Test your Expectation Suite with a `SimpleCheckpoint`
 
 To verify that your Expectation Suite is working, you can use a `SimpleCheckpoint`. First, you will configure one to
  operate with the Expectation Suite and Batch Request that you have already defined:
@@ -109,7 +107,7 @@ Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiat
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint"
 ```
 
-### 6. Plot and inspect the Data Assistant's calculated Metrics and produced Expectations
+## Plot and inspect the Data Assistant's calculated Metrics and produced Expectations
 
 To see Batch-level visualizations of Metrics computed by the Onboarding Data Assistant run:
 
@@ -148,7 +146,7 @@ To see the Expectations produced and grouped by Expectation type run:
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type"
 ```
 
-### 7. (Optional) Edit your Expectation Suite, save, and test again.
+## Edit your Expectation Suite, save, and test again (Optional)
 
 The Onboarding Data Assistant will create as many applicable Expectations as it can for the permitted columns. This
  provides a solid base for analyzing your data, but may exceed your needs. It is also possible that you may possess

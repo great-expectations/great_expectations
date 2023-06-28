@@ -33,7 +33,7 @@ def get_extras_require():
         "sqlalchemy",
         "test",
         "tools",
-        "all-contrib-expectations",
+        "sqlalchemy-alchemy-less-than-2" "all-contrib-expectations",
     )
 
     requirements_dir = "reqs"
@@ -120,6 +120,7 @@ config = {
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 }
 
