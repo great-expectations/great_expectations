@@ -127,11 +127,11 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     _BIGQUERY_MODULE_NAME,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 

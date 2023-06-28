@@ -21,6 +21,11 @@ try:
 except (ImportError, AttributeError):
     GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
 
+try:
+    from sqlalchemy_bigquery import parse_url
+except (ImportError, AttributeError):
+    parse_url = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
+
 if sqlalchemy_bigquery:
     BIGQUERY_TYPES = {
         "INTEGER": sqlalchemy_bigquery.INTEGER,

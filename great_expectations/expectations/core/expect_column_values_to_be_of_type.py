@@ -55,11 +55,11 @@ logger = logging.getLogger(__name__)
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     GEOGRAPHY,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as BigQueryDialect,
 )
 

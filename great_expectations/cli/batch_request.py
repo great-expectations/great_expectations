@@ -10,10 +10,7 @@ from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.util import get_sqlalchemy_inspector
 
-try:
-    from sqlalchemy_bigquery.parse_url import parse_url as parse_bigquery_url
-except (ImportError, ModuleNotFoundError):
-    parse_bigquery_url = None
+from great_expectations.compatibility.bigquery import parse_url as parse_bigquery_url
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.datasource import (
