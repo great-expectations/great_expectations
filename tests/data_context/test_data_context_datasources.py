@@ -218,7 +218,7 @@ def test_DataContext_add_datasource_updates_cache_and_store(
         "great_expectations.data_context.store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
+    ) as mock_set, pytest.deprecated_call():  # non-FDS datasources are discouraged in Cloud
         context.add_datasource(**datasource_config_with_names.to_json_dict())
 
     mock_set.assert_called_once()

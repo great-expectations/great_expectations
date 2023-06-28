@@ -80,6 +80,7 @@ class GXDependencies:
             "freezegun",
             "gcsfs",
             "google-cloud-bigquery",
+            "google-cloud-bigquery-storage",
             "google-cloud-secret-manager",
             "google-cloud-storage",
             "invoke",

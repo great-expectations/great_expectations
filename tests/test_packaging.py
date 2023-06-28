@@ -72,7 +72,8 @@ def test_requirements_files():
     assert req_set_dict["requirements.txt"] <= req_set_dict["requirements-dev.txt"]
 
     assert (
-        req_set_dict["requirements-dev-contrib.txt"]
+        req_set_dict["requirements-dev-arrow.txt"]
+        | req_set_dict["requirements-dev-contrib.txt"]
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
         | req_set_dict["requirements-dev-cloud.txt"]
@@ -184,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 73
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 74
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -200,6 +201,11 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-lite.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev-mysql.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev-pagerduty.txt", "pypd", (("==", "1.1.0"),)),
+        (
+            "requirements-dev-sqlalchemy-less-than-2.txt",
+            "sqlalchemy",
+            (("<", "2.0.0"),),
+        ),
         (
             "requirements-dev-sqlalchemy.txt",
             "PyMySQL",

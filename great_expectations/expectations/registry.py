@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import warnings
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -389,21 +388,6 @@ def get_domain_metrics_dict_by_name(
 
 
 def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
-    renamed: Dict[str, str] = {
-        "expect_column_values_to_be_vector": "expect_column_values_to_be_vectors",
-        "expect_columns_values_confidence_for_data_label_to_be_greater_than_or_equalto_threshold": "expect_column_values_confidence_for_data_label_to_be_greater_than_or_equal_to_threshold",
-        "expect_column_values_to_be_greater_than_or_equal_to_threshold": "expect_column_values_to_be_probabilistically_greater_than_or_equal_to_threshold",
-        "expect_yesterday_count_compared_to_avg_equivalent_days_of_week": "expect_day_count_to_be_close_to_equivalent_week_day_mean",
-    }
-    if expectation_name in renamed:
-        # deprecated-v0.14.12
-        warnings.warn(
-            f"Expectation {expectation_name} was renamed to {renamed['expectation_name']} as of v0.14.12 "
-            "Please update usage in your pipeline(s) before the v0.17 release",
-            DeprecationWarning,
-        )
-        expectation_name = renamed[expectation_name]
-
     expectation: Type[Expectation] | None = _registered_expectations.get(
         expectation_name
     )
@@ -445,11 +429,11 @@ def is_metric_persistable(metric_name: str, execution_engine: ExecutionEngine) -
     if metric_name.endswith(
         tuple(
             f".{metric_suffix.value}"
-            for metric_suffix in {
+            for metric_suffix in [
                 MetricPartialFunctionTypeSuffixes.MAP,
                 MetricPartialFunctionTypeSuffixes.CONDITION,
                 MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION,
-            }
+            ]
         )
     ):
         return False
@@ -465,10 +449,10 @@ def is_metric_persistable(metric_name: str, execution_engine: ExecutionEngine) -
     if metric_name.endswith(
         tuple(
             f".{metric_suffix.value}"
-            for metric_suffix in {
+            for metric_suffix in [
                 SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT,
                 SummarizationMetricNameSuffixes.UNEXPECTED_COUNT,
-            }
+            ]
         )
     ):
         return True
@@ -476,13 +460,13 @@ def is_metric_persistable(metric_name: str, execution_engine: ExecutionEngine) -
     if metric_name.endswith(
         tuple(
             f".{metric_suffix.value}"
-            for metric_suffix in {
+            for metric_suffix in [
                 SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST,
                 SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY,
                 SummarizationMetricNameSuffixes.UNEXPECTED_ROWS,
                 SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS,
                 SummarizationMetricNameSuffixes.UNEXPECTED_VALUES,
-            }
+            ]
         )
     ):
         return False

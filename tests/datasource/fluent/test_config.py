@@ -444,20 +444,6 @@ def test_catch_bad_top_level_config(
     [
         p(
             {
-                "name": "missing `table_name`",
-                "type": "table",
-            },
-            (
-                _FLUENT_DATASOURCES_KEY,
-                "assets",
-                0,
-                "table_name",
-            ),
-            "field required",
-            id="missing `table_name`",
-        ),
-        p(
-            {
                 "name": "unknown splitter",
                 "type": "table",
                 "table_name": "pool",
@@ -886,3 +872,9 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
 
     assert round_tripped_datasources["my_new_one"]
     assert round_tripped_datasources["my_sqlite_ds_w_subs"]["assets"]["new_asset"]
+
+
+def test_table_asset_omit_table_name():
+    name = "my_table"
+    asset = TableAsset(name=name)
+    assert asset.table_name == name

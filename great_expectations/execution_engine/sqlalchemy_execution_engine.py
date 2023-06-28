@@ -32,7 +32,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -152,13 +152,6 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
-    trinotypes = None
-
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
@@ -211,11 +204,11 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
         if (
             isinstance(
                 dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
+            and trino.trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -735,6 +728,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert (
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
+
+            # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            if not isinstance(selectable, sa.Table):
+                selectable = selectable.subquery()
 
             selectable = (
                 sa.select(sa.text("*"))
@@ -1341,11 +1339,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
+        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
-
-        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
             # deprecated-v0.15.3
@@ -1369,8 +1366,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             selectable: Union[

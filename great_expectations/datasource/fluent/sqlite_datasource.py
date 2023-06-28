@@ -16,7 +16,7 @@ from typing import (
 import pydantic
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
@@ -207,7 +207,7 @@ class SqliteDatasource(SQLDatasource):
     def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
-        table_name: str,
+        table_name: str = "",
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,

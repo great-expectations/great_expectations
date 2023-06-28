@@ -138,7 +138,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
 
         def get_table_columns_metric_multi_batch_parameter_builder(
-            self,
+            self, include_nested: bool = False
         ) -> ParameterBuilder:
             """
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
@@ -147,7 +147,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_name="table.columns",
                 suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-                metric_value_kwargs=None,
+                metric_value_kwargs={
+                    "include_nested": include_nested,
+                },
             )
 
         def get_column_distinct_values_count_metric_multi_batch_parameter_builder(
@@ -909,7 +911,7 @@ def build_map_metric_rule(  # noqa: PLR0913
         ),
     ]
     column_values_attribute_mean_unexpected_value_multi_batch_parameter_builder_for_validations = MeanUnexpectedMapMetricMultiBatchParameterBuilder(
-        name=f"{map_metric_name}.unexpected_value",
+        name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         map_metric_name=map_metric_name,
         total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
         null_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,

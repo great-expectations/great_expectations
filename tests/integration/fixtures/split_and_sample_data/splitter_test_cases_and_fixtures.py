@@ -29,7 +29,7 @@ class TaxiTestData:
             > 1
         ):
             raise ValueError(
-                f"No more than one of test_column_name or test_column_names can be specified."
+                "No more than one of test_column_name or test_column_names can be specified."
             )
 
         self._test_column_name = test_column_name
@@ -144,7 +144,7 @@ class TaxiTestData:
         column_value: Any
         if (
             move_null_to_front
-            and any([column_value is None for column_value in column_values])
+            and any(column_value is None for column_value in column_values)
             and column_values[0] is not None
             and column_values[-1] is None
         ):

@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
 )
-from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed for pydantic
-)
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -53,6 +51,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         BatchSlice,
@@ -425,6 +424,10 @@ class _SQLAsset(DataAsset):
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
         self.test_splitter_connection()
+        # persist the config changes
+        context: AbstractDataContext | None
+        if context := self._datasource._data_context:
+            context._save_project_config(self._datasource)
         return self
 
     @public_api
@@ -799,7 +802,10 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str
+    table_name: str = pydantic.Field(
+        "",
+        description="Name of the SQL table. Will default to the value of `name` if not provided.",
+    )
     schema_name: Optional[str] = None
 
     @property
@@ -809,6 +815,15 @@ class TableAsset(_SQLAsset):
             if self.schema_name
             else self.table_name
         )
+
+    @pydantic.validator("table_name", pre=True, always=True)
+    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
+        if not (validated_table_name := table_name or values.get("name")):
+            raise ValueError(
+                "table_name cannot be empty and should default to name if not provided"
+            )
+
+        return validated_table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -962,7 +977,7 @@ class SQLDatasource(Datasource):
     def add_table_asset(  # noqa: PLR0913
         self,
         name: str,
-        table_name: str,
+        table_name: str = "",
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
         batch_metadata: Optional[BatchMetadata] = None,

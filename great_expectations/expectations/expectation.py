@@ -1142,6 +1142,16 @@ class Expectation(metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
+
+        result_format = parse_result_format(
+            runtime_configuration.get("result_format", {})
+        )
+        if result_format.get("result_format") == "BOOLEAN_ONLY":
+            if isinstance(expectation_validation_result, ExpectationValidationResult):
+                expectation_validation_result.result = {}
+            else:
+                expectation_validation_result["result"] = {}
+
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
             configuration=configuration,

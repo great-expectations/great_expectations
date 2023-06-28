@@ -34,7 +34,7 @@ import pandas as pd
 from dateutil.parser import parse
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import pyspark, sqlalchemy, trino
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
@@ -276,34 +276,28 @@ except (ImportError, KeyError):
     CLICKHOUSE_TYPES = {}
 
 
-try:
-    import trino
-    import trino.sqlalchemy.datatype as trinotypes
-    from trino.sqlalchemy.dialect import TrinoDialect as trinoDialect
-
-    TRINO_TYPES = {
-        "BOOLEAN": trinotypes._type_map["boolean"],
-        "TINYINT": trinotypes._type_map["tinyint"],
-        "SMALLINT": trinotypes._type_map["smallint"],
-        "INT": trinotypes._type_map["int"],
-        "INTEGER": trinotypes._type_map["integer"],
-        "BIGINT": trinotypes._type_map["bigint"],
-        "REAL": trinotypes._type_map["real"],
-        "DOUBLE": trinotypes._type_map["double"],
-        "DECIMAL": trinotypes._type_map["decimal"],
-        "VARCHAR": trinotypes._type_map["varchar"],
-        "CHAR": trinotypes._type_map["char"],
-        "VARBINARY": trinotypes._type_map["varbinary"],
-        "JSON": trinotypes._type_map["json"],
-        "DATE": trinotypes._type_map["date"],
-        "TIME": trinotypes._type_map["time"],
-        "TIMESTAMP": trinotypes._type_map["timestamp"],
+TRINO_TYPES: Dict[str, Any] = (
+    {
+        "BOOLEAN": trino.trinotypes._type_map["boolean"],
+        "TINYINT": trino.trinotypes._type_map["tinyint"],
+        "SMALLINT": trino.trinotypes._type_map["smallint"],
+        "INT": trino.trinotypes._type_map["int"],
+        "INTEGER": trino.trinotypes._type_map["integer"],
+        "BIGINT": trino.trinotypes._type_map["bigint"],
+        "REAL": trino.trinotypes._type_map["real"],
+        "DOUBLE": trino.trinotypes._type_map["double"],
+        "DECIMAL": trino.trinotypes._type_map["decimal"],
+        "VARCHAR": trino.trinotypes._type_map["varchar"],
+        "CHAR": trino.trinotypes._type_map["char"],
+        "VARBINARY": trino.trinotypes._type_map["varbinary"],
+        "JSON": trino.trinotypes._type_map["json"],
+        "DATE": trino.trinotypes._type_map["date"],
+        "TIME": trino.trinotypes._type_map["time"],
+        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
     }
-except (ImportError, KeyError):
-    trino = None
-    trinotypes = None
-    trinoDialect = None
-    TRINO_TYPES = {}
+    if trino.trinotypes
+    else {}
+)
 
 try:
     import sqlalchemy_redshift.dialect as redshiftDialect
@@ -957,11 +951,10 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["clickhouse"] = CLICKHOUSE_TYPES
     except AttributeError:
         pass
-    try:
-        dialect_classes["trino"] = trinoDialect
+
+    if trino.trinodialect:
+        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
         dialect_types["trino"] = TRINO_TYPES
-    except AttributeError:
-        pass
     try:
         dialect_classes["snowflake"] = snowflakeDialect.dialect
         dialect_types["snowflake"] = SNOWFLAKE_TYPES
@@ -1900,6 +1893,7 @@ def generate_expectation_tests(  # noqa: C901, PLR0912, PLR0913, PLR0915
         include_mysql=dialects_to_include.get("mysql", False),
         include_mssql=dialects_to_include.get("mssql", False),
         include_bigquery=dialects_to_include.get("bigquery", False),
+        include_clickhouse=dialects_to_include.get("clickhouse", False),
         include_trino=dialects_to_include.get("trino", False),
         include_redshift=dialects_to_include.get("redshift", False),
         include_athena=dialects_to_include.get("athena", False),
@@ -2824,7 +2818,6 @@ def _create_trino_engine(
     engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
-    from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
         try:
@@ -2833,7 +2826,7 @@ def _create_trino_engine(
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(sa.text(f"create schema {schema_name}"))
-        except TrinoUserError:
+        except trino.trinoexceptions.TrinoUserError:
             pass
 
     return engine

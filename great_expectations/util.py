@@ -374,7 +374,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str) -> Any:
+def load_class(class_name: str, module_name: str) -> type:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -1713,6 +1713,28 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
         [np.ndarray], np.ndarray
     ] = np.vectorize(pyfunc=convert_decimal_to_float)
     return convert_decimal_to_float_vectorized(data)
+
+
+def convert_pandas_series_decimal_to_float_dtype(
+    data: pd.Series, inplace: bool = False
+) -> pd.Series | None:
+    """
+    Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
+    """
+    series_data: np.ndarray = data.to_numpy()
+    series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
+    if series_data_has_decimal:
+        series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
+        if inplace:
+            data.update(pd.Series(series_data))
+            return None
+
+        return pd.Series(series_data)
+
+    if inplace:
+        return None
+
+    return data
 
 
 @overload

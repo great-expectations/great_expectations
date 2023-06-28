@@ -8,6 +8,7 @@ import shutil
 from abc import ABCMeta
 from typing import Any, List, Tuple
 
+from great_expectations.compatibility import aws
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict
@@ -703,10 +704,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key in all_keys
 
     def _assume_role_and_get_secret_credentials(self):
-        import boto3
-
         role_session_name = "GXAssumeRoleSession"
-        client = boto3.client("sts", self._boto3_options.get("region_name"))
+        client = aws.boto3.client("sts", self._boto3_options.get("region_name"))
         role_arn = self._boto3_options.pop("assume_role_arn")
         assume_role_duration = self._boto3_options.pop("assume_role_duration")
         response = client.assume_role(
@@ -726,12 +725,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     @property
     def boto3_options(self):
-        from botocore.client import Config
-
         result = {}
         if self._boto3_options.get("signature_version"):
             signature_version = self._boto3_options.pop("signature_version")
-            result["config"] = Config(signature_version=signature_version)
+            result["config"] = aws.Config(signature_version=signature_version)
         if self._boto3_options.get("assume_role_arn"):
             self._assume_role_and_get_secret_credentials()
         result.update(self._boto3_options)
@@ -739,14 +736,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return result
 
     def _create_client(self):
-        import boto3
-
-        return boto3.client("s3", **self.boto3_options)
+        return aws.boto3.client("s3", **self.boto3_options)
 
     def _create_resource(self):
-        import boto3
-
-        return boto3.resource("s3", **self.boto3_options)
+        return aws.boto3.resource("s3", **self.boto3_options)
 
     @property
     def config(self) -> dict:
@@ -852,7 +845,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
             )
         else:
-            return gcs_response_object.download_as_string().decode("utf-8")
+            return gcs_response_object.download_as_bytes().decode("utf-8")
 
     def _set(
         self,

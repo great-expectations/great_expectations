@@ -197,8 +197,8 @@ class OnboardingDataAssistant(DataAssistant):
         table_row_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
         )
-        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder()
+        table_columns_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.get_table_columns_metric_multi_batch_parameter_builder(
+            include_nested=True
         )
 
         # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
@@ -781,6 +781,10 @@ class OnboardingDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_text_columns_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for text columns.
+        """
+
         # Step-1: Instantiate "ColumnDomainBuilder" for selecting proper text columns.
 
         text_column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(

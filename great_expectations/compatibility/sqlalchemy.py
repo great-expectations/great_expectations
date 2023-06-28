@@ -9,7 +9,6 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 
 try:
     import sqlalchemy
-
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
@@ -22,6 +21,11 @@ try:
     from sqlalchemy import dialects
 except ImportError:
     dialects = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy import inspect
+except ImportError:
+    inspect = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.dialects import sqlite
@@ -206,7 +210,7 @@ except (ImportError, AttributeError):
     Select = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    from sqlalchemy.sql.expression import Selectable
+    from sqlalchemy.sql import Selectable
 except (ImportError, AttributeError):
     Selectable = SQLALCHEMY_NOT_IMPORTED
 
@@ -244,3 +248,8 @@ try:
     from sqlalchemy.pool import StaticPool
 except (ImportError, AttributeError):
     StaticPool = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy import Table
+except (ImportError, AttributeError):
+    Table = SQLALCHEMY_NOT_IMPORTED
