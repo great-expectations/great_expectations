@@ -22,13 +22,6 @@ class Maturity(str, Enum):
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
 
-    def __format__(self, _: str) -> str:
-        """
-        This method is necessary to due to changes in default __format__ behavior in Python 3.11+
-        https://docs.python.org/3/whatsnew/3.11.html#enum
-        """
-        return self.value
-
 
 @dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
