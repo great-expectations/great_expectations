@@ -6,13 +6,6 @@ SNOWFLAKE_NOT_IMPORTED = NotImported(
     "snowflake connection components are not installed, please 'pip install snowflake-sqlalchemy snowflake-connector-python'"
 )
 
-"""
-import snowflake.sqlalchemy.snowdialect
-import snowflake.sqlalchemy.snowdialect
-import snowflake.sqlalchemy.snowdialect as snowflakeDialect
-import snowflake.sqlalchemy.custom_types as snowflaketypes
-"""
-
 try:
     import snowflake
 except ImportError:
