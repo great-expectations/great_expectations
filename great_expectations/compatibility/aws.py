@@ -45,12 +45,12 @@ except (ImportError, AttributeError):
 try:
     import pyathena
 except ImportError:
-    pyathena = ATHENA_NOT_IMPORTED
+    pyathena = ATHENA_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from pyathena import sqlalchemy_athena
 except (ImportError, AttributeError):
-    sqlalchemy_athena = ATHENA_NOT_IMPORTED
+    sqlalchemy_athena = ATHENA_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from pyathena.sqlalchemy_athena import types as athenatypes
