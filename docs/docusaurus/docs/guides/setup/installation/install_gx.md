@@ -1,5 +1,5 @@
 ---
-sidebar_label: "Install Great Expectations"
+sidebar_label: "Install GX"
 title: "Install Great Expectations"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
