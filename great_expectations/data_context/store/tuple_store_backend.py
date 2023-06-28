@@ -739,7 +739,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return aws.boto3.client("s3", **self.boto3_options)
 
     def _create_resource(self):
-        return aws.oto3.resource("s3", **self.boto3_options)
+        return aws.boto3.resource("s3", **self.boto3_options)
 
     @property
     def config(self) -> dict:
