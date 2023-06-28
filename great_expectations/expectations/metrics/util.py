@@ -258,8 +258,6 @@ def _get_dialect_type_module(dialect=None):
         aws.redshiftdialect.RedshiftDialect,
     ):
         return dialect.sa
-    else:
-        pass
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
