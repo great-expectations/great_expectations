@@ -395,7 +395,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         cls, content_block, has_failed_evr, render_object=None
     ) -> None:
         header = cls._get_header()
-        if header != "":
+        if header != "":  # noqa: PLC1901
             content_block.header = header
 
     @classmethod

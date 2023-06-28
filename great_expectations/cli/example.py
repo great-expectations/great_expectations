@@ -215,7 +215,6 @@ def example_s3(
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
 
-
 @example.command(name="gcs")
 @click.option(
     "--stop",
@@ -431,7 +430,6 @@ def _check_bigquery_env_vars() -> set[str]:
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
-
 
 def _check_gcs_env_vars() -> set[str]:
     """Return list of env var names that are not set."""
