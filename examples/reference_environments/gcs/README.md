@@ -8,7 +8,7 @@ that is hosted in the project defined by `GCP_PROJECT_NAME` env variable.
 You can connect to GCS by setting up 2 environment variables:
 
 First, the `GOOGLE_APPLICATION_CREDENTIALS` variable is used for authentication, and can point to a credential configuration JSON file. 
-The second variable needed is the `GE_TEST_GCP_PROJECT`. 
+The second variable needed is the `GCP_PROJECT_NAME`. 
 
 More information on authentication can be found in the [Google Cloud Authentication Documentation](https://cloud.google.com/docs/authentication/application-default-credentials#GAC).
 
