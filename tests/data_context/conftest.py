@@ -770,7 +770,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
         "requests.Session.get",
         autospec=True,
         side_effect=mocked_datasource_get_response,
-    ):
+    ), pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
         context.add_datasource(
             "my_datasource",
             **config,

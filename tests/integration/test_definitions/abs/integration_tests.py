@@ -4,18 +4,18 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 abs_integration_tests = []
 
 connecting_to_your_data = [
-    # IntegrationTestFixture(
-    #     name="azure_pandas_configured_yaml",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.AZURE],
-    # ),
-    # IntegrationTestFixture(
-    #     name="azure_pandas_configured_python",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.AZURE],
-    # ),
+    IntegrationTestFixture(
+        name="azure_pandas_configured_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
+    IntegrationTestFixture(
+        name="azure_pandas_configured_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.AZURE],
+    ),
     IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",

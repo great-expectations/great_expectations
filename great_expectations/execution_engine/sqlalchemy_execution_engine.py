@@ -32,7 +32,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -152,13 +152,6 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
-    trinotypes = None
-
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
@@ -211,11 +204,11 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
         if (
             isinstance(
                 dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
+            and trino.trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 

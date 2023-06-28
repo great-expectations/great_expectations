@@ -2,15 +2,10 @@ import logging
 from typing import List, Optional
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -88,7 +83,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             boto3_options = {}
 
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
