@@ -1,15 +1,12 @@
 ---
-title: "Setup: Overview"
+sidebar_label: 'GX installation and configuration workflow'
+title: "Great Expectations installation and configuration workflow"
 ---
-# [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Overview
-
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
 import GxData from '/docs/components/_data.jsx';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
-
-<UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/>
 
 Setting up Great Expectations includes installing Great Expectations and initializing your deployment. Optionally, you can customize the configuration of some components, such as Stores, Data Docs, and Plugins.
 
@@ -34,7 +31,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 - A web browser (for Jupyter Notebooks).
 - A virtual environment. Recommended for your project workspace.
 
-## 1. Install Great Expectations
+## Install Great Expectations
 
 Run the following pip command in a terminal to install Great Expectations and its dependencies:
 
@@ -44,7 +41,7 @@ pip install great_expectations
 
 If you experience difficulty with the installation, see <TechnicalTag relative="../" tag="supporting_resource" text="Supporting Resources" />.
 
-## 2. Initialize a Data Context
+## Initialize a Data Context
 
 Your Data Context contains your Great Expectations project, and it is the entry point for configuring and interacting with Great Expectations. The Data Context manages various classes and helps limit the number of objects you need to manage to get Great Expectations working.
 
@@ -57,7 +54,7 @@ Run the following command to retrieve your Data Context:
 
 To configure your Data Context, see [Data Context](./index.md#data-contexts).
 
-## 3. Optional configurations
+## Optional configurations
 
 After you've initialized your Data Context, you can start using Great Expectations. However, a few components such as Stores, Data Docs, and Plugins that are configured by default to operate locally can be changed to hosted if it better suits your use case.
 

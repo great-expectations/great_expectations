@@ -13,6 +13,7 @@ import LinkCard from '/docs/components/LinkCard';
 #### Install and connect
 
 <LinkCardGrid>
+  <LinkCard topIcon label="GX installation and configuration workflow" description="Learn more about the GX installation and configuration process" href="/docs/guides/setup/setup_overview" icon="/img/workflow_icon.svg" />
   <LinkCard topIcon label="Install GX" description="Install and configure GX" href="/docs/guides/setup/installation/install_gx" icon="/img/install_icon.svg" />
   <LinkCard topIcon label="Connect to a Source Data System" description="Configure the dependencies necessary to access Source Data stored on databases" href="/docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system" icon="/img/connect_icon.svg" />
 </LinkCardGrid>
