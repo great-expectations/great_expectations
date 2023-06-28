@@ -51,7 +51,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
@@ -631,7 +631,14 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+        try:
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
+        except StoreBackendError:
+            raise ValueError(
+                f"Unable to load Expectation Suite {key.resource_name or key.id}"
+            )
 
         if include_rendered_content is None:
             include_rendered_content = (
