@@ -3,42 +3,21 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started',
-      link: { type: 'doc', id: 'guides/setup/setup_overview'},
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
       items: [
-        {
-          type: 'doc', id: 'guides/setup/installation/install_gx', label: 'Install Great Expectations'
-        },
-        {
-          type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_with_sql'
-        }
+        'tutorials/quickstart/quickstart',
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
       ]
     },
     {
       type: 'category',
-      label: 'Getting Started with Great Expectations',
-      link: { type: 'doc', id: 'guides/setup/setup_overview'},
-      items: [
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_with_sql'
-        }
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
-        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
+        'guides/setup/setup_overview',
+        'guides/setup/installation/install_gx',
         {
           type: 'category',
           label: 'Configure Data Contexts',
@@ -57,7 +36,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to data',
+      label: 'Connect to Source Data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',

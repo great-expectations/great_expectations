@@ -2605,8 +2605,7 @@ class QueryExpectation(BatchExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.upper() != ""
-                and x.upper() not in valid_sql_tokens_and_types
+                if x.upper() and x.upper() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
