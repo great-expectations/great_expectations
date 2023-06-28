@@ -276,24 +276,28 @@ except (ImportError, KeyError):
     CLICKHOUSE_TYPES = {}
 
 
-TRINO_TYPES = {
-    "BOOLEAN": trino.trinotypes._type_map["boolean"],
-    "TINYINT": trino.trinotypes._type_map["tinyint"],
-    "SMALLINT": trino.trinotypes._type_map["smallint"],
-    "INT": trino.trinotypes._type_map["int"],
-    "INTEGER": trino.trinotypes._type_map["integer"],
-    "BIGINT": trino.trinotypes._type_map["bigint"],
-    "REAL": trino.trinotypes._type_map["real"],
-    "DOUBLE": trino.trinotypes._type_map["double"],
-    "DECIMAL": trino.trinotypes._type_map["decimal"],
-    "VARCHAR": trino.trinotypes._type_map["varchar"],
-    "CHAR": trino.trinotypes._type_map["char"],
-    "VARBINARY": trino.trinotypes._type_map["varbinary"],
-    "JSON": trino.trinotypes._type_map["json"],
-    "DATE": trino.trinotypes._type_map["date"],
-    "TIME": trino.trinotypes._type_map["time"],
-    "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
-}
+TRINO_TYPES = (
+    {
+        "BOOLEAN": trino.trinotypes._type_map["boolean"],
+        "TINYINT": trino.trinotypes._type_map["tinyint"],
+        "SMALLINT": trino.trinotypes._type_map["smallint"],
+        "INT": trino.trinotypes._type_map["int"],
+        "INTEGER": trino.trinotypes._type_map["integer"],
+        "BIGINT": trino.trinotypes._type_map["bigint"],
+        "REAL": trino.trinotypes._type_map["real"],
+        "DOUBLE": trino.trinotypes._type_map["double"],
+        "DECIMAL": trino.trinotypes._type_map["decimal"],
+        "VARCHAR": trino.trinotypes._type_map["varchar"],
+        "CHAR": trino.trinotypes._type_map["char"],
+        "VARBINARY": trino.trinotypes._type_map["varbinary"],
+        "JSON": trino.trinotypes._type_map["json"],
+        "DATE": trino.trinotypes._type_map["date"],
+        "TIME": trino.trinotypes._type_map["time"],
+        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
+    }
+    if trino.trinotypes
+    else {}
+)
 
 try:
     import sqlalchemy_redshift.dialect as redshiftDialect
