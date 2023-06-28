@@ -7,9 +7,8 @@ import pandas as pd
 import pytest
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
-from great_expectations.compatibility import snowflake
 from great_expectations import DataContext
-from great_expectations.compatibility import sqlalchemy, trino
+from great_expectations.compatibility import snowflake, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
 )
