@@ -276,7 +276,7 @@ except (ImportError, KeyError):
     CLICKHOUSE_TYPES = {}
 
 
-TRINO_TYPES: dict | None = (
+TRINO_TYPES: Dict[str, Any] = (
     {
         "BOOLEAN": trino.trinotypes._type_map["boolean"],
         "TINYINT": trino.trinotypes._type_map["tinyint"],
