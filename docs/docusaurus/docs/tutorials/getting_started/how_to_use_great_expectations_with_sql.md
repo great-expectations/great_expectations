@@ -1,5 +1,5 @@
 ---
-title: Get Started with GX and SQL
+title: Get started with Great Expectations and SQL
 ---
 
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'

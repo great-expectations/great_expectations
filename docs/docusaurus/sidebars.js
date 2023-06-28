@@ -6,18 +6,9 @@ module.exports = {
       label: 'Get Started with GX',
       link: { type: 'doc', id: 'guides/setup/get_started_lp'},
       items: [
-        {
-          type: 'doc', id: 'guides/setup/installation/install_gx', label: 'Install Great Expectations'
-        },
-        {
-          type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_in_databricks'
-        },
-        {
-          type: 'doc', id: 'tutorials/getting_started/how_to_use_great_expectations_with_sql'
-        }
+        'tutorials/quickstart/quickstart',
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
       ]
     },
     {
@@ -25,6 +16,7 @@ module.exports = {
       label: 'Set up your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/installation/install_gx',
         'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
