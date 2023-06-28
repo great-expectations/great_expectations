@@ -946,10 +946,6 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     except AttributeError:
         pass
 
-    if trino.trinodialect:
-        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
-        dialect_types["trino"] = TRINO_TYPES
-
     if aws.redshiftdialect:
         dialect_classes["redshift"] = aws.redshiftdialect.RedshiftDialect
         dialect_types["redshift"] = REDSHIFT_TYPES
@@ -963,6 +959,10 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["athena"] = ATHENA_TYPES
     except AttributeError:
         pass
+
+    if trino.trinodialect:
+        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
+        dialect_types["trino"] = TRINO_TYPES
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
