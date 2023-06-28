@@ -8,7 +8,7 @@ description: Install Great Expectations and initialize your deployment.
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX) and want to test features and functionality. If you're ready to set up GX in your production environment, see [Set up your Great Expectations environment](/docs/docusaurus/docs/guides/setup/setup_overview_lp.md). </p>
+<p class="DocItem__header-description">Start here if you're unfamiliar with Great Expectations (GX) and want to test features and functionality. If you're ready to set up GX in your production environment, see [Set up your Great Expectations environment](../setup/setup_overview_lp.md). </p>
 
 
 
