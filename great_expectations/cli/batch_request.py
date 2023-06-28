@@ -6,24 +6,21 @@ from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Type, Union
 
 import click
 
-from great_expectations.cli.pretty_printing import cli_message
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.util import get_sqlalchemy_inspector
-
-from great_expectations.compatibility.bigquery import parse_url as parse_bigquery_url
-
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.compatibility.bigquery import parse_url as parse_bigquery_url
 from great_expectations.datasource import (
     BaseDatasource,
     DataConnector,
     Datasource,
     SimpleSqlalchemyDatasource,
 )
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, get_sqlalchemy_inspector
 
 logger = logging.getLogger(__name__)
 
