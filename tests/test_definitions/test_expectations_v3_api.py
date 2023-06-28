@@ -194,7 +194,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         generate_test = True
                                     elif (
                                         "snowflake" in only_for
-                                        and snowflake.snowflakedialect is not None
+                                        and snowflake.snowflakedialect
                                         and isinstance(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
                                             snowflake.snowflakedialect.SnowflakeDialect,
@@ -351,7 +351,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     or (
                                         "snowflake" in suppress_test_for
-                                        and snowflake.snowflakedialect is not None
+                                        and snowflake.snowflakedialect
                                         and validator_with_data
                                         and isinstance(
                                             validator_with_data.active_batch_data,
