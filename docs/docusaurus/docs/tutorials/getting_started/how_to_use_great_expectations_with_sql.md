@@ -5,7 +5,6 @@ title: Get Started with GX and SQL
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from '../../guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 Use the information provided here to learn how you can use Great Expectations (GX) with a SQL Datasource. The following examples use a [PostgreSQL Database](https://www.postgresql.org/).

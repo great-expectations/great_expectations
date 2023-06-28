@@ -5,70 +5,67 @@ title: Get Started with GX and Databricks
 import Prerequisites from '../../deployment_patterns/components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from '../../guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you run an end-to-end workflow with Great Expectations in [Databricks](https://databricks.com/).
+Use the information provided here to learn how you can use Great Expectations (GX) with [Databricks](https://databricks.com/).
 
-You will:
-  - Load data
-  - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
-  - Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
-  - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
-  - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
+To use GX with Databricks, you'll complete the following tasks:
+
+- Load data
+- Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
+- Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
+- Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
+- Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
+
+The information provided here is intended to get you up and running quickly. To validate files stored in the DBFS, select the **File** tab. If you have an existing Spark DataFrame loaded, select one of the **DataFrame** tabs. See the specific integration guides if you're using a different file store such as Amazon S3, Google Cloud Storage (GCS), or Microsoft Azure Blob Storage (ABS).
+
+The full code used in the following examples is available on GitHub:
+
+- [databricks_deployment_patterns_file_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py)
+
+- [databricks_deployment_patterns_dataframe_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py)
 
 ## Prerequisites
 
 <Prerequisites>
 
-- Have completed Databricks setup including having a running Databricks cluster with attached notebook
-- Have access to [DBFS](https://docs.databricks.com/dbfs/index.html)
+- A complete Databricks setup including a running Databricks cluster with an attached notebook
+- Access to [DBFS](https://docs.databricks.com/dbfs/index.html)
 
 </Prerequisites>
 
 
-We will cover a basic configuration to get you up and running quickly, and link to our other guides for more customized configurations. For example:
-  - If you want to validate files stored in DBFS select one of the "File" tabs below.
-    - If you are using a different file store (e.g. s3, GCS, ABS) take a look at our integration guides for those respective file stores.
-  - If you already have a Spark DataFrame loaded, select one of the "DataFrame" tabs below.
+## 1. Install GX
 
-### 1. Install Great Expectations
+1. Run the following command in your notebook to install GX as a notebook-scoped library:
 
-Install Great Expectations as a notebook-scoped library by running the following command in your notebook:
-```bash
-  %pip install great-expectations
+    ```bash
+    %pip install great-expectations
+    ```
+
+  A notebook-scoped library is a custom Python environment that is specific to a notebook. You can also install a library at the cluster or workspace level. See [Databricks Libraries](https://docs.databricks.com/data/databricks-file-system.html).
+
+2. Run the following command to import the Python configurations you'll use in the following steps:
+
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
   ```
 
-<details>
-  <summary>What is a notebook-scoped library?</summary>
-A notebook-scoped library is what it sounds like - "custom Python environments that are specific to a notebook." You can also install a library at the cluster or workspace level. See the <a href="https://docs.databricks.com/libraries/index.html">Databricks documentation on Libraries</a> for more information.
-</details>
+## 2. Set up GX
 
-After that we will take care of some imports that will be used later:
+To avoid configuring external resources, you'll use the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store.
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
-```
+DBFS is a distributed file system mounted in a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
 
-### 2. Set up Great Expectations
+1. Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> with the default settings:
 
-In this guide, we will be using the [Databricks File System (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store. This is a simple way to get up and running within the Databricks environment without configuring external resources. For other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
+  ```
+2. Run the following code to instantiate your Data Context:
 
-  <details>
-    <summary>What is DBFS?</summary>
-    Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
-  </details>
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
+  ```
 
-Run the following code to set the root directory for your <TechnicalTag tag="data_context" text="Data Context"/>:
-
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
-```
-
-Then, instantiate your Data Context in code:
-
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
-```
-
-### 3. Prepare your data
+## 3. Prepare your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -79,7 +76,7 @@ Then, instantiate your Data Context in code:
   ]}>
   <TabItem value="file">
 
-We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
+Run the following command with [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html) to copy existing example csv taxi data to your DBFS folder:
 
 ```python
 # Copy 3 months of data
@@ -94,7 +91,7 @@ for month in range(1, 4):
 
   <TabItem value="dataframe">
 
-We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
+Run the following code in your notebook to load a month of existing example taxi data as a DataFrame:
 
 ```python
 df = spark.read.format("csv")\
@@ -106,7 +103,7 @@ df = spark.read.format("csv")\
   </TabItem>
 </Tabs>
 
-### 4. Connect to your data
+## 4. Connect to your data
 
 <Tabs
   groupId="file-or-dataframe"
@@ -115,119 +112,113 @@ df = spark.read.format("csv")\
   {label: 'File', value:'file'},
   {label: 'DataFrame', value:'dataframe'},
   ]}>
-  <TabItem value="file">
+<TabItem value="file">
 
-Set the base directory containing our data:
+1. Run the following command to set the base directory that contains the data:
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory"
+  ```
 
-And create our <TechnicalTag tag="datasource" text="Datasource" />:
+2. Run the following command to create our <TechnicalTag tag="datasource" text="Datasource" />:
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
+  ```
 
-Then we'll set the [batching regex](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
+3. Run the following command to set the [batching regex](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset/#create-a-batching_regex):
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
+  ```
 
-And create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+4. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset"
+  ```
 
-Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> we configured earlier to use as a sample of data when creating Expectations:
+5. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> with the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured earlier:
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py build batch request"
+  ```
 
-  </TabItem>
+</TabItem>
+<TabItem value="dataframe">
 
-  <TabItem value="dataframe">
+1. Run the following command to create the Datasource:
 
-Create our <TechnicalTag tag="datasource" text="Datasource" />:
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
+  ```
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
-```
+2. Run the following command to create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
 
-And create a <TechnicalTag tag="data_asset" text="Data Asset" /> with the Datasource:
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
+  ```
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset"
-```
+3. Run the following command to build a <TechnicalTag tag="batch_request" text="Batch Request" /> with the <TechnicalTag tag="data_asset" text="Data Asset" /> you configured earlier:
 
-Then we build a <TechnicalTag tag="batch_request" text="Batch Request" /> using the <TechnicalTag tag="data_asset" text="Data Asset" /> we configured earlier to use as a sample of data when creating Expectations:
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py build batch request"
+  ```
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py build batch request"
-```
-
-  </TabItem>
+</TabItem>
 </Tabs>
 
+## 5. Create Expectations
 
-<Congratulations />
-Now let's keep going to create an Expectation Suite and validate our data.
+You'll use a <TechnicalTag tag="validator" text="Validator" /> to interact with your batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
 
-### 5. Create Expectations
+Every time you evaluate an Expectation with `validator.expect_*`, it is immediately Validated against your data. This instant feedback helps you identify unexpected data and removes the guesswork from data exploration. The Expectation configuration is stored in the Validator. When you are finished running the Expectations on the dataset, you can use `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
 
-Here we will use a <TechnicalTag tag="validator" text="Validator" /> to interact with our batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
+1. Run the following command to create the suite and get a `Validator`:
 
-Each time we evaluate an Expectation (e.g. via `validator.expect_*`), it will immediately be Validated against your data. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration. Also, the Expectation configuration will be stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py get validator"
+  ```
 
-First we create the suite and get a `Validator`:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py get validator"
-```
+2. Run the following command to use the `Validator` to add a few Expectations:
 
-Then we use the `Validator` to add a few Expectations:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add expectations"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add expectations"
+  ```
 
-Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py save suite"
-```
+3. Run the following command to save your Expectation Suite (all the unique Expectation Configurations from each run of `validator.expect_*`) to your Expectation Store:
 
-### 6. Validate your data
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py save suite"
+  ```
 
-Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+## 6. Validate your data
 
-First, we create the Checkpoint configuration utilizing our data context, passing in our Batch Request (our data) and our Expectation Suite (our tests):
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py checkpoint config"
-```
+You'll create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for your batch, which you can use to validate and run post-validation actions.
 
-Next, we save the Checkpoint:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add checkpoint config"
-```
+1. Run the following command to create the Checkpoint configuration that uses your Data Context, passes in your Batch Request (your data) and your Expectation Suite (your tests):
 
-Finally, we run the Checkpoint:
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py run checkpoint"
-```
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py checkpoint config"
+  ```
 
-<details>
-<summary>Checkpoint actions?</summary>
+2. Run the following command to save the Checkpoint:
 
-  In our Checkpoint configuration, we've included two important actions: `store_validation_result` & `update_data_docs`.
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add checkpoint config"
+  ```
 
-  `store_validation_result` saves your validation results from this Checkpoint run, allowing these results to be persisted for further use.
+3. Run the following command to run the Checkpoint:
 
-  `update_data_docs` builds Data Docs files for the validations run in this Checkpoint.
+  ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py run checkpoint"
+  ```
 
-  Check out [our docs on Validating your data](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview) for more info on how to customize your Checkpoints.
+  Your Checkpoint configuration includes the `store_validation_result` and `update_data_docs` actions. The `store_validation_result` action saves your validation results from the Checkpoint run and allows the results to be persisted for future use. The  `update_data_docs` action builds Data Docs files for the validations run in the Checkpoint.
 
-  Also, to see the full Checkpoint configuration, you can run: <code>print(my_checkpoint.get_substituted_config().to_yaml_str())</code>
-</details>
+  To learn more about Data validation and customizing Checkpoints, see [Validate Data:Overview ](https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview).
 
-### 7. Build and view Data Docs
+  To view the full Checkpoint configuration, run: `print(my_checkpoint.get_substituted_config().to_yaml_str())`.
 
-Since our Checkpoint contained an `UpdateDataDocsAction`, our <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation we just ran. That means our Data Docs store will contain a new rendered validation result.
+## 7. Build and view Data Docs
 
-Since we used DBFS for our Data Docs store, we need to download our data docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your team. To learn more, see our documentation on Data Docs for other locations e.g. [filesystem](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md), [s3](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), [GCS](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), [ABS](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
+Your Checkpoint contained an `UpdateDataDocsAction`, so your <TechnicalTag tag="data_docs" text="Data Docs" /> have already been built from the validation you ran and your Data Docs store contains a new rendered validation result.
 
-Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs (replacing the paths as appropriate), then open the local copy of `index.html` to view your updated Data Docs:
+Because you used the DBFS for your Data Docs store, you need to download your Data Docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your organization. 
+
+Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs and open the local copy of `index.html` to view your updated Data Docs:
+
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
 
-Using the `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking on a link in the displayed data documents will result in an empty page. If you wish to see some validation results, use this approach.
+The `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking a link in the displayed data documents returns an empty page. To view some validation results, use this method. For example:
 
 ```python 
 html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
@@ -236,14 +227,7 @@ with open(html, "r") as f:
 displayHTML(data)
 ```
 
-You've successfully validated your data with Great Expectations using Databricks and viewed the resulting Data Docs. Check out our other guides for more customization options and happy validating!
+## Next steps
 
-### 8. What's next?
-
-Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, you can follow [our documentation on Checkpoints](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
-to create a script to run this checkpoint without having to re-create your Assets & Expectations. For more on productionalizing Databricks notebooks, see [this guide](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.
-
-View the full scripts used in this page on GitHub:
-
-- [databricks_deployment_patterns_file_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py)
-- [databricks_deployment_patterns_dataframe_python_configs.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py)
+Now that you've created and saved a Data Context, Datasource, Data Asset, Expectation Suite, and Checkpoint, see [Validate data by running a Checkpoint](https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) 
+to create a script to run the Checkpoint without the need to recreate your Data Assets and Expectations. To move Databricks notebooks to production, see [Software Engineering Best Practices With Databricks Notebooks](https://www.databricks.com/blog/2022/06/25/software-engineering-best-practices-with-databricks-notebooks.html) from Databricks.
