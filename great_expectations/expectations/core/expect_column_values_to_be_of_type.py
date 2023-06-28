@@ -591,11 +591,12 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     # Trino types module
     try:
         if (
-            isinstance(
+            trino.trinodialect
+            and trino.trinotypes
+            and isinstance(
                 execution_engine.dialect,
                 trino.trinodialect.TrinoDialect,
             )
-            and trino.trinotypes is not None
         ):
             return trino.trinotypes
     except (TypeError, AttributeError):
