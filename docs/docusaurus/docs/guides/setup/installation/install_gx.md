@@ -1,8 +1,10 @@
 ---
-sidebar_label: "Install GX"
-title: "Install Great Expectations"
+sidebar_label: "Install GX with Source Data System dependencies"
+title: "Install Great Expectations with Source Data System dependencies"
 id: install_gx
 description: Install Great Expectations locally, or in a hosted environment.
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 ---
 
 import Preface from './components_local/_preface.mdx'
@@ -47,12 +49,12 @@ Windows support for the open source Python version of GX is currently unavailabl
   groupId="install-gx"
   defaultValue='local'
   values={[
-  {label: 'Install GX locally', value:'local'},
-  {label: 'Install GX in a hosted environment', value:'hosted'},
-  {label: 'Install GX with Amazon S3', value:'amazon'},
-  {label: 'Install GX with Microsoft Azure Blob Storage', value:'azure'},
-  {label: 'Install GX with Google Cloud Storage', value:'gcs'},
-  {label: 'Install GX with SQL databases', value:'sql'},
+  {label: 'Local', value:'local'},
+  {label: 'Hosted environment', value:'hosted'},
+  {label: 'Amazon S3', value:'amazon'},
+  {label: 'Microsoft Azure Blob Storage', value:'azure'},
+  {label: 'Google Cloud Storage', value:'gcs'},
+  {label: 'SQL databases', value:'sql'},
   ]}>
   <TabItem value="local">
 
