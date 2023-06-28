@@ -5,7 +5,7 @@ This reference environment spins up two containers:
 - A postgres database pre-loaded with a sample of one month of NYC taxi trip data
 - A jupyter notebook server
 
-The jupyter notebook server contains a notebook with a quickstart for using Great Expectations with postgres.
+The jupyter notebook server contains a notebook with a quickstart for using Great Expectations with postgres. It also contains a notebook with a quickstart example that uses the database to store expectation suites and validation results (instead of storing them on the filesystem).
 
 You can connect to the database using the following credentials:
 
