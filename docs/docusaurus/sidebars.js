@@ -13,7 +13,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
         'guides/setup/setup_overview',

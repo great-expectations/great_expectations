@@ -1,8 +1,8 @@
 ---
-sidebar_label: 'Set up your Great Expectations environment'
-title: 'Set up your Great Expectations environment'
+sidebar_label: 'Configure your Great Expectations environment'
+title: 'Configure your Great Expectations environment'
 id: setup_overview_lp
-description: Set up and configure GX in your specific environment.
+description: Configure GX in your specific environment.
 ---
 
 import LinkCardGrid from '/docs/components/LinkCardGrid';
