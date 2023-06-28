@@ -2,13 +2,21 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
+      items: [
+        'tutorials/quickstart/quickstart',
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+      ]
     },
     {
       type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/setup_overview',
         'guides/setup/installation/install_gx',
         {
           type: 'category',
@@ -168,7 +176,6 @@ module.exports = {
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',

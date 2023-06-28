@@ -3,7 +3,7 @@ import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports">
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.checkpoint import Checkpoint
 
 # </snippet>
 
@@ -74,12 +74,19 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py checkpoint config">
 my_checkpoint_name = "my_databricks_checkpoint"
 
-checkpoint = SimpleCheckpoint(
+checkpoint = Checkpoint(
     name=my_checkpoint_name,
-    config_version=1.0,
-    class_name="SimpleCheckpoint",
     run_name_template="%Y%m%d-%H%M%S-my-run-name-template",
     data_context=context,
+    batch_request=batch_request,
+    expectation_suite_name=expectation_suite_name,
+    action_list=[
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {"name": "update_data_docs", "action": {"class_name": "UpdateDataDocsAction"}},
+    ],
 )
 # </snippet>
 
@@ -88,13 +95,5 @@ context.add_or_update_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py run checkpoint">
-checkpoint_result = context.run_checkpoint(
-    checkpoint_name=my_checkpoint_name,
-    validations=[
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": expectation_suite_name,
-        }
-    ],
-)
+checkpoint_result = checkpoint.run()
 # </snippet>
