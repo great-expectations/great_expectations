@@ -162,7 +162,7 @@ def test_substitute_value_from_aws_ssm(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.boto3.session.Session",
+            "great_expectations.core.config_substitutor.aws.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
             assert (
