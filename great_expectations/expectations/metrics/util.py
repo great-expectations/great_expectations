@@ -292,12 +292,9 @@ def _get_dialect_type_module(dialect=None):
 
 def attempt_allowing_relative_error(dialect):
     # noinspection PyUnresolvedReferences
-    detected_redshift: bool = (
-        aws.redshiftdialect is not None
-        and check_sql_engine_dialect(
-            actual_sql_engine_dialect=dialect,
-            candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
-        )
+    detected_redshift: bool = aws.redshiftdialect and check_sql_engine_dialect(
+        actual_sql_engine_dialect=dialect,
+        candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
     )
     # noinspection PyTypeChecker
     detected_psycopg2: bool = (
