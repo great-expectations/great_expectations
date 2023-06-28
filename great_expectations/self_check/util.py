@@ -34,7 +34,7 @@ import pandas as pd
 from dateutil.parser import parse
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
-from great_expectations.compatibility import pyspark, sqlalchemy, trino
+from great_expectations.compatibility import aws, pyspark, sqlalchemy, trino
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
@@ -299,32 +299,28 @@ TRINO_TYPES: Dict[str, Any] = (
     else {}
 )
 
-try:
-    import sqlalchemy_redshift.dialect as redshiftDialect
-    import sqlalchemy_redshift.dialect as redshifttypes
-
-    REDSHIFT_TYPES = {
-        "BIGINT": redshifttypes.BIGINT,
-        "BOOLEAN": redshifttypes.BOOLEAN,
-        "CHAR": redshifttypes.CHAR,
-        "DATE": redshifttypes.DATE,
-        "DECIMAL": redshifttypes.DECIMAL,
-        "DOUBLE_PRECISION": redshifttypes.DOUBLE_PRECISION,
-        "FOREIGN_KEY_RE": redshifttypes.FOREIGN_KEY_RE,
-        "GEOMETRY": redshifttypes.GEOMETRY,
-        "INTEGER": redshifttypes.INTEGER,
-        "PRIMARY_KEY_RE": redshifttypes.PRIMARY_KEY_RE,
-        "REAL": redshifttypes.REAL,
-        "SMALLINT": redshifttypes.SMALLINT,
-        "TIMESTAMP": redshifttypes.TIMESTAMP,
-        "TIMESTAMPTZ": redshifttypes.TIMESTAMPTZ,
-        "TIMETZ": redshifttypes.TIMETZ,
-        "VARCHAR": redshifttypes.VARCHAR,
+REDSHIFT_TYPES: Dict[str, Any] = (
+    {
+        "BIGINT": aws.redshiftdialect.BIGINT,
+        "BOOLEAN": aws.redshiftdialect.BOOLEAN,
+        "CHAR": aws.redshiftdialect.CHAR,
+        "DATE": aws.redshiftdialect.DATE,
+        "DECIMAL": aws.redshiftdialect.DECIMAL,
+        "DOUBLE_PRECISION": aws.redshiftdialect.DOUBLE_PRECISION,
+        "FOREIGN_KEY_RE": aws.redshiftdialect.FOREIGN_KEY_RE,
+        "GEOMETRY": aws.redshiftdialect.GEOMETRY,
+        "INTEGER": aws.redshiftdialect.INTEGER,
+        "PRIMARY_KEY_RE": aws.redshiftdialect.PRIMARY_KEY_RE,
+        "REAL": aws.redshiftdialect.REAL,
+        "SMALLINT": aws.redshiftdialect.SMALLINT,
+        "TIMESTAMP": aws.redshiftdialect.TIMESTAMP,
+        "TIMESTAMPTZ": aws.redshiftdialect.TIMESTAMPTZ,
+        "TIMETZ": aws.redshiftdialect.TIMETZ,
+        "VARCHAR": aws.redshiftdialect.VARCHAR,
     }
-except (ImportError, KeyError):
-    redshifttypes = None
-    redshiftDialect = None
-    REDSHIFT_TYPES = {}
+    if aws.redshiftdialect
+    else {}
+)
 
 try:
     import snowflake.sqlalchemy.custom_types as snowflaketypes
@@ -955,16 +951,17 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
     if trino.trinodialect:
         dialect_classes["trino"] = trino.trinodialect.TrinoDialect
         dialect_types["trino"] = TRINO_TYPES
+
     try:
         dialect_classes["snowflake"] = snowflakeDialect.dialect
         dialect_types["snowflake"] = SNOWFLAKE_TYPES
     except AttributeError:
         pass
-    try:
-        dialect_classes["redshift"] = redshiftDialect.RedshiftDialect
+
+    if aws.redshiftdialect:
+        dialect_classes["redshift"] = aws.redshiftdialect.RedshiftDialect
         dialect_types["redshift"] = REDSHIFT_TYPES
-    except AttributeError:
-        pass
+
     try:
         dialect_classes["athena"] = athenaDialect
         dialect_types["athena"] = ATHENA_TYPES
