@@ -12,6 +12,7 @@ from typing import List, Optional, Union
 import requests
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import aws
 from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
@@ -22,11 +23,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointValidationConfig
 from great_expectations.types import DictDot
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -518,7 +514,7 @@ def send_sns_notification(
     :return:  Message ID that was published or error message
 
     """
-    if not boto3:
+    if not aws.boto3:
         logger.warning("boto3 is not installed")
         return "boto3 is not installed"
 
@@ -531,7 +527,7 @@ def send_sns_notification(
         },
         "MessageStructure": "json",
     }
-    session = boto3.Session(**kwargs)
+    session = aws.boto3.Session(**kwargs)
     sns = session.client("sns")
     try:
         response = sns.publish(**message_dict)
