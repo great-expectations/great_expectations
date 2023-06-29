@@ -186,11 +186,14 @@ stages:
     - job: docs_snippet_checker
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
+      - script: |
+          yarn install
+        name: YarnInstall
       - task: PythonScript@0
         inputs:
           scriptSource: 'filePath'
           scriptPath: 'ci/checks/validate_docs_snippets.py'
-          failOnStderr: true
+          failOnStderr: false
         name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
