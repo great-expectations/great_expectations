@@ -1,0 +1,12 @@
+services:
+  jupyter:
+    image: gx/abs_example_jupyter
+    container_name: gx_abs_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      - AZURE_CREDENTIAL=${AZURE_CREDENTIAL}
+      - AZURE_STORAGE_ACCOUNT_URL=${AZURE_STORAGE_ACCOUNT_URL}
+    ports:
+      - "8888:8888"
