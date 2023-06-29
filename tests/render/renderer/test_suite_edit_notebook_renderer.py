@@ -3,7 +3,6 @@ import os
 import shutil
 
 import pytest
-
 from nbformat import NotebookNode
 
 from great_expectations.core.expectation_suite import (
