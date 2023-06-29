@@ -83,7 +83,16 @@
         },
         "password": {
             "title": "Password",
-            "type": "string"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                }
+            ]
         },
         "database": {
             "title": "Database",
