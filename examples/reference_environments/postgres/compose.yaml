@@ -37,7 +37,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - gx_stores:/gx
+      - gx_stores:/gx/gx_stores
 
   data_docs:
     image: gx/data_docs
@@ -53,7 +53,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - gx_stores:/gx:ro
+      - gx_stores:/gx/gx_stores:ro
 
 networks:
   dbnet:

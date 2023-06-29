@@ -2,6 +2,8 @@ FROM jupyter/minimal-notebook:python-3.10
 
 WORKDIR /gx
 
+RUN mkdir -p gx_stores/data_docs/
+
 COPY ./postgres_example.ipynb ./
 
 RUN pip install great_expectations[postgresql]
