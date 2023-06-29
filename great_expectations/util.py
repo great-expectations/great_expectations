@@ -1715,6 +1715,28 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
+def convert_pandas_series_decimal_to_float_dtype(
+    data: pd.Series, inplace: bool = False
+) -> pd.Series | None:
+    """
+    Convert all elements of "pd.Series" argument from "decimal.Decimal" type to "float" type objects "pd.Series" result.
+    """
+    series_data: np.ndarray = data.to_numpy()
+    series_data_has_decimal: bool = does_ndarray_contain_decimal_dtype(data=series_data)
+    if series_data_has_decimal:
+        series_data = convert_ndarray_decimal_to_float_dtype(data=series_data)
+        if inplace:
+            data.update(pd.Series(series_data))
+            return None
+
+        return pd.Series(series_data)
+
+    if inplace:
+        return None
+
+    return data
+
+
 @overload
 def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,

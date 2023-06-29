@@ -1,11 +1,7 @@
 import logging
 from typing import List, Optional
 
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
+from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
@@ -82,7 +78,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             boto3_options = {}
 
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."

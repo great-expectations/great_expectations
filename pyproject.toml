@@ -344,8 +344,10 @@ convention = "google"
 [tool.ruff.flake8-tidy-imports.banned-api]
 "sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 "pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
+"boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
+"trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
 [tool.pytest.ini_options]
@@ -433,6 +435,11 @@ filterwarnings = [
     # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
     # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
     'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
+    # python 3.11
+    # data_connector/util.py imports deprecated modules that will be removed in Python 3.12
+    "ignore: module 'sre_constants' is deprecated:DeprecationWarning",
+    "ignore: module 'sre_parse' is deprecated:DeprecationWarning",
 
     # trino
     # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
