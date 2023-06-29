@@ -4,6 +4,8 @@ import shutil
 
 import pytest
 
+from nbformat import NotebookNode
+
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
@@ -1441,73 +1443,79 @@ def test_notebook_execution_with_custom_notebooks(
         data_context_custom_notebooks
     ).render(suite_with_multiple_citations)
     assert isinstance(obs, dict)
-    expected = {
-        "nbformat": 4,
-        "nbformat_minor": 4,
-        "metadata": {},
-        "cells": [
-            {
-                "cell_type": "markdown",
-                "source": "# Custom header for MyCompany",
-                "metadata": {},
-            },
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
-                "outputs": [],
-            },
-            {
-                "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
-                "metadata": {},
-            },
-            {
-                "cell_type": "markdown",
-                "source": "### Table Expectation(s)",
-                "metadata": {},
-            },
-            {
-                "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
-                "metadata": {},
-            },
-            {
-                "cell_type": "markdown",
-                "source": "### Column Expectation(s)\nwrite your column expectations here",
-                "metadata": {},
-            },
-            {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
-                "outputs": [],
-            },
-            {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
-                "outputs": [],
-            },
-            {
-                "cell_type": "markdown",
-                "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
-                "metadata": {},
-            },
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n    "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n    "run_time": datetime.datetime.now(datetime.timezone.utc),\n}\nresults = context.run_validation_operator(\n    "local", assets_to_validate=[batch], run_id=run_id\n)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
-                "outputs": [],
-            },
-        ],
-    }
+    expected = NotebookNode(
+        {
+            "nbformat": 4,
+            "nbformat_minor": 4,
+            "metadata": {},
+            "cells": [
+                {
+                    "cell_type": "markdown",
+                    "source": "# Custom header for MyCompany",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "code",
+                    "metadata": {},
+                    "execution_count": None,
+                    "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                    "outputs": [],
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "### Table Expectation(s)",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "### Column Expectation(s)\nwrite your column expectations here",
+                    "metadata": {},
+                },
+                {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
+                {
+                    "cell_type": "code",
+                    "metadata": {},
+                    "execution_count": None,
+                    "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
+                    "outputs": [],
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "#### `provider_type`",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "code",
+                    "metadata": {},
+                    "execution_count": None,
+                    "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
+                    "outputs": [],
+                },
+                {
+                    "cell_type": "markdown",
+                    "source": "## Review & Save Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                    "metadata": {},
+                },
+                {
+                    "cell_type": "code",
+                    "metadata": {},
+                    "execution_count": None,
+                    "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n    "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n    "run_time": datetime.datetime.now(datetime.timezone.utc),\n}\nresults = context.run_validation_operator(\n    "local", assets_to_validate=[batch], run_id=run_id\n)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
+                    "outputs": [],
+                },
+            ],
+        }
+    )
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
