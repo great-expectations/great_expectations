@@ -32,7 +32,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.compatibility import aws, sqlalchemy, trino
+from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -115,17 +115,13 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-try:
-    import snowflake.sqlalchemy.snowdialect
-
+if snowflake.snowflakedialect:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(
             GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
         )
-except (ImportError, KeyError, AttributeError):
-    snowflake = None
 
 from great_expectations.compatibility.sqlalchemy_bigquery import (
     _BIGQUERY_MODULE_NAME,
