@@ -1,0 +1,14 @@
+services:
+  jupyter:
+    image: gx/aws_rds_example_jupyter
+    container_name: gx_aws_rds_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_RDS_CONNECTION_STRING=${AWS_RDS_CONNECTION_STRING}
+    ports:
+      - "8888:8888"
