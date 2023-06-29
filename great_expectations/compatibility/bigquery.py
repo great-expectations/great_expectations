@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, Dict
+
 from great_expectations.compatibility.not_imported import NotImported
 
 SQLALCHEMY_BIGQUERY_NOT_IMPORTED = NotImported(
@@ -16,13 +18,8 @@ try:
 except (ImportError, AttributeError):
     sqlalchemy_bigquery = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
 
-try:
-    from sqlalchemy_bigquery import GEOGRAPHY
-except (ImportError, AttributeError):
-    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
-
-if sqlalchemy_bigquery:
-    BIGQUERY_TYPES = {
+BIGQUERY_TYPES: Dict[str, Any] = (
+    {
         "INTEGER": sqlalchemy_bigquery.INTEGER,
         "NUMERIC": sqlalchemy_bigquery.NUMERIC,
         "STRING": sqlalchemy_bigquery.STRING,
@@ -36,5 +33,16 @@ if sqlalchemy_bigquery:
         "DATE": sqlalchemy_bigquery.DATE,
         "DATETIME": sqlalchemy_bigquery.DATETIME,
     }
-else:
-    BIGQUERY_TYPES = {}
+    if sqlalchemy_bigquery
+    else {}
+)
+
+try:
+    from sqlalchemy_bigquery import GEOGRAPHY
+except (ImportError, AttributeError):
+    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
+
+try:
+    from sqlalchemy_bigquery import parse_url
+except (ImportError, AttributeError):
+    parse_url = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
