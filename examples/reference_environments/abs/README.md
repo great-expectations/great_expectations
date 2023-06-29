@@ -9,7 +9,7 @@ that is hosted in the project defined by `AZURE_STORAGE_ACOUNT_URL` env variable
 
 You can connect to Azure Blob Store by setting up 2 environment variables:
 
-First, the `AZURE_CONNECTION_STRING` variable is used for authentication, and `AZURE_STORAGE_ACCOUNT_URL`, which points to the storage account location.
+First, the `AZURE_CONNECTION_STRING` and `AZURE_CREDENTIAL` variables are used for authentication, and `AZURE_STORAGE_ACCOUNT_URL`, which points to the storage account location.
 
 Please note that unless you take steps to save data, your notebook changes could be lost when you stop the reference environment.
 
