@@ -184,7 +184,7 @@ stages:
           name: CheckRepoRootSize
 
     - job: docs_snippet_checker
-      # condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
         - script: |
             yarn install
