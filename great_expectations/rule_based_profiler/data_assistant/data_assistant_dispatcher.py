@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Type
+from typing import TYPE_CHECKING, Dict, List, Set, Type
 
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,  # noqa: TCH001
@@ -33,15 +33,15 @@ class DataAssistantDispatcher:
         """
         self._data_context = data_context
 
-        self._data_assistant_runner_cache: dict = {}
+        self._data_assistant_runner_cache: Dict[str, DataAssistantRunner] = {}
 
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
 
         # _registered_data_assistants has both aliases and full names
-        data_assistant_cls: Optional[
-            Type[DataAssistant]
-        ] = DataAssistantDispatcher._get_data_assistant_impl(name=name)
+        data_assistant_cls: Type[
+            DataAssistant
+        ] | None = DataAssistantDispatcher._get_data_assistant_impl(name=name)
 
         # If "DataAssistant" is not registered, then raise "AttributeError", which is appropriate for "__getattr__()".
         if data_assistant_cls is None:
@@ -50,9 +50,9 @@ class DataAssistantDispatcher:
             )
 
         data_assistant_name: str = data_assistant_cls.data_assistant_type
-        data_assistant_runner: Optional[
-            DataAssistantRunner
-        ] = self._data_assistant_runner_cache.get(data_assistant_name)
+        data_assistant_runner: DataAssistantRunner | None = (
+            self._data_assistant_runner_cache.get(data_assistant_name)
+        )
         if data_assistant_runner is None:
             data_assistant_runner = DataAssistantRunner(
                 data_assistant_cls=data_assistant_cls,
@@ -79,7 +79,7 @@ class DataAssistantDispatcher:
         # data_assistant_type = data_assistant.data_assistant_type
         # cls._register(data_assistant_type, data_assistant)
 
-        alias: Optional[str] = data_assistant.__alias__
+        alias: str | None = data_assistant.__alias__
         if alias is not None:
             cls._register(alias, data_assistant)
 
@@ -98,8 +98,8 @@ class DataAssistantDispatcher:
     @classmethod
     def _get_data_assistant_impl(
         cls,
-        name: Optional[str],
-    ) -> Optional[Type[DataAssistant]]:
+        name: str | None,
+    ) -> Type[DataAssistant] | None:
         """
         This method obtains (previously registered) "DataAssistant" class from DataAssistant Registry.
 
