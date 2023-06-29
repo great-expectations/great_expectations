@@ -34,6 +34,14 @@ class StoreConfigTypedDict(TypedDict):
     store_backend: dict
 
 
+class DataDocsSiteConfigTypedDict(TypedDict):
+    # NOTE: TypeDict values may be incomplete, update as needed
+    class_name: str
+    module_name: NotRequired[str]
+    store_backend: dict
+    site_index_builder: dict
+
+
 class Store:
     """A store is responsible for reading and writing Great Expectations objects
     to appropriate backends. It provides a generic API that the DataContext can

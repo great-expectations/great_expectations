@@ -3600,10 +3600,11 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,
     ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
+        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+            context.add_datasource(
+                "my_datasource",
+                **config,
+            )
     return context
 
 
