@@ -45,15 +45,15 @@ stages:
     - job: docs_snippet_checker
       # condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
-      - script: |
-          yarn install
-        name: YarnInstall
-      - task: PythonScript@0
-        inputs:
-          scriptSource: 'filePath'
-          scriptPath: 'ci/checks/validate_docs_snippets.py'
-          failOnStderr: false
-        name: DocsSnippetChecker
+        - script: |
+            yarn install
+          name: YarnInstall
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/validate_docs_snippets.py'
+            failOnStderr: false
+          name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
