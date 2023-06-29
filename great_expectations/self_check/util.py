@@ -357,45 +357,39 @@ if (
 else:
     SNOWFLAKE_TYPES = {}
 
-try:
-    import pyathena.sqlalchemy_athena
-    from pyathena.sqlalchemy_athena import AthenaDialect as athenaDialect
-    from pyathena.sqlalchemy_athena import types as athenatypes
-
+ATHENA_TYPES: Dict[str, Any] = (
     # athenatypes is just `from sqlalchemy import types`
     # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L692
     #   - the _get_column_type method of AthenaDialect does some mapping via conditional statements
     # https://github.com/laughingman7743/PyAthena/blob/master/pyathena/sqlalchemy_athena.py#L105
     #   - The AthenaTypeCompiler has some methods named `visit_<TYPE>`
-    ATHENA_TYPES = {
-        "BOOLEAN": athenatypes.BOOLEAN,
-        "FLOAT": athenatypes.FLOAT,
-        "DOUBLE": athenatypes.FLOAT,
-        "REAL": athenatypes.FLOAT,
-        "TINYINT": athenatypes.INTEGER,
-        "SMALLINT": athenatypes.INTEGER,
-        "INTEGER": athenatypes.INTEGER,
-        "INT": athenatypes.INTEGER,
-        "BIGINT": athenatypes.BIGINT,
-        "DECIMAL": athenatypes.DECIMAL,
-        "CHAR": athenatypes.CHAR,
-        "VARCHAR": athenatypes.VARCHAR,
-        "STRING": athenatypes.String,
-        "DATE": athenatypes.DATE,
-        "TIMESTAMP": athenatypes.TIMESTAMP,
-        "BINARY": athenatypes.BINARY,
-        "VARBINARY": athenatypes.BINARY,
-        "ARRAY": athenatypes.String,
-        "MAP": athenatypes.String,
-        "STRUCT": athenatypes.String,
-        "ROW": athenatypes.String,
-        "JSON": athenatypes.String,
+    {
+        "BOOLEAN": aws.athenatypes.BOOLEAN,
+        "FLOAT": aws.athenatypes.FLOAT,
+        "DOUBLE": aws.athenatypes.FLOAT,
+        "REAL": aws.athenatypes.FLOAT,
+        "TINYINT": aws.athenatypes.INTEGER,
+        "SMALLINT": aws.athenatypes.INTEGER,
+        "INTEGER": aws.athenatypes.INTEGER,
+        "INT": aws.athenatypes.INTEGER,
+        "BIGINT": aws.athenatypes.BIGINT,
+        "DECIMAL": aws.athenatypes.DECIMAL,
+        "CHAR": aws.athenatypes.CHAR,
+        "VARCHAR": aws.athenatypes.VARCHAR,
+        "STRING": aws.athenatypes.String,
+        "DATE": aws.athenatypes.DATE,
+        "TIMESTAMP": aws.athenatypes.TIMESTAMP,
+        "BINARY": aws.athenatypes.BINARY,
+        "VARBINARY": aws.athenatypes.BINARY,
+        "ARRAY": aws.athenatypes.String,
+        "MAP": aws.athenatypes.String,
+        "STRUCT": aws.athenatypes.String,
+        "ROW": aws.athenatypes.String,
+        "JSON": aws.athenatypes.String,
     }
-except ImportError:
-    pyathena = None  # type: ignore[assignment]
-    athenatypes = None
-    athenaDialect = None  # type: ignore[assignment,misc]
-    ATHENA_TYPES = {}
+    if aws.pyathena and aws.athenatypes
+    else {}
+)
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
 # try:
@@ -920,26 +914,31 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["sqlite"] = SQLITE_TYPES
     except AttributeError:
         pass
+
     try:
         dialect_classes["postgresql"] = postgresqltypes.dialect
         dialect_types["postgresql"] = POSTGRESQL_TYPES
     except AttributeError:
         pass
+
     try:
         dialect_classes["mysql"] = mysqltypes.dialect
         dialect_types["mysql"] = MYSQL_TYPES
     except AttributeError:
         pass
+
     try:
         dialect_classes["mssql"] = mssqltypes.dialect
         dialect_types["mssql"] = MSSQL_TYPES
     except AttributeError:
         pass
+
     try:
         dialect_classes["bigquery"] = BigQueryDialect  # type: ignore[assignment]
         dialect_types["bigquery"] = BIGQUERY_TYPES
     except AttributeError:
         pass
+
     try:
         dialect_classes["clickhouse"] = clickhouseDialect
         dialect_types["clickhouse"] = CLICKHOUSE_TYPES
@@ -950,15 +949,17 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_classes["redshift"] = aws.redshiftdialect.RedshiftDialect
         dialect_types["redshift"] = REDSHIFT_TYPES
 
+    if aws.sqlalchemy_athena:
+        dialect_classes["athena"] = aws.sqlalchemy_athena.AthenaDialect
+        dialect_types["athena"] = ATHENA_TYPES
+
     if snowflake.snowflakedialect:
         dialect_classes["snowflake"] = snowflake.snowflakedialect.dialect
         dialect_types["snowflake"] = SNOWFLAKE_TYPES
 
-    try:
-        dialect_classes["athena"] = athenaDialect
-        dialect_types["athena"] = ATHENA_TYPES
-    except AttributeError:
-        pass
+    if trino.trinodialect:
+        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
+        dialect_types["trino"] = TRINO_TYPES
 
     if trino.trinodialect:
         dialect_classes["trino"] = trino.trinodialect.TrinoDialect
