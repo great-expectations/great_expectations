@@ -4,4 +4,4 @@ WORKDIR /gx
 
 COPY aws_rds_example.ipynb ./
 
-RUN pip install great_expectations[s3]
+RUN pip install 'great_expectations[s3, postgresql]'
