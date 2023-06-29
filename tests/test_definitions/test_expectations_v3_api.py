@@ -6,7 +6,7 @@ from typing import cast
 import pandas as pd
 import pytest
 
-import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
+import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations import DataContext
 from great_expectations.compatibility import snowflake, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (

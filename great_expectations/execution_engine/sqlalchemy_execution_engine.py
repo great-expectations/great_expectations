@@ -123,11 +123,11 @@ if snowflake.snowflakedialect:
             GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
         )
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     _BIGQUERY_MODULE_NAME,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
