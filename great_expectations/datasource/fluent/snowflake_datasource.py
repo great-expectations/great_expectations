@@ -37,11 +37,11 @@ class SnowflakeDatasource(SQLDatasource):
     """
 
     type: Literal["snowflake"] = "snowflake"  # type: ignore[assignment]
-    connection_string: Optional[Union[ConfigStr, SnowflakeDsn]] = None
+    connection_string: Optional[Union[ConfigStr, SnowflakeDsn]] = None  # type: ignore[assignment] # Deviation from parent class as individual args are supported for connection
     # connect_args
     account: Optional[str] = None
     user: Optional[str] = None
-    password: Optional[str] = None
+    password: Optional[Union[ConfigStr, str]] = None
     database: Optional[str] = None
     schema_: Optional[str] = pydantic.Field(
         None, alias="schema"
@@ -49,6 +49,21 @@ class SnowflakeDatasource(SQLDatasource):
     warehouse: Optional[str] = None
     role: Optional[str] = None
     numpy: bool = False
+
+    @pydantic.root_validator
+    def _check_xor_input_args(cls, values: dict) -> dict:
+        # Method 1 - connection string
+        connection_string = values.get("connection_string")
+        # Method 2 - individual args (account, user, and password are bare minimum)
+        account = values.get("account")
+        user = values.get("user")
+        password = values.get("password")
+
+        if not bool(connection_string) ^ bool(account and user and password):
+            raise ValueError(
+                "Must provide either a connection string or a combination of account, user, and password."
+            )
+        return values
 
     @classmethod
     def _get_exec_engine_excludes(cls) -> set[str]:
@@ -85,7 +100,9 @@ class SnowflakeDatasource(SQLDatasource):
                     f"connection_string: {self.connection_string} due to the "
                     f"following exception: {str(e)}"
                 ) from e
-            self._cached_connection_string = self.connection_string
+            # Since a connection string isn't strictly required for Snowflake, we conditionally cache
+            if self.connection_string:
+                self._cached_connection_string = self.connection_string
         return self._engine
 
     def _build_engine_with_connect_args(self, **kwargs) -> URL:
