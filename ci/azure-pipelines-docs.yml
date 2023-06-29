@@ -43,17 +43,20 @@ stages:
         name: LinkChecker
 
     - job: docs_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
-      - task: PythonScript@0
-        inputs:
-          scriptSource: 'filePath'
-          scriptPath: 'ci/checks/validate_docs_snippets.py'
-          failOnStderr: true
-        name: DocsSnippetChecker
+        - script: |
+            yarn install
+          name: YarnInstall
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/validate_docs_snippets.py'
+            failOnStderr: false
+          name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - task: PythonScript@0
           inputs:
@@ -64,7 +67,7 @@ stages:
 
 
     - job: name_tag_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - task: PythonScript@0
           inputs:
