@@ -18,11 +18,6 @@ try:
 except (ImportError, AttributeError):
     sqlalchemy_bigquery = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
 
-try:
-    from sqlalchemy_bigquery import GEOGRAPHY
-except (ImportError, AttributeError):
-    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
-
 BIGQUERY_TYPES: Dict[str, Any] = (
     {
         "INTEGER": sqlalchemy_bigquery.INTEGER,
@@ -41,3 +36,13 @@ BIGQUERY_TYPES: Dict[str, Any] = (
     if sqlalchemy_bigquery
     else {}
 )
+
+try:
+    from sqlalchemy_bigquery import GEOGRAPHY
+except (ImportError, AttributeError):
+    GEOGRAPHY = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
+
+try:
+    from sqlalchemy_bigquery import parse_url
+except (ImportError, AttributeError):
+    parse_url = SQLALCHEMY_BIGQUERY_NOT_IMPORTED
