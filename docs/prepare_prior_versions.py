@@ -50,6 +50,16 @@ def _paths_to_versioned_docs_after_v0_14_13() -> list[pathlib.Path]:
     return paths
 
 
+def _paths_to_versioned_docs_after_v0_15_50() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_docs"
+    paths = [
+        f
+        for f in data_path.iterdir()
+        if f.is_dir() and ("0.14.13" not in str(f) or "0.15.50" not in str(f))
+    ]
+    return paths
+
+
 def _paths_to_versioned_code() -> list[pathlib.Path]:
     data_path = _docs_dir() / "docusaurus/versioned_code"
     paths = [f for f in data_path.iterdir() if f.is_dir()]
@@ -304,9 +314,148 @@ def _use_relative_path_for_imports_substitution_path_starting_with_forwardslash(
     return contents
 
 
+def prepend_version_info_to_name_for_md_relative_links(verbose: bool = False) -> None:
+    """Prepend version info to md relative links.
+
+    Links to ../../../../docs/guides/validation/index.md#checkpoints
+    Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
+
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    # Currently fixes the following:
+    # docs/docusaurus/versioned_docs/version-0.16.16/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_and_run.md
+    # Links to ../../../../docs/guides/validation/index.md#checkpoints
+    # Should link to: ../../../../docs/0.16.16/guides/validation/#checkpoints
+    # docs/docusaurus/versioned_docs/version-0.16.16/deployment_patterns/how_to_use_gx_with_aws/components/_data_docs_build_and_view.md
+    # Links to ../../../../docs/guides/validation/index.md#actions
+    # Should link to: ../../../../docs/0.16.16/guides/validation/index.md#actions
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs_after_v0_15_50()
+
+    method_name_for_logging = "prepend_version_info_to_name_for_md_relative_links"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        # NOTE: update files_to_process if there are more files that use relative markdown links.
+        # Alternatively, remove this list if all files should be processed.
+        files_to_process = [
+            "_data_docs_build_and_view.md",
+            "_checkpoint_create_and_run.md",
+        ]
+        files = [file for file in files if file.split("/")[-1] in files_to_process]
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _prepend_version_info_to_name_for_md_relative_links(
+                    contents=contents, version=version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _prepend_version_info_to_name_for_md_relative_links(
+    contents: str, version: str
+) -> str:
+    pattern = re.compile(
+        r"(?P<docs>(.*\.\./docs/))(?P<middle>(.*))(?P<index>(index\.md))(?P<rest>(.*))"
+    )
+    contents = re.sub(pattern, rf"\g<docs>{version}/\g<middle>\g<rest>", contents)
+
+    return contents
+
+
+def prepend_version_info_for_md_absolute_links(
+    verbose: bool = False,
+) -> None:
+    """Add version info to md absolute links.
+
+    e.g. `- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.16.16/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)`
+    instead of `- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)`
+
+    This also does not add the version if there already is a version in the link (e.g. when we manually reference earlier versions).
+
+    Args:
+        verbose: Whether to print verbose output.
+    """
+
+    paths = _paths_to_versioned_docs()
+
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+
+    method_name_for_logging = "prepend_version_info_for_md_absolute_links"
+    print(f"Processing {len(paths)} paths in {method_name_for_logging}...")
+    for path in paths:
+        version = path.name
+        version_only: str = version_from_path_name_pattern.search(version).group(
+            "version"
+        )
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(path.glob(f"**/*{extension}"))
+        print(
+            f"    Processing {len(files)} files for path {path} in {method_name_for_logging}..."
+        )
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = _prepend_version_info_for_md_absolute_links(
+                    contents, version_only
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
+        print(
+            f"    Processed {len(files)} files for path {path} in {method_name_for_logging}"
+        )
+    print(f"Processed {len(paths)} paths in {method_name_for_logging}")
+
+
+def _prepend_version_info_for_md_absolute_links(contents: str, version: str) -> str:
+    # The negative lookahead (?!\d{1,2}\.\d{1,2}\.\d{1,2}) ensures that we don't add the version if there
+    # already is a version in the link (e.g. when we manually reference earlier versions):
+    pattern = re.compile(
+        r"(?P<start>.*)(?P<text>\[.*\])(?P<link_start_no_version>\(/docs/(?!\d{1,2}\.\d{1,2}\.\d{1,2}))(?P<rest>.*)"
+    )
+    contents = re.sub(pattern, rf"\g<start>\g<text>(/docs/{version}/\g<rest>", contents)
+    return contents
+
+
 if __name__ == "__main__":
+    print("Starting to process files in prepare_prior_versions.py...")
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
     update_tag_references_for_correct_version()
     use_relative_path_for_imports()
+    prepend_version_info_to_name_for_md_relative_links()
+    prepend_version_info_for_md_absolute_links()
+    print("Finished processing files in prepare_prior_versions.py")

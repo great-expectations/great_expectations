@@ -34,7 +34,7 @@ import pandas as pd
 from dateutil.parser import parse
 
 import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
-from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
@@ -276,67 +276,58 @@ except (ImportError, KeyError):
     CLICKHOUSE_TYPES = {}
 
 
-try:
-    import trino
-    import trino.sqlalchemy.datatype as trinotypes
-    from trino.sqlalchemy.dialect import TrinoDialect as trinoDialect
-
-    TRINO_TYPES = {
-        "BOOLEAN": trinotypes._type_map["boolean"],
-        "TINYINT": trinotypes._type_map["tinyint"],
-        "SMALLINT": trinotypes._type_map["smallint"],
-        "INT": trinotypes._type_map["int"],
-        "INTEGER": trinotypes._type_map["integer"],
-        "BIGINT": trinotypes._type_map["bigint"],
-        "REAL": trinotypes._type_map["real"],
-        "DOUBLE": trinotypes._type_map["double"],
-        "DECIMAL": trinotypes._type_map["decimal"],
-        "VARCHAR": trinotypes._type_map["varchar"],
-        "CHAR": trinotypes._type_map["char"],
-        "VARBINARY": trinotypes._type_map["varbinary"],
-        "JSON": trinotypes._type_map["json"],
-        "DATE": trinotypes._type_map["date"],
-        "TIME": trinotypes._type_map["time"],
-        "TIMESTAMP": trinotypes._type_map["timestamp"],
+TRINO_TYPES: Dict[str, Any] = (
+    {
+        "BOOLEAN": trino.trinotypes._type_map["boolean"],
+        "TINYINT": trino.trinotypes._type_map["tinyint"],
+        "SMALLINT": trino.trinotypes._type_map["smallint"],
+        "INT": trino.trinotypes._type_map["int"],
+        "INTEGER": trino.trinotypes._type_map["integer"],
+        "BIGINT": trino.trinotypes._type_map["bigint"],
+        "REAL": trino.trinotypes._type_map["real"],
+        "DOUBLE": trino.trinotypes._type_map["double"],
+        "DECIMAL": trino.trinotypes._type_map["decimal"],
+        "VARCHAR": trino.trinotypes._type_map["varchar"],
+        "CHAR": trino.trinotypes._type_map["char"],
+        "VARBINARY": trino.trinotypes._type_map["varbinary"],
+        "JSON": trino.trinotypes._type_map["json"],
+        "DATE": trino.trinotypes._type_map["date"],
+        "TIME": trino.trinotypes._type_map["time"],
+        "TIMESTAMP": trino.trinotypes._type_map["timestamp"],
     }
-except (ImportError, KeyError):
-    trino = None
-    trinotypes = None
-    trinoDialect = None
-    TRINO_TYPES = {}
+    if trino.trinotypes
+    else {}
+)
 
-try:
-    import sqlalchemy_redshift.dialect as redshiftDialect
-    import sqlalchemy_redshift.dialect as redshifttypes
-
-    REDSHIFT_TYPES = {
-        "BIGINT": redshifttypes.BIGINT,
-        "BOOLEAN": redshifttypes.BOOLEAN,
-        "CHAR": redshifttypes.CHAR,
-        "DATE": redshifttypes.DATE,
-        "DECIMAL": redshifttypes.DECIMAL,
-        "DOUBLE_PRECISION": redshifttypes.DOUBLE_PRECISION,
-        "FOREIGN_KEY_RE": redshifttypes.FOREIGN_KEY_RE,
-        "GEOMETRY": redshifttypes.GEOMETRY,
-        "INTEGER": redshifttypes.INTEGER,
-        "PRIMARY_KEY_RE": redshifttypes.PRIMARY_KEY_RE,
-        "REAL": redshifttypes.REAL,
-        "SMALLINT": redshifttypes.SMALLINT,
-        "TIMESTAMP": redshifttypes.TIMESTAMP,
-        "TIMESTAMPTZ": redshifttypes.TIMESTAMPTZ,
-        "TIMETZ": redshifttypes.TIMETZ,
-        "VARCHAR": redshifttypes.VARCHAR,
+REDSHIFT_TYPES: Dict[str, Any] = (
+    {
+        "BIGINT": aws.redshiftdialect.BIGINT,
+        "BOOLEAN": aws.redshiftdialect.BOOLEAN,
+        "CHAR": aws.redshiftdialect.CHAR,
+        "DATE": aws.redshiftdialect.DATE,
+        "DECIMAL": aws.redshiftdialect.DECIMAL,
+        "DOUBLE_PRECISION": aws.redshiftdialect.DOUBLE_PRECISION,
+        "FOREIGN_KEY_RE": aws.redshiftdialect.FOREIGN_KEY_RE,
+        "GEOMETRY": aws.redshiftdialect.GEOMETRY,
+        "INTEGER": aws.redshiftdialect.INTEGER,
+        "PRIMARY_KEY_RE": aws.redshiftdialect.PRIMARY_KEY_RE,
+        "REAL": aws.redshiftdialect.REAL,
+        "SMALLINT": aws.redshiftdialect.SMALLINT,
+        "TIMESTAMP": aws.redshiftdialect.TIMESTAMP,
+        "TIMESTAMPTZ": aws.redshiftdialect.TIMESTAMPTZ,
+        "TIMETZ": aws.redshiftdialect.TIMETZ,
+        "VARCHAR": aws.redshiftdialect.VARCHAR,
     }
-except (ImportError, KeyError):
-    redshifttypes = None
-    redshiftDialect = None
-    REDSHIFT_TYPES = {}
+    if aws.redshiftdialect
+    else {}
+)
 
-try:
-    import snowflake.sqlalchemy.custom_types as snowflaketypes
-    import snowflake.sqlalchemy.snowdialect
-    import snowflake.sqlalchemy.snowdialect as snowflakeDialect
-
+SNOWFLAKE_TYPES: Dict[str, Any]
+if (
+    snowflake.snowflakesqlalchemy
+    and snowflake.snowflakedialect
+    and snowflake.snowflaketypes
+):
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     sqlalchemy.dialects.registry.register(
@@ -344,29 +335,26 @@ try:
     )
 
     SNOWFLAKE_TYPES = {
-        "ARRAY": snowflaketypes.ARRAY,
-        "BYTEINT": snowflaketypes.BYTEINT,
-        "CHARACTER": snowflaketypes.CHARACTER,
-        "DEC": snowflaketypes.DEC,
-        "BOOLEAN": snowflakeDialect.BOOLEAN,
-        "DOUBLE": snowflaketypes.DOUBLE,
-        "FIXED": snowflaketypes.FIXED,
-        "NUMBER": snowflaketypes.NUMBER,
-        "INTEGER": snowflakeDialect.INTEGER,
-        "OBJECT": snowflaketypes.OBJECT,
-        "STRING": snowflaketypes.STRING,
-        "TEXT": snowflaketypes.TEXT,
-        "TIMESTAMP_LTZ": snowflaketypes.TIMESTAMP_LTZ,
-        "TIMESTAMP_NTZ": snowflaketypes.TIMESTAMP_NTZ,
-        "TIMESTAMP_TZ": snowflaketypes.TIMESTAMP_TZ,
-        "TINYINT": snowflaketypes.TINYINT,
-        "VARBINARY": snowflaketypes.VARBINARY,
-        "VARIANT": snowflaketypes.VARIANT,
+        "ARRAY": snowflake.snowflaketypes.ARRAY,
+        "BYTEINT": snowflake.snowflaketypes.BYTEINT,
+        "CHARACTER": snowflake.snowflaketypes.CHARACTER,
+        "DEC": snowflake.snowflaketypes.DEC,
+        "BOOLEAN": snowflake.snowflakedialect.BOOLEAN,
+        "DOUBLE": snowflake.snowflaketypes.DOUBLE,
+        "FIXED": snowflake.snowflaketypes.FIXED,
+        "NUMBER": snowflake.snowflaketypes.NUMBER,
+        "INTEGER": snowflake.snowflakedialect.INTEGER,
+        "OBJECT": snowflake.snowflaketypes.OBJECT,
+        "STRING": snowflake.snowflaketypes.STRING,
+        "TEXT": snowflake.snowflaketypes.TEXT,
+        "TIMESTAMP_LTZ": snowflake.snowflaketypes.TIMESTAMP_LTZ,
+        "TIMESTAMP_NTZ": snowflake.snowflaketypes.TIMESTAMP_NTZ,
+        "TIMESTAMP_TZ": snowflake.snowflaketypes.TIMESTAMP_TZ,
+        "TINYINT": snowflake.snowflaketypes.TINYINT,
+        "VARBINARY": snowflake.snowflaketypes.VARBINARY,
+        "VARIANT": snowflake.snowflaketypes.VARIANT,
     }
-except (ImportError, KeyError, AttributeError):
-    snowflake = None
-    snowflaketypes = None
-    snowflakeDialect = None
+else:
     SNOWFLAKE_TYPES = {}
 
 try:
@@ -957,26 +945,24 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_types["clickhouse"] = CLICKHOUSE_TYPES
     except AttributeError:
         pass
-    try:
-        dialect_classes["trino"] = trinoDialect
-        dialect_types["trino"] = TRINO_TYPES
-    except AttributeError:
-        pass
-    try:
-        dialect_classes["snowflake"] = snowflakeDialect.dialect
-        dialect_types["snowflake"] = SNOWFLAKE_TYPES
-    except AttributeError:
-        pass
-    try:
-        dialect_classes["redshift"] = redshiftDialect.RedshiftDialect
+
+    if aws.redshiftdialect:
+        dialect_classes["redshift"] = aws.redshiftdialect.RedshiftDialect
         dialect_types["redshift"] = REDSHIFT_TYPES
-    except AttributeError:
-        pass
+
+    if snowflake.snowflakedialect:
+        dialect_classes["snowflake"] = snowflake.snowflakedialect.dialect
+        dialect_types["snowflake"] = SNOWFLAKE_TYPES
+
     try:
         dialect_classes["athena"] = athenaDialect
         dialect_types["athena"] = ATHENA_TYPES
     except AttributeError:
         pass
+
+    if trino.trinodialect:
+        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
+        dialect_types["trino"] = TRINO_TYPES
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -2822,7 +2808,6 @@ def _create_trino_engine(
     engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
-    from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
         try:
@@ -2831,7 +2816,7 @@ def _create_trino_engine(
             ).fetchall()
             if (schema_name,) not in schemas:
                 conn.execute(sa.text(f"create schema {schema_name}"))
-        except TrinoUserError:
+        except trino.trinoexceptions.TrinoUserError:
             pass
 
     return engine
