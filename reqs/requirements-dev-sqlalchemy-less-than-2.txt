@@ -1,0 +1,8 @@
+# used for packages that are currently not compatible with sqlalchemy 2.0
+# as of 2023-06 the list includes: 
+# clickhouse-sqlalchemy
+# snowflake-sqlalchemy
+# sqlalchemy-bigquery
+# sqlalchemy-redshift
+# teradatasqlalchemy 
+sqlalchemy<2.0.0

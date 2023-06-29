@@ -1,5 +1,5 @@
 ---
-title: How to compare two tables with the OnboardingDataAssistant
+title: Compare two tables with the Onboarding Data Assistant
 ---
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -19,9 +19,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 </Prerequisites>
 
 
-## Steps
-
-### 1. Set-Up
+## Set-Up
 
 In this workflow, we will be making use of the `OnboardingDataAssistant` to profile against a <TechnicalTag tag="batch_request" text="BatchRequest" /> representing our source data, and validate the resulting suite against a `BatchRequest` representing our second set of data.
 
@@ -39,7 +37,7 @@ context = gx.get_context(
 ```
 :::
 
-### 2. Create Batch Requests
+## Create Batch Requests
 
 In order to profile our first table and validate our second table, we need to set up our Batch Requests pointing to each set of data.
 
@@ -53,7 +51,7 @@ From this data, we will create an <TechnicalTag tag="expectation_suite" text="Ex
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request"
 ```
 
-### 3. Profile Source Data
+## Profile Source Data
 
 We can now use the `OnboardingDataAssistant` to profile our MySQL data defined in the `mysql_batch_request` above.
 
@@ -74,7 +72,7 @@ This is one example of the ways in which we can customize the Suite built by our
 For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 </details>
 
-### 4. Checkpoint Set-Up
+## Checkpoint Set-Up
 
 Before we can validate our second table, we need to define a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
@@ -83,7 +81,7 @@ We will pass both the `pg_batch_request` and the Expectation Suite defined above
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py checkpoint_config"
 ```
 
-### 5. Validation
+## Validation
 
 Finally, we can use our Checkpoint to validate that our two tables are identical:
 
