@@ -77,7 +77,7 @@ stages:
           name: NameTagSnippetChecker
 
     - job: name_tag_snippet_referenced_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - task: PythonScript@0
           inputs:
