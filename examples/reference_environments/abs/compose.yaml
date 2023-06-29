@@ -8,5 +8,7 @@ services:
     environment:
       - AZURE_CREDENTIAL=${AZURE_CREDENTIAL}
       - AZURE_STORAGE_ACCOUNT_URL=${AZURE_STORAGE_ACCOUNT_URL}
+      # The following environment variable is optional:
+      - ABS_METADATA_STORES_CONTAINER_NAME=${ABS_METADATA_STORES_CONTAINER_NAME}
     ports:
       - "8888:8888"
