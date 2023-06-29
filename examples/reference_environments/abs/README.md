@@ -5,11 +5,11 @@ This reference environment spins up one container which contains a jupyter noteb
 The example code demonstrates how to use Great Expectations with data stored in Azure Blob Storage (ABS) and by default uses data in the ``
 that is hosted in the project defined by `AZURE_STORAGE_ACOUNT_URL` env variable.
 
- It also contains a notebook with a quickstart example that optionally uses an ABS bucket to store expectation suites, validation results and data docs (instead of storing them on the filesystem). To use this notebook, set the name of your bucket in the `ABS_METADATA_STORES_CONTAINER_NAME` environment variable on your host machine, or modify the notebook (see instructions in the notebook).
+ It also contains a notebook with a quickstart example that optionally uses an ABS bucket to store expectation suites, validation results and data docs (instead of storing them on the filesystem). To use this notebook, set the name of your bucket in the `ABS_METADATA_STORES_CONTAINER_NAME` and `AZURE_CONNECTION_STRING` environment variables on your host machine, or modify the notebook (see instructions in the notebook).
 
 You can connect to Azure Blob Store by setting up 2 environment variables:
 
-First, the `AZURE_CREDENTIAL` variable is used for authentication, and `AZURE_STORAGE_ACCOUNT_URL`, which points to the storage account location.
+First, the `AZURE_CONNECTION_STRING` variable is used for authentication, and `AZURE_STORAGE_ACCOUNT_URL`, which points to the storage account location.
 
 Please note that unless you take steps to save data, your notebook changes could be lost when you stop the reference environment.
 
