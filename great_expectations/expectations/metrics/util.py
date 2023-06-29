@@ -52,8 +52,8 @@ except ImportError:
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
-from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
-from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
+from great_expectations.compatibility import bigquery as sqla_bigquery
+from great_expectations.compatibility.bigquery import bigquery_types_tuple
 
 if TYPE_CHECKING:
     import pandas as pd
