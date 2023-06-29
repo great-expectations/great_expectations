@@ -33,7 +33,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
+import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations.compatibility import aws, pyspark, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
@@ -123,7 +123,7 @@ else:
     SQLITE_TYPES = {}
 
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     BIGQUERY_TYPES,
     GEOGRAPHY,
 )
