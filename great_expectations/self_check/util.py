@@ -961,6 +961,10 @@ def build_sa_validator_with_data(  # noqa: C901, PLR0912, PLR0913, PLR0915
         dialect_classes["trino"] = trino.trinodialect.TrinoDialect
         dialect_types["trino"] = TRINO_TYPES
 
+    if trino.trinodialect:
+        dialect_classes["trino"] = trino.trinodialect.TrinoDialect
+        dialect_types["trino"] = TRINO_TYPES
+
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
