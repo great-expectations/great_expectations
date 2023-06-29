@@ -390,7 +390,6 @@ def example_abs(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
-
 @example.command(name="aws_rds")
 @click.option(
     "--stop",
@@ -448,7 +447,6 @@ def example_aws_rds(
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
-
 
 
 def _execute_standard_functions(
@@ -543,12 +541,13 @@ def _check_aws_env_vars() -> set[str]:
 
     return result
 
+
 def _check_aws_rds_env_vars() -> set[str]:
     """Return list of env var names that are not set."""
     env_vars_to_check = (
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
-        "AWS_RDS_CONNECTION_STRING"
+        "AWS_RDS_CONNECTION_STRING",
     )
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
