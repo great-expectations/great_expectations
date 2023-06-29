@@ -36,7 +36,28 @@ services:
       - dbnet
     ports:
       - "8888:8888"
+    volumes:
+      - gx_stores:/gx
+
+  data_docs:
+    image: gx/data_docs
+    container_name: gx_data_docs
+    build:
+      context: .
+      dockerfile: data_docs.Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dbnet
+    ports:
+      - "8080:8080"
+    volumes:
+      - gx_stores:/gx
 
 networks:
   dbnet:
     driver: bridge
+
+volumes:
+  gx_stores:
