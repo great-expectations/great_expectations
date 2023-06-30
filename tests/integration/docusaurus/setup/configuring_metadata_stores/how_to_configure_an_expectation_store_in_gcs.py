@@ -214,10 +214,8 @@ result = subprocess.run(
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_suites_output = """
-# <snippet name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_suites_output">
 1 Expectation Suite found:
  - my_expectation_suite
-# </snippet>
 """
 
 assert "1 Expectation Suite found:" in list_expectation_suites_output

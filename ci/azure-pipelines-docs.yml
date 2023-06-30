@@ -65,7 +65,6 @@ stages:
             failOnStderr: true
           name: LineNumberSnippetChecker
 
-
     - job: name_tag_snippet_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
@@ -76,6 +75,26 @@ stages:
             failOnStderr: true
           name: NameTagSnippetChecker
 
+    - job: integration_test_gets_run_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/check_integration_test_gets_run.py'
+            failOnStderr: true
+          name: IntegrationTestGetsRunChecker
+
+
+    - job: name_tag_snippet_referenced_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      steps:
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py' 
+            failOnStderr: true
+          name: NameTagSnippetReferencedChecker
 
     - job: public_api_report
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
