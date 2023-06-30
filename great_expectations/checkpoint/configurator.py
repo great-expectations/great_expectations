@@ -17,7 +17,6 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
@@ -170,22 +169,18 @@ class SimpleCheckpointConfigurator:
             )
 
         # DataFrames shouldn't be saved to CheckpointStore
-        _validations = config_kwargs.get("validations") or []
-        validations = [
-            CheckpointValidationConfig(**validation)
-            if isinstance(validation, dict)
-            else validation
-            for validation in _validations
-        ]
-
+        validations = config_kwargs.get("validations", [])
         if does_batch_request_in_validations_contain_batch_data(
             validations=validations
         ):
             config_kwargs.pop("validations", [])
         else:
-            config_kwargs["validations"] = get_validations_with_batch_request_as_dict(
+            validations = get_validations_with_batch_request_as_dict(
                 validations=validations
             )
+            config_kwargs["validations"] = [
+                validation.to_dict() for validation in validations
+            ]
 
         specific_config_kwargs_overrides: dict = {
             "config_version": 1.0,
