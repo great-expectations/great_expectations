@@ -9,7 +9,7 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
     TaxiSplittingTestCasesDateTime,
     TaxiTestData,
 )
-from tests.test_utils import LoadedTable, get_connection_string_and_dialect
+from tests.test_utils import get_connection_string_and_dialect
 
 if __name__ == "test_script_module":
     dialect: str

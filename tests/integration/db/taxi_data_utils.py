@@ -1,6 +1,6 @@
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, List
 
-from contextlib import contextmanager
 import sqlalchemy as sa
 
 import great_expectations as gx
@@ -20,8 +20,6 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
 from tests.test_utils import (
     LoadedTable,
     clean_up_tables_with_prefix,
-    get_awsathena_db_name,
-    get_connection_string_and_dialect,
     load_and_concatenate_csvs,
     load_data_into_test_database,
 )

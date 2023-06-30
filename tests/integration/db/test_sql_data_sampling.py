@@ -12,17 +12,16 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from tests.integration.db.taxi_data_utils import (
+    loaded_table,
+)
 from tests.integration.fixtures.split_and_sample_data.sampler_test_cases_and_fixtures import (
     SamplerTaxiTestData,
     TaxiSamplingTestCase,
     TaxiSamplingTestCases,
 )
 from tests.test_utils import (
-    LoadedTable,
     get_connection_string_and_dialect,
-)
-from tests.integration.db.taxi_data_utils import (
-    loaded_table,
 )
 
 if __name__ == "test_script_module":
