@@ -5,7 +5,7 @@ from great_expectations.agent.actions.agent_action import (
     AgentAction,
 )
 from great_expectations.agent.models import (
-    ListTableNamesEvent,
+    ListTableNamesEvent, CreatedResource,
 )
 from great_expectations.compatibility.sqlalchemy import inspect
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
@@ -29,8 +29,23 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
         inspector: Inspector = inspect(datasource.get_engine())
         table_names: List[str] = inspector.get_table_names()
 
+        table_names_list_id: str = self._add_or_update_table_names_list(
+            datasource_id=str(datasource.id),
+            names_list=table_names
+        )
+
         return ActionResult(
             id=id,
             type=event.type,
-            created_resources=[],
+            created_resources=[
+                CreatedResource(
+                    resource_id=table_names_list_id,
+                    type="TableNamesList"
+                )
+            ],
         )
+
+    def _add_or_update_table_names_list(self, datasource_id: str, names_list: list[str]) -> str:
+        # TODO: PUT to /datasources/<UUID>/table-names-list with body {"names_list": list[str]}
+        # response returns id of TableNamesList
+        pass
