@@ -13,7 +13,7 @@ import LinkCard from '/docs/components/LinkCard';
 
 
 <LinkCardGrid>
-  <LinkCard topIcon label="Quickstart" description="Install GX, connect to sample data, build your first Expectation, validate data, and review the validation results" href="/docs/guides/setup/optional_dependencies/cloud/connect_gx_source_data_system" icon="/img/test_icon.svg" />
+  <LinkCard topIcon label="Quickstart" description="Install GX, connect to sample data, build your first Expectation, validate data, and review the validation results" href="/docs/tutorials/quickstart/" icon="/img/test_icon.svg" />
   <LinkCard topIcon label="Get started with GX and Databricks" description="Learn how you can use GX with Databricks in a production environment" href="/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks" icon="/img/databricks_icon.svg" />
   <LinkCard topIcon label="Get Started with GX and SQL" description="Learn how you can use GX with a SQL Datasource in a production environment" href="/docs/tutorials/getting_started/how_to_use_great_expectations_with_sql" icon="/img/sql_icon.svg" />
 </LinkCardGrid>
