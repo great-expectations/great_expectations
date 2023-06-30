@@ -1,9 +1,10 @@
 # Postgres Reference Environment
 
-This reference environment spins up two containers:
+This reference environment spins up three containers:
 
 - A postgres database pre-loaded with a sample of one month of NYC taxi trip data
 - A jupyter notebook server
+- A server to host data docs (to view navigate to http://127.0.0.1:3000/)
 
 The jupyter notebook server contains a notebook with a quickstart for using Great Expectations with postgres. It also contains a notebook with a quickstart example that optionally uses the database to store expectation suites and validation results (instead of storing them on the filesystem).
 
