@@ -1,4 +1,5 @@
 """Contains general abstract or base classes used across configuration objects."""
+import json
 from abc import ABC
 from typing import Optional
 
@@ -15,6 +16,9 @@ class AbstractConfig(ABC, SerializableDictDot):
         self.id = id
         self.name = name
         super().__init__()
+
+    def __repr__(self) -> str:
+        return json.dumps(self.to_dict(), indent=2)
 
     @classmethod
     def _dict_round_trip(cls, schema: Schema, target: dict) -> dict:

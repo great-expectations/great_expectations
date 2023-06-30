@@ -91,25 +91,15 @@ def _get_validator_class() -> Type[Validator]:
 
 
 def _does_validation_contain_batch_request(
-    validations: Optional[List[dict]] = None,
+    validations: List[CheckpointValidationConfig],
 ) -> bool:
-    if validations is not None:
-        for val in validations:
-            if val.get("batch_request") is not None:
-                return True
-
-    return False
+    return any(val.batch_request is not None for val in validations)
 
 
 def _does_validation_contain_expectation_suite_name(
-    validations: Optional[List[dict]] = None,
+    validations: List[CheckpointValidationConfig],
 ) -> bool:
-    if validations is not None:
-        for val in validations:
-            if val.get("expectation_suite_name") is not None:
-                return True
-
-    return False
+    return any(val.expectation_suite_name is not None for val in validations)
 
 
 class BaseCheckpoint(ConfigPeer):
@@ -154,23 +144,21 @@ class BaseCheckpoint(ConfigPeer):
     )
     def run(  # noqa: C901, PLR0913, PLR0915
         self,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[
-            Union[BatchRequestBase, FluentBatchRequest, dict]
-        ] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        validator: Validator | None = None,
+        action_list: Sequence[ActionDict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: List[dict] | List[CheckpointValidationConfig] | None = None,
+        profilers: List[dict] | None = None,
+        run_id: str | RunIdentifier | None = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | None = None,
+        result_format: str | dict | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
     ) -> CheckpointResult:
         """Validate against current Checkpoint.
 
@@ -203,6 +191,14 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
+        if not validations:
+            validations = []
+        validations = [
+            CheckpointValidationConfig(**validation)
+            for validation in validations
+            if isinstance(validation, dict)
+        ]
+
         if (
             sum(bool(x) for x in [self._validator is not None, validator is not None])
             > 1
@@ -773,12 +769,20 @@ class Checkpoint(BaseCheckpoint):
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[dict] | List[CheckpointValidationConfig]] = None,
         profilers: Optional[List[dict]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
+        if not validations:
+            validations = []
+        validations = [
+            CheckpointValidationConfig(**validation)
+            for validation in validations
+            if isinstance(validation, dict)
+        ]
+
         if validator:
             if batch_request or _does_validation_contain_batch_request(
                 validations=validations
