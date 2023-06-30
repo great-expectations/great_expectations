@@ -59,6 +59,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "noop",
         # TODO: <Alex>ALEX</Alex>
+        "single_batch_mode",
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         "diptest",
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -254,7 +257,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
         result: Union[np.ndarray, np.float64]
 
-        if aggregation_method == "noop":
+        if aggregation_method == "single_batch_mode":
+            ...
+        elif aggregation_method == "noop":
             result = unexpected_count_fraction_values
             # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-NOOP:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}')
         elif aggregation_method == "diptest":
