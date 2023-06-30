@@ -6,9 +6,9 @@ from typing import cast
 import pandas as pd
 import pytest
 
-import great_expectations.compatibility.sqlalchemy_bigquery as BigQueryDialect
+import great_expectations.compatibility.bigquery as BigQueryDialect
 from great_expectations import DataContext
-from great_expectations.compatibility import sqlalchemy, trino
+from great_expectations.compatibility import snowflake, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     SQLALCHEMY_NOT_IMPORTED,
 )
@@ -26,7 +26,6 @@ from great_expectations.self_check.util import (
     mssqlDialect,
     mysqlDialect,
     pgDialect,
-    snowflakeDialect,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
@@ -195,10 +194,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         generate_test = True
                                     elif (
                                         "snowflake" in only_for
-                                        and snowflakeDialect is not None
+                                        and snowflake.snowflakedialect
                                         and isinstance(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
-                                            snowflakeDialect.SnowflakeDialect,
+                                            snowflake.snowflakedialect.SnowflakeDialect,
                                         )
                                     ):
                                         generate_test = True
@@ -352,7 +351,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     or (
                                         "snowflake" in suppress_test_for
-                                        and snowflakeDialect is not None
+                                        and snowflake.snowflakedialect
                                         and validator_with_data
                                         and isinstance(
                                             validator_with_data.active_batch_data,
@@ -360,7 +359,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                         )
                                         and isinstance(
                                             validator_with_data.active_batch_data.sql_engine_dialect,
-                                            snowflakeDialect.SnowflakeDialect,
+                                            snowflake.snowflakedialect.SnowflakeDialect,
                                         )
                                     )
                                     or (

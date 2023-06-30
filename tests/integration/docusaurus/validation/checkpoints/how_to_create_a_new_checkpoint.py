@@ -1,10 +1,8 @@
 import pathlib
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get_context">
 import great_expectations as gx
 
 context = gx.get_context()
-# </snippet>
 data_directory = pathlib.Path(
     gx.__file__,
     "..",
@@ -15,7 +13,6 @@ data_directory = pathlib.Path(
 ).resolve(strict=True)
 
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create asset and get validator">
 datasource = context.sources.add_pandas_filesystem(
     name="demo_pandas", base_directory=data_directory
 )
@@ -31,13 +28,10 @@ validator = context.get_validator(
     batch_request=batch_request,
     create_expectation_suite_with_name="my_expectation_suite",
 )
-# </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create expectation suite">
 validator.expect_table_row_count_to_be_between(min_value=5000, max_value=20000)
 validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>
 
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request">
