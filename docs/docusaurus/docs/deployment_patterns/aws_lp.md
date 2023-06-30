@@ -1,6 +1,6 @@
 ---
 title: "Integrate Great Expectations with AWS"
-sidebar_label: "AWS"
+sidebar_label: "Amazon Web Services (AWS)"
 description: "Integrate Great Expectations with AWS"
 id: aws_lp
 ---
@@ -8,7 +8,7 @@ id: aws_lp
 import LinkCardGrid from '/docs/components/LinkCardGrid';
 import LinkCard from '/docs/components/LinkCard';
 
-<p class="DocItem__header-description">Integrate Great Expectations (GX) with AWS Glue, AWS with S3 and Pandas, AWS with S3 and Spark, AWS with Athena, and AWS with Redshift.</p>
+<p class="DocItem__header-description">Integrate Great Expectations (GX) with AWS Glue, AWS with S3 and Pandas, AWS with S3 and Spark, AWS with Athena, AWS with Redshift, AWS EMR Serverless, and EMR Spark.</p>
 
 <LinkCardGrid>
   <LinkCard topIcon label="Use Great Expectations in AWS Glue" description="Set up, initialize and run validations against your data on AWS Glue Spark Job" href="/docs/deployment_patterns/how_to_use_great_expectations_in_aws_glue" icon="/img/integrations/aws_glue_icon.svg" />

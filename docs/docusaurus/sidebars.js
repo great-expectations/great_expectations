@@ -138,16 +138,16 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integrate',
+      label: 'Integrations',
       link: {
         type: 'generated-index',
-        title: 'Integrate',
+        title: 'Integrations',
         description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
       },
       items: [
         {
           type: 'category',
-          label: 'Integrate with AWS',
+          label: 'Amazon Web Services (AWS)',
           link: {
             type: 'doc',
             id: 'deployment_patterns/aws_lp',
