@@ -268,9 +268,8 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = cast(
-            List[CheckpointValidationConfig],
-            substituted_runtime_config.get("validations") or [],
+        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+            substituted_runtime_config.get("validations") or []
         )
 
         if run_name is None and run_name_template is not None:
