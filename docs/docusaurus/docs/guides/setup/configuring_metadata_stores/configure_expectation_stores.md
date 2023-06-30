@@ -75,7 +75,7 @@ Use the information provided here to configure a new storage location for Expect
 - A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Azure Blob name.
 
 </Prerequisites>
-    
+
 ### Configure the ``config_variables.yml`` file with your Azure Storage credentials
 
 GX recommends that you store Azure Storage credentials in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following code adds Azure Storage credentials below the ``AZURE_STORAGE_CONNECTION_STRING`` key:

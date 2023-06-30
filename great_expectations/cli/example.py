@@ -54,6 +54,7 @@ class CommandOptions:
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -114,6 +115,7 @@ def example_snowflake(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -174,6 +176,7 @@ def example_postgres(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -238,6 +241,7 @@ def example_s3(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -296,6 +300,7 @@ def example_gcs(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -354,6 +359,7 @@ def example_bigquery(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,

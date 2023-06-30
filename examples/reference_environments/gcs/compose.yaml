@@ -8,6 +8,8 @@ services:
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
       GCP_PROJECT_NAME: ${GCP_PROJECT_NAME}
+      # The following environment variable is optional:
+      GCS_METADATA_STORES_BUCKET_NAME: ${GCS_METADATA_STORES_BUCKET_NAME}
     ports:
       - "8888:8888"
     volumes:
