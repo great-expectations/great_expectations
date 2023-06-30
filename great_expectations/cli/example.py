@@ -149,6 +149,9 @@ def example_postgres(
         cli_message(
             "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
         )
+        cli_message(
+            "<green>To view data docs, visit localhost port 3000 e.g. http://127.0.0.1:3000/</green>"
+        )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
