@@ -5,6 +5,7 @@ WORKDIR /gx
 RUN mkdir -p gx_stores/data_docs/
 
 COPY ./postgres_example.ipynb ./
+COPY ./postgres_example_postgres_stores.ipynb ./
 
 RUN pip install great_expectations[postgresql]
 

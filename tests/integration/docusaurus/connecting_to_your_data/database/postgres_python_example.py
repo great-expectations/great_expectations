@@ -13,9 +13,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py get_context">
 context = gx.get_context()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config">
 datasource_config = {
