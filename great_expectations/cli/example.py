@@ -485,7 +485,7 @@ def _check_aws_env_vars() -> set[str]:
     More information in boto3 docs:
         https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-environment-variables
     """
-    result = set()
+    result: set[str] = set()
     if os.getenv("AWS_SESSION_TOKEN"):
         return result
 
