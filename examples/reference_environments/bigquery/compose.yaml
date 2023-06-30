@@ -22,9 +22,6 @@ services:
     build:
       context: .
       dockerfile: data_docs.Dockerfile
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - dbnet
     ports:
