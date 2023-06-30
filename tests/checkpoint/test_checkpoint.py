@@ -4886,8 +4886,10 @@ def test_checkpoint_with_validator_creates_validations_list(
     actual = validations[0]
     expected = CheckpointValidationConfig(
         batch_request={
+            "batch_slice": None,
             "data_asset_name": "#ephemeral_pandas_asset",
             "datasource_name": "default_pandas_datasource",
+            "options": {},
         },
         expectation_suite_name="default",
     )

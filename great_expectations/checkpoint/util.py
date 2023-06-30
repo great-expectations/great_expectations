@@ -450,7 +450,7 @@ def get_updated_action_list(
 
 
 def does_batch_request_in_validations_contain_batch_data(
-    validations: Optional[List[CheckpointValidationConfig]] = None,
+    validations: List[CheckpointValidationConfig],
 ) -> bool:
     if validations is not None:
         for val in validations:
@@ -480,8 +480,9 @@ def get_validations_with_batch_request_as_dict(
 
     return [
         CheckpointValidationConfig(**validation)
-        for validation in validations
         if isinstance(validation, dict)
+        else validation
+        for validation in validations
     ]
 
 

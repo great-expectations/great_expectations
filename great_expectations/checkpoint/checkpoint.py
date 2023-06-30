@@ -286,7 +286,7 @@ class BaseCheckpoint(ConfigPeer):
         # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
         if using_default_validation:
             for validation in validations:
-                validation["id"] = self.config.default_validation_id
+                validation.id = self.config.default_validation_id
 
         # Use AsyncExecutor to speed up I/O bound validations by running them in parallel with multithreading (if
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
@@ -368,8 +368,9 @@ class BaseCheckpoint(ConfigPeer):
             return []
         return [
             CheckpointValidationConfig(**validation)
-            for validation in validations
             if isinstance(validation, dict)
+            else validation
+            for validation in validations
         ]
 
     def get_substituted_config(
@@ -1157,7 +1158,9 @@ class SimpleCheckpoint(Checkpoint):
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[
+            Union[List[CheckpointValidationConfig], List[dict]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         ge_cloud_id: Optional[str] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator

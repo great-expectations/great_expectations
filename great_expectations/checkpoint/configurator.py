@@ -17,6 +17,7 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
@@ -91,6 +92,7 @@ class SimpleCheckpointConfigurator:
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
         notify_with: str | list[str] | None = "all",
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -138,6 +140,7 @@ class SimpleCheckpointConfigurator:
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.slack_webhook = slack_webhook
+        self.validations = validations
         self.other_kwargs = kwargs
 
     def build(self) -> CheckpointConfig:
@@ -169,7 +172,12 @@ class SimpleCheckpointConfigurator:
             )
 
         # DataFrames shouldn't be saved to CheckpointStore
-        validations = config_kwargs.get("validations")
+        validations = [
+            CheckpointValidationConfig(**validation)
+            if isinstance(validation, dict)
+            else validation
+            for validation in self.validations
+        ]
         if does_batch_request_in_validations_contain_batch_data(
             validations=validations
         ):
