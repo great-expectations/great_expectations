@@ -268,7 +268,10 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = cast(list, substituted_runtime_config.get("validations") or [])
+        validations = cast(
+            List[CheckpointValidationConfig],
+            substituted_runtime_config.get("validations") or [],
+        )
 
         if run_name is None and run_name_template is not None:
             run_name = run_time.strftime(run_name_template)
@@ -363,13 +366,12 @@ class BaseCheckpoint(ConfigPeer):
     ) -> list[CheckpointValidationConfig]:
         # We accept both dicts and rich config types but all internal usage should use the latter
         if not validations:
-            validations = []
-        validations = [
+            return []
+        return [
             CheckpointValidationConfig(**validation)
             for validation in validations
             if isinstance(validation, dict)
         ]
-        return validations
 
     def get_substituted_config(
         self,
@@ -454,12 +456,12 @@ class BaseCheckpoint(ConfigPeer):
         result_format: Union[dict, str, None],
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
-        validation_dict: Optional[dict] = None,
+        validation_dict: Optional[CheckpointValidationConfig] = None,
     ) -> None:
         if validation_dict is None:
-            validation_dict = {
-                "id": substituted_runtime_config.get("default_validation_id")
-            }
+            validation_dict = CheckpointValidationConfig(
+                id=substituted_runtime_config.get("default_validation_id")
+            )
 
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -863,7 +865,9 @@ constructor arguments.
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[
+            Union[List[CheckpointValidationConfig], List[dict]]
+        ] = None,
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, int, float]] = None,
         run_name: Optional[str] = None,
@@ -1046,7 +1050,7 @@ constructor arguments.
     def _reconcile_validations(
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         validator: Validator | None = None,
-    ) -> list[dict] | None:
+    ) -> list[CheckpointValidationConfig]:
         """
         Helper to help resolve logic between validator and validations input
         arguments to `construct_from_config_args`.
@@ -1056,21 +1060,11 @@ constructor arguments.
                 raise ValueError(
                     "Please provide either a validator or validations list (but not both)."
                 )
-            validations = validator.convert_to_checkpoint_validations_list()
+            return validator.convert_to_checkpoint_validations_list()
 
-        if not validations:
-            return None
-
-        # A lot of downstream logic depends on validations being a dict instead of a rich config type
-        # We should patch those instances so they can expect a CheckpointValidationConfig
-        validations = [
-            validation.to_dict()
-            if isinstance(validation, CheckpointValidationConfig)
-            else validation
-            for validation in validations
-        ]
-
-        return validations
+        return Checkpoint._convert_validations_list_to_checkpoint_validation_configs(
+            validations
+        )
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(

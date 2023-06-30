@@ -188,7 +188,7 @@ def send_email(  # noqa: PLR0913
 
 
 def get_substituted_validation_dict(
-    substituted_runtime_config: dict, validation_dict: dict
+    substituted_runtime_config: dict, validation_dict: CheckpointValidationConfig
 ) -> dict:
     substituted_validation_dict = {
         "batch_request": get_substituted_batch_request(
@@ -450,15 +450,15 @@ def get_updated_action_list(
 
 
 def does_batch_request_in_validations_contain_batch_data(
-    validations: Optional[List[dict]] = None,
+    validations: Optional[List[CheckpointValidationConfig]] = None,
 ) -> bool:
     if validations is not None:
         for val in validations:
             if (
-                val.get("batch_request") is not None
-                and isinstance(val.get("batch_request"), (dict, DictDot))
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
+                val.batch_request is not None
+                and isinstance(val.batch_request, (dict, DictDot))
+                and val.batch_request.get("runtime_parameters") is not None
+                and val.batch_request["runtime_parameters"].get("batch_data")
                 is not None
             ):
                 return True
@@ -468,21 +468,21 @@ def does_batch_request_in_validations_contain_batch_data(
 
 def get_validations_with_batch_request_as_dict(
     validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-) -> list[dict] | None:
+) -> list[CheckpointValidationConfig]:
     if not validations:
-        return None
+        return []
 
-    validations = [
-        v.to_dict() if isinstance(v, CheckpointValidationConfig) else v
-        for v in validations
-    ]
     for value in validations:
         if "batch_request" in value:
             value["batch_request"] = get_batch_request_as_dict(
                 batch_request=value["batch_request"]
             )
 
-    return validations
+    return [
+        CheckpointValidationConfig(**validation)
+        for validation in validations
+        if isinstance(validation, dict)
+    ]
 
 
 def validate_validation_dict(
