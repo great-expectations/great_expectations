@@ -40,8 +40,8 @@ services:
       - gx_stores:/gx/gx_stores
 
   data_docs:
-    image: gx/data_docs
-    container_name: gx_data_docs
+    image: gx/postgres_data_docs
+    container_name: gx_postgres_data_docs
     build:
       context: .
       dockerfile: data_docs.Dockerfile
