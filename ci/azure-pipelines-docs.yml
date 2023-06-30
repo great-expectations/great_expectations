@@ -76,7 +76,7 @@ stages:
           name: NameTagSnippetChecker
 
     - job: integration_test_gets_run_checker
-      # condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - task: PythonScript@0
           inputs:
