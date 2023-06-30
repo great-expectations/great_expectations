@@ -705,7 +705,7 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Optional[Union[ConfigStr, SnowflakeDsn, str]] = ...,
         create_temp_table: bool = True,
         account: Optional[str] = None,
         user: Optional[str] = None,
