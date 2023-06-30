@@ -105,7 +105,7 @@ class SnowflakeDatasource(SQLDatasource):
                 self._cached_connection_string = self.connection_string
         return self._engine
 
-    def _build_engine_with_connect_args(self, **kwargs) -> URL:
+    def _build_engine_with_connect_args(self, **kwargs) -> sqlalchemy.Engine:
         connect_args = self._get_connect_args()
         connect_args.update(kwargs)
         url = URL(**connect_args)
