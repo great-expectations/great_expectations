@@ -2612,8 +2612,8 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
         unknown = INCLUDE
 
     id = fields.String(required=False, allow_none=False)
-    expectation_suite_name: fields.String(required=False, allow_none=None)
-    expectation_suite_ge_cloud_id: fields.String(required=False, allow_none=None)
+    expectation_suite_name = fields.String(required=False, allow_none=True)
+    expectation_suite_ge_cloud_id = fields.String(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:

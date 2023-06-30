@@ -92,7 +92,6 @@ class SimpleCheckpointConfigurator:
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
         notify_with: str | list[str] | None = "all",
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -140,7 +139,6 @@ class SimpleCheckpointConfigurator:
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.slack_webhook = slack_webhook
-        self.validations = validations
         self.other_kwargs = kwargs
 
     def build(self) -> CheckpointConfig:
@@ -172,12 +170,14 @@ class SimpleCheckpointConfigurator:
             )
 
         # DataFrames shouldn't be saved to CheckpointStore
+        _validations = config_kwargs.get("validations") or []
         validations = [
             CheckpointValidationConfig(**validation)
             if isinstance(validation, dict)
             else validation
-            for validation in self.validations
+            for validation in _validations
         ]
+
         if does_batch_request_in_validations_contain_batch_data(
             validations=validations
         ):
