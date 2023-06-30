@@ -43,11 +43,9 @@ import sys
 from typing import List
 
 ITEMS_IGNORED_FROM_NAME_TAG_SNIPPET_CHECKER = {
-    "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.md",
-    "docs/docusaurus/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas.md",
     "docs/docusaurus/docs/components/connect_to_data/cloud/_abs_fluent_data_asset_config_keys.mdx",
 }
-EXCLUDED_FILENAMES_PATTERN = re.compile(r"fluent|node_modules", re.IGNORECASE)
+EXCLUDED_FILENAMES_PATTERN = re.compile(r"node_modules", re.IGNORECASE)
 
 
 def check_dependencies(*deps: str) -> None:
