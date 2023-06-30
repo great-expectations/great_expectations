@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from great_expectations.datasource.fluent import SnowflakeDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 
 
 @pytest.mark.unit
@@ -23,7 +24,7 @@ from great_expectations.datasource.fluent import SnowflakeDatasource
     ],
 )
 def test_conflicting_connection_string_and_args_raises_error(
-    connection_string: str | None, connect_args: dict
+    connection_string: ConfigStr | str | None, connect_args: dict
 ):
     with pytest.raises(ValueError):
         _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
