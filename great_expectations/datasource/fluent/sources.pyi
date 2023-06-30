@@ -562,8 +562,16 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Optional[Union[ConfigStr, SnowflakeDsn, str]] = ...,
         create_temp_table: bool = True,
+        account: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[Union[ConfigStr, str]] = None,
+        database: Optional[str] = None,
+        schema: Optional[str] = None,
+        warehouse: Optional[str] = None,
+        role: Optional[str] = None,
+        numpy: bool = False,
     ) -> SnowflakeDatasource: ...
     def update_snowflake(  # noqa: PLR0913
         self,
@@ -573,6 +581,14 @@ class _SourceFactories:
         *,
         connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
         create_temp_table: bool = True,
+        account: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[Union[ConfigStr, str]] = None,
+        database: Optional[str] = None,
+        schema: Optional[str] = None,
+        warehouse: Optional[str] = None,
+        role: Optional[str] = None,
+        numpy: bool = False,
     ) -> SnowflakeDatasource: ...
     def add_or_update_snowflake(  # noqa: PLR0913
         self,
