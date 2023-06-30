@@ -191,13 +191,9 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        if not validations:
-            validations = []
-        validations = [
-            CheckpointValidationConfig(**validation)
-            for validation in validations
-            if isinstance(validation, dict)
-        ]
+        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+            validations
+        )
 
         if (
             sum(bool(x) for x in [self._validator is not None, validator is not None])
@@ -360,6 +356,20 @@ class BaseCheckpoint(ConfigPeer):
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
         )
+
+    @staticmethod
+    def _convert_validations_list_to_checkpoint_validation_configs(
+        validations: list[dict] | list[CheckpointValidationConfig] | None,
+    ) -> list[CheckpointValidationConfig]:
+        # We accept both dicts and rich config types but all internal usage should use the latter
+        if not validations:
+            validations = []
+        validations = [
+            CheckpointValidationConfig(**validation)
+            for validation in validations
+            if isinstance(validation, dict)
+        ]
+        return validations
 
     def get_substituted_config(
         self,
@@ -775,13 +785,9 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
-        if not validations:
-            validations = []
-        validations = [
-            CheckpointValidationConfig(**validation)
-            for validation in validations
-            if isinstance(validation, dict)
-        ]
+        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+            validations
+        )
 
         if validator:
             if batch_request or _does_validation_contain_batch_request(
