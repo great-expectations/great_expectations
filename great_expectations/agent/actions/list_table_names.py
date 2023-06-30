@@ -33,5 +33,4 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
             id=id,
             type=event.type,
             created_resources=[],
-            details=table_names,
         )
