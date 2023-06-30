@@ -1,0 +1,16 @@
+services:
+  jupyter:
+    image: gx/gcs_example_jupyter
+    container_name: gx_gcs_example_jupyter
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/creds.json
+      GCP_PROJECT_NAME: ${GCP_PROJECT_NAME}
+      # The following environment variable is optional:
+      GCS_METADATA_STORES_BUCKET_NAME: ${GCS_METADATA_STORES_BUCKET_NAME}
+    ports:
+      - "8888:8888"
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/creds.json
