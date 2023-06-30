@@ -164,8 +164,8 @@ def get_batch_ids(  # noqa: PLR0913
             return None
 
         batch_request = build_batch_request(
-            domain=domain,
             batch_request=batch_request,
+            domain=domain,
             variables=variables,
             parameters=parameters,
         )
