@@ -236,7 +236,6 @@ stages:
             scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py'
             failOnStderr: true
           name: NameTagSnippetReferencedChecker
-          
     - job: public_api_report
       steps:
         - script: |
