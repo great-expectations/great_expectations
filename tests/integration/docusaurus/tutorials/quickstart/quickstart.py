@@ -1,4 +1,3 @@
-# <snippet name="tutorials/quickstart/quickstart.py all">
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 
@@ -38,5 +37,4 @@ checkpoint_result = checkpoint.run()
 # View results
 # <snippet name="tutorials/quickstart/quickstart.py view_results">
 context.view_validation_result(checkpoint_result)
-# </snippet>
 # </snippet>

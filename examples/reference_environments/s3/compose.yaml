@@ -9,5 +9,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      # The following environment variable is optional:
+      - S3_METADATA_STORES_BUCKET_NAME=${S3_METADATA_STORES_BUCKET_NAME}
     ports:
       - "8888:8888"
