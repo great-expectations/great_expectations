@@ -15,8 +15,8 @@ services:
       - dbnet
 
   data_docs:
-    image: gx/data_docs
-    container_name: gx_data_docs
+    image: gx/snowflake_data_docs
+    container_name: gx_snowflake_data_docs
     build:
       context: .
       dockerfile: data_docs.Dockerfile
