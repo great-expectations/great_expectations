@@ -27,7 +27,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder(
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     # noinspection PyUnusedLocal
-    ValueSetMultiBatchParameterBuilder(
+    parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
         name="my_name",
         data_context=data_context,
     )
@@ -42,7 +42,7 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        ValueSetMultiBatchParameterBuilder(
+        parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
             data_context=data_context,
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
