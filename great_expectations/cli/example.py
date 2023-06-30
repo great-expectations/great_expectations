@@ -543,14 +543,21 @@ def _check_aws_env_vars() -> set[str]:
 
 
 def _check_aws_rds_env_vars() -> set[str]:
-    """Return list of env var names that are not set."""
+    """Checking 3 ENV variables that boto3 looks for
+           1. Using AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+           2. Using AWS_SESSION_TOKEN
+    More information in boto3 docs:
+           https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-environment-variables
+    """
+    result: set[str] = set()
+    if os.getenv("AWS_SESSION_TOKEN"):
+        return result
+
     env_vars_to_check = (
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
-        "AWS_RDS_CONNECTION_STRING",
     )
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
-
     return result
 
 
