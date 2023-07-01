@@ -2,33 +2,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-# TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX</Alex>
-import diptest
-
-# TODO: <Alex>ALEX</Alex>
-import distfit
 import numpy as np
 
-# TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX</Alex>
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import numpy
 from great_expectations.core.domain import Domain  # noqa: TCH001
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.metric_function_types import (
-#     SummarizationMetricNameSuffixes,
-# )
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
-    get_false_positive_rate_from_rule_state,
     get_parameter_value_and_validate_return_type,
-    get_quantile_statistic_interpolation_method_from_rule_state,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,  # noqa: TCH001
@@ -57,20 +41,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     """
 
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
-        "noop",
-        # TODO: <Alex>ALEX</Alex>
-        "single_batch_mode",
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        "diptest",
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        "distfit",
-        # TODO: <Alex>ALEX</Alex>
-        "mean",
-        "std",
-        "median",
-        "quantile",
+        "all_values",
+        "active_batch_value",
     }
 
     def __init__(  # noqa: PLR0913
@@ -156,7 +128,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     def round_decimals(self) -> Optional[Union[str, int]]:
         return self._round_decimals
 
-    def _build_parameters(  # noqa PLR0915
+    def _build_parameters(  # PLR0915
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -169,7 +141,6 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
-        # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; TYPE: {str(type(self.name))} ; DOMAIN: {domain}')
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_builder_name: str = (
             get_parameter_value_and_validate_return_type(
@@ -197,7 +168,6 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         total_count_values: MetricValues = total_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
-        # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; TOTAL_COUNT_VALUES:\n{total_count_values} ; TYPE: {str(type(total_count_values))} ; DOMAIN: {domain}')
 
         # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         unexpected_count_parameter_builder_name: Optional[
@@ -225,13 +195,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         unexpected_count_values: MetricValues = parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
-        # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_VALUES:\n{unexpected_count_values} ; TYPE: {str(type(unexpected_count_values))} ; DOMAIN: {domain}')
         unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             total_count_values + NP_EPSILON
-        )
-        # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_FRACTION_VALUES:\n{unexpected_count_fraction_values} ; TYPE: {str(type(unexpected_count_fraction_values))} ; DOMAIN: {domain}')
-        print(
-            f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_FRACTION_VALUES_AS_LIST:\n{unexpected_count_fraction_values.tolist()} ; TYPE: {str(type(unexpected_count_fraction_values.tolist()))} ; DOMAIN: {domain}"
         )
 
         # Obtain aggregation_method from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -253,120 +218,32 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 {UnexpectedCountStatisticsMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS} ("{aggregation_method}" was detected).
 """
             )
-        # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; AGGREGATION_METHOD:\n{aggregation_method} ; TYPE: {str(type(aggregation_method))} ; DOMAIN: {domain}')
 
-        result: Union[np.ndarray, np.float64]
+        result: Union[np.ndarray, np.float64, Dict[str, np.float64]]
 
-        if aggregation_method == "single_batch_mode":
-            ...
-        elif aggregation_method == "noop":
+        if aggregation_method == "all_values":
             result = unexpected_count_fraction_values
-            # print(f'\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-NOOP:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}')
-        elif aggregation_method == "diptest":
+        elif aggregation_method == "active_batch_value":
+            print(
+                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-COMPUTED-UNEXPECTED_COUNT_FRACTION_VALUES_FOR_ACTIVE_BATCH_VALUE_{aggregation_method}:\n{unexpected_count_fraction_values} ; TYPE: {str(type(unexpected_count_fraction_values))} ; DOMAIN: {domain}"
+            )
+            active_batch_value: np.float64 = unexpected_count_fraction_values[-1]
+            print(
+                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-COMPUTED-UNEXPECTED_COUNT_FRACTION_ACTIVE_BATCH_VALUE_{aggregation_method}:\n{active_batch_value} ; TYPE: {str(type(active_batch_value))} ; DOMAIN: {domain}"
+            )
             # TODO: <Alex>ALEX</Alex>
-            dip, pval = diptest.diptest(unexpected_count_fraction_values)
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DIPTEST-DIP:\n{dip} ; TYPE: {str(type(dip))} ; DOMAIN: {domain}"
-            )
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DIPTEST-P_VALUE:\n{pval} ; TYPE: {str(type(pval))} ; DOMAIN: {domain}"
-            )
-            result = unexpected_count_fraction_values
+            # TODO: <Thu>Here is where we use Tal's flowchart to compute the value of "mostly" (I put a placeholder)</Thu>
+            mostly: np.float64 = np.float64(6.5e-1)
+            # TODO: <Thu></Thu>
             # TODO: <Alex>ALEX</Alex>
-        elif aggregation_method == "distfit":
-            # TODO: <Alex>ALEX</Alex>
-            dfit = distfit.distfit(distr="popular")
-            dfit.fit_transform(unexpected_count_fraction_values, verbose=0)
-            # print(
-            #     f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.SUMMARY-DISTFIT:\n{dfit.summary} ; TYPE: {str(type(dfit.summary))} ; DOMAIN: {domain}"
-            # )
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; DFIT.MODEL-DISTFIT:\n{dfit.model} ; TYPE: {str(type(dfit.model))} ; DOMAIN: {domain}"
-            )
-            result = unexpected_count_fraction_values
-            # TODO: <Alex>ALEX</Alex>
-        elif aggregation_method == "mean":
-            result = np.mean(unexpected_count_fraction_values)
-        elif aggregation_method == "std":
-            result = np.std(unexpected_count_fraction_values)
-        elif aggregation_method == "median":
-            result = np.median(unexpected_count_fraction_values)
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-MEDIAN:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
-            )
-        elif aggregation_method == "quantile":
-            false_positive_rate: np.float64 = get_false_positive_rate_from_rule_state(  # type: ignore[assignment] # could be float
-                false_positive_rate=self.false_positive_rate,  # type: ignore[union-attr] # configuration could be None
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; FALSE_POSITIVE_RATE:\n{false_positive_rate} ; TYPE: {str(type(false_positive_rate))} ; DOMAIN: {domain}"
-            )
-
-            # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-            round_decimals: Optional[
-                int
-            ] = get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.round_decimals,
-                expected_return_type=None,
-                variables=variables,
-                parameters=parameters,
-            )
-            if not (
-                round_decimals is None
-                or (isinstance(round_decimals, int) and (round_decimals >= 0))
-            ):
-                raise gx_exceptions.ProfilerExecutionError(
-                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
-positive integer, or must be omitted (or set to None).
-"""
-                )
-
-            quantile_statistic_interpolation_method: str = get_quantile_statistic_interpolation_method_from_rule_state(
-                quantile_statistic_interpolation_method=self.quantile_statistic_interpolation_method,  # type: ignore[union-attr] # configuration could be None
-                round_decimals=round_decimals or 2,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; QUANTILE_STATISTIC_INTERPOLATION_METHOD:\n{quantile_statistic_interpolation_method} ; TYPE: {str(type(quantile_statistic_interpolation_method))} ; DOMAIN: {domain}"
-            )
-            result = numpy.numpy_quantile(
-                a=unexpected_count_fraction_values,
-                # TODO: <Alex>ALEX</Alex>
-                # q=1.0 - false_positive_rate,
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                q=false_positive_rate,
-                # TODO: <Alex>ALEX</Alex>
-                axis=0,
-                method=quantile_statistic_interpolation_method,
-            )
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-QUANTILE:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
-            )
-
-            if round_decimals is None:
-                result = np.float64(1.0 - result)
-                print(
-                    f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-MOSTLY-NO_ROUNDING:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
-                )
-            else:
-                result = round(np.float64(1.0 - result), round_decimals)
-                print(
-                    f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER_NAME:\n{self.name} ; UNEXPECTED_COUNT_OUTPUT-MOSTLY-ROUNDED:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
-                )
+            result = {"active_batch_value": active_batch_value, "mostly": mostly}
         else:
             result = np.float64(0.0)  # This statement cannot be reached.
 
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
         details["aggregation_method"] = aggregation_method
         print(
-            f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-RETURNING-UNEXPECTED_COUNT_OUTPUT:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
+            f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-RETURNING-UNEXPECTED_COUNT_{aggregation_method}:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
         )
 
         return Attributes(

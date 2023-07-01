@@ -32,12 +32,7 @@ class MetricsCalculator:
             show_progress_bars: Directive for whether or not to show progress bars.
         """
         self._execution_engine: ExecutionEngine = execution_engine
-        # TODO: <Alex>ALEX</Alex>
-        # self._show_progress_bars: bool = show_progress_bars
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        self._show_progress_bars: bool = False
-        # TODO: <Alex>ALEX</Alex>
+        self._show_progress_bars: bool = show_progress_bars
 
     @property
     def show_progress_bars(self) -> bool:
