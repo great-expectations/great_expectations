@@ -7,7 +7,6 @@ import pandas as pd
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
-    pandas_read_sql,
     pandas_read_sql_query,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
@@ -61,10 +60,8 @@ class TableHead(TableMetricProvider):
 
     # def _sqlalchemy_without_temp_table():
 
-
-
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def _sqlalchemy(  # noqa: PLR0912, PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
