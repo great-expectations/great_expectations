@@ -81,19 +81,19 @@ if TYPE_CHECKING:
     from great_expectations.core.batch import (
         AnyBatch,
         Batch,
-        BatchData,
+        BatchDataUnion,
         BatchDefinition,
         BatchMarkers,
     )
-    from great_expectations.core.batch import BatchDataType, BatchDataUnion
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.core.usage_statistics.usage_statistics import UsageStatisticsHandler
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
-    from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+    from great_expectations.rule_based_profiler.domain_builder import (
+        ColumnDomainBuilder,
+    )
     from great_expectations.rule_based_profiler.expectation_configuration_builder import (
         ExpectationConfigurationBuilder,
     )
@@ -216,7 +216,7 @@ class Validator:
             expectation_suite_name=expectation_suite_name,
         )
         self._default_expectation_args: Dict[str, Union[bool, str]] = copy.deepcopy(
-            Validator.DEFAULT_RUNTIME_CONFIGURATION # type: ignore[arg-type]
+            Validator.DEFAULT_RUNTIME_CONFIGURATION  # type: ignore[arg-type]
         )  # type: ignore[arg-type]
 
         # This special state variable tracks whether a validation run is going on, which will disable
@@ -501,10 +501,12 @@ class Validator:
                 basic_default_expectation_args
             )
             basic_runtime_configuration.update(
-            {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
+                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            allowed_config_keys: Tuple[str, ...] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[
+                str, ...
+            ] = expectation_impl.get_allowed_config_keys()
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -616,8 +618,12 @@ class Validator:
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
             "profiler_config"
         )
-        default_profiler_config = expectation_impl.default_kwarg_values.get("profiler_config")
-        if default_profiler_config and not isinstance(default_profiler_config, RuleBasedProfilerConfig):
+        default_profiler_config = expectation_impl.default_kwarg_values.get(
+            "profiler_config"
+        )
+        if default_profiler_config and not isinstance(
+            default_profiler_config, RuleBasedProfilerConfig
+        ):
             raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
 
         if auto and profiler_config is None and default_profiler_config is None:
@@ -707,7 +713,7 @@ class Validator:
         """
         expectation_impl = get_expectation_impl(expectation_type)
 
-        def inst_rule_based_profiler(
+        def inst_rule_based_profiler(  # noqa: PLR0912
             *args, **kwargs
         ) -> Optional[BaseRuleBasedProfiler]:
             if args is None:
@@ -718,7 +724,9 @@ class Validator:
 
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
 
-            allowed_config_keys: Tuple[str, ...] = expectation_impl.get_allowed_config_keys()
+            allowed_config_keys: Tuple[
+                str, ...
+            ] = expectation_impl.get_allowed_config_keys()
 
             args_keys: Tuple[str, ...] = expectation_impl.args_keys or tuple()
 
@@ -750,9 +758,15 @@ class Validator:
             profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
                 "profiler_config"
             )
-            default_profiler_config = expectation_impl.default_kwarg_values.get("profiler_config")
-            if default_profiler_config and not isinstance(default_profiler_config, RuleBasedProfilerConfig):
-                raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
+            default_profiler_config = expectation_impl.default_kwarg_values.get(
+                "profiler_config"
+            )
+            if default_profiler_config and not isinstance(
+                default_profiler_config, RuleBasedProfilerConfig
+            ):
+                raise TypeError(
+                    "profiler_config must be None or RuleBasedProfilerConfig"
+                )
 
             if auto and profiler_config is None and default_profiler_config is None:
                 raise ValueError(
@@ -776,7 +790,9 @@ class Validator:
                 """
                 profiler_config_to_use = default_profiler_config or profiler_config
                 if not isinstance(profiler_config_to_use, RuleBasedProfilerConfig):
-                    raise TypeError("profiler_config must be None or RuleBasedProfilerConfig")
+                    raise TypeError(
+                        "profiler_config must be None or RuleBasedProfilerConfig"
+                    )
 
                 profiler = self._build_rule_based_profiler_from_config_and_runtime_args(
                     expectation_type=expectation_type,
@@ -874,8 +890,8 @@ class Validator:
     ) -> None:
         rule: Rule = profiler.rules[0]
         assert (
-            rule.expectation_configuration_builders and
-            rule.expectation_configuration_builders[0].expectation_type
+            rule.expectation_configuration_builders
+            and rule.expectation_configuration_builders[0].expectation_type
             == expectation_type
         ), "ExpectationConfigurationBuilder in profiler used to build an ExpectationConfiguration must have the same expectation_type as the expectation being invoked."
 
@@ -1767,7 +1783,7 @@ class Validator:
         if batch_markers is None:
             batch_markers = self.active_batch_markers
         if batch_definition is None:
-            batch_definition = self.active_batch_definition # type: ignore [assignment]
+            batch_definition = self.active_batch_definition  # type: ignore [assignment]
         self._expectation_suite.add_citation(
             comment,
             batch_spec=batch_spec,
@@ -1897,9 +1913,7 @@ class Validator:
                 data_context=self._data_context,
             )
 
-        self._expectation_suite.execution_engine_type = type(
-            self._execution_engine
-        )
+        self._expectation_suite.execution_engine_type = type(self._execution_engine)
 
     def _get_runtime_configuration(
         self,
@@ -1935,7 +1949,9 @@ class Validator:
         """
         # calc stats
         evaluated_expectations = len(validation_results)
-        successful_expectations = len([exp for exp in validation_results if exp.success])
+        successful_expectations = len(
+            [exp for exp in validation_results if exp.success]
+        )
         unsuccessful_expectations = evaluated_expectations - successful_expectations
         success = successful_expectations == evaluated_expectations
         try:
@@ -2012,7 +2028,7 @@ class BridgeValidator:
         if self.expectation_engine is None:
             from great_expectations.compatibility import pyspark
 
-            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame): # type: ignore [truthy-function]
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):  # type: ignore [truthy-function]
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
@@ -2027,7 +2043,9 @@ class BridgeValidator:
         Bridges between Execution Engines in providing access to the batch data. Validates that Dataset classes
         contain proper type of data (i.e. a Pandas Dataset does not contain SqlAlchemy data)
         """
-        if self.expectation_engine and issubclass(self.expectation_engine, PandasDataset):
+        if self.expectation_engine and issubclass(
+            self.expectation_engine, PandasDataset
+        ):
             if not isinstance(self.batch["data"], pd.DataFrame):
                 raise ValueError(
                     "PandasDataset expectation_engine requires a Pandas Dataframe for its batch"
@@ -2048,7 +2066,7 @@ class BridgeValidator:
             from great_expectations.compatibility import pyspark
 
             if not (
-                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame) # type: ignore [truthy-function]
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)  # type: ignore [truthy-function]
             ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"

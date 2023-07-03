@@ -81,7 +81,9 @@ class DocInherit:
         return f
 
 
-def recursively_convert_to_json_serializable(test_obj: dict) -> dict:  # noqa: C901, PLR0911, PLR0912
+def recursively_convert_to_json_serializable(
+    test_obj: dict,
+) -> dict:
     """
     Helper function to convert an object to one that is serializable
 
@@ -97,7 +99,10 @@ def recursively_convert_to_json_serializable(test_obj: dict) -> dict:  # noqa: C
     """
     return _recursively_convert_to_json_serializable(test_obj)
 
-def _recursively_convert_to_json_serializable(test_obj) -> Any:  # noqa: C901, PLR0911, PLR0912
+
+def _recursively_convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
+    test_obj,
+) -> Any:
     # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj

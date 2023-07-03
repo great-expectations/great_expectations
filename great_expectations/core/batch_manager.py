@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
-from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
 
 from great_expectations.core.batch import (
     Batch,
@@ -14,9 +13,10 @@ from great_expectations.core.batch import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import AnyBatch, BatchDataType
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.core.batch import BatchDataType, AnyBatch
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
