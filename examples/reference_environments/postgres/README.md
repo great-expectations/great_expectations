@@ -28,3 +28,5 @@ docker cp jupyter_container_id:/gx/my_notebook.ipynb .
 ```
 
 Please also note that the database and jupyter notebook will use the default ports, so please make sure you don't have anything else running on those ports, or take steps to avoid port conflicts.
+
+The container serving the jupyter notebook will install Great Expectations with the appropriate dependencies based on the latest release, then install from the latest on the `develop` branch. To modify this e.g. install from the latest release only or from a different branch, edit `jupyter.Dockerfile`.
