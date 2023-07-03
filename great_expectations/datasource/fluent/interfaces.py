@@ -507,7 +507,7 @@ class Datasource(
             return found_asset
         except IndexError as exc:
             raise LookupError(
-                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
+                f'"{asset_name}" not found. Available assets are ({", ".join(self.get_asset_names())})'
             ) from exc
 
     def delete_asset(self, asset_name: str) -> None:
