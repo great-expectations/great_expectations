@@ -13,8 +13,9 @@ from great_expectations.core.batch import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import AnyBatch
+    from great_expectations.core.batch import AnyBatch, BatchDataType
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -38,13 +39,13 @@ class BatchManager:
         self._active_batch_data_id: Optional[str] = None
 
         self._batch_cache: Dict[str, AnyBatch] = OrderedDict()
-        self._batch_data_cache: Dict[str, AnyBatch] = {}
+        self._batch_data_cache: Dict[str, BatchDataUnion] = {}
 
         if batch_list:
             self.load_batch_list(batch_list=batch_list)
 
     @property
-    def batch_data_cache(self) -> Dict[str, AnyBatch]:
+    def batch_data_cache(self) -> Dict[str, BatchDataUnion]:
         """Dictionary of loaded BatchData objects."""
         return self._batch_data_cache
 
@@ -154,7 +155,7 @@ class BatchManager:
                 logger.error(str(e))
 
             self._execution_engine.load_batch_data(
-                batch_id=batch.id, batch_data=batch.data  # type: ignore[arg-type] # batch.data could be None
+                batch_id=batch.id, batch_data=batch.data
             )
 
             self._batch_cache[batch.id] = batch
@@ -162,7 +163,7 @@ class BatchManager:
             # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
             self._active_batch_id = batch.id
 
-    def save_batch_data(self, batch_id: str, batch_data: AnyBatch) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         """
         Updates the data for the specified Batch in the cache
         """
