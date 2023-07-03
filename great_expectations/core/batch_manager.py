@@ -13,9 +13,8 @@ from great_expectations.core.batch import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import AnyBatch, BatchDataType
+    from great_expectations.core.batch import AnyBatch
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
