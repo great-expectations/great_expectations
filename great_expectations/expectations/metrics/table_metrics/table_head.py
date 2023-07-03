@@ -28,7 +28,7 @@ from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
-
+    from great_expectations.compatibility.sqlalchemy import Selectable
 
 class TableHead(TableMetricProvider):
     metric_name = "table.head"
@@ -56,7 +56,7 @@ class TableHead(TableMetricProvider):
         )
         return df.head(n=n_rows)
 
-    # def _sqlalchemy_with_temp_table():
+    
 
     # def _sqlalchemy_without_temp_table():
 
@@ -86,76 +86,23 @@ class TableHead(TableMetricProvider):
             sqlalchemy._anonymous_label
             and isinstance(table_name, sqlalchemy._anonymous_label)
         ):
-            # without temp_table
+            # if table_name is not None then we have created a TempTable
             # if a custom query was passed
-            try:
-                if metric_value_kwargs["fetch_all"]:
-                    with execution_engine.get_connection() as con:
-                        df = pandas_read_sql_query(
-                            sql=selectable,
-                            con=con,
-                            execution_engine=execution_engine,
-                        )
-                else:
-                    # passing chunksize causes the Iterator to be returned
-                    with execution_engine.get_connection() as con:
-                        # convert subquery into query using select_from()
-                        if not selectable.supports_execution:
-                            selectable = sa.select(sa.text("*")).select_from(selectable)
-                        df_chunk_iterator = pandas_read_sql_query(
-                            sql=selectable,
-                            con=con,
-                            execution_engine=execution_engine,
-                            chunksize=abs(n_rows),
-                        )
-                        df = TableHead._get_head_df_from_df_iterator(
-                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                        )
-            except (ValueError, NotImplementedError):
-                # MetaData that is used by pd.read_sql_table
-                # cannot work on a temp table with pandas < 1.4.0.
-                # If it fails, we try to get the data using read_sql.
-                df = None
-            except StopIteration:
-                validator = Validator(execution_engine=execution_engine)
-                columns = validator.get_metric(
-                    MetricConfiguration("table.columns", metric_domain_kwargs)
-                )
-                df = pd.DataFrame(columns=columns)
+            df = _sqlalchemy_with_temp_table(
+                execution_engine,
+                metric_value_kwargs,
+                metric_domain_kwargs,
+                n_rows
+            ) 
         else:
-            try:
-                if metric_value_kwargs["fetch_all"]:
-                    with execution_engine.get_connection() as con:
-                        df = read_sql_table_as_df(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=con,
-                            dialect=dialect,
-                        )
-                else:
-                    with execution_engine.get_connection() as con:
-                        # passing chunksize causes the Iterator to be returned
-                        df_chunk_iterator = read_sql_table_as_df(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=con,
-                            chunksize=abs(n_rows),
-                            dialect=dialect,
-                        )
-                        df = TableHead._get_head_df_from_df_iterator(
-                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                        )
-            except (ValueError, NotImplementedError):
-                # MetaData that is used by pd.read_sql_table
-                # cannot work on a temp table with pandas < 1.4.0.
-                # If it fails, we try to get the data using read_sql.
-                df = None
-            except StopIteration:
-                validator = Validator(execution_engine=execution_engine)
-                columns = validator.get_metric(
-                    MetricConfiguration("table.columns", metric_domain_kwargs)
-                )
-                df = pd.DataFrame(columns=columns)
+            df = _sqlalchemy_without_temp_table(
+                execution_engine,
+                dialect,
+                selectable,
+                metric_value_kwargs,
+                metric_domain_kwargs,
+                n_rows
+            ) 
 
         # if df is None:
         #     # we want to compile our selectable
@@ -252,3 +199,89 @@ class TableHead(TableMetricProvider):
         df = pd.DataFrame(data=rows)
 
         return df
+
+def _sqlalchemy_with_temp_table(
+        execution_engine: SqlAlchemyExecutionEngine, 
+        metric_value_kwargs: dict,
+        metric_domain_kwargs: dict,
+        n_rows: int 
+    ) -> pd.DataFrame:
+        try:
+            if metric_value_kwargs["fetch_all"]:
+                with execution_engine.get_connection() as con:
+                    df = pandas_read_sql_query(
+                        sql=selectable,
+                        con=con,
+                        execution_engine=execution_engine,
+                    )
+            else:
+                # passing chunksize causes the Iterator to be returned
+                with execution_engine.get_connection() as con:
+                    # convert subquery into query using select_from()
+                    if not selectable.supports_execution:
+                        selectable = sa.select(sa.text("*")).select_from(selectable)
+                    df_chunk_iterator = pandas_read_sql_query(
+                        sql=selectable,
+                        con=con,
+                        execution_engine=execution_engine,
+                        chunksize=abs(n_rows),
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
+        except (ValueError, NotImplementedError):
+            # MetaData that is used by pd.read_sql_table
+            # cannot work on a temp table with pandas < 1.4.0.
+            # If it fails, we try to get the data using read_sql.
+            df = None
+        except StopIteration:
+            validator = Validator(execution_engine=execution_engine)
+            columns = validator.get_metric(
+                MetricConfiguration("table.columns", metric_domain_kwargs)
+            )
+            df = pd.DataFrame(columns=columns)
+        return df
+
+
+def _sqlalchemy_without_temp_table(
+    execution_engine: SqlAlchemyExecutionEngine,
+    dialect: str,
+    selectable: Selectable,
+    metric_value_kwargs: dict,
+    metric_domain_kwargs: dict,
+    n_rows: int
+    ) -> df.DataFrame:
+    try:
+        if metric_value_kwargs["fetch_all"]:
+            with execution_engine.get_connection() as con:
+                df = read_sql_table_as_df(
+                    table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            dialect=dialect,
+                    )
+        else:
+            with execution_engine.get_connection() as con:
+                # passing chunksize causes the Iterator to be returned
+                df_chunk_iterator = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            chunksize=abs(n_rows),
+                            dialect=dialect,
+                        )
+                df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
+    except (ValueError, NotImplementedError):
+            # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
+        df = None
+    except StopIteration:
+        validator = Validator(execution_engine=execution_engine)
+        columns = validator.get_metric(
+                MetricConfiguration("table.columns", metric_domain_kwargs)
+            )
+        df = pd.DataFrame(columns=columns)
+    return df
