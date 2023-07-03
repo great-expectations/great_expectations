@@ -46,7 +46,6 @@ IGNORED_VIOLATIONS = [
     "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
     "tests/integration/docusaurus/expectations/examples/batch_expectation_template.py",
     "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
-    "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
     "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
     "tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml",
     "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
