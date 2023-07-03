@@ -3,16 +3,12 @@ import logging
 import re
 from typing import Dict, Iterable
 
+from great_expectations.compatibility import aws
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +98,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self._max_keys = max_keys
         self._iterators: Dict = {}
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except TypeError:
             raise (
                 ImportError(

@@ -1,15 +1,20 @@
 from __future__ import annotations
 
+import warnings
+
 from great_expectations.compatibility.not_imported import NotImported
 
 GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
 )
 
-try:
-    from google.cloud import secretmanager
-except (ImportError, AttributeError):
-    secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
+with warnings.catch_warnings():
+    # DeprecationWarning: pkg_resources is deprecated as an API
+    warnings.simplefilter(action="ignore", category=DeprecationWarning)
+    try:
+        from google.cloud import secretmanager
+    except (ImportError, AttributeError):
+        secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from google.api_core.exceptions import GoogleAPIError
