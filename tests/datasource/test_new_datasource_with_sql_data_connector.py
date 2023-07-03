@@ -28,7 +28,7 @@ try:
 except ImportError:
     sqlalchemy = None
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
