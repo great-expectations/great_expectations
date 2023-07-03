@@ -29,7 +29,6 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.batch import BatchDataType, BatchDataUnion
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -41,7 +40,6 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import UsageStatisticsHandler
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.data_context.types.base import CheckpointValidationConfig
@@ -87,7 +85,9 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.core.batch import BatchDataType, BatchDataUnion
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.core.usage_statistics.usage_statistics import UsageStatisticsHandler
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
@@ -1598,12 +1598,7 @@ class Validator:
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
-                if data_context and hasattr(data_context, "_usage_statistics_handler"):
-                    # noinspection PyProtectedMember
-                    handler = data_context._usage_statistics_handler
-                    if not handler:
-                        raise TypeError("handler must be UsageStatisticsHandler")
-                    # noinspection PyProtectedMember
+                if handler := getattr(data_context, "_usage_statistics_handler", None):
                     handler.send_usage_message(
                         event="data_asset.validate",
                         event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1711,12 +1706,7 @@ class Validator:
 
             self._data_context = validation_data_context
         except Exception:
-            if data_context and hasattr(data_context, "_usage_statistics_handler"):
-                # noinspection PyProtectedMember
-                handler = data_context._usage_statistics_handler
-                if not handler:
-                    raise TypeError("handler must be UsageStatisticsHandler")
-                # noinspection PyProtectedMember
+            if handler := getattr(data_context, "_usage_statistics_handler", None):
                 handler.send_usage_message(
                     event="data_asset.validate",
                     event_payload=handler.anonymizer.anonymize(obj=self),
@@ -1726,12 +1716,7 @@ class Validator:
         finally:
             self._active_validation = False
 
-        if data_context and hasattr(data_context, "_usage_statistics_handler"):
-            # noinspection PyProtectedMember
-            handler = data_context._usage_statistics_handler
-            if not handler:
-                raise TypeError("handler must be UsageStatisticsHandler")
-            # noinspection PyProtectedMember
+        if handler := getattr(data_context, "_usage_statistics_handler", None):
             handler.send_usage_message(
                 event="data_asset.validate",
                 event_payload=handler.anonymizer.anonymize(obj=self),
@@ -2027,7 +2012,7 @@ class BridgeValidator:
         if self.expectation_engine is None:
             from great_expectations.compatibility import pyspark
 
-            if isinstance(batch.data, pyspark.DataFrame):
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame): # type: ignore [truthy-function]
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
@@ -2063,7 +2048,7 @@ class BridgeValidator:
             from great_expectations.compatibility import pyspark
 
             if not (
-                isinstance(self.batch.data, pyspark.DataFrame)
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame) # type: ignore [truthy-function]
             ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
