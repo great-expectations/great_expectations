@@ -1364,7 +1364,9 @@ def standardize_batch_request_display_ordering(
     return batch_request_as_dict  # type: ignore[return-value] # TODO: create a new object to return instead of popping
 
 
-AnyBatch: TypeAlias = Union[Batch, FluentBatch]
+if TYPE_CHECKING:
+    AnyBatch: TypeAlias = Union[Batch, FluentBatch]
+
 if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
     BatchDataUnion: TypeAlias = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
 
