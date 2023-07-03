@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import numpy
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
@@ -50,7 +49,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         name: str,
         unexpected_count_parameter_builder_name: str,
         total_count_parameter_builder_name: str,
-        aggregation_method: Optional[str] = None,
+        aggregation_method: str,
         false_positive_rate: Optional[Union[str, float]] = None,
         quantile_statistic_interpolation_method: str = None,
         round_decimals: Optional[Union[str, int]] = None,
@@ -113,7 +112,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         return self._total_count_parameter_builder_name
 
     @property
-    def aggregation_method(self) -> Optional[str]:
+    def aggregation_method(self) -> str:
         return self._aggregation_method
 
     @property
@@ -141,6 +140,32 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         Returns:
             Attributes object, containing computed parameter values and parameter computation details metadata.
         """
+        # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        unexpected_count_parameter_builder_name: Optional[
+            str
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.unexpected_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        fully_qualified_unexpected_count_parameter_builder_name: str = (
+            f"{RAW_PARAMETER_KEY}{unexpected_count_parameter_builder_name}"
+        )
+        # Obtain unexpected_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        unexpected_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=fully_qualified_unexpected_count_parameter_builder_name,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        unexpected_count_values: MetricValues = unexpected_count_parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
+        ]
+
         # Obtain total_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         total_count_parameter_builder_name: str = (
             get_parameter_value_and_validate_return_type(
@@ -169,43 +194,15 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        # Obtain unexpected_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        unexpected_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.unexpected_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        fully_qualified_unexpected_count_parameter_builder_name: str = (
-            f"{RAW_PARAMETER_KEY}{unexpected_count_parameter_builder_name}"
-        )
-        # Obtain unexpected_count from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=fully_qualified_unexpected_count_parameter_builder_name,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        unexpected_count_values: MetricValues = parameter_node[
-            FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
-        ]
         unexpected_count_fraction_values: np.ndarray = unexpected_count_values / (
             total_count_values + NP_EPSILON
         )
 
         # Obtain aggregation_method from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        aggregation_method: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
+        aggregation_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.aggregation_method,
-            expected_return_type=None,
+            expected_return_type=str,
             variables=variables,
             parameters=parameters,
         )
@@ -214,7 +211,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             not in UnexpectedCountStatisticsMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS
         ):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"""The directive "aggregation_method" can only be empty or one of \
+                message=f"""The directive "aggregation_method" can only be one of \
 {UnexpectedCountStatisticsMultiBatchParameterBuilder.RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS} ("{aggregation_method}" was detected).
 """
             )
@@ -240,7 +237,9 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         else:
             result = np.float64(0.0)  # This statement cannot be reached.
 
-        details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
+        details: dict = unexpected_count_parameter_node[
+            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+        ]
         details["aggregation_method"] = aggregation_method
         print(
             f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-RETURNING-UNEXPECTED_COUNT_{aggregation_method}:\n{result} ; TYPE: {str(type(result))} ; DOMAIN: {domain}"
