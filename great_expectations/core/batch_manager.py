@@ -107,10 +107,10 @@ class BatchManager:
         return self._active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Optional[AnyBatch]:
         """Getter for active Batch"""
         active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[Batch] = (
+        batch: Optional[AnyBatch] = (
             None if active_batch_id is None else self.batch_cache.get(active_batch_id)
         )
         return batch
@@ -144,8 +144,8 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: Sequence[Batch | FluentBatch]) -> None:
-        batch: Batch
+    def load_batch_list(self, batch_list: Sequence[AnyBatch]) -> None:
+        batch: AnyBatch
         for batch in batch_list:
             try:
                 assert isinstance(
@@ -163,7 +163,7 @@ class BatchManager:
             # that has been loaded.  Hence, the final active_batch_id will be that of the final BatchData loaded.
             self._active_batch_id = batch.id
 
-    def save_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+    def save_batch_data(self, batch_id: str, batch_data: AnyBatch) -> None:
         """
         Updates the data for the specified Batch in the cache
         """

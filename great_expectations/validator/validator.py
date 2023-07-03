@@ -217,7 +217,7 @@ class Validator:
         )
         self._default_expectation_args: Dict[str, Union[bool, str]] = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION  # type: ignore[arg-type]
-        )  # type: ignore[arg-type]
+        )
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -281,7 +281,7 @@ class Validator:
         return self._execution_engine.batch_manager.active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Optional[AnyBatch]:
         """Getter for active Batch (convenience property)"""
         return self._execution_engine.batch_manager.active_batch
 
@@ -1890,7 +1890,7 @@ class Validator:
                 )
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
-            self._expectation_suite = expectation_suite
+            self._expectation_suite: ExpectationSuite = expectation_suite
 
             if expectation_suite_name is not None:
                 if (
