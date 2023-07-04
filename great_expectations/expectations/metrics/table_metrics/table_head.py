@@ -87,7 +87,8 @@ class TableHead(TableMetricProvider):
             sqlalchemy._anonymous_label
             and isinstance(table_name, sqlalchemy._anonymous_label)
             ):
-            # if a custom query was passed
+                # if a custom query was passed
+                # no table name
                 try:
                     if metric_value_kwargs["fetch_all"]:
                         with execution_engine.get_connection() as con:
@@ -120,6 +121,7 @@ class TableHead(TableMetricProvider):
                     )
                     df = pd.DataFrame(columns=columns)
             else:
+                # named table
                 try:
                     if metric_value_kwargs["fetch_all"]:
                         with execution_engine.get_connection() as con:
@@ -240,7 +242,7 @@ class TableHead(TableMetricProvider):
         return df
 
 
-def _sqlalchemy_with_temp_table(
+def _sqlalchemy_with_named_table(
     execution_engine: SqlAlchemyExecutionEngine,
     selectable: Selectable,
     metric_value_kwargs: dict,
