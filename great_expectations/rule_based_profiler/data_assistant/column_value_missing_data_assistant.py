@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -98,50 +98,14 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         )
 
     @staticmethod
-    def _build_column_value_missing_rule() -> Rule:
-        """
-        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for columns missingness.
-        """
-
-        # Step-1: Instantiate "ColumnDomainBuilder" for selecting user-supplied columns.
-        # Step-2: Declare "ParameterBuilder" for every relevant metric of interest.
-        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
-        # Step-3.1: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
-        # Step-3.2: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "mostly" for emitting "ExpectationConfiguration" (based on "Domain" data).
-        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
-        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
-
-        column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
-            include_column_names=None,
-            exclude_column_names=None,
-            include_column_name_suffixes=None,
-            exclude_column_name_suffixes=None,
-            semantic_type_filter_module_name=None,
-            semantic_type_filter_class_name=None,
-            include_semantic_types=None,
-            exclude_semantic_types=None,
-            data_context=None,
-        )
-
+    def _get_nonnull_unexpected_parameter_and_expectation_builders(
+        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder,
+    ) -> Tuple[List[ParameterBuilder], List[ExpectationConfigurationBuilder]]:
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
             DataAssistant.commonly_used_parameter_builders.get_column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder()
         )
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
-        )
 
         column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
-        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
-            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
-        )
-
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
-
-        map_metric_name: str
-        aggregation_method: str
-
-        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         map_metric_name = "column_values.nonnull"
         evaluation_parameter_builder_configs = [
@@ -196,7 +160,26 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 "profiler_details": f"{column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
+        return (
+            [
+                column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations,
+                column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
+            ],
+            [expect_column_values_to_not_be_null_expectation_configuration_builder],
+        )
 
+    @staticmethod
+    def _get_null_unexpected_parameter_and_expectation_builders(
+        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder,
+    ) -> Tuple[List[ParameterBuilder], List[ExpectationConfigurationBuilder]]:
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
+        )
+        column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics
+
+        (
+            DataAssistant.commonly_used_parameter_builders.get_column_values_null_unexpected_count_metric_multi_batch_parameter_builder()
+        )
         map_metric_name = "column_values.null"
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
@@ -251,19 +234,72 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             },
         )
 
+        return (
+            [
+                column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations,
+                column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
+            ],
+            [expect_column_values_to_be_null_expectation_configuration_builder],
+        )
+
+    @staticmethod
+    def _build_column_value_missing_rule() -> Rule:
+        """
+        This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for columns missingness.
+
+        Builds:
+            One or no expectation configuration builders.
+            No expectation configuration builders, if more than 50% of values are unexpected.
+        """
+
+        # Step-1: Instantiate "ColumnDomainBuilder" for selecting user-supplied columns.
+        # Step-3: Declare "ParameterBuilder" for every "validation" need in "ExpectationConfigurationBuilder" objects.
+        # Step-3.1: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "condition" for emitting "ExpectationConfiguration" (based on "Domain" data).
+        # Step-3.2: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "mostly" for emitting "ExpectationConfiguration" (based on "Domain" data).
+        # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
+        # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            data_context=None,
+        )
+
+        total_count_metric_multi_batch_parameter_builder_for_evaluations: ParameterBuilder = (
+            DataAssistant.commonly_used_parameter_builders.get_table_row_count_metric_multi_batch_parameter_builder()
+        )
+
+        (
+            column_values_nonnull_unexpected_parameter_builders,
+            expect_column_values_to_not_be_null_expectation_configuration_builders,
+        ) = ColumnValueMissingDataAssistant._get_nonnull_unexpected_parameter_and_expectation_builders(
+            total_count_metric_multi_batch_parameter_builder_for_evaluations
+        )  # Not expecting non-null values
+
+        (
+            column_values_null_unexpected_parameter_builders,
+            expect_column_values_to_be_null_expectation_configuration_builders,
+        ) = ColumnValueMissingDataAssistant._get_null_unexpected_parameter_and_expectation_builders(
+            total_count_metric_multi_batch_parameter_builder_for_evaluations
+        )  # Not expecting null values
+
         variables: dict = {
-            "max_unexpected_count_fraction": 5.0e-1,
+            "max_unexpected_count_fraction": 5.0e-1,  # 50%
         }
-        parameter_builders: List[ParameterBuilder] = [
-            column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
-            column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
-            column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
-            column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
-        ]
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
-            expect_column_values_to_not_be_null_expectation_configuration_builder,
-            expect_column_values_to_be_null_expectation_configuration_builder,
-        ]
+        parameter_builders: List[ParameterBuilder] = (
+            column_values_nonnull_unexpected_parameter_builders
+            + column_values_null_unexpected_parameter_builders
+        )
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
+            expect_column_values_to_not_be_null_expectation_configuration_builders
+            + expect_column_values_to_be_null_expectation_configuration_builders,
+        )
         rule = Rule(
             name="column_value_missing_rule",
             variables=variables,

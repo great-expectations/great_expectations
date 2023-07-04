@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
-import numpy as np
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
@@ -29,6 +27,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 
 if TYPE_CHECKING:
+    import numpy as np
+
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -127,7 +127,24 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     def round_decimals(self) -> Optional[Union[str, int]]:
         return self._round_decimals
 
-    def _build_parameters(  # PLR0915
+    def _standardize_mostly(self, mostly: np.float64) -> np.float64:
+        """
+        Standardizes "mostly" value to:
+            1.0 if >= 1.0
+            0.99 if >= 0.99
+            0.975 if >= 0.975 and < 0.99
+        Otherwise, returns the original value.
+        """
+        if mostly >= 1.0:  # noqa:  PLR0915
+            return 1.0
+        elif mostly >= 0.99:  # noqa:  PLR0915
+            return 0.99
+        elif mostly >= 0.975:  # noqa:  PLR0915
+            return 0.975
+        else:
+            return mostly
+
+    def _build_parameters(
         self,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
@@ -228,14 +245,13 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             print(
                 f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-COMPUTED-UNEXPECTED_COUNT_FRACTION_ACTIVE_BATCH_VALUE_{aggregation_method}:\n{active_batch_value} ; TYPE: {str(type(active_batch_value))} ; DOMAIN: {domain}"
             )
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Thu>Here is where we use Tal's flowchart to compute the value of "mostly" (I put a placeholder)</Thu>
-            mostly: np.float64 = np.float64(6.5e-1)
-            # TODO: <Thu></Thu>
-            # TODO: <Alex>ALEX</Alex>
-            result = {"active_batch_value": active_batch_value, "mostly": mostly}
-        else:
-            result = np.float64(0.0)  # This statement cannot be reached.
+
+            mostly: np.float64 = self._standardize_mostly(active_batch_value)
+
+            result = {
+                "active_batch_value": active_batch_value,
+                "mostly": mostly,
+            }
 
         details: dict = unexpected_count_parameter_node[
             FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
