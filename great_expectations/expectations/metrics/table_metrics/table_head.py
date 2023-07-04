@@ -1,10 +1,11 @@
 from __future__ import annotations
-from ast import parse
 
+from ast import parse
 from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from build.lib.great_expectations.compatibility.not_imported import is_version_less_than
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
@@ -60,7 +61,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def _sqlalchemy(  # noqa: PLR0912, PLR0913, PLR0915
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -81,39 +82,42 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        pandas_version = parse(pd.__version__)
-        if pandas_version >= parse("1.4.0"):
+        if not is_version_less_than(pd.__version__, "1.4.0"):
             if (table_name is None) or (
-            sqlalchemy._anonymous_label
-            and isinstance(table_name, sqlalchemy._anonymous_label)
+                sqlalchemy._anonymous_label
+                and isinstance(table_name, sqlalchemy._anonymous_label)
             ):
-                # if a custom query was passed
-                # no table name
+                print("path 1")
+                # no named table:
+                # either custom query was passed
+                # or no_temp_table
                 try:
                     if metric_value_kwargs["fetch_all"]:
                         with execution_engine.get_connection() as con:
                             df = pandas_read_sql_query(
-                            sql=selectable,
-                            con=con,
-                            execution_engine=execution_engine,
-                        )
+                                sql=selectable,
+                                con=con,
+                                execution_engine=execution_engine,
+                            )
                     else:
                         # passing chunksize causes the Iterator to be returned
                         with execution_engine.get_connection() as con:
                             # convert subquery into query using select_from()
                             if not selectable.supports_execution:
-                                selectable = sa.select(sa.text("*")).select_from(selectable)
+                                selectable = sa.select(sa.text("*")).select_from(
+                                    selectable
+                                )
                             df_chunk_iterator = pandas_read_sql_query(
                                 sql=selectable,
-                            con=con,
-                            execution_engine=execution_engine,
-                            chunksize=abs(n_rows),
+                                con=con,
+                                execution_engine=execution_engine,
+                                chunksize=abs(n_rows),
                             )
                             df = TableHead._get_head_df_from_df_iterator(
-                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                                df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                             )
                 except StopIteration:
-                    # a better way to do this without StopIteraction exception? 
+                    # a better way to do this without StopIteraction exception?
                     # what is a better pattern?
                     validator = Validator(execution_engine=execution_engine)
                     columns = validator.get_metric(
@@ -122,24 +126,25 @@ class TableHead(TableMetricProvider):
                     df = pd.DataFrame(columns=columns)
             else:
                 # named table
+                print("path 2")
                 try:
                     if metric_value_kwargs["fetch_all"]:
                         with execution_engine.get_connection() as con:
                             df = read_sql_table_as_df(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=con,
-                            dialect=dialect,
+                                table_name=getattr(selectable, "name", None),
+                                schema=getattr(selectable, "schema", None),
+                                con=con,
+                                dialect=dialect,
                             )
                     else:
                         with execution_engine.get_connection() as con:
                             # passing chunksize causes the Iterator to be returned
                             df_chunk_iterator = read_sql_table_as_df(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=con,
-                            chunksize=abs(n_rows),
-                            dialect=dialect,
+                                table_name=getattr(selectable, "name", None),
+                                schema=getattr(selectable, "schema", None),
+                                con=con,
+                                chunksize=abs(n_rows),
+                                dialect=dialect,
                             )
                             df = TableHead._get_head_df_from_df_iterator(
                                 df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
@@ -151,7 +156,7 @@ class TableHead(TableMetricProvider):
                     )
                     df = pd.DataFrame(columns=columns)
         else:
-            # if pandas_version < "1.4.0" 
+            # if pandas_version < "1.4.0"
             # MetaData that is used by pd.read_sql_table
             # cannot work on a temp table with pandas < 1.4.0.
             # If it fails, we try to get the data using read_sql.
@@ -181,7 +186,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-
+            print("path 3")
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             # why? We have already done the n_rows filter so we just run the query
             with execution_engine.get_connection() as con:
@@ -194,6 +199,7 @@ class TableHead(TableMetricProvider):
     def _get_head_df_from_df_iterator(
         df_chunk_iterator: Iterator[pd.DataFrame], n_rows: int
     ) -> pd.DataFrame:
+        # n_rows and chunk are they the same?
         if n_rows > 0:
             df = next(df_chunk_iterator)
         else:
