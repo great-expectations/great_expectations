@@ -57,10 +57,8 @@ class TableHead(TableMetricProvider):
         )
         return df.head(n=n_rows)
 
-    # def _sqlalchemy_without_temp_table():
-
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0913
+    def _sqlalchemy(  # noqa: C901, PLR0912, PLR0913, PLR0915
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -85,67 +83,118 @@ class TableHead(TableMetricProvider):
             sqlalchemy._anonymous_label
             and isinstance(table_name, sqlalchemy._anonymous_label)
         ):
-            # if table_name is not None then we have created a TempTable
             # if a custom query was passed
-            df = _sqlalchemy_with_temp_table(
-                execution_engine,
-                selectable,
-                metric_value_kwargs,
-                metric_domain_kwargs,
-                n_rows,
-            )
+            try:
+                if metric_value_kwargs["fetch_all"]:
+                    with execution_engine.get_connection() as con:
+                        df = pandas_read_sql_query(
+                            sql=selectable,
+                            con=con,
+                            execution_engine=execution_engine,
+                        )
+                else:
+                    # passing chunksize causes the Iterator to be returned
+                    with execution_engine.get_connection() as con:
+                        # convert subquery into query using select_from()
+                        if not selectable.supports_execution:
+                            selectable = sa.select(sa.text("*")).select_from(selectable)
+                        df_chunk_iterator = pandas_read_sql_query(
+                            sql=selectable,
+                            con=con,
+                            execution_engine=execution_engine,
+                            chunksize=abs(n_rows),
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
+            except (ValueError, NotImplementedError):
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
+                df = None
+            except StopIteration:
+                validator = Validator(execution_engine=execution_engine)
+                columns = validator.get_metric(
+                    MetricConfiguration("table.columns", metric_domain_kwargs)
+                )
+                df = pd.DataFrame(columns=columns)
         else:
-            df = _sqlalchemy_without_temp_table(
-                execution_engine,
-                dialect,
-                selectable,
-                metric_value_kwargs,
-                metric_domain_kwargs,
-                n_rows,
-            )
+            try:
+                if metric_value_kwargs["fetch_all"]:
+                    with execution_engine.get_connection() as con:
+                        df = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            dialect=dialect,
+                        )
+                else:
+                    with execution_engine.get_connection() as con:
+                        # passing chunksize causes the Iterator to be returned
+                        df_chunk_iterator = read_sql_table_as_df(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=con,
+                            chunksize=abs(n_rows),
+                            dialect=dialect,
+                        )
+                        df = TableHead._get_head_df_from_df_iterator(
+                            df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                        )
+            except (ValueError, NotImplementedError):
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
+                df = None
+            except StopIteration:
+                validator = Validator(execution_engine=execution_engine)
+                columns = validator.get_metric(
+                    MetricConfiguration("table.columns", metric_domain_kwargs)
+                )
+                df = pd.DataFrame(columns=columns)
 
-        # if df is None:
-        #     # we want to compile our selectable
-        #     stmt = sa.select("*").select_from(selectable)
-        #     fetch_all = metric_value_kwargs["fetch_all"]
-        #     if fetch_all:
-        #         sql = stmt.compile(
-        #             dialect=execution_engine.engine.dialect,
-        #             compile_kwargs={"literal_binds": True},
-        #         )
-        #     elif execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
-        #         # limit doesn't compile properly for mssql
-        #         sql = str(
-        #             stmt.compile(
-        #                 dialect=execution_engine.engine.dialect,
-        #                 compile_kwargs={"literal_binds": True},
-        #             )
-        #         )
-        #         if n_rows > 0:
-        #             sql = f"SELECT TOP {n_rows}{sql[6:]}"
-        #     else:
-        #         if n_rows > 0:
-        #             stmt = stmt.limit(n_rows)
+        if df is None:
+            # we want to compile our selectable
+            stmt = sa.select("*").select_from(selectable)
+            fetch_all = metric_value_kwargs["fetch_all"]
+            if fetch_all:
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+            elif execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
+                # limit doesn't compile properly for mssql
+                sql = str(
+                    stmt.compile(
+                        dialect=execution_engine.engine.dialect,
+                        compile_kwargs={"literal_binds": True},
+                    )
+                )
+                if n_rows > 0:
+                    sql = f"SELECT TOP {n_rows}{sql[6:]}"
+            else:
+                if n_rows > 0:
+                    stmt = stmt.limit(n_rows)
 
-        #         sql = stmt.compile(
-        #             dialect=execution_engine.engine.dialect,
-        #             compile_kwargs={"literal_binds": True},
-        #         )
+                sql = stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
 
-        #     # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
-        #     if n_rows <= 0 and not fetch_all:
-        #         with execution_engine.get_connection() as con:
-        #             df_chunk_iterator = pandas_read_sql(
-        #                 sql=sql, con=con, chunksize=abs(n_rows)
-        #             )
-        #             df = TableHead._get_head_df_from_df_iterator(
-        #                 df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-        #             )
-        #     else:
-        #         with execution_engine.get_connection() as con:
-        #             df = pandas_read_sql_query(
-        #                 sql=sql, con=con, execution_engine=execution_engine
-        #             )
+            # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
+            if n_rows <= 0 and not fetch_all:
+                with execution_engine.get_connection() as con:
+                    df_chunk_iterator = pandas_read_sql(
+                        sql=sql, con=con, chunksize=abs(n_rows)
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
+            else:
+                with execution_engine.get_connection() as con:
+                    df = pandas_read_sql_query(
+                        sql=sql, con=con, execution_engine=execution_engine
+                    )
 
         return df
 
