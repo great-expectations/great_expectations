@@ -593,23 +593,6 @@ class _SourceFactories:
         role: Optional[str] = ...,
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
-    def add_snowflake(  # noqa: PLR0913
-        self,
-        name_or_datasource: Optional[Union[str, Datasource]] = None,
-        name: Optional[str] = None,
-        datasource: Optional[Datasource] = None,
-        *,
-        connection_string: Optional[Union[ConfigStr, SnowflakeDsn, str]] = ...,
-        create_temp_table: bool = True,
-        account: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[Union[ConfigStr, str]] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
-        warehouse: Optional[str] = None,
-        role: Optional[str] = None,
-        numpy: bool = False,
-    ) -> SnowflakeDatasource: ...
     @overload
     def update_snowflake(  # noqa: PLR0913
         self,
@@ -646,23 +629,6 @@ class _SourceFactories:
         role: Optional[str] = ...,
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
-    def update_snowflake(  # noqa: PLR0913
-        self,
-        name_or_datasource: Optional[Union[str, Datasource]] = None,
-        name: Optional[str] = None,
-        datasource: Optional[Datasource] = None,
-        *,
-        connection_string: Optional[Union[ConfigStr, SnowflakeDsn, str]] = ...,
-        create_temp_table: bool = True,
-        account: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[Union[ConfigStr, str]] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
-        warehouse: Optional[str] = None,
-        role: Optional[str] = None,
-        numpy: bool = False,
-    ) -> SnowflakeDatasource: ...
     @overload
     def add_or_update_snowflake(  # noqa: PLR0913
         self,
@@ -698,23 +664,6 @@ class _SourceFactories:
         warehouse: Optional[str] = ...,
         role: Optional[str] = ...,
         numpy: bool = ...,
-    ) -> SnowflakeDatasource: ...
-    def add_or_update_snowflake(  # noqa: PLR0913
-        self,
-        name_or_datasource: Optional[Union[str, Datasource]] = None,
-        name: Optional[str] = None,
-        datasource: Optional[Datasource] = None,
-        *,
-        connection_string: Optional[Union[ConfigStr, SnowflakeDsn, str]] = ...,
-        create_temp_table: bool = True,
-        account: Optional[str] = None,
-        user: Optional[str] = None,
-        password: Optional[Union[ConfigStr, str]] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
-        warehouse: Optional[str] = None,
-        role: Optional[str] = None,
-        numpy: bool = False,
     ) -> SnowflakeDatasource: ...
     def delete_snowflake(
         self,
