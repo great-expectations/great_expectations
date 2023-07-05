@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional, Tuple, overload
+from typing import TYPE_CHECKING, Optional, Tuple, overload
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -8,6 +10,9 @@ from great_expectations.compatibility.sqlalchemy import (
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.sqlalchemy import Selectable
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +70,7 @@ class SqlAlchemyBatchData(BatchData):
         # Option 2
         query: None = ...,
         # Option 3
-        selectable: sqlalchemy.Selectable = ...,
+        selectable: Selectable = ...,
         create_temp_table: bool = ...,
         temp_table_schema_name: Optional[str] = ...,
         use_quoted_name: bool = ...,
@@ -83,7 +88,7 @@ class SqlAlchemyBatchData(BatchData):
         # Option 2
         query: Optional[str] = None,
         # Option 3
-        selectable: Optional[sqlalchemy.Selectable] = None,
+        selectable: Optional[Selectable] = None,
         create_temp_table: bool = True,
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
