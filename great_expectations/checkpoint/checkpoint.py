@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    List,
     Literal,
     Optional,
     Sequence,
@@ -91,13 +90,13 @@ def _get_validator_class() -> Type[Validator]:
 
 
 def _does_validation_contain_batch_request(
-    validations: List[CheckpointValidationConfig],
+    validations: list[CheckpointValidationConfig],
 ) -> bool:
     return any(val.batch_request is not None for val in validations)
 
 
 def _does_validation_contain_expectation_suite_name(
-    validations: List[CheckpointValidationConfig],
+    validations: list[CheckpointValidationConfig],
 ) -> bool:
     return any(val.expectation_suite_name is not None for val in validations)
 
@@ -126,7 +125,7 @@ class BaseCheckpoint(ConfigPeer):
 
         self._checkpoint_config = checkpoint_config
 
-        self._validator: Optional[Validator] = None
+        self._validator: Validator | None = None
 
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
@@ -152,8 +151,8 @@ class BaseCheckpoint(ConfigPeer):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: List[dict] | List[CheckpointValidationConfig] | None = None,
-        profilers: List[dict] | None = None,
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        profilers: list[dict] | None = None,
         run_id: str | RunIdentifier | None = None,
         run_name: str | None = None,
         run_time: datetime.datetime | None = None,
@@ -296,7 +295,7 @@ class BaseCheckpoint(ConfigPeer):
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
             # noinspection PyUnresolvedReferences
-            async_validation_operator_results: List[
+            async_validation_operator_results: list[
                 AsyncResult[ValidationOperatorResult]
             ] = []
             if len(validations) > 0:
@@ -326,7 +325,7 @@ class BaseCheckpoint(ConfigPeer):
                 run_results = async_result.run_results
 
                 run_result: dict
-                validation_result: Optional[ExpectationSuiteValidationResult]
+                validation_result: ExpectationSuiteValidationResult | None
                 meta: ExpectationSuiteValidationResultMeta
                 validation_result_url: str | None = None
                 for run_result in run_results.values():
@@ -375,14 +374,14 @@ class BaseCheckpoint(ConfigPeer):
 
     def get_substituted_config(
         self,
-        runtime_kwargs: Optional[dict] = None,
+        runtime_kwargs: dict | None = None,
     ) -> dict:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
         config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)  # type: ignore[assignment] # always returns a dict
 
-        template_name: Optional[str] = runtime_kwargs.get("template_name")
+        template_name: str | None = runtime_kwargs.get("template_name")
         if template_name:
             config_kwargs["template_name"] = template_name
 
@@ -431,7 +430,7 @@ class BaseCheckpoint(ConfigPeer):
     def _get_substituted_runtime_kwargs(
         self,
         source_config: dict,
-        runtime_kwargs: Optional[dict] = None,
+        runtime_kwargs: dict | None = None,
     ) -> dict:
         if runtime_kwargs is None:
             runtime_kwargs = {}
@@ -451,12 +450,12 @@ class BaseCheckpoint(ConfigPeer):
     def _run_validation(  # noqa: PLR0913
         self,
         substituted_runtime_config: dict,
-        async_validation_operator_results: List[AsyncResult],
+        async_validation_operator_results: list[AsyncResult],
         async_executor: AsyncExecutor,
-        result_format: Union[dict, str, None],
-        run_id: Optional[Union[str, RunIdentifier]],
-        idx: Optional[int] = 0,
-        validation_dict: Optional[CheckpointValidationConfig] = None,
+        result_format: dict | str | None,
+        run_id: str | RunIdentifier | None,
+        idx: int | None = 0,
+        validation_dict: CheckpointValidationConfig | None = None,
     ) -> None:
         if validation_dict is None:
             validation_dict = CheckpointValidationConfig(
@@ -482,7 +481,7 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: str | None = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
-            include_rendered_content: Optional[bool] = substituted_validation_dict.get(
+            include_rendered_content: bool | None = substituted_validation_dict.get(
                 "include_rendered_content"
             )
             if include_rendered_content is None:
@@ -538,7 +537,7 @@ class BaseCheckpoint(ConfigPeer):
             if catch_exceptions_validation is not None:
                 operator_run_kwargs["catch_exceptions"] = catch_exceptions_validation
 
-            validation_id: Optional[str] = substituted_validation_dict.get("id")
+            validation_id: str | None = substituted_validation_dict.get("id")
 
             async_validation_operator_result = async_executor.submit(
                 action_list_validation_operator.run,
@@ -605,7 +604,7 @@ class BaseCheckpoint(ConfigPeer):
             and isinstance(self.validations, list)
             and len(self.validations) > 0
         )
-        action_list: Optional[Sequence[ActionDict]] = self.action_list
+        action_list: Sequence[ActionDict] | None = self.action_list
         action_list_present: bool = (
             action_list is not None
             and isinstance(action_list, list)
@@ -644,14 +643,14 @@ is run), with each validation having its own defined "action_list" attribute.
         return self._checkpoint_config
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         try:
             return self.config.name
         except AttributeError:
             return None
 
     @property
-    def config_version(self) -> Optional[float]:
+    def config_version(self) -> float | None:
         try:
             return self.config.config_version
         except AttributeError:
@@ -675,7 +674,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return result
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def ge_cloud_id(self) -> str | None:
         try:
             return self.config.ge_cloud_id
         except AttributeError:
@@ -770,22 +769,20 @@ class Checkpoint(BaseCheckpoint):
         self,
         name: str,
         data_context: AbstractDataContext,
-        config_version: Union[int, float] = 1.0,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[
-            Union[BatchRequestBase, FluentBatchRequest, dict]
-        ] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict] | List[CheckpointValidationConfig]] = None,
-        profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        default_validation_id: Optional[str] = None,
+        config_version: int | float = 1.0,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        validator: Validator | None = None,
+        action_list: Sequence[ActionDict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        profilers: list[dict] = None,
+        ge_cloud_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        default_validation_id: str | None = None,
     ) -> None:
         validations = self._convert_validations_list_to_checkpoint_validation_configs(
             validations
@@ -855,25 +852,21 @@ constructor arguments.
 
     def run_with_runtime_args(  # noqa: PLR0913
         self,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[
-            Union[BatchRequestBase, FluentBatchRequest, dict]
-        ] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[List[CheckpointValidationConfig], List[dict]]
-        ] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, int, float]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[datetime.datetime] = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        validator: Validator | None = None,
+        action_list: Sequence[ActionDict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        run_id: str | int | float | None = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | None = None,
         result_format: str | dict | None = None,  # TODO: type-dict?
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         **kwargs,
     ) -> CheckpointResult:
         checkpoint_config_from_store: CheckpointConfig = cast(
@@ -951,14 +944,14 @@ constructor arguments.
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
         validations: Optional[
-            Union[List[dict], List[CheckpointValidationConfig]]
+            Union[list[dict], list[CheckpointValidationConfig]]
         ] = None,
-        profilers: Optional[List[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
+        site_names: Optional[Union[str, list[str]]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
+        notify_with: Optional[Union[str, list[str]]] = None,
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
@@ -1147,28 +1140,24 @@ class SimpleCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        config_version: Optional[Union[int, float]] = 1.0,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[
-            Union[BatchRequestBase, FluentBatchRequest, dict]
-        ] = None,
-        validator: Optional[Validator] = None,
-        action_list: Optional[Sequence[ActionDict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[
-            Union[List[CheckpointValidationConfig], List[dict]]
-        ] = None,
-        profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[str] = None,
+        config_version: int | float | None = 1.0,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
+        validator: Validator | None = None,
+        action_list: Sequence[ActionDict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[CheckpointValidationConfig] | list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        ge_cloud_id: str | None = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
-        site_names: Union[str, List[str]] = "all",
-        slack_webhook: Optional[str] = None,
+        site_names: str | list[str] = "all",
+        slack_webhook: str | None = None,
         notify_on: str = "all",
-        notify_with: Union[str, List[str]] = "all",
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        notify_with: str | list[str] = "all",
+        expectation_suite_ge_cloud_id: str | None = None,
         **kwargs,
     ) -> None:
         checkpoint_config: CheckpointConfig = self._configurator_class(
@@ -1228,17 +1217,17 @@ class SimpleCheckpoint(Checkpoint):
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        validations: Optional[list[dict]] = None,
+        profilers: Optional[list[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         # the following four arguments are specific to SimpleCheckpoint
-        site_names: Union[str, List[str]] = "all",
+        site_names: Union[str, list[str]] = "all",
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
-        notify_with: Union[str, List[str]] = "all",
+        notify_with: Union[str, list[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         """Validate against the current SimpleCheckpoint.
