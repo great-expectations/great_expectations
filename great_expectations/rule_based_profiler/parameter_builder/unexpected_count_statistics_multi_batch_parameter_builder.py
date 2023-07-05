@@ -238,18 +238,12 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         if aggregation_method == "all_values":
             result = unexpected_count_fraction_values
         elif aggregation_method == "active_batch_value":
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-COMPUTED-UNEXPECTED_COUNT_FRACTION_VALUES_FOR_ACTIVE_BATCH_VALUE_{aggregation_method}:\n{unexpected_count_fraction_values} ; TYPE: {str(type(unexpected_count_fraction_values))} ; DOMAIN: {domain}"
-            )
-            active_batch_value: np.float64 = unexpected_count_fraction_values[-1]
-            print(
-                f"\n[ALEX_TEST] [UnexpectedCountStatisticsMultiBatchParameterBuilder._build_parameters()] PARAMETER_BUILDER-{self.name}-COMPUTED-UNEXPECTED_COUNT_FRACTION_ACTIVE_BATCH_VALUE_{aggregation_method}:\n{active_batch_value} ; TYPE: {str(type(active_batch_value))} ; DOMAIN: {domain}"
-            )
-
-            mostly: np.float64 = self._standardize_mostly(active_batch_value)
+            unexpected_fraction: np.float64 = unexpected_count_fraction_values[-1]
+            expected_fraction: np.float64 = 1 - unexpected_fraction
+            mostly: np.float64 = self._standardize_mostly(expected_fraction)
 
             result = {
-                "active_batch_value": active_batch_value,
+                "active_batch_value": unexpected_fraction,
                 "mostly": mostly,
             }
 

@@ -289,16 +289,14 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             total_count_metric_multi_batch_parameter_builder_for_evaluations
         )  # Not expecting null values
 
-        variables: dict = {
-            "max_unexpected_count_fraction": 5.0e-1,  # 50%
-        }
+        variables: dict = {"max_unexpected_count_fraction": 0.025}
         parameter_builders: List[ParameterBuilder] = (
             column_values_nonnull_unexpected_parameter_builders
             + column_values_null_unexpected_parameter_builders
         )
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
             expect_column_values_to_not_be_null_expectation_configuration_builders
-            + expect_column_values_to_be_null_expectation_configuration_builders,
+            + expect_column_values_to_be_null_expectation_configuration_builders
         )
         rule = Rule(
             name="column_value_missing_rule",
