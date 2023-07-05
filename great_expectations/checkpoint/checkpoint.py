@@ -22,6 +22,7 @@ from great_expectations.checkpoint.configurator import (
 )
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
+    convert_validations_list_to_checkpoint_validation_configs,
     does_batch_request_in_validations_contain_batch_data,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
@@ -190,7 +191,7 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+        validations = convert_validations_list_to_checkpoint_validation_configs(
             validations
         )
 
@@ -267,7 +268,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
-        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+        validations = convert_validations_list_to_checkpoint_validation_configs(
             substituted_runtime_config.get("validations") or []
         )
 
@@ -357,20 +358,6 @@ class BaseCheckpoint(ConfigPeer):
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
         )
-
-    @staticmethod
-    def _convert_validations_list_to_checkpoint_validation_configs(
-        validations: list[dict] | list[CheckpointValidationConfig] | None,
-    ) -> list[CheckpointValidationConfig]:
-        # We accept both dicts and rich config types but all internal usage should use the latter
-        if not validations:
-            return []
-        return [
-            CheckpointValidationConfig(**validation)
-            if isinstance(validation, dict)
-            else validation
-            for validation in validations
-        ]
 
     def get_substituted_config(
         self,
@@ -779,12 +766,12 @@ class Checkpoint(BaseCheckpoint):
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
         validations: list[dict] | list[CheckpointValidationConfig] | None = None,
-        profilers: list[dict] = None,
+        profilers: list[dict] | None = None,
         ge_cloud_id: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> None:
-        validations = self._convert_validations_list_to_checkpoint_validation_configs(
+        validations = convert_validations_list_to_checkpoint_validation_configs(
             validations
         )
 
@@ -1055,9 +1042,7 @@ constructor arguments.
                 )
             return validator.convert_to_checkpoint_validations_list()
 
-        return Checkpoint._convert_validations_list_to_checkpoint_validation_configs(
-            validations
-        )
+        return convert_validations_list_to_checkpoint_validation_configs(validations)
 
     @staticmethod
     def instantiate_from_config_with_runtime_args(
