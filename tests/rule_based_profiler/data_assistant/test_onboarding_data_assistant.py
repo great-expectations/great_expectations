@@ -676,11 +676,9 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_correctly_handl
         "congestion_surcharge",
     ]
 
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.column_value_missing.run(
-            batch_request=batch_request,
-            include_column_names=include_column_names,
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        include_column_names=include_column_names,
     )
     plot_result: PlotResult = data_assistant_result.plot_expectations_and_metrics(
         include_column_names=include_column_names
@@ -688,7 +686,7 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_correctly_handl
 
     # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
-    assert len(column_domain_charts) == 0
+    assert len(column_domain_charts) == 8
 
 
 @pytest.mark.integration
