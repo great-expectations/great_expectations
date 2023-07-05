@@ -242,10 +242,13 @@ def test_checkpoint_with_validator_workflow(
 
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
 
-    _: str | None = checkpoint.validations[0].pop("expectation_suite_ge_cloud_id", None)  # type: ignore[union-attr]
+    actual_validations = [v.to_dict() for v in checkpoint.validations]
+    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
 
-    assert checkpoint.validations == [
+    assert actual_validations == [
         {
+            "name": None,
+            "id": None,
             "batch_request": {
                 "data_asset_name": asset_name,
                 "datasource_name": datasource_name,
@@ -253,6 +256,7 @@ def test_checkpoint_with_validator_workflow(
                     "month": month,
                     "year": year,
                 },
+                "batch_slice": None,
             },
             "expectation_suite_name": "default",
         },
