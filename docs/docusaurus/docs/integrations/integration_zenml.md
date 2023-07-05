@@ -13,6 +13,8 @@ production ML toolset and workflows.
 
 :::info 
 
+The most recent version of GX supported by this guide is GX 0.15.50.
+
 To use GX with ZenML, see [Integrating ZenML with Great Expectations](/docs/0.15.50/integrations/integration_zenml) in version 0.15.50 of the documentation.
 
 For more information about implementing and using ZenML, see the [ZenML site](https://docs.zenml.io/).

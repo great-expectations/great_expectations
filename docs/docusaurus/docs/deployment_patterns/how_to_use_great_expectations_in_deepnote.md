@@ -9,6 +9,8 @@ Deepnote is a Jupyter compatible, cloud-hosted, data science notebook that helps
 
 :::info 
 
+The most recent version of GX supported by this guide is GX 0.15.50.
+
 To use Great Expectations (GX) with Deepnote, see [How to use GX in Deepnote](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_deepnote) in version 0.15.50 of the documentation.
 
 For more information about implementing and using Deepnote, see the [Deepnote site](https://deepnote.com/).

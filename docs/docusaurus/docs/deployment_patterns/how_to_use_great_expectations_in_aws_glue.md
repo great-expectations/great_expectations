@@ -9,6 +9,8 @@ AWS Glue is a serverless data integration service by Amazon.  It makes it easier
 
 :::info 
 
+The most recent version of GX supported by this guide is GX 0.15.50.
+
 To use Great Expectations (GX) with AWS Glue, see [How to use GX in AWS Glue](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_aws_glue) in version 0.15.50 of the documentation.
 
 For more information about implementing and using AWS Glue, see the [AWS Glue site](https://aws.amazon.com/glue/).
