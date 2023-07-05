@@ -15,6 +15,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.rule_based_profiler.altair import AltairDataTypes
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -657,6 +658,24 @@ def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_
         )
 
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
+
+
+@pytest.mark.unit
+def test_onboarding_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
+    None
+):
+    data_assistant_result: DataAssistantResult = OnboardingDataAssistantResult()
+
+    include_column_names: List[str] = [
+        "congestion_surcharge",
+    ]
+    plot_result: PlotResult = data_assistant_result.plot_expectations_and_metrics(
+        include_column_names=include_column_names
+    )
+
+    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 0
 
 
 @pytest.mark.integration
