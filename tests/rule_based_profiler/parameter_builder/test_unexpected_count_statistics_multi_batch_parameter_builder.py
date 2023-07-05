@@ -760,3 +760,28 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "round_decimals",
         "evaluation_parameter_builder_configs",
     }
+
+
+def test_column_value_missing_data_assistant_standardize_mostly(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    # tests for UnexpectedCountStatisticsMultiBatchParameterBuilder._standardize_mostly
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    # noinspection PyUnusedLocal
+    builder: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        name="my_name",
+        aggregation_method="all_values",
+        unexpected_count_parameter_builder_name="my_unexpected_count",
+        total_count_parameter_builder_name="my_total_count",
+        data_context=data_context,
+    )
+    assert builder._standardize_mostly(1.0) == 1.0
+    assert builder._standardize_mostly(0.99) == 0.99
+    assert builder._standardize_mostly(0.997) == 0.99
+    assert builder._standardize_mostly(0.98) == 0.975
+    assert builder._standardize_mostly(0.975) == 0.975
+    assert builder._standardize_mostly(0.96) == 0.96
+    assert builder._standardize_mostly(0.2) == 0.2

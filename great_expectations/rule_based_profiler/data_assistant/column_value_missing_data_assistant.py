@@ -29,9 +29,9 @@ from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-    from great_expectations.rule_based_profiler.parameter_builder import (
-        ParameterBuilder,
-    )
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,
+)
 
 
 class ColumnValueMissingDataAssistant(DataAssistant):
