@@ -684,7 +684,10 @@ def test_onboarding_data_assistant_plot_expectations_and_metrics_correctly_handl
         include_column_names=include_column_names
     )
 
-    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    """
+    This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    Since column under test is semantically "NUMERIC", 8 (eight) numeric metrics to plot must be only remaining ones.
+    """
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 8
 
