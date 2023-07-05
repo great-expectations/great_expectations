@@ -3,7 +3,6 @@ import re
 import typing
 from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Hashable,
     Iterable,
     Literal,
@@ -18,38 +17,36 @@ from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasour
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
+from great_expectations.datasource.fluent.dynamic_pandas import (
+    CompressionOptions,
+    CSVEngine,
+    FilePath,
+    IndexLabel,
+    StorageOptions,
+)
+from great_expectations.datasource.fluent.interfaces import BatchMetadata
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.dynamic_pandas import (
-        CompressionOptions,
-        CSVEngine,
-        FilePath,
-        IndexLabel,
-        StorageOptions,
-    )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-        CSVAsset,
-        ExcelAsset,
-        FeatherAsset,
-        FWFAsset,
-        HDFAsset,
-        HTMLAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        PickleAsset,
-        SASAsset,
-        SPSSAsset,
-        StataAsset,
-        XMLAsset,
-    )
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 
 logger: Logger
 

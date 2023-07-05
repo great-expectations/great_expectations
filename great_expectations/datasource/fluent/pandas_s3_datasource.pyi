@@ -2,7 +2,6 @@ import re
 import typing
 from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Any,
     Dict,
     Hashable,
@@ -19,12 +18,21 @@ from botocore.client import BaseClient as BaseClient
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector as S3DataConnector,
 )
+from great_expectations.datasource.fluent.dynamic_pandas import (
+    CompressionOptions,
+    CSVEngine,
+    FilePath,
+    IndexLabel,
+    StorageOptions,
+)
+from great_expectations.datasource.fluent.interfaces import BatchMetadata
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
@@ -34,33 +42,22 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError as PandasDatasourceError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.config_str import ConfigStr
-    from great_expectations.datasource.fluent.dynamic_pandas import (
-        CompressionOptions,
-        CSVEngine,
-        FilePath,
-        IndexLabel,
-        StorageOptions,
-    )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-        CSVAsset,
-        ExcelAsset,
-        FeatherAsset,
-        FWFAsset,
-        HDFAsset,
-        HTMLAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        PickleAsset,
-        SASAsset,
-        SPSSAsset,
-        StataAsset,
-        XMLAsset,
-    )
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 
 logger: Logger
 

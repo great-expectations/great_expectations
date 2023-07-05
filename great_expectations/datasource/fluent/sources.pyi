@@ -1,5 +1,6 @@
+import pathlib
+from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -12,44 +13,38 @@ from typing import (
     Union,
 )
 
+import pydantic
 from typing_extensions import TypeAlias
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
+from great_expectations.datasource.fluent import (
+    PandasAzureBlobStorageDatasource,
+    PandasDatasource,
+    PandasDBFSDatasource,
+    PandasFilesystemDatasource,
+    PandasGoogleCloudStorageDatasource,
+    PandasS3Datasource,
+    PostgresDatasource,
+    SnowflakeDatasource,
+    SparkAzureBlobStorageDatasource,
+    SparkDatasource,
+    SparkDBFSDatasource,
+    SparkFilesystemDatasource,
+    SparkGoogleCloudStorageDatasource,
+    SparkS3Datasource,
+    SQLDatasource,
+    SqliteDatasource,
+)
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    Datasource,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
-
-if TYPE_CHECKING:
-    import pathlib
-    from logging import Logger
-
-    import pydantic
-
-    from great_expectations.datasource.fluent import (
-        PandasAzureBlobStorageDatasource,
-        PandasDatasource,
-        PandasDBFSDatasource,
-        PandasFilesystemDatasource,
-        PandasGoogleCloudStorageDatasource,
-        PandasS3Datasource,
-        PostgresDatasource,
-        SnowflakeDatasource,
-        SparkAzureBlobStorageDatasource,
-        SparkDatasource,
-        SparkDBFSDatasource,
-        SparkFilesystemDatasource,
-        SparkGoogleCloudStorageDatasource,
-        SparkS3Datasource,
-        SQLDatasource,
-        SqliteDatasource,
-    )
-    from great_expectations.datasource.fluent.config_str import ConfigStr
-    from great_expectations.datasource.fluent.interfaces import (
-        DataAsset,
-        Datasource,
-    )
-    from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger

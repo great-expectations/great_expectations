@@ -1,35 +1,32 @@
 import pathlib
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Type, Union
+from typing import ClassVar, Literal, Optional, Type, Union
 
 from great_expectations.compatibility.pyspark import (
     types as pyspark_types,
 )
-from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent import BatchMetadata, _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import BatchMetadata
-    from great_expectations.datasource.fluent.interfaces import (
-        SortersDefinition,
-    )
-    from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-        DeltaAsset,
-        DirectoryCSVAsset,
-        DirectoryDeltaAsset,
-        DirectoryJSONAsset,
-        DirectoryORCAsset,
-        DirectoryParquetAsset,
-        DirectoryTextAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        TextAsset,
-    )
+from great_expectations.datasource.fluent.interfaces import (
+    SortersDefinition,
+)
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    CSVAsset,
+    DeltaAsset,
+    DirectoryCSVAsset,
+    DirectoryDeltaAsset,
+    DirectoryJSONAsset,
+    DirectoryORCAsset,
+    DirectoryParquetAsset,
+    DirectoryTextAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    TextAsset,
+)
 
 logger: Logger
 
