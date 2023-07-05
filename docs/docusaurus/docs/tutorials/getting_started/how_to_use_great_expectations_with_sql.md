@@ -14,7 +14,7 @@ To use GX with PostgreSQL Database, you'll complete the following tasks:
 
 - Load data
 - Instantiate a <TechnicalTag tag="data_context" text="Data Context" />
-- Create a <TechnicalTag tag="datasource" text="Datasource" /> & <TechnicalTag tag="data_asset" text="Data Asset" />
+- Create a <TechnicalTag tag="datasource" text="Datasource" /> and a <TechnicalTag tag="data_asset" text="Data Asset" />
 - Create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />
 - Validate data using a <TechnicalTag tag="checkpoint" text="Checkpoint" />
 

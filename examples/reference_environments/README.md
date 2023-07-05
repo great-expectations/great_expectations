@@ -27,11 +27,11 @@ This example will show you how to start a reference environment for a postgres d
 
 2. Click on the jupyter notebook link in the output to open the notebook in your browser.
 
-If there are more than one URL being displayed, you can use the following command to only show the URL for the notebook.
+If there are more than one URL being displayed, you can use the following command to only show the URL for the notebook:
 
-    ```bash
-    great_expectations example postgres --url
-    ```
+```bash
+great_expectations example postgres --url
+```
 
 That's it!
 
@@ -52,6 +52,14 @@ The notebook contains a quickstart which you can edit to your heart's content.
 
     ```bash
     great_expectations example postgres --bash
+    ```
+
+### To rebuild a reference environment
+
+1. Navigate to the repo root and run:
+
+    ```bash
+    great_expectations example postgres --build
     ```
 
 Alternatively you can run `docker ps` to find the container name and then run `docker exec -it <container_name> bash` to hop into a bash session. The above command is just a shortcut.

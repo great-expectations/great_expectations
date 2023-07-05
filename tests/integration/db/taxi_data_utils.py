@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, List
 
 import sqlalchemy as sa
@@ -19,8 +20,6 @@ from tests.integration.fixtures.split_and_sample_data.splitter_test_cases_and_fi
 from tests.test_utils import (
     LoadedTable,
     clean_up_tables_with_prefix,
-    get_awsathena_db_name,
-    get_connection_string_and_dialect,
     load_and_concatenate_csvs,
     load_data_into_test_database,
 )
@@ -65,19 +64,12 @@ def _is_dialect_athena(dialect: str) -> bool:
     return dialect == "awsathena"
 
 
-def _get_loaded_table(dialect: str) -> LoadedTable:
-    dialect, connection_string = get_connection_string_and_dialect(
-        athena_db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
-    )
-    print(f"Testing dialect: {dialect}")
-
+@contextmanager
+def loaded_table(dialect: str, connection_string: str) -> LoadedTable:
     test_df: pd.DataFrame
     table_name: str
     loaded_table: LoadedTable
     if _is_dialect_athena(dialect):
-        athena_db_name: str = get_awsathena_db_name(  # noqa: F841
-            db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
-        )
         table_name = "ten_trips_from_each_month"
         test_df = load_and_concatenate_csvs(
             csv_paths=[
@@ -91,13 +83,17 @@ def _get_loaded_table(dialect: str) -> LoadedTable:
             inserted_dataframe=test_df,
         )
     else:
-        print("Preemptively cleaning old tables")
-        clean_up_tables_with_prefix(
-            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-        )
         loaded_table = _load_data(connection_string=connection_string, dialect=dialect)
 
-    return loaded_table
+    try:
+        yield loaded_table
+    finally:
+        if not _is_dialect_athena(dialect):
+            print("Cleaning up created loaded table")
+            clean_up_tables_with_prefix(
+                connection_string=connection_string,
+                table_prefix=loaded_table.table_name,
+            )
 
 
 def _execute_taxi_splitting_test_cases(
