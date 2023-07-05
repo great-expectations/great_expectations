@@ -660,6 +660,39 @@ def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_
 
 
 @pytest.mark.integration
+@pytest.mark.slow  # 1.67s
+def test_onboarding_data_assistant_plot_expectations_and_metrics_correctly_handle_empty_plot_data(
+    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+) -> None:
+    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    include_column_names: List[str] = [
+        "congestion_surcharge",
+    ]
+
+    data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+        batch_request=batch_request,
+        include_column_names=include_column_names,
+    )
+    plot_result: PlotResult = data_assistant_result.plot_expectations_and_metrics(
+        include_column_names=include_column_names
+    )
+
+    """
+    This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    Since column under test is semantically "NUMERIC", 8 (eight) numeric metrics to plot must be only remaining ones.
+    """
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 8
+
+
+@pytest.mark.integration
 @pytest.mark.slow  # 5.63s
 def test_onboarding_data_assistant_plot_custom_theme_overrides(
     bobby_onboarding_data_assistant_result: OnboardingDataAssistantResult,
