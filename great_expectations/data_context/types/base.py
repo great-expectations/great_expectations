@@ -2897,11 +2897,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -3161,7 +3161,7 @@ class CheckpointConfig(BaseYamlConfig):
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        validation_dict: dict
+        validation_dict: CheckpointValidationConfig
 
         for validation_dict in validations:  # type: ignore[assignment]
             substituted_validation_dict: dict = get_substituted_validation_dict(

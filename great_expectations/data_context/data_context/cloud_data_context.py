@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
+    CheckpointValidationConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -718,7 +719,7 @@ class CloudDataContext(SerializableDataContext):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
