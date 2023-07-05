@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 import pydantic
-from pydantic import AnyUrl
+from pydantic import AnyUrl, errors
 
 from great_expectations.compatibility.snowflake import URL
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -15,13 +15,52 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from pydantic.networks import Parts
+
     from great_expectations.compatibility import sqlalchemy
+
+
+class _UrlPasswordError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing password in SnowflakeDsn.
+    """
+
+    code = "url.password"
+    msg_template = "URL password invalid"
+
+
+class _UrlDomainError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing domain in SnowflakeDsn.
+    """
+
+    code = "url.domain"
+    msg_template = "URL domain invalid"
 
 
 class SnowflakeDsn(AnyUrl):
     allowed_schemes = {
         "snowflake",
     }
+
+    @classmethod
+    def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
+        """
+        Overridden to validate additional fields outside of scheme (which is performed by AnyUrl).
+        """
+        user = parts["user"]
+        if user is None:
+            raise errors.UrlUserInfoError()
+
+        password = parts["password"]
+        if password is None:
+            raise _UrlPasswordError()
+
+        domain = parts["domain"]
+        if domain is None:
+            raise _UrlDomainError()
+
+        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
 
 @public_api
