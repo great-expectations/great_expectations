@@ -405,7 +405,7 @@ def example_abs(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
-@example.command(name="aws_rds")
+@example.command(name="aws_postgres")
 @click.option(
     "--stop",
     "--down",
@@ -432,22 +432,22 @@ def example_abs(
     help="Rebuild the containers.",
     default=False,
 )
-def example_aws_rds(
+def example_aws_postgres(
     stop: bool,
     url: bool,
     bash: bool,
     rebuild: bool,
 ) -> None:
-    """Start an Azure Blob Storage example."""
-    unset_env_vars = _check_aws_rds_env_vars()
+    """Start an AWS Postgres example."""
+    unset_env_vars = _check_aws_env_vars()
     if unset_env_vars:
         cli_message(
             f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
         )
     repo_root = pathlib.Path(__file__).parents[2]
-    example_directory = repo_root / "examples" / "reference_environments" / "aws_rds"
+    example_directory = repo_root / "examples" / "reference_environments" / "aws_postgres"
     assert example_directory.is_dir(), "Example directory not found"
-    container_name = "aws_rds_example_jupyter"
+    container_name = "aws_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
         command_options, example_directory, container_name
@@ -546,18 +546,6 @@ def print_green_line() -> None:
 
 
 def _check_aws_env_vars() -> set[str]:
-    """Return list of env var names that are not set."""
-    env_vars_to_check = (
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "AWS_SESSION_TOKEN",
-    )
-    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
-
-    return result
-
-
-def _check_aws_rds_env_vars() -> set[str]:
     """Checking 3 ENV variables that boto3 looks for
            1. Using AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
            2. Using AWS_SESSION_TOKEN
