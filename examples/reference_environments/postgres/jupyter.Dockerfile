@@ -1,4 +1,7 @@
-FROM jupyter/minimal-notebook:python-3.10
+# To use a specific python version, replace the first line with the following,
+# where 3.10 is the version you want to use (requires a `--rebuild`):
+# FROM jupyter/minimal-notebook:python-3.10
+FROM jupyter/minimal-notebook
 
 WORKDIR /gx
 
