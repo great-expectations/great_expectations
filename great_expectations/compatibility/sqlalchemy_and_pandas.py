@@ -103,7 +103,7 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
         con: SQLAlchemy connectable, str, or sqlite3 connection
         **kwargs: Other keyword arguments, not enumerated here since they differ
             between pandas versions.
-
+        TODO: add chunksize
     Returns:
         dataframe
     """

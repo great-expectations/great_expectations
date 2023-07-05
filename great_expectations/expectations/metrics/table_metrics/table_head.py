@@ -82,7 +82,7 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        if not is_version_less_than(pd.__version__, "1.4.0"):
+        if is_version_less_than(pd.__version__, "1.4.0"):
             if (table_name is None) or (
                 sqlalchemy._anonymous_label
                 and isinstance(table_name, sqlalchemy._anonymous_label)
@@ -100,6 +100,7 @@ class TableHead(TableMetricProvider):
                                 execution_engine=execution_engine,
                             )
                     else:
+                        # this is the default : because by default `fetch_all` is false
                         # passing chunksize causes the Iterator to be returned
                         with execution_engine.get_connection() as con:
                             # convert subquery into query using select_from()
@@ -107,6 +108,7 @@ class TableHead(TableMetricProvider):
                                 selectable = sa.select(sa.text("*")).select_from(
                                     selectable
                                 )
+                            # is this it!!!!!! It might be!!
                             df_chunk_iterator = pandas_read_sql_query(
                                 sql=selectable,
                                 con=con,
@@ -137,8 +139,10 @@ class TableHead(TableMetricProvider):
                                 dialect=dialect,
                             )
                     else:
+                        # we don't need iterator if chunksize
                         with execution_engine.get_connection() as con:
                             # passing chunksize causes the Iterator to be returned
+                            # chunk size and n_rows should be considered differently
                             df_chunk_iterator = read_sql_table_as_df(
                                 table_name=getattr(selectable, "name", None),
                                 schema=getattr(selectable, "schema", None),
@@ -160,7 +164,7 @@ class TableHead(TableMetricProvider):
             # MetaData that is used by pd.read_sql_table
             # cannot work on a temp table with pandas < 1.4.0.
             # If it fails, we try to get the data using read_sql.
-
+            #breakpoint()
             stmt = sa.select("*").select_from(selectable)
             fetch_all = metric_value_kwargs["fetch_all"]
             if fetch_all:
@@ -190,9 +194,12 @@ class TableHead(TableMetricProvider):
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             # why? We have already done the n_rows filter so we just run the query
             with execution_engine.get_connection() as con:
-                df = pandas_read_sql(
-                    sql=sql, con=con, execution_engine=execution_engine
-                )
+                df = pandas_read_sql_query(
+                        sql=sql, con=con, execution_engine=execution_engine
+                    )
+                # df = pandas_read_sql(
+                #     sql=sql, con=con, execution_engine=execution_engine
+                # )
         return df
 
     @staticmethod
@@ -203,11 +210,13 @@ class TableHead(TableMetricProvider):
         if n_rows > 0:
             df = next(df_chunk_iterator)
         else:
+            # why is n_rows -1?
             # if n_rows is zero or negative, remove the last chunk
             df_chunk_list: list[pd.DataFrame]
             df_last_chunk: pd.DataFrame
             *df_chunk_list, df_last_chunk = df_chunk_iterator
             if df_chunk_list:
+                # TODO: this might not be the most efficient way to get a DF
                 df = pd.concat(objs=df_chunk_list, ignore_index=True)
             else:
                 # if n_rows is zero, the last chunk is the entire dataframe,

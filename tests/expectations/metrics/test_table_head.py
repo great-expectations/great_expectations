@@ -4,13 +4,15 @@ from pyinstrument import Profiler
 
 
 def test_bigquery_head(empty_data_context):
+    profiler = Profiler()
+    profiler.start()
     context = gx.get_context()
     my_connection_string = os.getenv("BIGQUERY_CONNECTION_STRING")
     datasource_name = "my_datasource"
     datasource = context.sources.add_or_update_sql(
         name=datasource_name,
         connection_string=my_connection_string,
-        create_temp_table=True,
+        create_temp_table=False,
     )
     asset_name = "my_asset"
 
@@ -30,6 +32,8 @@ def test_bigquery_head(empty_data_context):
         expectation_suite_name=expectation_suite_name,
     )
     print(validator.head())
+    profiler.stop()
+    profiler.print()
 
 
 # def test_snowflake_head(empty_data_context):
