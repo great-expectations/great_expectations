@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import pytest
-from scipy import stats
+import scipy.stats as stats
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
