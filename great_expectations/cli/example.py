@@ -482,11 +482,11 @@ def _check_aws_env_vars() -> set[str]:
 
     Boto3 can be authenticated using either a `AWS_SESSION_TOKEN` or `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
-    Method will check the two modes by checking if: 
+    Method will check the two modes by checking if:
 
     1. AWS_SESSION_TOKEN is already set. If so, then assumes session is active and does not check other credentials.
 
-    or 
+    or
 
     2. Checks that both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set.
 
