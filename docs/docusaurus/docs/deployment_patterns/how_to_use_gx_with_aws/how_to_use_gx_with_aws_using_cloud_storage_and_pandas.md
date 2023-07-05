@@ -1,6 +1,7 @@
 ---
 title: Use Great Expectations with Amazon Web Services using S3 and Pandas
 description: AWS S3
+sidebar_label: "AWS S3 and Pandas"
 sidebar_custom_props: { icon: 'img/integrations/s3_icon.png' }
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'

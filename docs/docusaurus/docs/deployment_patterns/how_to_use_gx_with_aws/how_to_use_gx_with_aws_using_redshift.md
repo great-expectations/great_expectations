@@ -1,5 +1,6 @@
 ---
 title: Use Great Expectations with Amazon Web Services using Redshift
+sidebar_label: "AWS S3 and Redshift"
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';

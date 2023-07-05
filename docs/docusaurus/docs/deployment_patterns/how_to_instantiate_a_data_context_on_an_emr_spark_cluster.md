@@ -1,7 +1,7 @@
 ---
 title: Instantiate a Data Context on an EMR Spark cluster
 description: "Instantiate a Data Context on an EMR Spark cluster"
-sidebar_label: "EMR Spark cluster"
+sidebar_label: "Amazon EMR Spark cluster"
 sidebar_custom_props: { icon: 'img/integrations/spark_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'

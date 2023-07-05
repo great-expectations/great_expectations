@@ -1,6 +1,7 @@
 ---
-title: Use Great Expectations in AWS Glue
+title: Use Great Expectations with AWS Glue
 description: AWS Glue
+sidebar_label: "AWS Glue"
 sidebar_custom_props: { icon: 'img/integrations/aws_glue_icon.svg' }
 ---
 

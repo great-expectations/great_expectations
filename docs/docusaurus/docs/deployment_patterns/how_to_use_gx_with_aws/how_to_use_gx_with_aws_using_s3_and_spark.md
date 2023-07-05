@@ -1,5 +1,6 @@
 ---
 title: Use Great Expectations with Amazon Web Services using S3 and Spark
+sidebar_label: "AWS S3 and Spark"
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';

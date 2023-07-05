@@ -1,5 +1,6 @@
 ---
 title: Use Great Expectations with Amazon Web Services using Athena
+sidebar_label: "AWS S3 and Athena"
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
