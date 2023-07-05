@@ -58,24 +58,24 @@ if TYPE_CHECKING:
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
-        BatchData,  # noqa: TCH004
-        BatchDefinition,  # noqa: TCH004
-        BatchMarkers,  # noqa: TCH004
+        BatchData,
+        BatchDefinition,
+        BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import (
-        AbstractDataContext as GXDataContext,  # noqa: TCH004 # private attr
+        AbstractDataContext as GXDataContext,
     )
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent import (
-        BatchRequest,  # noqa: TCH004 # not needed at runtime
+        BatchRequest,
         BatchRequestOptions,
     )
     from great_expectations.datasource.fluent.data_asset.data_connector import (
-        DataConnector,  # noqa: TCH004 # not needed at runtime
+        DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import (
-        TypeLookup,  # noqa: TCH004 # not needed at runtime
+        TypeLookup,
     )
 
 
