@@ -18,6 +18,7 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
     PlotResult,
 )
 
+
 @pytest.fixture
 def sqlite_datasource_name() -> str:
     return "sqlite_datasource"
