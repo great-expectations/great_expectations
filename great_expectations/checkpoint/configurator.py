@@ -169,7 +169,7 @@ class SimpleCheckpointConfigurator:
             )
 
         # DataFrames shouldn't be saved to CheckpointStore
-        validations = config_kwargs.get("validations", [])
+        validations = config_kwargs.get("validations") or []
         if does_batch_request_in_validations_contain_batch_data(
             validations=validations
         ):

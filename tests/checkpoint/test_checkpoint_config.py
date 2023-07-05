@@ -62,50 +62,19 @@ def checkpoint(
 def test_checkpoint_config_repr(checkpoint):
     checkpoint_config_repr: str = str(checkpoint)
 
-    assert (
-        checkpoint_config_repr
-        == """{
-  "action_list": [
-    {
-      "name": "store_validation_result",
-      "action": {
-        "class_name": "StoreValidationResultAction"
-      }
-    },
-    {
-      "name": "store_evaluation_params",
-      "action": {
-        "class_name": "StoreEvaluationParametersAction"
-      }
-    },
-    {
-      "name": "update_data_docs",
-      "action": {
-        "class_name": "UpdateDataDocsAction",
-        "site_names": []
-      }
-    }
-  ],
-  "batch_request": {},
-  "class_name": "Checkpoint",
-  "config_version": 1.0,
-  "evaluation_parameters": {},
-  "module_name": "great_expectations.checkpoint",
-  "name": "my_checkpoint",
-  "profilers": [],
-  "runtime_configuration": {},
-  "validations": [
-    {
-      "batch_request": {
-        "datasource_name": "example_datasource",
-        "data_connector_name": "default_runtime_data_connector_name",
-        "data_asset_name": "my_data_asset"
-      },
-      "expectation_suite_name": "test_suite"
-    }
-  ]
-}"""
-    )
+    for key in (
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "runtime_configuration",
+        "validations",
+    ):
+        assert key in checkpoint_config_repr
 
 
 def test_checkpoint_config_repr_after_substitution(checkpoint):

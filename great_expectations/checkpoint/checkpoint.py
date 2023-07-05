@@ -1204,7 +1204,7 @@ class SimpleCheckpoint(Checkpoint):
             action_list=checkpoint_config.action_list,
             evaluation_parameters=checkpoint_config.evaluation_parameters,
             runtime_configuration=checkpoint_config.runtime_configuration,
-            validations=validations,
+            validations=checkpoint_config.validations,
             profilers=checkpoint_config.profilers,
             ge_cloud_id=checkpoint_config.ge_cloud_id,
             expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
