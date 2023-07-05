@@ -74,5 +74,5 @@ Alternatively you can run `docker ps` to find the container name and then run `d
 
 ### What if I want to customize the reference environment?
 
-- You can customize the reference environment by editing the files in `great_expectations/examples/reference_environments/` related to the reference environment you are interested in. For example the `docker-compose.yml` file (if it exists for your environment) defines all the services that spin up when you start the environment.
+- You can customize the reference environment by editing the files in `great_expectations/examples/reference_environments/` related to the reference environment you are interested in. For example the `compose.yml` file (if it exists for your environment) defines all the services that spin up when you start the environment.
 - Look for documentation or comments in the reference environment for help on how it is used and how to customize it.
