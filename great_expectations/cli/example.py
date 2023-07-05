@@ -445,7 +445,9 @@ def example_aws_postgres(
             f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
         )
     repo_root = pathlib.Path(__file__).parents[2]
-    example_directory = repo_root / "examples" / "reference_environments" / "aws_postgres"
+    example_directory = (
+        repo_root / "examples" / "reference_environments" / "aws_postgres"
+    )
     assert example_directory.is_dir(), "Example directory not found"
     container_name = "aws_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
