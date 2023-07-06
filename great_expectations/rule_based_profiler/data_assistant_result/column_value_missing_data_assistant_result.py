@@ -12,7 +12,10 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
-        return {}
+        return {
+            "column_values.nonnull.unexpected_count": "expect_column_values_to_not_be_null",
+            "column_values.null.unexpected_count": "expect_column_values_to_be_null",
+        }
 
     @property
     def metric_types(self) -> Dict[str, AltairDataTypes]:
@@ -24,4 +27,7 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         #     - Ordinal: Metric is a discrete ordered quantity
         #     - Quantitative: Metric is a continuous real-valued quantity
         #     - Temporal: Metric is a time or date value
-        return {}
+        return {
+            "column_values.nonnull.unexpected_count": AltairDataTypes.QUANTITATIVE,
+            "column_values.null.unexpected_count": AltairDataTypes.QUANTITATIVE,
+        }
