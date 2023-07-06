@@ -1,5 +1,8 @@
 ---
-title: How to Use Great Expectations with Google Cloud Platform and BigQuery
+title: Use Great Expectations with Google Cloud Platform and BigQuery
+description: "Use Great Expectations with Google Cloud Platform and BigQuery"
+sidebar_label: "Google Cloud Platform and BigQuery"
+sidebar_custom_props: { icon: 'img/integrations/google_cloud_icon.png' }
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
@@ -414,7 +417,7 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
 
-```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full
+```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
@@ -435,7 +438,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
 
-```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full
+```python name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full"
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.

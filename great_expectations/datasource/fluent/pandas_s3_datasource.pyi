@@ -12,6 +12,7 @@ from typing import (
     Literal,
     Optional,
     Sequence,
+    Tuple,
     Union,
 )
 
@@ -50,6 +51,7 @@ if TYPE_CHECKING:
         CSVAsset,
         ExcelAsset,
         FeatherAsset,
+        FWFAsset,
         HDFAsset,
         HTMLAsset,
         JSONAsset,
@@ -63,7 +65,6 @@ if TYPE_CHECKING:
     )
 
 logger: Logger
-BOTO3_IMPORTED: bool
 
 class PandasS3DatasourceError(PandasDatasourceError): ...
 
@@ -81,6 +82,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = ...,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
+        s3_recursive_file_discovery: bool = False,
         s3_max_keys: int = 1000,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -181,6 +183,20 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
     ) -> FeatherAsset: ...
+    def add_fwf_asset(  # noqa: PLR0913
+        self,
+        name: str,
+        *,
+        batching_regex: typing.Pattern = ...,
+        glob_directive: str = ...,
+        order_by: typing.List[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        connect_options: typing.Mapping = ...,
+        colspecs: Union[Sequence[Tuple[int, int]], str, None] = ...,
+        widths: Union[Sequence[int], None] = ...,
+        infer_nrows: int = ...,
+        kwargs: Optional[dict] = ...,
+    ) -> FWFAsset: ...
     def add_hdf_asset(  # noqa: PLR0913
         self,
         name: str,

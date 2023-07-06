@@ -32,7 +32,8 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -100,14 +101,9 @@ if sa:
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401, TID251
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
-
-try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
 
 try:
     import sqlalchemy_dremio.pyodbc
@@ -119,23 +115,19 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-try:
-    import snowflake.sqlalchemy.snowdialect
-
+if snowflake.snowflakedialect:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
         sa.dialects.registry.register(
             GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
         )
-except (ImportError, KeyError, AttributeError):
-    snowflake = None
 
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     _BIGQUERY_MODULE_NAME,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
@@ -151,18 +143,11 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
-    trinotypes = None
-
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
 
-def _get_dialect_type_module(dialect):  # noqa: PLR0912
+def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects
     """
@@ -171,12 +156,12 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            # noinspection PyUnresolvedReferences
-            return dialect.sa
-    except (TypeError, AttributeError):
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
+        # noinspection PyUnresolvedReferences
+        return dialect.sa
+    else:
         pass
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
@@ -210,11 +195,11 @@ def _get_dialect_type_module(dialect):  # noqa: PLR0912
         if (
             isinstance(
                 dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
+            and trino.trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -358,6 +343,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self.dialect_name in [
             GXSqlDialect.TRINO,
             GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+            GXSqlDialect.CLICKHOUSE,
         ]:
             self._create_temp_table = False
 
@@ -400,6 +386,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="trino.sqlalchemy.dialect"
+            )
+        elif self.dialect_name == GXSqlDialect.CLICKHOUSE:
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="clickhouse_sqlalchemy.drivers.base"
             )
         else:
             self.dialect_module = None
@@ -728,6 +719,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             assert (
                 filter_condition.condition_type == RowConditionParserType.GE
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
+
+            # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
+            # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
+            if not isinstance(selectable, sa.Table):
+                selectable = selectable.subquery()
 
             selectable = (
                 sa.select(sa.text("*"))
@@ -1334,11 +1330,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
+        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
-
-        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
             # deprecated-v0.15.3
@@ -1353,7 +1348,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
         )
-
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
@@ -1363,8 +1357,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
                 create_temp_table=create_temp_table,
-                source_table_name=source_table_name,
-                source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             selectable: Union[
@@ -1419,7 +1411,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
             result = connection.execute(query)
 
@@ -1440,9 +1431,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
-
         with self.get_connection() as connection:
-            with connection.begin():
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
                 result = connection.execute(query)
+                connection.commit()
+            else:
+                with connection.begin():
+                    result = connection.execute(query)
 
         return result

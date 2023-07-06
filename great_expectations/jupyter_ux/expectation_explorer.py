@@ -117,7 +117,6 @@ class ExpectationExplorer:
             "expect_column_pair_values_A_to_be_greater_than_B": [
                 "or_equal",
                 "ignore_row_if",
-                "allow_cross_type_comparisons",
             ],
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
@@ -566,7 +565,7 @@ class ExpectationExplorer:
     def generate_zero_or_positive_integer_widget(
         self,
         value,
-        max=int(9e300),  # noqa: B008 # function-call-in-default-argument
+        max=int(9e300),
         description="",
         continuous_update=False,
     ):

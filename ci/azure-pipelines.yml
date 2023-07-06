@@ -183,6 +183,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
           GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -228,6 +230,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -410,6 +414,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -532,6 +538,8 @@ stages:
              python.version: '3.9'
            Python310:
              python.version: '3.10'
+           Python311:
+             python.version: '3.11'
 
         steps:
          - task: UsePythonVersion@0
@@ -608,6 +616,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
 
         steps:
           - task: UsePythonVersion@0
@@ -635,6 +645,8 @@ stages:
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isRelease, true))

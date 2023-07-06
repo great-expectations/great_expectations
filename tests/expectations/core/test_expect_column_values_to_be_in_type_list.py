@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.compatibility import aws
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
@@ -16,12 +17,10 @@ from great_expectations.util import build_in_memory_runtime_context, is_library_
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyathena"),
+    not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
-    from pyathena import sqlalchemy_athena
-
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
     validator = build_sa_validator_with_data(
         df=df,
@@ -30,7 +29,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     )
 
     # Monkey-patch dialect for testing purposes.
-    validator.execution_engine.dialect_module = sqlalchemy_athena
+    validator.execution_engine.dialect_module = aws.sqlalchemy_athena
 
     result = validator.expect_column_values_to_be_in_type_list(
         "col", type_list=["string", "boolean"]
@@ -66,12 +65,10 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyathena"),
+    not (aws.sqlalchemy_athena and is_library_loadable(library_name="pyathena")),
     reason="pyathena is not installed",
 )
 def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
-    from pyathena import sqlalchemy_athena
-
     df = pd.DataFrame({"col": [True, False]})
     validator = build_sa_validator_with_data(
         df=df,
@@ -80,7 +77,7 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     )
 
     # Monkey-patch dialect for testing purposes.
-    validator.execution_engine.dialect_module = sqlalchemy_athena
+    validator.execution_engine.dialect_module = aws.sqlalchemy_athena
 
     result = validator.expect_column_values_to_be_in_type_list(
         "col", type_list=["string", "boolean"]
@@ -126,7 +123,7 @@ def test_expect_column_values_to_be_in_type_list_nullable_int():
     df = pd.DataFrame({"col": pd.Series([1, 2, None], dtype=pd.Int32Dtype())})
 
     context: Optional[DataContext] = cast(
-        DataContext, build_in_memory_runtime_context()
+        DataContext, build_in_memory_runtime_context(include_spark=False)
     )
     validator = get_test_validator_with_data(
         execution_engine="pandas",

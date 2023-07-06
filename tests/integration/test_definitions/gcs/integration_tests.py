@@ -4,28 +4,18 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 gcs_integration_tests = []
 
 connecting_to_your_data = [
-    # Uncomment after resolving
-    #   -  and how_to_configure_a_validation_result_store_in_gcs
-    #
-    # E               ValueError: No data reference for data asset name "taxi_data" matches the given
-    # E               batch identifiers {} from batch definition {
-    # E                 "datasource_name": "my_gcs_datasource",
-    # E                 "data_connector_name": "configured_data_connector_name",
-    # E                 "data_asset_name": "taxi_data",
-    # E                 "batch_identifiers": {}
-    # E               }.
-    # IntegrationTestFixture(
-    #     name="gcs_pandas_configured_yaml",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
-    # IntegrationTestFixture(
-    #     name="gcs_pandas_configured_python",
-    #     user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
+    IntegrationTestFixture(
+        name="gcs_pandas_configured_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
+    IntegrationTestFixture(
+        name="gcs_pandas_configured_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
     IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
@@ -70,17 +60,12 @@ connecting_to_your_data = [
 ]
 
 how_to_configure_metadata_store = [
-    # Uncomment after resolving
-    #           def _dump(self, data: dict, stream, **kwargs) -> None:
-    #               """If an input stream has been provided, modify it in place."""
-    #       >       self._handler.dump(data=data, stream=stream, **kwargs)
-    #       E       TypeError: dump() got an unexpected keyword argument 'default_flow_style'
-    # IntegrationTestFixture(
-    #     name="how_to_configure_an_expectation_store_in_gcs",
-    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_configure_an_expectation_store_in_gcs",
+        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
     IntegrationTestFixture(
         name="how_to_host_and_share_data_docs_on_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
@@ -88,13 +73,13 @@ how_to_configure_metadata_store = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.GCS],
     ),
-    # IntegrationTestFixture(
-    #     name="how_to_configure_a_validation_result_store_in_gcs",
-    #     user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[BackendDependencies.GCS],
-    # ),
+    IntegrationTestFixture(
+        name="how_to_configure_a_validation_result_store_in_gcs",
+        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.GCS],
+    ),
 ]
 
 split_data = []

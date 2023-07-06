@@ -83,11 +83,17 @@ def test_vcs_schemas_match(
         """
         key: str
         value: Any
+
         for key, value in schema_as_dict.items():
             if key == "required":
                 schema_as_dict[key] = sorted(value)
             elif key == "anyOf":
-                schema_as_dict[key] = sorted(value, key=_sort_any_of)
+                if isinstance(value, list):
+                    for val in value:
+                        if isinstance(value, dict):
+                            schema_as_dict[key] = sorted(val, key=_sort_any_of)
+                else:
+                    schema_as_dict[key] = sorted(value, key=_sort_any_of)
 
             if isinstance(value, dict):
                 _sort_lists(schema_as_dict=value)
@@ -109,7 +115,7 @@ def test_vcs_schemas_match(
     _sort_lists(schema_as_dict=fluent_ds_or_asset_model_as_dict)
 
     if "Excel" in str(schema_path):
-        pytest.xfail(reason="Sorting of nested anOf key")
+        pytest.xfail(reason="Sorting of nested anyOf key")
 
     assert (
         schema_as_dict == fluent_ds_or_asset_model_as_dict

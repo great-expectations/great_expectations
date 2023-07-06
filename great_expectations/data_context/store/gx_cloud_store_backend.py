@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class ErrorDetail(TypedDict):
     code: Optional[str]
     detail: Optional[str]
-    source: Optional[str]
+    source: Union[str, Dict[str, str], None]
 
 
 class ErrorPayload(TypedDict):
@@ -44,7 +44,7 @@ class PayloadDataField(TypedDict):
 
 
 class ResponsePayload(TypedDict):
-    data: PayloadDataField
+    data: PayloadDataField | list[PayloadDataField]
 
 
 AnyPayload = Union[ResponsePayload, ErrorPayload]
@@ -222,7 +222,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         }
         filter_properties_dict(properties=self._config, inplace=True)
 
-    def _get(self, key: Tuple[str, ...]) -> ResponsePayload:  # type: ignore[override]
+    def _get(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> ResponsePayload:  # type: ignore[override]
         ge_cloud_url = self.get_url_for_key(key=key)
         params: Optional[dict] = None
         try:
@@ -317,10 +317,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            logger.debug(str(e))
+            logger.debug(repr(e))
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {e}"
-            )
+            ) from e
 
     @property
     def allowed_set_kwargs(self) -> Set[str]:
@@ -387,7 +387,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response_json = response.json()
 
             object_id = response_json["data"]["id"]
-            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            object_url = self.get_url_for_key(
+                (self.ge_cloud_resource_type, object_id, None)
+            )
             # This method is where posts get made for all cloud store endpoints. We pass
             # the response_json back up to the caller because the specific resource may
             # want to parse resource specific data out of the response.
@@ -471,7 +473,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def get_url_for_key(  # type: ignore[override]
-        self, key: Tuple[str, ...], protocol: Optional[Any] = None
+        self,
+        key: Tuple[GXCloudRESTResource, str | None, str | None],
+        protocol: Optional[Any] = None,
     ) -> str:
         id = key[1]
         url = construct_url(
@@ -542,26 +546,70 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to delete object in GX Cloud Store Backend: {repr(e)}"
             )
 
-    def _update(self, key, value, **kwargs):
-        existing = self._get(key)
+    def _get_one_or_none_from_response_data(
+        self,
+        response_data: list[PayloadDataField] | PayloadDataField,
+        key: tuple[GXCloudRESTResource, str | None, str | None],
+    ) -> PayloadDataField | None:
+        """
+        GET requests to cloud can either return response data that is a single object (get by id) or a
+        list of objects with length >= 0 (get by name). This method takes this response data and returns a single
+        object or None.
+        """
+        if not isinstance(response_data, list):
+            return response_data
+        if len(response_data) == 0:
+            return None
+        if len(response_data) == 1:
+            return response_data[0]
+        raise StoreBackendError(
+            f"Unable to update object in GX Cloud Store Backend: the provided key ({key}) maps "
+            f"to more than one object."
+        )
+
+    def _update(
+        self,
+        key: tuple[GXCloudRESTResource, str | None, str | None],
+        value: dict,
+        **kwargs,
+    ):
+        response_data = self._get(key)["data"]
+        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
+        # by name, with length >= 0, instead of a single object (or error if not found)
+        existing = self._get_one_or_none_from_response_data(
+            response_data=response_data, key=key
+        )
+
+        if existing is None:
+            raise StoreBackendError(
+                f"Unable to update object in GX Cloud Store Backend: could not find object associated with key {key}."
+            )
+
         if key[1] is None:
-            key = (key[0], existing["data"]["id"], key[2])
+            key = (key[0], existing["id"], key[2])
 
         return self.set(key=key, value=value, **kwargs)
 
     def _add_or_update(self, key, value, **kwargs):
         try:
-            existing = self._get(key)
+            response_data = self._get(key)["data"]
         except StoreBackendError as e:
             logger.info(f"Could not find object associated with key {key}: {e}")
-            existing = None
+            response_data = None
+
+        # if the provided key does not contain id (only name), cloud will return a list of resources filtered
+        # by name, with length >= 0, instead of a single object (or error if not found)
+        existing = self._get_one_or_none_from_response_data(
+            response_data=response_data, key=key
+        )
+
         if existing is not None:
-            id = key[1] if key[1] is not None else existing["data"]["id"]
+            id = key[1] if key[1] is not None else existing["id"]
             key = (key[0], id, key[2])
             return self.set(key=key, value=value, **kwargs)
         return self.add(key=key, value=value, **kwargs)
 
-    def _has_key(self, key: Tuple[str, ...]) -> bool:
+    def _has_key(self, key: Tuple[GXCloudRESTResource, str | None, str | None]) -> bool:
         try:
             _ = self._get(key)
         except StoreBackendTransientError:

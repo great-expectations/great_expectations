@@ -3,8 +3,8 @@ from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
@@ -118,7 +118,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         set_camel_name: str,
         set_: str,
     ) -> str:
-        """Register an ephemeral metric using a constructed name with the logic provided by RegexColumnMapMetricProvider.
+        """Register an ephemeral metric using a constructed name with the logic provided by SetColumnMapMetricProvider.
 
         Args:
             set_camel_name: A name describing a set of values, in camel case.

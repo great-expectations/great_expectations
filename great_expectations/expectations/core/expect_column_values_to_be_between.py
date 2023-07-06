@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING, List, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
@@ -56,8 +56,6 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             If True, values must be strictly smaller than max_value, default=False
 
     Keyword Args:
-        allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and \
-            string). Otherwise, attempting such comparisons will raise an exception.
         parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column \
             values to datetimes before making comparisons.
         output_strftime_format (str or None): \

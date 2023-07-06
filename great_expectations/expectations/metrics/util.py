@@ -9,7 +9,7 @@ from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -36,11 +36,6 @@ except ImportError:
     snowflake = None
 
 
-try:
-    import sqlalchemy_redshift
-except ImportError:
-    sqlalchemy_redshift = None
-
 logger = logging.getLogger(__name__)
 
 try:
@@ -51,14 +46,14 @@ except ImportError:
     sqlalchemy_dremio = None
 
 try:
-    import trino
+    import clickhouse_sqlalchemy
 except ImportError:
-    trino = None
+    clickhouse_sqlalchemy = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 
-from great_expectations.compatibility import sqlalchemy_bigquery as sqla_bigquery
-from great_expectations.compatibility.sqlalchemy_bigquery import bigquery_types_tuple
+from great_expectations.compatibility import bigquery as sqla_bigquery
+from great_expectations.compatibility.bigquery import bigquery_types_tuple
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -88,24 +83,21 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     except AttributeError:
         pass
 
-    try:
-        # redshift
-        # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "RedshiftDialect") or issubclass(
-            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
-        ):
-            if positive:
-                return sqlalchemy.BinaryExpression(
-                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
-                )
-            else:
-                return sqlalchemy.BinaryExpression(
-                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
-                )
-    except (
-        AttributeError,
-        TypeError,
-    ):  # TypeError can occur if the driver was not installed and so is None
+    # redshift
+    # noinspection PyUnresolvedReferences
+    if hasattr(dialect, "RedshiftDialect") or (
+        aws.redshiftdialect
+        and issubclass(dialect.dialect, aws.redshiftdialect.RedshiftDialect)
+    ):
+        if positive:
+            return sqlalchemy.BinaryExpression(
+                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
+            )
+        else:
+            return sqlalchemy.BinaryExpression(
+                column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
+            )
+    else:
         pass
 
     try:
@@ -167,8 +159,8 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.sqlalchemy.dialect.TrinoDialect
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             if positive:
                 return sa.func.regexp_like(column, sqlalchemy.literal(regex))
@@ -180,6 +172,21 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
 
+    try:
+        # Clickhouse
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickHouseDialect") or isinstance(
+            dialect, clickhouse_sqlalchemy.drivers.base.ClickHouseDialect
+        ):
+            if positive:
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
+            else:
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
     try:
         # Dremio
         if hasattr(dialect, "DremioDialect"):
@@ -243,13 +250,14 @@ def _get_dialect_type_module(dialect=None):
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        # noinspection PyUnresolvedReferences
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            return dialect.sa
-    except (TypeError, AttributeError):
-        pass
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    # noinspection PyUnresolvedReferences
+    if aws.redshiftdialect and isinstance(
+        dialect,
+        aws.redshiftdialect.RedshiftDialect,
+    ):
+        return dialect.sa
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
@@ -282,12 +290,9 @@ def _get_dialect_type_module(dialect=None):
 
 def attempt_allowing_relative_error(dialect):
     # noinspection PyUnresolvedReferences
-    detected_redshift: bool = (
-        sqlalchemy_redshift is not None
-        and check_sql_engine_dialect(
-            actual_sql_engine_dialect=dialect,
-            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-        )
+    detected_redshift: bool = aws.redshiftdialect and check_sql_engine_dialect(
+        actual_sql_engine_dialect=dialect,
+        candidate_sql_engine_dialect=aws.redshiftdialect.RedshiftDialect,
     )
     # noinspection PyTypeChecker
     detected_psycopg2: bool = (
@@ -564,6 +569,11 @@ def column_reflection_fallback(
                 )
                 .alias("column_info")
             )
+
+            # in sqlalchemy > 2.0.0 this is a Subquery, which we need to convert into a Selectable
+            if not col_info_query.supports_execution:
+                col_info_query = sa.select(col_info_query)
+
             col_info_tuples_list = connection.execute(col_info_query).fetchall()
             # type_module = _get_dialect_type_module(dialect=dialect)
             col_info_dict_list = [
@@ -768,22 +778,30 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
     except (AttributeError, TypeError):
         pass
 
-    try:
-        # noinspection PyUnresolvedReferences
-        if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
-            dialect_supported = True
-    except (AttributeError, TypeError):
+    # noinspection PyUnresolvedReferences
+    if aws.redshiftdialect and isinstance(dialect, aws.redshiftdialect.RedshiftDialect):
+        dialect_supported = True
+    else:
         pass
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
-            dialect, "TrinoDialect"
+        if hasattr(dialect, "TrinoDialect") or (
+            trino.trinodialect and isinstance(dialect, trino.trinodialect.TrinoDialect)
         ):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
 
+    try:
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "ClickhouseDialect") or (
+            trino.trinodrivers
+            and isinstance(dialect, trino.trinodrivers.base.ClickhouseDialect)
+        ):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
     try:
         if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
