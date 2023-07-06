@@ -117,7 +117,9 @@ def test_cardinality_checker_instantiation_valid_max_proportion_unique_parameter
 def test_cardinality_checker_instantiation_invalid_cardinality_limit_mode_parameter():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyTypeChecker
-        CardinalityChecker(cardinality_limit_mode="&^*%not_a_valid_mode^&*(")
+        cardinality_checker: CardinalityChecker = CardinalityChecker(
+            cardinality_limit_mode="&^*%not_a_valid_mode^&*("
+        )
     assert "specify a supported cardinality mode" in str(excinfo.value)
     assert "REL_1" in str(excinfo.value)
     assert "MANY" in str(excinfo.value)
@@ -127,7 +129,9 @@ def test_cardinality_checker_instantiation_invalid_cardinality_limit_mode_parame
 def test_cardinality_checker_instantiation_invalid_max_unique_values_parameter():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyTypeChecker
-        CardinalityChecker(max_unique_values="invalid_input_type_string")
+        cardinality_checker: CardinalityChecker = CardinalityChecker(
+            max_unique_values="invalid_input_type_string"
+        )
     assert "specify an int" in str(excinfo.value)
     assert "str" in str(excinfo.value)
 
@@ -136,7 +140,9 @@ def test_cardinality_checker_instantiation_invalid_max_unique_values_parameter()
 def test_cardinality_checker_instantiation_invalid_max_proportion_unique_parameter():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyTypeChecker
-        CardinalityChecker(max_proportion_unique="invalid_input_type_string")
+        cardinality_checker: CardinalityChecker = CardinalityChecker(
+            max_proportion_unique="invalid_input_type_string"
+        )
     assert "specify a float or int" in str(excinfo.value)
     assert "str" in str(excinfo.value)
 
@@ -145,7 +151,9 @@ def test_cardinality_checker_instantiation_invalid_max_proportion_unique_paramet
 def test_cardinality_checker_instantiation_invalid_multiple_parameters():
     with pytest.raises(ProfilerConfigurationError) as excinfo:
         # noinspection PyUnusedLocal,PyTypeChecker
-        CardinalityChecker(cardinality_limit_mode="REL_0_1", max_proportion_unique=0.42)
+        cardinality_checker: CardinalityChecker = CardinalityChecker(
+            cardinality_limit_mode="REL_0_1", max_proportion_unique=0.42
+        )
     assert "Please pass ONE of the following parameters" in str(excinfo.value)
     assert "you passed 2 parameters" in str(excinfo.value)
 

@@ -1,21 +1,14 @@
-import warnings
 from enum import Enum
 
 import altair as alt
 
-# Once the context manager exits, the warning filter is removed.
-# Do not remove this context-manager.
-# https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
-# DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0
-with warnings.catch_warnings():
-    warnings.simplefilter(action="ignore", category=DeprecationWarning)
 
-    class AltairDataTypes(Enum):
-        # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
-        QUANTITATIVE = alt.StandardType("quantitative")
-        ORDINAL = alt.StandardType("ordinal")
-        NOMINAL = alt.StandardType("nominal")
-        TEMPORAL = alt.StandardType("temporal")
+class AltairDataTypes(Enum):
+    # available data types: https://altair-viz.github.io/user_guide/encoding.html#encoding-data-types
+    QUANTITATIVE = alt.StandardType("quantitative")
+    ORDINAL = alt.StandardType("ordinal")
+    NOMINAL = alt.StandardType("nominal")
+    TEMPORAL = alt.StandardType("temporal")
 
 
 class AltairAggregates(Enum):
