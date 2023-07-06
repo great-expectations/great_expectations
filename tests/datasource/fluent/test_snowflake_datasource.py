@@ -36,18 +36,77 @@ def test_conflicting_connection_string_and_args_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "connection_string",
+    "connection_string, expected_errors",
     [
         pytest.param(
-            "not_snowflake://<user_login_name>:<password>@<account_identifier>",
-            id="bad scheme",
+            "user_login_name:password@account_identifier",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "invalid or missing URL scheme",
+                    "type": "value_error.url.scheme",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="missing scheme",
         ),
         pytest.param(
-            "snowflake://<user_login_name>@<account_identifier>", id="bad password"
+            "snowflake://user_login_name@account_identifier",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "URL password invalid",
+                    "type": "value_error.url.password",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="bad password",
         ),
-        pytest.param("snowflake://<user_login_name>:<password>", id="bad domain"),
+        pytest.param(
+            "snowflake://user_login_name:password@",
+            [
+                {
+                    "loc": ("connection_string",),
+                    "msg": "ConfigStr - contains no config template strings in the format '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'",
+                    "type": "value_error",
+                },
+                {
+                    "loc": ("connection_string",),
+                    "msg": "URL domain invalid",
+                    "type": "value_error.url.domain",
+                },
+                {
+                    "loc": ("__root__",),
+                    "msg": "Must provide either a connection string or a combination of account, user, and password.",
+                    "type": "value_error",
+                },
+            ],
+            id="bad domain",
+        ),
     ],
 )
-def test_invalid_connection_string_raises_dsn_error(connection_string: str):
-    with pytest.raises(pydantic.ValidationError):
-        _ = SnowflakeDatasource(connection_string=connection_string)
+def test_invalid_connection_string_raises_dsn_error(
+    connection_string: str, expected_errors: list[dict]
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)  # type: ignore[arg-type] # Pydantic coerces connection_string to SnowflakeDsn
+
+    assert expected_errors == exc_info.value.errors()
