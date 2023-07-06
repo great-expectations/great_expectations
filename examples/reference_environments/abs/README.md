@@ -1,6 +1,9 @@
 # Azure Blob Store Reference Environment
 
-This reference environment spins up one container which contains a jupyter notebook server and some example code.
+This reference environment spins up two containers:
+
+- A jupyter notebook server
+- A server to host data docs (to view navigate to http://127.0.0.1:3000/)
 
 The example code demonstrates how to use Great Expectations with data stored in Azure Blob Storage (ABS) and by default uses data in the ``
 that is hosted in the project defined by `AZURE_STORAGE_ACOUNT_URL` env variable.
