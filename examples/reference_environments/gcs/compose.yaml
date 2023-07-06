@@ -14,3 +14,26 @@ services:
       - "8888:8888"
     volumes:
       - ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/creds.json
+      - gx_stores:/gx/gx_stores
+    networks:
+      - dbnet
+
+  data_docs:
+    image: gx/gcs_data_docs
+    container_name: gx_gcs_data_docs
+    build:
+      context: .
+      dockerfile: data_docs.Dockerfile
+    networks:
+      - dbnet
+    ports:
+      - "3000:3000"
+    volumes:
+      - gx_stores:/gx/gx_stores:ro
+
+networks:
+  dbnet:
+    driver: bridge
+
+volumes:
+  gx_stores:
