@@ -113,12 +113,11 @@ def pandas_read_sql_query(sql, con, execution_engine, **kwargs) -> pd.DataFrame:
         and is_version_less_than(pd.__version__, "2.0.0")
     ):
         warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
-        with warnings.catch_warnings():
-            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-            # but using the base class here since sqlalchemy is an optional dependency and this
-            # warning type only exists in sqlalchemy < 2.0.
-            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-            return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
-    else:
+
+    with warnings.catch_warnings():
+        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+        # but using the base class here since sqlalchemy is an optional dependency and this
+        # warning type only exists in sqlalchemy < 2.0.
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
-    return return_value
+        return return_value
