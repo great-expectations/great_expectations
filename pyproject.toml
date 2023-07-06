@@ -422,8 +422,6 @@ filterwarnings = [
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
 
     # python
-    # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
-    'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
     'ignore: divide by zero encountered:RuntimeWarning',
