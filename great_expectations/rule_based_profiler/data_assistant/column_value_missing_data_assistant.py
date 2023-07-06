@@ -52,7 +52,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         ColumnValueMissingDataAssistantResult
     """
 
-    __alias__: str = "column_value_missing"
+    __alias__: str = "missingness"
 
     def __init__(
         self,

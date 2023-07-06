@@ -47,11 +47,9 @@ def test_column_value_missing_data_assistant_plot_expectations_and_metrics_corre
         "congestion_surcharge",
     ]
 
-    data_assistant_result: DataAssistantResult = (
-        context.assistants.column_value_missing.run(
-            batch_request=batch_request,
-            include_column_names=include_column_names,
-        )
+    data_assistant_result: DataAssistantResult = context.assistants.missingness.run(
+        batch_request=batch_request,
+        include_column_names=include_column_names,
     )
     plot_result: PlotResult = data_assistant_result.plot_expectations_and_metrics(
         include_column_names=include_column_names
