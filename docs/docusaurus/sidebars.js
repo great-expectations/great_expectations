@@ -2,15 +2,22 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
+      items: [
+        'tutorials/quickstart/quickstart',
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+      ]
     },
     {
       type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/setup_overview',
         'guides/setup/installation/install_gx',
-        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
           label: 'Configure Data Contexts',
@@ -29,7 +36,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to data',
+      label: 'Connect to Source Data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
@@ -60,13 +67,20 @@ module.exports = {
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
             'guides/expectations/how_to_edit_an_existing_expectationsuite',
             'guides/expectations/how_to_use_auto_initializing_expectations',
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
             'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant',
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Profilers and Data Assistants',
+          link: { type: 'doc', id: 'guides/expectations/profilers_data_assistants_lp' },
+          items: [
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
           ]
         },
         {
@@ -108,9 +122,6 @@ module.exports = {
       link: { type: 'doc', id: 'guides/validation/validate_data_lp' },
       items: [
         'guides/validation/validate_data_overview',
-        'guides/validation/how_to_validate_data_by_running_a_checkpoint',
-        'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-        'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
         {
           type: 'category',
           label: 'Manage Checkpoints',
@@ -119,7 +130,8 @@ module.exports = {
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
-            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
+            'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+            'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
           ]
         },
         {
@@ -131,7 +143,8 @@ module.exports = {
             'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
             'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
-            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
+            'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action',
+            'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
           ]
         },
       ]
@@ -164,7 +177,6 @@ module.exports = {
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',

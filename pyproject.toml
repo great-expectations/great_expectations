@@ -345,8 +345,10 @@ convention = "google"
 [tool.ruff.flake8-tidy-imports.banned-api]
 "sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 "pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
+"boto3".msg = "Please do not import boto3 directly, import from great_expectations.compatibility.aws instead."
 "google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
 "azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
+"trino".msg = "Please do not import trino directly, import from great_expectations.compatibility.trino instead."
 "pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
 [tool.pytest.ini_options]
@@ -421,8 +423,6 @@ filterwarnings = [
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
 
     # python
-    # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
-    'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
     'ignore: divide by zero encountered:RuntimeWarning',
@@ -434,6 +434,11 @@ filterwarnings = [
     # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
     # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
     'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
+    # python 3.11
+    # data_connector/util.py imports deprecated modules that will be removed in Python 3.12
+    "ignore: module 'sre_constants' is deprecated:DeprecationWarning",
+    "ignore: module 'sre_parse' is deprecated:DeprecationWarning",
 
     # trino
     # example actual warning: found in great_expectations/self_check/util.py:2752: in _create_trino_engine
@@ -514,6 +519,16 @@ filterwarnings = [
     # Example Actual Warning:
     # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
     "ignore: Exception ignored in:UserWarning",
+    # jsonschema (altair dependency)
+    # Example Actual Warning:
+    # DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the
+    # https://github.com/python-jsonschema/referencing library,
+    # which provides more compliant referencing behavior as well as more flexible APIs for customization.
+    # A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    "ignore: jsonschema.RefResolver is deprecated as of v4.18.0:DeprecationWarning",
+    # Example Actual Warning:
+    # DeprecationWarning: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.
+    "ignore: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.:DeprecationWarning"
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]

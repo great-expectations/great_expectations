@@ -7,16 +7,8 @@ from functools import lru_cache
 from typing import Any, Dict, Final, Optional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure, google
+from great_expectations.compatibility import aws, azure, google
 from great_expectations.data_context.types.base import BaseYamlConfig
-
-try:
-    import boto3
-    from botocore.exceptions import ClientError
-except ImportError:
-    boto3 = None
-    ClientError = None
-
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +203,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AWS_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
-        if not boto3:
+        if not aws.boto3:
             logger.error(
                 "boto3 is not installed, please install great_expectations with aws_secrets extra > "
                 "pip install great_expectations[aws_secrets]"
@@ -229,7 +221,7 @@ class _ConfigurationSubstitutor:
         secret_key = matches.group(5)
 
         # Create a Secrets Manager client
-        session = boto3.session.Session()
+        session = aws.boto3.session.Session()
         client = session.client(service_name="secretsmanager", region_name=region_name)
 
         if secret_version:
@@ -276,7 +268,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AWS_SSM_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
-        if not boto3:
+        if not aws.boto3:
             logger.error(
                 "boto3 is not installed, please install great_expectations with aws_secrets extra > "
                 "pip install great_expectations[aws_secrets]"
@@ -294,7 +286,7 @@ class _ConfigurationSubstitutor:
         secret_key = matches.group(5)
 
         # Create a Secrets Manager client
-        session = boto3.session.Session()
+        session = aws.boto3.session.Session()
 
         client = session.client(service_name="ssm", region_name=region_name)
 
