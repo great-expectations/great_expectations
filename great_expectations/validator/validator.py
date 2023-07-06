@@ -837,6 +837,10 @@ class Validator:
 
         if isinstance(override_profiler_config, RuleBasedProfilerConfig):
             override_profiler_config_dict = override_profiler_config.to_json_dict()
+        elif override_profiler_config is not None:
+            # NOTE: we shouldn't get here per the override_profiler_config type, but it is needed per tests
+            # See test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes
+            override_profiler_config_dict = override_profiler_config
 
         override_profiler_config_dict.pop("name", None)
         override_profiler_config_dict.pop("config_version", None)
