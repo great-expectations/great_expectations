@@ -77,10 +77,11 @@ with DAG(
         # Note: the following is a simple example of how to use Great Expectations in a DAG.
         # In a production environment, you would likely want to use a different data source
         # and/or a stored expectation suite rather than building it on each run.
+        print("gx.__version__:", gx.__version__)
         context = gx.get_context()
         datasource = context.sources.add_pandas(name="my_pandas_datasource")
-        data_asset = datasource.add_dataframe_asset(name="my_df")
-        my_batch_request = data_asset.build_batch_request(dataframe=df)
+        data_asset = datasource.add_dataframe_asset(name="my_df", dataframe=df)
+        my_batch_request = data_asset.build_batch_request()
         context.add_or_update_expectation_suite("my_expectation_suite")
         validator = context.get_validator(
             batch_request=my_batch_request,
@@ -138,6 +139,17 @@ with DAG(
     """
     )
 
+    validate_order_data_extract_task = PythonOperator(
+        task_id="validate_order_data_extract",
+        python_callable=validate_order_data_extract,
+    )
+    validate_order_data_extract_task.doc_md = dedent(
+        """\
+    #### Validate_order_data_extract task
+    A simple task to validate the extracted data before running the rest of the data pipeline.
+    """
+    )
+
     transform_task = PythonOperator(
         task_id="transform",
         python_callable=transform,
@@ -163,7 +175,7 @@ with DAG(
     """
     )
 
-    extract_task >> transform_task >> load_task
+    extract_task >> validate_order_data_extract_task >> transform_task >> load_task
 
 # [END main_flow]
 
