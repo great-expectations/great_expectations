@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pydantic
 import pytest
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
@@ -31,3 +32,22 @@ def test_conflicting_connection_string_and_args_raises_error(
 ):
     with pytest.raises(ValueError):
         _ = SnowflakeDatasource(connection_string=connection_string, **connect_args)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string",
+    [
+        pytest.param(
+            "not_snowflake://<user_login_name>:<password>@<account_identifier>",
+            id="bad scheme",
+        ),
+        pytest.param(
+            "snowflake://<user_login_name>@<account_identifier>", id="bad password"
+        ),
+        pytest.param("snowflake://<user_login_name>:<password>", id="bad domain"),
+    ],
+)
+def test_invalid_connection_string_raises_dsn_error(connection_string: str):
+    with pytest.raises(pydantic.ValidationError):
+        _ = SnowflakeDatasource(connection_string=connection_string)
