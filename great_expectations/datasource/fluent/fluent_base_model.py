@@ -57,12 +57,12 @@ class FluentBaseModel(pydantic.BaseModel):
     configs full of mostly unset default values.
     Also prevents passing along unset kwargs to BatchSpec.
     https://docs.pydantic.dev/usage/exporting_models/
-
-    Due to namespace collisions with certain keywords like 'schema', we've set the default of
-    `by_alias` for the various serialization methods to `True`.
-    If we're using an alias, the assumption is that we want to serialize with that alias.
-    Related FastAPI thread that discusses overriding this default: https://github.com/tiangolo/fastapi/discussions/2753
     """
+
+    # Due to namespace collisions with certain keywords like 'schema', we've set the default of
+    # `by_alias` for the various serialization methods to `True`.
+    # If we're using an alias, the assumption is that we want to serialize with that alias.
+    # Related FastAPI thread that discusses overriding this default: https://github.com/tiangolo/fastapi/discussions/2753
 
     class Config:
         extra = pydantic.Extra.forbid
