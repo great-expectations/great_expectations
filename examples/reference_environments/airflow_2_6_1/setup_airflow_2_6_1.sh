@@ -23,8 +23,8 @@ echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 # TODO: Only initialize if not already initialized
 
 print_orange_header "Initializing airflow"
-docker compose up airflow-init --build
+docker compose up airflow-init
 
 print_orange_header "Starting airflow containers"
-docker compose up --build
+docker compose up
 # TODO: pass ARG PYTHON_BASE_IMAGE="python:3.8-slim-bullseye" to docker compose via build arg
