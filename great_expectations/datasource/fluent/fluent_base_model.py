@@ -57,6 +57,11 @@ class FluentBaseModel(pydantic.BaseModel):
     configs full of mostly unset default values.
     Also prevents passing along unset kwargs to BatchSpec.
     https://docs.pydantic.dev/usage/exporting_models/
+
+    Due to namespace collisions with certain keywords like 'schema', we've set the default of
+    `by_alias` for the various serialization methods to `True`.
+    If we're using an alias, the assumption is that we want to serialize with that alias.
+    Related FastAPI thread that discusses overriding this default: https://github.com/tiangolo/fastapi/discussions/2753
     """
 
     class Config:
@@ -110,7 +115,7 @@ class FluentBaseModel(pydantic.BaseModel):
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -150,7 +155,7 @@ class FluentBaseModel(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
         # Default to True to prevent serializing long configs full of unset default values
@@ -192,7 +197,7 @@ class FluentBaseModel(pydantic.BaseModel):
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -223,7 +228,7 @@ class FluentBaseModel(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # Default to True to prevent serializing long configs full of unset default values
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
