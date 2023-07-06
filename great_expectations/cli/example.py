@@ -466,6 +466,68 @@ def example_aws_postgres(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
+@example.command(name="airflow")
+@click.option(
+    "--stop",
+    "--down",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+@click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+@click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    "--build",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+def example_airflow(
+    stop: bool,
+    url: bool,
+    bash: bool,
+    rebuild: bool,
+) -> None:
+    """Start an airflow example."""
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = (
+        repo_root / "examples" / "reference_environments" / "airflow_2_6_1"
+    )
+    assert example_directory.is_dir(), "Example directory not found"
+    container_name = "not_applicable"
+    command_options = CommandOptions(stop, url, bash, rebuild)
+    if command_options.url or command_options.bash:
+        cli_message(
+            "<red>url and bash options are not supported for airflow example.</red>"
+        )
+        return
+    executed_standard_function = _execute_standard_functions(
+        command_options, example_directory, container_name
+    )
+    if not executed_standard_function:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+        )
+        cli_message("<green>Setting up airflow example using airflow v2.6.1...</green>")
+        print_green_line()
+        example_setup_file = example_directory / "setup_airflow_2_6_1.sh"
+        subprocess.run(example_setup_file, cwd=example_directory)
+
+
 def _execute_standard_functions(
     command_options: CommandOptions,
     example_directory: pathlib.Path,
@@ -605,31 +667,3 @@ def _check_abs_env_vars() -> set[str]:
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result
-
-
-@example.command(name="airflow")
-@click.option(
-    "--stop",
-    is_flag=True,
-    help="Stop example and clean up. Default false.",
-    default=False,
-)
-def example_airflow(stop: bool) -> None:
-    """Start an airflow example."""
-    repo_root = pathlib.Path(__file__).parents[2]
-    example_directory = (
-        repo_root / "examples" / "reference_environments" / "airflow_2_6_1"
-    )
-    assert example_directory.is_dir(), "Example directory not found"
-    if stop:
-        cli_message("<green>Stopping example containers...</green>")
-        stop_commands = ["docker", "compose", "down"]
-        subprocess.run(stop_commands, cwd=example_directory)
-        cli_message("<green>Done stopping containers.</green>")
-    else:
-        cli_message(
-            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
-        )
-        cli_message("<green>Setting up airflow example using airflow v2.6.1...</green>")
-        example_setup_file = example_directory / "setup_airflow_2_6_1.sh"
-        subprocess.run(example_setup_file, cwd=example_directory)
