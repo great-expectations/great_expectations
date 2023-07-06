@@ -487,14 +487,30 @@ def print_green_line() -> None:
 
 
 def _check_aws_env_vars() -> set[str]:
-    """Return list of env var names that are not set."""
+    """Checking ENV variables for boto3 authentication.
+
+    Boto3 can be authenticated using either a `AWS_SESSION_TOKEN` or `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+    Method will check the two modes by checking if:
+
+    1. AWS_SESSION_TOKEN is already set. If so, then assumes session is active and does not check other credentials.
+
+    or
+
+    2. Checks that both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set.
+
+    More information in boto3 docs:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-environment-variables
+    """
+    result: set[str] = set()
+    if os.getenv("AWS_SESSION_TOKEN"):
+        return result
+
     env_vars_to_check = (
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
-        "AWS_SESSION_TOKEN",
     )
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
-
     return result
 
 
