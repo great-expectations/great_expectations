@@ -54,6 +54,7 @@ class CommandOptions:
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -87,6 +88,9 @@ def example_snowflake(
         cli_message(
             "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
         )
+        cli_message(
+            "<green>To view data docs, visit localhost port 3000 e.g. http://127.0.0.1:3000/</green>"
+        )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
@@ -114,6 +118,7 @@ def example_snowflake(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -147,6 +152,9 @@ def example_postgres(
         cli_message(
             "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
         )
+        cli_message(
+            "<green>To view data docs, visit localhost port 3000 e.g. http://127.0.0.1:3000/</green>"
+        )
         print_green_line()
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
@@ -174,6 +182,7 @@ def example_postgres(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -216,6 +225,65 @@ def example_s3(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
+@example.command(name="gcs")
+@click.option(
+    "--stop",
+    "--down",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+@click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+@click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    "--build",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+def example_gcs(
+    stop: bool,
+    url: bool,
+    bash: bool,
+    rebuild: bool,
+) -> None:
+    """Start a google cloud storage example."""
+    unset_env_vars = _check_gcs_env_vars()
+    if unset_env_vars:
+        cli_message(
+            f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
+        )
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = repo_root / "examples" / "reference_environments" / "gcs"
+    assert example_directory.is_dir(), "Example directory not found"
+    container_name = "gx_gcs_example_jupyter"
+    command_options = CommandOptions(stop, url, bash, rebuild)
+    executed_standard_function = _execute_standard_functions(
+        command_options, example_directory, container_name
+    )
+    if not executed_standard_function:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+        )
+        print_green_line()
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
+
+
 @example.command(name="bigquery")
 @click.option(
     "--stop",
@@ -238,6 +306,7 @@ def example_s3(
 )
 @click.option(
     "--rebuild",
+    "--build",
     is_flag=True,
     help="Rebuild the containers.",
     default=False,
@@ -258,6 +327,129 @@ def example_bigquery(
     example_directory = repo_root / "examples" / "reference_environments" / "bigquery"
     assert example_directory.is_dir(), "Example directory not found"
     container_name = "gx_bigquery_example_jupyter"
+    command_options = CommandOptions(stop, url, bash, rebuild)
+    executed_standard_function = _execute_standard_functions(
+        command_options, example_directory, container_name
+    )
+    if not executed_standard_function:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+        )
+        cli_message(
+            "<green>To view data docs, visit localhost port 3000 e.g. http://127.0.0.1:3000/</green>"
+        )
+        print_green_line()
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
+
+
+@example.command(name="abs")
+@click.option(
+    "--stop",
+    "--down",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+@click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+@click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    "--build",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+def example_abs(
+    stop: bool,
+    url: bool,
+    bash: bool,
+    rebuild: bool,
+) -> None:
+    """Start an Azure Blob Storage example."""
+    unset_env_vars = _check_abs_env_vars()
+    if unset_env_vars:
+        cli_message(
+            f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
+        )
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = repo_root / "examples" / "reference_environments" / "abs"
+    assert example_directory.is_dir(), "Example directory not found"
+    container_name = "gx_abs_example_jupyter"
+    command_options = CommandOptions(stop, url, bash, rebuild)
+    executed_standard_function = _execute_standard_functions(
+        command_options, example_directory, container_name
+    )
+    if not executed_standard_function:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+        )
+        print_green_line()
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
+
+
+@example.command(name="aws_postgres")
+@click.option(
+    "--stop",
+    "--down",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+@click.option(
+    "--url",
+    is_flag=True,
+    help="Print url for jupyter notebook.",
+    default=False,
+)
+@click.option(
+    "--bash",
+    is_flag=True,
+    help="Open a bash terminal in the container (container should already be running).",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    "--build",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+def example_aws_postgres(
+    stop: bool,
+    url: bool,
+    bash: bool,
+    rebuild: bool,
+) -> None:
+    """Start an AWS Postgres example."""
+    unset_env_vars = _check_aws_env_vars()
+    if unset_env_vars:
+        cli_message(
+            f"<red>Please check your config, currently we only support connecting via env vars. You are missing the following vars: {', '.join(unset_env_vars)}</red>"
+        )
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = (
+        repo_root / "examples" / "reference_environments" / "aws_postgres"
+    )
+    assert example_directory.is_dir(), "Example directory not found"
+    container_name = "aws_postgres_example_jupyter"
     command_options = CommandOptions(stop, url, bash, rebuild)
     executed_standard_function = _execute_standard_functions(
         command_options, example_directory, container_name
@@ -356,14 +548,30 @@ def print_green_line() -> None:
 
 
 def _check_aws_env_vars() -> set[str]:
-    """Return list of env var names that are not set."""
+    """Checking ENV variables for boto3 authentication.
+
+    Boto3 can be authenticated using either a `AWS_SESSION_TOKEN` or `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+    Method will check the two modes by checking if:
+
+    1. AWS_SESSION_TOKEN is already set. If so, then assumes session is active and does not check other credentials.
+
+    or
+
+    2. Checks that both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are set.
+
+    More information in boto3 docs:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html#using-environment-variables
+    """
+    result: set[str] = set()
+    if os.getenv("AWS_SESSION_TOKEN"):
+        return result
+
     env_vars_to_check = (
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
-        "AWS_SESSION_TOKEN",
     )
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
-
     return result
 
 
@@ -375,9 +583,25 @@ def _check_bigquery_env_vars() -> set[str]:
     return result
 
 
+def _check_gcs_env_vars() -> set[str]:
+    """Return list of env var names that are not set."""
+    env_vars_to_check = ("GOOGLE_APPLICATION_CREDENTIALS", "GCP_PROJECT_NAME")
+    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
+
+    return result
+
+
 def _check_snowflake_env_vars() -> set[str]:
     """Return list of env var names that are not set."""
     env_vars_to_check = ("SNOWFLAKE_CONNECTION_STRING",)
+    result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
+
+    return result
+
+
+def _check_abs_env_vars() -> set[str]:
+    """Return list of env var names that are not set."""
+    env_vars_to_check = ("AZURE_STORAGE_ACCOUNT_URL", "AZURE_CREDENTIAL")
     result = {ev for ev in env_vars_to_check if not os.getenv(ev)}
 
     return result

@@ -4,7 +4,8 @@ title: Result format
 
 
 The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.
-  * For string usage, see `result_format` [values and fields](#result_format-values-and-fields).
+  * The following string values are supported:
+    * `"BOOLEAN_ONLY"`, `"BASIC"`, `"SUMMARY"`, or `"COMPLETE"`. The default is `"BASIC"`. The behavior of each setting is described in the [examples](#examples) below.
   * For dictionary usage, `result_format` may include the following keys:
     * `result_format`: Sets the fields to return in result.
     * `unexpected_index_column_names`: Defines columns that can be used to identify unexpected results, for example primary key (PK) column(s) or other columns with unique identifiers. Supports multiple column names as a list.
@@ -22,18 +23,18 @@ The `result_format` parameter may be either a string or a dictionary which speci
   unwieldy amount of data.
   :::
 
-## Configure Result Format
-Result Format can be applied to either a single Expectation or an entire Checkpoint. When configured at the Expectation-level, 
+## Configure result format
+`result_format` can be specified for either a single Expectation or an entire Checkpoint. When configured at the Expectation-level, 
 the configuration will not be persisted, and you will receive a `UserWarning`. We therefore recommend that the Expectation-level
 configuration be used for exploratory analysis, with the final configuration added at the Checkpoint-level.
 
-### Expectation Level Config
+### Expectation-level configuration
 To apply `result_format` to an Expectation, pass it into the Expectation. We will first need to obtain a Validator object instance (e.g. by running the `$ great_expectations suite new` command).
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set"
 ```
 
-### Checkpoint Level Config
+### Checkpoint-level configuration
 To apply `result_format` to every Expectation in a Suite, define it in your Checkpoint configuration under the `runtime_configuration` key.
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example"
@@ -54,22 +55,20 @@ To suppress this output, the `return_unexpected_index_query` parameter can be se
 Regardless of how Result Format is configured, `unexpected_list` is never rendered in Data Docs.
 :::
 
-## `result_format` Values and Fields
+## Result format values and fields
 
-Great Expectations supports four values for `result_format`: `BOOLEAN_ONLY`, `BASIC`, `SUMMARY`, and `COMPLETE`. The 
-out-of-the-box default is `BASIC`. Each successive value includes more detail and so can support different use 
-cases for working with Great Expectations, including interactive exploratory work and automatic validation.
 
-### Fields defined for all Expectations
+
+### All Expectations
+| Fields within `result`                | BOOLEAN_ONLY                       |BASIC           |SUMMARY         |COMPLETE        |
+----------------------------------------|------------------------------------|----------------|----------------|-----------------
+|    details (dictionary)               | Defined on a per-Expectation basis |
+### Column map Expectations (e.g. `ColumnMapExpectation`, `ColumnPairMapExpectation`, `MulticolumnMapExpectation`)
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    element_count                      |no              |yes             |yes             |yes             |
 |    missing_count                      |no              |yes             |yes             |yes             |
 |    missing_percent                    |no              |yes             |yes             |yes             |
-|    details (dictionary)               |Defined on a per-expectation basis                                 |
-### Fields defined for `column_map_expectation` type Expectations
-| Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
-----------------------------------------|----------------|----------------|----------------|-----------------
 |    unexpected_count                   |no              |yes             |yes             |yes             |
 |    unexpected_percent                 |no              |yes             |yes             |yes             |
 |    unexpected_percent_nonmissing      |no              |yes             |yes             |yes             |
@@ -79,11 +78,10 @@ cases for working with Great Expectations, including interactive exploratory wor
 |    unexpected_index_list              |no              |no              |no              |yes             |
 |    unexpected_index_query             |no              |no              |no              |yes             |
 |    unexpected_list                    |no              |no              |no              |yes             |
-### Fields defined for `column_aggregate_expectation` type Expectations
+### Column aggregate Expectations
 | Fields within `result`                |BOOLEAN_ONLY    |BASIC           |SUMMARY         |COMPLETE        |
 ----------------------------------------|----------------|----------------|----------------|-----------------
 |    observed_value                     |no              |yes             |yes             |yes             |
-|    details (e.g. statistical details) |no              |no              |yes             |yes             |
 
 ### Example use cases for different result_format values
 
@@ -118,14 +116,14 @@ Will return the following output:
 
 ### Behavior for `BASIC`
 
-For `BASIC` format, a `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
+For `BASIC` format, a `result` is generated with a basic justification for why an Expectation was met or not. The format is intended 
 for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
+`ColumnAggregateExpectation` Expectations.
 
 `column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of  
-unexpected values to justify the expectation result.
+unexpected values to justify the Expectation result.
 
 The basic `result` includes:
 
@@ -133,7 +131,7 @@ The basic `result` includes:
 {
     "success" : Boolean,
     "result" : {
-        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation]
+        "partial_unexpected_list" : [A list of up to 20 values that violate the Expectation]
         "unexpected_count" : The total count of unexpected values in the column
         "unexpected_percent" : The overall percent of unexpected values
         "unexpected_percent_nonmissing" : The percent of unexpected values, excluding missing values from the denominator
@@ -153,8 +151,8 @@ Will return the following output:
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_basic_example_set_output"
 ```
 
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a single 
-`observed_value` to justify the expectation result.
+`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a single 
+`observed_value` to justify the Expectation result.
 
 The basic `result` includes:
 
@@ -179,15 +177,15 @@ Will return the following output:
 
 ### Behavior for `SUMMARY`
 
-A `result` is generated with a summary justification for why an expectation was met or not. The format is intended  
+A `result` is generated with a summary justification for why an Expectation was met or not. The format is intended  
 for more detailed exploratory work and includes additional information beyond what is included by `BASIC`.
-For example, it can support generating dashboard results of whether a set of expectations are being met.
+For example, it can support generating dashboard results of whether a set of Expectations are being met.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
+`ColumnAggregateExpectation` Expectations.
 
 `column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of
-unexpected values to justify the expectation result.
+unexpected values to justify the Expectation result.
 
 The summary `result` includes:
 
@@ -199,7 +197,7 @@ The summary `result` includes:
         'unexpected_count': The total count of unexpected values in the column (also in `BASIC`)
         'unexpected_percent': The overall percent of unexpected values (also in `BASIC`)
         'unexpected_percent_nonmissing': The percent of unexpected values, excluding missing values from the denominator (also in `BASIC`)
-        "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
+        "partial_unexpected_list" : [A list of up to 20 values that violate the Expectation] (also in `BASIC`)
         'missing_count': The number of missing values in the column
         'missing_percent': The total percent of missing values in the column
         'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}
@@ -217,9 +215,9 @@ Will return the following output:
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_summary_example_set_output"
 ```
 
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
-to justify the expectation result. It also includes additional information regarding observed values and counts, 
-depending on the specific expectation.
+`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` 
+to justify the Expectation result. It also includes additional information regarding observed values and counts, 
+depending on the specific Expectation.
 
 The summary `result` includes:
 
@@ -244,14 +242,14 @@ Will return the following output:
 
 
 ### Behavior for `COMPLETE`
-A `result` is generated with all available justification for why an expectation was met or not. The format is  
+A `result` is generated with all available justification for why an Expectation was met or not. The format is  
 intended for debugging pipelines or developing detailed regression tests.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
-`column_aggregate_expectation` expectations.
+`ColumnAggregateExpectation` Expectations.
 
 `column_map_expectation` applies a boolean test function to each element within a column, and so returns a list of 
-unexpected values to justify the expectation result.
+unexpected values to justify the Expectation result.
 
 The complete `result` includes:
 
@@ -259,7 +257,7 @@ The complete `result` includes:
 {
     'success': False,
     'result': {
-        "unexpected_list" : [A list of all values that violate the expectation]
+        "unexpected_list" : [A list of all values that violate the Expectation]
         'unexpected_index_list': [A list of the indices of the unexpected values in the column, as defined by the columns in `unexpected_index_column_names`]
         'unexpected_index_query': [A query that can be used to retrieve all unexpected values (SQL and Spark), or the full list of unexpected indices (Pandas)]
         'element_count': The total number of values in the column (also in `SUMMARY`)
@@ -281,9 +279,9 @@ Will return the following output:
 ```python name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_complete_example_set_output"
 ```
 
-`column_aggregate_expectation` computes a single aggregate value for the column, and so returns a `observed_value` 
-to justify the expectation result. It also includes additional information regarding observed values and counts,  
-depending on the specific expectation.
+`ColumnAggregateExpectation` computes a single aggregate value for the column, and so returns a `observed_value` 
+to justify the Expectation result. It also includes additional information regarding observed values and counts,  
+depending on the specific Expectation.
 
 The complete `result` includes:
 
@@ -292,7 +290,7 @@ The complete `result` includes:
     'success': False,
     'result': {
         'observed_value': The aggregate statistic computed for the column (also in `SUMMARY`)
-        'details': {<expectation-specific result justification fields, which may be more detailed than in `SUMMARY`>}
+        'details': {<Expectation-specific result justification fields, which may be more detailed than in `SUMMARY`>}
     }
 }
 ```

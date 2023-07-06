@@ -87,24 +87,27 @@ def test_base_data_context_in_cloud_mode_add_datasource(
             expected_datasource_config = datasourceConfigSchema.dump(
                 block_config_datasource_config
             )
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **expected_datasource_config,
-                save_changes=save_changes,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **expected_datasource_config,
+                    save_changes=save_changes,
+                )
         elif config_includes_name_setting == "config_includes_name":
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict(), save_changes=save_changes
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    **datasource_config_with_name.to_dict(), save_changes=save_changes
+                )
         elif (
             config_includes_name_setting
             == "name_supplied_separately_and_included_in_config"
         ):
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-                save_changes=save_changes,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **datasource_config_with_name.to_dict(),
+                    save_changes=save_changes,
+                )
         else:
             raise ValueError(
                 "Invalid value provided for 'config_includes_name_setting'"
@@ -208,22 +211,25 @@ def test_data_context_in_cloud_mode_add_datasource(
             expected_datasource_config = datasourceConfigSchema.dump(
                 block_config_datasource_config
             )
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **expected_datasource_config,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **expected_datasource_config,
+                )
         elif config_includes_name_setting == "config_includes_name":
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict()
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    **datasource_config_with_name.to_dict()
+                )
         elif (
             config_includes_name_setting
             == "name_supplied_separately_and_included_in_config"
         ):
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **datasource_config_with_name.to_dict(),
+                )
         else:
             raise ValueError(
                 "Invalid value provided for 'config_includes_name_setting'"
@@ -320,25 +326,28 @@ def test_cloud_data_context_add_datasource(
             expected_datasource_config = datasourceConfigSchema.dump(
                 block_config_datasource_config
             )
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **expected_datasource_config,
-                save_changes=True,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **expected_datasource_config,
+                    save_changes=True,
+                )
         elif config_includes_name_setting == "config_includes_name":
-            stored_datasource = context.add_datasource(
-                **datasource_config_with_name.to_dict(),
-                save_changes=True,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    **datasource_config_with_name.to_dict(),
+                    save_changes=True,
+                )
         elif (
             config_includes_name_setting
             == "name_supplied_separately_and_included_in_config"
         ):
-            stored_datasource = context.add_datasource(
-                name=datasource_name,
-                **datasource_config_with_name.to_dict(),
-                save_changes=True,
-            )
+            with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+                stored_datasource = context.add_datasource(
+                    name=datasource_name,
+                    **datasource_config_with_name.to_dict(),
+                    save_changes=True,
+                )
         else:
             raise ValueError(
                 "Invalid value provided for 'config_includes_name_setting'"
@@ -395,7 +404,8 @@ def test_cloud_context_datasource_crud_e2e() -> None:
         },
     )
 
-    context.add_datasource(datasource=datasource)
+    with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+        context.add_datasource(datasource=datasource)
 
     saved_datasource = context.get_datasource(datasource_name)
     assert saved_datasource is not None and saved_datasource.name == datasource_name
