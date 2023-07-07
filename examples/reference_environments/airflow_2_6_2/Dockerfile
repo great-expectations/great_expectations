@@ -9,4 +9,7 @@ FROM apache/airflow:2.6.2-python3.10
 # modify the line below to install a different version of GX
 # E.g. for GX 0.17.0 use the line below:
 # RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" great_expectations==0.17.0
+# Note, you can also install GX from the develop branch (requires a `--rebuild`),
+# or replace develop with the branch name you want to install from:
+# RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" git+https://github.com/great-expectations/great_expectations.git@develop
 RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" great_expectations
