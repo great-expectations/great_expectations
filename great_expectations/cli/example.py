@@ -520,7 +520,10 @@ def example_airflow(
             "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
         )
         cli_message(
-            "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
+            "<green>To connect to the airflow webserver, please use the url http://localhost:8080/ with user and password `airflow`</green>"
+        )
+        cli_message(
+            "<green>The demo dag with Great Expectations based on the airflow tutorial is called tutorial_dag_with_gx.</green>"
         )
         cli_message("<green>Setting up airflow example using airflow v2.6.2...</green>")
         print_green_line()
