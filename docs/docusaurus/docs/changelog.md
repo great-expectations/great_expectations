@@ -39,8 +39,6 @@ title: Changelog
 * [MAINTENANCE] Update `test_deprecation.py` in advance of 0.17.3 release ([#8251](https://github.com/great-expectations/great_expectations/pull/8251))
 * [MAINTENANCE] enable typechecking in validator.py ([#8204](https://github.com/great-expectations/great_expectations/pull/8204))
 * [MAINTENANCE] Refactor validations in Checkpoint to use `CheckpointValidationConfig` ([#8225](https://github.com/great-expectations/great_expectations/pull/8225))
-* [MAINTENANCE] Bump scipy from 1.5.2 to 1.10.0 in docs_rtd ([#8249](https://github.com/great-expectations/great_expectations/pull/8249))
-* [MAINTENANCE] Protect `develop` with `no-commit-to-branch` pre-commit hook ([#8254](https://github.com/great-expectations/great_expectations/pull/8254))
 
 ### 0.17.2
 * [FEATURE] AWS S3 reference environment ([#8166](https://github.com/great-expectations/great_expectations/pull/8166))
