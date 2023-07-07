@@ -1149,7 +1149,8 @@ def test_add_or_update_checkpoint_adds_successfully(
         actual_config.expectation_suite_name
         == checkpoint_config["expectation_suite_name"]
     )
-    assert actual_config.validations == checkpoint_config["validations"]
+    actual_validations = [v.to_dict() for v in actual_config.validations]
+    assert actual_validations == checkpoint_config["validations"]
     assert context.checkpoint_store.save_count == 1
 
 
@@ -1169,13 +1170,23 @@ def test_add_or_update_checkpoint_adds_successfully(
                 "profilers": [],
                 "runtime_configuration": {},
                 "validations": [
-                    {"expectation_suite_name": "taxi.demo_pass"},
                     {
+                        "name": None,
+                        "id": None,
+                        "expectation_suite_name": "taxi.demo_pass",
+                        "expectation_suite_ge_cloud_id": None,
+                        "batch_request": None,
+                    },
+                    {
+                        "name": None,
+                        "id": None,
+                        "expectation_suite_name": None,
+                        "expectation_suite_ge_cloud_id": None,
                         "batch_request": {
                             "datasource_name": "oss_test_datasource",
                             "data_connector_name": "oss_test_data_connector",
                             "data_asset_name": "users",
-                        }
+                        },
                     },
                 ],
             },
@@ -1192,13 +1203,23 @@ def test_add_or_update_checkpoint_adds_successfully(
                     "profilers": [],
                     "runtime_configuration": {},
                     "validations": [
-                        {"expectation_suite_name": "taxi.demo_pass"},
                         {
+                            "name": None,
+                            "id": None,
+                            "expectation_suite_name": "taxi.demo_pass",
+                            "expectation_suite_ge_cloud_id": None,
+                            "batch_request": None,
+                        },
+                        {
+                            "name": None,
+                            "id": None,
+                            "expectation_suite_name": None,
+                            "expectation_suite_ge_cloud_id": None,
                             "batch_request": {
                                 "datasource_name": "oss_test_datasource",
                                 "data_connector_name": "oss_test_data_connector",
                                 "data_asset_name": "users",
-                            }
+                            },
                         },
                     ],
                 }
