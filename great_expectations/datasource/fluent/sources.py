@@ -615,15 +615,14 @@ class _SourceFactories:
         return delete_datasource
 
     @public_api
-    def delete_datasource(self, name: str) -> None:
+    def delete(self, name: str) -> None:
         """
         Deletes a datasource by name.
 
         Args:
             name: The name of the given datasource.
         """
-        self._data_context._delete_fluent_datasource(datasource_name=name)
-        self._data_context._save_project_config()
+        self._data_context.delete_datasource(datasource_name=name)
 
     def __getattr__(self, attr_name: str):
         try:
