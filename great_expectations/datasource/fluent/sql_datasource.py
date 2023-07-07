@@ -16,6 +16,8 @@ from typing import (
     cast,
 )
 
+from datetime import date, datetime
+
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
@@ -572,8 +574,12 @@ class _SQLAsset(DataAsset):
     @staticmethod
     def _matches_request_options(
         candidate: Dict, requested_options: BatchRequestOptions
-    ) -> bool:
+    ) -> bool:            
         for k, v in requested_options.items():
+            if type(candidate[k]) == datetime:
+                candidate[k] = str(candidate[k].date())
+            elif type(candidate[k]) == date:
+                candidate[k] = str(candidate[k])
             if v is not None and candidate[k] != v:
                 return False
         return True
