@@ -1,4 +1,5 @@
 from typing import Literal, Sequence, Union
+from uuid import UUID
 
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
@@ -23,6 +24,11 @@ class RunOnboardingDataAssistantEvent(EventBase):
 
 class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
+
+
+class TestDatasourceConfig(EventBase):
+    type: Literal["test_datasource_config"] = "test_datasource_config"
+    config_id: UUID
 
 
 class UnknownEvent(EventBase):

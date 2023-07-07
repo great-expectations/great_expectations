@@ -1,0 +1,8 @@
+from great_expectations.agent.actions import AgentAction, ActionResult
+from great_expectations.agent.models import TestDatasourceConfig
+
+
+class TestDraftDatasourceConfigAction(AgentAction[TestDatasourceConfig]):
+    def run(self, event: TestDatasourceConfig, id: str) -> ActionResult:
+        # get config
+        config = {}
