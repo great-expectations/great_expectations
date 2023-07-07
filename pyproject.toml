@@ -31,6 +31,7 @@ files = [
     "great_expectations",
     "tests/datasource/fluent",
     "tests/agent",
+    "tests/experimental",
     # "contrib" # ignore entire `contrib` package
     ]
 warn_unused_configs = true
