@@ -167,8 +167,7 @@ class CloudDataContext(SerializableDataContext):
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ) -> None:
         # Usage statistics are always disabled within Cloud-backed environments.
-        # By short-circuiting here, we ensure that no usage stats handler is created and attached to the context.
-        return
+        self._usage_statistics_handler = None
 
     @staticmethod
     def _resolve_cloud_args(  # noqa: PLR0913
