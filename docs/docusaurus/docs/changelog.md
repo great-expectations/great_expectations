@@ -10,6 +10,38 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.3
+* [FEATURE] Examples of using different store backends in reference environments ([#8211](https://github.com/great-expectations/great_expectations/pull/8211))
+* [FEATURE] Add checker to ensure snippets are being used ([#8178](https://github.com/great-expectations/great_expectations/pull/8178))
+* [FEATURE] Host data docs for the postgres reference environment ([#8221](https://github.com/great-expectations/great_expectations/pull/8221))
+* [FEATURE] Add checker to ensure test files have fixture definition ([#8186](https://github.com/great-expectations/great_expectations/pull/8186))
+* [FEATURE] make backend_dependencies required and not optional for doc integration tests ([#8216](https://github.com/great-expectations/great_expectations/pull/8216))
+* [FEATURE] View data docs inside snowflake and bigquery reference environments ([#8231](https://github.com/great-expectations/great_expectations/pull/8231))
+* [FEATURE] Reference Environment - AWS RDS ([#8222](https://github.com/great-expectations/great_expectations/pull/8222))
+* [BUGFIX] Fix yarn install and condition on CI pipeline ([#8217](https://github.com/great-expectations/great_expectations/pull/8217))
+* [BUGFIX] Ensure DataAssistantResult.plot_expectations_and_metrics does not raise exceptions when no Metrics or Expectations are available to plot ([#8238](https://github.com/great-expectations/great_expectations/pull/8238))
+* [DOCS] update result_format configuration documentation ([#8209](https://github.com/great-expectations/great_expectations/pull/8209))
+* [DOCS] Update Install GX ([#8206](https://github.com/great-expectations/great_expectations/pull/8206))
+* [DOCS] minor updates to the readme files ([#8245](https://github.com/great-expectations/great_expectations/pull/8245))
+* [MAINTENANCE] Arranging call arguments to `build_batch_request()` utility method to be in consistent order ([#8224](https://github.com/great-expectations/great_expectations/pull/8224))
+* [MAINTENANCE] Use python static file server ([#8229](https://github.com/great-expectations/great_expectations/pull/8229))
+* [MAINTENANCE] Fix race condition in integration tests using context manager ([#8223](https://github.com/great-expectations/great_expectations/pull/8223))
+* [MAINTENANCE] Remove a line ignoring warnings about iteritems ([#8227](https://github.com/great-expectations/great_expectations/pull/8227))
+* [MAINTENANCE] Correcting typographical error in test method naming. ([#8233](https://github.com/great-expectations/great_expectations/pull/8233))
+* [MAINTENANCE] Reference environment consistency - installed version ([#8237](https://github.com/great-expectations/great_expectations/pull/8237))
+* [MAINTENANCE] Reference environment consistency - unpin python version ([#8239](https://github.com/great-expectations/great_expectations/pull/8239))
+* [MAINTENANCE] Use data docs container for cloud blob stores ([#8240](https://github.com/great-expectations/great_expectations/pull/8240))
+* [MAINTENANCE] Reference Environments: Match the new quickstart ([#8242](https://github.com/great-expectations/great_expectations/pull/8242))
+* [MAINTENANCE] Reference Environment - AWS Credentials Clean up ([#8230](https://github.com/great-expectations/great_expectations/pull/8230))
+* [MAINTENANCE] Filter altair/jsonschema Deprecation warning ([#8244](https://github.com/great-expectations/great_expectations/pull/8244))
+* [MAINTENANCE] Filter `jsonschema.RefResolver`, `ErrorTree` warnings in tests ([#8246](https://github.com/great-expectations/great_expectations/pull/8246))
+* [MAINTENANCE] Temporarily upper bound Click due to `mypy` typing issues ([#8247](https://github.com/great-expectations/great_expectations/pull/8247))
+* [MAINTENANCE] Update `test_deprecation.py` in advance of 0.17.3 release ([#8251](https://github.com/great-expectations/great_expectations/pull/8251))
+* [MAINTENANCE] enable typechecking in validator.py ([#8204](https://github.com/great-expectations/great_expectations/pull/8204))
+* [MAINTENANCE] Refactor validations in Checkpoint to use `CheckpointValidationConfig` ([#8225](https://github.com/great-expectations/great_expectations/pull/8225))
+* [MAINTENANCE] Bump scipy from 1.5.2 to 1.10.0 in docs_rtd ([#8249](https://github.com/great-expectations/great_expectations/pull/8249))
+* [MAINTENANCE] Protect `develop` with `no-commit-to-branch` pre-commit hook ([#8254](https://github.com/great-expectations/great_expectations/pull/8254))
+
 ### 0.17.2
 * [FEATURE] AWS S3 reference environment ([#8166](https://github.com/great-expectations/great_expectations/pull/8166))
 * [FEATURE] Snowflake FDS ([#8157](https://github.com/great-expectations/great_expectations/pull/8157))
