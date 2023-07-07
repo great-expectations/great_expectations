@@ -653,7 +653,7 @@ is run), with each validation having its own defined "action_list" attribute.
     @property
     def validations(
         self,
-    ) -> list[CheckpointValidationConfig] | list[dict]:  # always a list[dict]
+    ) -> list[CheckpointValidationConfig]:
         try:
             return self.config.validations
         except AttributeError:
