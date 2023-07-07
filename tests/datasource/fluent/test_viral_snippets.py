@@ -5,7 +5,7 @@ import logging
 import pathlib
 import random
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -188,10 +188,7 @@ def test_sources_delete_removes_datasource_from_yaml(
 ):
     print(f"Delete -> '{random_datasource.name}'\n")
 
-    ds_delete_method: Callable[[str], None] = getattr(
-        seeded_file_context.sources, f"delete_{random_datasource.type}"
-    )
-    ds_delete_method(random_datasource.name)
+    seeded_file_context.sources.delete(random_datasource.name)
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
