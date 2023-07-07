@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from great_expectations.data_context.types.base import CheckpointValidationConfig
-from great_expectations.experimental.checkpoint import ExperimentalCheckpoint
+from great_expectations.experimental.checkpoint import Checkpoint
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
@@ -49,8 +49,8 @@ def experimental_checkpoint(
     in_memory_runtime_context: EphemeralDataContext,
     action_list: list[ActionDict],
     validations: list[CheckpointValidationConfig],
-) -> ExperimentalCheckpoint:
-    return ExperimentalCheckpoint(
+) -> Checkpoint:
+    return Checkpoint(
         name="my_experimental_checkpoint",
         data_context=in_memory_runtime_context,
         action_list=action_list,
@@ -58,7 +58,7 @@ def experimental_checkpoint(
     )
 
 
-def test_add_action(experimental_checkpoint: ExperimentalCheckpoint):
+def test_add_action(experimental_checkpoint: Checkpoint):
     before = len(experimental_checkpoint.action_list)
     action = {
         "name": "update_data_docs",
@@ -73,7 +73,7 @@ def test_add_action(experimental_checkpoint: ExperimentalCheckpoint):
 
 
 def test_add_action_collision_raises_error(
-    experimental_checkpoint: ExperimentalCheckpoint, action_list: list[ActionDict]
+    experimental_checkpoint: Checkpoint, action_list: list[ActionDict]
 ):
     action = action_list[0]
     with pytest.raises(ValueError):
@@ -106,7 +106,7 @@ def test_add_action_collision_raises_error(
     ],
 )
 def test_add_validation(
-    experimental_checkpoint: ExperimentalCheckpoint,
+    experimental_checkpoint: Checkpoint,
     validation: CheckpointValidationConfig | dict,
 ):
     before = len(experimental_checkpoint.validations)
@@ -146,7 +146,7 @@ def test_add_validation(
     ],
 )
 def test_add_validation_collision_raises_error(
-    experimental_checkpoint: ExperimentalCheckpoint,
+    experimental_checkpoint: Checkpoint,
     validation: CheckpointValidationConfig | dict,
 ):
     with pytest.raises(ValueError):

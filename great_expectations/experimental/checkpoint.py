@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 # TODO: to be renamed once we're good to move this out of experimental
-class ExperimentalCheckpoint:
+class Checkpoint:
     def __init__(
         self,
         name: str,
