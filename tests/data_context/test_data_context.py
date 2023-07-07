@@ -1937,13 +1937,16 @@ expectation_suite_ge_cloud_id:
         ],
         "validations": [
             {
+                "name": None,
+                "id": None,
+                "expectation_suite_name": "newsuite",
+                "expectation_suite_ge_cloud_id": None,
                 "batch_request": {
                     "datasource_name": "data_dir",
                     "data_connector_name": "data_dir_example_data_connector",
                     "data_asset_name": "DEFAULT_ASSET_NAME",
                     "partition_request": {"index": -1},
                 },
-                "expectation_suite_name": "newsuite",
             }
         ],
     }

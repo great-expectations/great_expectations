@@ -27,6 +27,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
+    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -4883,11 +4884,13 @@ def test_checkpoint_with_validator_creates_validations_list(
     assert len(validations) == 1
 
     actual = validations[0]
-    expected = {
-        "batch_request": {
+    expected = CheckpointValidationConfig(
+        batch_request={
+            "batch_slice": None,
             "data_asset_name": "#ephemeral_pandas_asset",
             "datasource_name": "default_pandas_datasource",
+            "options": {},
         },
-        "expectation_suite_name": "default",
-    }
-    assert actual == expected
+        expectation_suite_name="default",
+    )
+    assert actual.to_dict() == expected.to_dict()
