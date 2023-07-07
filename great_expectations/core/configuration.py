@@ -1,6 +1,6 @@
 """Contains general abstract or base classes used across configuration objects."""
-import json
 from abc import ABC
+from pprint import pformat as pf
 from typing import Optional
 
 from marshmallow.decorators import post_dump
@@ -18,7 +18,7 @@ class AbstractConfig(ABC, SerializableDictDot):
         super().__init__()
 
     def __repr__(self) -> str:
-        return json.dumps(self.to_dict(), indent=2)
+        return pf(self.to_dict(), indent=2, sort_dicts=True)
 
     @classmethod
     def _dict_round_trip(cls, schema: Schema, target: dict) -> dict:

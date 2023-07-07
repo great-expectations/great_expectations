@@ -631,10 +631,7 @@ is run), with each validation having its own defined "action_list" attribute.
 
     @property
     def name(self) -> str | None:
-        try:
-            return self.config.name
-        except AttributeError:
-            return None
+        return self.config.name
 
     @property
     def config_version(self) -> float | None:
@@ -657,8 +654,7 @@ is run), with each validation having its own defined "action_list" attribute.
         try:
             return self.config.validations
         except AttributeError:
-            result: list[dict] = []
-            return result
+            return []
 
     @property
     def ge_cloud_id(self) -> str | None:
