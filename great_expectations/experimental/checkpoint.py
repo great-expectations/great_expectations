@@ -30,6 +30,10 @@ class ExperimentalCheckpoint:
         )
 
     @property
+    def name(self) -> str:
+        return self._checkpoint.name
+
+    @property
     def action_list(self) -> Sequence[ActionDict]:
         return self._checkpoint.action_list
 
@@ -52,27 +56,21 @@ class ExperimentalCheckpoint:
         self._checkpoint.config.validations = validations
 
     def add_action(self, action: ActionDict) -> None:
-        existing_actions = self._checkpoint.action_list
-        if action in existing_actions:
+        if action in self.action_list:
             raise ValueError(
                 "The provided action already exists in this Checkpoint's action list"
             )
-
-        updated_actions = existing_actions.append(action)
-        self.action_list = updated_actions
+        self.action_list.append(action)
 
     def add_validation(self, validation: dict | CheckpointValidationConfig) -> None:
         if isinstance(validation, dict):
             validation = CheckpointValidationConfig(**validation)
 
-        existing_validations = self._checkpoint.validations
-        if validation in existing_validations:
+        if validation in self.validations:
             raise ValueError(
                 "The provided validation already exists in this Checkpoint's validations list"
             )
-
-        updated_validations = existing_validations.append(validation)
-        self.validations = updated_validations
+        self.validations.append(validation)
 
     def run(self) -> CheckpointResult:
         # TODO: expand with more args?
