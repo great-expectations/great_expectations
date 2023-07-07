@@ -475,18 +475,6 @@ def example_aws_postgres(
     default=False,
 )
 @click.option(
-    "--url",
-    is_flag=True,
-    help="Print url for jupyter notebook.",
-    default=False,
-)
-@click.option(
-    "--bash",
-    is_flag=True,
-    help="Open a bash terminal in the container (container should already be running).",
-    default=False,
-)
-@click.option(
     "--rebuild",
     "--build",
     is_flag=True,
@@ -495,8 +483,6 @@ def example_aws_postgres(
 )
 def example_airflow(
     stop: bool,
-    url: bool,
-    bash: bool,
     rebuild: bool,
 ) -> None:
     """Start an airflow example."""
@@ -505,15 +491,9 @@ def example_airflow(
         repo_root / "examples" / "reference_environments" / "airflow_2_6_2"
     )
     assert example_directory.is_dir(), "Example directory not found"
-    container_name = "not_applicable"
-    command_options = CommandOptions(stop, url, bash, rebuild)
-    if command_options.url or command_options.bash:
-        cli_message(
-            "<red>url and bash options are not supported for airflow example.</red>"
-        )
-        return
+    command_options = CommandOptions(stop, False, False, rebuild)
     executed_standard_function = _execute_standard_functions(
-        command_options, example_directory, container_name
+        command_options, example_directory, container_name="not_applicable"
     )
     if not executed_standard_function:
         cli_message(
