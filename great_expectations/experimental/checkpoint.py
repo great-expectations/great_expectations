@@ -19,8 +19,8 @@ class ExperimentalCheckpoint:
         self,
         name: str,
         data_context: AbstractDataContext,
-        action_list: Sequence[ActionDict] | None = None,
-        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
+        action_list: Sequence[ActionDict],
+        validations: list[dict] | list[CheckpointValidationConfig],
     ) -> None:
         self._checkpoint = LegacyCheckpoint(
             name=name,
