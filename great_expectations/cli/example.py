@@ -502,7 +502,7 @@ def example_airflow(
     """Start an airflow example."""
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = (
-        repo_root / "examples" / "reference_environments" / "airflow_2_6_1"
+        repo_root / "examples" / "reference_environments" / "airflow_2_6_2"
     )
     assert example_directory.is_dir(), "Example directory not found"
     container_name = "not_applicable"
@@ -522,9 +522,9 @@ def example_airflow(
         cli_message(
             "<green>To connect to the jupyter server, please use the links at the end of the log messages.</green>"
         )
-        cli_message("<green>Setting up airflow example using airflow v2.6.1...</green>")
+        cli_message("<green>Setting up airflow example using airflow v2.6.2...</green>")
         print_green_line()
-        example_setup_file = example_directory / "setup_airflow_2_6_1.sh"
+        example_setup_file = example_directory / "setup_airflow.sh"
         subprocess.run(example_setup_file, cwd=example_directory)
 
 

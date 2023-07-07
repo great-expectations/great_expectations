@@ -24,7 +24,7 @@
 # The following variables are supported:
 #
 # AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:2.6.1
+#                                Default: apache/airflow:2.6.2
 # AIRFLOW_UID                  - User ID in Airflow containers
 #                                Default: 50000
 # AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
@@ -50,7 +50,7 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-#  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.1}
+#  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.2}
   build: .
   environment:
     &airflow-common-env
