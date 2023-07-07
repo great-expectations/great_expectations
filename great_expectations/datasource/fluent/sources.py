@@ -638,7 +638,7 @@ class _SourceFactories:
             elif crud_method_type == CrudMethodType.DELETE:
                 # deprecated-v0.17.2
                 warnings.warn(
-                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `delete_datasource` moving forward.",
+                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",
                     DeprecationWarning,
                 )
                 return self.create_delete_crud_method(datasource_type, docstring)
