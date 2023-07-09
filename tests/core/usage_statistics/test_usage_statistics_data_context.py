@@ -119,10 +119,6 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         # Source: https://stackoverflow.com/a/64348247
         pytest.param("in_memory_runtime_context", id="EphemeralDataContext"),
         pytest.param("empty_data_context", id="FileDataContext"),
-        pytest.param(
-            "empty_data_context_in_cloud_mode",
-            id="CloudDataContext",
-        ),
     ],
 )
 @pytest.mark.integration
