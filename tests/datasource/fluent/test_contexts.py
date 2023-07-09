@@ -278,7 +278,7 @@ def test_cloud_context_delete_datasource(
     print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
     assert response1.status_code == 200
 
-    context.sources.delete_pandas_filesystem(datasource.name)
+    context.sources.delete(datasource.name)
     assert datasource.name not in context.fluent_datasources
 
     cloud_api_fake.assert_call_count(
