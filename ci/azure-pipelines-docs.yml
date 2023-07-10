@@ -85,7 +85,6 @@ stages:
             failOnStderr: true
           name: IntegrationTestGetsRunChecker
 
-
     - job: name_tag_snippet_referenced_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:

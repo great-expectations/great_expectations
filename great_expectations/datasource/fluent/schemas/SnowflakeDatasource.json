@@ -72,11 +72,52 @@
                     {}
                 ]
             }
+        },
+        "account": {
+            "title": "Account",
+            "type": "string"
+        },
+        "user": {
+            "title": "User",
+            "type": "string"
+        },
+        "password": {
+            "title": "Password",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "database": {
+            "title": "Database",
+            "type": "string"
+        },
+        "schema": {
+            "title": "Schema",
+            "type": "string"
+        },
+        "warehouse": {
+            "title": "Warehouse",
+            "type": "string"
+        },
+        "role": {
+            "title": "Role",
+            "type": "string"
+        },
+        "numpy": {
+            "title": "Numpy",
+            "default": false,
+            "type": "boolean"
         }
     },
     "required": [
-        "name",
-        "connection_string"
+        "name"
     ],
     "additionalProperties": false,
     "definitions": {
