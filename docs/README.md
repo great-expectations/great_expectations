@@ -46,7 +46,7 @@ The objective of a how-to guide is to help users successfully replicate a specif
 
 When you create your how-to guide, you can make the following assumptions:
 
-- The user has a working deployment of Great Expectations, whether it is set up on the file system by running `great_expectations init` or configured in-memory.
+- The user has a working deployment of Great Expectations.
 
 - The user is already familiar with Great Expectations core concepts including Expectations, Data Contexts, Validation, and Datasources.
 

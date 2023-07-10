@@ -3600,10 +3600,11 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,
     ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
+        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+            context.add_datasource(
+                "my_datasource",
+                **config,
+            )
     return context
 
 
@@ -7816,11 +7817,12 @@ def multibatch_generic_csv_generator():
     """
 
     def _multibatch_generic_csv_generator(
-        data_path: str,
+        data_path: str | pathlib.Path,
         start_date: Optional[datetime.datetime] = None,
         num_event_batches: Optional[int] = 20,
         num_events_per_batch: Optional[int] = 5,
     ) -> List[str]:
+        data_path = pathlib.Path(data_path)
         if start_date is None:
             start_date = datetime.datetime(2000, 1, 1)
 
@@ -7858,7 +7860,7 @@ def multibatch_generic_csv_generator():
             file_list.append(filename)
             # noinspection PyTypeChecker
             df.to_csv(
-                os.path.join(data_path, filename),  # noqa: PTH118
+                data_path / filename,
                 index_label="intra_batch_index",
             )
 

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -14,10 +16,12 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.data_connector.asset import Asset
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +215,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        self._execution_engine.load_batch_data(batch_definition.id, batch_data)  # type: ignore[arg-type] # got ExecutionEngine
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,  # type: ignore[return-value]
             batch_spec,

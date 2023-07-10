@@ -172,3 +172,24 @@ fluent_datasources:
         type: csv
         connect_options:
           abs_container: "this_is_always_required"
+  my_snowflake_ds:
+    type: snowflake
+    connection_string: "snowflake://user_login_name:password@account_identifier"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table
+  my_snowflake_ds_with_connect_args:
+    type: snowflake
+    account: "myorganization"
+    user: "testuser1"
+    password: "foobarbaz"
+    database: "testdb"
+    schema: "public"
+    warehouse: "testwh"
+    role: "admin"
+    numpy: true
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        table_name: my_table

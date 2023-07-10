@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def run_checkpoint_and_data_doc(  # noqa: PLR0915
+def run_checkpoint_and_data_doc(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
@@ -259,7 +259,7 @@ def run_batch_head(  # noqa: PLR0915
         assert isinstance(fetch_all, bool)
 
         execution_engine: ExecutionEngine = batch.data.execution_engine
-        execution_engine.batch_manager.load_batch_list(batch_list=[batch])  # type: ignore[list-item] # expect core.Batch got interfaces.Batch
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
 
         metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 

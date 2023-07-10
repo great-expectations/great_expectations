@@ -32,6 +32,7 @@ class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
                 "english": ["hello", "world"],
                 "thai": ["สวัสดี", "ชาวโลก"],
             },
+            "only_for": ["pandas", "spark"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -50,16 +51,6 @@ class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
                         "success": False,
                     },
                     "include_in_gallery": True,
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

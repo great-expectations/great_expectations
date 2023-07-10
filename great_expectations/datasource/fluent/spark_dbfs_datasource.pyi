@@ -5,7 +5,7 @@ from logging import Logger
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    types as pyspark_types,
 )
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import SparkFilesystemDatasource

@@ -31,7 +31,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource import DataConnector, Datasource  # noqa: TCH001
+from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict

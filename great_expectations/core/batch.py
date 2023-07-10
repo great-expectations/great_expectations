@@ -690,14 +690,6 @@ class BatchData:
         return pd.DataFrame({})
 
 
-if pyspark:
-    BatchDataType: TypeAlias = Union[
-        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
-    ]
-else:
-    BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
-
-
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
@@ -1370,3 +1362,19 @@ def standardize_batch_request_display_ordering(
         }
 
     return batch_request_as_dict  # type: ignore[return-value] # TODO: create a new object to return instead of popping
+
+
+if TYPE_CHECKING:
+    AnyBatch: TypeAlias = Union[Batch, FluentBatch]
+
+if pyspark.DataFrame:  # type: ignore[truthy-function] # False if NotImported
+    BatchDataUnion: TypeAlias = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
+
+    BatchDataType: TypeAlias = Union[
+        Type[BatchData], Type[pd.DataFrame], Type[pyspark.DataFrame]
+    ]
+else:
+    BatchDataType = Union[Type[BatchData], Type[pd.DataFrame]]  # type: ignore[misc] # Cannot assign multiple types
+    BatchDataUnion = Union[  # type: ignore[misc] # Cannot assign multiple types
+        BatchData, pd.DataFrame
+    ]

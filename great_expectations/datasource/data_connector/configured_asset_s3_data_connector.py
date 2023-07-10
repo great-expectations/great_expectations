@@ -1,15 +1,11 @@
 import logging
 from typing import List, Optional
 
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
+from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
@@ -17,7 +13,7 @@ from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
     sanitize_prefix_for_gcs_and_s3,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +78,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             boto3_options = {}
 
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."

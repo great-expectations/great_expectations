@@ -109,6 +109,9 @@ ge_dev/
 gx_dev/
 .gx_dev/
 
+# direnv
+.envrc
+
 # Spyder project settings
 .spyderproject
 .spyproject

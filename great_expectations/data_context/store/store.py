@@ -34,6 +34,14 @@ class StoreConfigTypedDict(TypedDict):
     store_backend: dict
 
 
+class DataDocsSiteConfigTypedDict(TypedDict):
+    # NOTE: TypeDict values may be incomplete, update as needed
+    class_name: str
+    module_name: NotRequired[str]
+    store_backend: dict
+    site_index_builder: dict
+
+
 class Store:
     """A store is responsible for reading and writing Great Expectations objects
     to appropriate backends. It provides a generic API that the DataContext can
@@ -245,13 +253,11 @@ class Store:
 
     def has_key(self, key: DataContextKey) -> bool:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.has_key(key)  # noqa: W601
+            return self._store_backend.has_key(key)
         else:
             if self._use_fixed_length_key:
-                return self._store_backend.has_key(  # noqa: W601
-                    key.to_fixed_length_tuple()
-                )
-            return self._store_backend.has_key(key.to_tuple())  # noqa: W601
+                return self._store_backend.has_key(key.to_fixed_length_tuple())
+            return self._store_backend.has_key(key.to_tuple())
 
     def self_check(self, pretty_print: bool) -> None:
         NotImplementedError(

@@ -1,5 +1,5 @@
 ---
-title: How to create example cases for a Custom Expectation
+title: Create example cases for a Custom Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -23,9 +23,7 @@ If you decide to contribute your Expectation, its entry in the [Expectations Gal
 
 We will explain the structure of these tests using the <TechnicalTag tag="custom_expectation" text="Custom Expectation" /> implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
-## Steps
-
-### 1. Decide which tests you want to implement
+## Decide which tests you want to implement
 
 Expectations can have a robust variety of possible applications. We want to create tests that demonstrate (and verify) the capabilities and limitations of our Custom Expectation.
 
@@ -69,7 +67,7 @@ These basic positive and negative example cases are the minimum amount of test c
 
 To begin with, let's implement those two basic tests: one positive example case, and one negative example case. 
 
-### 2. Defining our data
+## Define your data
 
 Search for `examples = []` in the template file you are modifying for your new Custom Expectation. 
 
@@ -127,7 +125,7 @@ will tell Great Expectations to only instantiate the data specified in that exam
 Passing this attribute within a test (at the same level as `title`, `in`, `out`, etc.) will execute that individual test only for that specified backend.
 :::
 
-### 3. Defining our tests
+## Define your tests
 
 In our example, `tests` will be a list containing dictionaries defining each test. 
 
@@ -143,9 +141,9 @@ If you are interested in contributing your Custom Expectation back to Great Expe
 ```
 
 :::note
-You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
+The optional `only_for` and `suppress_test_for` keys can be specified at the top-level (next to `data` and `tests`) or within specific tests (next to `title`, and so on).
 
-If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+Allowed backends include: "bigquery", "mssql", "mysql", "pandas", "postgresql", "redshift", "snowflake", "spark", "sqlite", "trino"
 :::
 
 <details>
@@ -162,7 +160,7 @@ For example:
 </code>
 </details>
 
-### 4. Verifying our tests
+## Verify your tests
 
 If you now run your file, `print_diagnostic_checklist()` will attempt to execute these example cases.
 
@@ -178,7 +176,7 @@ Congratulations!<br/>&#127881; You've successfully created example cases & tests
 </b></p>
 </div>
 
-### 5. Contribution (Optional)
+## Contribution (Optional)
 
 This guide will leave you with test coverage sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) back to Great Expectations at an Experimental level.  
 

@@ -1,11 +1,7 @@
 ---
 id: glossary
-title: "Glossary of Terms"
+title: "Glossary"
 ---
-
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 [**Action:**](./terms/action.md) A Python class with a run method that takes a Validation Result and does something with it
 

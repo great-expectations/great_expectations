@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
+    CheckpointValidationConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -51,7 +52,8 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions.exceptions import DataContextError
+from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
@@ -59,11 +61,15 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.base import (
+        AnonymizedUsageStatisticsConfig,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
-    from great_expectations.datasource.fluent import Datasource as FluentDatasource
+    from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.validator.validator import Validator
 
@@ -157,6 +163,12 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._apply_global_config_overrides(config=project_data_context_config)
+
+    def _initialize_usage_statistics(
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        # Usage statistics are always disabled within Cloud-backed environments.
+        self._usage_statistics_handler = None
 
     @staticmethod
     def _resolve_cloud_args(  # noqa: PLR0913
@@ -631,7 +643,14 @@ class CloudDataContext(SerializableDataContext):
             resource_name=expectation_suite_name,
         )
 
-        expectations_schema_dict: dict = cast(dict, self.expectations_store.get(key))
+        try:
+            expectations_schema_dict: dict = cast(
+                dict, self.expectations_store.get(key)
+            )
+        except StoreBackendError:
+            raise ValueError(
+                f"Unable to load Expectation Suite {key.resource_name or key.id}"
+            )
 
         if include_rendered_content is None:
             include_rendered_content = (
@@ -682,7 +701,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> None:
         ge_cloud_id = key.id
         if ge_cloud_id:
-            if self.expectations_store.has_key(key):  # noqa: W601
+            if self.expectations_store.has_key(key):
                 raise gx_exceptions.DataContextError(
                     f"expectation_suite with GX Cloud ID {ge_cloud_id} already exists. "
                     f"If you would like to overwrite this expectation_suite, set overwrite_existing=True."
@@ -709,7 +728,7 @@ class CloudDataContext(SerializableDataContext):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
@@ -919,3 +938,27 @@ class CloudDataContext(SerializableDataContext):
             url
         ), "Guaranteed to have a validation_result_url if generating a CheckpointResult in a Cloud-backed environment"
         self._open_url_in_browser(url)
+
+    def _add_datasource(
+        self,
+        name: str | None = None,
+        initialize: bool = True,
+        save_changes: bool | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        **kwargs,
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+        result = super()._add_datasource(
+            name=name,
+            initialize=initialize,
+            save_changes=save_changes,
+            datasource=datasource,
+            **kwargs,
+        )
+        if result and not isinstance(result, FluentDatasource):
+            # deprecated-v0.17.2
+            warnings.warn(
+                "Adding block-style or legacy datasources in a Cloud-backed environment is deprecated as of v0.17.2 and will be removed in a future version. "
+                "Please migrate to fluent-style datasources moving forward.",
+                DeprecationWarning,
+            )
+        return result

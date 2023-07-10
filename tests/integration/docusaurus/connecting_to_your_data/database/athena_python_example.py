@@ -49,10 +49,7 @@ datasource_dict = {
 # </snippet>
 
 context.test_yaml_config(yaml.dump(datasource_dict))
-
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Create Datasource from dict">
 context.add_datasource(**datasource_dict)
-# </snippet>
 
 # clean db to prepare for test
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")

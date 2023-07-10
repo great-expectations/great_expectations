@@ -730,7 +730,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
     )
 
     # noinspection PyUnusedLocal
-    @validates_schema  # noqa: C901
+    @validates_schema
     def validate_schema(self, data, **kwargs):  # noqa: C901, PLR0912
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
         if data["class_name"][0] == "$":
@@ -778,11 +778,13 @@ configuration to continue.
                 "ConfiguredAssetS3DataConnector",
                 "InferredAssetAzureDataConnector",
                 "ConfiguredAssetAzureDataConnector",
+                "InferredAssetGCSDataConnector",
+                "ConfiguredAssetGCSDataConnector",
             ]
         ):
             raise gx_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector that are required only by an
-S3/Azure type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
+S3/Azure/GCS type of the data connector (your data connector is "{data['class_name']}").  Please update your configuration \
 to continue.
 """
             )
@@ -2609,7 +2611,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
     class Meta:
         unknown = INCLUDE
 
-    id = fields.String(required=False, allow_none=False)
+    id = fields.String(required=False, allow_none=True)
 
     def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
         """
@@ -2808,7 +2810,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[Sequence[ActionDict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
+        validations: Optional[List[CheckpointValidationConfig]] = None,
         default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
@@ -2895,11 +2897,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[dict]:
+    def validations(self) -> List[CheckpointValidationConfig]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[dict]) -> None:
+    def validations(self, value: List[CheckpointValidationConfig]) -> None:
         self._validations = value
 
     @property
@@ -3159,7 +3161,7 @@ class CheckpointConfig(BaseYamlConfig):
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
-        validation_dict: dict
+        validation_dict: CheckpointValidationConfig
 
         for validation_dict in validations:  # type: ignore[assignment]
             substituted_validation_dict: dict = get_substituted_validation_dict(

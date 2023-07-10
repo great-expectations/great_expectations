@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, cast
 
+from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -20,11 +21,6 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine, SparkDFExecutionEngine
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +77,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
             boto3_options = {}
 
         try:
-            self._glue_client: Any = boto3.client("glue", **boto3_options)
+            self._glue_client: Any = aws.boto3.client("glue", **boto3_options)
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetAWSGlueDataCatalogDataConnector)."

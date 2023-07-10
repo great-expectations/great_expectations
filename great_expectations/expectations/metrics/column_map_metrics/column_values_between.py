@@ -30,7 +30,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(  # noqa: C901, PLR0912, PLR0913, PLR0915
+    def _pandas(  # noqa: C901, PLR0912, PLR0913
         cls,
         column,
         min_value=None,
@@ -44,11 +44,8 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         if min_value is None and max_value is None:
             raise ValueError("min_value and max_value cannot both be None")
 
-        if allow_cross_type_comparisons is None:
-            # NOTE - 20220818 - JPC: the "default" for `allow_cross_type_comparisons` is None
-            # to support not including it in configs if it is not explicitly set, but the *behavior*
-            # defaults to False. I think that's confusing and we should explicitly clarify.
-            allow_cross_type_comparisons = False
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
 
         if parse_strings_as_datetimes:
             warn_deprecated_parse_strings_as_datetimes()
@@ -77,21 +74,13 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             raise ValueError("min_value cannot be greater than max_value")
 
         # Use a vectorized approach for native numpy dtypes
-        if column.dtype in [int, float] and not allow_cross_type_comparisons:
+        if column.dtype in [int, float]:
             return cls._pandas_vectorized(
                 temp_column, min_value, max_value, strict_min, strict_max
             )
-        elif (
-            isinstance(column.dtype, pd.DatetimeTZDtype)
-            or pd.api.types.is_datetime64_ns_dtype(column.dtype)
-        ) and (not allow_cross_type_comparisons):
-            # NOTE: 20220818 - JPC
-            # we parse the *parameters* that we will be comparing here because it is possible
-            # that the user could have started with a true datetime, but that was converted to a string
-            # in order to support json serialization into the expectation configuration.
-            # We should fix that at a deeper level by creating richer containers for parameters that are type aware.
-            # Until that deeper refactor, we parse the string value back into a datetime here if we
-            # are going to compare to a datetime column.
+        elif isinstance(
+            column.dtype, pd.DatetimeTZDtype
+        ) or pd.api.types.is_datetime64_ns_dtype(column.dtype):
             if min_value is not None and isinstance(min_value, str):
                 min_value = parse(min_value)
 
@@ -102,7 +91,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 temp_column, min_value, max_value, strict_min, strict_max
             )
 
-        def is_between(val):  # noqa: C901, PLR0911, PLR0912
+        def is_between(val):  # noqa: PLR0911, PLR0912
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
@@ -111,87 +100,51 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
                 return False
 
             if min_value is not None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min and strict_max:
-                            return (val > min_value) and (val < max_value)
+                # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                # column must match type of constant being compared to column value (otherwise, error is raised).
+                if (isinstance(val, str) != isinstance(min_value, str)) or (
+                    isinstance(val, str) != isinstance(max_value, str)
+                ):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
 
-                        if strict_min:
-                            return (val > min_value) and (val <= max_value)
+                if strict_min and strict_max:
+                    return (val > min_value) and (val < max_value)
 
-                        if strict_max:
-                            return (val >= min_value) and (val < max_value)
+                if strict_min:
+                    return (val > min_value) and (val <= max_value)
 
-                        return (val >= min_value) and (val <= max_value)
-                    except TypeError:
-                        return False
+                if strict_max:
+                    return (val >= min_value) and (val < max_value)
 
-                else:
-                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
-                    # column must match type of constant being compared to column value (otherwise, error is raised).
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                    ):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min and strict_max:
-                        return (val > min_value) and (val < max_value)
-
-                    if strict_min:
-                        return (val > min_value) and (val <= max_value)
-
-                    if strict_max:
-                        return (val >= min_value) and (val < max_value)
-
-                    return (val >= min_value) and (val <= max_value)
+                return (val >= min_value) and (val <= max_value)
 
             elif min_value is None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_max:
-                            return val < max_value
+                # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                # column must match type of constant being compared to column value (otherwise, error is raised).
+                if isinstance(val, str) != isinstance(max_value, str):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
 
-                        return val <= max_value
-                    except TypeError:
-                        return False
+                if strict_max:
+                    return val < max_value
 
-                else:
-                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
-                    # column must match type of constant being compared to column value (otherwise, error is raised).
-                    if isinstance(val, str) != isinstance(max_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_max:
-                        return val < max_value
-
-                    return val <= max_value
+                return val <= max_value
 
             elif min_value is not None and max_value is None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min:
-                            return val > min_value
+                # Type of column values is either string or specific rich type (or "None").  In all cases, type of
+                # column must match type of constant being compared to column value (otherwise, error is raised).
+                if isinstance(val, str) != isinstance(min_value, str):
+                    raise TypeError(
+                        "Column values, min_value, and max_value must either be None or of the same type."
+                    )
 
-                        return val >= min_value
-                    except TypeError:
-                        return False
+                if strict_min:
+                    return val > min_value
 
-                else:
-                    # Type of column values is either string or specific rich type (or "None").  In all cases, type of
-                    # column must match type of constant being compared to column value (otherwise, error is raised).
-                    if isinstance(val, str) != isinstance(min_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min:
-                        return val > min_value
-
-                    return val >= min_value
+                return val >= min_value
 
             else:
                 return False
@@ -232,7 +185,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             return (min_value <= column) & (column <= max_value)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: C901, PLR0911, PLR0912, PLR0913
+    def _sqlalchemy(  # noqa: PLR0911, PLR0912, PLR0913
         cls,
         column,
         min_value=None,
@@ -300,7 +253,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(  # noqa: C901, PLR0911, PLR0912, PLR0913
+    def _spark(  # noqa: PLR0911, PLR0912, PLR0913
         cls,
         column,
         min_value=None,
