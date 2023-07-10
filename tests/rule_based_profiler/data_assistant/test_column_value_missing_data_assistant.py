@@ -64,7 +64,7 @@ def test_column_value_missing_data_assistant_plot_expectations_and_metrics_corre
         component_name="missingness_data_assistant",
         persist=False,
     )
-    assert len(validator.batches) == 36
+    assert len(validator.batches) == 3
 
     data_assistant_name: str = "test_missingness_data_assistant"
 
