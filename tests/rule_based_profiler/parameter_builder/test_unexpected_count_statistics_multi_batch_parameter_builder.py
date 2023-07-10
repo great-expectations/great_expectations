@@ -689,6 +689,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "total_count_parameter_builder_name",
         "mode",
         "max_error_rate",
+        "expectation_type",
         "evaluation_parameter_builder_configs",
     }
 
@@ -752,5 +753,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "total_count_parameter_builder_name",
         "mode",
         "max_error_rate",
+        "expectation_type",
         "evaluation_parameter_builder_configs",
     }

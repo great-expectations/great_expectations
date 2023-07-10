@@ -94,6 +94,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         total_count_parameter_builder_name: str,
         mode: str,
         max_error_rate: Optional[Union[str, float]] = None,
+        expectation_type: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
@@ -109,6 +110,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             mode: directive for aggregating/summarizing unexpected count fractions of domain over observed Batch samples.
             max_error_rate: user-configured fraction between 0 and 1 expressing maximum error rate for encountering
             unexpected values as judged by computing predicted validation errors based on observed unexpected fractions.
+            expectation_type: name of Expectation (optional, for troubleshooting and/or single_batch mode purposes).
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
@@ -125,6 +127,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             unexpected_count_parameter_builder_name
         )
         self._mode = mode
+        self._expectation_type = expectation_type
 
         if max_error_rate is None:
             max_error_rate = 2.5e-2
@@ -142,6 +145,10 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     @property
     def mode(self) -> str:
         return self._mode
+
+    @property
+    def expectation_type(self) -> str:
+        return self._expectation_type
 
     @property
     def max_error_rate(self) -> Union[str, float]:
@@ -255,7 +262,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
             if single_batch_mode:
                 # TODO: <Alex>ALEX</Alex>
-                # TODO: <Thu>Here is where we use Tal's flowchart to compute the value of "mostly" (I put a placeholder)</Thu>
+                # TODO: <Thu>Here is where we use Tal's flowchart to compute the value of "mostly" (I put a placeholder).</Thu>
+                # TODO: <Thu>This is also where we can use "self.expectation_type" for asymmetric logic.</Thu>
                 mostly: np.float64 = np.float64(6.5e-1)
                 # TODO: <Thu></Thu>
                 # TODO: <Alex>ALEX</Alex>
