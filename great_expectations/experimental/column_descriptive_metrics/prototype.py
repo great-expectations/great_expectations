@@ -1,9 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
 from pydantic import BaseModel
 
+from great_expectations.rule_based_profiler.domain_builder import (
+    CategoricalColumnDomainBuilder,
+)
+from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
+    CardinalityChecker,
+    CardinalityLimitMode,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
@@ -16,7 +23,7 @@ if TYPE_CHECKING:
 
 class Metric(BaseModel):
     name: str
-    placeholder_value: str  # TODO: Add value model and replace this
+    placeholder_value: Any  # TODO: Add value model and replace this
     # TODO: Add fields, config
 
 
@@ -132,7 +139,7 @@ def _convert_metrics_dict_to_metrics_object(raw_metrics: dict) -> Metrics:
     """
     # TODO: Add the rest of the metric fields, convert value to Value object:
     metric_objs = [
-        Metric(name=metric_name, placeholder_value=str(metric))
+        Metric(name=metric_name, placeholder_value=metric)
         for metric_name, metric in raw_metrics.items()
     ]
     return Metrics(metrics=metric_objs)
@@ -143,11 +150,9 @@ def _get_metrics_to_describe_batch(batch: Batch) -> Metrics:
     #  Shouldn't it be from the datasource?
     metric_calculator = MetricsCalculator(execution_engine=batch.data.execution_engine)
 
-    # TODO: Get domain_kwargs from DomainBuilder for columns.
-
     # TODO: Implement more than just table.head:
-
-    metrics_to_get = [
+    # TODO: Better variable names for _to_get variables:
+    table_summary_metrics_to_get = [
         MetricConfiguration(
             metric_name="table.head",
             metric_domain_kwargs={"batch_id": batch.id},
@@ -163,8 +168,100 @@ def _get_metrics_to_describe_batch(batch: Batch) -> Metrics:
         ),
     ]
 
-    raw_metrics = metric_calculator.get_metrics(
-        {metric_config.metric_name: metric_config for metric_config in metrics_to_get}
+    # TODO: Get domain_kwargs from DomainBuilder for columns.
+
+    metrics_to_get = []
+    metrics_to_get += table_summary_metrics_to_get
+    metrics_to_get += _categorical_metrics_to_get(batch)
+
+    # print("metric configs to get:", metrics_to_get)
+    #
+    # get_metrics_format = _convert_list_of_metric_configs_to_get_metrics_format(
+    #     metric_configs=metrics_to_get
+    # )
+
+    return_val = []
+    for metric in metrics_to_get:
+        metric_to_get_in_get_metrics_format = (
+            _convert_list_of_metric_configs_to_get_metrics_format([metric])
+        )
+        raw_metrics = metric_calculator.get_metrics(metric_to_get_in_get_metrics_format)
+        metrics = _convert_metrics_dict_to_metrics_object(raw_metrics=raw_metrics)
+        return_val.append(metrics)
+
+    actual_return_val = []
+    for metrics in return_val:
+        actual_return_val += metrics.metrics
+    return Metrics(metrics=actual_return_val)
+
+
+def _convert_list_of_metric_configs_to_get_metrics_format(
+    metric_configs: list[MetricConfiguration],
+) -> dict:
+    return_val = {}
+    for metric_config in metric_configs:
+        if not return_val.get(metric_config.metric_name):
+            return_val[metric_config.metric_name] = [metric_config]
+        else:
+            return_val[metric_config.metric_name].append(metric_config)
+
+    return return_val
+
+
+def _categorical_metrics_to_get(batch: Batch) -> list[MetricConfiguration]:
+    metric_calculator = MetricsCalculator(execution_engine=batch.data.execution_engine)
+    print("getting columns")
+    columns_raw_metric = metric_calculator.get_metrics(
+        {
+            metric_config.metric_name: metric_config
+            for metric_config in [
+                MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs={
+                        "batch_id": batch.id,
+                    },
+                    metric_value_kwargs={
+                        "include_nested": False,
+                    },
+                )
+            ]
+        }
     )
-    metrics = _convert_metrics_dict_to_metrics_object(raw_metrics=raw_metrics)
-    return metrics
+    columns_metric = _convert_metrics_dict_to_metrics_object(
+        columns_raw_metric
+    ).metrics[0]
+    columns = list(columns_metric.placeholder_value)
+
+    # TODO: Remove debug statements
+    print("columns:", columns)
+
+    print("Getting cardinality metrics")
+    categorical_column_domain_builder = CategoricalColumnDomainBuilder(
+        # VERY_FEW=AbsoluteCardinalityLimit("VERY_FEW", 10)
+        cardinality_limit_mode=CardinalityLimitMode.VERY_FEW,
+        max_unique_values=None,
+        max_proportion_unique=None,
+        data_context=None,
+    )
+
+    # TODO: This is a workaround to get _generate_metric_configurations_to_check_cardinality to work. It needs to be fixed.
+    categorical_column_domain_builder._cardinality_checker = CardinalityChecker(
+        cardinality_limit_mode=CardinalityLimitMode.VERY_FEW,  # TODO: Only needs to be set to get _generate_metric_configurations_to_check_cardinality to work.
+    )
+    # TODO: This is a private method - is there already a better way or an alternative or should we make this public?
+    cardinality_metrics_to_get = categorical_column_domain_builder._generate_metric_configurations_to_check_cardinality(
+        column_names=columns, batch_ids=[batch.id]
+    )
+    print("cardinality_metrics_to_get:", cardinality_metrics_to_get)
+
+    # Flatten the dict of lists into a single list of values (MetricConfigurations):
+    cardinality_metric_configs = [
+        config for val in cardinality_metrics_to_get.values() for config in val
+    ]
+
+    # TODO: Does metric_config already have the column name? If so we might not need to add it here as a key.
+
+    return cardinality_metric_configs
+
+
+# Use ColumnDomainBuilder to get columns for numeric & datetime columns.
