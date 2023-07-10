@@ -34,6 +34,7 @@ module.exports = {
         facetFilters: [
         'version:current'
       ]
+    }
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
