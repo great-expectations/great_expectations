@@ -24,7 +24,7 @@ jobs:
             reqs/requirements-dev-contrib.txt
 
       - name: Install dependencies
-        run: pip install -r requirements-types.txt -r eqs/requirements-dev-contrib.txt
+        run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
 
       - run: invoke type-check
       - run: invoke lint
