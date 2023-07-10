@@ -38,7 +38,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
     parameter_builder: ParameterBuilder = (
         UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name="my_name",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             unexpected_count_parameter_builder_name="my_unexpected_count",
             total_count_parameter_builder_name="my_total_count",
             data_context=data_context,
@@ -64,7 +64,7 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
         )
 
     assert (
-        "__init__() missing 3 required positional arguments: 'unexpected_count_parameter_builder_name', 'total_count_parameter_builder_name', and 'aggregation_method'"
+        "__init__() missing 3 required positional arguments: 'unexpected_count_parameter_builder_name', 'total_count_parameter_builder_name', and 'mode'"
         in str(excinfo.value)
     )
 
@@ -79,9 +79,8 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
             )
         )
 
-    assert (
-        "__init__() missing 1 required positional argument: 'aggregation_method'"
-        in str(excinfo.value)
+    assert "__init__() missing 1 required positional argument: 'mode'" in str(
+        excinfo.value
     )
 
 
@@ -132,7 +131,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=None,
             data_context=data_context,
         )
@@ -236,7 +235,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
@@ -324,7 +323,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
@@ -419,7 +418,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=None,
             data_context=data_context,
         )
@@ -523,7 +522,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
@@ -613,7 +612,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
@@ -674,7 +673,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=None,
             data_context=data_context,
         )
@@ -689,7 +688,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "name",
         "unexpected_count_parameter_builder_name",
         "total_count_parameter_builder_name",
-        "aggregation_method",
+        "mode",
         "false_positive_rate",
         "quantile_statistic_interpolation_method",
         "round_decimals",
@@ -739,7 +738,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
             name="my_passenger_count_values_not_null_unexpected_count_statistics",
             unexpected_count_parameter_builder_name="my_null_count",
             total_count_parameter_builder_name="my_total_count",
-            aggregation_method="all_values",
+            mode="unexpected_count_fraction_values",
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=data_context,
         )
@@ -754,7 +753,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "name",
         "unexpected_count_parameter_builder_name",
         "total_count_parameter_builder_name",
-        "aggregation_method",
+        "mode",
         "false_positive_rate",
         "quantile_statistic_interpolation_method",
         "round_decimals",

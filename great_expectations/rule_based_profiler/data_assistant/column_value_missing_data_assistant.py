@@ -139,9 +139,11 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         map_metric_name: str
-        aggregation_method: str
+        mode: str
 
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        condition: str
 
         map_metric_name = "column_values.nonnull"
         evaluation_parameter_builder_configs = [
@@ -153,49 +155,129 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ),
         ]
 
-        aggregation_method = "all_values"
+        # TODO: <Alex>ALEX</Alex>
+        mode = "unexpected_count_fraction_values"
 
         column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method=aggregation_method,
+            mode=mode,
             false_positive_rate=None,
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
+        # TODO: <Alex>ALEX</Alex>
 
-        aggregation_method = "active_batch_value"
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "single_batch"
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
 
-        column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method=aggregation_method,
-            false_positive_rate=None,
+            mode=mode,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
+        # TODO: <Alex>ALEX</Alex>
+        # column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations
+        # TODO: <Alex>ALEX</Alex>
+
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "quantile"
+        #
+        # column_values_nonnull_unexpected_count_quantile_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        #     name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        #     unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     mode=mode,
+        #     false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        #     quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        #     round_decimals=f"{VARIABLES_KEY}round_decimals",
+        #     evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        #     data_context=None,
+        # )
+        # TODO: <Alex>ALEX</Alex>
 
         validation_parameter_builder_configs = [
+            # TODO: <Alex>ALEX</Alex>
             ParameterBuilderConfig(
-                **column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
+                **column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # ParameterBuilderConfig(
+            #     **column_values_nonnull_unexpected_count_quantile_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
+            # ),
+            # TODO: <Alex>ALEX</Alex>
         ]
+        # TODO: <Alex>ALEX</Alex>
+        # expect_column_values_to_not_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        #     expectation_type="expect_column_values_to_not_be_null",
+        #     validation_parameter_builder_configs=validation_parameter_builder_configs,
+        #     column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+        #     mostly=f"{column_values_nonnull_unexpected_count_quantile_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # condition=f"{column_values_nonnull_unexpected_count_median_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_unexpected_count_median_fraction & {column_values_nonnull_unexpected_count_quantile_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} >= {VARIABLES_KEY}min_mostly",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # condition=f"{column_values_nonnull_unexpected_count_median_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_unexpected_count_median_fraction",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     meta={
+        #         "profiler_details": {
+        #             # TODO: <Alex>ALEX</Alex>
+        #             # "condition_estimator": f"{column_values_nonnull_unexpected_count_median_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        #             # "mostly_estimator": f"{column_values_nonnull_unexpected_count_quantile_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        #             # TODO: <Alex>ALEX</Alex>
+        #         },
+        #     },
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
+        # &
+        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mean_error < {VARIABLES_KEY}min_mean_error))
+        # TODO: <Alex>ALEX</Alex>
+        condition = f"""
+        ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
+        &
+        ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}unexpected_count_fraction_active_batch_value < {VARIABLES_KEY}max_unexpected_count_fraction))
+        |
+        ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode != True
+        &
+        ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
+        &
+        ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mean_error < {VARIABLES_KEY}min_mean_error))
+        """
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         expect_column_values_to_not_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_not_be_null",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            mostly=f"{column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}.mostly",
-            condition=f"{column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}.active_batch_value <= {VARIABLES_KEY}max_unexpected_count_fraction",
+            mostly=f"{column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly",
+            # TODO: <Alex>ALEX</Alex>
+            # condition=f"{column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}unexpected_count_fraction_active_batch_value <= {VARIABLES_KEY}max_unexpected_count_fraction",
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            condition=condition,
+            # TODO: <Alex>ALEX</Alex>
             meta={
-                "profiler_details": f"{column_values_nonnull_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
+        # TODO: <Alex>ALEX</Alex>
 
         map_metric_name = "column_values.null"
         evaluation_parameter_builder_configs = [
@@ -207,58 +289,154 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             ),
         ]
 
-        aggregation_method = "all_values"
+        # TODO: <Alex>ALEX</Alex>
+        mode = "unexpected_count_fraction_values"
 
         column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method=aggregation_method,
+            mode=mode,
             false_positive_rate=None,
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
+        # TODO: <Alex>ALEX</Alex>
 
-        aggregation_method = "active_batch_value"
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "single_batch"
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
 
-        column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
-            name=f"{aggregation_method}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+            name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
-            aggregation_method=aggregation_method,
-            false_positive_rate=None,
+            mode=mode,
+            false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
             quantile_statistic_interpolation_method=None,
             round_decimals=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
+        # TODO: <Alex>ALEX</Alex>
+        # column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics: ParameterBuilder = column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations
+        # TODO: <Alex>ALEX</Alex>
+
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "quantile"
+        #
+        # column_values_null_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
+        #     name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        #     unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
+        #     mode=mode,
+        #     false_positive_rate=f"{VARIABLES_KEY}false_positive_rate",
+        #     quantile_statistic_interpolation_method=f"{VARIABLES_KEY}quantile_statistic_interpolation_method",
+        #     round_decimals=f"{VARIABLES_KEY}round_decimals",
+        #     evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        #     data_context=None,
+        # )
+        # TODO: <Alex>ALEX</Alex>
 
         validation_parameter_builder_configs = [
+            # TODO: <Alex>ALEX</Alex>
             ParameterBuilderConfig(
-                **column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
+                **column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # ParameterBuilderConfig(
+            #     **column_values_null_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.to_json_dict()
+            # ),
+            # TODO: <Alex>ALEX</Alex>
         ]
+        # TODO: <Alex>ALEX</Alex>
+        # expect_column_values_to_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        #     expectation_type="expect_column_values_to_be_null",
+        #     validation_parameter_builder_configs=validation_parameter_builder_configs,
+        #     column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+        #     mostly=f"{column_values_null_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # condition=f"{column_values_null_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_unexpected_count_median_fraction & {column_values_null_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} >= {VARIABLES_KEY}min_mostly",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # condition=f"{column_values_null_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY} <= {VARIABLES_KEY}max_unexpected_count_median_fraction",
+        #     # TODO: <Alex>ALEX</Alex>
+        #     meta={
+        #         # TODO: <Alex>ALEX</Alex>
+        #         # "profiler_details": {
+        #         #     "condition_estimator": f"{column_values_null_unexpected_count_median_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        #         #     "mostly_estimator": f"{column_values_null_unexpected_count_quantile_fraction_metric_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+        #         # },
+        #         # TODO: <Alex>ALEX</Alex>
+        #     },
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
+        # &
+        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mean_error < {VARIABLES_KEY}min_mean_error))
+        # TODO: <Alex>ALEX</Alex>
+        condition = f"""\
+        ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
+        &
+        ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}unexpected_count_fraction_active_batch_value < {VARIABLES_KEY}max_unexpected_count_fraction))
+        |
+        ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode != True
+        &
+        ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
+        &
+        ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mean_error < {VARIABLES_KEY}min_mean_error))
+        """
+        # TODO: <Alex>ALEX</Alex>
         expect_column_values_to_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
             expectation_type="expect_column_values_to_be_null",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
-            mostly=f"{column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}.mostly",
-            condition=f"{column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}.active_batch_value <= {VARIABLES_KEY}max_unexpected_count_fraction",
+            mostly=f"{column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly",
+            # TODO: <Alex>ALEX</Alex>
+            # condition=f"{column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}unexpected_count_fraction_active_batch_value <= {VARIABLES_KEY}max_unexpected_count_fraction",
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            condition=condition,
+            # TODO: <Alex>ALEX</Alex>
             meta={
-                "profiler_details": f"{column_values_null_unexpected_count_active_batch_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+                "profiler_details": f"{column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}.{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
             },
         )
+        # TODO: <Alex>ALEX</Alex>
 
         variables: dict = {
+            "false_positive_rate": 2.5e-2,
+            "quantile_statistic_interpolation_method": "auto",
+            "round_decimals": 2,
             "max_unexpected_count_fraction": 5.0e-1,
+            # TODO: <Alex>ALEX</Alex>
+            "min_mostly": 5.0e-1,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # "min_mean_error": 5.0e-1,
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            "min_mean_error": 2.5e-2,  # min per-Batch Hamming expectation validation success/failure distance tolerance
+            # TODO: <Alex>ALEX</Alex>
         }
         parameter_builders: List[ParameterBuilder] = [
             column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
+            # TODO: <Alex>ALEX</Alex>
             column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
+            # TODO: <Alex>ALEX</Alex>
             column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_metrics,
+            # TODO: <Alex>ALEX</Alex>
             column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_metrics,
+            # TODO: <Alex>ALEX</Alex>
         ]
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
             expect_column_values_to_not_be_null_expectation_configuration_builder,
