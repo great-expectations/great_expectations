@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Literal, Union
 
 from pydantic import AnyUrl
 
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -14,6 +15,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.datasource.fluent.interfaces import _ExecutionEngineT
 
 
