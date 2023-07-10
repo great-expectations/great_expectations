@@ -168,7 +168,12 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        mode = "single_batch"
+        # TODO: <Alex>ALEX</Alex>
 
         column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -235,7 +240,12 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
+        # mode = "auto"
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        mode = "single_batch"
+        # TODO: <Alex>ALEX</Alex>
 
         column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
