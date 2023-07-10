@@ -145,6 +145,7 @@ stages:
 
     jobs:
     - job: static_type_check
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       variables:
         python.version: '3.8'
       steps:
@@ -164,12 +165,14 @@ stages:
           invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
     - job: docstring_linter
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       steps:
       - script: |
           pip install --requirement reqs/requirements-dev-test.txt
           invoke docstrings
         name: DocstringLinter
     - job: unused_import_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       steps:
       - script: |
           pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
@@ -180,6 +183,14 @@ stages:
       steps:
         - script: ./ci/checks/check_repo_root_size.sh
           name: CheckRepoRootSize
+    - job: public_api_report
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+      steps:
+        - script: |
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
+          name: PublicAPIReport
+
 
   - stage: import_ge
     dependsOn: scope_check
