@@ -10,6 +10,13 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.17.4
+* [MAINTENANCE] Protect `develop` with `no-commit-to-branch` pre-commit hook ([#8254](https://github.com/great-expectations/great_expectations/pull/8254))
+* [MAINTENANCE] Change Pydantic models to utilize `by_alias=True` ([#8252](https://github.com/great-expectations/great_expectations/pull/8252))
+* [MAINTENANCE] Support individual connection args for Snowflake FDS ([#8183](https://github.com/great-expectations/great_expectations/pull/8183))
+* [MAINTENANCE] Replace dynamic datasource deletion with single `delete` method ([#8189](https://github.com/great-expectations/great_expectations/pull/8189))
+* [MAINTENANCE] Disable usage statistics when in Cloud-backed environments ([#8248](https://github.com/great-expectations/great_expectations/pull/8248))
+
 ### 0.17.3
 * [FEATURE] Examples of using different store backends in reference environments ([#8211](https://github.com/great-expectations/great_expectations/pull/8211))
 * [FEATURE] Add checker to ensure snippets are being used ([#8178](https://github.com/great-expectations/great_expectations/pull/8178))
