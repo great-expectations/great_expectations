@@ -283,7 +283,7 @@ def _compute_multi_batch_min_unexpected_count_fraction(
     """
 
     # Define objective function to be minimized (minimum "unexpected_count_fraction" is desired to maximize "mostly").
-    def _objective_function(x: np.floati64) -> np.float64:
+    def _objective_function(x: np.float64) -> np.float64:
         return x
 
     # Sort array in ascending order

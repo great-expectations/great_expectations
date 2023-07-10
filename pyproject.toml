@@ -176,6 +176,7 @@ exclude = [
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/util\.py',  # 46
+    'rule_based_profiler/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py',  # 69
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
@@ -285,7 +286,7 @@ extend-exclude = [
     "tests/dataset", # 10 warnings
     "tests/expectations", # 56 warnings
     "tests/integration/docusaurus", # 208 warnings, 144 auto-fixable
-    "tests/rule_based_profiler", # 90 warnings
+    "tests/rule_based_profiler", # 28 warnings
     "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
 ]
 
