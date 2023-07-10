@@ -284,14 +284,16 @@ def _compute_multi_batch_min_unexpected_count_fraction(
 
     # Define objective function to be minimized (minimum "unexpected_count_fraction" is desired to maximize "mostly").
     def _objective_function(x: np.float64) -> np.float64:
-        return x
+        return x[0]
 
     # Sort array in ascending order
     sorted_a: np.ndarray = np.sort(a, axis=None)
 
     # Define constraint function reflecting penalty incurred by lowering "unexpected_count_fraction" (raising "mostly").
     def _constraint_function(x: np.float64) -> np.float64:
-        return np.float64(_multi_batch_cost_function(x=x, a=sorted_a) - max_error_rate)
+        return np.float64(
+            _multi_batch_cost_function(x=x[0], a=sorted_a) - max_error_rate
+        )
 
     # Perform optimization.
     result: scipy.optimize.OptimizeResult = scipy.optimize.minimize(
@@ -302,4 +304,4 @@ def _compute_multi_batch_min_unexpected_count_fraction(
     )
 
     # Return optimized variable (minimum "unexpected_count_fraction").
-    return result.x
+    return result.x[0]
