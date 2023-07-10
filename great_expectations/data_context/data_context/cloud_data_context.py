@@ -43,6 +43,7 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.types.base import (
     DEFAULT_USAGE_STATISTICS_URL,
     CheckpointConfig,
+    CheckpointValidationConfig,
     DataContextConfig,
     DataContextConfigDefaults,
     GXCloudConfig,
@@ -60,6 +61,9 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.base import (
+        AnonymizedUsageStatisticsConfig,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
@@ -159,6 +163,12 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._apply_global_config_overrides(config=project_data_context_config)
+
+    def _initialize_usage_statistics(
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        # Usage statistics are always disabled within Cloud-backed environments.
+        self._usage_statistics_handler = None
 
     @staticmethod
     def _resolve_cloud_args(  # noqa: PLR0913
@@ -718,7 +728,7 @@ class CloudDataContext(SerializableDataContext):
         action_list: Sequence[ActionDict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[dict] | list[CheckpointValidationConfig] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,

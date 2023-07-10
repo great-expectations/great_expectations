@@ -215,7 +215,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
-        self._execution_engine.load_batch_data(batch_definition.id, batch_data)  # type: ignore[arg-type] # got ExecutionEngine
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,  # type: ignore[return-value]
             batch_spec,
