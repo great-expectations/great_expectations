@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from inspect import isabstract
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch, BatchRequestBase
