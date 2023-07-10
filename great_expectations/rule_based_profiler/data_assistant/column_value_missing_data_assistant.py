@@ -141,6 +141,8 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         map_metric_name: str
         mode: str
 
+        expectation_type: str
+
         validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
 
         condition: str
@@ -162,8 +164,8 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
-            expectation_type=None,
             max_error_rate=None,
+            expectation_type=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
@@ -175,12 +177,15 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         mode = "single_batch"
         # TODO: <Alex>ALEX</Alex>
 
+        expectation_type = "expect_column_values_to_not_be_null"
+
         column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_nonnull_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
+            expectation_type=expectation_type,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
@@ -207,7 +212,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
         """
         expect_column_values_to_not_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_not_be_null",
+            expectation_type=expectation_type,
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             mostly=f"{column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly",
@@ -234,8 +239,8 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
-            expectation_type=None,
             max_error_rate=None,
+            expectation_type=None,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
@@ -247,12 +252,15 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         mode = "single_batch"
         # TODO: <Alex>ALEX</Alex>
 
+        expectation_type = "expect_column_values_to_be_null"
+
         column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations: ParameterBuilder = UnexpectedCountStatisticsMultiBatchParameterBuilder(
             name=f"{mode}.{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             unexpected_count_parameter_builder_name=column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             total_count_parameter_builder_name=total_count_metric_multi_batch_parameter_builder_for_evaluations.name,
             mode=mode,
             max_error_rate=f"{VARIABLES_KEY}max_error_rate",
+            expectation_type=expectation_type,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
             data_context=None,
         )
@@ -279,7 +287,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
         """
         expect_column_values_to_be_null_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_null",
+            expectation_type=expectation_type,
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
             mostly=f"{column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly",
