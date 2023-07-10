@@ -5,14 +5,6 @@ bigquery_integration_tests = []
 
 connecting_to_your_data = [
     IntegrationTestFixture(
-        name="bigquery_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
         name="bigquery_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -108,20 +100,20 @@ split_data = [
         ),
         backend_dependencies=[BackendDependencies.BIGQUERY],
     ),
-    # IntegrationTestFixture(
-    #     name="split_data_on_datetime_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
-    # ),
+    IntegrationTestFixture(
+        name="split_data_on_datetime_bigquery",
+        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+        util_script="tests/test_utils.py",
+        other_files=(
+            (
+                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
+                "connection_string.yml",
+            ),
+        ),
+        backend_dependencies=[BackendDependencies.BIGQUERY],
+    ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_bigquery",

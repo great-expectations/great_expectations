@@ -659,6 +659,24 @@ def test_onboarding_data_assistant_plot_include_and_exclude_column_names_raises_
     assert "either use `include_column_names` or `exclude_column_names`" in str(e.value)
 
 
+@pytest.mark.unit
+def test_onboarding_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
+    None
+):
+    data_assistant_result: DataAssistantResult = OnboardingDataAssistantResult()
+
+    include_column_names: List[str] = [
+        "congestion_surcharge",
+    ]
+    plot_result: PlotResult = data_assistant_result.plot_expectations_and_metrics(
+        include_column_names=include_column_names
+    )
+
+    # This test passes only if absense of any metrics and expectations to plot does not cause exceptions to be raised.
+    column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
+    assert len(column_domain_charts) == 0
+
+
 @pytest.mark.integration
 @pytest.mark.slow  # 5.63s
 def test_onboarding_data_assistant_plot_custom_theme_overrides(

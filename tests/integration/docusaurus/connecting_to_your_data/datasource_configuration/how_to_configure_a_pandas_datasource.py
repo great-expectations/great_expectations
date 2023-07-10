@@ -20,13 +20,11 @@ from functools import reduce
 from typing import List, Tuple
 
 # Import the necessary modules for the examples, and initialize a Data Context.
-# <snippet name="filesystem_datasource_config_gx_imports">
 import great_expectations as gx
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 data_context: gx.DataContext = gx.get_context()
-# </snippet>
 
 # The following methods are used to verify that the example configuration snippets are consistent with each other.
 # Users can disregard them.
