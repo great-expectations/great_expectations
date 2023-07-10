@@ -23,7 +23,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
-from tests.rule_based_profiler.conftest import ATOL, RTOL
 
 
 @pytest.mark.integration
@@ -689,9 +688,7 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "unexpected_count_parameter_builder_name",
         "total_count_parameter_builder_name",
         "mode",
-        "false_positive_rate",
-        "quantile_statistic_interpolation_method",
-        "round_decimals",
+        "max_error_rate",
         "evaluation_parameter_builder_configs",
     }
 
@@ -754,8 +751,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "unexpected_count_parameter_builder_name",
         "total_count_parameter_builder_name",
         "mode",
-        "false_positive_rate",
-        "quantile_statistic_interpolation_method",
-        "round_decimals",
+        "max_error_rate",
         "evaluation_parameter_builder_configs",
     }

@@ -13,10 +13,8 @@ class ColumnValueMissingDataAssistantResult(DataAssistantResult):
         A mapping is defined for which metrics to plot and their associated expectations.
         """
         return {
-            # TODO: <Alex>ALEX</Alex>
             "column_values.nonnull.unexpected_count": "expect_column_values_to_not_be_null",
             "column_values.null.unexpected_count": "expect_column_values_to_be_null",
-            # TODO: <Alex>ALEX</Alex>
         }
 
     @property
