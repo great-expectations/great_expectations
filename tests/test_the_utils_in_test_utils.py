@@ -7,6 +7,7 @@ from great_expectations.util import (
 from tests.test_utils import get_awsathena_connection_url
 
 
+@pytest.mark.athena
 @pytest.mark.unit
 def test_get_awsathena_connection_url(monkeypatch):
     monkeypatch.setenv("ATHENA_STAGING_S3", "s3://test-staging/")
@@ -23,11 +24,7 @@ def test_get_awsathena_connection_url(monkeypatch):
         == "awsathena+rest://@athena.us-east-1.amazonaws.com/test_ten_trips_db_name?s3_staging_dir=s3://test-staging/"
     )
 
-
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="clickhouse_sqlalchemy"),
-    reason="clickhouse_sqlalchemy is not installed",
-)
+@pytest.mark.clickhouse
 def test_get_clickhouse_sqlalchemy_potential_type():
     import clickhouse_sqlalchemy
     from clickhouse_sqlalchemy import types
