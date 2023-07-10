@@ -106,7 +106,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         return self._mode
 
     @property
-    def expectation_type(self) -> str:
+    def expectation_type(self) -> Optional[str]:
         return self._expectation_type
 
     @property
