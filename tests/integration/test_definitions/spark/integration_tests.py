@@ -12,19 +12,8 @@ connecting_to_your_data = [
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
-        name="in_memory_spark_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
         name="in_memory_spark_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="filesystem_spark_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
@@ -52,12 +41,6 @@ databricks_deployment_patterns = [
     IntegrationTestFixture(
         name="databricks_deployment_patterns_dataframe_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
