@@ -155,7 +155,12 @@ def _get_metrics_to_describe_batch(batch: Batch) -> Metrics:
                 "n_rows": 5,
                 # "fetch_all": fetch_all,  # TODO: Is default already false?
             },
-        )
+        ),
+        MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs={"batch_id": batch.id},
+            metric_value_kwargs={},
+        ),
     ]
 
     raw_metrics = metric_calculator.get_metrics(
