@@ -10,7 +10,7 @@ from great_expectations.self_check.util import (
     generate_dataset_name_from_expectation_name,
 )
 
-
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "dataset,expectation_name,index,sub_index,expected_output,expectation",
     [
@@ -88,7 +88,7 @@ def test_generate_table_name_with_expectation(
             == expected_output
         )
 
-
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "dataset_name,expected_output,expectation",
     [
