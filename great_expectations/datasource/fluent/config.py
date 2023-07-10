@@ -292,7 +292,7 @@ class GxConfig(FluentBaseModel):
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,

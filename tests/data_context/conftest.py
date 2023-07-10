@@ -637,9 +637,17 @@ def checkpoint_config() -> dict:
         "expectation_suite_name": "oss_test_expectation_suite",
         "validations": [
             {
+                "name": None,
+                "id": None,
                 "expectation_suite_name": "taxi.demo_pass",
+                "expectation_suite_ge_cloud_id": None,
+                "batch_request": None,
             },
             {
+                "name": None,
+                "id": None,
+                "expectation_suite_name": None,
+                "expectation_suite_ge_cloud_id": None,
                 "batch_request": {
                     "datasource_name": "oss_test_datasource",
                     "data_connector_name": "oss_test_data_connector",
