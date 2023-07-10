@@ -306,46 +306,46 @@ def test_parse_cli_config_file_location_windows_paths(tmp_path_factory):
     # We are unable to create files with windows paths on our unix test CI
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_local_posix():
     assert not is_cloud_file_url("bucket/files/ ")
     assert not is_cloud_file_url("./bucket/files/ ")
     assert not is_cloud_file_url("/full/path/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_file_url():
     assert not is_cloud_file_url("file://bucket/files/ ")
     assert not is_cloud_file_url("file://./bucket/files/ ")
     assert not is_cloud_file_url("file:///full/path/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_ftp_url():
     assert is_cloud_file_url("ftp://bucket/files/ ")
     assert is_cloud_file_url("ftp://./bucket/files/ ")
     assert is_cloud_file_url("ftp:///full/path/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_s3():
     assert is_cloud_file_url("s3://bucket/files/")
     assert is_cloud_file_url(" s3://bucket/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_google_storage():
     assert is_cloud_file_url("gs://bucket/files/")
     assert is_cloud_file_url(" gs://bucket/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_azure_storage():
     assert is_cloud_file_url("wasb://bucket/files/")
     assert is_cloud_file_url(" wasb://bucket/files/ ")
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_is_cloud_file_path_http_url():
     assert is_cloud_file_url("http://bucket/files/")
     assert is_cloud_file_url(" http://bucket/files/ ")

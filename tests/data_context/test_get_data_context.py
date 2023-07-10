@@ -145,7 +145,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
 
 
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_env(
     set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
 ):
@@ -160,7 +160,7 @@ def test_cloud_context_env(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -169,7 +169,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
         assert isinstance(gx.get_context(cloud_mode=False), FileDataContext)
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
@@ -178,7 +178,7 @@ def test_cloud_missing_env_throws_exception(
 
 
 @pytest.mark.parametrize("params", [GX_CLOUD_PARAMS_REQUIRED, GX_CLOUD_PARAMS_ALL])
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_params(monkeypatch, empty_ge_cloud_data_context_config, params):
     with mock.patch.object(
         CloudDataContext,
@@ -191,7 +191,7 @@ def test_cloud_context_params(monkeypatch, empty_ge_cloud_data_context_config, p
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_with_in_memory_config_overrides(
     monkeypatch, empty_ge_cloud_data_context_config
 ):
@@ -246,7 +246,7 @@ def test_get_context_with_no_arguments_returns_ephemeral_with_sensible_defaults(
 
 
 @pytest.mark.parametrize("ge_cloud_mode", [True, None])
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_include_rendered_content(
     set_up_cloud_envs, empty_ge_cloud_data_context_config, ge_cloud_mode
 ):

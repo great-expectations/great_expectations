@@ -533,7 +533,7 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
-    "gx_cloud: mark test as being relevant to Great Expectations Cloud.",
+    "gxcloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",

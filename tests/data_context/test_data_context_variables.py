@@ -586,7 +586,7 @@ def test_file_data_context_variables_e2e(
 
 
 @pytest.mark.e2e
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
     data_context_config: DataContextConfig,
@@ -604,7 +604,7 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
 
 
 @pytest.mark.e2e
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @mock.patch(
     "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
 )

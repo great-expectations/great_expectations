@@ -4712,7 +4712,7 @@ def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
 
 
 @pytest.mark.integration
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     context = fake_cloud_context_basic
     checkpoint_name = "my_checkpoint"
@@ -4726,7 +4726,7 @@ def test_use_validation_url_from_cloud(fake_cloud_context_basic):
 
 
 @pytest.mark.integration
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
     context, slack_counter = fake_cloud_context_with_slack
     checkpoint_name = "my_checkpoint"

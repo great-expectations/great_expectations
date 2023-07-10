@@ -355,7 +355,7 @@ store_backend:
 
 
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = ValidationsStore(store_name="validations_store")
 
