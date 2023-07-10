@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import _ExecutionEngineT
 
 
-class DatabricksDSN(AnyUrl):
+class DatabricksDsn(AnyUrl):
     allowed_schemes = {
         "databricks+connector",
     }
@@ -39,7 +39,7 @@ class DatabricksSQLDatasource(SQLDatasource):
     """
 
     type: Literal["databricks_sql"] = "databricks_sql"  # type: ignore[assignment]
-    connection_string: Union[ConfigStr, DatabricksDSN]
+    connection_string: Union[ConfigStr, DatabricksDsn]
     # connect args
     http_path: str
 

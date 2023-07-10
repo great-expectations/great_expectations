@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.databricks_sql_datasource import (
-        DatabricksDSN,
+        DatabricksDsn,
     )
     from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
@@ -679,7 +679,7 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, DatabricksDSN, str] = ...,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def update_databricks_sql(  # noqa: PLR0913
@@ -688,7 +688,7 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, DatabricksDSN, str] = ...,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def add_or_update_databricks_sql(  # noqa: PLR0913
@@ -697,7 +697,7 @@ class _SourceFactories:
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, DatabricksDSN, str] = ...,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def delete_databricks_sql(
