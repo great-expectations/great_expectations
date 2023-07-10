@@ -32,9 +32,9 @@ module.exports = {
       searchPagePath: 'search',
       searchParameters: {
         facetFilters: [
-        'version:current'
-      ]
-    }
+          'version:current'
+        ]
+      }
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
