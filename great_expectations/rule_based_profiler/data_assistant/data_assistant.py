@@ -483,7 +483,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
     @classmethod
     def build(
         cls,
-        data_context: AbstractDataContext,
+        data_context: "AbstractDataContext",
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
     ) -> "DataAssistant":
         """
