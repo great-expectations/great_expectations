@@ -1,7 +1,8 @@
-from typing import Literal, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, Union
 
 from pydantic import AnyUrl
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -12,7 +13,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SQLDatasourceError,
 )
 
-from great_expectations.compatibility import sqlalchemy
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import _ExecutionEngineT
 
 
 class DatabricksDSN(AnyUrl):
@@ -56,7 +58,7 @@ class DatabricksSQLDatasource(SQLDatasource):
         # dump as json dict to force serialization of things like AnyUrl
         return self._json_dict(exclude=excluded_fields, exclude_none=True)
 
-    def get_execution_engine(self) -> "_ExecutionEngineT":
+    def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
             exclude=self._get_exec_engine_excludes(),
             config_provider=self._config_provider,
