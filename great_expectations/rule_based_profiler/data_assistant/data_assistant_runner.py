@@ -76,7 +76,7 @@ class DataAssistantRunner:
         Returns:
             BaseRuleBasedProfiler: The "BaseRuleBasedProfiler" object, corresponding to this instance's "DataAssistant".
         """
-        return self._data_assistant_cls.build().profiler
+        return self._data_assistant_cls.build(data_context=self._data_context).profiler
 
     def get_profiler_config(
         self,
@@ -184,7 +184,7 @@ class DataAssistantRunner:
             ] = build_domain_type_directives(**domain_type_directives_kwargs)
             """
             Run "data_assistant" with thus constructed "variables"-level and "Domain"-level custom user-specified
-            overwrite arguments/directives and return comput3ed "data_assistant_result" to caller.
+            overwrite arguments/directives and return computed "data_assistant_result" to caller.
             """
             data_assistant_result: DataAssistantResult = data_assistant.run(
                 variables_directives_list=variables_directives_list,

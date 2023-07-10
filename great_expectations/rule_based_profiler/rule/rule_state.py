@@ -16,7 +16,7 @@ class RuleState:
     """
     RuleState maintains state information, resulting from executing "Rule.run()" method by combining passed "Batch" data
     with currently loaded configuration of "Rule" components ("DomainBuilder" object, "ParameterBuilder" objects, and
-    "ExpectationConfigurationBuilder" objects).  Using "RuleState" with correponding flags is sufficient for generating
+    "ExpectationConfigurationBuilder" objects).  Using "RuleState" with corresponding flags is sufficient for generating
     outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
     """
 

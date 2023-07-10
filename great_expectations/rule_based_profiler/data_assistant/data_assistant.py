@@ -12,9 +12,6 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
-)
 from great_expectations.datasource.fluent.interfaces import (
     Batch as FluentBatch,  # noqa: TCH001
 )
@@ -70,6 +67,10 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 # noinspection PyMethodParameters
 
 
