@@ -12,6 +12,9 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,  # noqa: TCH001
 )
+from great_expectations.data_context.data_context.abstract_data_context import (
+    AbstractDataContext,
+)
 from great_expectations.datasource.fluent.interfaces import (
     Batch as FluentBatch,  # noqa: TCH001
 )
@@ -36,7 +39,10 @@ from great_expectations.rule_based_profiler.helpers.runtime_environment import (
     RuntimeEnvironmentDomainTypeDirectives,
     RuntimeEnvironmentVariablesDirectives,
 )
-from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_validator_with_expectation_suite,
+    sanitize_parameter_name,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     HistogramSingleBatchParameterBuilder,
     MeanUnexpectedMapMetricMultiBatchParameterBuilder,
@@ -472,6 +478,48 @@ class DataAssistant(metaclass=MetaDataAssistant):
     )
 
     __alias__: Optional[str] = None
+
+    @classmethod
+    def build(
+        cls,
+        data_context: AbstractDataContext,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+    ) -> "DataAssistant":
+        """
+        This method builds specified "DataAssistant" object and returns its effective "BaseRuleBasedProfiler" object.
+
+        Args:
+            batch_request: Explicit batch_request used to supply data at runtime
+            data_context: Explicit data_context used to supply data at runtime
+
+        Returns:
+            DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
+        """
+        data_assistant_name: str = cls.data_assistant_type
+
+        data_assistant: DataAssistant
+
+        if batch_request is None:
+            data_assistant = cls(
+                name=data_assistant_name,
+                validator=None,
+            )
+        else:
+            validator: Validator = get_validator_with_expectation_suite(
+                data_context=data_context,
+                batch_list=None,
+                batch_request=batch_request,
+                expectation_suite=None,
+                expectation_suite_name=None,
+                component_name=data_assistant_name,
+                persist=False,
+            )
+            data_assistant = cls(
+                name=data_assistant_name,
+                validator=validator,
+            )
+
+        return data_assistant
 
     def __init__(
         self,
@@ -920,7 +968,6 @@ def build_map_metric_rule(  # noqa: PLR0913
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]

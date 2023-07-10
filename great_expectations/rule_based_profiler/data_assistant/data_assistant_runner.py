@@ -22,11 +22,9 @@ from great_expectations.rule_based_profiler.domain_builder import (
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
-    get_validator_with_expectation_suite,
 )
 from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (  # isort:skip
     RuntimeEnvironmentVariablesDirectives,
@@ -78,7 +76,7 @@ class DataAssistantRunner:
         Returns:
             BaseRuleBasedProfiler: The "BaseRuleBasedProfiler" object, corresponding to this instance's "DataAssistant".
         """
-        return self._build_data_assistant().profiler
+        return self._data_assistant_cls.build().profiler
 
     def get_profiler_config(
         self,
@@ -141,8 +139,9 @@ class DataAssistantRunner:
                 estimation = estimation.lower()
                 estimation = NumericRangeEstimatorType(estimation)
 
-            data_assistant: DataAssistant = self._build_data_assistant(
-                batch_request=batch_request
+            data_assistant: DataAssistant = self._data_assistant_cls.build(
+                batch_request=batch_request,
+                data_context=self._data_context,
             )
             directives: dict = deep_filter_properties_iterable(
                 properties=kwargs,
@@ -230,45 +229,6 @@ class DataAssistantRunner:
         gen_func: Callable = create_function(func_signature=func_sig, func_impl=run)
 
         return gen_func
-
-    def _build_data_assistant(
-        self,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    ) -> DataAssistant:
-        """
-        This method builds specified "DataAssistant" object and returns its effective "BaseRuleBasedProfiler" object.
-
-        Args:
-            batch_request: Explicit batch_request used to supply data at runtime
-
-        Returns:
-            DataAssistant: The "DataAssistant" object, corresponding to this instance's specified "DataAssistant" type.
-        """
-        data_assistant_name: str = self._data_assistant_cls.data_assistant_type
-
-        data_assistant: DataAssistant
-
-        if batch_request is None:
-            data_assistant = self._data_assistant_cls(
-                name=data_assistant_name,
-                validator=None,
-            )
-        else:
-            validator: Validator = get_validator_with_expectation_suite(
-                data_context=self._data_context,
-                batch_list=None,
-                batch_request=batch_request,
-                expectation_suite=None,
-                expectation_suite_name=None,
-                component_name=data_assistant_name,
-                persist=False,
-            )
-            data_assistant = self._data_assistant_cls(
-                name=data_assistant_name,
-                validator=validator,
-            )
-
-        return data_assistant
 
     def _get_method_signature_parameters_for_variables_directives(
         self,
