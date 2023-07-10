@@ -16,7 +16,6 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v4
-        id: sp
         with:
           python-version: "3.8"
           cache: "pip"
@@ -33,8 +32,6 @@ jobs:
         run: |
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
-      - name: Check pip dependency cache hit
-        run: echo 'cache-hit=${{ steps.sp.outputs.cache-hit }}'
 
   unit-tests:
     strategy:
@@ -50,7 +47,6 @@ jobs:
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
-        id: sp
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
@@ -62,6 +58,3 @@ jobs:
 
       - name: Run the unit tests
         run: invoke tests --cloud --unit --timeout=3.0
-
-      - name: Check pip dependency cache hit
-        run: echo 'cache-hit=${{ steps.sp.outputs.cache-hit }}'
