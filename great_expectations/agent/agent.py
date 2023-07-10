@@ -11,6 +11,10 @@ from pydantic import AmqpDsn
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
+from great_expectations.agent.agent_server_session import (
+    AgentServerSession,
+    GxAgentServerSessionConfig,
+)
 from great_expectations.agent.event_handler import (
     EventHandler,
 )
@@ -31,7 +35,6 @@ from great_expectations.agent.models import (
     JobStatus,
     UnknownEvent,
 )
-from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
@@ -212,29 +215,26 @@ class GXAgent:
             self._correlation_ids.clear()
         return should_reject
 
-    @classmethod
-    def _get_config(cls) -> GXAgentConfig:
+    def _get_config(self) -> GXAgentConfig:
         """Construct GXAgentConfig."""
 
         # ensure we have all required env variables, and provide a useful error if not
-
-        class GxAgentConfigSettings(pydantic.BaseSettings):
-            gx_cloud_base_url: str = "https://api.greatexpectations.io"
-            gx_cloud_organization_id: str
-            gx_cloud_access_token: str
-
         try:
-            config = GxAgentConfigSettings()
+            config = GxAgentServerSessionConfig()
+            self._agent_server_session_config = config
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
             ) from validation_err
 
         # obtain the broker url and queue name from Cloud
+        agent_server_session = AgentServerSession(config)
 
-        agent_sessions_url = f"{config.gx_cloud_base_url}/organizations/{config.gx_cloud_organization_id}/agent-sessions"
+        agent_sessions_url = agent_server_session.build_url(
+            resource_endpoint="/agent-sessions"
+        )
 
-        session = create_session(access_token=config.gx_cloud_access_token)
+        session = agent_server_session.session()
 
         response = session.post(agent_sessions_url)
         if response.ok is not True:
@@ -265,11 +265,11 @@ class GXAgent:
             job_id: job identifier, also known as correlation_id
             status: pydantic model encapsulating the current status
         """
-        agent_sessions_url = (
-            f"{self._config.gx_cloud_base_url}/organizations/{self._config.gx_cloud_organization_id}"
-            + f"/agent-jobs/{job_id}"
+        agent_server_session = AgentServerSession(self._agent_server_session_config)
+        agent_sessions_url = agent_server_session.build_url(
+            resource_endpoint=f"/agent-jobs/{job_id}"
         )
-        session = create_session(access_token=self._config.gx_cloud_access_token)
+        session = agent_server_session.session()
         data = status.json()
         session.patch(agent_sessions_url, data=data)
 

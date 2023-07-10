@@ -1,11 +1,17 @@
+import pydantic
 from requests import Session
 
-from great_expectations.agent.agent import GXAgentConfig
 from great_expectations.core.http import create_session
 
 
+class GxAgentServerSessionConfig(pydantic.BaseSettings):
+    gx_cloud_base_url: str = "https://api.greatexpectations.io"
+    gx_cloud_organization_id: str
+    gx_cloud_access_token: str
+
+
 class AgentServerSession:
-    def __init__(self, config: GXAgentConfig):
+    def __init__(self, config: GxAgentServerSessionConfig):
         self._config = config
 
     def session(self) -> Session:
