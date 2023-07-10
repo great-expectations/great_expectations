@@ -12,7 +12,7 @@ from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 from great_expectations.util import get_context
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
@@ -26,7 +26,7 @@ def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_er
 
 @responses.activate
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     request_headers: dict,
     ge_cloud_runtime_base_url,
@@ -59,7 +59,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
 
 @responses.activate
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @mock.patch("requests.Session.get")
 def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_error(
     mock_request,
@@ -80,7 +80,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
 
 
 @responses.activate
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 @mock.patch("requests.Session.get")
 def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(

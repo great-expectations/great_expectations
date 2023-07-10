@@ -96,7 +96,7 @@ def mocked_post_response(
     return _mocked_post_response
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
@@ -147,7 +147,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     assert return_profiler.ge_cloud_id == profiler_with_id.ge_cloud_id
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
@@ -201,7 +201,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
 
 
 @pytest.mark.e2e
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 @pytest.mark.xfail(
     strict=False,
@@ -336,7 +336,7 @@ def mock_get_all_profilers_json(
 
 
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_list_profilers(
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,

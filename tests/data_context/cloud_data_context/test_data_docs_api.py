@@ -9,7 +9,7 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 
 
 @pytest.mark.integration
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_view_validation_result(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_result: CheckpointResult,

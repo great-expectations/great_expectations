@@ -1187,7 +1187,7 @@ def test_add_profiler(
     mock_data_context.profiler_store.add.asset_called_once()
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
     ge_cloud_profiler_id: str,
@@ -1355,7 +1355,7 @@ def test_list_profilers(mock_profiler_store: mock.MagicMock):
 
 
 @mock.patch("great_expectations.data_context.store.ProfilerStore")
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
     store = mock_profiler_store()

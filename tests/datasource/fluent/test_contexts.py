@@ -52,7 +52,7 @@ def taxi_data_samples_dir() -> pathlib.Path:
     ).resolve(strict=True)
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_add_fluent_datasource_are_persisted(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -96,7 +96,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     assert datasource_name not in yaml_dict["datasources"]
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_splitters_are_persisted_on_creation(
     empty_cloud_context_fluent: CloudDataContext,
     cloud_api_fake_db: FakeDBTypedDict,
@@ -152,7 +152,7 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
     assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -193,7 +193,7 @@ def test_context_add_or_update_datasource(
     )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_add_or_update_datasource_kw_vs_positional(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -218,7 +218,7 @@ def test_cloud_add_or_update_datasource_kw_vs_positional(
     assert datasource1 == datasource2 == datasource3
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_context_add_and_then_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -245,7 +245,7 @@ def test_context_add_and_then_update_datasource(
     assert datasource2 == datasource3
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_update_non_existant_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -259,7 +259,7 @@ def test_update_non_existant_datasource(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_context_delete_datasource(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -327,7 +327,7 @@ def verify_asset_names_mock(cloud_api_fake: RequestsMock, cloud_details: CloudDe
     return cloud_api_fake
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 class TestPandasDefaultWithCloud:
     def test_payload_sent_to_cloud(
         self,

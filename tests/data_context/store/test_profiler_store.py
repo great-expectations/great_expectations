@@ -105,7 +105,7 @@ def test_profiler_store_integration(
 
 
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_ge_cloud_response_json_to_object_dict(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ) -> None:

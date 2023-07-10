@@ -13,7 +13,7 @@ access_token = "1009d2fe-54b3-43b8-8297-ba2d517f9752"
 organization_id = "0dcf5ce1-806f-4199-9e69-e24dfba5e62a"
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "cloud_config,expected_values",

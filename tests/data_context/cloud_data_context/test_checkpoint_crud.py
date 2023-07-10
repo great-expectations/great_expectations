@@ -188,7 +188,7 @@ def mocked_get_by_name_response_0_results(
     return _mocked_get_by_name_response
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_get_checkpoint_by_name(
     empty_cloud_data_context: CloudDataContext,
@@ -230,7 +230,7 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_get_checkpoint_no_identifier_raises_error(
     empty_cloud_data_context: CloudDataContext,
@@ -241,7 +241,7 @@ def test_get_checkpoint_no_identifier_raises_error(
         context.get_checkpoint()
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_checkpoint(
     empty_cloud_data_context: CloudDataContext,
@@ -299,7 +299,7 @@ def test_cloud_backed_data_context_add_checkpoint(
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     empty_cloud_data_context: CloudDataContext,
@@ -356,7 +356,7 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     assert checkpoint.ge_cloud_id == checkpoint_id
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
     empty_cloud_data_context: CloudDataContext,
@@ -414,7 +414,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
@@ -472,7 +472,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_present(
     empty_cloud_data_context: CloudDataContext,
@@ -533,7 +533,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
@@ -591,7 +591,7 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
     empty_cloud_data_context: CloudDataContext,
@@ -660,7 +660,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
     assert checkpoint.validations[1]["id"] == validation_id_2
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
@@ -692,7 +692,7 @@ def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_pr
             )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
@@ -762,7 +762,7 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     strict=True,
 )
 @pytest.mark.e2e
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_backed_data_context_add_checkpoint_e2e(
     mock_save_project_config: mock.MagicMock,
@@ -784,7 +784,7 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
 
 
 @pytest.mark.e2e
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_cloud_data_context_run_checkpoint_e2e():
     """
     What does this test do and why?
@@ -975,7 +975,7 @@ def mock_get_all_checkpoints_json(
 
 
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_list_checkpoints(
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,

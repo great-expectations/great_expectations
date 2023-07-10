@@ -71,7 +71,7 @@ def construct_ge_cloud_store_backend(
     ],
 )
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_construct_url(
     base_url: str,
     organization_id: str,
@@ -185,7 +185,7 @@ def test_construct_url(
     ],
 )
 @pytest.mark.unit
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 def test_construct_json_payload(
     resource_type: str,
     organization_id: str,
@@ -206,7 +206,7 @@ def test_construct_json_payload(
     )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_set(
     construct_ge_cloud_store_backend: Callable[
@@ -263,7 +263,7 @@ def test_set(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
@@ -280,7 +280,7 @@ def test_list_keys(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_remove_key_with_only_id(
     construct_ge_cloud_store_backend: Callable[
@@ -314,7 +314,7 @@ def test_remove_key_with_only_id(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_remove_key_with_id_and_name(
     construct_ge_cloud_store_backend: Callable[
@@ -345,7 +345,7 @@ def test_remove_key_with_id_and_name(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_remove_key_with_only_name(
     construct_ge_cloud_store_backend: Callable[
@@ -366,7 +366,7 @@ def test_remove_key_with_only_name(
         )
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
     construct_ge_cloud_store_backend: Callable[
@@ -393,7 +393,7 @@ def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
         ),
     ],
 )
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_allowed_set_kwargs(
     resource_type: GXCloudRESTResource,
@@ -433,7 +433,7 @@ def test_allowed_set_kwargs(
         ),
     ],
 )
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_validate_set_kwargs(
     kwargs: dict,
@@ -448,7 +448,7 @@ def test_validate_set_kwargs(
     assert store_backend.validate_set_kwargs(kwargs) == expected
 
 
-@pytest.mark.gx_cloud
+@pytest.mark.gxcloud
 @pytest.mark.unit
 def test_config_property_and_defaults(
     construct_ge_cloud_store_backend: Callable[
