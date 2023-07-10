@@ -35,47 +35,6 @@ if TYPE_CHECKING:
     )
 
 
-def _cost_function(x: np.float64, a: np.ndarray) -> np.float64:
-    """
-    Mean (per-Batch) Hamming distance -- loss only when expectation validation fails; no change otherwise.
-    Expectation validation fails when candidate unexpected_count_fraction x is less than observed array element value.
-    Once optimal unexpected_count_fraction is computed, mostly becomes its complement (1.0 - unexpected_count_fraction).
-    """
-
-    return np.mean(x < a)
-
-
-def _compute_min_unexpected_count_fraction(
-    a: np.ndarray, max_error_rate: np.float64
-) -> np.float64:
-    """
-    Use constrained optimization algorithm to compute minimum value of x ("unexpected_count_fraction") under constraint
-    that _cost_function() of variable x given array a must be less than or equal to "max_error_rate" constant.
-    """
-
-    # Define objective function to be minimized (minimum "unexpected_count_fraction" is desired to maximize "mostly").
-    def _objective_function(x: np.floati64) -> np.float64:
-        return x
-
-    # Sort array in ascending order
-    sorted_a: np.ndarray = np.sort(a, axis=None)
-
-    # Define constraint function reflecting penalty incurred by lowering "unexpected_count_fraction" (raising "mostly").
-    def _constraint_function(x: np.float64) -> np.float64:
-        return np.float64(_cost_function(x=x, a=sorted_a) - max_error_rate)
-
-    # Perform optimization.
-    result: scipy.optimize.OptimizeResult = scipy.optimize.minimize(
-        _objective_function,
-        x0=sorted_a[-1],
-        bounds=[(np.float64(0.0), np.float64(1.0))],
-        constraints={"type": "ineq", "fun": _constraint_function},
-    )
-
-    # Return optimized variable (minimum "unexpected_count_fraction").
-    return result.x
-
-
 class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     """
     Compute specified aggregate of unexpected count fraction (e.g., of a map metric) across every Batch of data given.
@@ -280,14 +239,14 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
                 )
 
                 min_unexpected_count_fraction: np.float64 = (
-                    _compute_min_unexpected_count_fraction(
+                    _compute_multi_batch_min_unexpected_count_fraction(
                         a=unexpected_count_fraction_values,
                         max_error_rate=np.float64(max_error_rate),
                     )
                 )
                 mostly = np.float64(1.0 - min_unexpected_count_fraction)
                 result["mostly"] = mostly
-                error_rate: np.float64 = _cost_function(
+                error_rate: np.float64 = _multi_batch_cost_function(
                     x=min_unexpected_count_fraction, a=unexpected_count_fraction_values
                 )  # per-Batch Hamming expectation validation success/failure distance
                 result["error_rate"] = error_rate
@@ -303,3 +262,44 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: details,
             }
         )
+
+
+def _multi_batch_cost_function(x: np.float64, a: np.ndarray) -> np.float64:
+    """
+    Mean (per-Batch) Hamming distance -- loss only when expectation validation fails; no change otherwise.
+    Expectation validation fails when candidate unexpected_count_fraction x is less than observed array element value.
+    Once optimal unexpected_count_fraction is computed, mostly becomes its complement (1.0 - unexpected_count_fraction).
+    """
+
+    return np.mean(x < a)
+
+
+def _compute_multi_batch_min_unexpected_count_fraction(
+    a: np.ndarray, max_error_rate: np.float64
+) -> np.float64:
+    """
+    Use constrained optimization algorithm to compute minimum value of x ("unexpected_count_fraction") under constraint
+    that _cost_function() of variable x given array a must be less than or equal to "max_error_rate" constant.
+    """
+
+    # Define objective function to be minimized (minimum "unexpected_count_fraction" is desired to maximize "mostly").
+    def _objective_function(x: np.floati64) -> np.float64:
+        return x
+
+    # Sort array in ascending order
+    sorted_a: np.ndarray = np.sort(a, axis=None)
+
+    # Define constraint function reflecting penalty incurred by lowering "unexpected_count_fraction" (raising "mostly").
+    def _constraint_function(x: np.float64) -> np.float64:
+        return np.float64(_multi_batch_cost_function(x=x, a=sorted_a) - max_error_rate)
+
+    # Perform optimization.
+    result: scipy.optimize.OptimizeResult = scipy.optimize.minimize(
+        _objective_function,
+        x0=sorted_a[-1],
+        bounds=[(np.float64(0.0), np.float64(1.0))],
+        constraints={"type": "ineq", "fun": _constraint_function},
+    )
+
+    # Return optimized variable (minimum "unexpected_count_fraction").
+    return result.x
