@@ -26,9 +26,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
 
-      - run: invoke type-check
       - run: invoke lint
       - run: invoke fmt --check
+      - run: invoke type-check
 
   unit-tests:
     strategy:
