@@ -28,7 +28,9 @@ jobs:
 
       - run: invoke lint
       - run: invoke fmt --check
-      - run: invoke type-check
+      - run: |
+          invoke type-check --ci --pretty
+          invoke type-check --ci --pretty  --check-stub-sources
       - run: echo 'cache-hit=${{ steps.sp.outputs.cache-hit }}'
 
   unit-tests:
