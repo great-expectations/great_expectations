@@ -29,6 +29,7 @@ jobs:
       - run: invoke lint
       - run: invoke fmt --check
       - run: invoke type-check
+      - run: echo 'cache-hit=${{ steps.sp.outputs.cache-hit }}'
 
   unit-tests:
     strategy:
