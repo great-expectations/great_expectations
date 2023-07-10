@@ -29,7 +29,8 @@ jobs:
 
       - run: invoke lint --no-fmt
       - run: invoke fmt --check
-      - run: |
+      - name: Type-check
+        run: |
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
       - name: Check pip dependency cache hit
