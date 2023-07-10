@@ -18,7 +18,7 @@ from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
 
 
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 @responses.activate
 def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rendered_content(
     empty_cloud_data_context: CloudDataContext,
@@ -96,7 +96,7 @@ def test_cloud_backed_data_context_add_or_update_expectation_suite_include_rende
         }
 
 
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 @pytest.mark.integration
 def test_cloud_backed_data_context_expectation_validation_result_include_rendered_content(
     empty_cloud_data_context: CloudDataContext,

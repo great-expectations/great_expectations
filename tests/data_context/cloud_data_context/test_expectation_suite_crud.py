@@ -254,7 +254,7 @@ def mock_expectations_store_has_key() -> mock.MagicMock:
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_list_expectation_suites(
     empty_ge_cloud_data_context_config: DataContextConfig,
     ge_cloud_config: GXCloudConfig,
@@ -294,7 +294,7 @@ def test_list_expectation_suites(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
@@ -315,7 +315,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
@@ -347,7 +347,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
@@ -365,7 +365,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -386,7 +386,7 @@ def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -406,7 +406,7 @@ def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_delete_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -423,7 +423,7 @@ def test_delete_expectation_suite_nonexistent_suite_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -448,7 +448,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_get_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_404_response
 ) -> None:
@@ -466,7 +466,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_get_expectation_suite_no_identifier_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ) -> None:
@@ -477,7 +477,7 @@ def test_get_expectation_suite_no_identifier_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_save_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
@@ -499,7 +499,7 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_save_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -535,7 +535,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_expectations_store_has_key: mock.MagicMock,
@@ -560,7 +560,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
@@ -591,7 +591,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_add_or_update_expectation_suite_adds_new_obj(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ):
@@ -617,7 +617,7 @@ def test_add_or_update_expectation_suite_adds_new_obj(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_add_expectation_suite_without_name_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ):
@@ -628,7 +628,7 @@ def test_add_expectation_suite_without_name_raises_error(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
 ):
@@ -641,7 +641,7 @@ def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
 
 
 @pytest.mark.unit
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_add_or_update_expectation_suite_updates_existing_obj(
     empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_get_by_name_response
 ):

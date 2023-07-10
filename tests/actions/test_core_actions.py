@@ -649,7 +649,7 @@ def test_api_action_run(
 #
 
 
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 def test_cloud_sns_notification_action(
     sns,
     validation_result_suite,

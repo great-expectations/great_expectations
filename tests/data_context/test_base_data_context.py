@@ -259,7 +259,7 @@ def prepare_validator_for_cloud_e2e() -> (
     strict=True,
 )
 @pytest.mark.e2e
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_cloud_backend(
     mock_save_project_config: mock.MagicMock,
@@ -295,7 +295,7 @@ def test_get_validator_with_cloud_enabled_context_saves_expectation_suite_to_clo
     strict=True,
 )
 @pytest.mark.e2e
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_validator_e2e_workflow_with_cloud_enabled_context(
     mock_save_project_config: mock.MagicMock,

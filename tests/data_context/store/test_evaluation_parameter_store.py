@@ -273,7 +273,7 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
 )
-@pytest.mark.cloud
+@pytest.mark.gx_cloud
 @pytest.mark.integration
 def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
