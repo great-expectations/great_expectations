@@ -77,6 +77,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    # gx_stores volume added to enable serving data docs
     - gx_stores:/gx/gx_stores
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
@@ -169,6 +170,7 @@ services:
         condition: service_completed_successfully
 
   data_docs:
+    # airflow-common is added so that the volumes config is available to the data_docs container
     <<: *airflow-common
     image: gx/airflow_data_docs
     container_name: gx_airflow_data_docs

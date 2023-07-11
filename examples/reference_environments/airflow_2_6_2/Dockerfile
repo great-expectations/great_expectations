@@ -7,6 +7,7 @@
 FROM apache/airflow:2.6.2-python3.10
 
 
+# Set the permissions on the data docs folder to be owned by airflow and available to all users.
 USER root
 RUN mkdir -p /gx/gx_stores/data_docs/ && chown -R airflow:0 /gx && chmod -R 777 /gx
 USER airflow
