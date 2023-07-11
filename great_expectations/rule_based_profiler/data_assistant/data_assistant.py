@@ -89,11 +89,8 @@ class MetaDataAssistant(ABCMeta):
                 DataAssistantDispatcher,
             )
 
-            if newclass.__alias__:
-                # noinspection PyTypeChecker
-                DataAssistantDispatcher._register(
-                    name=newclass.__alias__, data_assistant=newclass
-                )
+            # noinspection PyTypeChecker
+            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
 
         return newclass
 
@@ -920,7 +917,6 @@ def build_map_metric_rule(  # noqa: PLR0913
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]
