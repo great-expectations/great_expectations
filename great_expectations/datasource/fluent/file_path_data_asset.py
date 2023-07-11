@@ -184,9 +184,9 @@ class _FilePathDataAsset(DataAsset):
             get_batch_list_from_batch_request method.
 
         Note:
-            Option "batch_slice" is supported for all DataAsset extensions of this class "_FilePathDataAsset(DataAsset)"
-            identically under "Datasource" types for any "ExecutionEngine" that is capable of loading data from files on
-            local or cloud/remote/networked filesystems (e.g., currently Pandas and Spark.  Same mechanism serves all.
+            Option "batch_slice" is supported for all "DataAsset" extensions of this class identically.  This mechanism
+            applies to every "Datasource" type and any "ExecutionEngine" that is capable of loading data from files on
+            local and/or cloud/networked filesystems (currently, Pandas and Spark backends work with files).
         """
         if options:
             for option, value in options.items():
