@@ -25,8 +25,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 
+# module level markers
+pytestmark = [pytest.mark.integration]
 
-@pytest.mark.integration
+
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -45,7 +47,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     )
 
 
-@pytest.mark.integration
+
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -84,7 +86,7 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.56s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_dependencies_evaluated_separately(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -197,7 +199,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -297,7 +299,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_dependencies_evaluated_mixed(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -404,7 +406,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime_dependencies_evaluated_separately(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -517,7 +519,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -617,7 +619,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.65s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime_dependencies_evaluated_mixed(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -726,7 +728,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-@pytest.mark.integration
+
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -763,7 +765,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
     }
 
 
-@pytest.mark.integration
+
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

@@ -18,8 +18,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
+# module level markers
+pytestmark = [pytest.mark.integration]
 
-@pytest.mark.integration
+
+
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -103,7 +106,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_default(
     assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
+
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -191,7 +194,7 @@ def test_metric_multi_batch_parameter_builder_bobby_single_batch_no(
     assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
+
 def test_metric_multi_batch_parameter_builder_bobby_single_batch_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
