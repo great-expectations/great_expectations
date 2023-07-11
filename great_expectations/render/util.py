@@ -306,7 +306,7 @@ def build_count_and_index_table(
         List of strings that will be rendered into DataDocs
 
     """
-    table_rows: list[list[str]] = []
+    table_rows: list[list[str | int]] = []
     total_count: int = 0
 
     unexpected_index_df: pd.DataFrame = _convert_unexpected_indices_to_df(
