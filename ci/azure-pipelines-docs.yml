@@ -85,24 +85,15 @@ stages:
             failOnStderr: true
           name: IntegrationTestGetsRunChecker
 
-
     - job: name_tag_snippet_referenced_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - task: PythonScript@0
           inputs:
             scriptSource: 'filePath'
-            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py' 
+            scriptPath: 'ci/checks/check_name_tag_snippets_referenced.py'
             failOnStderr: true
           name: NameTagSnippetReferencedChecker
-
-    - job: public_api_report
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            pip install --requirement reqs/requirements-dev-test.txt
-            invoke public-api
-          name: PublicAPIReport
 
   - stage: test_build_docs
     dependsOn: [ scope_check, custom_checks ]

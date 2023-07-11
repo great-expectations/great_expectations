@@ -12,6 +12,11 @@ except ImportError:
     snowflake = SNOWFLAKE_NOT_IMPORTED
 
 try:
+    from snowflake.sqlalchemy import URL
+except ImportError:
+    URL = SNOWFLAKE_NOT_IMPORTED
+
+try:
     import snowflake.sqlalchemy as snowflakesqlalchemy
 except (ImportError, AttributeError):
     snowflakesqlalchemy = SNOWFLAKE_NOT_IMPORTED

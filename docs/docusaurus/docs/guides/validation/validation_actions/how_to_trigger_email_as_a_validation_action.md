@@ -16,41 +16,41 @@ This guide will help you trigger emails as an <TechnicalTag tag="action" text="A
 
 Open `uncommitted/config_variables.yml` file and add the following variables by adding the following lines:
 
-````yaml
+```yaml
 smtp_address: [address of the smtp server]
 smtp_port: [port used by the smtp server]
 sender_login: [login used to send the email]
 sender_password: [password used to send the email]
 sender_alias: [optional alias used to send the email (default = sender_login)]
 receiver_emails: [addresses you want to send the email to]  # each address must be separated by commas
-````
+```
 
 ## Update `action_list` in your Checkpoint configuration
 
 Locate the relevant checkpoint that you want to set up an email trigger for. Open the checkpoint's configuration file that is located at `great_expectations/checkpoints/` (for example, `great_expectations/checkpoints/checkpoint_01.yml`) and add an email action to the `action_list`. Follow the snippet below to set up the detials of your email trigger.
 
-````yaml
+```yaml
 action_list:
-    - name: send_email_on_validation_result # name can be set to any value
-      action:
-        class_name: EmailAction
-        notify_on: all # possible values: "all", "failure", "success"
-        notify_with: # optional list containing the DataDocs sites to include in the notification. Defaults to including links to all configured sites.
-        # You can choose between using SSL encryption, TLS encryption or none of them (not advised)
-        use_tls: False
-        use_ssl: True
-        renderer:
-          module_name: great_expectations.render.renderer.email_renderer
-          class_name: EmailRenderer
-        # put the actual following information in the uncommitted/config_variables.yml file
-        # or pass in as environment variable
-        smtp_address: ${smtp_address}
-        smtp_port: ${smtp_port}
-        sender_login: ${sender_login}
-        sender_password: ${sender_password}
-        sender_alias: ${sender_alias}
-        receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
-````
+  - name: send_email_on_validation_result # name can be set to any value
+    action:
+      class_name: EmailAction
+      notify_on: all # possible values: "all", "failure", "success"
+      notify_with: # optional list containing the DataDocs sites to include in the notification. Defaults to including links to all configured sites.
+      # You can choose between using SSL encryption, TLS encryption or none of them (not advised)
+      use_tls: False
+      use_ssl: True
+      renderer:
+        module_name: great_expectations.render.renderer.email_renderer
+        class_name: EmailRenderer
+      # put the actual following information in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      smtp_address: ${smtp_address}
+      smtp_port: ${smtp_port}
+      sender_login: ${sender_login}
+      sender_password: ${sender_password}
+      sender_alias: ${sender_alias}
+      receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
+```
 
 ## Test your updated Action list
 
@@ -94,29 +94,29 @@ data_docs_sites:
 ```yaml
 # Example Checkpoint configuration
 action_list:
-    - name: send_email_on_validation_result # name can be set to any value
-          action:
-            class_name: EmailAction
-            notify_on: all # possible values: "all", "failure", "success"
-            #--------------------------------
-            # This is what was configured
-            #--------------------------------
-            notify_with:
-              - local_site
-              - gcs_site
-            use_ssl: True
-            use_tls: False
-            renderer:
-              module_name: great_expectations.render.renderer.email_renderer
-              class_name: EmailRenderer
-            # put the actual following information in the uncommitted/config_variables.yml file
-            # or pass in as environment variable
-            smtp_address: ${smtp_address}
-            smtp_port: ${smtp_port}
-            sender_login: ${sender_login}
-            sender_password: ${sender_password}
-            sender_alias: ${sender_alias}
-            receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
+  - name: send_email_on_validation_result # name can be set to any value
+    action:
+      class_name: EmailAction
+      notify_on: all # possible values: "all", "failure", "success"
+      #--------------------------------
+      # This is what was configured
+      #--------------------------------
+      notify_with:
+        - local_site
+        - gcs_site
+      use_ssl: True
+      use_tls: False
+      renderer:
+        module_name: great_expectations.render.renderer.email_renderer
+        class_name: EmailRenderer
+      # put the actual following information in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      smtp_address: ${smtp_address}
+      smtp_port: ${smtp_port}
+      sender_login: ${sender_login}
+      sender_password: ${sender_password}
+      sender_alias: ${sender_alias}
+      receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
 ```
 
 ## Additional resources

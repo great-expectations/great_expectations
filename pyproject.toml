@@ -176,6 +176,7 @@ exclude = [
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/util\.py',  # 46
+    'rule_based_profiler/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py',  # 69
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
@@ -186,7 +187,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/validator\.py', # 54
     # tests
     'tests/datasource/fluent/tasks\.py',
 ]
