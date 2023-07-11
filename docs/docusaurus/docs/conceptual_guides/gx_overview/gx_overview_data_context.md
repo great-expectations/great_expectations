@@ -33,6 +33,6 @@ By default, Stores exist in the same folder hierarchy as your Data Context (or i
 
 ## The GX Python API
 
-An instantiated Data Context object in Python gives you access to the GX API.  The Data Context object manages classes, limits the number of objects you need to directly manage, and provides a number of convenience methods to help streamline GX workflows.
+A Data Context object in Python gives you access to the GX API.  The Data Context object limits the objects you need to directly manage and provides convenience methods to help streamline GX workflows.
 
 [//]: # (TODO: Reference material: The GX Python API LP)
