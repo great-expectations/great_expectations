@@ -40,74 +40,6 @@ def integer_and_datetime_sample_dataset() -> dict:
         ],
     }
 
-
-@pytest.mark.spark
-def test_column_partition_metric_spark(
-    in_memory_runtime_context,
-    spark_session,
-    integer_and_datetime_sample_dataset,
-):
-    validator_with_data: Validator = get_test_validator_with_data(
-        execution_engine="spark",
-        table_name="column_partition_metric_test",
-        data=integer_and_datetime_sample_dataset,
-        context=in_memory_runtime_context,
-    )
-
-    metrics_calculator: MetricsCalculator = validator_with_data.metrics_calculator
-
-    seconds_in_week = 604800
-
-    n_bins = 10
-
-    increment: Union[float, datetime.timedelta]
-    idx: int
-    element: Union[float, pd.Timestamp]
-
-    desired_metric = MetricConfiguration(
-        metric_name="column.partition",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "bins": "uniform",
-            "n_bins": n_bins,
-            "allow_relative_error": False,
-        },
-    )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
-
-    increment = float(n_bins + 1) / n_bins
-    assert all(
-        isclose(operand_a=element, operand_b=(increment * idx))
-        for idx, element in enumerate(results[desired_metric.id])
-    )
-
-    # Test using "datetime.datetime" column.
-
-    desired_metric = MetricConfiguration(
-        metric_name="column.partition",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs={
-            "bins": "uniform",
-            "n_bins": n_bins,
-            "allow_relative_error": False,
-        },
-    )
-    results = metrics_calculator.compute_metrics(metric_configurations=[desired_metric])
-
-    increment = datetime.timedelta(
-        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
-    )
-    assert all(
-        isclose(
-            operand_a=element.to_pydatetime()
-            if isinstance(validator_with_data.execution_engine, PandasExecutionEngine)
-            else element,
-            operand_b=(datetime.datetime(2021, 1, 1, 0, 0, 0) + (increment * idx)),
-        )
-        for idx, element in enumerate(results[desired_metric.id])
-    )
-
-
 # noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "backend,",
@@ -118,7 +50,10 @@ def test_column_partition_metric_spark(
         pytest.param(
             "sqlite",
         ),
-        pytest.param("spark", marks=[pytest.mark.spark]),
+        pytest.param(
+            "spark",
+            marks=[pytest.mark.spark]
+        )
     ],
 )
 def test_column_partition_metric(
