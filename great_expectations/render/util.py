@@ -201,7 +201,7 @@ def parse_row_condition_string_pandas_engine(
     conditions_list: list[str] = [
         condition.strip()
         for condition in re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
-        if condition != "" and condition != " "  # noqa PLC1901
+        if condition != "" and condition != " "  # noqa: PLC1901
     ]
 
     for i, condition in enumerate(conditions_list):
@@ -325,7 +325,7 @@ def build_count_and_index_table(
         unexpected_index_column_names = ["Index"]
 
     for index, row in unexpected_index_df.iterrows():
-        row_list: list[str] = []
+        row_list: list[str | int] = []
 
         unexpected_value = index
         count = int(row.Count)
@@ -334,14 +334,14 @@ def build_count_and_index_table(
 
         if unexpected_value is not None and unexpected_value != "":  # noqa: PLC1901
             row_list.append(unexpected_value)
-            row_list.append(str(count))
+            row_list.append(count)
         elif unexpected_value == "":  # noqa: PLC1901
             row_list.append("EMPTY")
-            row_list.append(str(count))
+            row_list.append(count)
         else:
             unexpected_value = "null"
             row_list.append("null")
-            row_list.append(str(count))
+            row_list.append(count)
         for column_name in unexpected_index_column_names:
             row_list.append(str(row[column_name]))
 
@@ -362,7 +362,7 @@ def build_count_and_index_table(
 
 
 def _convert_unexpected_indices_to_df(
-    unexpected_index_list: list[dict | int],
+    unexpected_index_list: Sequence[dict | int],
     partial_unexpected_counts: list[dict],
     unexpected_index_column_names: list[str] | None = None,
     unexpected_list: list[Any] | None = None,
