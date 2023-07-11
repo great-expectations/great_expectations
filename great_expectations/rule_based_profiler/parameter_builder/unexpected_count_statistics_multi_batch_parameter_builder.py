@@ -262,7 +262,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         )
 
 
-def _standardize_mostly_for_single_batch(
+def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     expectation_type: str, mostly: np.float64
 ) -> np.float64:
     """
