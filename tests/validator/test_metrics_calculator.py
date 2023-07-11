@@ -40,6 +40,7 @@ def integer_and_datetime_sample_dataset() -> dict:
         ],
     }
 
+
 # noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "backend,",
@@ -50,10 +51,7 @@ def integer_and_datetime_sample_dataset() -> dict:
         pytest.param(
             "sqlite",
         ),
-        pytest.param(
-            "spark",
-            marks=[pytest.mark.spark]
-        )
+        pytest.param("spark", marks=[pytest.mark.spark]),
     ],
 )
 def test_column_partition_metric(
