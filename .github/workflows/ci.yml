@@ -55,3 +55,30 @@ jobs:
 
       - name: Run the unit tests
         run: invoke tests --cloud --unit --timeout=3.0
+
+  unnamed-matrix-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.11"]
+        markers: ["spark", "postgres"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache-dependency-path: |
+            constraints-dev.txt
+            setup.py
+
+      - name: Install dependencies
+        run: pip install -c constraints-dev.txt ".[test]"
+
+      - name: Run the tests
+        run: pytest -m "${{ matrix.markers }} and not unit"
