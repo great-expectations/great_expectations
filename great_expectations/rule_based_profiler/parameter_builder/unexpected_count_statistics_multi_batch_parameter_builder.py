@@ -221,7 +221,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
             if single_batch_mode:
                 unexpected_fraction: np.float64 = unexpected_count_fraction_values[-1]
-                expected_fraction: np.float64 = 1.0 - unexpected_fraction
+                expected_fraction: np.float64 = np.float64(1.0 - unexpected_fraction)
                 result["mostly"] = _standardize_mostly_for_single_batch(
                     self._expectation_type, expected_fraction
                 )
@@ -270,22 +270,22 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     """
     if expectation_type == "expect_column_values_to_be_null":
         if mostly >= 1.0:  # noqa:  PLR0915
-            return 1.0
+            return np.float64(1.0)
 
         if mostly >= 0.99:  # noqa:  PLR0915
-            return 0.99
+            return np.float64(0.99)
 
         if mostly >= 0.975:  # noqa:  PLR0915
-            return 0.975
+            return np.float64(0.975)
 
         return mostly
 
     if expectation_type == "expect_column_values_to_not_be_null":
         if mostly >= 1.0:  # noqa:  PLR0915
-            return 1.0
+            return np.float64(1.0)
 
         if mostly >= 0.99:  # noqa:  PLR0915
-            return 0.99
+            return np.float64(0.99)
 
         # round down to nearest 0.025
         return np.floor(mostly * 40) / 40
