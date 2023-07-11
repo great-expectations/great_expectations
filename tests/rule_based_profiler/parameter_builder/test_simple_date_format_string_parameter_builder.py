@@ -42,7 +42,6 @@ def test_simple_date_format_parameter_builder_instantiation(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
 
-
 @pytest.mark.slow  # 1.08s
 def test_simple_date_format_parameter_builder_zero_batch_id_error(
     alice_columnar_table_single_batch_context,
@@ -76,7 +75,6 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         str(e.value)
         == "Utilizing a SimpleDateFormatStringParameterBuilder requires a non-empty list of Batch identifiers."
     )
-
 
 
 @pytest.mark.slow  # 1.44s
@@ -203,7 +201,6 @@ def test_simple_date_format_parameter_builder_alice(
     )
 
     assert parameter_node == expected_parameter_node_as_dict
-
 
 
 @pytest.mark.slow  # 1.76s

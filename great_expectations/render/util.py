@@ -396,12 +396,12 @@ def _convert_unexpected_indices_to_df(
             unexpected_index_list, dtype="string"
         )
         unexpected_index_df = unexpected_index_df.fillna(value="null")
-        first_unexpected_index = unexpected_index_list[0] 
+        first_unexpected_index = unexpected_index_list[0]
         if isinstance(first_unexpected_index, dict):
             domain_column_name_list = list(
-            set(first_unexpected_index.keys()).difference(
-                set(unexpected_index_column_names)
-            )
+                set(first_unexpected_index.keys()).difference(
+                    set(unexpected_index_column_names)
+                )
             )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices

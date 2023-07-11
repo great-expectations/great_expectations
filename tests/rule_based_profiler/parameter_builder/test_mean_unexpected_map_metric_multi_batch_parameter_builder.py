@@ -47,7 +47,6 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder(
     )
 
 
-
 def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_required_arguments_absent(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -84,7 +83,6 @@ def test_instantiation_mean_unexpected_map_metric_multi_batch_parameter_builder_
         "__init__() missing 1 required positional argument: 'map_metric_name'"
         in str(excinfo.value)
     )
-
 
 
 @pytest.mark.slow  # 1.56s
@@ -199,7 +197,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
     )
 
 
-
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -297,7 +294,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
         atol=atol,
         err_msg=f"Actual value of {parameter_node.value} differs from expected value of {expected_parameter_value} by more than {atol + rtol * abs(parameter_node.value)} tolerance.",
     )
-
 
 
 @pytest.mark.slow  # 1.58s
@@ -404,7 +400,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_metric_d
         atol=atol,
         err_msg=f"Actual value of {parameter_node.value} differs from expected value of {expected_parameter_value} by more than {atol + rtol * abs(parameter_node.value)} tolerance.",
     )
-
 
 
 @pytest.mark.slow  # 1.58s
@@ -519,7 +514,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-
 @pytest.mark.slow  # 1.58s
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -617,7 +611,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         atol=atol,
         err_msg=f"Actual value of {parameter_node.value} differs from expected value of {expected_parameter_value} by more than {atol + rtol * abs(parameter_node.value)} tolerance.",
     )
-
 
 
 @pytest.mark.slow  # 1.65s
@@ -728,7 +721,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
     )
 
 
-
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -763,7 +755,6 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         "metric_value_kwargs",
         "evaluation_parameter_builder_configs",
     }
-
 
 
 def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(

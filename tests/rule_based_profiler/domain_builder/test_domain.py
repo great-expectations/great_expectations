@@ -40,7 +40,6 @@ def test_semantic_domain_consistency():
     )
 
 
-
 def test_semantic_domain_serialization():
     domain: Domain
 
@@ -119,7 +118,6 @@ def test_semantic_domain_serialization():
         },
         "rule_name": "my_rule",
     }
-
 
 
 def test_semantic_domain_equivalence():
@@ -236,7 +234,6 @@ def test_semantic_domain_equivalence():
         "'unknown_semantic_type_as_string' is not a valid SemanticDomainTypes"
         in str(excinfo.value)
     )
-
 
 
 def test_semantic_domain_comparisons_inclusion():
@@ -429,7 +426,6 @@ def test_semantic_domain_comparisons_inclusion():
         rule_name="my_rule",
     )
     assert not domain_a.is_superset(other=domain_b)
-
 
 
 def test_integer_semantic_domain_type():

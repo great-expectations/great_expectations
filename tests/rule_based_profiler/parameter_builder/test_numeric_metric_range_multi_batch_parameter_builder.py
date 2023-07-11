@@ -26,7 +26,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 pytestmark = [pytest.mark.integration]
 
 
-
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -151,7 +150,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
-
 
 
 @pytest.mark.slow  # 1.10s
@@ -354,7 +352,6 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-
 def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -474,7 +471,6 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     p_value: float = ks_result[1]
     assert p_value > 9.5e-1
-
 
 
 def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
@@ -691,7 +687,6 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     assert p_value > 9.5e-1
 
 
-
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -748,7 +743,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             batch_request=batch_request,
             runtime_configuration=None,
         )
-
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
@@ -809,7 +803,6 @@ provided.
         )
 
 
-
 @pytest.mark.slow  # 2.51s
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -867,7 +860,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             batch_request=batch_request,
             runtime_configuration=None,
         )
-
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
@@ -933,7 +925,6 @@ to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
             batch_request=batch_request,
             runtime_configuration=None,
         )
-
 
 
 def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
@@ -1062,7 +1053,6 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-
 @pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -1186,7 +1176,6 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
     kde_value: np.ndarray = parameter_node.pop("value")
 
     assert kde_value[1] > bootstrap_value[1]
-
 
 
 @pytest.mark.slow  # 1.12s

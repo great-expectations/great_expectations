@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.config.base import RuleBasedProfiler
 # module level markers
 pytestmark = [pytest.mark.unit]
 
+
 @pytest.fixture
 def profiler_anonymizer() -> ProfilerAnonymizer:
     # Standardize the salt so our tests are deterimistic
@@ -20,7 +21,6 @@ def profiler_anonymizer() -> ProfilerAnonymizer:
         salt=salt, aggregate_anonymizer=aggregate_anonymizer
     )
     return anonymizer
-
 
 
 def test_anonymize_profiler_run(
@@ -54,7 +54,6 @@ def test_anonymize_profiler_run(
         "rule_count": 1,
         "variable_count": 1,
     }
-
 
 
 def test_anonymize_profiler_run_custom_values(
@@ -93,7 +92,6 @@ def test_anonymize_profiler_run_custom_values(
         "rule_count": 1,
         "variable_count": 1,
     }
-
 
 
 def test_anonymize_profiler_run_multiple_rules(
@@ -143,7 +141,6 @@ def test_anonymize_profiler_run_multiple_rules(
         "rule_count": 2,
         "variable_count": 1,
     }
-
 
 
 def test_anonymize_profiler_run_multiple_rules_custom_values(
@@ -205,7 +202,6 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
     }
 
 
-
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -264,7 +260,6 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
         "rule_count": 1,
         "variable_count": 1,
     }
-
 
 
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(

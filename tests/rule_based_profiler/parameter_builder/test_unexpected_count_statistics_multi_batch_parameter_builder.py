@@ -23,9 +23,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
+
 # module level markers
 pytestmark = [pytest.mark.integration]
-
 
 
 def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder(
@@ -45,7 +45,6 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
             data_context=data_context,
         )
     )
-
 
 
 def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder_builder_required_arguments_absent(
@@ -83,7 +82,6 @@ def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder
     assert "__init__() missing 1 required positional argument: 'mode'" in str(
         excinfo.value
     )
-
 
 
 @pytest.mark.slow  # 1.56s
@@ -187,7 +185,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
     assert np.array_equal(parameter_node.value, expected_parameter_value)
 
 
-
 @pytest.mark.slow  # 1.58s
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -274,7 +271,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
         parameters=parameters,
     )
     assert np.array_equal(parameter_node.value, expected_parameter_value)
-
 
 
 @pytest.mark.slow  # 1.58s
@@ -370,7 +366,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_metric_
         parameters=parameters,
     )
     assert np.array_equal(parameter_node.value, expected_parameter_value)
-
 
 
 @pytest.mark.slow  # 1.58s
@@ -474,7 +469,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
     assert np.array_equal(parameter_node.value, expected_parameter_value)
 
 
-
 @pytest.mark.slow  # 1.58s
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetime_dependencies_evaluated_in_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -561,7 +555,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
         parameters=parameters,
     )
     assert np.array_equal(parameter_node.value, expected_parameter_value)
-
 
 
 @pytest.mark.slow  # 1.65s
@@ -661,7 +654,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_datetim
     assert np.array_equal(parameter_node.value, expected_parameter_value)
 
 
-
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_no_evaluation_parameter_builder_configs(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -694,7 +686,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "expectation_type",
         "evaluation_parameter_builder_configs",
     }
-
 
 
 def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_serialized_keys_with_evaluation_parameter_builder_configs(

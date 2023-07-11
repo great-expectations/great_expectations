@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
 
+
 @pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 19s
@@ -126,6 +127,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     data_context.add_checkpoint(**checkpoint_config)
     results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
     assert results.success is False
+
 
 @pytest.mark.filesystem
 @pytest.mark.spark
@@ -234,6 +236,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     data_context.add_checkpoint(**checkpoint_config)
     results = data_context.run_checkpoint(checkpoint_name="my_checkpoint")
     assert results.success is False
+
 
 @pytest.mark.postgres
 @pytest.mark.filesystem
@@ -391,6 +394,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
     )
     assert len(result.metrics_by_domain) == 36
     assert len(result.expectation_configurations) == 122
+
 
 @pytest.mark.postgres
 @pytest.mark.filesystem

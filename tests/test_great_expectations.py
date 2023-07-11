@@ -103,6 +103,7 @@ class CustomPandasDataset(PandasDataset):
                 },
             }
 
+
 @pytest.mark.filesystem
 def test_custom_class():
     script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
@@ -182,6 +183,7 @@ def test_base_class_expectation():
         is True
     )
 
+
 @pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
@@ -209,6 +211,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
         with pytest.warns(Warning, match=r"No great_expectations version found"):
             my_df.validate(catch_exceptions=False)
 
+
 @pytest.mark.filesystem
 def test_validate_catch_non_existent_expectation(empty_data_context):
     context: DataContext = empty_data_context
@@ -231,6 +234,7 @@ def test_validate_catch_non_existent_expectation(empty_data_context):
         "object has no attribute 'non_existent_expectation'"
         in results.results[0].exception_info["exception_message"]
     )
+
 
 @pytest.mark.filesystem
 def test_validate_catch_invalid_parameter(empty_data_context):
@@ -255,6 +259,7 @@ def test_validate_catch_invalid_parameter(empty_data_context):
         in result.results[0].exception_info["exception_message"]
     )
 
+
 @pytest.mark.unit
 def test_stats_no_expectations():
     expectation_results = []
@@ -267,6 +272,7 @@ def test_stats_no_expectations():
     assert 0 == actual.successful_expectations
     assert 0 == actual.evaluated_expectations
     assert 0 == actual.unsuccessful_expectations
+
 
 @pytest.mark.unit
 def test_stats_no_successful_expectations():
@@ -283,6 +289,7 @@ def test_stats_no_successful_expectations():
     actual = _calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(3, 0, 3, 0.0, False)
     assert expected == actual
+
 
 @pytest.mark.unit
 def test_stats_all_successful_expectations():
@@ -302,6 +309,7 @@ def test_stats_all_successful_expectations():
     expected = ValidationStatistics(3, 3, 0, 100.0, True)
     assert expected == actual
 
+
 @pytest.mark.unit
 def test_stats_mixed_expectations():
     expectation_results = [
@@ -312,8 +320,8 @@ def test_stats_mixed_expectations():
     expected = ValidationStatistics(2, 1, 1, 50.0, False)
     assert expected == actual
 
-class TestIO(unittest.TestCase):
 
+class TestIO(unittest.TestCase):
     @pytest.mark.filesystem
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
@@ -339,7 +347,6 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
-    
     @pytest.mark.filesystem
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),

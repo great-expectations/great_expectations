@@ -21,7 +21,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 pytestmark = [pytest.mark.integration]
 
 
-
 def test_instantiation_value_counts_single_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
@@ -32,7 +31,6 @@ def test_instantiation_value_counts_single_batch_parameter_builder(
         name="my_name_0",
         data_context=data_context,
     )
-
 
 
 def test_value_counts_single_batch_parameter_builder_alice(

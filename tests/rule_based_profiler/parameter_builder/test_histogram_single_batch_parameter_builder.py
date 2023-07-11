@@ -24,7 +24,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 pytestmark = [pytest.mark.integration]
 
 
-
 def test_instantiation_histogram_single_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
@@ -35,7 +34,6 @@ def test_instantiation_histogram_single_batch_parameter_builder(
         name="my_name_0",
         data_context=data_context,
     )
-
 
 
 def test_histogram_single_batch_parameter_builder_alice(
@@ -106,7 +104,6 @@ def test_histogram_single_batch_parameter_builder_alice(
     assert parameter_node == expected_parameter_node_as_dict
 
 
-
 def test_histogram_single_batch_parameter_builder_alice_null_bins(
     alice_columnar_table_single_batch_context,
 ):
@@ -158,7 +155,6 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
             "Partitioning values for HistogramSingleBatchParameterBuilder by column_partition_metric_single_batch_parameter_builder into bins encountered empty or non-existent elements."
             in str(excinfo.value)
         )
-
 
 
 def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
@@ -240,7 +236,6 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
         assert parameter_node == expected_parameter_node_as_dict
 
 
-
 def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     alice_columnar_table_single_batch_context,
 ):
@@ -320,7 +315,6 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
         ),
     ],
 )
-
 def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
     column_values,
     bins,
@@ -400,7 +394,6 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
         )
 
         assert parameter_node == expected_parameter_node_as_dict
-
 
 
 def test_histogram_single_batch_parameter_builder_alice_check_serialized_keys(
