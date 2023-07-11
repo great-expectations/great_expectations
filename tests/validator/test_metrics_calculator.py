@@ -118,6 +118,7 @@ def test_column_partition_metric_spark(
         pytest.param(
             "sqlite",
         ),
+        pytest.param("spark", marks=[pytest.mark.spark]),
     ],
 )
 def test_column_partition_metric(
