@@ -1,7 +1,8 @@
+import pytest
 from click.testing import CliRunner
+
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import DATASOURCE_NEW_WARNING
-
 
 pytestmark = [pytest.mark.cli]
 
