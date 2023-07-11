@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -135,9 +137,9 @@ from great_expectations.datasource.data_connector.batch_filter import (
 def test_batch_filter_parse_batch_slice(
     data_connector_query_dict: dict,
     parsed_batch_slice: slice,
-    sliced_list: list[int],
+    sliced_list: List[int],
 ):
-    original_list: list[int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    original_list: List[int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     batch_filter_obj: BatchFilter = build_batch_filter(
         data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
