@@ -59,8 +59,8 @@ jobs:
   unnamed-matrix-tests:
     strategy:
       matrix:
-        python-version: ["3.8", "3.11"]
         markers: ["spark", "postgres"]
+        python-version: ["3.8", "3.11"]
 
     runs-on: ubuntu-latest
 
