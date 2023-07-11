@@ -466,6 +466,51 @@ def example_aws_postgres(
         subprocess.run(setup_commands, cwd=example_directory)
 
 
+@example.command(name="airflow")
+@click.option(
+    "--stop",
+    "--down",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+@click.option(
+    "--rebuild",
+    "--build",
+    is_flag=True,
+    help="Rebuild the containers.",
+    default=False,
+)
+def example_airflow(
+    stop: bool,
+    rebuild: bool,
+) -> None:
+    """Start an airflow example."""
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = (
+        repo_root / "examples" / "reference_environments" / "airflow_2_6_2"
+    )
+    assert example_directory.is_dir(), "Example directory not found"
+    command_options = CommandOptions(stop, False, False, rebuild)
+    executed_standard_function = _execute_standard_functions(
+        command_options, example_directory, container_name="not_applicable"
+    )
+    if not executed_standard_function:
+        cli_message(
+            "<yellow>Reference environments are experimental, the api is likely to change.</yellow>"
+        )
+        cli_message(
+            "<green>To connect to the airflow webserver, please use the url http://localhost:8080/ with user and password `airflow`</green>"
+        )
+        cli_message(
+            "<green>The demo dag with Great Expectations based on the airflow tutorial is called tutorial_dag_with_gx.</green>"
+        )
+        cli_message("<green>Setting up airflow example using airflow v2.6.2...</green>")
+        print_green_line()
+        example_setup_file = example_directory / "setup_airflow.sh"
+        subprocess.run(example_setup_file, cwd=example_directory)
+
+
 def _execute_standard_functions(
     command_options: CommandOptions,
     example_directory: pathlib.Path,

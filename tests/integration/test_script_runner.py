@@ -121,12 +121,6 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
-        name="in_memory_pandas_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.PANDAS],
-    ),
-    IntegrationTestFixture(
         name="in_memory_pandas_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

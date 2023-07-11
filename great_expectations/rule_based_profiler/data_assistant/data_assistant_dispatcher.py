@@ -80,7 +80,7 @@ class DataAssistantDispatcher:
         # cls._register(data_assistant_type, data_assistant)
 
         alias: str | None = data_assistant.__alias__
-        if alias is not None:
+        if alias is not None and not alias.startswith("_"):
             cls._register(alias, data_assistant)
 
     @classmethod

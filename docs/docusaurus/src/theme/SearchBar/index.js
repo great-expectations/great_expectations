@@ -16,7 +16,7 @@ const aa = require('search-insights')
 
 aa('init', {
   appId: 'B4HD9FJQCB',
-  apiKey: 'b910554b878b1ad33ec7eb6afb6714c1',
+  apiKey: '4f0951c44b2d9b26c88bcac0b14ebdfd',
   useCookie: true,  
 })
 function Hit ({ hit, children }) {
