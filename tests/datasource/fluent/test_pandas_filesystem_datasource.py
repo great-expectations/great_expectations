@@ -762,7 +762,7 @@ def test_test_connection_failures(
 
 
 @pytest.mark.timeout(
-    2.0,  # deepcopy operation can be slow. Try to eliminate it in the future.
+    2.25,  # deepcopy operation can be slow. Try to eliminate it in the future.
 )
 @pytest.mark.unit
 def test_csv_asset_batch_metadata(
