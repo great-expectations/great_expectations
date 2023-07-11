@@ -917,7 +917,6 @@ def build_map_metric_rule(  # noqa: PLR0913
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]
