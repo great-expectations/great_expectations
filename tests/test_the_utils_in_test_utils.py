@@ -2,7 +2,6 @@ import pytest
 
 from great_expectations.util import (
     get_clickhouse_sqlalchemy_potential_type,
-    is_library_loadable,
 )
 from tests.test_utils import get_awsathena_connection_url
 
@@ -23,6 +22,7 @@ def test_get_awsathena_connection_url(monkeypatch):
         get_awsathena_connection_url(db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME")
         == "awsathena+rest://@athena.us-east-1.amazonaws.com/test_ten_trips_db_name?s3_staging_dir=s3://test-staging/"
     )
+
 
 @pytest.mark.clickhouse
 def test_get_clickhouse_sqlalchemy_potential_type():
