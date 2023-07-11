@@ -581,6 +581,9 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert expected_year_month == batch_year_month
 
 
+@pytest.mark.timeout(
+    2.0  # this test can take longer than the default timeout, try to reduce it
+)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "order_by",
