@@ -166,6 +166,23 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - dbnet
+    volumes:
+      - gx_stores:/gx/gx_stores
+
+  data_docs:
+    image: gx/airflow_data_docs
+    container_name: gx_airflow_data_docs
+    build:
+      context: .
+      dockerfile: data_docs.Dockerfile
+    networks:
+      - dbnet
+    ports:
+      - "3000:3000"
+    volumes:
+      - gx_stores:/gx/gx_stores:ro
 
   airflow-triggerer:
     <<: *airflow-common
@@ -295,5 +312,10 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+networks:
+  dbnet:
+    driver: bridge
+
 volumes:
   postgres-db-volume:
+  gx_stores:

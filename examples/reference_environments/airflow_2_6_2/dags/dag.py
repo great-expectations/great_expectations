@@ -78,10 +78,28 @@ with DAG(
         # In a production environment, you would likely want to use a different data source
         # and/or a stored expectation suite rather than building it on each run.
         print("gx.__version__:", gx.__version__)
+        print("Setting up context...")
         context = gx.get_context()
+
+        # Explicitly create data docs site to use filesystem store with known file location.
+        # This is done to simplify hosting data docs so that they can easily be served in a separate container since
+        # the default for an ephemeral context is to write to a temp directory.
+        context.add_data_docs_site(
+            site_config={
+                "class_name": "SiteBuilder",
+                "store_backend": {
+                    "class_name": "TupleFilesystemStoreBackend",
+                    "base_directory": "/gx/gx_stores/data_docs",
+                },
+                "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+            },
+            site_name="local_site_for_hosting",
+        )
+        print("Connecting to data...")
         datasource = context.sources.add_pandas(name="my_pandas_datasource")
         data_asset = datasource.add_dataframe_asset(name="my_df", dataframe=df)
         my_batch_request = data_asset.build_batch_request()
+        print("Validating data...")
         context.add_or_update_expectation_suite("my_expectation_suite")
         validator = context.get_validator(
             batch_request=my_batch_request,
@@ -98,6 +116,7 @@ with DAG(
         checkpoint_result = checkpoint.run()
         if not checkpoint_result.success:
             raise Exception("Validation failed!")
+        print("Validation succeeded!")
 
     # [START transform_function]
     def transform(**kwargs):
