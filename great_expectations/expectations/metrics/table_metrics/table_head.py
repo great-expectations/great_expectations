@@ -90,23 +90,22 @@ class TableHead(TableMetricProvider):
                 # either custom query 
                 # or temp_table = False 
                 df = _sqlalchemy_without_named_table(
-                    execution_engine,
-                    dialect,
-                    selectable,
-                    metric_domain_kwargs,
-                    metric_value_kwargs,
-                    n_rows
+                    execution_engine=execution_engine,
+                    dialect=dialect,
+                    selectable=selectable,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    n_rows=n_rows
                 )
             else:
                 # named table
                 # temp_table = True
                 df = _sqlalchemy_with_named_table(
-                    execution_engine,
-                    
-                    selectable,
-                    metric_value_kwargs,
-                    metric_domain_kwargs,
-                    n_rows
+                    execution_engine=execution_engine,
+                    selectable=selectable,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    n_rows=n_rows
                 )
         return df
 
