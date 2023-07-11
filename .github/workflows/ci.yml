@@ -59,11 +59,10 @@ jobs:
   unnamed-matrix-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.8", "3.11"]
         markers: ["spark", "postgres"]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
