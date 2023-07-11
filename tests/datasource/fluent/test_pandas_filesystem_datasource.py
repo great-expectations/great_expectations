@@ -667,7 +667,7 @@ def test_pandas_sorter(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "batch_slice,expected_batch_count",
+    "batch_slice, expected_batch_count",
     [
         ("[-3:]", 3),
         ("[5:9]", 4),
