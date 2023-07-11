@@ -172,7 +172,14 @@ def _get_metrics_to_describe_batch(batch: Batch) -> Metrics:
 
     metrics_to_get = []
     metrics_to_get += table_summary_metrics_to_get
-    metrics_to_get += _categorical_metrics_to_get(batch)
+    # metrics_to_get += _categorical_metrics_to_get(batch) # TODO: Get this working
+
+    metric_to_get_in_get_metrics_format = (
+        _convert_list_of_metric_configs_to_get_metrics_format(metrics_to_get)
+    )
+    raw_metrics = metric_calculator.get_metrics(metric_to_get_in_get_metrics_format)
+    metrics = _convert_metrics_dict_to_metrics_object(raw_metrics=raw_metrics)
+    return metrics
 
     # print("metric configs to get:", metrics_to_get)
     #
@@ -180,19 +187,19 @@ def _get_metrics_to_describe_batch(batch: Batch) -> Metrics:
     #     metric_configs=metrics_to_get
     # )
 
-    return_val = []
-    for metric in metrics_to_get:
-        metric_to_get_in_get_metrics_format = (
-            _convert_list_of_metric_configs_to_get_metrics_format([metric])
-        )
-        raw_metrics = metric_calculator.get_metrics(metric_to_get_in_get_metrics_format)
-        metrics = _convert_metrics_dict_to_metrics_object(raw_metrics=raw_metrics)
-        return_val.append(metrics)
-
-    actual_return_val = []
-    for metrics in return_val:
-        actual_return_val += metrics.metrics
-    return Metrics(metrics=actual_return_val)
+    # return_val = []
+    # for metric in metrics_to_get:
+    #     metric_to_get_in_get_metrics_format = (
+    #         _convert_list_of_metric_configs_to_get_metrics_format([metric])
+    #     )
+    #     raw_metrics = metric_calculator.get_metrics(metric_to_get_in_get_metrics_format)
+    #     metrics = _convert_metrics_dict_to_metrics_object(raw_metrics=raw_metrics)
+    #     return_val.append(metrics)
+    #
+    # actual_return_val = []
+    # for metrics in return_val:
+    #     actual_return_val += metrics.metrics
+    # return Metrics(metrics=actual_return_val)
 
 
 def _convert_list_of_metric_configs_to_get_metrics_format(
