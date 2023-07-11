@@ -59,6 +59,7 @@ def checkpoint(
     )
 
 
+@pytest.mark.filesystem
 def test_checkpoint_config_repr(checkpoint):
     checkpoint_config_repr: str = str(checkpoint)
 
@@ -77,6 +78,7 @@ def test_checkpoint_config_repr(checkpoint):
         assert key in checkpoint_config_repr
 
 
+@pytest.mark.filesystem
 def test_checkpoint_config_repr_after_substitution(checkpoint):
     df: pd.DataFrame = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
