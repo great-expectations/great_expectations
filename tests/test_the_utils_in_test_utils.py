@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.util import (
     get_clickhouse_sqlalchemy_potential_type,
+    is_library_loadable,
 )
 from tests.test_utils import get_awsathena_connection_url
 
@@ -25,6 +26,10 @@ def test_get_awsathena_connection_url(monkeypatch):
 
 
 @pytest.mark.clickhouse
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="clickhouse_sqlalchemy"),
+    reason="clickhouse_sqlalchemy is not installed",
+)
 def test_get_clickhouse_sqlalchemy_potential_type():
     import clickhouse_sqlalchemy
     from clickhouse_sqlalchemy import types
