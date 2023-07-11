@@ -6,6 +6,7 @@ from great_expectations.agent.actions import (
     CreatedResource,
     RunOnboardingDataAssistantAction,
 )
+from great_expectations.agent.agent_server_session import AgentServerSession
 from great_expectations.agent.models import RunOnboardingDataAssistantEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import LegacyDatasource
@@ -21,6 +22,11 @@ def context():
 
 
 @pytest.fixture
+def agent_server_session():
+    return MagicMock(autospec=AgentServerSession)
+
+
+@pytest.fixture
 def event():
     return RunOnboardingDataAssistantEvent(
         type="onboarding_data_assistant_request.received",
@@ -30,9 +36,11 @@ def event():
 
 
 def test_run_onboarding_data_assistant_event_raises_for_legacy_datasource(
-    context, event
+    context, event, agent_server_session
 ):
-    action = RunOnboardingDataAssistantAction(context=context)
+    action = RunOnboardingDataAssistantAction(
+        context=context, agent_server_session=agent_server_session
+    )
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
@@ -43,8 +51,12 @@ def test_run_onboarding_data_assistant_event_raises_for_legacy_datasource(
         action.run(event=event, id=id)
 
 
-def test_run_onboarding_data_assistant_event_creates_expectation_suite(context, event):
-    action = RunOnboardingDataAssistantAction(context=context)
+def test_run_onboarding_data_assistant_event_creates_expectation_suite(
+    context, event, agent_server_session
+):
+    action = RunOnboardingDataAssistantAction(
+        context=context, agent_server_session=agent_server_session
+    )
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
@@ -64,8 +76,12 @@ def test_run_onboarding_data_assistant_event_creates_expectation_suite(context, 
     )
 
 
-def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):
-    action = RunOnboardingDataAssistantAction(context=context)
+def test_run_onboarding_data_assistant_event_creates_checkpoint(
+    context, event, agent_server_session
+):
+    action = RunOnboardingDataAssistantAction(
+        context=context, agent_server_session=agent_server_session
+    )
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
@@ -101,8 +117,12 @@ def test_run_onboarding_data_assistant_event_creates_checkpoint(context, event):
     context.add_checkpoint.assert_called_once_with(**expected_checkpoint_config)
 
 
-def test_run_onboarding_data_assistant_action_returns_action_result(context, event):
-    action = RunOnboardingDataAssistantAction(context=context)
+def test_run_onboarding_data_assistant_action_returns_action_result(
+    context, event, agent_server_session
+):
+    action = RunOnboardingDataAssistantAction(
+        context=context, agent_server_session=agent_server_session
+    )
     id = "096ce840-7aa8-45d1-9e64-2833948f4ae8"
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")

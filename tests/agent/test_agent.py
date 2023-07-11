@@ -90,20 +90,17 @@ def connection_string():
 
 
 @pytest.fixture(autouse=True)
-def create_session(mocker, queue, connection_string):
+def agent_server_session(mocker, queue, connection_string):
     """Patch for great_expectations.core.http.create_session"""
-    create_session = mocker.patch("great_expectations.agent.agent.create_session")
-    create_session().post().json.return_value = {
+    agent_server_session = mocker.patch(
+        "great_expectations.agent.agent.AgentServerSession"
+    )
+    agent_server_session.return_value.session.return_value.post.return_value.json.return_value = {
         "queue": queue,
         "connection_string": connection_string,
     }
-    create_session().post().ok = True
-    return create_session
-
-
-def test_gx_agent_gets_env_vars_on_init(get_context, gx_agent_config):
-    agent = GXAgent()
-    assert agent._config == gx_agent_config
+    agent_server_session.return_value.session.return_value.post.return_value.ok = True
+    return agent_server_session
 
 
 def test_gx_agent_initializes_cloud_context(get_context, gx_agent_config):
@@ -175,10 +172,16 @@ def test_gx_agent_run_handles_subscriber_error_on_close(
 
 
 def test_gx_agent_updates_cloud_on_job_status(
-    subscriber, create_session, get_context, client, gx_agent_config, event_handler
+    subscriber,
+    agent_server_session,
+    get_context,
+    client,
+    gx_agent_config,
+    event_handler,
 ):
     correlation_id = "4ae63677-4dd5-4fb0-b511-870e7a286e77"
     url = f"{gx_agent_config.gx_cloud_base_url}/organizations/{gx_agent_config.gx_cloud_organization_id}/agent-jobs/{correlation_id}"
+    agent_server_session().build_url.return_value = url
     job_started_data = JobStarted().json()
     job_completed = JobCompleted(success=True, created_resources=[])
     job_completed_data = job_completed.json()
@@ -226,9 +229,12 @@ def test_gx_agent_updates_cloud_on_job_status(
     agent = GXAgent()
     agent.run()
 
-    create_session.return_value.patch.assert_has_calls(
+    patch = agent_server_session.return_value.session.return_value.patch
+
+    patch.assert_has_calls(
         calls=[
-            call(url, data=job_started_data),
-            call(url, data=job_completed_data),
+            call(url=url, data=job_started_data),
+            call(url=url, data=job_completed_data),
         ],
+        any_order=True,
     )

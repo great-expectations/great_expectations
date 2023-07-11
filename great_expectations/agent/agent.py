@@ -155,7 +155,10 @@ class GXAgent:
         print(
             f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
         )
-        handler = EventHandler(context=self._context)
+        handler = EventHandler(
+            context=self._context,
+            agent_server_session=AgentServerSession(self._agent_server_session_config),
+        )
         # This method might raise an exception. Allow it and handle in _handle_event_as_thread_exit
         result = handler.handle_event(
             event=event_context.event, id=event_context.correlation_id
@@ -271,7 +274,7 @@ class GXAgent:
         )
         session = agent_server_session.session()
         data = status.json()
-        session.patch(agent_sessions_url, data=data)
+        session.patch(url=agent_sessions_url, data=data)
 
 
 class GXAgentError(Exception):
