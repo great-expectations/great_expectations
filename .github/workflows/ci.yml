@@ -47,7 +47,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
-            constraints-dev.txt
+            reqs/requirements-dev-test.txt
             setup.py
 
       - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
-            constraints-dev.txt
+            reqs/requirements-dev-test.txt
             setup.py
 
       - name: Install dependencies
