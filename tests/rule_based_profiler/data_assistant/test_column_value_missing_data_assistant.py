@@ -22,33 +22,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.validator.validator import Validator
 
 
-@pytest.fixture
-def datasource_name() -> str:
-    return "datasource"
-
-
-@pytest.fixture
-def database_path() -> pathlib.Path:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata.db",
-    )
-    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-
-
-@pytest.fixture
-def datasource(empty_data_context, database_path, datasource_name) -> PandasDatasource:
-    datasource = empty_data_context.sources.add_pandas_filesystem(
-        name=datasource_name, base_path=database_path
-    )
-
-    return datasource
-
-
 @pytest.mark.unit
 def test_column_value_missing_data_assistant_result_plot_expectations_and_metrics_correctly_handle_empty_plot_data() -> (
     None
@@ -119,69 +92,43 @@ def test_column_value_missing_data_assistant_plot_expectations_and_metrics_corre
     assert len(column_domain_charts) == 0
 
 
-# WIP tests
-# @pytest.mark.integration
-# @pytest.mark.slow
-# def test_single_batch_not_null_expectation(datasource):
-#     asset = datasource.add_query_asset(
-#         name="my_asset", query="select vendor_id from yellow_tripdata_sample_2019_01"
-#     )
-#     data_context = datasource.get_data_context()
-#     data_context.assistants._register(
-#         "my_data_assistant", ColumnValueMissingDataAssistant
-#     )
+@pytest.mark.integration
+@pytest.mark.slow
+def test_single_batch_multiple_columns(empty_data_context):
+    context = empty_data_context
+    datasource = context.sources.add_or_update_pandas("my_datasource")
+    asset = datasource.add_dataframe_asset("my_asset")
+    df = pd.DataFrame(
+        {
+            "non-null": [i for i in range(100)],
+            "null": [None for _ in range(100)],
+            "low-null": [None for _ in range(38)] + [i for i in range(62)],
+        }
+    )
+    batch_request = asset.build_batch_request(dataframe=df)
 
-#     result = data_context.assistants.my_data_assistant.run(
-#         batch_request=asset.build_batch_request()
-#     )
+    context.assistants._register("my_data_assistant", ColumnValueMissingDataAssistant)
+    result = context.assistants.my_data_assistant.run(batch_request=batch_request)
 
-#     assert len(result.expectation_configurations) == 1
-#     assert (
-#         result.expectation_configurations[0].expectation_type
-#         == "expect_column_values_to_not_be_null"
-#     )
-#     assert result.expectation_configurations[0].kwargs["column"] == "vendor_id"
-#     assert result.expectation_configurations[0].kwargs["mostly"] == 1.0
+    assert len(result.expectation_configurations) == 3
 
+    expected_results = {
+        "null": {"mostly": 1.0, "expectation": "expect_column_values_to_be_null"},
+        "non-null": {
+            "mostly": 1.0,
+            "expectation": "expect_column_values_to_not_be_null",
+        },
+        "low-null": {
+            "mostly": 0.6,
+            "expectation": "expect_column_values_to_not_be_null",
+        },
+    }
 
-# @pytest.mark.integration
-# @pytest.mark.slow
-# def test_single_batch_null_expectation(datasource):
-#     asset = datasource.add_query_asset(
-#         name="my_asset",
-#         query="select congestion_surcharge from yellow_tripdata_sample_2019_01 where congestion_surcharge is null",
-#     )
-#     data_context = datasource.get_data_context()
-#     data_context.assistants._register(
-#         "my_data_assistant", ColumnValueMissingDataAssistant
-#     )
-
-#     result = data_context.assistants.my_data_assistant.run(
-#         batch_request=asset.build_batch_request()
-#     )
-
-#     assert len(result.expectation_configurations) == 1
-#     assert (
-#         result.expectation_configurations[0].expectation_type
-#         == "expect_column_values_to_be_null"
-#     )
-#     assert (
-#         result.expectation_configurations[0].kwargs["column"] == "congestion_surcharge"
-#     )
-#     assert result.expectation_configurations[0].kwargs["mostly"] == 1.0
-
-
-# @pytest.mark.integration
-# @pytest.mark.slow
-# def test_single_batch_no_expectation(datasource):
-#     asset = datasource.add_dataframe_asset(name="my_asset")
-#     data_context = datasource._data_context
-#     data_context.assistants._register(
-#         "my_data_assistant", ColumnValueMissingDataAssistant
-#     )
-
-#     result = data_context.assistants.my_data_assistant.run(
-#         batch_request=asset.build_batch_request(dataframe=asset.dataframe)
-#     )
-
-#     assert len(result.expectation_configurations) == 0
+    for expectation in result.expectation_configurations:
+        assert expectation.expectation_type in [
+            "expect_column_values_to_not_be_null",
+            "expect_column_values_to_be_null",
+        ]
+        column = expectation.kwargs["column"]
+        assert expectation.kwargs["mostly"] == expected_results[column]["mostly"]
+        assert expectation.expectation_type == expected_results[column]["expectation"]
