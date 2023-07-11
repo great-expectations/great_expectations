@@ -9,10 +9,8 @@ YData-Synthetic is an open-source synthetic data engine. Using different kinds o
 
 :::info 
 
-The most recent version of GX supported by this guide is GX 0.15.50.
+To use Great Expectations (GX) with YData-Synthetic, see [YData-Synthetic's documentation on GX](https://docs.synthetic.ydata.ai/1.2/integrations/gx_integration/).
 
-To use Great Expectations (GX) with YData-Synthetic, see [How to use GX with YData-Synthetic](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic) in version 0.15.50 of the documentation.
-
-For more information about implementing and using Ydata-Synthetic, see the [YData-Synthetic site](https://github.com/ydataai/ydata-synthetic).
+For more information about implementing and using YData-Synthetic, see the [YData-Synthetic site](https://github.com/ydataai/ydata-synthetic).
 
 :::
