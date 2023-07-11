@@ -9,7 +9,7 @@ EMR Serverless is a deployment option for Amazon EMR that provides a serverless 
 
 :::info 
 
-The most recent version of GX supported by this guide is GX 0.15.50.
+The most recent version of GX that supports this integration is GX 0.15.50
 
 To use Great Expectations (GX) with Amazon EMR Serverless, see [How to use Great Expectations in EMR Serverless](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_emr_serverless) in version 0.15.50 of the documentation.
 

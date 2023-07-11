@@ -10,7 +10,7 @@ The power of data validation in Great Expectations can be integrated with Flyte 
 
 :::info 
 
-The most recent version of GX supported by this guide is GX 0.15.50.
+The most recent version of GX that supports this integration is GX 0.15.50
 
 To use Great Expectations (GX) in Flyte, see [How to use GX in Flyte](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_flyte) in version 0.15.50 of the documentation.
 

@@ -5,6 +5,7 @@ sidebar_label: "AWS S3 and Pandas"
 sidebar_custom_props: { icon: 'img/integrations/s3_icon.png' }
 ---
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
+import PrereqPython from '@site/docs/components/prerequisites/_python_version.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_s3_pandas.md'
@@ -156,7 +157,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <Prerequisites>
 
-- Python 3. To download and install Python, see [Python downloads](https://www.python.org/downloads/).
+- <PrereqPython />
 - The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
 - Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.

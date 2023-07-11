@@ -11,7 +11,7 @@ Using Meltano enables teams to easily implement DataOps best practices like conf
 
 :::info 
 
-The most recent version of GX supported by this guide is GX 0.15.50.
+The most recent version of GX that supports this integration is GX 0.15.50
 
 To use GX with Meltano, see [How to use GX with Meltano](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_with_meltano) in version 0.15.50 of the documentation.
 
