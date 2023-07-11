@@ -389,17 +389,20 @@ def _convert_unexpected_indices_to_df(
     Returns:
         pd.DataFrame that contains indices for unexpected values
     """
+    domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
         unexpected_index_df: pd.DataFrame = pd.DataFrame(
             unexpected_index_list, dtype="string"
         )
         unexpected_index_df = unexpected_index_df.fillna(value="null")
-        domain_column_name_list: list[str] = list(
-            set(unexpected_index_list[0].keys()).difference(
+        first_unexpected_index = unexpected_index_list[0] 
+        if isinstance(first_unexpected_index, dict):
+            domain_column_name_list = list(
+            set(first_unexpected_index.keys()).difference(
                 set(unexpected_index_column_names)
             )
-        )
+            )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
         unexpected_index_df = pd.DataFrame(
@@ -408,8 +411,8 @@ def _convert_unexpected_indices_to_df(
             dtype="string",
         )
         unexpected_index_df = unexpected_index_df.fillna(value="null")
-        domain_column_name_list: list[str] = ["Value"]
-        unexpected_index_column_names: list[str] = ["Index"]
+        domain_column_name_list = ["Value"]
+        unexpected_index_column_names = ["Index"]
     else:
         return pd.DataFrame()
 
