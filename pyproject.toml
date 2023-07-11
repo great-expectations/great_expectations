@@ -543,6 +543,9 @@ markers = [
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
+    "clickhouse: mark a test as Clickhouse-dependent.", 
+    "athena: mark a test as AWS Athena-dependent.",
+    "spark : mark a test as Spark-dependent.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]
