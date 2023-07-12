@@ -36,8 +36,8 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
 
 @pytest.mark.integration
 @pytest.mark.slow
-def test_single_batch_multiple_columns(empty_data_context):
-    context = empty_data_context
+def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
+    context = ephemeral_context_with_defaults
     datasource = context.sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
     df = pd.DataFrame(
