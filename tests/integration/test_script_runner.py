@@ -76,7 +76,7 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.PANDAS],
-    ),    
+    ),
     IntegrationTestFixture(
         name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
