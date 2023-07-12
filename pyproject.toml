@@ -548,6 +548,7 @@ markers = [
     "spark: mark a test as Spark-dependent.",
     "postgres: mark a test as postgres-dependent.",
     "pyarrow: mark a test as PyArrow-dependent.",
+    "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]

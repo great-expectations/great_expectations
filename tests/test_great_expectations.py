@@ -321,7 +321,6 @@ def test_stats_mixed_expectations():
     assert expected == actual
 
 
-@pytest.mark.filesystem
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
@@ -329,7 +328,6 @@ class TestIO(unittest.TestCase):
             script_path + "/test_sets/Titanic.csv",
         )
 
-    @pytest.mark.filesystem
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_json(
@@ -347,7 +345,7 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
-    @pytest.mark.filesystem
+    @pytest.mark.openpyxl
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),
         reason="GX uses pandas to read excel files, which requires openpyxl",
@@ -381,7 +379,6 @@ class TestIO(unittest.TestCase):
         assert isinstance(dfs_dict["Titanic_1"], PandasDataset)
         assert dfs_dict["Titanic_1"]["Name"][0] == "Allen, Miss Elisabeth Walton"
 
-    @pytest.mark.filesystem
     def test_read_table(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
@@ -441,7 +438,6 @@ class TestIO(unittest.TestCase):
         assert df["Name"][1] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
-    @pytest.mark.filesystem
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_pickle(
@@ -450,7 +446,6 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
-    @pytest.mark.filesystem
     def test_read_sas(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_sas(
