@@ -46,7 +46,7 @@ class _UrlHttpPathError(pydantic.UrlError):
     Custom Pydantic error for missing http_path in DatabricksDsn query.
     """
 
-    code = "url.http_path"
+    code = "url.query.http_path"
     msg_template = "HTTP path invalid"
 
 
