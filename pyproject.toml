@@ -534,7 +534,7 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
-    "aws: mark all tests that require aws credentials",
+    "aws_creds: mark all tests that require aws credentials",
     "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
