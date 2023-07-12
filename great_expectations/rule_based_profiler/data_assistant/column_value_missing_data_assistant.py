@@ -53,10 +53,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
     """
 
     # TODO: <Alex>ALEX</Alex>
-    __alias__: str = "_missingness"
+    # __alias__: str = "_missingness"
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX</Alex>
-    # __alias__: str = "missingness"
+    __alias__: str = "missingness"
     # TODO: <Alex>ALEX</Alex>
 
     def __init__(
@@ -228,10 +228,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         map_metric_name = "column_values.null"
         evaluation_parameter_builder_configs = [
             ParameterBuilderConfig(
-                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
+                **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
             ParameterBuilderConfig(
-                **column_values_null_unexpected_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
+                **total_count_metric_multi_batch_parameter_builder_for_evaluations.to_json_dict()
             ),
         ]
 
