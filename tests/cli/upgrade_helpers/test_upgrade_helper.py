@@ -21,6 +21,9 @@ from tests.cli.utils import (
 )
 
 
+pytestmark = [pytest.mark.cli]
+
+
 @pytest.fixture
 def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
     """
