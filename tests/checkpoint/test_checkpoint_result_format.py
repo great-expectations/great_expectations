@@ -3660,7 +3660,7 @@ runtime_configuration:
     }
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
 )
