@@ -378,6 +378,7 @@ def tests(  # noqa: PLR0913
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
     full_cov: bool = False,
+    verbose: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -401,8 +402,10 @@ def tests(  # noqa: PLR0913
         f"--durations={slowest}",
         cov_param,
         "--cov-report term",
-        "-vv",
+        "-rEf",  # show extra test summary info for errors & failed tests
     ]
+    if verbose:
+        cmds.append("-vv")
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
     if unit and not ignore_markers:
