@@ -349,7 +349,7 @@ def mv_usage_stats_json(ctx: Context):
     print(f"'{outfile}' copied to dbfs.")
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
 @invoke.task(

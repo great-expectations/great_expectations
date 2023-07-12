@@ -8,6 +8,9 @@ from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer im
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 
+# module level markers
+pytestmark = [pytest.mark.unit]
+
 
 @pytest.fixture
 def profiler_anonymizer() -> ProfilerAnonymizer:
@@ -20,7 +23,6 @@ def profiler_anonymizer() -> ProfilerAnonymizer:
     return anonymizer
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -54,7 +56,6 @@ def test_anonymize_profiler_run(
     }
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run_custom_values(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_custom_values: RuleBasedProfilerConfig,
@@ -93,7 +94,6 @@ def test_anonymize_profiler_run_custom_values(
     }
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run_multiple_rules(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules: RuleBasedProfilerConfig,
@@ -143,7 +143,6 @@ def test_anonymize_profiler_run_multiple_rules(
     }
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run_multiple_rules_custom_values(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args_multiple_rules_custom_values: RuleBasedProfilerConfig,
@@ -203,7 +202,6 @@ def test_anonymize_profiler_run_multiple_rules_custom_values(
     }
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
@@ -264,7 +262,6 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
     }
 
 
-@pytest.mark.unit
 def test_anonymize_profiler_run_with_condition_in_expectation_configuration_builder(
     profiler_anonymizer: ProfilerAnonymizer,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
