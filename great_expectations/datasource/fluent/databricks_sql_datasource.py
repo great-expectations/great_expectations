@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal, Union
 from urllib import parse
 
+import pydantic
 from pydantic import AnyUrl
 
 from great_expectations.compatibility.sqlalchemy import (
@@ -15,13 +16,59 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from pydantic.networks import Parts
+
     from great_expectations.compatibility import sqlalchemy
+
+
+def _parse_http_path_from_query(query: str) -> str | None:
+    url_components = parse.urlparse(query)
+    path = str(url_components.path)
+    parse_results: dict[str, list[str]] = parse.parse_qs(path)
+    path_results = parse_results.get("http_path", [])
+
+    if path_results and len(path_results) == 1:
+        return path_results[0]
+    return None
+
+
+class _UrlQueryError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing query in DatabricksDsn.
+    """
+
+    code = "url.query"
+    msg_template = "URL query invalid"
+
+
+class _UrlHttpPathError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing http_path in DatabricksDsn query.
+    """
+
+    code = "url.http_path"
+    msg_template = "HTTP path invalid"
 
 
 class DatabricksDsn(AnyUrl):
     allowed_schemes = {
         "databricks+connector",
     }
+
+    @classmethod
+    def validate_parts(cls, parts: Parts, validate_port: bool = True) -> Parts:
+        """
+        Overridden to validate additional fields outside of scheme (which is performed by AnyUrl).
+        """
+        query = parts["query"]
+        if query is None:
+            raise _UrlQueryError()
+
+        http_path = _parse_http_path_from_query(query)
+        if http_path is None:
+            raise _UrlHttpPathError()
+
+        return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
 
 @public_api
@@ -47,19 +94,13 @@ class DatabricksSQLDatasource(SQLDatasource):
         )
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
-        connect_args = {"http_path": self._get_http_path(connection_string)}
+
+        http_path = _parse_http_path_from_query(connection_string.query)
+        assert (
+            http_path
+        ), "Presence of http_path query string is guaranteed due to prior validation"
+
+        connect_args = {"http_path": http_path}
         self._engine = sa.create_engine(
             connection_string, connect_args=connect_args, **kwargs
         )
-
-    def _get_http_path(self, connection_string: DatabricksDsn) -> dict[str, str]:
-        query = connection_string.query
-        url_components = parse.urlparse(query)
-        parse_results = parse.parse_qs(url_components.path)
-
-        path_result = parse_results.get("http_path", [])
-        assert (
-            path_result and len(path_result) == 1
-        )  # TODO: Add prior validation such that this value is guaranteed
-
-        return path_result[0]
