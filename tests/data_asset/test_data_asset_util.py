@@ -12,6 +12,7 @@ import great_expectations as gx
 from great_expectations.self_check.util import expectationSuiteSchema
 
 
+@pytest.mark.e2e
 @pytest.mark.filterwarnings(
     "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
 )
@@ -138,6 +139,7 @@ class Child(Parent):
         """
 
 
+@pytest.mark.unit
 def test_doc_inheritance():
     c = Child()
 

@@ -7,6 +7,7 @@ import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
 
+@pytest.mark.unit
 def test_expect_file_line_regex_match_count_to_be_between():
     #####Invalid File Path######
     joke_file_path = "joke.txt"
@@ -84,6 +85,7 @@ def test_expect_file_line_regex_match_count_to_be_between():
     assert success_trial.result["missing_percent"] == 0
 
 
+@pytest.mark.unit
 def test_expect_file_line_regex_match_count_to_equal():
     complete_file_path = file_relative_path(
         __file__, "../test_sets/toy_data_complete.csv"
@@ -141,6 +143,7 @@ def test_expect_file_line_regex_match_count_to_equal():
     assert success_trial.result["missing_percent"] == 0
 
 
+@pytest.mark.unit
 def test_expect_file_hash_to_equal():
     # Test for non-existent file
     fake_file = gx.data_asset.FileDataAsset(file_path="abc")
@@ -172,6 +175,7 @@ def test_expect_file_hash_to_equal():
     assert good_hash_new_alg.success
 
 
+@pytest.mark.unit
 def test_expect_file_size_to_be_between():
     fake_file = gx.data_asset.FileDataAsset("abc")
 
@@ -212,6 +216,7 @@ def test_expect_file_size_to_be_between():
     assert good_range.success
 
 
+@pytest.mark.unit
 def test_expect_file_to_exist():
     # Test for non-existent file
     fake_file = gx.data_asset.FileDataAsset("abc")
@@ -226,6 +231,7 @@ def test_expect_file_to_exist():
     assert real_file_existence.success
 
 
+@pytest.mark.unit
 def test_expect_file_to_have_valid_table_header():
     # Test for non-existent file
     fake_file = gx.data_asset.FileDataAsset("abc")
@@ -251,6 +257,7 @@ def test_expect_file_to_have_valid_table_header():
     assert valid_header_dat_expectation.success
 
 
+@pytest.mark.unit
 def test_expect_file_to_be_valid_json():
     # Test for non-existent file
     fake_file = gx.data_asset.FileDataAsset("abc")
