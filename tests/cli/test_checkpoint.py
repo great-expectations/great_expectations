@@ -41,6 +41,9 @@ yaml = YAMLHandler()
 logger = logging.getLogger(__name__)
 
 
+pytestmark = [pytest.mark.cli]
+
+
 # TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_sql_datasource(

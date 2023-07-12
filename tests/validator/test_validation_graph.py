@@ -168,6 +168,7 @@ def test_ValidationGraph_add(metric_edge: MetricEdge) -> None:
     assert metric_edge.id in graph.edge_ids
 
 
+@pytest.mark.unit
 def test_ExpectationValidationGraph_constructor(
     expect_column_values_to_be_unique_expectation_config: ExpectationConfiguration,
     validation_graph_with_no_edges: ValidationGraph,
