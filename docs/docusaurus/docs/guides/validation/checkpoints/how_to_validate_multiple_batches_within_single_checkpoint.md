@@ -15,7 +15,7 @@ By following this guide, you can efficiently process multiple batches of data us
 
 ## Complete Initial Batch Creation
 
-First, either create batches from a Filesystem Data Source or a SQL Datasource.
+First, create either batches from a Filesystem Data Source or a SQL Datasource.
 
 1. [Batches of Organized Data from Filesystem Datasource](/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset).
 
