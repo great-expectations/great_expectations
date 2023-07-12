@@ -16,5 +16,7 @@ To access the Airflow UI, go to http://localhost:8080/ and use the default usern
 
 In the UI, you can run the dag named `tutorial_dag_with_gx`
 
+To view data docs, go to http://localhost:3000/. Note that only the latest run of the `tutorial_dag_with_gx` dag will be visible in data docs. This implementation is using a local data docs store on the celery worker and the overwriting may be related to the use of the celery worker filesystem. If you need to persist data docs or view several validations in data docs, please set up an external data docs store e.g. s3, GCS or ABS and add the configuration to the data context in the dag.
+
 
 This environment was built using the [official Airflow Docker Compose example](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html) with minor modifications.
