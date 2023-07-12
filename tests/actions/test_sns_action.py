@@ -1,7 +1,10 @@
+import pytest
+
 from great_expectations.checkpoint.util import send_sns_notification
 from great_expectations.core import ExpectationSuiteValidationResult
 
 
+@pytest.mark.aws
 def test_send_sns_notification(sns, aws_credentials):
     results = {
         "success": True,

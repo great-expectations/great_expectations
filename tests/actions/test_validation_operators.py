@@ -122,6 +122,7 @@ def warning_failure_validation_operator_data_context(
 @pytest.mark.filterwarnings(
     "ignore:System time is way off:urllib3.exceptions.SystemTimeWarning:urllib3"
 )
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_run_slack_query(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -215,6 +216,7 @@ def test_errors_warnings_validation_operator_run_slack_query(
     assert slack_query == expected_slack_query
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_failed_vo_result(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -278,6 +280,7 @@ def test_errors_warnings_validation_operator_failed_vo_result(
     assert not return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_failed_warning_suite(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
@@ -341,6 +344,7 @@ def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_faile
     assert return_obj_2.success
 
 
+@pytest.mark.filesystem
 def test_passing_run_id_as_a_parameter_to_warning_and_failure_vo(
     warning_failure_validation_operator_data_context, assets_to_validate
 ):
