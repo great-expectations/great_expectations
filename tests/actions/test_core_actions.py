@@ -57,7 +57,7 @@ class MockCloudResponse:
         self.content = json.dumps({"ok": "True"})
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
@@ -117,7 +117,7 @@ def test_StoreAction():
     ) == ExpectationSuiteValidationResult(success=False, results=[])
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockSlackResponse(200))
 def test_SlackNotificationAction(
     data_context_parameterized_expectation_suite,
@@ -237,7 +237,7 @@ def test_SlackNotificationAction(
     ) == {"slack_notification_result": "none required"}
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.skipif(
     not is_library_loadable(library_name="pypd"),
     reason="pypd is not installed",
@@ -276,7 +276,7 @@ def test_PagerdutyAlertAction(
     ) == {"pagerduty_alert_result": "none sent"}
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_OpsgenieAlertAction(
     data_context_parameterized_expectation_suite,
     validation_result_suite,
@@ -314,7 +314,7 @@ def test_OpsgenieAlertAction(
     ) == {"opsgenie_alert_result": "error"}
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(200))
 def test_MicrosoftTeamsNotificationAction_good_request(
     data_context_parameterized_expectation_suite,
@@ -425,7 +425,7 @@ def test_MicrosoftTeamsNotificationAction_good_request(
     ) == {"microsoft_teams_notification_result": None}
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
 def test_MicrosoftTeamsNotificationAction_bad_request(
     data_context_parameterized_expectation_suite,
@@ -536,7 +536,7 @@ class MockSMTPServer:
     ],
     scope="module",
 )
-@pytest.mark.e2e
+@pytest.mark.big
 def test_EmailAction(
     class_to_patch,
     use_tls,
@@ -599,7 +599,7 @@ def test_api_action_create_payload():
     assert payload == expected_payload
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @mock.patch("great_expectations.checkpoint.actions.requests")
 def test_api_action_run(
     mock_requests,
