@@ -3659,6 +3659,7 @@ runtime_configuration:
         "unsuccessful_expectations": 0,
     }
 
+
 @pytest.mark.timeout(
     2.0  # this test can take longer than the default timeout, try to reduce it
 )
