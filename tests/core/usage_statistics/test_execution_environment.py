@@ -20,6 +20,7 @@ else:
     METADATA_VERSION_PATCH: str = "importlib.metadata.version"
 
 
+@pytest.mark.project
 @pytest.mark.parametrize(
     "input_version", ["8.8.8", "0.14.12+14.g8f54aa902.dirty", "0.1.0.post0"]
 )
