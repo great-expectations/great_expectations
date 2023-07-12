@@ -1,3 +1,5 @@
+import pytest
+
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 
 
