@@ -680,7 +680,6 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
-        http_path: str = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def update_databricks_sql(  # noqa: PLR0913
@@ -690,7 +689,6 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
-        http_path: str = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def add_or_update_databricks_sql(  # noqa: PLR0913
@@ -700,7 +698,6 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
-        http_path: str = ...,
         create_temp_table: bool = True,
     ) -> DatabricksSQLDatasource: ...
     def delete_databricks_sql(
