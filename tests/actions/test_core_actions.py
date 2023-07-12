@@ -658,7 +658,6 @@ def test_api_action_run(
 #
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_cloud_sns_notification_action(
     sns,
