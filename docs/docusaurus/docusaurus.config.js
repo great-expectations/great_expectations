@@ -14,6 +14,7 @@ module.exports = {
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   plugins: [
+    require.resolve('@cmfcmf/docusaurus-search-local'),
     '@docusaurus-terminology/parser',
     'docusaurus-plugin-sass',
     [
@@ -26,14 +27,14 @@ module.exports = {
 
   themeConfig: {
     algolia: {
+      // See: https://docusaurus.io/docs/search#connecting-algolia
       appId: 'PFK639M3JK', 
       apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
       indexName: 'greatexpectations',
       searchPagePath: 'search',
+      contextualSearch: true,
       searchParameters: {
-        facetFilters: [
-          'version:current'
-        ]
+        facetFilters: ['version:current'],
       }
     },
     prism: {
