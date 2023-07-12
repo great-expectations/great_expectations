@@ -65,6 +65,25 @@ class DataAssistantDispatcher:
         return data_assistant_runner
 
     @classmethod
+    def _register_data_assistant(
+        cls,
+        data_assistant: Type[DataAssistant],
+    ) -> None:
+        """
+        This method registers "DataAssistant" subclass for future instantiation and execution of its "run()" method.
+
+        Args:
+            data_assistant: "DataAssistant" class to be registered
+        """
+        # TODO: <Alex>6/21/2022: Only alias is to be registered (leave formal type registration in as commented).</Alex>
+        # data_assistant_type = data_assistant.data_assistant_type
+        # cls._register(data_assistant_type, data_assistant)
+
+        alias: str | None = data_assistant.__alias__
+        if alias is not None and not alias.startswith("_"):
+            cls._register(alias, data_assistant)
+
+    @classmethod
     def _register(cls, name: str, data_assistant: Type[DataAssistant]) -> None:
         registered_data_assistants = cls._registered_data_assistants
 

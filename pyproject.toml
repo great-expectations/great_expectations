@@ -176,6 +176,7 @@ exclude = [
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/util\.py',  # 46
+    'rule_based_profiler/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py',  # 69
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
@@ -533,13 +534,21 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
+    "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
+    "filesystem: mark tests using the filesystem as the storage backend.",
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
+    "clickhouse: mark a test as Clickhouse-dependent.", 
+    "athena: mark a test as AWS Athena-dependent.",
+    "spark: mark a test as Spark-dependent.",
+    "postgres: mark a test as postgres-dependent.",
+    "pyarrow: mark a test as PyArrow-dependent.",
+    "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]
