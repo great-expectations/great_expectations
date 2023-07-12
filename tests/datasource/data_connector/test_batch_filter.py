@@ -12,7 +12,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "data_connector_query_dict,parsed_batch_slice,sliced_list",
+    "data_connector_query_dict, parsed_batch_slice, sliced_list",
     [
         pytest.param(
             {
