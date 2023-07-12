@@ -72,16 +72,11 @@
                     {}
                 ]
             }
-        },
-        "http_path": {
-            "title": "Http Path",
-            "type": "string"
         }
     },
     "required": [
         "name",
-        "connection_string",
-        "http_path"
+        "connection_string"
     ],
     "additionalProperties": false,
     "definitions": {
