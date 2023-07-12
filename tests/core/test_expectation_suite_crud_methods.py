@@ -319,7 +319,6 @@ def test_find_expectation_indexes(
         )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
     # All expectations in `ge_cloud_suite` have our desired id
@@ -331,7 +330,6 @@ def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_i
     assert res == []
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -343,7 +341,6 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
     with pytest.raises(InvalidExpectationConfigurationError) as err:
@@ -383,7 +380,6 @@ def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite)
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectations_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -618,7 +614,6 @@ def test_add_expectation(
     ]
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -690,7 +685,6 @@ def test_remove_all_expectations_of_type(
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
     # The state of the first expectation before update
@@ -719,7 +713,6 @@ def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, e
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -734,7 +727,6 @@ def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, ge_cloud_id):
     new_expectation_configuration = ExpectationConfiguration(
@@ -754,7 +746,6 @@ def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, ge_cloud_id)
     )
 
 
-@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_finds_no_matches(ge_cloud_suite, ge_cloud_id, exp4):
     with pytest.raises(ValueError) as err:
