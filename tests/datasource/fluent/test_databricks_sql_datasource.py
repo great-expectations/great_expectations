@@ -22,7 +22,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "URL query invalid",
+                    "msg": "URL query is invalid or missing",
                     "type": "value_error.url.query",
                 },
             ],

@@ -49,7 +49,7 @@ class _UrlHttpPathError(pydantic.UrlError):
     """
 
     code = "url.query.http_path"
-    msg_template = "HTTP path is invalid or missing"
+    msg_template = "'http_path' query param is invalid or missing"
 
 
 class DatabricksDsn(AnyUrl):
@@ -103,6 +103,4 @@ class DatabricksSQLDatasource(SQLDatasource):
 
         # Databricks connection is a bit finicky - the http_path portion of the connection string needs to be passed in connect_args
         connect_args = {"http_path": http_path}
-        return sa.create_engine(
-            connection_string, connect_args=connect_args, **kwargs
-        )
+        return sa.create_engine(connection_string, connect_args=connect_args, **kwargs)
