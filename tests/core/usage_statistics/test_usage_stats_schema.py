@@ -323,10 +323,6 @@ def test_cli_suite_edit_message():
 
 
 @pytest.mark.unit
-@pytest.mark.timeout(
-    3.0  # this test can take longer than the default timeout, try to reduce it
-)
-@pytest.mark.slow  # 2.42s
 def test_test_yaml_config_messages():
     usage_stats_records_messages = [
         "data_context.test_yaml_config",
@@ -383,10 +379,6 @@ def test_usage_stats_expectation_suite_messages():
 
 
 @pytest.mark.unit
-@pytest.mark.timeout(
-    6.0  # this test can take longer than the default timeout, try to reduce it
-)
-@pytest.mark.slow  # 5.20s
 def test_usage_stats_cli_payload_messages():
     usage_stats_records_messages = [
         "cli.checkpoint.delete",
