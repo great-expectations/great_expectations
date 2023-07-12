@@ -38,7 +38,7 @@ from great_expectations.datasource.fluent.databricks_sql_datasource import (
                 },
                 {
                     "loc": ("connection_string",),
-                    "msg": "HTTP path invalid",
+                    "msg": "'http_path' query param is invalid or missing",
                     "type": "value_error.url.query.http_path",
                 },
             ],
