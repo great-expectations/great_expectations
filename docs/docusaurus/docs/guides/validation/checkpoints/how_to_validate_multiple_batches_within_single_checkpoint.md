@@ -23,12 +23,12 @@ When working with a Filesystem Data Source and organizing batches, the **batchin
 This SQL-based asset can either be a merged table resulting from multiple tables joined through a SQL query (using the `add_query_asset` function), or an entire table loaded as a single batch using the `add_table_asset` function.
 :::
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py build_a_batch_request_with_multiple_batches"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py build_a_batch_request_with_multiple_batches"
 ```
 
 ## Create Batch Request List
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_batch_list"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_batch_list"
 ```
 In this scenario, the asset's build batch request combines all the data into a single batch, which is then linked to a corresponding batch request. Following that, in the second line, we utilize the `get_batch_list_from_batch_request` function to divide the single batch into multiple individual batches, forming a list. Moving on to the third line, each split-apart batch is associated with its respective batch request. Ultimately, we compile these batch requests, along with their corresponding batches, into a `batch_request_list`.
 
