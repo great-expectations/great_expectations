@@ -404,7 +404,7 @@ def _convert_unexpected_indices_to_df(
         else:
             raise TypeError(
                 f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."
-            ) 
+            )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
         unexpected_index_df = pd.DataFrame(
