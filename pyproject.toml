@@ -538,9 +538,13 @@ markers = [
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
+    "filesystem: mark tests using the filesystem as the storage backend.",
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
+    "clickhouse: mark a test as Clickhouse-dependent.", 
+    "athena: mark a test as AWS Athena-dependent.",
+    "spark : mark a test as Spark-dependent.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]

@@ -2,6 +2,9 @@ name: ci
 
 on:
   pull_request:
+  schedule:
+    # https://crontab.guru/every-3-hours
+    - cron: "0 */3 * * *"
 
 jobs:
   static-analysis:
