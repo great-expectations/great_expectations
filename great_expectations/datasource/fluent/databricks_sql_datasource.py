@@ -27,9 +27,11 @@ def _parse_http_path_from_query(query: str) -> str | None:
     parse_results: dict[str, list[str]] = parse.parse_qs(path)
     path_results = parse_results.get("http_path", [])
 
-    if path_results and len(path_results) == 1:
-        return path_results[0]
-    return None
+    if not path_results:
+        return None
+    if len(path_results) > 1:
+        raise ValueError("Only one `http_path` query entry is allowed")
+    return path_results[0]
 
 
 class _UrlQueryError(pydantic.UrlError):
