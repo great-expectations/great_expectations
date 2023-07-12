@@ -104,6 +104,7 @@ class CustomPandasDataset(PandasDataset):
             }
 
 
+@pytest.mark.filesystem
 def test_custom_class():
     script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     df = gx.read_csv(
@@ -150,6 +151,7 @@ def test_custom_class():
     assert df.expect_column_values_to_be_prime("primes").result["unexpected_list"] == []
 
 
+@pytest.mark.unit
 def test_custom_expectation():
     df = CustomPandasDataset({"x": [1, 1, 1, 1, 2]})
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -166,6 +168,7 @@ def test_custom_expectation():
 
 
 # Ensure that Custom Data Set classes can properly call non-overridden methods from their parent class
+@pytest.mark.unit
 def test_base_class_expectation():
     df = CustomPandasDataset(
         {
@@ -181,6 +184,7 @@ def test_base_class_expectation():
     )
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
@@ -208,6 +212,7 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
             my_df.validate(catch_exceptions=False)
 
 
+@pytest.mark.filesystem
 def test_validate_catch_non_existent_expectation(empty_data_context):
     context: DataContext = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
@@ -231,6 +236,7 @@ def test_validate_catch_non_existent_expectation(empty_data_context):
     )
 
 
+@pytest.mark.filesystem
 def test_validate_catch_invalid_parameter(empty_data_context):
     context: DataContext = empty_data_context
     df = gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
@@ -254,6 +260,7 @@ def test_validate_catch_invalid_parameter(empty_data_context):
     )
 
 
+@pytest.mark.unit
 def test_stats_no_expectations():
     expectation_results = []
     actual = _calc_validation_statistics(expectation_results)
@@ -267,6 +274,7 @@ def test_stats_no_expectations():
     assert 0 == actual.unsuccessful_expectations
 
 
+@pytest.mark.unit
 def test_stats_no_successful_expectations():
     expectation_results = [ExpectationValidationResult(success=False)]
     actual = _calc_validation_statistics(expectation_results)
@@ -283,6 +291,7 @@ def test_stats_no_successful_expectations():
     assert expected == actual
 
 
+@pytest.mark.unit
 def test_stats_all_successful_expectations():
     expectation_results = [
         ExpectationValidationResult(success=True),
@@ -301,6 +310,7 @@ def test_stats_all_successful_expectations():
     assert expected == actual
 
 
+@pytest.mark.unit
 def test_stats_mixed_expectations():
     expectation_results = [
         ExpectationValidationResult(success=False),
@@ -335,6 +345,7 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
 
+    @pytest.mark.openpyxl
     @pytest.mark.skipif(
         not is_library_loadable(library_name="openpyxl"),
         reason="GX uses pandas to read excel files, which requires openpyxl",
@@ -374,6 +385,7 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.pyarrow
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pyarrow"),
         reason="pyarrow is not installed",
@@ -393,6 +405,7 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.pyarrow
     @pytest.mark.skipif(
         not is_library_loadable(library_name="pyarrow")
         and not is_library_loadable(library_name="fastparquet"),
