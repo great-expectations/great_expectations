@@ -5,7 +5,7 @@ context = gx.get_context()
 
 datasource = context.sources.add_pandas_filesystem(
     name = "example_datasource",
-    base_directory='/path/to/your/datafolder/'
+    base_directory='/data'
 )
 
 my_batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
