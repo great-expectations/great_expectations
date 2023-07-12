@@ -28,7 +28,6 @@ from great_expectations.data_context.store import (  # isort:skip
 if TYPE_CHECKING:
     from great_expectations.data_context import (
         AbstractDataContext,
-        CloudDataContext,
         EphemeralDataContext,
     )
 
