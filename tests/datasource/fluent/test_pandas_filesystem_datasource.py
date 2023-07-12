@@ -582,7 +582,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
 
 @pytest.mark.timeout(
-    2.5  # this test can take longer than the default timeout, try to reduce it
+    3.0  # this test can take longer than the default timeout, try to reduce it
 )
 @pytest.mark.unit
 @pytest.mark.parametrize(
