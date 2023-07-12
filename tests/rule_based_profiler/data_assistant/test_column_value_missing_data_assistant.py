@@ -33,6 +33,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
     column_domain_charts: List[dict] = [p.to_dict() for p in plot_result.charts[2:]]
     assert len(column_domain_charts) == 0
 
+
 @pytest.mark.integration
 @pytest.mark.slow
 def test_single_batch_multiple_columns(empty_data_context):
@@ -73,4 +74,3 @@ def test_single_batch_multiple_columns(empty_data_context):
         column = expectation.kwargs["column"]
         assert expectation.kwargs["mostly"] == expected_results[column]["mostly"]
         assert expectation.expectation_type == expected_results[column]["expectation"]
-
