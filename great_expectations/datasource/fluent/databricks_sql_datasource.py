@@ -40,7 +40,7 @@ class _UrlQueryError(pydantic.UrlError):
     """
 
     code = "url.query"
-    msg_template = "URL query invalid"
+    msg_template = "URL query is invalid or missing"
 
 
 class _UrlHttpPathError(pydantic.UrlError):
@@ -49,7 +49,7 @@ class _UrlHttpPathError(pydantic.UrlError):
     """
 
     code = "url.query.http_path"
-    msg_template = "HTTP path invalid"
+    msg_template = "HTTP path is invalid or missing"
 
 
 class DatabricksDsn(AnyUrl):
