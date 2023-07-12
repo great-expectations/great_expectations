@@ -63,6 +63,7 @@ def basic_in_memory_data_context_just_stores(
     )
 
 
+@pytest.mark.unit
 def test_instantiation_and_basic_stores(
     basic_in_memory_data_context_just_stores,
     basic_in_memory_data_context_config_just_stores,
@@ -85,11 +86,13 @@ def test_instantiation_and_basic_stores(
     # TODO : metric store?
 
 
+@pytest.mark.unit
 def test_config_variables(basic_in_memory_data_context_just_stores):
     # nothing instantiated yet
     assert basic_in_memory_data_context_just_stores.config_variables == {}
 
 
+@pytest.mark.unit
 def test_list_stores(basic_in_memory_data_context_just_stores):
     assert basic_in_memory_data_context_just_stores.list_stores() == [
         {"class_name": "ExpectationsStore", "name": "expectations_store"},
@@ -101,6 +104,7 @@ def test_list_stores(basic_in_memory_data_context_just_stores):
     ]
 
 
+@pytest.mark.unit
 def test_add_store(basic_in_memory_data_context_just_stores):
     store_name: str = "my_new_expectations_store"
     store_config: dict = {"class_name": "ExpectationsStore"}
@@ -118,6 +122,7 @@ def test_add_store(basic_in_memory_data_context_just_stores):
     ]
 
 
+@pytest.mark.unit
 def test_list_active_stores(basic_in_memory_data_context_just_stores):
     """
     Active stores are identified by the following keys:
@@ -153,6 +158,7 @@ def test_list_active_stores(basic_in_memory_data_context_just_stores):
     )
 
 
+@pytest.mark.unit
 def test_get_config_with_variables_substituted(
     basic_in_memory_data_context_just_stores,
 ):
