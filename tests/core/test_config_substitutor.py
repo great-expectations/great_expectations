@@ -192,7 +192,7 @@ class MockedSecretManagerServiceClient:
         return response
 
 
-# BDIRKS
+# This test requires this import but monkeypatches external calls made to google.
 @pytest.mark.skipif(
     not google.secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
@@ -296,7 +296,7 @@ class MockedSecretClient:
     ],
 )
 @pytest.mark.unit
-# BDIRKS
+# This test requires this import but monkeypatches external calls made to azure.
 @pytest.mark.skipif(
     not (azure.storage and azure.SecretClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
