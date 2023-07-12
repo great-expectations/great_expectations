@@ -285,10 +285,12 @@ def ge_cloud_suite(
     )
 
 
+@pytest.mark.filesystem
 def test_find_expectation_indexes_on_empty_suite(exp1, empty_suite):
     assert empty_suite.find_expectation_indexes(exp1, "domain") == []
 
 
+@pytest.mark.filesystem
 def test_find_expectation_indexes(
     exp1, exp4, domain_success_runtime_suite, single_expectation_suite
 ):
@@ -317,6 +319,7 @@ def test_find_expectation_indexes(
         )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_id):
     # All expectations in `ge_cloud_suite` have our desired id
@@ -328,6 +331,7 @@ def test_find_expectation_indexes_with_ge_cloud_suite(ge_cloud_suite, ge_cloud_i
     assert res == []
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -339,6 +343,7 @@ def test_find_expectation_indexes_without_necessary_args(ge_cloud_suite):
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suite):
     with pytest.raises(InvalidExpectationConfigurationError) as err:
@@ -348,6 +353,7 @@ def test_find_expectation_indexes_with_invalid_config_raises_error(ge_cloud_suit
     assert str(err.value) == "Ensure that expectation configuration is valid."
 
 
+@pytest.mark.filesystem
 def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite):
     expectation_to_find1 = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -377,6 +383,7 @@ def test_find_expectations(exp2, exp3, exp4, exp5, domain_success_runtime_suite)
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_find_expectations_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -388,6 +395,7 @@ def test_find_expectations_without_necessary_args(ge_cloud_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_remove_expectation(
     exp1, exp2, exp3, exp4, exp5, single_expectation_suite, domain_success_runtime_suite
 ):
@@ -425,6 +433,7 @@ def test_remove_expectation(
     assert domain_success_runtime_suite.isEquivalentTo(single_expectation_suite)
 
 
+@pytest.mark.filesystem
 def test_remove_expectation_without_necessary_args(single_expectation_suite):
     with pytest.raises(TypeError) as err:
         single_expectation_suite.remove_expectation(
@@ -435,6 +444,7 @@ def test_remove_expectation_without_necessary_args(single_expectation_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
@@ -453,6 +463,7 @@ def test_patch_expectation_replace(exp5, exp6, domain_success_runtime_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
@@ -471,6 +482,7 @@ def test_patch_expectation_add(exp5, exp7, domain_success_runtime_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     assert domain_success_runtime_suite.expectations[4] is exp5
 
@@ -489,6 +501,7 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     )
 
 
+@pytest.mark.filesystem
 def test_add_expectation_configurations(
     exp1,
     exp2,
@@ -525,6 +538,7 @@ def test_add_expectation_configurations(
     assert single_expectation_suite.isEquivalentTo(different_suite)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -604,6 +618,7 @@ def test_add_expectation(
     ]
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -657,6 +672,7 @@ def test_add_expectation_with_ge_cloud_id(
     ]
 
 
+@pytest.mark.filesystem
 def test_remove_all_expectations_of_type(
     suite_with_table_and_column_expectations,
     suite_with_column_pair_and_table_expectations,
@@ -674,6 +690,7 @@ def test_remove_all_expectations_of_type(
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, exp1):
     # The state of the first expectation before update
@@ -702,6 +719,7 @@ def test_replace_expectation_replaces_expectation(ge_cloud_suite, ge_cloud_id, e
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     with pytest.raises(TypeError) as err:
@@ -716,6 +734,7 @@ def test_replace_expectation_without_necessary_args(ge_cloud_suite):
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, ge_cloud_id):
     new_expectation_configuration = ExpectationConfiguration(
@@ -735,6 +754,7 @@ def test_replace_expectation_finds_too_many_matches(ge_cloud_suite, ge_cloud_id)
     )
 
 
+@pytest.mark.gxcloud
 @pytest.mark.cloud
 def test_replace_expectation_finds_no_matches(ge_cloud_suite, ge_cloud_id, exp4):
     with pytest.raises(ValueError) as err:
