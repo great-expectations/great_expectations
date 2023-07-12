@@ -933,7 +933,7 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                self._create_engine()
+                self._engine = self._create_engine()
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -952,7 +952,7 @@ class SQLDatasource(Datasource):
         )
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
-        self._engine = sa.create_engine(connection_string, **kwargs)
+        return sa.create_engine(connection_string, **kwargs)
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
