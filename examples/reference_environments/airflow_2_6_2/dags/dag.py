@@ -84,6 +84,9 @@ with DAG(
         # Explicitly create data docs site to use filesystem store with known file location.
         # This is done to simplify hosting data docs so that they can easily be served in a separate container since
         # the default for an ephemeral context is to write to a temp directory.
+        # NOTE: Using the worker filesystem to store data docs is not recommended for production,
+        # you may want to use a different store_backend e.g. S3, GCS or ABS. To set that up you can replace
+        # the configuration below in the `add_data_docs_site` call:
         context.add_data_docs_site(
             site_config={
                 "class_name": "SiteBuilder",
