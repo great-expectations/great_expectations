@@ -5,11 +5,11 @@ title: Validate Multiple Batches within a Single Checkpoint Using a Batch Reques
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-By following this guide, you can efficiently process multiple batches of data using a simple approach. This method eliminates the need to create multiple versions of checkpoints and assets, streamlining the process. By adhering to the steps outlined below, you can ensure that all batches from a list stored in the asset are processed, preventing any potential issue of only processing the last batch. 
+By following this guide, you can efficiently process multiple batches of data using a simple approach. This method eliminates the need to create multiple versions of checkpoints gand assets, streamlining the process. By adhering to the steps outlined below, you can ensure that all batches from a list stored in the asset are processed, preventing any potential issue of only processing the last batch. 
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configure a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 
 </Prerequisites>
 
@@ -17,11 +17,13 @@ By following this guide, you can efficiently process multiple batches of data us
 
 First, either create batches from a Filesystem Data Source or a SQL Datasource.
 
-1. [Batches of Organized Data from Filesystem Data Source] (/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset).
+1. [Batches of Organized Data from Filesystem Datasource](/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset).
 
-2. [Batches of Organized Data from SQL Datasource] (/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/sql_data_assets.md).
+2. [Batches of Organized Data from SQL Datasource](/docs/docusaurus/docs/guides/connecting_to_your_data/fluent/database/sql_data_assets).
 
-When working with a Filesystem Data Source and organizing batches, the **batching_regex** argument enables the loading of multiple batches onto a single asset. On the other hand, when utilizing SQL Datasource, the asset generates a single batch by default, which can then be split into multiple batches using splitters. This SQL-based asset can either be a merged table resulting from multiple tables joined through a SQL query (using the `add_query_asset` function), or an entire table loaded as a single batch using the `add_table_asset` function.
+When working with a Filesystem Data Source and organizing batches, the **batching_regex** argument enables the loading of multiple batches onto a single asset. On the other hand, when utilizing SQL Datasource, the asset generates a single batch by default, which can then be split into multiple batches using splitters.
+
+This SQL-based asset can either be a merged table resulting from multiple tables joined through a SQL query (using the `add_query_asset` function), or an entire table loaded as a single batch using the `add_table_asset` function.
 
 ## Create Expectation Suite
 
