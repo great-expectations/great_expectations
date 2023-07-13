@@ -51,6 +51,7 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
     return gx.get_context(context_root_dir=context_path)
 
 
+@pytest.mark.filesystem
 def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     context: DataContext = empty_data_context_stats_enabled
     asset = DataAsset()
@@ -67,6 +68,7 @@ def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     assert asset.get_expectation_suite() == default_suite
 
 
+@pytest.mark.filesystem
 def test_custom_expectation_default_arg_values_set(
     data_context_simple_expectation_suite_with_custom_pandas_dataset,
 ):

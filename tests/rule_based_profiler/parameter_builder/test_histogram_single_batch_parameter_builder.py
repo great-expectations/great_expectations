@@ -20,8 +20,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
+# module level markers
+pytestmark = [pytest.mark.integration]
 
-@pytest.mark.integration
+
 def test_instantiation_histogram_single_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
@@ -34,7 +36,6 @@ def test_instantiation_histogram_single_batch_parameter_builder(
     )
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
@@ -103,7 +104,6 @@ def test_histogram_single_batch_parameter_builder_alice(
     assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_null_bins(
     alice_columnar_table_single_batch_context,
 ):
@@ -157,7 +157,6 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
         )
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
     alice_columnar_table_single_batch_context,
 ):
@@ -237,7 +236,6 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
         assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     alice_columnar_table_single_batch_context,
 ):
@@ -317,7 +315,6 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
         ),
     ],
 )
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
     column_values,
     bins,
@@ -399,7 +396,6 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
         assert parameter_node == expected_parameter_node_as_dict
 
 
-@pytest.mark.integration
 def test_histogram_single_batch_parameter_builder_alice_check_serialized_keys(
     alice_columnar_table_single_batch_context,
 ):
