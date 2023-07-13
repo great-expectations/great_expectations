@@ -110,6 +110,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
+    # print(json.dumps(titanic_expectations, indent=2))
     for exp in titanic_expectations.expectations:
         try:
             column = exp.kwargs["column"]
@@ -150,6 +151,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
     )
 
     assert content_block["content_block_type"] == "header"
+    print(content_block["header"])
     assert content_block["header"] == {
         "content_block_type": "string_template",
         "string_template": {
@@ -159,6 +161,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
             "styling": {"classes": ["m-0", "p-0"]},
         },
     }
+    print(content_block["subheader"])
     assert content_block["subheader"] == {
         "content_block_type": "string_template",
         "string_template": {
@@ -208,6 +211,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     ).to_json_dict()
+    print(content_block)
     assert content_block == {
         "content_block_type": "header",
         "styling": {
@@ -262,6 +266,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     titanic_profiled_evrs_1,
 ):
+    print(titanic_profiled_evrs_1.results[0])
     distinct_values_evrs = [
         evr
         for evr in titanic_profiled_evrs_1.results
@@ -317,7 +322,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
             },
         },
     }
-
+    print(content_blocks.to_json_dict())
     assert content_blocks.to_json_dict() == expected
 
     expectation_with_unescaped_dollar_sign = ExpectationConfiguration(
@@ -345,6 +350,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
         [expectation_with_unescaped_dollar_sign],
     )
 
+    print(content_blocks.to_json_dict())
     expected = {
         "content_block_type": "header",
         "styling": {
@@ -521,6 +527,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
+    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -685,6 +692,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
+    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -993,6 +1001,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
+    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -1144,6 +1153,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
+    print(result_json)
     assert result_json == expected_result_json
 
 

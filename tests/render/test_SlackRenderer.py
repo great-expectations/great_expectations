@@ -113,6 +113,8 @@ def test_SlackRenderer_validation_results_with_datadocs(
         ],
         "text": "default: Success :tada:",
     }
+    print(rendered_output)
+    print(expected_output)
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
@@ -250,6 +252,8 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
         ],
         "text": "default: Success :tada:",
     }
+    print(rendered_output)
+    print(expected_output)
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
