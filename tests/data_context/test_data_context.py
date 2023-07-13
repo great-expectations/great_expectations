@@ -1498,7 +1498,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     ]
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1678,7 +1678,7 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.slow  # 8.13s
 def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
@@ -1701,7 +1701,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     assert my_validator.expectation_suite_name == "default"
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.slow  # 1.35s
 def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
@@ -1725,7 +1725,7 @@ def test_get_validator_with_batch(in_memory_runtime_context):
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_get_validator_with_batch_list(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -2852,7 +2852,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_finds_diff(
     empty_data_context_stats_enabled: DataContext,
@@ -2872,7 +2872,7 @@ def test_check_for_usage_stats_sync_finds_diff(
     assert res is True
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_does_not_find_diff(
     empty_data_context_stats_enabled: DataContext,
@@ -2891,7 +2891,7 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
     assert res is False
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     empty_data_context: DataContext,
