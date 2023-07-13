@@ -20,10 +20,10 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
-      - checkout: self
-        fetchDepth: "0"
       - job: changes
         steps:
+          - checkout: self
+            fetchDepth: "0"
           - task: ChangedFiles@1
             name: CheckDocsChanges
             inputs:
