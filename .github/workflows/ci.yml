@@ -66,8 +66,7 @@ jobs:
           - big
           - cli
           - filesystem
-          - openpyxl or pyarrow
-          - project
+          - openpyxl or pyarrow or project
         python-version: ["3.8"]
 
     runs-on: ubuntu-latest
