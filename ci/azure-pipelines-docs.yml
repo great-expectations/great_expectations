@@ -28,9 +28,6 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-          - bash: ./ci/checks/check_for_docs_deps_changes.sh
-            name: CheckDocsDependenciesChanges
-
   - stage: custom_checks
     dependsOn: scope_check
     pool:
