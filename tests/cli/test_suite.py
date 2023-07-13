@@ -41,7 +41,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.renderer.v3.test_suite_profile_notebook_renderer import (
     EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT,
 )
-from render.util import (
+from tests.render.util import (
     find_code_in_notebook,
     load_notebook_from_path,
     run_notebook,
