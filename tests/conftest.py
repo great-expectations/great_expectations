@@ -2910,13 +2910,6 @@ def filesystem_csv_4(tmp_path):
     return base_dir
 
 
-def pytest_collection_finish(session):
-    for test in session.items:
-        print(test.name)
-        for m in test.own_markers:
-            print(f"    {m.name}")
-
-
 @pytest.fixture
 def titanic_profiled_evrs_1():
     with open(
