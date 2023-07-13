@@ -3,10 +3,12 @@ Test the ability to use datetime objects as run time evaluation parameters.
 """
 
 import pandas as pd
+import pytest
 
 from great_expectations.dataset import PandasDataset
 
 
+@pytest.mark.big
 def test_pandas_datetime_evaluation_parameter():
     evaluation_parameters = {
         "now": pd.Timestamp.now(),

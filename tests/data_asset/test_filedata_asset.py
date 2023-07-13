@@ -10,6 +10,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.util import file_relative_path
 
 
+@pytest.mark.filesystem
 def test_autoinspect_filedata_asset():
     # Expect an error to be raised since a file object doesn't have a columns attribute
     warnings.simplefilter("always", UserWarning)
@@ -28,6 +29,7 @@ def test_autoinspect_filedata_asset():
     #         raise
 
 
+@pytest.mark.filesystem
 def test_expectation_suite_filedata_asset():
     # Load in data files
     file_path = file_relative_path(__file__, "../test_sets/toy_data_complete.csv")
@@ -104,6 +106,7 @@ def test_expectation_suite_filedata_asset():
     ] == complete_config3.expectations
 
 
+@pytest.mark.filesystem
 def test_file_format_map_output():
     incomplete_file_path = file_relative_path(
         __file__, "../test_sets/toy_data_incomplete.csv"
