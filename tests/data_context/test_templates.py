@@ -1,6 +1,6 @@
 import pytest
 
-import great_expectations.data_context.templates as templates
+from great_expectations.data_context import templates
 
 
 @pytest.fixture()
@@ -103,6 +103,7 @@ datasources: {}
     return PROJECT_HELP_COMMENT
 
 
+@pytest.mark.unit
 def test_project_optional_config_comment_matches_default(
     project_optional_config_comment,
 ):
@@ -114,6 +115,7 @@ def test_project_optional_config_comment_matches_default(
     assert templates.PROJECT_OPTIONAL_CONFIG_COMMENT == project_optional_config_comment
 
 
+@pytest.mark.unit
 def test_project_help_comment_matches_default(project_help_comment):
     """
     What does this test and why?

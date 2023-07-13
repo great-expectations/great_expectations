@@ -3,7 +3,7 @@ from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Type, Union
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
@@ -59,7 +59,7 @@ def column_aggregate_value(
         def wrapper(metric_fn: Callable):
             @metric_value(engine=PandasExecutionEngine)
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -135,7 +135,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -198,7 +198,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 domain_type=domain_type,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,

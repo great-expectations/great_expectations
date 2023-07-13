@@ -8,6 +8,7 @@ import shutil
 from abc import ABCMeta
 from typing import Any, List, Tuple
 
+from great_expectations.compatibility import aws
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict
@@ -24,7 +25,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
     three components.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         filepath_template=None,
         filepath_prefix=None,
@@ -124,7 +125,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return converted_string
 
-    def _convert_filepath_to_key(self, filepath):
+    def _convert_filepath_to_key(self, filepath):  # noqa: PLR0912
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
             return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
@@ -232,7 +233,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     The filepath_template is a string template used to convert the key to a filepath.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         base_directory,
         filepath_template=None,
@@ -262,7 +263,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         if os.path.isabs(base_directory):  # noqa: PTH117
             self.full_base_directory = base_directory
         else:
-            if root_directory is None:
+            if root_directory is None:  # noqa: PLR5501
                 raise ValueError(
                     "base_directory must be an absolute path if root_directory is not provided"
                 )
@@ -392,7 +393,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             while (
                 not os.listdir(curpath)
                 and os.path.exists(curpath)  # noqa: PTH110
-                and mroot != curpath  # noqa: PTH110
+                and mroot != curpath
             ):
                 f2 = os.path.dirname(curpath)  # noqa: PTH120
                 os.rmdir(curpath)  # noqa: PTH106
@@ -457,7 +458,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     The filepath_template is a string template used to convert the key to a filepath.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bucket,
         prefix="",
@@ -539,7 +540,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             else:
                 s3_object_key = self._convert_key_to_filepath(key)
         else:
-            if self.prefix:
+            if self.prefix:  # noqa: PLR5501
                 s3_object_key = "/".join(
                     (self.prefix, self._convert_key_to_filepath(key))
                 )
@@ -626,11 +627,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
             else:
-                if self.prefix is None:
+                if self.prefix is None:  # noqa: PLR5501
                     if s3_object_key.startswith("/"):
                         s3_object_key = s3_object_key[1:]
                 else:
-                    if s3_object_key.startswith(f"{self.prefix}/"):
+                    if s3_object_key.startswith(f"{self.prefix}/"):  # noqa: PLR5501
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
@@ -691,7 +692,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3_object_key = self._build_s3_object_key(key)
 
         # Check if the object exists
-        if self.has_key(key):  # noqa: W601
+        if self.has_key(key):
             # This implementation deletes the object if non-versioned or adds a delete marker if versioned
             s3.Object(self.bucket, s3_object_key).delete()
             return True
@@ -703,10 +704,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key in all_keys
 
     def _assume_role_and_get_secret_credentials(self):
-        import boto3
-
         role_session_name = "GXAssumeRoleSession"
-        client = boto3.client("sts", self._boto3_options.get("region_name"))
+        client = aws.boto3.client("sts", self._boto3_options.get("region_name"))
         role_arn = self._boto3_options.pop("assume_role_arn")
         assume_role_duration = self._boto3_options.pop("assume_role_duration")
         response = client.assume_role(
@@ -726,12 +725,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     @property
     def boto3_options(self):
-        from botocore.client import Config
-
         result = {}
         if self._boto3_options.get("signature_version"):
             signature_version = self._boto3_options.pop("signature_version")
-            result["config"] = Config(signature_version=signature_version)
+            result["config"] = aws.Config(signature_version=signature_version)
         if self._boto3_options.get("assume_role_arn"):
             self._assume_role_and_get_secret_credentials()
         result.update(self._boto3_options)
@@ -739,14 +736,10 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return result
 
     def _create_client(self):
-        import boto3
-
-        return boto3.client("s3", **self.boto3_options)
+        return aws.boto3.client("s3", **self.boto3_options)
 
     def _create_resource(self):
-        import boto3
-
-        return boto3.resource("s3", **self.boto3_options)
+        return aws.boto3.resource("s3", **self.boto3_options)
 
     @property
     def config(self) -> dict:
@@ -763,7 +756,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     The filepath_template is a string template used to convert the key to a filepath.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bucket,
         project,
@@ -831,7 +824,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             else:
                 gcs_object_key = self._convert_key_to_filepath(key)
         else:
-            if self.prefix:
+            if self.prefix:  # noqa: PLR5501
                 gcs_object_key = "/".join(
                     (self.prefix, self._convert_key_to_filepath(key))
                 )
@@ -852,7 +845,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 f"Unable to retrieve object from TupleGCSStoreBackend with the following Key: {str(key)}"
             )
         else:
-            return gcs_response_object.download_as_string().decode("utf-8")
+            return gcs_response_object.download_as_bytes().decode("utf-8")
 
     def _set(
         self,
@@ -950,7 +943,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         if self.prefix:
             path_url = "/".join((self.bucket, self.prefix, path))
         else:
-            if self.base_public_path:
+            if self.base_public_path:  # noqa: PLR5501
                 if self.base_public_path[-1] != "/":
                     path_url = f"/{path}"
                 else:
@@ -988,7 +981,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     """
 
     # We will use blobclient here
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         container,
         connection_string=None,

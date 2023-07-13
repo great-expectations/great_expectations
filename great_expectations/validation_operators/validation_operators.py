@@ -74,7 +74,7 @@ class ValidationOperator:
 
         raise NotImplementedError
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -302,7 +302,7 @@ class ActionListValidationOperator(ValidationOperator):
         # if not isinstance(item, (DataAsset, Validator)):
         if isinstance(item, tuple):
             if not (
-                len(item) == 2
+                len(item) == 2  # noqa: PLR2004
                 and isinstance(item[0], dict)
                 and isinstance(item[1], str)
             ):
@@ -315,7 +315,7 @@ class ActionListValidationOperator(ValidationOperator):
 
         return batch
 
-    def run(
+    def run(  # noqa: PLR0913
         self,
         assets_to_validate,
         run_id=None,
@@ -337,15 +337,9 @@ class ActionListValidationOperator(ValidationOperator):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
         ###
-        # NOTE: 20211010 - jdimatteo: This method is called by both Checkpoint.run and LegacyCheckpoint.run and below
+        # NOTE: 20211010 - jdimatteo: This method is called by Checkpoint.run and below
         # usage of AsyncExecutor may speed up I/O bound validations by running them in parallel with multithreading
         # (if concurrency is enabled in the data context configuration).
-        #
-        # When this method is called by LegacyCheckpoint.run, len(assets_to_validate) may be greater than 1. If
-        # concurrency is enabled in the configuration AND len(assets_to_validate) > 1, then execution is run in multiple
-        # threads with AsyncExecutor -- otherwise AsyncExecutor only uses the current single thread to execute the work.
-        # Please see the below arguments used to initialize AsyncExecutor and the corresponding AsyncExecutor docstring
-        # for more details on when multiple threads are used.
         #
         # When this method is called by Checkpoint.run, len(assets_to_validate) may be 1 even if there are multiple
         # validations, because Checkpoint.run calls this method in a loop for each validation. AsyncExecutor is also
@@ -441,7 +435,7 @@ class ActionListValidationOperator(ValidationOperator):
             evaluation_parameters=evaluation_parameters,
         )
 
-    def _run_actions(
+    def _run_actions(  # noqa: PLR0913
         self,
         batch: Union[Batch, DataAsset],
         expectation_suite_identifier: ExpectationSuiteIdentifier,
@@ -654,7 +648,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         data_context,
         action_list,
@@ -675,7 +669,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         self.stop_on_first_error = stop_on_first_error
         self.base_expectation_suite_name = base_expectation_suite_name
 
-        assert len(expectation_suite_name_suffixes) == 2
+        assert len(expectation_suite_name_suffixes) == 2  # noqa: PLR2004
         for suffix in expectation_suite_name_suffixes:
             assert isinstance(suffix, str)
         self.expectation_suite_name_suffixes = expectation_suite_name_suffixes
@@ -803,7 +797,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(  # noqa: C901 - complexity 18
+    def run(  # noqa: PLR0912, PLR0913
         self,
         assets_to_validate,
         run_id=None,

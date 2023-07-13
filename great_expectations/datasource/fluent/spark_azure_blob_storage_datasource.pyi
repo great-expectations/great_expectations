@@ -40,7 +40,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     azure_options: dict[str, ConfigStr | Any] = {}
     # private
     _azure_client: azure.BlobServiceClient | None
-    def add_csv_asset(
+    def add_csv_asset(  # noqa: PLR0913
         self,
         name: str,
         *,
@@ -49,6 +49,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
+        abs_recursive_file_discovery: bool = False,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,

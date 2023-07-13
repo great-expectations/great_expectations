@@ -55,7 +55,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         "limit",
     }
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -207,7 +207,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             limit=limit,
         )
 
-    def _build_batch_kwargs_path_iter(
+    def _build_batch_kwargs_path_iter(  # noqa: PLR0913
         self,
         path_list,
         glob_config,
@@ -224,7 +224,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 limit=limit,
             )
 
-    def _build_batch_kwargs_from_path(
+    def _build_batch_kwargs_from_path(  # noqa: PLR0913
         self, path, glob_config, reader_method=None, reader_options=None, limit=None
     ):
         batch_kwargs = self._datasource.process_batch_parameters(

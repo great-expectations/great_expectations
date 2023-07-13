@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Literal, Type, Union
 
 import pydantic
 
+from great_expectations.compatibility import aws
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -33,15 +34,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BOTO3_IMPORTED = False
-try:
-    import boto3  # noqa: disable=E0602
-
-    BOTO3_IMPORTED = True
-except ImportError:
-    pass
-
-
 class SparkS3DatasourceError(SparkDatasourceError):
     pass
 
@@ -50,6 +42,11 @@ class SparkS3DatasourceError(SparkDatasourceError):
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket",
+        "boto3_options",
+    }
 
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"
@@ -64,7 +61,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         s3_client: Union[BaseClient, None] = self._s3_client
         if not s3_client:
             # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
-            if BOTO3_IMPORTED:
+            if aws.boto3:
                 _check_config_substitutions_needed(
                     self, self.boto3_options, raise_warning_if_provider_not_present=True
                 )
@@ -74,7 +71,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                     config_provider=self._config_provider
                 ).get("boto3_options", {})
                 try:
-                    s3_client = boto3.client("s3", **boto3_options)
+                    s3_client = aws.boto3.client("s3", **boto3_options)
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise SparkS3DatasourceError(
@@ -110,12 +107,13 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
-    def _build_data_connector(
+    def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
+        s3_recursive_file_discovery: bool = False,
         **kwargs,
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
@@ -133,6 +131,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             prefix=s3_prefix,
             delimiter=s3_delimiter,
             max_keys=s3_max_keys,
+            recursive_file_discovery=s3_recursive_file_discovery,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -144,5 +143,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 bucket=self.bucket,
                 prefix=s3_prefix,
                 delimiter=s3_delimiter,
+                recursive_file_discovery=s3_recursive_file_discovery,
             )
         )

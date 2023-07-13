@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
 
 
-def column_function_partial(  # noqa: C901 - 19
+def column_function_partial(  # noqa: C901, PLR0915
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[str] = None,
     **kwargs,
@@ -75,7 +75,7 @@ def column_function_partial(  # noqa: C901 - 19
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -137,7 +137,7 @@ def column_function_partial(  # noqa: C901 - 19
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: dict,
@@ -210,7 +210,7 @@ def column_function_partial(  # noqa: C901 - 19
                 **kwargs,
             )
             @wraps(metric_fn)
-            def inner_func(
+            def inner_func(  # noqa: PLR0913
                 cls,
                 execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: dict,

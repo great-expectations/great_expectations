@@ -31,7 +31,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         map_metric_name: str,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
@@ -284,7 +284,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         return metric_configurations
 
     @staticmethod
-    def _get_column_names_satisfying_tolerance_limits(
+    def _get_column_names_satisfying_tolerance_limits(  # noqa: PLR0913
         validator: Validator,
         num_batch_ids: int,
         metric_configurations_by_column_name: Dict[str, List[MetricConfiguration]],
@@ -321,7 +321,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         metric_value: Any
         intra_batch_unexpected_ratios_by_column_name: Dict[str, List[float]] = {
             column_name: [
-                metric_value / mean_table_row_count_as_float
+                (metric_value or 0.0) / mean_table_row_count_as_float
                 for metric_value in resolved_metrics.values()
             ]
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()

@@ -3,13 +3,8 @@ from typing import Generic, Sequence, TypeVar
 
 from pydantic import BaseModel
 
-from great_expectations.agent.models import Event
+from great_expectations.agent.models import CreatedResource, Event
 from great_expectations.data_context import CloudDataContext
-
-
-class CreatedResource(BaseModel):
-    type: str
-    id: str
 
 
 class ActionResult(BaseModel):

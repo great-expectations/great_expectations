@@ -64,7 +64,7 @@ def parse_feature_annotation(docstring: Union[str, List[str], None]):
                 if this_key in maturity_details_keys:
                     maturity_details_dict[this_key] = this_val
                 elif this_key == "icon":  # icon is a special cases
-                    if this_val == "":
+                    if this_val == "":  # noqa: PLC1901
                         annotation_dict[
                             this_key
                         ] = f"https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/{id_val}.png"

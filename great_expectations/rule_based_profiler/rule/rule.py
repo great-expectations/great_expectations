@@ -2,8 +2,8 @@ import copy
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
-from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -14,10 +14,10 @@ from great_expectations.rule_based_profiler.config.base import (
     parameterBuilderConfigSchema,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
-    DomainBuilder,  # noqa: TCH001
+    DomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,  # noqa: TCH001
+    ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
@@ -28,7 +28,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,  # noqa: TCH001
+    ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
@@ -43,7 +43,7 @@ from great_expectations.util import (
 
 
 class Rule(SerializableDictDot):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: str,
         variables: Optional[Union[ParameterContainer, Dict[str, Any]]] = None,
@@ -88,7 +88,7 @@ class Rule(SerializableDictDot):
         execution_time_property_name="rule_execution_time",
         pretty_print=False,
     )
-    def run(
+    def run(  # noqa: PLR0913
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
@@ -323,7 +323,7 @@ class Rule(SerializableDictDot):
         execution_time_property_name="rule_domain_builder_execution_time",
         pretty_print=False,
     )
-    def _get_rule_domains(
+    def _get_rule_domains(  # noqa: PLR0913
         self,
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,

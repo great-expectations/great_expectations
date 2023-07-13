@@ -1,5 +1,5 @@
 ---
-title: How to trigger Opsgenie notifications as an Action
+title: Trigger Opsgenie notifications as an Action
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -16,9 +16,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 
 </Prerequisites>
 
-## Steps
-
-### 1. Set up a new API integration within Opsgenie
+## Set up a new API integration within Opsgenie
 
 - Navigate to Settings > Integration list within Opsgenie using the sidebar menu.
 
@@ -32,7 +30,7 @@ This guide will help you set up Opsgenie alert notifications when running Great 
 - Ensure 'Create and Update Access' is checked along with the 'Enabled' checkbox.
 - Click 'Save Integration' to save the newly created integration.
 
-### 2. Update your Great Expectations configuration variables
+## Update your Great Expectations configuration variables
 
 Using the API Key you copied from Step 1, update your Great Expectations configuration variables in your `config_variables.yml` file
 
@@ -40,7 +38,7 @@ Using the API Key you copied from Step 1, update your Great Expectations configu
 opsgenie_api_key: YOUR-API-KEY
 ```
 
-### 3. Add `send_opsgenie_alert_on_validation_result` operator to your Checkpoint configuration
+## Add `send_opsgenie_alert_on_validation_result` operator to your Checkpoint configuration
 
 Next, update your Checkpoint configuration file to add a new action to the <TechnicalTag tag="action" text="Actions" /> list in great_expectations.yml
 
@@ -65,7 +63,7 @@ action_list:
  - Set region: eu if you are using the European Opsgenie endpoint
  - Optionally include 'tags' in your settings which will be included in your API call to OpsGenie. e.g.: 'Production'
 
-### 4. Validate a Batch of data to test your alerts
+## Validate a Batch of data to test your alerts
 
 Run your Checkpoint to <TechnicalTag tag="validate" text="Validate" /> a <TechnicalTag tag="batch" text="Batch" /> of data and receive an Opsgenie alert on the success or failure of the Validation.
 

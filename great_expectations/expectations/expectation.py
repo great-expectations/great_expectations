@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import traceback
 import warnings
@@ -246,7 +247,7 @@ def param_method(param_name: str) -> Callable:
                         renderer_configuration=renderer_configuration
                     )
                 else:
-                    if return_type is RendererConfiguration:
+                    if return_type is RendererConfiguration:  # noqa: PLR5501
                         return_obj = renderer_configuration
                     else:
                         return_obj = None
@@ -810,7 +811,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @classmethod
     @renderer(renderer_type=LegacyDiagnosticRendererType.UNEXPECTED_TABLE)
-    def _diagnostic_unexpected_table_renderer(
+    def _diagnostic_unexpected_table_renderer(  # noqa: PLR0912
         cls,
         configuration: Optional[ExpectationConfiguration] = None,
         result: Optional[ExpectationValidationResult] = None,
@@ -871,7 +872,7 @@ class Expectation(metaclass=MetaExpectation):
                 for unexpected_value in partial_unexpected_list:
                     if unexpected_value:
                         string_unexpected_value = str(unexpected_value)
-                    elif unexpected_value == "":
+                    elif unexpected_value == "":  # noqa: PLC1901
                         string_unexpected_value = "EMPTY"
                     else:
                         string_unexpected_value = "null"
@@ -1067,6 +1068,16 @@ class Expectation(metaclass=MetaExpectation):
             runtime_configuration=runtime_configuration,
             execution_engine=execution_engine,
         )
+
+        result_format = parse_result_format(
+            runtime_configuration.get("result_format", {})
+        )
+        if result_format.get("result_format") == "BOOLEAN_ONLY":
+            if isinstance(expectation_validation_result, ExpectationValidationResult):
+                expectation_validation_result.result = {}
+            else:
+                expectation_validation_result["result"] = {}
+
         evr: ExpectationValidationResult = self._build_evr(
             raw_response=expectation_validation_result,
             configuration=configuration,
@@ -1222,7 +1233,7 @@ class Expectation(metaclass=MetaExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @public_api
-    def validate(
+    def validate(  # noqa: PLR0913
         self,
         validator: Validator,
         configuration: Optional[ExpectationConfiguration] = None,
@@ -1277,7 +1288,7 @@ class Expectation(metaclass=MetaExpectation):
         return self._configuration
 
     @public_api
-    def run_diagnostics(
+    def run_diagnostics(  # noqa: PLR0913
         self,
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
@@ -1342,7 +1353,7 @@ class Expectation(metaclass=MetaExpectation):
             _tests_to_include = [
                 test for test in example.tests if test.include_in_gallery
             ]
-            example = deepcopy(example)
+            example = deepcopy(example)  # noqa: PLW2901
             if _tests_to_include:
                 example.tests = _tests_to_include
                 gallery_examples.append(example)
@@ -1370,6 +1381,14 @@ class Expectation(metaclass=MetaExpectation):
                 metric_diagnostics_list=metric_diagnostics_list,
                 registered_metrics=_registered_metrics,
             )
+        )
+        engines_implemented = [
+            e.replace("ExecutionEngine", "")
+            for e, i in introspected_execution_engines.items()
+            if i is True
+        ]
+        _debug(
+            f"Implemented engines for {self.expectation_type}: {', '.join(engines_implemented)}"
         )
 
         _debug("Getting test results")
@@ -1404,7 +1423,6 @@ class Expectation(metaclass=MetaExpectation):
                 examples=examples,
                 tests=test_results,
                 backend_test_result_counts=backend_test_result_counts,
-                execution_engines=introspected_execution_engines,
             )
         )
 
@@ -1482,6 +1500,8 @@ class Expectation(metaclass=MetaExpectation):
         self,
         diagnostics: Optional[ExpectationDiagnostics] = None,
         show_failed_tests: bool = False,
+        backends: Optional[List[str]] = None,
+        show_debug_messages: bool = False,
     ) -> str:
         """Runs self.run_diagnostics and generates a diagnostic checklist.
 
@@ -1491,10 +1511,27 @@ class Expectation(metaclass=MetaExpectation):
         Args:
             diagnostics (optional[ExpectationDiagnostics]): If diagnostics are not provided, diagnostics will be ran on self.
             show_failed_tests (bool): If true, failing tests will be printed.
+            backends: list of backends to pass to run_diagnostics
+            show_debug_messages (bool): If true, create a logger and pass to run_diagnostics
         """
 
         if diagnostics is None:
-            diagnostics = self.run_diagnostics()
+            debug_logger = None
+            if show_debug_messages:
+                debug_logger = logging.getLogger()
+                chandler = logging.StreamHandler(stream=sys.stdout)
+                chandler.setLevel(logging.DEBUG)
+                chandler.setFormatter(
+                    logging.Formatter(
+                        "%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S"
+                    )
+                )
+                debug_logger.addHandler(chandler)
+                debug_logger.setLevel(logging.DEBUG)
+
+            diagnostics = self.run_diagnostics(
+                debug_logger=debug_logger, only_consider_these_backends=backends
+            )
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
@@ -1796,7 +1833,7 @@ class Expectation(metaclass=MetaExpectation):
         return supported_renderers
 
     @classmethod
-    def _get_test_results(
+    def _get_test_results(  # noqa: PLR0913
         cls,
         expectation_type: str,
         test_data_cases: List[ExpectationTestDataCases],
@@ -1919,7 +1956,9 @@ class Expectation(metaclass=MetaExpectation):
 
         return test_results
 
-    def _get_rendered_result_as_string(self, rendered_result) -> str:  # noqa: C901 - 16
+    def _get_rendered_result_as_string(  # noqa: C901, PLR0912
+        self, rendered_result
+    ) -> str:
         """Convenience method to get rendered results as strings."""
 
         result: str = ""
@@ -2170,7 +2209,7 @@ class Expectation(metaclass=MetaExpectation):
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    def _get_maturity_checklist(
+    def _get_maturity_checklist(  # noqa: PLR0913
         self,
         library_metadata: Union[
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
@@ -2179,7 +2218,6 @@ class Expectation(metaclass=MetaExpectation):
         examples: List[ExpectationTestDataCases],
         tests: List[ExpectationTestDiagnostics],
         backend_test_result_counts: List[ExpectationBackendTestResultCounts],
-        execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
         experimental_checks = []
@@ -2365,7 +2403,7 @@ class BatchExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(  # noqa: C901 - 21
+    def _validate_metric_value_between(  # noqa: C901, PLR0912, PLR0913
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2567,7 +2605,7 @@ class QueryExpectation(BatchExpectation, ABC):
             parsed_query: Set[str] = {
                 x
                 for x in re.split(", |\\(|\n|\\)| |/", query)
-                if x.upper() != "" and x.upper() not in valid_sql_tokens_and_types
+                if x.upper() and x.upper() not in valid_sql_tokens_and_types
             }
             assert "{active_batch}" in parsed_query, (
                 "Your query appears to not be parameterized for a data asset. "
@@ -2822,21 +2860,6 @@ class ColumnMapExpectation(BatchExpectation, ABC):
                 ),
             )
 
-        if include_unexpected_rows:
-            metric_kwargs = get_metric_kwargs(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
@@ -2876,15 +2899,12 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         runtime_configuration: Optional[dict] = None,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
-        result_format: Union[
-            Dict[str, Union[int, str, bool, List[str], None]], str
-        ] = self.get_result_format(
+        result_format: str | dict[str, Any] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
 
-        unexpected_index_column_names = None
-        include_unexpected_rows = None
-
+        include_unexpected_rows: bool
+        unexpected_index_column_names: int | str | list[str] | None
         if isinstance(result_format, dict):
             include_unexpected_rows = result_format.get(
                 "include_unexpected_rows", False
@@ -2892,6 +2912,9 @@ class ColumnMapExpectation(BatchExpectation, ABC):
             unexpected_index_column_names = result_format.get(
                 "unexpected_index_column_names", None
             )
+        else:
+            include_unexpected_rows = False
+            unexpected_index_column_names = None
 
         total_count: Optional[int] = metrics.get("table.row_count")
         null_count: Optional[int] = metrics.get(
@@ -2909,7 +2932,8 @@ class ColumnMapExpectation(BatchExpectation, ABC):
         unexpected_index_query: Optional[str] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
-        unexpected_rows = None
+
+        unexpected_rows: pd.DataFrame | None = None
         if include_unexpected_rows:
             unexpected_rows = metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
@@ -3115,6 +3139,7 @@ class ColumnPairMapExpectation(BatchExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
@@ -3485,7 +3510,7 @@ class MulticolumnMapExpectation(BatchExpectation, ABC):
         )
 
 
-def _format_map_output(  # noqa: C901 - 22
+def _format_map_output(  # noqa: C901, PLR0912, PLR0913, PLR0915
     result_format: dict,
     success: bool,
     element_count: Optional[int] = None,
@@ -3496,7 +3521,7 @@ def _format_map_output(  # noqa: C901 - 22
     unexpected_index_query: Optional[str] = None,
     # Actually Optional[List[str]], but this is necessary to keep the typechecker happy
     unexpected_index_column_names: Optional[Union[int, str, List[str]]] = None,
-    unexpected_rows=None,
+    unexpected_rows: pd.DataFrame | None = None,
 ) -> Dict:
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).

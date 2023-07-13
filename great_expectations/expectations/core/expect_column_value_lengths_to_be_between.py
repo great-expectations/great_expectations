@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -290,7 +290,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _prescriptive_template(
+    def _prescriptive_template(  # noqa: PLR0912
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
@@ -321,7 +321,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                     renderer_configuration=renderer_configuration
                 )
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -332,7 +332,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 else:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if params.min_value and params.max_value:
+                if params.min_value and params.max_value:  # noqa: PLR5501
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
                 elif not params.min_value:
                     template_str = f"values must always be {at_most_str} $max_value characters long."
@@ -390,7 +390,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         else:
             at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
+            if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
@@ -404,7 +404,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if params["min_value"] is not None and params["max_value"] is not None:
+                if (  # noqa: PLR5501
+                    params["min_value"] is not None and params["max_value"] is not None
+                ):
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:

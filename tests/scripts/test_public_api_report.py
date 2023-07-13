@@ -381,6 +381,7 @@ from a.b.c import some_method as sm
 """
 
 
+@pytest.mark.unit
 def test__get_import_names(various_imports: str):
     """Make sure the actual class and module names are returned."""
     tree = ast.parse(various_imports)
@@ -439,7 +440,7 @@ class TestPublicAPIChecker:
         definitions = []
         for node in ast.walk(tree):
             if (
-                isinstance(node, ast.ClassDef)
+                isinstance(node, ast.ClassDef)  # noqa: PLR1701
                 or isinstance(node, ast.FunctionDef)
                 or isinstance(node, ast.AsyncFunctionDef)
             ):

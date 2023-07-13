@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
@@ -220,7 +220,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
-            if params.mostly and params.mostly.value < 1.0:
+            if params.mostly and params.mostly.value < 1.0:  # noqa: PLR2004
                 renderer_configuration = cls._add_mostly_pct_param(
                     renderer_configuration=renderer_configuration
                 )
@@ -276,7 +276,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         template_str = f"values must belong to this set: {values_string}"
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
+        if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
             params["mostly_pct"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
@@ -335,7 +335,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         classes = ["col-3", "mt-1", "pl-1", "pr-1"]
 
-        if any(len(value) > 80 for value in values):
+        if any(len(value) > 80 for value in values):  # noqa: PLR2004
             content_block_type = "bullet_list"
             content_block_class = RenderedBulletListContent
         else:

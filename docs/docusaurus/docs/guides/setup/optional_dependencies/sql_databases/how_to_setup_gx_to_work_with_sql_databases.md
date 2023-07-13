@@ -1,5 +1,5 @@
 ---
-title: How to set up GX to work with SQL databases
+title: Connect to a SQL database
 tag: [how-to, setup]
 keywords: [Great Expectations, SQL]
 
@@ -9,9 +9,6 @@ keywords: [Great Expectations, SQL]
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!-- ## Prerequisites -->
 

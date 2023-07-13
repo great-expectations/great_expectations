@@ -11,10 +11,12 @@ To show task help page `invoke <NAME> --help`
 from __future__ import annotations
 
 import json
+import logging
 import os
 import pathlib
 import shutil
 import sys
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Union
 
 import invoke
@@ -22,16 +24,11 @@ import invoke
 from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
 from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
-try:
-    from tests.integration.usage_statistics import usage_stats_utils
-
-    is_ge_installed: bool = True
-except ModuleNotFoundError:
-    is_ge_installed = False
-
 if TYPE_CHECKING:
     from invoke.context import Context
 
+
+LOGGER = logging.getLogger(__name__)
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
@@ -55,7 +52,7 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
         "pty": _PTY_HELP_DESC,
     }
 )
-def sort(
+def sort(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     check: bool = False,
@@ -94,7 +91,7 @@ def sort(
         "pty": _PTY_HELP_DESC,
     }
 )
-def fmt(
+def fmt(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
     sort_: bool = True,
@@ -119,20 +116,23 @@ def fmt(
 @invoke.task(
     help={
         "path": _PATH_HELP_DESC,
+        "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(
+def lint(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
+    fmt_: bool = True,
     fix: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
     """Run formatter (black) and linter (ruff)"""
-    fmt(ctx, path, check=not fix, pty=pty)
+    if fmt_:
+        fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", path]
@@ -225,7 +225,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
-def type_check(
+def type_check(  # noqa: PLR0913, PLR0912
     ctx: Context,
     packages: list[str],
     install_types: bool = False,
@@ -310,7 +310,9 @@ def get_usage_stats_json(ctx: Context):
     """
     Dump usage stats event examples to json file
     """
-    if not is_ge_installed:
+    try:
+        from tests.integration.usage_statistics import usage_stats_utils
+    except ModuleNotFoundError:
         raise invoke.Exit(
             message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
             code=1,
@@ -331,6 +333,14 @@ def mv_usage_stats_json(ctx: Context):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
+    try:
+        from tests.integration.usage_statistics import usage_stats_utils
+    except ModuleNotFoundError:
+        raise invoke.Exit(
+            message="This invoke task requires Great Expecations to be installed in the environment. Please try again.",
+            code=1,
+        )
+
     version = usage_stats_utils.get_gx_version()
     outfile = f"v{version}_example_events.json"
     cmd = "databricks fs cp --overwrite {0} dbfs:/schemas/{0}"
@@ -339,7 +349,7 @@ def mv_usage_stats_json(ctx: Context):
     print(f"'{outfile}' copied to dbfs.")
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
 @invoke.task(
@@ -356,7 +366,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
         "full-cov": "Show coverage report on the entire `great_expectations` package regardless of `--package` param.",
     },
 )
-def tests(
+def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
     integration: bool = False,
@@ -368,6 +378,7 @@ def tests(
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
     full_cov: bool = False,
+    verbose: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -391,8 +402,10 @@ def tests(
         f"--durations={slowest}",
         cov_param,
         "--cov-report term",
-        "-vv",
+        "-rEf",  # show extra test summary info for errors & failed tests
     ]
+    if verbose:
+        cmds.append("-vv")
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
     if unit and not ignore_markers:
@@ -428,7 +441,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "target": "Set the target build stage to build.",
     }
 )
-def docker(
+def docker(  # noqa: PLR0913
     ctx: Context,
     name: str = "gx38local",
     tag: str = "latest",
@@ -654,7 +667,7 @@ def docs(
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     else:
-        if start:
+        if start:  # noqa: PLR5501
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
@@ -730,3 +743,37 @@ def link_checker(ctx: Context, skip_external: bool = True):
         skip_external=skip_external,
     )
     raise invoke.Exit(message, code)
+
+
+@invoke.task(
+    aliases=("automerge",),
+)
+def show_automerges(ctx: Context):
+    """Show github pull requests currently in automerge state."""
+    import requests
+
+    url = "https://api.github.com/repos/great-expectations/great_expectations/pulls"
+    response = requests.get(
+        url,
+        params={
+            "state": "open",
+            "sort": "updated",
+            "direction": "desc",
+            "per_page": 50,
+        },
+    )
+    LOGGER.debug(f"{response.request.method} {response.request.url} - {response}")
+
+    if response.status_code != requests.codes.ok:
+        print(f"Error: {response.reason}\n{pf(response.json(), depth=2)}")
+        response.raise_for_status()
+
+    pr_details = response.json()
+    LOGGER.debug(pf(pr_details, depth=2))
+
+    if automerge_prs := tuple(x for x in pr_details if x["auto_merge"]):
+        print(f"\tAutomerge PRs: {len(automerge_prs)}")
+        for i, pr in enumerate(automerge_prs, start=1):
+            print(f"{i}. @{pr['user']['login']} {pr['title']} {pr['html_url']}")
+    else:
+        print("\tNo PRs set to automerge")

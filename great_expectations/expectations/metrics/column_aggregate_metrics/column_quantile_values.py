@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility import sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -27,11 +27,6 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
-
-try:
-    from trino.exceptions import TrinoUserError
-except ImportError:
-    TrinoUserError = None
 
 
 if sqlalchemy.Row:
@@ -61,7 +56,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: PLR0911, PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -98,6 +93,13 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
         elif dialect_name == GXSqlDialect.MYSQL:
             return _get_column_quantiles_mysql(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                execution_engine=execution_engine,
+            )
+        elif dialect_name.lower() == GXSqlDialect.CLICKHOUSE:
+            return _get_column_quantiles_clickhouse(
                 column=column,
                 quantiles=quantiles,
                 selectable=selectable,
@@ -151,7 +153,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
 
     @metric_value(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -175,8 +177,8 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
 
         if (
             not isinstance(allow_relative_error, float)
-            or allow_relative_error < 0.0
-            or allow_relative_error > 1.0
+            or allow_relative_error < 0.0  # noqa: PLR2004
+            or allow_relative_error > 1.0  # noqa: PLR2004
         ):
             raise ValueError(
                 "SparkDFExecutionEngine requires relative error to be False or to be a float between 0 and 1."
@@ -256,7 +258,7 @@ def _get_column_quantiles_mysql(
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
         if np.issubdtype(type(quantile), np.float_):
-            quantile = float(quantile)
+            quantile = float(quantile)  # noqa: PLW2901
         quantile_column: sqlalchemy.Label = (
             sa.func.first_value(column)
             .over(
@@ -306,7 +308,32 @@ def _get_column_quantiles_trino(
             quantiles_query
         ).fetchone()
         return list(quantiles_results)[0]
-    except (sqlalchemy.ProgrammingError, TrinoUserError) as pe:
+    except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_clickhouse(
+    column: str, quantiles: Iterable, selectable, execution_engine
+) -> list:
+    quantiles_list = list(quantiles)
+    sql_approx: str = (
+        f"quantilesExact({', '.join([str(x) for x in quantiles_list])})({column})"
+    )
+    selects_approx: List[sqlalchemy.TextClause] = [sa.text(sql_approx)]
+    quantiles_query: sqlalchemy.Select = sa.select(selects_approx).select_from(
+        selectable
+    )
+    try:
+        quantiles_results = execution_engine.execute(quantiles_query).fetchone()[0]
+        return quantiles_results
+
+    except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
