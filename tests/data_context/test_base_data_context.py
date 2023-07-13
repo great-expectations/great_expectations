@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import random
-from typing import Callable, List, Tuple
+from typing import TYPE_CHECKING, Callable, List, Tuple
 from unittest import mock
 
 import pandas as pd
@@ -22,6 +24,12 @@ from great_expectations.data_context.store import (  # isort:skip
     ValidationsStore,
     EvaluationParameterStore,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import (
+        AbstractDataContext,
+        EphemeralDataContext,
+    )
 
 yaml = YAMLHandler()
 
@@ -48,17 +56,18 @@ def basic_in_memory_data_context_config_just_stores():
 @pytest.fixture()
 def basic_in_memory_data_context_just_stores(
     basic_in_memory_data_context_config_just_stores,
-):
+) -> AbstractDataContext:
     return BaseDataContext(
         project_config=basic_in_memory_data_context_config_just_stores
     )
 
 
+@pytest.mark.unit
 def test_instantiation_and_basic_stores(
     basic_in_memory_data_context_just_stores,
     basic_in_memory_data_context_config_just_stores,
 ):
-    context: BaseDataContext = basic_in_memory_data_context_just_stores
+    context: EphemeralDataContext = basic_in_memory_data_context_just_stores
     # TODO <WILL> - config is basic_in_memory_data_context_config_just_stores + global overrides. Add test for this
     assert len(context.stores) == 3
 
@@ -76,11 +85,13 @@ def test_instantiation_and_basic_stores(
     # TODO : metric store?
 
 
+@pytest.mark.unit
 def test_config_variables(basic_in_memory_data_context_just_stores):
     # nothing instantiated yet
     assert basic_in_memory_data_context_just_stores.config_variables == {}
 
 
+@pytest.mark.unit
 def test_list_stores(basic_in_memory_data_context_just_stores):
     assert basic_in_memory_data_context_just_stores.list_stores() == [
         {"class_name": "ExpectationsStore", "name": "expectations_store"},
@@ -92,6 +103,7 @@ def test_list_stores(basic_in_memory_data_context_just_stores):
     ]
 
 
+@pytest.mark.unit
 def test_add_store(basic_in_memory_data_context_just_stores):
     store_name: str = "my_new_expectations_store"
     store_config: dict = {"class_name": "ExpectationsStore"}
@@ -109,6 +121,7 @@ def test_add_store(basic_in_memory_data_context_just_stores):
     ]
 
 
+@pytest.mark.unit
 def test_list_active_stores(basic_in_memory_data_context_just_stores):
     """
     Active stores are identified by the following keys:
@@ -144,6 +157,7 @@ def test_list_active_stores(basic_in_memory_data_context_just_stores):
     )
 
 
+@pytest.mark.unit
 def test_get_config_with_variables_substituted(
     basic_in_memory_data_context_just_stores,
 ):
@@ -154,7 +168,7 @@ def test_get_config_with_variables_substituted(
     precedence over config_file values, which they should.
     """
 
-    context: BaseDataContext = basic_in_memory_data_context_just_stores
+    context: EphemeralDataContext = basic_in_memory_data_context_just_stores
     assert isinstance(context.get_config(), DataContextConfig)
 
     # override the project config to use the $ escaped variable
