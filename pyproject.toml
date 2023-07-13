@@ -533,6 +533,8 @@ filterwarnings = [
 ]
 junit_family="xunit2"
 markers = [
+    "aws_creds: mark all tests that require aws credentials",
+    "big: mark tests that don't have external dependencies but aren't unit tests",
     "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
@@ -546,6 +548,7 @@ markers = [
     "athena: mark a test as AWS Athena-dependent.",
     "spark: mark a test as Spark-dependent.",
     "postgres: mark a test as postgres-dependent.",
+    "project: mark a test that verifies properties of the gx project",
     "pyarrow: mark a test as PyArrow-dependent.",
     "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
