@@ -106,6 +106,7 @@ stages:
 
     jobs:
       - job: test_build_docs
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
