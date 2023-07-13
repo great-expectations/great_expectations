@@ -10,6 +10,8 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import get_context
 
+pytestmark = pytest.mark.filesystem
+
 BASE_DIR = pathlib.Path(__file__).parent.joinpath("fixtures")
 
 

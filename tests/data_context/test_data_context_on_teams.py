@@ -7,6 +7,7 @@ from great_expectations.exceptions import InvalidConfigError
 from great_expectations.util import get_context
 
 
+@pytest.mark.filesystem
 def test_incomplete_uncommitted(tmp_path):
     """
     When a project is shared between users, it is common to have an incomplete
