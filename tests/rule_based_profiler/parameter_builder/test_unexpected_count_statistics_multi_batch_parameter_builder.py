@@ -188,7 +188,6 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         # returns mostly as-is
         ["expect_column_values_to_be_null", 0.9612, 0.9612],
         ["expect_column_values_to_be_null", 0.1010, 0.1010],
-        #####
         # Standardizes for expect_column_values_to_not_be_null
         ["expect_column_values_to_not_be_null", 1.0, 1.0],
         ["expect_column_values_to_not_be_null", 0.997, 0.99],
