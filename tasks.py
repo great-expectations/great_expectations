@@ -792,7 +792,7 @@ def show_automerges(ctx: Context):
     iterable=["markers"],
     help={"markers": "Optional list of markers to install dependencies for"},
 )
-def deps(ctx: Context, markers: list[str]):
+def deps(ctx: Context, markers: list[str], constraints: bool = True):
     """
     Install dependencies for development and testing.
 
@@ -811,5 +811,8 @@ def deps(ctx: Context, markers: list[str]):
 
     for req_file in req_files:
         cmds.append(f"-r {req_file}")
+
+    if constraints:
+        cmds.extend(["-c", "constraints-dev.txt"])
 
     ctx.run(" ".join(cmds), echo=True, pty=True)

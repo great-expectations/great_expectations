@@ -84,7 +84,7 @@ jobs:
             setup.py
 
       - name: Install dependencies
-        run: pip install -c constraints-dev.txt ".[test]"
+        run: invoke deps -m '${{ matrix.markers }}'
 
       - name: Run the tests
         run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
