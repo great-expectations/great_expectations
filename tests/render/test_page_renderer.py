@@ -29,6 +29,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*hi*",
@@ -41,6 +42,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*alpha*",
@@ -60,6 +62,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*alpha*",
@@ -74,6 +77,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -145,6 +149,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns."
     ]
