@@ -65,9 +65,6 @@ stages:
                 tests/integration/test_script_runner.py
                 tests/test_sets/**
 
-          - bash: ./ci/checks/check_for_docs_deps_changes.sh
-            name: CheckDocsDependenciesChanges
-
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:
