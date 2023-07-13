@@ -62,6 +62,7 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
     Keyword args:
         - threshold (int)
     """
+
     from datetime import datetime
 
     today = datetime.now()
