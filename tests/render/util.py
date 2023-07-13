@@ -2,8 +2,8 @@ import copy
 from typing import Dict, List, Optional
 
 import nbformat
-from nbcovert.preprocessors import ExecutePreprocessor
-from nbformat.notebooknote import NotebookNode
+from nbconvert.preprocessors import ExecutePreprocessor
+from nbformat.notebooknode import NotebookNode
 
 
 def run_notebook(
