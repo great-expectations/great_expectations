@@ -8,7 +8,7 @@ import pytest
 from great_expectations.dataset import PandasDataset
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_pandas_datetime_evaluation_parameter():
     evaluation_parameters = {
         "now": pd.Timestamp.now(),

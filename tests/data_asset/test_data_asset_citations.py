@@ -3,7 +3,7 @@ import pytest
 from great_expectations.util import filter_properties_dict
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_data_asset_citations(pandas_dataset):
     citation_date = "2020-02-27T12:34:56.123456Z"
     pandas_dataset.add_citation("test citation", citation_date=citation_date)

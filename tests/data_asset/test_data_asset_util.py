@@ -12,7 +12,7 @@ import great_expectations as gx
 from great_expectations.self_check.util import expectationSuiteSchema
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.filterwarnings(
     "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
 )

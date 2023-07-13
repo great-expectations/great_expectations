@@ -123,7 +123,7 @@ def test_store_evaluation_parameter_with_validator(validator_with_titanic_1911_a
         )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_parameter_substitution(single_expectation_custom_data_asset):
     # Set our evaluation parameter from upstream
     single_expectation_custom_data_asset.set_evaluation_parameter(
@@ -168,7 +168,7 @@ def test_parameter_substitution_with_validator(validator_with_titanic_1911_asset
     }
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_exploratory_parameter_substitution(single_expectation_custom_data_asset):
     # Establish our expectation using a parameter provided at runtime
 
@@ -238,7 +238,7 @@ def test_exploratory_parameter_substitution_with_validator(
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_validation_substitution(single_expectation_custom_data_asset):
     # Set up an expectation using a parameter, providing a default value.
     result = single_expectation_custom_data_asset.expect_nothing(

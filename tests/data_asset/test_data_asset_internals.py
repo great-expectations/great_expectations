@@ -162,7 +162,7 @@ def test_get_and_save_expectation_suite(
     assert output_config == loaded_suite
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_expectation_meta():
     df = gx.dataset.PandasDataset(
         {
@@ -216,7 +216,7 @@ def test_set_default_expectation_argument():
     } == df.get_default_expectation_arguments()
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_test_column_map_expectation_function():
     asset = gx.dataset.PandasDataset(
         {
@@ -268,7 +268,7 @@ def test_test_column_map_expectation_function():
     ) == ExpectationValidationResult(success=True)
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_test_column_aggregate_expectation_function():
     asset = gx.dataset.PandasDataset(
         {
@@ -685,7 +685,7 @@ def test_calc_map_expectation_success():
     ) == (True, 0.0)
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_discard_failing_expectations():
     df = gx.dataset.PandasDataset(
         {

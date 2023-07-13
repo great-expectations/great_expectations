@@ -129,7 +129,7 @@ def test_pandas_column_map_decorator_partial_exception_counts():
     assert 3 == len(out.result["unexpected_list"])
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_column_map_expectation_decorator():
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
@@ -310,7 +310,7 @@ def test_column_map_expectation_decorator():
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_column_aggregate_expectation_decorator():
     # Create a new CustomPandasDataset to
     # (1) demonstrate that custom subclassing works, and
@@ -394,7 +394,7 @@ def test_column_aggregate_expectation_decorator():
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_column_pair_map_expectation_decorator():
     # Create a new CustomPandasDataset to
     # (1) Demonstrate that custom subclassing works, and
