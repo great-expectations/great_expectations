@@ -185,3 +185,75 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
         parameters=parameters,
     )
     assert parameter_node == "mock.Mock"
+
+
+@pytest.mark.unit
+@mock.patch("test_parameter_builder.DummyParameterBuilder._build_parameters")
+def test_parameter_builder_dependencies_evaluated_mixed(
+    mock_parameter_builder__build_parameters: mock.MagicMock,
+):
+    my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
+        DummyParameterBuilder(
+            name="my_evaluation_dependency_parameter_name_0",
+            evaluation_parameter_builder_configs=None,
+            data_context=None,
+        )
+    )
+    my_evaluation_dependency_1_parameter_builder: ParameterBuilder = (
+        DummyParameterBuilder(
+            name="my_evaluation_dependency_parameter_name_1",
+            evaluation_parameter_builder_configs=None,
+            data_context=None,
+        )
+    )
+
+    domain = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+        domain_kwargs=None,
+        rule_name="my_rule",
+    )
+
+    variables: Optional[ParameterContainer] = None
+
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    my_evaluation_dependency_0_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert mock_parameter_builder__build_parameters.call_count == 1
+
+    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
+        ),
+    ]
+    my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_dependent_parameter_builder",
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+        data_context=None,
+    )
+
+    my_dependent_parameter_builder.build_parameters(
+        domain=domain,
+        variables=variables,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert mock_parameter_builder__build_parameters.call_count == 3
+
+    parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
+        domain=domain,
+        parameter_reference=my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name,
+        expected_return_type=None,
+        variables=variables,
+        parameters=parameters,
+    )
+    assert parameter_node == "mock.Mock"
