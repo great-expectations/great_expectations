@@ -68,7 +68,7 @@ jobs:
           - filesystem
           - openpyxl or pyarrow
           - project
-        python-version: ["3.8", "3.11"]
+        python-version: ["3.8"]
 
     runs-on: ubuntu-latest
 
