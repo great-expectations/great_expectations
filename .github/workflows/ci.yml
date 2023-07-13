@@ -1,6 +1,11 @@
 name: ci
 
 on:
+  push:
+    branches:
+      - develop
+    tags:
+      - "**"
   pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
