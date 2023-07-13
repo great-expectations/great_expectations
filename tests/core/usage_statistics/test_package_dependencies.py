@@ -5,6 +5,7 @@ import pytest
 from great_expectations.core.usage_statistics.package_dependencies import GXDependencies
 
 
+@pytest.mark.project
 def test__get_dependency_names():
     """Test that the regex in _get_dependency_names() parses a requirements file correctly."""
     mock_dependencies: List[str] = [
@@ -52,6 +53,7 @@ def test__get_dependency_names():
     assert observed_dependencies == expected_dependendencies
 
 
+@pytest.mark.project
 @pytest.mark.integration
 def test_required_dependency_names_match_requirements_file():
     """If there is a mismatch, GXDependencies should change to match our requirements.txt file.
@@ -65,6 +67,7 @@ def test_required_dependency_names_match_requirements_file():
     )
 
 
+@pytest.mark.project
 @pytest.mark.integration
 def test_dev_dependency_names_match_requirements_file():
     """If there is a mismatch, GXDependencies should change to match our requirements-dev*.txt files.
