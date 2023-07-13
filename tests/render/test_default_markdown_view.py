@@ -338,6 +338,8 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
+    # print(md_str)
+
     assert (
         md_str
         == """

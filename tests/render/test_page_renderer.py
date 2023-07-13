@@ -107,6 +107,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -161,6 +162,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -197,6 +199,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
+    # print(RenderedContent.rendered_content_list_to_json(result.text)[0])
     assert (
         RenderedContent.rendered_content_list_to_json(result.text)[0]
         == "This Expectation suite currently contains 3 total Expectations across 2 columns."
@@ -259,6 +262,9 @@ def test_ValidationResultsPageRenderer_render_validation_header(
             },
         },
     }
+    import pprint
+
+    pprint.pprint(validation_header)
 
     assert validation_header == expected_validation_header
 
@@ -294,7 +300,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
             ["Run Time", "2020-03-22T17:02:47Z"],
         ],
     }
-
+    print(validation_info)
     assert validation_info == expected_validation_info
 
 
@@ -304,6 +310,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(
         titanic_profiled_evrs_1
     ).to_json_dict()
+    print(validation_statistics)
     expected_validation_statistics = {
         "content_block_type": "table",
         "styling": {
@@ -345,6 +352,7 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
         batch_kwargs, header="Batch Kwargs"
     ).to_json_dict()
+    print(batch_kwargs_table)
 
     expected_batch_kwarg_table = {
         "content_block_type": "table",

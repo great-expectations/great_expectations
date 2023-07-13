@@ -42,12 +42,14 @@ def test__find_evr_by_type(titanic_profiled_evrs_1):
     found_evr = Renderer()._find_evr_by_type(
         titanic_profiled_evrs_1.results, "expect_column_to_exist"
     )
+    print(found_evr)
     assert found_evr is None
 
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
     found_evr = Renderer()._find_evr_by_type(
         titanic_profiled_evrs_1.results, "expect_column_distinct_values_to_be_in_set"
     )
+    print(found_evr)
     assert found_evr == ExpectationValidationResult(
         success=True,
         result={
@@ -81,12 +83,14 @@ def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
     found_evrs = Renderer()._find_all_evrs_by_type(
         titanic_profiled_evrs_1.results, "expect_column_to_exist", column_=None
     )
+    print(found_evrs)
     assert found_evrs == []
 
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
     found_evrs = Renderer()._find_all_evrs_by_type(
         titanic_profiled_evrs_1.results, "expect_column_to_exist", column_="SexCode"
     )
+    print(found_evrs)
     assert found_evrs == []
 
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
@@ -95,6 +99,7 @@ def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
         "expect_column_distinct_values_to_be_in_set",
         column_=None,
     )
+    print(found_evrs)
     assert len(found_evrs) == 4
 
     # TODO: _find_all_evrs_by_type should accept an ValidationResultSuite, not ValidationResultSuite.results
@@ -103,6 +108,7 @@ def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
         "expect_column_distinct_values_to_be_in_set",
         column_="SexCode",
     )
+    print(found_evrs)
     assert len(found_evrs) == 1
 
 
