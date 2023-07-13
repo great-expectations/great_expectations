@@ -11,7 +11,7 @@ By following this guide, you can efficiently process multiple batches of data us
 
 - [Configure a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - [Create a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_lp).
-- [Create an Expectation Suite](docs/guides/expectations/expectations_lp). 
+- [Create an Expectation Suite](/docs/guides/expectations/expectations_lp). 
 
 </Prerequisites>
 

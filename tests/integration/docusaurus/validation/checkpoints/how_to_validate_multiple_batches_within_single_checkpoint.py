@@ -7,11 +7,10 @@ datasource = context.sources.add_pandas_filesystem(
     name="example_datasource", base_directory="./data"
 )
 
-my_batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+MY_BATCHING_REGEX = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 
-asset = datasource.add_csv_asset("asset", batching_regex=my_batching_regex)
+asset = datasource.add_csv_asset("asset", batching_regex=MY_BATCHING_REGEX)
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_suite">
 ec = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={"column": "passenger_count"},
@@ -19,7 +18,6 @@ ec = ExpectationConfiguration(
 suite = context.add_expectation_suite(
     expectation_suite_name="example_suite", expectations=[ec]
 )
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py build_a_batch_request_with_multiple_batches">
 batch_request = asset.build_batch_request()
