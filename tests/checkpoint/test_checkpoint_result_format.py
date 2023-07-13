@@ -3660,6 +3660,9 @@ runtime_configuration:
     }
 
 
+@pytest.mark.timeout(
+    2.0  # this test can take longer than the default timeout, try to reduce it
+)
 @pytest.mark.filesystem
 @pytest.mark.parametrize(
     "result_format", ["BOOLEAN_ONLY", {"result_format": "BOOLEAN_ONLY"}]
