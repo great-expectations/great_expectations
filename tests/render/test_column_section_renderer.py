@@ -211,7 +211,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     ).to_json_dict()
-    print(content_block.to_json_dict())
+    print(content_block)
     assert content_block == {
         "content_block_type": "header",
         "styling": {
