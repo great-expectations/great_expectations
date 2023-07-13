@@ -25,7 +25,6 @@ from typing import (
     Union,
     overload,
 )
-from unittest import mock
 from urllib.parse import urlparse
 
 import dateutil.parser
@@ -411,10 +410,6 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
-
-    # Provisions for pytest and unittest.mock (to facilitate developing unit tests that utilize Mock objects).
-    if isinstance(data, mock.Mock):
-        return "mock.Mock"
 
     # Unable to serialize (unrecognized data type).
     raise TypeError(
