@@ -1246,6 +1246,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
     ) = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
     )
+    print(content_block.to_json_dict())
 
     assert content_block.to_json_dict() == {
         "content_block_type": "header",
