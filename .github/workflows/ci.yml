@@ -2,7 +2,6 @@ name: ci
 
 on:
   push:
-  pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
