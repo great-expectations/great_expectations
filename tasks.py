@@ -813,6 +813,6 @@ def deps(ctx: Context, markers: list[str], constraints: bool = True):
         cmds.append(f"-r {req_file}")
 
     if constraints:
-        cmds.extend(["-c", "constraints-dev.txt"])
+        cmds.append("-c constraints-dev.txt")
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
