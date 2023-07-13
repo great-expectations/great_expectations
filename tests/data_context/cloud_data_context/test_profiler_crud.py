@@ -200,7 +200,6 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     assert return_profiler.ge_cloud_id == profiler_id
 
 
-@pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 @pytest.mark.xfail(
@@ -335,7 +334,6 @@ def mock_get_all_profilers_json(
     return mock_json
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_profilers(
     empty_ge_cloud_data_context_config: DataContextConfig,

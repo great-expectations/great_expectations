@@ -231,7 +231,6 @@ def test_cloud_backed_data_context_get_checkpoint_by_name(
 
 
 @pytest.mark.cloud
-@pytest.mark.unit
 def test_get_checkpoint_no_identifier_raises_error(
     empty_cloud_data_context: CloudDataContext,
 ) -> None:
@@ -242,7 +241,6 @@ def test_get_checkpoint_no_identifier_raises_error(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_add_checkpoint(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -300,7 +298,6 @@ def test_cloud_backed_data_context_add_checkpoint(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_config: dict,
@@ -357,7 +354,6 @@ def test_add_checkpoint_updates_existing_checkpoint_in_cloud_backend(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -415,7 +411,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -473,7 +468,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_adds_when_id_not_pre
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -534,7 +528,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_pres
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -592,7 +585,6 @@ def test_cloud_backed_data_context_add_or_update_checkpoint_updates_when_id_not_
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -661,7 +653,6 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_present(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_config_with_ids: dict,
@@ -693,7 +684,6 @@ def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_pr
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -761,7 +751,6 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     run=True,
     strict=True,
 )
-@pytest.mark.e2e
 @pytest.mark.cloud
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_backed_data_context_add_checkpoint_e2e(
@@ -786,7 +775,6 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
 @pytest.mark.xfail(
     reason="GX Cloud E2E tests are currently failing due to a migration to a new CI environment",
 )
-@pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_run_checkpoint_e2e():
     """
@@ -977,7 +965,6 @@ def mock_get_all_checkpoints_json(
     return mock_json
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints(
     empty_ge_cloud_data_context_config: DataContextConfig,
