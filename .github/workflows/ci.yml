@@ -1,7 +1,6 @@
 name: ci
 
 on:
-  push:
   pull_request:
   schedule:
     # https://crontab.guru/every-3-hours
@@ -59,3 +58,33 @@ jobs:
 
       - name: Run the unit tests
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+
+  marker-tests:
+    strategy:
+      matrix:
+        markers:
+          - big
+          - cli
+          - filesystem
+          - openpyxl or pyarrow or project
+        python-version: ["3.8"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Install dependencies
+        run: pip install -c constraints-dev.txt ".[test]"
+
+      - name: Run the tests
+        run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
