@@ -34,7 +34,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 For this example we will use a connection string to connect to our PostgreSQL database.  In PostgreSQL, connection strings are formatted like:
 
-```pythonname="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string
+```pythonname="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string"
 ```
 
 :::tip Is there a more secure way to store my credentials than plain text in a connection string?
@@ -47,12 +47,12 @@ For this example we will use a connection string to connect to our PostgreSQL da
 
 Creating a PostgreSQL Datasource is as simple as providing the `add_postgres(...)` method a `name` by which to reference it in the future and the `connection_string` with which to access it.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py connection_string2"
 ```
 
 With these two values, we can create our Datasource:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_postgres"
 ```
 
 ### 4. Connect to a specific set of data with a Data Asset
@@ -71,24 +71,24 @@ Although there is no set maximum number of Data Assets you can define for a data
 
 We will indicate a table to connect to with a Table Data Asset.  This is done by providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `table_name` to specify the table we wish the Data Asset to connect to.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_name"
 ```
 
 With these two values, we can create our Data Asset:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_table_asset
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_table_asset"
 ```
 
 ### 6. (Optional) Connect a Data Asset to the data returned by a query
 
 To indicate the query that provides data to connect to we will define a Query Data Asset.  This done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py asset_query"
 ```
 
 Once we have these two values, we can create our Data Asset with:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_query_asset
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgresql_data.py add_query_asset"
 ```
 
 ### 7. (Optional) Repeat steps 5 and 6 as needed to connect to additional tables or queries

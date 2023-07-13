@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,  # noqa: TCH001
-    ExpectationValidationResult,  # noqa: TCH001
+    ExpectationConfiguration,
+    ExpectationValidationResult,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     BatchExpectation,
     render_evaluation_parameter_string,
@@ -328,7 +328,7 @@ class ExpectTableColumnsToMatchSet(BatchExpectation):
                 return return_failed
             else:
                 # Failed if there are items in the missing list (but OK to have unexpected_list)
-                if len(missing_list) > 0:
+                if len(missing_list) > 0:  # noqa: PLR5501
                     return return_failed
                 # Passed if there are no items in the missing list
                 else:

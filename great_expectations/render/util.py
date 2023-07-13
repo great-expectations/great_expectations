@@ -5,7 +5,7 @@ import copy
 import decimal
 import locale
 import re
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, Sequence
 
 import pandas as pd
 
@@ -69,6 +69,10 @@ def num_to_str(
         #  ≈  # \u2248
         result = f"≈{result}"
     decimal_char = locale.localeconv().get("decimal_point")
+    if not isinstance(decimal_char, str):
+        raise TypeError(
+            f"Expected str but got {decimal_char} which is type {type(decimal_char).__name__}."
+        )
     if "e" not in result and "E" not in result and decimal_char in result:
         result = result.rstrip("0").rstrip(decimal_char)
     return result
@@ -81,7 +85,7 @@ def ordinal(num):
     """Convert a number to ordinal"""
     # Taken from https://codereview.stackexchange.com/questions/41298/producing-ordinal-numbers/41301
     # Consider a library like num2word when internationalization comes
-    if 10 <= num % 100 <= 20:
+    if 10 <= num % 100 <= 20:  # noqa: PLR2004
         suffix = "th"
     else:
         # the second parameter is a default.
@@ -107,6 +111,8 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         return run_name_filter.get("not_includes") not in run_name
     elif run_name_filter.get("matches_regex"):
         regex = run_name_filter.get("matches_regex")
+        if run_name is None:
+            return False
         regex_match = re.search(regex, run_name)
         return False if regex_match is None else True
 
@@ -171,7 +177,7 @@ def parse_row_condition_string_pandas_engine(
         condition_string = "True"
 
     template_str = "if "
-    params = {}
+    params: dict[str, dict | str] = {}
 
     condition_string = (
         condition_string.replace("&", " AND ")
@@ -190,25 +196,24 @@ def parse_row_condition_string_pandas_engine(
         condition_string = condition_string.replace(value_tuple, value_list)
 
     # divide the whole condition into smaller parts
-    conditions_list = re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
-    conditions_list = [
+    conditions_list: list[str] = [
         condition.strip()
-        for condition in conditions_list
-        if condition != "" and condition != " "
+        for condition in re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
+        if condition != "" and condition != " "  # noqa: PLC1901
     ]
 
     for i, condition in enumerate(conditions_list):
         param_value = condition.replace(" NOT ", " not ")
 
         if with_schema:
-            params[f"row_condition__{str(i)}"] = {
+            params[f"row_condition__{i}"] = {
                 "schema": {"type": "string"},
                 "value": param_value,
             }
         else:
-            params[f"row_condition__{str(i)}"] = param_value
+            params[f"row_condition__{i}"] = param_value
             condition_string = condition_string.replace(
-                condition, f"$row_condition__{str(i)}"
+                condition, f"$row_condition__{i}"
             )
 
     template_str += condition_string.lower()
@@ -239,8 +244,8 @@ def handle_strict_min_max(params: dict) -> tuple[str, str]:
 
 
 def build_count_table(
-    partial_unexpected_counts: List[dict], unexpected_count: int
-) -> Tuple[List[str], List[List[Any]]]:
+    partial_unexpected_counts: list[dict], unexpected_count: int
+) -> tuple[list[str], list[list[Any]]]:
     """
     Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
     Unexpected Counts table.
@@ -250,20 +255,20 @@ def build_count_table(
         unexpected_count: total number of unexpected values. Used to build the header
 
     Returns:
-        List of strings that will be rendered into DataDocs
+        list of strings that will be rendered into DataDocs
 
     """
-    table_rows: List[List[str]] = []
+    table_rows: list[list[str | int | None]] = []
     total_count: int = 0
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: Optional[Any] = unexpected_count_dict.get("value")
-        count: Optional[int] = unexpected_count_dict.get("count")
+        value: Any | None = unexpected_count_dict.get("value")
+        count: int | None = unexpected_count_dict.get("count")
         if count:
             total_count += count
-        if value is not None and value != "":
+        if value is not None and value != "":  # noqa: PLC1901
             table_rows.append([value, count])
-        elif value == "":
+        elif value == "":  # noqa: PLC1901
             table_rows.append(["EMPTY", count])
         else:
             table_rows.append(["null", count])
@@ -278,12 +283,12 @@ def build_count_table(
 
 
 def build_count_and_index_table(
-    partial_unexpected_counts: List[dict],
-    unexpected_index_list: List[dict],
+    partial_unexpected_counts: list[dict],
+    unexpected_index_list: list[dict],
     unexpected_count: int,
-    unexpected_list: Optional[List[dict]] = None,
-    unexpected_index_column_names: Optional[List[str]] = None,
-) -> Tuple[List[str], List[List[Any]]]:
+    unexpected_list: list[dict] | None = None,
+    unexpected_index_column_names: list[str] | None = None,
+) -> tuple[list[str], list[list[Any]]]:
     """
         Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
         Unexpected Counts and Indices table for ID/PK.
@@ -299,7 +304,7 @@ def build_count_and_index_table(
         List of strings that will be rendered into DataDocs
 
     """
-    table_rows: List[List[str]] = []
+    table_rows: list[list[str | int]] = []
     total_count: int = 0
 
     unexpected_index_df: pd.DataFrame = _convert_unexpected_indices_to_df(
@@ -318,17 +323,17 @@ def build_count_and_index_table(
         unexpected_index_column_names = ["Index"]
 
     for index, row in unexpected_index_df.iterrows():
-        row_list: List[Union[str, int]] = []
+        row_list: list[str | int] = []
 
         unexpected_value = index
         count = int(row.Count)
 
         total_count += count
 
-        if unexpected_value is not None and unexpected_value != "":
+        if unexpected_value is not None and unexpected_value != "":  # noqa: PLC1901
             row_list.append(unexpected_value)
             row_list.append(count)
-        elif unexpected_value == "":
+        elif unexpected_value == "":  # noqa: PLC1901
             row_list.append("EMPTY")
             row_list.append(count)
         else:
@@ -355,10 +360,10 @@ def build_count_and_index_table(
 
 
 def _convert_unexpected_indices_to_df(
-    unexpected_index_list: List[Union[dict, int]],
-    partial_unexpected_counts: List[dict],
-    unexpected_index_column_names: Optional[List[str]] = None,
-    unexpected_list: Optional[List[Any]] = None,
+    unexpected_index_list: Sequence[dict | int],
+    partial_unexpected_counts: list[dict],
+    unexpected_index_column_names: list[str] | None = None,
+    unexpected_list: list[Any] | None = None,
 ) -> pd.DataFrame:
     """
     Helper method to convert the list of unexpected indices into a DataFrame that can be used to
@@ -382,17 +387,24 @@ def _convert_unexpected_indices_to_df(
     Returns:
         pd.DataFrame that contains indices for unexpected values
     """
+    domain_column_name_list: list[str]
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
         unexpected_index_df: pd.DataFrame = pd.DataFrame(
             unexpected_index_list, dtype="string"
         )
         unexpected_index_df = unexpected_index_df.fillna(value="null")
-        domain_column_name_list: List[str] = list(
-            set(unexpected_index_list[0].keys()).difference(
-                set(unexpected_index_column_names)
+        first_unexpected_index = unexpected_index_list[0]
+        if isinstance(first_unexpected_index, dict):
+            domain_column_name_list = list(
+                set(first_unexpected_index.keys()).difference(
+                    set(unexpected_index_column_names)
+                )
             )
-        )
+        else:
+            raise TypeError(
+                f"Expected dict but got {unexpected_index_list[0]} which is type {type(unexpected_index_list[0]).__name__}."
+            )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
         unexpected_index_df = pd.DataFrame(
@@ -401,8 +413,8 @@ def _convert_unexpected_indices_to_df(
             dtype="string",
         )
         unexpected_index_df = unexpected_index_df.fillna(value="null")
-        domain_column_name_list: List[str] = ["Value"]
-        unexpected_index_column_names: List[str] = ["Index"]
+        domain_column_name_list = ["Value"]
+        unexpected_index_column_names = ["Index"]
     else:
         return pd.DataFrame()
 
@@ -433,9 +445,7 @@ def _convert_unexpected_indices_to_df(
     return filtered_unexpected_indices
 
 
-def truncate_list_of_indices(
-    indices: List[Union[int, str]], max_index: int = 10
-) -> str:
+def truncate_list_of_indices(indices: list[int | str], max_index: int = 10) -> str:
     """
     Lambda function used to take unexpected_indices and turn into a string that can be rendered in DataDocs.
     For lists that are greater than max_index, it will truncate the list and add a "..."

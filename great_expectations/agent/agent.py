@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 from collections import defaultdict
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -7,7 +8,6 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 import pydantic
 from pydantic import AmqpDsn
-from pydantic.dataclasses import dataclass
 
 from great_expectations import get_context
 from great_expectations.agent.actions.agent_action import ActionResult
@@ -24,7 +24,13 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
 )
-from great_expectations.agent.models import UnknownEvent
+from great_expectations.agent.models import (
+    AgentBaseModel,
+    JobCompleted,
+    JobStarted,
+    JobStatus,
+    UnknownEvent,
+)
 from great_expectations.core.http import create_session
 
 if TYPE_CHECKING:
@@ -33,8 +39,7 @@ if TYPE_CHECKING:
 HandlerMap = Dict[str, OnMessageCallback]
 
 
-@dataclass(frozen=True)
-class GXAgentConfig:
+class GXAgentConfig(AgentBaseModel):
     """GXAgent configuration.
     Attributes:
         queue: name of queue
@@ -43,6 +48,9 @@ class GXAgentConfig:
 
     queue: str
     connection_string: AmqpDsn
+    gx_cloud_base_url: str = "https://api.greatexpectations.io"
+    gx_cloud_organization_id: str
+    gx_cloud_access_token: str
 
 
 class GXAgent:
@@ -85,7 +93,6 @@ class GXAgent:
             print("GX-Agent is ready.")
             # Open a connection until encountering a shutdown event
             subscriber.consume(
-                # TODO: replace with queue from agent-sessions endpoint
                 queue=self._config.queue,
                 on_message=self._handle_event_as_thread_enter,
             )
@@ -123,7 +130,6 @@ class GXAgent:
         self._current_task = self._executor.submit(
             self._handle_event, event_context=event_context
         )
-        # TODO lakitu-139: record job as started
 
         if self._current_task is not None:
             # add a callback for when the thread exits and pass it the event context
@@ -142,7 +148,7 @@ class GXAgent:
             event_context: event with related properties and actions.
         """
         # warning:  this method will not be executed in the main thread
-
+        self._update_status(job_id=event_context.correlation_id, status=JobStarted())
         print(
             f"Starting job {event_context.event.type} ({event_context.correlation_id}) "
         )
@@ -166,20 +172,22 @@ class GXAgent:
 
         # get results or errors from the thread
         error = future.exception()
-        # todo: underscore to appease linter - rename to `result` once this is used
-        _result = None
         if error is None:
-            _result = future.result()
+            result: ActionResult = future.result()
+            status = JobCompleted(
+                success=True,
+                created_resources=result.created_resources,
+            )
             print(
                 f"Completed job {event_context.event.type} ({event_context.correlation_id})"
             )
         else:
-            print(error)
+            status = JobCompleted(success=False, error_stack_trace=str(error))
+            print(traceback.format_exc())
             print(
                 f"Failed to complete job {event_context.event.type} ({event_context.correlation_id})"
             )
-
-        # TODO lakitu-139: record job as complete and send results
+        self._update_status(job_id=event_context.correlation_id, status=status)
 
         # ack message and cleanup resources
         event_context.processed_successfully()
@@ -215,7 +223,12 @@ class GXAgent:
             gx_cloud_organization_id: str
             gx_cloud_access_token: str
 
-        config = GxAgentConfigSettings()
+        try:
+            config = GxAgentConfigSettings()
+        except pydantic.ValidationError as validation_err:
+            raise GXAgentError(
+                f"Missing or badly formed environment variable\n{validation_err.errors()}"
+            ) from validation_err
 
         # obtain the broker url and queue name from Cloud
 
@@ -233,11 +246,32 @@ class GXAgent:
 
         try:
             # pydantic will coerce the url to the correct type
-            return GXAgentConfig(queue=queue, connection_string=connection_string)
+            return GXAgentConfig(
+                queue=queue,
+                connection_string=connection_string,
+                gx_cloud_base_url=config.gx_cloud_base_url,
+                gx_cloud_organization_id=config.gx_cloud_organization_id,
+                gx_cloud_access_token=config.gx_cloud_access_token,
+            )
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
             ) from validation_err
+
+    def _update_status(self, job_id: str, status: JobStatus) -> None:
+        """Update GX Cloud on the status of a job.
+
+        Args:
+            job_id: job identifier, also known as correlation_id
+            status: pydantic model encapsulating the current status
+        """
+        agent_sessions_url = (
+            f"{self._config.gx_cloud_base_url}/organizations/{self._config.gx_cloud_organization_id}"
+            + f"/agent-jobs/{job_id}"
+        )
+        session = create_session(access_token=self._config.gx_cloud_access_token)
+        data = status.json()
+        session.patch(agent_sessions_url, data=data)
 
 
 class GXAgentError(Exception):

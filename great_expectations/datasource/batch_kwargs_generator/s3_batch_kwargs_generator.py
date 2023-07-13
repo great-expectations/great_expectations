@@ -3,16 +3,12 @@ import logging
 import re
 from typing import Dict, Iterable
 
+from great_expectations.compatibility import aws
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import S3BatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-
-try:
-    import boto3
-except ImportError:
-    boto3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +56,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     }
 
     # FIXME add tests for new partitioner functionality
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name="default",
         datasource=None,
@@ -102,7 +98,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self._max_keys = max_keys
         self._iterators: Dict = {}
         try:
-            self._s3 = boto3.client("s3", **boto3_options)
+            self._s3 = aws.boto3.client("s3", **boto3_options)
         except TypeError:
             raise (
                 ImportError(
@@ -216,7 +212,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 data_asset_name=data_asset_name, **batch_parameters, **batch_kwargs
             )
 
-    def _build_batch_kwargs_from_key(
+    def _build_batch_kwargs_from_key(  # noqa: PLR0913
         self,
         key,
         asset_config=None,
@@ -311,7 +307,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
 
-    def _build_asset_iterator(
+    def _build_asset_iterator(  # noqa: PLR0913
         self,
         asset_config,
         iterator_dict,

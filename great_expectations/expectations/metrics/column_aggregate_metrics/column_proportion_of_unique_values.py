@@ -1,6 +1,6 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )

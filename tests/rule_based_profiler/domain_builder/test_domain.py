@@ -12,8 +12,10 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 
+# module level markers
+pytestmark = [pytest.mark.unit]
 
-@pytest.mark.unit
+
 def test_semantic_domain_consistency():
     domain: Domain
 
@@ -38,7 +40,6 @@ def test_semantic_domain_consistency():
     )
 
 
-@pytest.mark.unit
 def test_semantic_domain_serialization():
     domain: Domain
 
@@ -119,7 +120,6 @@ def test_semantic_domain_serialization():
     }
 
 
-@pytest.mark.unit
 def test_semantic_domain_equivalence():
     domain_a: Domain
     domain_b: Domain
@@ -236,7 +236,6 @@ def test_semantic_domain_equivalence():
     )
 
 
-@pytest.mark.unit
 def test_semantic_domain_comparisons_inclusion():
     domain_a: Optional[Domain]
     domain_b: Optional[Domain]
@@ -429,7 +428,6 @@ def test_semantic_domain_comparisons_inclusion():
     assert not domain_a.is_superset(other=domain_b)
 
 
-@pytest.mark.unit
 def test_integer_semantic_domain_type():
     domain: Domain
 

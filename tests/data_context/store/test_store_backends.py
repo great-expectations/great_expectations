@@ -8,7 +8,6 @@ import pyparsing as pp
 import pytest
 from moto import mock_s3
 
-import tests.test_utils as test_utils
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -41,6 +40,7 @@ from great_expectations.util import (
     get_context,
     is_library_loadable,
 )
+from tests import test_utils
 
 yaml = YAMLHandler()
 
@@ -497,7 +497,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     )
     my_store.remove_key(("BBB",))
     with pytest.raises(InvalidKeyError):
-        assert my_store.get(("BBB",)) == ""
+        assert my_store.get(("BBB",)) == ""  # noqa: PLC1901
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
         root_directory=project_path,
@@ -751,7 +751,7 @@ def test_TupleS3StoreBackend_with_prefix():
 
 @mock_s3
 @pytest.mark.integration
-def test_tuple_s3_store_backend_slash_conditions():
+def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
     bucket = "my_bucket"
     prefix = None
     conn = boto3.resource("s3", region_name="us-east-1")
@@ -1091,7 +1091,7 @@ def test_TupleGCSStoreBackend_base_public_path():
 )
 @pytest.mark.slow  # 1.35s
 @pytest.mark.integration
-def test_TupleGCSStoreBackend():
+def test_TupleGCSStoreBackend():  # noqa: PLR0915
     # pytest.importorskip("google-cloud-storage")
     """
     What does this test test and why?
@@ -1153,7 +1153,7 @@ def test_TupleGCSStoreBackend():
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.get_blob.return_value
-        mock_str = mock_blob.download_as_string.return_value
+        mock_str = mock_blob.download_as_bytes.return_value
 
         my_store.get(("BBB",))
 
@@ -1162,7 +1162,7 @@ def test_TupleGCSStoreBackend():
         mock_bucket.get_blob.assert_called_once_with(
             "this_is_a_test_prefix/my_file_BBB"
         )
-        mock_blob.download_as_string.assert_called_once()
+        mock_blob.download_as_bytes.assert_called_once()
         mock_str.decode.assert_called_once_with("utf-8")
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:

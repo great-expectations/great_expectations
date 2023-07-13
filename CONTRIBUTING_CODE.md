@@ -67,7 +67,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
 
 1. Run the following command to create a virtual environment in your local repository using Python versions 3.8 to 3.11, activate the environment, and then install the necessary dependencies:
 
-    ```python
+    ```sh
     python3 -m venv gx_dev
 
     source gx_dev/bin/activate
@@ -76,6 +76,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
 
     pip install -c constraints-dev.txt -e ".[test]"
     ```
+
     To specify other dependencies, add a comma after `test` and enter the dependency name. For example, "[test,postgresql,trino]". The supported dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`.
 
 2. Optional. If you're using Amazon Redshift, run the following command to install the `libpq-dev` package:
@@ -97,13 +98,26 @@ Python dependencies are required to modify Great Expectations code, submit a new
     ```
     or
     ```sh
-     brew install unixodbc
+    brew install unixodbc
     ```
-    If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
 
-    `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
+    If your Mac computer has an Apple Silicon chip, you might need to 
+    
+    1. specify additional compiler or linker options. For example:
 
-    `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+    ```sh
+    export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"
+    export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+    ```
+
+    2. reinstall pyodbc:
+
+    ```
+    python -m pip install --force-reinstall --no-binary :all: pyodbc
+    python -c "import pyodbc; print(pyodbc.version)"
+    ```
+
+    3. install the ODSBC 17 driver: https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15
 
 5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
 
@@ -122,25 +136,25 @@ A virtual environment allows you to create and test code without affecting the p
 
 1. Run the following command to create a virtual environment named `great_expectations_dev`:
 
-   ```python
-    python3 -m venv <path_to_environments_folder\>/great_expectations_dev
+   ```sh
+   python3 -m venv <path_to_environments_folder\>/great_expectations_dev
    ```
 2. Run the following command to activate the virtual environment:
 
-   ```python
-    <source path_to_environments_folder\>/great_expectations_dev/bin/activate
+   ```sh
+   <source path_to_environments_folder\>/great_expectations_dev/bin/activate
    ```
 ### Anaconda
 
 1. Run the following command to create a virtual environment named `great_expectations_dev`:
 
-   ```python
-    conda create --name great_expectations_dev
+   ```sh
+   conda create --name great_expectations_dev
    ```
 2. Run the following command to activate the virtual environment:
 
-   ```python
-    conda activate great_expectations_dev
+   ```sh
+   conda activate great_expectations_dev
    ```
 ## Install dependencies from requirements-dev.txt
 
@@ -228,8 +242,6 @@ Errors similar to the following are returned when you try to start the PostgreSQ
 To resolve these errors, configure Docker to run on another port and confirm the server details are correct.
 
 ### MySQL
-
-The `mysql` Docker image can't be used with Mac computers with Apple M1 chips.
 
 If another service is using port 3306, Docker might start the container but silently fail to set up the port.
 
@@ -336,7 +348,7 @@ One of the most significant features of an Expectation is that it produces the s
 
 The following is the test fixture file structure:
 
-````json
+```json
 {
     "expectation_type" : "expect_column_max_to_be_between",
     "datasets" : [{
@@ -345,14 +357,15 @@ The following is the test fixture file structure:
         "tests" : [...]
     }]
 }
-````
+```
+
 Below `datasets` are three entries: `data`, `schemas`, and `tests`.
 
 #### Data
 
 The `data` parameter defines a DataFrame of sample data to apply Expectations against. The DataFrame is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
 
-````console
+```console
 "data" : {
     "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
@@ -361,12 +374,13 @@ The `data` parameter defines a DataFrame of sample data to apply Expectations ag
     "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
 },
-````
+```
+
 #### Schemas
 
 The `schema` parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
 
-````console
+```console
 "schemas": {
     "sqlite": {
         "w" : "INTEGER",
@@ -385,7 +399,7 @@ The `schema` parameter defines the types to be used when instantiating tests aga
         "a" : "INTEGER",
     }
 },
-````
+```
 #### Tests
 
 The `tests` parameter defines the tests to be executed against the DataFrame. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
@@ -394,7 +408,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 
 `suppress_test_for` is an optional parameter to disable an Expectation for a specific list of backends. For example:
 
-````sh
+```sh
 "tests" : [{
     "title": "Basic negative test case",
     "exact_match_out" : false,
@@ -413,7 +427,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 ...
 ]
 
-````
+```
 
 The test fixture files are stored in subdirectories of `tests/test_definitions/` corresponding to the class of Expectation:
 

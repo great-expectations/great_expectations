@@ -6,7 +6,7 @@ from google.cloud import bigquery
 
 import great_expectations as gx
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.validator.validator import Validator
 
@@ -40,7 +40,7 @@ yaml = YAMLHandler()
 
 context: DataContext = gx.get_context()
 
-datasource_yaml: str = f"""
+datasource_yaml: str = """
 name: my_bigquery_datasource
 class_name: Datasource
 execution_engine:

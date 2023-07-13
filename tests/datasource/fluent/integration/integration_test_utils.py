@@ -238,7 +238,7 @@ def run_multibatch_data_assistant_and_checkpoint(
     )
 
 
-def run_batch_head(
+def run_batch_head(  # noqa: PLR0915
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
@@ -259,7 +259,7 @@ def run_batch_head(
         assert isinstance(fetch_all, bool)
 
         execution_engine: ExecutionEngine = batch.data.execution_engine
-        execution_engine.batch_manager.load_batch_list(batch_list=[batch])  # type: ignore[list-item] # expect core.Batch got interfaces.Batch
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
 
         metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 

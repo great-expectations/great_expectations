@@ -1,11 +1,14 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
     AgentAction,
-    CreatedResource,
 )
-from great_expectations.agent.models import RunOnboardingDataAssistantEvent
+from great_expectations.agent.models import (
+    CreatedResource,
+    RunOnboardingDataAssistantEvent,
+)
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions import StoreBackendError
 
@@ -18,25 +21,25 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
         expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
-        # ensure resources we create don't already exist before we run the Data Assistant.
+        # build tz aware timestamp
+        tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
+        timestamp = datetime.now(tz=tz)
+
+        # ensure we have unique names for created resources
         try:
             self._context.get_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
-            raise ValueError(
-                f"Onboarding Assistant Expectation Suite `{expectation_suite_name}` already exists. "
-                + "Please rename or delete suite and try again"
-            )
+            # if that didn't error, this name exists, so we add the timestamp
+            expectation_suite_name = f"{expectation_suite_name} {timestamp}"
         except StoreBackendError:
             # resource is unique
             pass
 
         try:
             self._context.get_checkpoint(name=checkpoint_name)
-            raise ValueError(
-                f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. "
-                + "Please rename or delete Checkpoint and try again"
-            )
+            # if that didn't error, this name exists, so we add the timestamp
+            checkpoint_name = f"{checkpoint_name} {timestamp}"
         except StoreBackendError:
             # resource is unique
             pass
@@ -90,7 +93,9 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(id=expectation_suite_id, type="ExpectationSuite"),
-                CreatedResource(id=checkpoint_id, type="Checkpoint"),
+                CreatedResource(
+                    resource_id=expectation_suite_id, type="ExpectationSuite"
+                ),
+                CreatedResource(resource_id=checkpoint_id, type="Checkpoint"),
             ],
         )

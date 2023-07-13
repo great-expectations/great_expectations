@@ -12,56 +12,17 @@ from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataC
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from tests.integration.db.taxi_data_utils import (
+    loaded_table,
+)
 from tests.integration.fixtures.split_and_sample_data.sampler_test_cases_and_fixtures import (
     SamplerTaxiTestData,
     TaxiSamplingTestCase,
     TaxiSamplingTestCases,
 )
 from tests.test_utils import (
-    LoadedTable,
-    clean_up_tables_with_prefix,
-    get_awsathena_db_name,
     get_connection_string_and_dialect,
-    load_and_concatenate_csvs,
-    load_data_into_test_database,
 )
-
-TAXI_DATA_TABLE_NAME: str = "taxi_data_all_samples"
-
-
-def _load_data(
-    connection_string: str,
-    dialect: str,
-    table_name: str = TAXI_DATA_TABLE_NAME,
-    random_table_suffix: bool = True,
-) -> LoadedTable:
-    dialects_supporting_multiple_values_in_single_insert_clause: List[str] = [
-        "redshift"
-    ]
-    to_sql_method: str = (
-        "multi"
-        if dialect in dialects_supporting_multiple_values_in_single_insert_clause
-        else None
-    )
-
-    # Load the first 10 rows of each month of taxi data
-    return load_data_into_test_database(
-        table_name=table_name,
-        csv_paths=[
-            f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
-        ],
-        connection_string=connection_string,
-        convert_colnames_to_datetime=["pickup_datetime", "dropoff_datetime"],
-        load_full_dataset=True,
-        random_table_suffix=random_table_suffix,
-        to_sql_method=to_sql_method,
-    )
-
-
-def _is_dialect_athena(dialect: str) -> bool:
-    """Is the dialect awsathena?"""
-    return dialect == "awsathena"
-
 
 if __name__ == "test_script_module":
     dialect, connection_string = get_connection_string_and_dialect(
@@ -69,110 +30,87 @@ if __name__ == "test_script_module":
     )
     print(f"Testing dialect: {dialect}")
 
-    if _is_dialect_athena(dialect):
-        athena_db_name: str = get_awsathena_db_name(
-            db_name_env_var="ATHENA_TEN_TRIPS_DB_NAME"
+    with loaded_table(dialect, connection_string) as table:
+        test_df: pd.DataFrame = table.inserted_dataframe
+        table_name: str = table.table_name
+
+        taxi_test_data: SamplerTaxiTestData = SamplerTaxiTestData(
+            test_df, test_column_name="pickup_datetime"
         )
-        table_name: str = "ten_trips_from_each_month"
-        test_df: pd.DataFrame = load_and_concatenate_csvs(
-            csv_paths=[
-                f"./data/ten_trips_from_each_month/yellow_tripdata_sample_10_trips_from_each_month.csv"
-            ],
-            convert_column_names_to_datetime=["pickup_datetime", "dropoff_datetime"],
-            load_full_dataset=True,
-        )
-    else:
-        print("Preemptively cleaning old tables")
-        clean_up_tables_with_prefix(
-            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-        )
+        test_cases: TaxiSamplingTestCases = TaxiSamplingTestCases(taxi_test_data)
 
-        loaded_table: LoadedTable = _load_data(
-            connection_string=connection_string, dialect=dialect
-        )
+        test_cases: List[TaxiSamplingTestCase] = test_cases.test_cases()
 
-        test_df: pd.DataFrame = loaded_table.inserted_dataframe
-        table_name: str = loaded_table.table_name
+        for test_case in test_cases:
+            print("Testing sampler method:", test_case.sampling_method_name)
 
-    taxi_test_data: SamplerTaxiTestData = SamplerTaxiTestData(
-        test_df, test_column_name="pickup_datetime"
-    )
-    test_cases: TaxiSamplingTestCases = TaxiSamplingTestCases(taxi_test_data)
+            # 1. Setup
 
-    test_cases: List[TaxiSamplingTestCase] = test_cases.test_cases()
+            context: DataContext = gx.get_context()
 
-    for test_case in test_cases:
-        print("Testing sampler method:", test_case.sampling_method_name)
+            datasource_name: str = "test_datasource"
+            data_connector_name: str = "test_data_connector"
+            data_asset_name: str = table_name  # Read from generated table name
 
-        # 1. Setup
+            # 2. Set sampler in DataConnector config
+            data_connector_config: dict = {
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "assets": {
+                    data_asset_name: {
+                        "sampling_method": test_case.sampling_method_name,
+                        "sampling_kwargs": test_case.sampling_kwargs,
+                    }
+                },
+            }
 
-        context: DataContext = gx.get_context()
+            context.add_datasource(
+                name=datasource_name,
+                class_name="Datasource",
+                execution_engine={
+                    "class_name": "SqlAlchemyExecutionEngine",
+                    "connection_string": connection_string,
+                },
+                data_connectors={data_connector_name: data_connector_config},
+            )
 
-        datasource_name: str = "test_datasource"
-        data_connector_name: str = "test_data_connector"
-        data_asset_name: str = table_name  # Read from generated table name
+            datasource: BaseDatasource = context.get_datasource(
+                datasource_name=datasource_name
+            )
 
-        # 2. Set sampler in DataConnector config
-        data_connector_config: dict = {
-            "class_name": "ConfiguredAssetSqlDataConnector",
-            "assets": {
-                data_asset_name: {
-                    "sampling_method": test_case.sampling_method_name,
-                    "sampling_kwargs": test_case.sampling_kwargs,
-                }
-            },
-        }
+            data_connector: ConfiguredAssetSqlDataConnector = (
+                datasource.data_connectors[data_connector_name]
+            )
 
-        context.add_datasource(
-            name=datasource_name,
-            class_name="Datasource",
-            execution_engine={
-                "class_name": "SqlAlchemyExecutionEngine",
-                "connection_string": connection_string,
-            },
-            data_connectors={data_connector_name: data_connector_config},
-        )
+            # 3. Check if resulting batches are as expected
+            # using data_connector.get_batch_definition_list_from_batch_request()
+            batch_request: BatchRequest = BatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+            )
+            batch_definition_list: List[
+                BatchDefinition
+            ] = data_connector.get_batch_definition_list_from_batch_request(
+                batch_request
+            )
 
-        datasource: BaseDatasource = context.get_datasource(
-            datasource_name=datasource_name
-        )
+            assert (
+                len(batch_definition_list) == test_case.num_expected_batch_definitions
+            )
 
-        data_connector: ConfiguredAssetSqlDataConnector = datasource.data_connectors[
-            data_connector_name
-        ]
+            # 4. Check that loaded data is as expected
 
-        # 3. Check if resulting batches are as expected
-        # using data_connector.get_batch_definition_list_from_batch_request()
-        batch_request: BatchRequest = BatchRequest(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-        )
-        batch_definition_list: List[
-            BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(batch_request)
+            batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
+                batch_definition_list[0]
+            )
 
-        assert len(batch_definition_list) == test_case.num_expected_batch_definitions
+            batch_data: SqlAlchemyBatchData = context.datasources[
+                datasource_name
+            ].execution_engine.get_batch_data(batch_spec=batch_spec)
 
-        # 4. Check that loaded data is as expected
+            num_rows: int = batch_data.execution_engine.execute_query(
+                sa.select(sa.func.count()).select_from(batch_data.selectable)
+            ).scalar()
+            assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
-        batch_spec: SqlAlchemyDatasourceBatchSpec = data_connector.build_batch_spec(
-            batch_definition_list[0]
-        )
-
-        batch_data: SqlAlchemyBatchData = context.datasources[
-            datasource_name
-        ].execution_engine.get_batch_data(batch_spec=batch_spec)
-
-        num_rows: int = batch_data.execution_engine.execute_query(
-            sa.select(sa.func.count()).select_from(batch_data.selectable)
-        ).scalar()
-        assert num_rows == test_case.num_expected_rows_in_first_batch_definition
-
-        # TODO: AJB 20220502 Test the actual rows that are returned e.g. for random sampling.
-
-    if not _is_dialect_athena(dialect):
-        print("Clean up tables used in this test")
-        clean_up_tables_with_prefix(
-            connection_string=connection_string, table_prefix=f"{TAXI_DATA_TABLE_NAME}_"
-        )
+            # TODO: AJB 20220502 Test the actual rows that are returned e.g. for random sampling.

@@ -13,7 +13,7 @@ Using a new Expectation contributed by a user is easy. Simply `pip install --upg
 
 For example:
 
-```
+```python
 from great_expectations_contrib.expectations import ExpectNelsonsColumnToExist
 
 # ... obtain Validator

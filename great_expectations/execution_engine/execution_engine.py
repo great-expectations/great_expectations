@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from great_expectations.core.batch import (
         BatchData,
         BatchDataType,
+        BatchDataUnion,
         BatchMarkers,
         BatchSpec,
     )
@@ -137,7 +138,7 @@ class ExecutionEngine(ABC):
 
     recognized_batch_spec_defaults: Set[str] = set()
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         name: Optional[str] = None,
         caching: bool = True,
@@ -224,7 +225,7 @@ class ExecutionEngine(ABC):
         for batch_id, batch_data in batch_data_dict.items():
             self.load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
-    def load_batch_data(self, batch_id: str, batch_data: BatchDataType) -> None:
+    def load_batch_data(self, batch_id: str, batch_data: BatchDataUnion) -> None:
         self._batch_manager.save_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data(
@@ -785,7 +786,7 @@ class ExecutionEngine(ABC):
 
         column_list = compute_domain_kwargs.pop("column_list")
 
-        if len(column_list) < 2:
+        if len(column_list) < 2:  # noqa: PLR2004
             raise gx_exceptions.GreatExpectationsError(
                 "column_list must contain at least 2 columns"
             )

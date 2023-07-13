@@ -18,6 +18,7 @@ def get_extras_require():
     sqla_keys = (
         "athena",
         "bigquery",
+        "clickhouse",
         "dremio",
         "mssql",
         "mysql",
@@ -32,7 +33,7 @@ def get_extras_require():
         "sqlalchemy",
         "test",
         "tools",
-        "all-contrib-expectations",
+        "sqlalchemy-alchemy-less-than-2" "all-contrib-expectations",
     )
 
     requirements_dir = "reqs"
@@ -56,10 +57,11 @@ def get_extras_require():
     lite = results.pop("lite")
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
-    cloud = results.pop("cloud")
+    cloud = results["cloud"]
+    arrow = results.pop("arrow")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test + cloud
+    results["test"] = lite + contrib + docs_test + cloud + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -118,6 +120,7 @@ config = {
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
 }
 

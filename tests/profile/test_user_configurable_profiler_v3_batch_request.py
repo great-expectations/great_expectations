@@ -9,6 +9,7 @@ import pytest
 
 import great_expectations as gx
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -217,6 +218,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
+        date_format="%Y-%m-%d %H:%M:%S",
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -1107,6 +1109,12 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
 
 # TODO: When this expectation is implemented for V3, remove this test and test for this expectation.
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="pyspark 3.4.0 is not compatible with pandas 2.0.0.",
+    run=True,
+    strict=True,
+)
 def test_expect_compound_columns_to_be_unique(
     taxi_validator_spark, taxi_data_ignored_columns, caplog
 ):
