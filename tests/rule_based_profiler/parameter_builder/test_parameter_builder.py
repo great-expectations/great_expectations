@@ -77,6 +77,7 @@ class DummyParameterBuilder(ParameterBuilder):
         )
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
@@ -138,6 +139,7 @@ def test_parameter_builder_dependencies_evaluated_separately(
     assert my_dependent_parameter_builder.call_count == 1
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
@@ -197,6 +199,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
     assert my_dependent_parameter_builder.call_count == 1
 
 
+# noinspection PyUnresolvedReferences,PyUnusedLocal
 @pytest.mark.unit
 @mock.patch(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
