@@ -114,6 +114,7 @@ def test__find_all_evrs_by_type(titanic_profiled_evrs_1):
 
 def test__get_column_list_from_evrs(titanic_profiled_evrs_1):
     column_list = Renderer()._get_column_list_from_evrs(titanic_profiled_evrs_1)
+    print(column_list)
     assert column_list == [
         "Unnamed: 0",
         "Name",

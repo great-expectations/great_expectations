@@ -273,6 +273,7 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
     validation_info = ValidationResultsPageRenderer._render_validation_info(
         titanic_profiled_evrs_1
     ).to_json_dict()
+    print(validation_info)
 
     expected_validation_info = {
         "content_block_type": "table",
@@ -300,7 +301,6 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
             ["Run Time", "2020-03-22T17:02:47Z"],
         ],
     }
-    print(validation_info)
     assert validation_info == expected_validation_info
 
 
