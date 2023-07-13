@@ -1,7 +1,5 @@
 name: ci
 
-# Test to see if check changes picks this up
-
 on:
   push:
   pull_request:
