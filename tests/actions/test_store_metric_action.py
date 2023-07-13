@@ -1,3 +1,4 @@
+import pytest
 from freezegun import freeze_time
 
 from great_expectations.checkpoint.actions import StoreMetricsAction
@@ -17,6 +18,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 
 
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator):
     action = StoreMetricsAction(
@@ -118,6 +120,7 @@ def test_StoreMetricsAction(basic_in_memory_data_context_for_validation_operator
     )
 
 
+@pytest.mark.big
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreMetricsAction_column_metric(
     basic_in_memory_data_context_for_validation_operator,
