@@ -310,9 +310,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
 
-        # Store cached datasources but don't init them
-        self._cached_datasources: dict = {}
-
         # Build the datasources we know about and have access to
         self._init_datasources()
 
@@ -779,13 +776,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Can not write the fluent datasource, because no name was provided."
             )
 
-        # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource_name in self.datasources:
-            raise gx_exceptions.DataContextError(
-                f"Can not write the fluent datasource {datasource_name} because a datasource of that "
-                "name already exists in the data context."
-            )
-
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
@@ -804,7 +794,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
-        self.datasources[datasource_name] = datasource
         return datasource
 
     def _update_fluent_datasource(
@@ -833,8 +822,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         update_datasource.test_connection()
         update_datasource._data_context._save_project_config()
 
-        self.datasources[datasource_name] = update_datasource
-
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
     ) -> None:
@@ -843,14 +830,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         This should generally be avoided.
         """
         self.fluent_config.pop(datasource_name, None)
-        datasource = self.datasources.get(datasource_name)
-        if datasource:
-            if self._datasource_store.cloud_mode and _call_store:
-                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
-        else:
-            # Raise key error instead?
-            logger.info(f"No Datasource '{datasource_name}' to delete")
-        self.datasources.pop(datasource_name, None)
+        self.delete_datasource(datasource_name)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1594,10 +1574,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must provide a datasource_name to retrieve an existing Datasource"
             )
 
-        if datasource_name in self._cached_datasources:
-            self._cached_datasources[datasource_name]._data_context = self
-            return self._cached_datasources[datasource_name]
-
         datasource_config: DatasourceConfig | FluentDatasource = (
             self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
@@ -1618,7 +1594,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 raw_config=raw_config, substituted_config=substituted_config
             )
 
-        self._cached_datasources[datasource_name] = datasource
         return datasource
 
     def _serialize_substitute_and_sanitize_datasource_config(
@@ -1829,7 +1804,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
-        self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
         if save_changes:
@@ -2255,9 +2229,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if not ((checkpoint is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
-            )
+            error_message = "Must either pass in an existing checkpoint or individual constructor arguments"
+            if checkpoint and name:
+                error_message += " (but not both)"
+            raise ValueError(error_message)
 
         action_list = action_list or self._determine_default_action_list()
 
@@ -4789,13 +4764,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.notebooks  # type: ignore[return-value]
 
     @property
-    def datasources(
-        self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
-        """A single holder for all Datasources in this context"""
-        return self._cached_datasources
-
-    @property
     def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
             name: ds
@@ -4927,45 +4895,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             return False
         return True
 
-    def _init_datasources(self) -> None:
-        """Initialize the datasources in store"""
-        config: DataContextConfig = self.config
-
-        if self._datasource_store.cloud_mode:
-            for fds in config.fluent_datasources.values():
-                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
-
-        datasources: Dict[str, DatasourceConfig] = cast(
-            Dict[str, DatasourceConfig], config.datasources
-        )
-
-        for datasource_name, datasource_config in datasources.items():
-            try:
-                config = copy.deepcopy(datasource_config)  # type: ignore[assignment]
-
-                raw_config_dict = dict(datasourceConfigSchema.dump(config))
-                substituted_config_dict: dict = self.config_provider.substitute_config(
-                    raw_config_dict
-                )
-
-                raw_datasource_config = datasourceConfigSchema.load(raw_config_dict)
-                substituted_datasource_config = datasourceConfigSchema.load(
-                    substituted_config_dict
-                )
-                substituted_datasource_config.name = datasource_name
-
-                datasource = self._instantiate_datasource_from_config(
-                    raw_config=raw_datasource_config,
-                    substituted_config=substituted_datasource_config,
-                )
-                self._cached_datasources[datasource_name] = datasource
-            except gx_exceptions.DatasourceInitializationError as e:
-                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
-                # this error will happen if our configuration contains datasources that GX can no longer connect to.
-                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
-                # caught at the context.get_batch() step. So we just pass here.
-                pass
-
     def _instantiate_datasource_from_config(
         self,
         raw_config: DatasourceConfig,
@@ -5083,12 +5012,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self._cached_datasources:
-            existing_datasource = self._cached_datasources[name]
-            if isinstance(existing_datasource, BaseDatasource):
-                config.id = existing_datasource.id
 
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
@@ -5105,7 +5029,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
