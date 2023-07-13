@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, ClassVar, Set
 
 import pytest
 from unittest import mock
@@ -30,6 +30,10 @@ class DummyDomain(Domain):
 
 
 class DummyParameterBuilder(ParameterBuilder):
+    exclude_field_names: ClassVar[Set[str]] = ParameterBuilder.exclude_field_names | {
+        "call_count",
+    }
+
     def __init__(
         self,
         name: str,
@@ -74,9 +78,12 @@ class DummyParameterBuilder(ParameterBuilder):
 
 
 @pytest.mark.unit
-@mock.patch("test_parameter_builder.DummyParameterBuilder._build_parameters")
+@mock.patch(
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
+    return_value="my_json_string",
+)
 def test_parameter_builder_dependencies_evaluated_separately(
-    mock_parameter_builder__build_parameters: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
         DummyParameterBuilder(
@@ -96,49 +103,48 @@ def test_parameter_builder_dependencies_evaluated_separately(
         evaluation_parameter_builder_configs=None,
     )
 
-    with mock.patch(
-        "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
-        return_value="my_json_string",
-    ):
-        domain = DummyDomain()
+    domain = DummyDomain()
 
-        parameter_container = ParameterContainer(parameter_nodes=None)
-        parameters: Dict[str, ParameterContainer] = {
-            domain.id: parameter_container,
-        }
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
-        my_evaluation_dependency_0_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 1
+    my_evaluation_dependency_0_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
 
-        my_evaluation_dependency_1_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 2
+    my_evaluation_dependency_1_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
-        my_dependent_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 3
+    my_dependent_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_dependent_parameter_builder.call_count == 1
 
 
 @pytest.mark.unit
-@mock.patch("test_parameter_builder.DummyParameterBuilder._build_parameters")
+@mock.patch(
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
+    return_value="my_json_string",
+)
 def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
-    mock_parameter_builder__build_parameters: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
         DummyParameterBuilder(
@@ -165,32 +171,39 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
         name="my_dependent_parameter_builder",
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
     )
+    my_evaluation_dependency_0_parameter_builder = (
+        my_dependent_parameter_builder._evaluation_parameter_builders[0]
+    )
+    my_evaluation_dependency_1_parameter_builder = (
+        my_dependent_parameter_builder._evaluation_parameter_builders[1]
+    )
 
-    with mock.patch(
-        "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
-        return_value="my_json_string",
-    ):
-        domain = DummyDomain()
+    domain = DummyDomain()
 
-        parameter_container = ParameterContainer(parameter_nodes=None)
-        parameters: Dict[str, ParameterContainer] = {
-            domain.id: parameter_container,
-        }
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
-        my_dependent_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 3
+    my_dependent_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
+    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
+    assert my_dependent_parameter_builder.call_count == 1
 
 
 @pytest.mark.unit
-@mock.patch("test_parameter_builder.DummyParameterBuilder._build_parameters")
+@mock.patch(
+    "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
+    return_value="my_json_string",
+)
 def test_parameter_builder_dependencies_evaluated_mixed(
-    mock_parameter_builder__build_parameters: mock.MagicMock,
+    mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
         DummyParameterBuilder(
@@ -205,41 +218,41 @@ def test_parameter_builder_dependencies_evaluated_mixed(
         )
     )
 
-    with mock.patch(
-        "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
-        return_value="my_json_string",
-    ):
-        domain = DummyDomain()
+    domain = DummyDomain()
 
-        parameter_container = ParameterContainer(parameter_nodes=None)
-        parameters: Dict[str, ParameterContainer] = {
-            domain.id: parameter_container,
-        }
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
 
-        my_evaluation_dependency_0_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 1
+    my_evaluation_dependency_0_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
 
-        evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-            ParameterBuilderConfig(
-                **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
-            ),
-        ]
-        my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
-            name="my_dependent_parameter_builder",
-            evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-        )
+    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
+        ),
+    ]
+    my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_dependent_parameter_builder",
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+    )
+    my_evaluation_dependency_1_parameter_builder = (
+        my_dependent_parameter_builder._evaluation_parameter_builders[0]
+    )
 
-        my_dependent_parameter_builder.build_parameters(
-            domain=domain,
-            variables=None,
-            parameters=parameters,
-            batch_request=None,
-            runtime_configuration=None,
-        )
-        assert mock_parameter_builder__build_parameters.call_count == 3
+    my_dependent_parameter_builder.build_parameters(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        batch_request=None,
+        runtime_configuration=None,
+    )
+    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
+    assert my_dependent_parameter_builder.call_count == 1
