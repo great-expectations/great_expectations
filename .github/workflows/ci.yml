@@ -58,11 +58,11 @@ jobs:
 
       - name: Run the unit tests
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
-        
-  unnamed-matrix-tests:
+
+  marker-tests:
     strategy:
       matrix:
-        markers: ["spark", "postgres"]
+        markers: ["big", "cli", "filesystem", "project"]
         python-version: ["3.8", "3.11"]
 
     runs-on: ubuntu-latest
