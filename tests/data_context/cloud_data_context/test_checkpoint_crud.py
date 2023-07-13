@@ -783,6 +783,9 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
     )
 
 
+@pytest.mark.xfail(
+    reason="GX Cloud E2E tests are currently failing due to a migration to a new CI environment",
+)
 @pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_run_checkpoint_e2e():

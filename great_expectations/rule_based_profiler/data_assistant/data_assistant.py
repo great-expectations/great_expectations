@@ -76,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         """
-        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        Instantiate class as part of descendants calling "__init__()" and register its type in "DataAssistant" registry.
         """
         newclass = super().__new__(cls, clsname, bases, attrs)
 
@@ -85,12 +85,14 @@ class MetaDataAssistant(ABCMeta):
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
 
-            from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-                DataAssistantDispatcher,
-            )
+            alias: Optional[str] = getattr(newclass, "__alias__", None)
+            if alias and not alias.startswith("_"):
+                from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+                    DataAssistantDispatcher,
+                )
 
-            # noinspection PyTypeChecker
-            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
+                # noinspection PyTypeChecker
+                DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
 
         return newclass
 
