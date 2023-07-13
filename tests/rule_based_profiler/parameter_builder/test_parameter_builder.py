@@ -19,6 +19,19 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 
+"""
+Tests in this module focus on behavior aspects of "ParameterBuilder.build_parameters()" -- this public method assesses
+dependencies on evaluation "ParameterBuilder" objects (if any specified), and resolves these dependencies, prior to
+calling its own interface method, "ParameterBuilder.build_parameters()".  One key method that is under test is
+"ParameterBuilder.resolve_evaluation_dependencies()" in terms of how it affects contents of shared memory object --
+"parameters: Dict[str, ParameterContainer]", whose "ParameterContainer" stores computation results of every
+"ParameterBuilder", evaluated within scope of given "Domain" object.  When one "ParameterBuilder" specifies dependencies
+on other "ParameterBuilder" objects for its evaluation, then "ParameterBuilder.resolve_evaluation_dependencies()" will
+process these dependencies recursively.  Hence, bebefore/after tests are provided for behavior of this method.  Utility
+method "get_fully_qualified_parameter_names()", whose thoroughly tests are elsewhere, is used to query shared memory.
+"""
+
+
 class DummyDomain(Domain):
     """
     To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
