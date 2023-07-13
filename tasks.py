@@ -16,6 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
+from collections.abc import Mapping
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Union
 
@@ -31,12 +32,20 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
+REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
 # https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
 _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
+
+
+MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
+    "athena": ("requirements-dev-athena.txt",),
+    "cloud": ("requirements-dev-cloud.txt",),
+    "pyarrow": ("requirements-dev-arrow.txt",),
+}
 
 
 @invoke.task(
@@ -777,3 +786,29 @@ def show_automerges(ctx: Context):
             print(f"{i}. @{pr['user']['login']} {pr['title']} {pr['html_url']}")
     else:
         print("\tNo PRs set to automerge")
+
+
+@invoke.task(
+    iterable=["markers"],
+    help={"markers": "Optional list of markers to install dependencies for"},
+)
+def deps(ctx: Context, markers: list[str]):
+    """
+    Install dependencies for development and testing.
+
+    If no markers are specified, the dev-contrib and core requirements are installed.
+    """
+    cmds = ["pip", "install"]
+    req_files: list[str] = []
+
+    for mark in markers:
+        if marker_depedencies := MARKER_REQ_MAPPING.get(mark):
+            req_files.extend(marker_depedencies)
+
+    if not req_files:
+        req_files.extend(["requirements.txt", "reqs/requirements-dev-contrib.txt"])
+
+    for req_file in req_files:
+        cmds.append(f"-r {req_file}")
+
+    ctx.run(" ".join(cmds), echo=True, pty=True)
