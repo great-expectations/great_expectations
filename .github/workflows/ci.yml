@@ -57,8 +57,8 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test]"
 
       - name: Run the unit tests
-        run: invoke tests --cloud --unit --timeout=3.0
-
+        run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+        
   unnamed-matrix-tests:
     strategy:
       matrix:
