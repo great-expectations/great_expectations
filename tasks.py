@@ -116,20 +116,23 @@ def fmt(  # noqa: PLR0913
 @invoke.task(
     help={
         "path": _PATH_HELP_DESC,
+        "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(
+def lint(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
+    fmt_: bool = True,
     fix: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
     """Run formatter (black) and linter (ruff)"""
-    fmt(ctx, path, check=not fix, pty=pty)
+    if fmt_:
+        fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", path]
@@ -346,7 +349,7 @@ def mv_usage_stats_json(ctx: Context):
     print(f"'{outfile}' copied to dbfs.")
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
 @invoke.task(
@@ -375,6 +378,7 @@ def tests(  # noqa: PLR0913
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
     full_cov: bool = False,
+    verbose: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -398,8 +402,10 @@ def tests(  # noqa: PLR0913
         f"--durations={slowest}",
         cov_param,
         "--cov-report term",
-        "-vv",
+        "-rEf",  # show extra test summary info for errors & failed tests
     ]
+    if verbose:
+        cmds.append("-vv")
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
     if unit and not ignore_markers:

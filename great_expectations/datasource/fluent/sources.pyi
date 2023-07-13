@@ -12,6 +12,7 @@ from typing import (
     Optional,
     Type,
     Union,
+    overload,
 )
 
 from typing_extensions import TypeAlias
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     import pydantic
 
     from great_expectations.datasource.fluent import (
+        DatabricksSQLDatasource,
         PandasAzureBlobStorageDatasource,
         PandasDatasource,
         PandasDBFSDatasource,
@@ -46,6 +48,9 @@ if TYPE_CHECKING:
         SqliteDatasource,
     )
     from great_expectations.datasource.fluent.config_str import ConfigStr
+    from great_expectations.datasource.fluent.databricks_sql_datasource import (
+        DatabricksDsn,
+    )
     from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
         Datasource,
@@ -556,34 +561,146 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    @overload
     def add_snowflake(  # noqa: PLR0913
         self,
-        name_or_datasource: Optional[Union[str, Datasource]] = None,
-        name: Optional[str] = None,
-        datasource: Optional[Datasource] = None,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
         *,
         connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
-        create_temp_table: bool = True,
+        create_temp_table: bool = ...,
+        account: None = ...,
+        user: None = ...,
+        password: None = ...,
+        database: None = ...,
+        schema: None = ...,
+        warehouse: None = ...,
+        role: None = ...,
+        numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
+    @overload
+    def add_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
+        *,
+        connection_string: None = ...,
+        create_temp_table: bool = ...,
+        account: str = ...,
+        user: str = ...,
+        password: Union[ConfigStr, str] = ...,
+        database: Optional[str] = ...,
+        schema: Optional[str] = ...,
+        warehouse: Optional[str] = ...,
+        role: Optional[str] = ...,
+        numpy: bool = ...,
+    ) -> SnowflakeDatasource: ...
+    @overload
     def update_snowflake(  # noqa: PLR0913
         self,
-        name_or_datasource: Optional[Union[str, Datasource]] = None,
-        name: Optional[str] = None,
-        datasource: Optional[Datasource] = None,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
         *,
         connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
-        create_temp_table: bool = True,
+        create_temp_table: bool = ...,
+        account: None = ...,
+        user: None = ...,
+        password: None = ...,
+        database: None = ...,
+        schema: None = ...,
+        warehouse: None = ...,
+        role: None = ...,
+        numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
+    @overload
+    def update_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
+        *,
+        connection_string: None = ...,
+        create_temp_table: bool = ...,
+        account: str = ...,
+        user: str = ...,
+        password: Union[ConfigStr, str] = ...,
+        database: Optional[str] = ...,
+        schema: Optional[str] = ...,
+        warehouse: Optional[str] = ...,
+        role: Optional[str] = ...,
+        numpy: bool = ...,
+    ) -> SnowflakeDatasource: ...
+    @overload
     def add_or_update_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
+        *,
+        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        create_temp_table: bool = ...,
+        account: None = ...,
+        user: None = ...,
+        password: None = ...,
+        database: None = ...,
+        schema: None = ...,
+        warehouse: None = ...,
+        role: None = ...,
+        numpy: bool = ...,
+    ) -> SnowflakeDatasource: ...
+    @overload
+    def add_or_update_snowflake(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = ...,
+        name: Optional[str] = ...,
+        datasource: Optional[Datasource] = ...,
+        *,
+        connection_string: None = ...,
+        create_temp_table: bool = ...,
+        account: str = ...,
+        user: str = ...,
+        password: Union[ConfigStr, str] = ...,
+        database: Optional[str] = ...,
+        schema: Optional[str] = ...,
+        warehouse: Optional[str] = ...,
+        role: Optional[str] = ...,
+        numpy: bool = ...,
+    ) -> SnowflakeDatasource: ...
+    def delete_snowflake(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_databricks_sql(  # noqa: PLR0913
         self,
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
         *,
-        connection_string: Union[ConfigStr, SnowflakeDsn, str] = ...,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
         create_temp_table: bool = True,
-    ) -> SnowflakeDatasource: ...
-    def delete_snowflake(
+    ) -> DatabricksSQLDatasource: ...
+    def update_databricks_sql(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> DatabricksSQLDatasource: ...
+    def add_or_update_databricks_sql(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> DatabricksSQLDatasource: ...
+    def delete_databricks_sql(
         self,
         name: str,
     ) -> None: ...

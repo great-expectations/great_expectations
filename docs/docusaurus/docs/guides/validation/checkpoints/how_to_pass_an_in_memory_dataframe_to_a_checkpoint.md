@@ -5,7 +5,7 @@ title: Validate data with Expectations and Checkpoints
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide will help you pass an in-memory DataFrame to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
+This guide will help you pass an in-memory DataFrame to a <TechnicalTag tag="checkpoint" text="Checkpoint" /> that is defined at runtime. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
 The full script used in the following code examples, is available in GitHub here: [how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py).
 
