@@ -16,6 +16,9 @@ from great_expectations.render.renderer import (
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
+
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
@@ -262,6 +265,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
     import pprint
 
     pprint.pprint(validation_header)
+
     assert validation_header == expected_validation_header
 
 
@@ -297,7 +301,6 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
             ["Run Time", "2020-03-22T17:02:47Z"],
         ],
     }
-
     assert validation_info == expected_validation_info
 
 
@@ -339,6 +342,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     assert validation_statistics == expected_validation_statistics
 
 
+@pytest.mark.filesystem
 def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     batch_kwargs = {
         "path": "project_dir/project_path/data/titanic/Titanic.csv",
@@ -569,10 +573,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-
-    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json"), "w") as f:
-    #     json.dump(rendered_validation_results, f, indent=2)
-
     assert (
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_start
