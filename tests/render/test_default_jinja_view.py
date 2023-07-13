@@ -98,9 +98,9 @@ def test_render_section_page():
         }
     )  # .replace(" ", "").replace("\t", "").replace("\n", "")
 
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
 
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """<div id="section-1" class="ge-section container-fluid mb-1 pb-1 pl-sm-3 px-0">
@@ -160,8 +160,8 @@ def test_rendering_components_without_section_loop_index():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -183,8 +183,8 @@ def test_rendering_components_without_section_loop_index():
             "content_block": header_component_content,
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -207,8 +207,8 @@ def test_rendering_components_without_section_loop_index():
             "section_loop": {"index": 3},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -299,9 +299,9 @@ def test_rendering_components_with_styling():
             "content_block_loop": {"index": 2},
         }
     )
+    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
 
-    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -361,8 +361,8 @@ def test_render_header_component():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -401,8 +401,8 @@ def test_render_table_component():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -472,8 +472,8 @@ def test_render_value_list():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -516,8 +516,8 @@ def test_render_graph():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -564,8 +564,8 @@ def test_render_text():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
@@ -602,8 +602,8 @@ def test_render_text():
             "content_block_loop": {"index": 2},
         }
     )
-    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     print(rendered_doc)
+    rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
         == """
