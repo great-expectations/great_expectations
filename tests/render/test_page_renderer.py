@@ -16,6 +16,9 @@ from great_expectations.render.renderer import (
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
+
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
     empty_data_context,
@@ -26,7 +29,6 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*hi*",
@@ -39,7 +41,6 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*alpha*",
@@ -59,7 +60,6 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns.",
         "*alpha*",
@@ -74,7 +74,6 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -104,7 +103,6 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -147,7 +145,6 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
         "This Expectation suite currently contains 0 total Expectations across 0 columns."
     ]
@@ -159,7 +156,6 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text))
 
     try:
         mistune.markdown("*test*")
@@ -196,7 +192,6 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
             data_context=context,
         )
     )
-    # print(RenderedContent.rendered_content_list_to_json(result.text)[0])
     assert (
         RenderedContent.rendered_content_list_to_json(result.text)[0]
         == "This Expectation suite currently contains 3 total Expectations across 2 columns."
@@ -259,9 +254,7 @@ def test_ValidationResultsPageRenderer_render_validation_header(
             },
         },
     }
-    import pprint
 
-    pprint.pprint(validation_header)
     assert validation_header == expected_validation_header
 
 
@@ -269,7 +262,6 @@ def test_ValidationResultsPageRenderer_render_validation_info(titanic_profiled_e
     validation_info = ValidationResultsPageRenderer._render_validation_info(
         titanic_profiled_evrs_1
     ).to_json_dict()
-    print(validation_info)
 
     expected_validation_info = {
         "content_block_type": "table",
@@ -307,7 +299,6 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     validation_statistics = ValidationResultsPageRenderer._render_validation_statistics(
         titanic_profiled_evrs_1
     ).to_json_dict()
-    print(validation_statistics)
     expected_validation_statistics = {
         "content_block_type": "table",
         "styling": {
@@ -339,6 +330,7 @@ def test_ValidationResultsPageRenderer_render_validation_statistics(
     assert validation_statistics == expected_validation_statistics
 
 
+@pytest.mark.filesystem
 def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     batch_kwargs = {
         "path": "project_dir/project_path/data/titanic/Titanic.csv",
@@ -348,7 +340,6 @@ def test_ValidationResultsPageRenderer_render_nested_table_from_dict():
     batch_kwargs_table = ValidationResultsPageRenderer._render_nested_table_from_dict(
         batch_kwargs, header="Batch Kwargs"
     ).to_json_dict()
-    print(batch_kwargs_table)
 
     expected_batch_kwarg_table = {
         "content_block_type": "table",
@@ -569,10 +560,6 @@ def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_start(
     content_block["graph"]["$schema"] = re.sub(
         r"v\d*\.\d*\.\d*", "v4.8.1", content_block["graph"]["$schema"]
     )
-
-    # with open(file_relative_path(__file__, "./fixtures/ValidationResultsPageRenderer_render_with_run_info_at_start_nc.json"), "w") as f:
-    #     json.dump(rendered_validation_results, f, indent=2)
-
     assert (
         rendered_validation_results
         == ValidationResultsPageRenderer_render_with_run_info_at_start

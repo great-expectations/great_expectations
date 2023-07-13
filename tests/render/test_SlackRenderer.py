@@ -6,6 +6,9 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.render.renderer import SlackRenderer
 
+# module level markers
+pytestmark = [pytest.mark.unit]
+
 
 @pytest.fixture
 def failed_expectation_suite_validation_result():
@@ -110,8 +113,6 @@ def test_SlackRenderer_validation_results_with_datadocs(
         ],
         "text": "default: Success :tada:",
     }
-    print(rendered_output)
-    print(expected_output)
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}
@@ -249,8 +250,6 @@ def test_SlackRenderer_checkpoint_validation_results_with_datadocs():
         ],
         "text": "default: Success :tada:",
     }
-    print(rendered_output)
-    print(expected_output)
     assert rendered_output == expected_output
 
     data_docs_pages = {"local_site": "file:///localsite/index.html"}

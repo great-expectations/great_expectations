@@ -26,6 +26,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 @pytest.fixture()
 def validation_operator_result():
@@ -334,8 +337,6 @@ def test_render_section_page_with_fixture_data_multiple_validations(
     md_str = " ".join(md_str_list)
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
-
-    # print(md_str)
 
     assert (
         md_str

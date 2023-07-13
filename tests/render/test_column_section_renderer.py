@@ -110,7 +110,6 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
-    # print(json.dumps(titanic_expectations, indent=2))
     for exp in titanic_expectations.expectations:
         try:
             column = exp.kwargs["column"]
@@ -140,34 +139,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
             )
 
 
-@pytest.mark.smoketest
-def test_ProfilingResultsColumnSectionRenderer_render(
-    titanic_profiled_evrs_1, titanic_profiled_name_column_evrs
-):
-    # Smoke test for titanic names
-    document = ProfilingResultsColumnSectionRenderer().render(
-        titanic_profiled_name_column_evrs
-    )
-    print(document)
-    assert document != {}
-
-    # Smoke test for titanic Ages
-
-    # This is a janky way to fetch expectations matching a specific name from an EVR suite.
-    # TODO: It will no longer be necessary once we implement ValidationResultSuite._group_evrs_by_column
-    from great_expectations.render.renderer.renderer import Renderer
-
-    evrs_by_column = Renderer()._group_evrs_by_column(titanic_profiled_evrs_1)
-    print(evrs_by_column.keys())
-
-    age_column_evrs = evrs_by_column["Age"]
-    for evr in age_column_evrs:
-        print(evr)
-
-    document = ProfilingResultsColumnSectionRenderer().render(age_column_evrs)
-    print(document)
-
-
+@pytest.mark.unit
 def test_ProfilingResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
@@ -178,7 +150,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
     )
 
     assert content_block["content_block_type"] == "header"
-    print(content_block["header"])
     assert content_block["header"] == {
         "content_block_type": "string_template",
         "string_template": {
@@ -188,7 +159,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
             "styling": {"classes": ["m-0", "p-0"]},
         },
     }
-    print(content_block["subheader"])
     assert content_block["subheader"] == {
         "content_block_type": "string_template",
         "string_template": {
@@ -202,6 +172,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_header(
     }
 
 
+@pytest.mark.unit
 def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_dollar_sign(
     titanic_profiled_name_column_evrs,
 ):
@@ -237,7 +208,6 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
         [evr_with_unescaped_dollar_sign],
         column_type=[],
     ).to_json_dict()
-    print(content_block)
     assert content_block == {
         "content_block_type": "header",
         "styling": {
@@ -288,10 +258,10 @@ def test_ProfilingResultsColumnSectionRenderer_render_header_with_unescaped_doll
 #     ProfilingResultsColumnSectionRenderer()._render_values_set(evrs, content_blocks)
 
 
+@pytest.mark.unit
 def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
     titanic_profiled_evrs_1,
 ):
-    print(titanic_profiled_evrs_1.results[0])
     distinct_values_evrs = [
         evr
         for evr in titanic_profiled_evrs_1.results
@@ -348,8 +318,6 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
         },
     }
 
-    print(content_blocks.to_json_dict())
-
     assert content_blocks.to_json_dict() == expected
 
     expectation_with_unescaped_dollar_sign = ExpectationConfiguration(
@@ -377,7 +345,6 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
         [expectation_with_unescaped_dollar_sign],
     )
 
-    print(content_blocks.to_json_dict())
     expected = {
         "content_block_type": "header",
         "styling": {
@@ -554,7 +521,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
-    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -719,7 +685,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
-    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -874,7 +839,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
-    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -1029,7 +993,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
-    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -1181,7 +1144,6 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     result_json = (
         ExpectationSuiteColumnSectionRenderer().render(expectations).to_json_dict()
     )
-    print(result_json)
     assert result_json == expected_result_json
 
 
@@ -1217,7 +1179,6 @@ def test_ValidationResultsColumnSectionRenderer_render_header(
     ) = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=titanic_profiled_name_column_evrs,
     )
-    print(content_block.to_json_dict())
     assert content_block.to_json_dict() == {
         "content_block_type": "header",
         "styling": {
@@ -1272,8 +1233,6 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
     ) = ValidationResultsColumnSectionRenderer._render_header(
         validation_results=[evr_with_unescaped_dollar_sign],
     )
-
-    print(content_block.to_json_dict())
 
     assert content_block.to_json_dict() == {
         "content_block_type": "header",
@@ -1434,7 +1393,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 
 
 # noinspection PyPep8Naming
-@pytest.mark.integration
+@pytest.mark.unit
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path_with_eval_parameter():
     evr = ExpectationValidationResult(
         success=True,
@@ -1683,6 +1642,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 @pytest.mark.filterwarnings(
     "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
 )
+@pytest.mark.unit
 def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
     # This rather specific test is a reaction to the error documented in #679
     validation = ExpectationSuiteValidationResult(
@@ -1723,6 +1683,7 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ProfilingColumnPropertiesTableContentBlockRenderer():
     ge_object = [
         ExpectationValidationResult(

@@ -17,10 +17,11 @@ from great_expectations.render import (
 from great_expectations.render.renderer import ProfilingResultsPageRenderer
 from great_expectations.render.view import DefaultJinjaPageView
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 # noinspection PyPep8Naming
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 @pytest.mark.filterwarnings(
     "ignore:Cannot get %*::great_expectations.render.renderer.profiling_results_overview_section_renderer"
 )
@@ -97,8 +98,6 @@ def test_render_section_page():
         }
     )  # .replace(" ", "").replace("\t", "").replace("\n", "")
 
-    print(rendered_doc)
-
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -159,7 +158,6 @@ def test_rendering_components_without_section_loop_index():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -182,7 +180,6 @@ def test_rendering_components_without_section_loop_index():
             "content_block": header_component_content,
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -206,7 +203,6 @@ def test_rendering_components_without_section_loop_index():
             "section_loop": {"index": 3},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -298,7 +294,6 @@ def test_rendering_components_with_styling():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
 
     assert (
@@ -360,7 +355,6 @@ def test_render_header_component():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -400,7 +394,6 @@ def test_render_table_component():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -471,7 +464,6 @@ def test_render_value_list():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -515,7 +507,6 @@ def test_render_graph():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -563,7 +554,6 @@ def test_render_text():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
@@ -601,7 +591,6 @@ def test_render_text():
             "content_block_loop": {"index": 2},
         }
     )
-    print(rendered_doc)
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
     assert (
         rendered_doc
