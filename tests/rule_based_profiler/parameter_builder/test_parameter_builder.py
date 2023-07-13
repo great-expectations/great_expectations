@@ -91,7 +91,7 @@ class DummyParameterBuilder(ParameterBuilder):
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
-def test_parameter_builder_dependencies_evaluated_separately(
+def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if_precomputed(
     mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
@@ -153,7 +153,7 @@ def test_parameter_builder_dependencies_evaluated_separately(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
-def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
+def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_precomputed(
     mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
@@ -213,7 +213,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder(
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
-def test_parameter_builder_dependencies_evaluated_mixed(
+def test_parameter_builder_should_only_evalute_dependencies_that_arent_precomputed(
     mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
