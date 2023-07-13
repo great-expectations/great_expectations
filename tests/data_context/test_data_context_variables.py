@@ -526,7 +526,7 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
     assert variables_repr == repr(config)
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 @pytest.mark.integration
 def test_file_data_context_variables_e2e(
     monkeypatch,
