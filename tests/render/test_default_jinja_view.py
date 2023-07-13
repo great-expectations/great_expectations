@@ -99,6 +99,8 @@ def test_render_section_page():
     )  # .replace(" ", "").replace("\t", "").replace("\n", "")
 
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
+
     assert (
         rendered_doc
         == """<div id="section-1" class="ge-section container-fluid mb-1 pb-1 pl-sm-3 px-0">
@@ -159,6 +161,7 @@ def test_rendering_components_without_section_loop_index():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -181,6 +184,7 @@ def test_rendering_components_without_section_loop_index():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -204,6 +208,7 @@ def test_rendering_components_without_section_loop_index():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -296,6 +301,7 @@ def test_rendering_components_with_styling():
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
 
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -356,6 +362,7 @@ def test_render_header_component():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -395,6 +402,7 @@ def test_render_table_component():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -465,6 +473,7 @@ def test_render_value_list():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -508,6 +517,7 @@ def test_render_graph():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -555,6 +565,7 @@ def test_render_text():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
@@ -592,6 +603,7 @@ def test_render_text():
         }
     )
     rendered_doc = rendered_doc.replace(" ", "").replace("\t", "").replace("\n", "")
+    print(rendered_doc)
     assert (
         rendered_doc
         == """
