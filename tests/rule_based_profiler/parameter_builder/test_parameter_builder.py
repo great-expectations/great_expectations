@@ -19,6 +19,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 
 class DummyDomain(Domain):
+    """
+    To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
+    """
+
     def __init__(self, domain_type=MetricDomainTypes.TABLE):
         super().__init__(domain_type=domain_type)
 
@@ -30,6 +34,13 @@ class DummyDomain(Domain):
 
 
 class DummyParameterBuilder(ParameterBuilder):
+    """
+    Since goal of these tests is to ensure that private implementation method, "ParameterBuilder._build_parameters()",
+    of public interface method, "ParameterBuilder.build_parameters()", is called (as proof that
+    "evaluation_parameter_builder" dependencies of given "ParameterBuilder" are executed), all production functionality
+    is "mocked", and "call_count" property is introduced and incremented in relevant method for assertions in tests.
+    """
+
     exclude_field_names: ClassVar[Set[str]] = ParameterBuilder.exclude_field_names | {
         "call_count",
     }
@@ -61,10 +72,7 @@ class DummyParameterBuilder(ParameterBuilder):
         runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
-
-        Returns:
-            Attributes object, containing computed parameter values and parameter computation details metadata.
+        Only "_call_count" is incremented; otherwise, arbitrary test value is returned.
         """
         self._call_count += 1
 
