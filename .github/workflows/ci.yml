@@ -62,7 +62,7 @@ jobs:
   marker-tests:
     strategy:
       matrix:
-        markers: ["big", "cli", "filesystem", "project"]
+        markers: ["big", "cli", "filesystem", "openpyxl", "project", "pyarrow"]
         python-version: ["3.8", "3.11"]
 
     runs-on: ubuntu-latest
