@@ -56,6 +56,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     )
 
 
+@pytest.mark.unit
 def test_consistent_name_anonymization(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -76,6 +77,7 @@ def test_consistent_name_anonymization(
     assert payload["anonymized_operator_name"] == "e079c942d946b823312054118b3b6ef4"
 
 
+@pytest.mark.unit
 def test_global_override_environment_variable_data_context(
     in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -90,6 +92,7 @@ def test_global_override_environment_variable_data_context(
     assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_from_config_file_in_etc(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -130,6 +133,7 @@ def test_global_override_from_config_file_in_etc(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_from_config_file_in_home_folder(
     in_memory_data_context_config_usage_stats_enabled, tmp_path_factory, monkeypatch
 ):
@@ -174,6 +178,7 @@ def test_global_override_from_config_file_in_home_folder(
             assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
@@ -198,6 +203,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
     )
 
 
+@pytest.mark.filesystem
 def test_global_override_conf_overrides_yml_and_env_variable(
     tmp_path_factory, monkeypatch
 ):
@@ -265,6 +271,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
@@ -330,6 +337,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         assert project_config.anonymous_usage_statistics.enabled is False
 
 
+@pytest.mark.filesystem
 def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatch):
     """
     What does this test and why?
