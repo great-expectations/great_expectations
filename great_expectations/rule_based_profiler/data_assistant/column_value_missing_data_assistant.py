@@ -171,10 +171,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         )
 
         # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
+        mode = "auto"
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
+        # mode = "single_batch"
         # TODO: <Alex>ALEX</Alex>
 
         expectation_type = "expect_column_values_to_not_be_null"
@@ -244,10 +244,10 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         )
 
         # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
+        mode = "auto"
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
+        # mode = "single_batch"
         # TODO: <Alex>ALEX</Alex>
 
         expectation_type = "expect_column_values_to_be_null"
