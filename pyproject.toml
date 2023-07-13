@@ -540,6 +540,7 @@ markers = [
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
+    "external_cloud: mark test as requiring install of an external cloud client.",
     "filesystem: mark tests using the filesystem as the storage backend.",
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
