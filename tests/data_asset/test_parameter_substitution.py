@@ -280,7 +280,7 @@ def test_validation_substitution_with_validator(validator_with_titanic_1911_asse
     )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_validation_substitution_with_json_coercion(
     single_expectation_custom_data_asset,
 ):
@@ -350,7 +350,7 @@ def test_validation_substitution_with_json_coercion_with_validator(
         )
 
 
-@pytest.mark.e2e
+@pytest.mark.big
 def test_validation_parameters_returned(single_expectation_custom_data_asset):
     single_expectation_custom_data_asset.expect_nothing(
         expectation_argument={
