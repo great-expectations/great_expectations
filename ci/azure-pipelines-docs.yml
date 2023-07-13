@@ -5,6 +5,11 @@
 # The pipeline is run under the following conditions:
 #   - On any PR
 
+trigger:
+  branches:
+    include:
+    - develop
+
 variables:
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
