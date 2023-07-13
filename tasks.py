@@ -788,14 +788,6 @@ def show_automerges(ctx: Context):
         print("\tNo PRs set to automerge")
 
 
-def _tokenize_marker_string(marker_str: str) -> list[str]:
-    """Tokenize a string of markers into a list of markers."""
-    tokens: list[str] = []
-    for marker in marker_str.split(" or "):
-        tokens.append(marker)
-    return tokens
-
-
 @invoke.task(
     iterable=["markers"],
     help={"markers": "Optional list of markers to install dependencies for"},
@@ -810,7 +802,7 @@ def deps(ctx: Context, markers: list[str]):
     req_files: list[str] = ["requirements.txt"]
 
     for marker_string in markers:
-        for marker_token in _tokenize_marker_string(marker_string):
+        for marker_token in marker_string.split(" or "):
             if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
                 req_files.extend(marker_depedencies)
 
