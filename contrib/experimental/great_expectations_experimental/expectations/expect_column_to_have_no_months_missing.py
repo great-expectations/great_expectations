@@ -17,7 +17,7 @@ MONTH_FORMAT = "%Y-%m"
 
 
 class ColumnDistinctMonths(ColumnAggregateMetricProvider):
-    """Metric that get all unique dates from date column"""
+    """Metric that get all unique months from date column"""
 
     metric_name = "column.distinct_months"
 
@@ -53,6 +53,15 @@ class ColumnDistinctMonths(ColumnAggregateMetricProvider):
 
 
 class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
+    """
+    This metric expects data to include dates from consecutive months, with no months missing in
+    between (relative to the maximal and minimal month existing in the data).
+    User can define a threshold which allows for some months to be missing (equal or lower than the threshold).
+    Expectation fails if the number of missing months is over the threshold.
+
+    Keyword args:
+        - threshold (int)
+    """
     from datetime import datetime
 
     today = datetime.now()
