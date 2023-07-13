@@ -3,6 +3,10 @@ from typing import Literal, Sequence, Union
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
 
+from great_expectations.experimental.column_descriptive_metrics.asset_inspector_agent_action import (
+    RunAssetInspectorEvent,
+)
+
 
 class AgentBaseModel(BaseModel):
     class Config:
@@ -29,8 +33,15 @@ class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
 
+# TODO: Can these Events be registered or should they be hardcoded here?
+
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Union[
+        RunOnboardingDataAssistantEvent,
+        RunCheckpointEvent,
+        RunAssetInspectorEvent,
+        UnknownEvent,
+    ],
     Field(discriminator="type"),
 ]
 

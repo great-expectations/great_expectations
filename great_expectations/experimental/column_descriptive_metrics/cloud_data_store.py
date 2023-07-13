@@ -1,14 +1,13 @@
 from typing import TypeAlias, Union
 
+from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.column_descriptive_metrics.metrics import Metrics
 
 CloudStorableTypes: TypeAlias = Union[Metrics,]  # TODO: are there better approaches?
 
 
 class CloudDataStore:
-    def __init__(
-        self,
-    ):
+    def __init__(self, context: CloudDataContext):
         # TODO: Get credentials from Cloud Data Context on init
         pass
 
