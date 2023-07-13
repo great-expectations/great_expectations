@@ -1,9 +1,10 @@
 """
 The real meat of these tests lives in the test_definitions directory for individual expectations
 """
+import pytest
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.render.renderer.content_block import ExpectationStringRenderer
-import pytest
 
 
 @pytest.mark.unit
