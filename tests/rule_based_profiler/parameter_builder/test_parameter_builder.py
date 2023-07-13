@@ -15,6 +15,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    get_fully_qualified_parameter_names,
 )
 
 
@@ -35,9 +36,9 @@ class DummyDomain(Domain):
 
 class DummyParameterBuilder(ParameterBuilder):
     """
-    Since goal of these tests is to ensure that private implementation method, "ParameterBuilder._build_parameters()",
+    One goal of these tests is to ensure that private implementation method, "ParameterBuilder._build_parameters()",
     of public interface method, "ParameterBuilder.build_parameters()", is called (as proof that
-    "evaluation_parameter_builder" dependencies of given "ParameterBuilder" are executed), all production functionality
+    "evaluation_parameter_builder" dependencies of given "ParameterBuilder" are executed).  All production functionality
     is "mocked", and "call_count" property is introduced and incremented in relevant method for assertions in tests.
     """
 
@@ -137,6 +138,61 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
+    dependencies_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    my_dependent_parameter_builder.resolve_evaluation_dependencies(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        fully_qualified_parameter_names=dependencies_fully_qualified_parameter_names,
+        runtime_configuration=None,
+    )
+
+    all_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    These assertions show that both "ParameterBuilder" dependencies computed their values, but dependent
+    "ParameterBuilder" has not yet computed its value.
+    """
+    assert (
+        my_evaluation_dependency_0_parameter_builder.raw_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+        and my_evaluation_dependency_0_parameter_builder.json_serialized_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+    )
+    assert (
+        my_evaluation_dependency_1_parameter_builder.raw_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+        and my_evaluation_dependency_1_parameter_builder.json_serialized_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+    )
+    assert (
+        my_dependent_parameter_builder.raw_fully_qualified_parameter_name
+        not in dependencies_fully_qualified_parameter_names
+        or my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
+        not in dependencies_fully_qualified_parameter_names
+    )
+    """
+    No "ParameterBuilder" dependencies need to be executed, because None are specified (hence,
+    "my_dependent_parameter_builder.resolve_evaluation_dependencies()" has no effect), but their values exist, because
+    they were executed individually previously.  Thus, set of computed fully_qualified_parameter_names does not change.
+    """
+    assert sorted(all_fully_qualified_parameter_names) == sorted(
+        dependencies_fully_qualified_parameter_names
+    )
+
     my_dependent_parameter_builder.build_parameters(
         domain=domain,
         variables=None,
@@ -144,7 +200,22 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
         batch_request=None,
         runtime_configuration=None,
     )
+
+    all_fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+    """
+    These assertions show that dependent "ParameterBuilder" computed its values.
+    """
     assert my_dependent_parameter_builder.call_count == 1
+    assert (
+        my_dependent_parameter_builder.raw_fully_qualified_parameter_name
+        in all_fully_qualified_parameter_names
+        or my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
+        in all_fully_qualified_parameter_names
+    )
 
 
 # noinspection PyUnresolvedReferences,PyUnusedLocal
@@ -181,17 +252,64 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
         name="my_dependent_parameter_builder",
         evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
     )
-    my_evaluation_dependency_0_parameter_builder = (
-        my_dependent_parameter_builder._evaluation_parameter_builders[0]
-    )
-    my_evaluation_dependency_1_parameter_builder = (
-        my_dependent_parameter_builder._evaluation_parameter_builders[1]
-    )
 
     domain = DummyDomain()
 
     parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
+        domain.id: parameter_container,
+    }
+
+    all_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    This assertion shows that neither "ParameterBuilder" dependencies computed their values, and dependent
+    "ParameterBuilder" also has not yet computed its value.
+    """
+    assert not all_fully_qualified_parameter_names
+
+    my_dependent_parameter_builder.resolve_evaluation_dependencies(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        fully_qualified_parameter_names=all_fully_qualified_parameter_names,
+        runtime_configuration=None,
+    )
+
+    dependencies_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    This assertion shows that because namespace of fully_qualified_parameter_names is empty (as previously asserted),
+    and because "ParameterBuilder" dependencies were specified as argument to instantiation of dependent
+    "ParameterBuilder", both "ParameterBuilder" dependencies computed their values (this was accomplished by,
+    "my_dependent_parameter_builder.resolve_evaluation_dependencies()" which ran "_build_parameters()" of each
+    dependency "ParameterBuilder" object).  However, dependent "ParameterBuilder" has not yet computed its value (as
+    name "my_dependent_parameter_builder" is not in list), since it has yet been called.
+    """
+    assert dependencies_fully_qualified_parameter_names == [
+        "$parameter.raw.my_evaluation_dependency_parameter_name_1",
+        "$parameter.raw.my_evaluation_dependency_parameter_name_0",
+        "$parameter.my_evaluation_dependency_parameter_name_1",
+        "$parameter.my_evaluation_dependency_parameter_name_0",
+    ]
+
+    # Now, reset shared memory and execute "my_dependent_parameter_builder" and ensure all parameter names are present.
+    domain = DummyDomain()
+
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters = {
         domain.id: parameter_container,
     }
 
@@ -202,9 +320,25 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
         batch_request=None,
         runtime_configuration=None,
     )
-    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
-    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
+
+    all_fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    This assertion shows that both "ParameterBuilder" dependencies computed their values, and that dependent
+    "ParameterBuilder" also computed its value (as all names are in list).
+    """
     assert my_dependent_parameter_builder.call_count == 1
+    assert sorted(all_fully_qualified_parameter_names) == sorted(
+        dependencies_fully_qualified_parameter_names
+        + [
+            "$parameter.raw.my_dependent_parameter_builder",
+            "$parameter.my_dependent_parameter_builder",
+        ]
+    )
 
 
 # noinspection PyUnresolvedReferences,PyUnusedLocal
@@ -213,7 +347,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     "great_expectations.rule_based_profiler.parameter_builder.parameter_builder.convert_to_json_serializable",
     return_value="my_json_string",
 )
-def test_parameter_builder_should_only_evalute_dependencies_that_arent_precomputed(
+def test_parameter_builder_should_only_evalute_dependencies_that_are_not_precomputed(
     mock_convert_to_json_serializable: mock.MagicMock,
 ):
     my_evaluation_dependency_0_parameter_builder: ParameterBuilder = (
@@ -227,6 +361,16 @@ def test_parameter_builder_should_only_evalute_dependencies_that_arent_precomput
             name="my_evaluation_dependency_parameter_name_1",
             evaluation_parameter_builder_configs=None,
         )
+    )
+
+    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
+        ParameterBuilderConfig(
+            **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
+        ),
+    ]
+    my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
+        name="my_dependent_parameter_builder",
+        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
     )
 
     domain = DummyDomain()
@@ -245,17 +389,60 @@ def test_parameter_builder_should_only_evalute_dependencies_that_arent_precomput
     )
     assert my_evaluation_dependency_0_parameter_builder.call_count == 1
 
-    evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
-        ParameterBuilderConfig(
-            **my_evaluation_dependency_1_parameter_builder.to_json_dict(),
-        ),
-    ]
-    my_dependent_parameter_builder: ParameterBuilder = DummyParameterBuilder(
-        name="my_dependent_parameter_builder",
-        evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
+    dependencies_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
-    my_evaluation_dependency_1_parameter_builder = (
-        my_dependent_parameter_builder._evaluation_parameter_builders[0]
+
+    """
+    This assertion shows that first "ParameterBuilder" dependency computed its value, but second "ParameterBuilder"
+    dependency and dependent "ParameterBuilder" have not yet computed their values (as can be seen by parameter names).
+    """
+    assert dependencies_fully_qualified_parameter_names == [
+        "$parameter.raw.my_evaluation_dependency_parameter_name_0",
+        "$parameter.my_evaluation_dependency_parameter_name_0",
+    ]
+
+    my_dependent_parameter_builder.resolve_evaluation_dependencies(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+        fully_qualified_parameter_names=dependencies_fully_qualified_parameter_names,
+        runtime_configuration=None,
+    )
+
+    dependencies_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    This assertion shows that because namespace of fully_qualified_parameter_names only has names of first dependecy
+    "ParameterBuilder" (as previously asserted), and because "ParameterBuilder" dependency was specified as argument to
+    instantiation of dependent "ParameterBuilder", second "ParameterBuilder" dependency computed its value (this was
+    accomplished by, "my_dependent_parameter_builder.resolve_evaluation_dependencies()" which ran "_build_parameters()" of specified
+    dependency "ParameterBuilder" object).  However, dependent "ParameterBuilder" has not yet computed its value (as
+    name "my_dependent_parameter_builder" is not in list), since it has yet been called.
+    """
+    assert dependencies_fully_qualified_parameter_names == [
+        "$parameter.raw.my_evaluation_dependency_parameter_name_1",
+        "$parameter.raw.my_evaluation_dependency_parameter_name_0",
+        "$parameter.my_evaluation_dependency_parameter_name_1",
+        "$parameter.my_evaluation_dependency_parameter_name_0",
+    ]
+
+    all_fully_qualified_parameter_names: List[
+        str
+    ] = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
     )
 
     my_dependent_parameter_builder.build_parameters(
@@ -265,5 +452,22 @@ def test_parameter_builder_should_only_evalute_dependencies_that_arent_precomput
         batch_request=None,
         runtime_configuration=None,
     )
-    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
     assert my_dependent_parameter_builder.call_count == 1
+
+    all_fully_qualified_parameter_names = get_fully_qualified_parameter_names(
+        domain=domain,
+        variables=None,
+        parameters=parameters,
+    )
+
+    """
+    This assertion shows that both "ParameterBuilder" dependencies computed their values, and that dependent
+    "ParameterBuilder" also computed its value (as all names are in list).
+    """
+    assert sorted(all_fully_qualified_parameter_names) == sorted(
+        dependencies_fully_qualified_parameter_names
+        + [
+            "$parameter.raw.my_dependent_parameter_builder",
+            "$parameter.my_dependent_parameter_builder",
+        ]
+    )
