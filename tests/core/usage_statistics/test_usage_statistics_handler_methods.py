@@ -16,6 +16,7 @@ from great_expectations.util import get_context
 from tests.core.usage_statistics.util import usage_stats_invalid_messages_exist
 
 
+@pytest.mark.unit
 def test_usage_statistics_handler_validate_message_failure(
     caplog, in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
@@ -63,6 +64,7 @@ def usage_statistics_envelope():
     }
 
 
+@pytest.mark.unit
 def test_usage_statistics_handler_validate_message_success(
     caplog,
     in_memory_data_context_config_usage_stats_enabled,
@@ -96,6 +98,7 @@ def test_usage_statistics_handler_validate_message_success(
     assert not usage_stats_invalid_messages_exist(caplog.messages)
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
     mock_data_context: mock.MagicMock,
@@ -203,6 +206,7 @@ def test_get_profiler_run_usage_statistics_with_handler_valid_payload(
     }
 
 
+@pytest.mark.unit
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
     mock_data_context: mock.MagicMock,
@@ -231,6 +235,7 @@ def test_get_profiler_run_usage_statistics_with_handler_invalid_payload(
     }
 
 
+@pytest.mark.unit
 def test_get_profiler_run_usage_statistics_without_handler():
     # Without a DataContext, the usage stats handler is not propogated down to the RBP
     profiler: RuleBasedProfiler = RuleBasedProfiler(
