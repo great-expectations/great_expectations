@@ -306,7 +306,7 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     """
     This assertion shows that because namespace of fully_qualified_parameter_names is empty (as previously asserted),
     and because "ParameterBuilder" dependencies were specified as argument to instantiation of dependent
-    "ParameterBuilder", both "ParameterBuilder" dependencies computed their values (this was accomplished by,
+    "ParameterBuilder", both "ParameterBuilder" dependencies computed their values (this was accomplished by
     "my_dependent_parameter_builder.resolve_evaluation_dependencies()" which ran "_build_parameters()" of each
     dependency "ParameterBuilder" object).  However, dependent "ParameterBuilder" has not yet computed its value (as
     name "my_dependent_parameter_builder" is not in list), since it has yet been called.
@@ -439,9 +439,9 @@ def test_parameter_builder_should_only_evalute_dependencies_that_are_not_precomp
     This assertion shows that because namespace of fully_qualified_parameter_names only has names of first dependecy
     "ParameterBuilder" (as previously asserted), and because "ParameterBuilder" dependency was specified as argument to
     instantiation of dependent "ParameterBuilder", second "ParameterBuilder" dependency computed its value (this was
-    accomplished by, "my_dependent_parameter_builder.resolve_evaluation_dependencies()" which ran "_build_parameters()" of specified
-    dependency "ParameterBuilder" object).  However, dependent "ParameterBuilder" has not yet computed its value (as
-    name "my_dependent_parameter_builder" is not in list), since it has yet been called.
+    accomplished by "my_dependent_parameter_builder.resolve_evaluation_dependencies()" which ran "_build_parameters()"
+    of specified dependency "ParameterBuilder" object).  However, dependent "ParameterBuilder" has not yet computed its
+    value (as name "my_dependent_parameter_builder" is not in list), since it has yet been called.
     """
     assert dependencies_fully_qualified_parameter_names == [
         "$parameter.raw.my_evaluation_dependency_parameter_name_1",
