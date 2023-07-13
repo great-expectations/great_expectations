@@ -42,9 +42,9 @@ _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
 
 
 MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
-    "athena": ("requirements-dev-athena.txt",),
-    "cloud": ("requirements-dev-cloud.txt",),
-    "pyarrow": ("requirements-dev-arrow.txt",),
+    "athena": ("reqs/requirements-dev-athena.txt",),
+    "cloud": ("reqs/requirements-dev-cloud.txt",),
+    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
 }
 
 
@@ -799,14 +799,14 @@ def deps(ctx: Context, markers: list[str]):
     If no markers are specified, the dev-contrib and core requirements are installed.
     """
     cmds = ["pip", "install"]
-    req_files: list[str] = []
+    req_files: list[str] = ["requirements.txt"]
 
     for mark in markers:
         if marker_depedencies := MARKER_REQ_MAPPING.get(mark):
             req_files.extend(marker_depedencies)
 
-    if not req_files:
-        req_files.extend(["requirements.txt", "reqs/requirements-dev-contrib.txt"])
+    if not markers:
+        req_files.append("reqs/requirements-dev-contrib.txt")
 
     for req_file in req_files:
         cmds.append(f"-r {req_file}")
