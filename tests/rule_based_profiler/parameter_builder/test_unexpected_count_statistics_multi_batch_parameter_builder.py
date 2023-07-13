@@ -11,6 +11,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     UnexpectedCountStatisticsMultiBatchParameterBuilder,
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.parameter_builder.unexpected_count_statistics_multi_batch_parameter_builder import (
+    _standardize_mostly_for_single_batch,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
 )
@@ -170,3 +173,31 @@ def test_unexpected_count_statistics_multi_batch_parameter_builder_bobby_check_s
         "expectation_type",
         "evaluation_parameter_builder_configs",
     }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["expectation_type", "mostly", "result"],
+    [
+        # Standardizes for expect_column_values_to_be_null
+        ["expect_column_values_to_be_null", 1.0, 1.0],
+        ["expect_column_values_to_be_null", 0.997, 0.99],
+        ["expect_column_values_to_be_null", 0.99, 0.99],
+        ["expect_column_values_to_be_null", 0.98, 0.975],
+        ["expect_column_values_to_be_null", 0.975, 0.975],
+        # returns mostly as-is
+        ["expect_column_values_to_be_null", 0.9612, 0.9612],
+        ["expect_column_values_to_be_null", 0.1010, 0.1010],
+        #####
+        # Standardizes for expect_column_values_to_not_be_null
+        ["expect_column_values_to_not_be_null", 1.0, 1.0],
+        ["expect_column_values_to_not_be_null", 0.997, 0.99],
+        ["expect_column_values_to_not_be_null", 0.99, 0.99],
+        # Rounds down to nearest 0.025
+        ["expect_column_values_to_not_be_null", 0.62, 0.6],
+        ["expect_column_values_to_not_be_null", 0.64, 0.625],
+        ["expect_column_values_to_not_be_null", 0.062, 0.05],
+    ],
+)
+def test_standardize_mostly_for_single_batch(expectation_type, mostly, result):
+    assert _standardize_mostly_for_single_batch(expectation_type, mostly) == result

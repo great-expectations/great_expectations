@@ -52,12 +52,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         ColumnValueMissingDataAssistantResult
     """
 
-    # TODO: <Alex>ALEX</Alex>
-    # __alias__: str = "_missingness"
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    __alias__: str = "missingness"
-    # TODO: <Alex>ALEX</Alex>
+    __alias__: str = "_missingness"
 
     def __init__(
         self,
