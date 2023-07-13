@@ -89,7 +89,6 @@ class GXDependencies:
             "mypy",
             "nbconvert",
             "openpyxl",
-            "pandas",
             "pika",
             "pre-commit",
             "psycopg2-binary",

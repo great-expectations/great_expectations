@@ -185,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 87
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 83
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -208,7 +208,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ),
         ("requirements-dev-sqlalchemy.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-sqlalchemy.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
-        ("requirements-dev-sqlalchemy.txt", "pandas", (("<", "2.0.0"),)),
         ("requirements-dev-sqlalchemy.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev-sqlalchemy.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev-sqlalchemy.txt", "sqlalchemy", (("<", "2.0.0"),)),
@@ -218,7 +217,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
             "teradatasqlalchemy",
             (("==", "17.0.0.5"),),
         ),
-        ("requirements-dev-sqlalchemy1.txt", "pandas", (("<", "2.0.0"),)),
         ("requirements-dev-sqlalchemy1.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev-teradata.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements-dev-test.txt", "adr-tools-python", (("==", "1.0.3"),)),
@@ -242,7 +240,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "mypy", (("==", "1.3.0"),)),
-        ("requirements-dev.txt", "pandas", (("<", "2.0.0"),)),
         ("requirements-dev.txt", "pika", (("==", "1.3.1"),)),
         ("requirements-dev.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
@@ -265,7 +262,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-types.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-types.txt", "mypy", (("==", "1.3.0"),)),
-        ("requirements-types.txt", "pandas", (("<", "2.0.0"),)),
         ("requirements-types.txt", "pika", (("==", "1.3.1"),)),
         ("requirements-types.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-types.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
