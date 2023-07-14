@@ -553,6 +553,7 @@ markers = [
     "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
+    "sqlite: mark test requiring sqlite",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
