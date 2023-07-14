@@ -223,15 +223,15 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
         runtime_configuration=None,
     )
 
+    # Assert that precomuted evaluation parameters are not recomputed -- call count should remain 1.
+    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
+    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
+
     all_fully_qualified_parameter_names = get_fully_qualified_parameter_names(
         domain=domain,
         variables=None,
         parameters=parameters,
     )
-
-    # Assert that precomuted evaluation parameters are not recomputed -- call count should remain 1.
-    assert my_evaluation_dependency_0_parameter_builder.call_count == 1
-    assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
     """
     These assertions show that dependent "ParameterBuilder" computed its values.
