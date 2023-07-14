@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence, Tuple
 
 import pytest
-import sqlalchemy
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.datasource.fluent import SQLDatasource
+from great_expectations.datasource.fluent.sql_datasource import (
+    _verify_table_name_exists_and_get_normalized_typed_name_map,
+)
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -26,6 +29,100 @@ def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
     create_engine_spy.assert_called_once_with(
         "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
     )
+
+
+@pytest.mark.unit
+def test_table_quoted_name_type_does_not_exist(sa):
+    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+        "table_name_0",
+        "table_name_1",
+        "table_name_2",
+        "table_name_3",
+    ]
+
+    with pytest.raises(ValueError) as eee:
+        _ = _verify_table_name_exists_and_get_normalized_typed_name_map(
+            name="nonexistent_table_name",
+            typed_names=table_names_in_dbms_schema,
+        )
+        assert (
+            str(eee.value)
+            == 'Error: The table "nonexistent_table_name" does not exist.'
+        )
+
+
+@pytest.mark.unit
+def test_table_quoted_name_type_all_upper_case_normalizion_is_noop(sa):
+    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+        "ACTORS",
+        "ARTISTS",
+        "ATHLETES",
+        "BUSINESS_PEOPLE",
+        "HEALTHCARE_WORKERS",
+        "ENGINEERS",
+        "LAWYERS",
+        "MUSICIANS",
+        "SCIENTISTS",
+        "LITERARY_PROFESSIONALS",
+    ]
+
+    name: str
+    normalized_table_name_mappings: Sequence[
+        Tuple[str, str | sqlalchemy.quoted_name] | None
+    ] = [
+        _verify_table_name_exists_and_get_normalized_typed_name_map(
+            name=name,
+            typed_names=table_names_in_dbms_schema,
+        )
+        for name in table_names_in_dbms_schema
+    ]
+
+    idx: int
+    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
+    for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+        assert normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
+
+
+@pytest.mark.unit
+def test_table_quoted_name_type_all_lower_case_normalizion_full(sa):
+    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+        "actors",
+        "artists",
+        "athletes",
+        "business_people",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "musicians",
+        "scientists",
+        "literary_professionals",
+    ]
+
+    name: str
+
+    quoted_table_names: list[sqlalchemy.quoted_name] = [
+        sqlalchemy.quoted_name(value=name, quote=True)
+        for name in table_names_in_dbms_schema
+    ]
+
+    normalized_table_name_mappings: Sequence[
+        Tuple[str, str | sqlalchemy.quoted_name] | None
+    ] = [
+        _verify_table_name_exists_and_get_normalized_typed_name_map(
+            name=name,
+            typed_names=quoted_table_names,
+        )
+        for name in table_names_in_dbms_schema
+    ]
+
+    idx: int
+    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
+    for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+        assert (
+            isinstance(normalized_table_name_mapping[1], sqlalchemy.quoted_name)
+            and normalized_table_name_mapping[1].quote is True
+            and normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
+        )
 
 
 if __name__ == "__main__":

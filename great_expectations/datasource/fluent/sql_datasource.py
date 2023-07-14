@@ -11,6 +11,7 @@ from typing import (
     Literal,
     Optional,
     Protocol,
+    Tuple,
     Type,
     Union,
     cast,
@@ -841,6 +842,8 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
+        self._normalize_table_name_if_not_exists(engine=engine, inspector=inspector)
+
         table_exists = sa.inspect(engine).has_table(
             table_name=self.table_name,
             schema=self.schema_name,
@@ -882,6 +885,29 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+    def _normalize_table_name_if_not_exists(
+        self,
+        engine: sqlalchemy.Engine,
+        inspector: sqlalchemy.Inspector,
+    ) -> None:
+        table_exists: bool
+
+        table_exists = sa.inspect(engine).has_table(
+            table_name=self.table_name,
+            schema=self.schema_name,
+        )
+        if not table_exists:
+            typed_names: list[
+                str | sqlalchemy.quoted_name
+            ] = inspector.get_table_names()
+            normalized_table_name_mapping: Tuple[
+                str, str | sqlalchemy.quoted_name
+            ] | None = _verify_table_name_exists_and_get_normalized_typed_name_map(
+                name=self.table_name,
+                typed_names=typed_names,
+            )
+            self.table_name = normalized_table_name_mapping[1]
 
 
 @public_api
@@ -1038,3 +1064,46 @@ class SQLDatasource(Datasource):
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
+
+
+def _verify_table_name_exists_and_get_normalized_typed_name_map(
+    name: str,
+    typed_names: List[str | sqlalchemy.quoted_name],
+    error_message_template: str = 'Error: The table "{table_name:s}" does not exist.',
+    verify_only: bool = False,
+) -> Tuple[str, str | sqlalchemy.quoted_name] | None:
+    """
+    Verifies that table name exists.
+
+    Args:
+        name: string-valued name
+        typed_names: Properly typed names (e.g., output of "inspector.get_table_names()" SQLAlchemy method call)
+        verify_only: Perform verification only (do not return normalized typed name map)
+        error_message_template: String template to output error message if name cannot be found in typed_names list
+
+    Returns:
+        Single tuple holding mapping from string-valued name to typed name; None if "verify_only" is set.
+    """
+
+    def _get_normalized_table_name_mapping_if_exists(
+        name: str,
+    ) -> Tuple[str, str | sqlalchemy.quoted_name] | None:
+        typed_name_cursor: str | sqlalchemy.quoted_name
+        for typed_name_cursor in typed_names:
+            if (
+                (type(typed_name_cursor) == str)
+                and (name.casefold() == typed_name_cursor.casefold())
+                or (name == str(typed_name_cursor))
+            ):
+                return name, typed_name_cursor
+
+        return None
+
+    normalized_table_name_mapping: Tuple[
+        str, str | sqlalchemy.quoted_name
+    ] | None = _get_normalized_table_name_mapping_if_exists(name=name)
+
+    if normalized_table_name_mapping is None:
+        raise ValueError(error_message_template.format(table_name=name))
+
+    return None if verify_only else normalized_table_name_mapping
