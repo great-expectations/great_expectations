@@ -4,6 +4,45 @@
 Changelog
 #########
 
+0.17.5
+-----------------
+* [FEATURE] Airflow reference environment ([#8257](https://github.com/great-expectations/great_expectations/pull/8257))
+* [FEATURE] Missingness DataAssistant initial implementation ([#8268](https://github.com/great-expectations/great_expectations/pull/8268))
+* [FEATURE] DatabricksSQL FDS ([#8184](https://github.com/great-expectations/great_expectations/pull/8184))
+* [FEATURE]  single batch missingness data assistant ([#8278](https://github.com/great-expectations/great_expectations/pull/8278))
+* [DOCS] Replaces outdated integration guides with redirects to versioned documentation ([#8173](https://github.com/great-expectations/great_expectations/pull/8173))
+* [MAINTENANCE] Remove unreferenced docs integration tests ([#8228](https://github.com/great-expectations/great_expectations/pull/8228))
+* [MAINTENANCE] Remove duplicate custom checks in PR pipeline ([#8265](https://github.com/great-expectations/great_expectations/pull/8265))
+* [MAINTENANCE] Use updated search api key ([#8269](https://github.com/great-expectations/great_expectations/pull/8269))
+* [MAINTENANCE] DataAssistantDispatcher should not reach into DataAssistant ([#8262](https://github.com/great-expectations/great_expectations/pull/8262))
+* [MAINTENANCE] GH action static analysis and unittest setup ([#8272](https://github.com/great-expectations/great_expectations/pull/8272))
+* [MAINTENANCE] remove algolia index action ([#8264](https://github.com/great-expectations/great_expectations/pull/8264))
+* [MAINTENANCE] Bump semver from 5.7.1 to 5.7.2 ([#8274](https://github.com/great-expectations/great_expectations/pull/8274))
+* [MAINTENANCE] Improvement to contributor documentation ([#8043](https://github.com/great-expectations/great_expectations/pull/8043)) (thanks @christian-bromann)
+* [MAINTENANCE] Implement unit tests for BatchFilter.parse_batch_slice logic ([#8280](https://github.com/great-expectations/great_expectations/pull/8280))
+* [MAINTENANCE] Run GH Action CI job every 3 hours ([#8281](https://github.com/great-expectations/great_expectations/pull/8281))
+* [MAINTENANCE] Ensure all tests in tests/checkpoint are marked ([#8282](https://github.com/great-expectations/great_expectations/pull/8282))
+* [MAINTENANCE] Pytest Mark - `Validator` and utils ([#8275](https://github.com/great-expectations/great_expectations/pull/8275))
+* [MAINTENANCE] Add marker cli to all cli tests. ([#8286](https://github.com/great-expectations/great_expectations/pull/8286))
+* [MAINTENANCE] Reduce maximum allowed unittest duration ([#8283](https://github.com/great-expectations/great_expectations/pull/8283))
+* [MAINTENANCE] Add tests for Batch slicing for SparkFilePathDatasource ([#8285](https://github.com/great-expectations/great_expectations/pull/8285))
+* [MAINTENANCE] Pytest Mark - `RuleBasedProfiler` and others ([#8288](https://github.com/great-expectations/great_expectations/pull/8288))
+* [MAINTENANCE] Pin jsonschema ([#8290](https://github.com/great-expectations/great_expectations/pull/8290))
+* [MAINTENANCE] Remove two slow DataAssistant integration tests ([#8287](https://github.com/great-expectations/great_expectations/pull/8287))
+* [MAINTENANCE] Add data docs container to airflow env ([#8284](https://github.com/great-expectations/great_expectations/pull/8284))
+* [MAINTENANCE] xfail Cloud E2E test ([#8292](https://github.com/great-expectations/great_expectations/pull/8292))
+* [MAINTENANCE] Remove --verbose pytest default ([#8298](https://github.com/great-expectations/great_expectations/pull/8298))
+* [MAINTENANCE] Update marker on slow test from unit to filesystem. ([#8296](https://github.com/great-expectations/great_expectations/pull/8296))
+* [MAINTENANCE]  Typing Improvements - render/util ([#8279](https://github.com/great-expectations/great_expectations/pull/8279))
+* [MAINTENANCE] Add pytest marks to tests/actions ([#8299](https://github.com/great-expectations/great_expectations/pull/8299))
+* [MAINTENANCE] Mark tests in tests/core/usage_statistics ([#8295](https://github.com/great-expectations/great_expectations/pull/8295))
+* [MAINTENANCE] Mark tests in /tests/data_asset ([#8300](https://github.com/great-expectations/great_expectations/pull/8300))
+* [MAINTENANCE] Add markers to tests/core ([#8297](https://github.com/great-expectations/great_expectations/pull/8297))
+* [MAINTENANCE] Apply pytest markers to root dir `tests/data_context` tests ([#8293](https://github.com/great-expectations/great_expectations/pull/8293))
+* [MAINTENANCE] Run Github `ci` action on `push` ([#8303](https://github.com/great-expectations/great_expectations/pull/8303))
+* [MAINTENANCE] Dont use check_for_docs_deps_changes ([#8304](https://github.com/great-expectations/great_expectations/pull/8304))
+* [MAINTENANCE] Increase timeout for flaky tests ([#8306](https://github.com/great-expectations/great_expectations/pull/8306))
+
 0.17.4
 -----------------
 * [MAINTENANCE] Protect `develop` with `no-commit-to-branch` pre-commit hook ([#8254](https://github.com/great-expectations/great_expectations/pull/8254))

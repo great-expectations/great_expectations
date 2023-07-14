@@ -57,4 +57,38 @@ jobs:
         run: pip install -c constraints-dev.txt ".[test]"
 
       - name: Run the unit tests
-        run: invoke tests --cloud --unit --timeout=1.5
+        run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+
+  marker-tests:
+    strategy:
+      matrix:
+        markers:
+          - big
+          - cli
+          - cloud
+          - filesystem
+          - openpyxl or pyarrow or project or sqlite
+          # - external_sqldialect # tests being skipped likely due to flagging system
+        python-version: ["3.8"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m '${{ matrix.markers }}' -r test
+
+      - name: Run the tests
+        run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
