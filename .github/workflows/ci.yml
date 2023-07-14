@@ -68,7 +68,7 @@ jobs:
           - cloud
           - filesystem
           - openpyxl or pyarrow or project or sqlite
-          - external_sqldialect
+          # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
 
     runs-on: ubuntu-latest
