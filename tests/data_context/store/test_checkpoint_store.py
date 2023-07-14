@@ -39,6 +39,7 @@ def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMoc
     return store, mock_backend
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
@@ -247,6 +248,7 @@ def test_checkpoint_store(empty_data_context):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
