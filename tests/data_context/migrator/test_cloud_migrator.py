@@ -77,10 +77,6 @@ def mock_successful_migration(
     return _build_mock_migrate
 
 
-# module level markers
-pytestmark = [pytest.mark.cloud]
-
-
 @pytest.fixture
 def mock_failed_migration(
     ge_cloud_base_url: str, ge_cloud_access_token: str, ge_cloud_organization_id: str
@@ -113,6 +109,7 @@ def mock_failed_migration(
     return _build_mock_migrate
 
 
+@pytest.mark.unit
 def assert_stdout_is_accurate_and_properly_ordered(
     stdout: str, statements: List[str]
 ) -> None:
@@ -125,6 +122,7 @@ def assert_stdout_is_accurate_and_properly_ordered(
         ), f"Statement '{statement}' occurred in the wrong order"
 
 
+@pytest.mark.unit
 def test__send_configuration_bundle_sends_valid_http_request(
     serialized_configuration_bundle: dict,
     migrator_with_mock_context: CloudMigrator,
@@ -152,6 +150,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
     )
 
 
+@pytest.mark.unit
 def test__send_validation_results_sends_valid_http_request(
     migrator_with_mock_context: CloudMigrator,
     ge_cloud_base_url: str,
@@ -192,6 +191,7 @@ def test__send_validation_results_sends_valid_http_request(
     assert mock_post.call_count == 5
 
 
+@pytest.mark.unit
 class TestUsageStats:
     def test_migrate_successful_event(
         self, ge_cloud_organization_id: str, mock_successful_migration: Callable
@@ -243,6 +243,7 @@ class TestUsageStats:
 @pytest.mark.parametrize("test_migrate", [True, False])
 @pytest.mark.parametrize("include_datasources", [True, False])
 @pytest.mark.parametrize("enable_usage_stats", [True, False])
+@pytest.mark.unit
 def test__migrate_to_cloud_outputs_warnings(
     migrator_factory: Callable,
     test_migrate: bool,
@@ -352,6 +353,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
     )
 
 
+@pytest.mark.unit
 def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
     capsys,
@@ -392,6 +394,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     )
 
 
+@pytest.mark.unit
 def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
     capsys,

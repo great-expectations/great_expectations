@@ -40,6 +40,7 @@ def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMoc
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
     base_directory: str = str(Path(empty_data_context.root_directory) / "checkpoints")
@@ -285,6 +286,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = CheckpointStore(store_name="checkpoint_store")
@@ -379,6 +381,7 @@ def test_list_checkpoints(
     assert checkpoints == ["a.b.c", "d.e.f"]
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints_cloud_mode(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]

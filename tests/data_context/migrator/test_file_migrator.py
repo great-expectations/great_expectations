@@ -45,6 +45,7 @@ def construct_file_migrator() -> Callable:
 
 
 @pytest.mark.big
+@pytest.mark.integration
 def test_migrate_scaffolds_filesystem(
     tmp_path: pathlib.Path, file_migrator: FileMigrator
 ):
@@ -68,6 +69,7 @@ def test_migrate_scaffolds_filesystem(
 
 
 @pytest.mark.big
+@pytest.mark.integration
 def test_migrate_transfers_store_contents(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
@@ -100,6 +102,7 @@ def test_migrate_transfers_store_contents(
 
 
 @pytest.mark.big
+@pytest.mark.integration
 def test_migrate_transfers_datasources(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
@@ -137,6 +140,7 @@ def test_migrate_transfers_datasources(
 
 
 @pytest.mark.big
+@pytest.mark.integration
 def test_migrate_transfers_fluent_datasources(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
@@ -169,6 +173,7 @@ def test_migrate_transfers_fluent_datasources(
 
 
 @pytest.mark.big
+@pytest.mark.integration
 def test_migrate_transfers_doc_sites(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,

@@ -97,6 +97,7 @@ def context_with_single_titanic_csv_spark(
     return context
 
 
+@pytest.mark.integration
 def test_get_validator(context_with_single_titanic_csv_spark):
     context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
@@ -119,6 +120,7 @@ def test_get_validator(context_with_single_titanic_csv_spark):
     assert len(my_validator.active_batch.data.dataframe.columns) == 7
 
 
+@pytest.mark.integration
 def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
     context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
@@ -134,6 +136,7 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
         )
 
 
+@pytest.mark.integration
 def test_get_batch_list_spark_engine_inferred_assets(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -212,6 +215,7 @@ data_connectors:
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_runtime_data_connector(
     empty_data_context, tmp_path_factory, spark_session
 ):
@@ -267,6 +271,7 @@ data_connectors:
     assert len(batch.data.dataframe.columns) == 2
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -365,6 +370,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_filter(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -460,6 +466,7 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limit_and_custom_filter_limit_param_ignored(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -574,6 +581,7 @@ def test_get_batch_list_from_datasource_with_spark_engine_configured_assets_limi
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_batch_list_with_batch_request(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -665,6 +673,7 @@ def test_get_batch_list_from_new_style_datasource_assets_testing_limit_in_get_ba
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
@@ -762,6 +771,7 @@ def test_get_batch_list_from_datasource_schema_in_datasource_config_serialized(
     assert batch.data.dataframe.schema == schema_for_spark_testset
 
 
+@pytest.mark.integration
 def test_get_batch_list_from_datasource_schema_in_datasource_config_non_serialized(
     empty_data_context, tmp_path_factory, spark_session, schema_for_spark_testset
 ):
