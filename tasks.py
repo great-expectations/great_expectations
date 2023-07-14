@@ -789,10 +789,19 @@ def show_automerges(ctx: Context):
 
 
 @invoke.task(
-    iterable=["markers"],
-    help={"markers": "Optional list of markers to install dependencies for"},
+    iterable=["markers", "requirements_dev"],
+    help={
+        "markers": "Optional list of markers to install dependencies for",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc.",
+        "constraints": "Optional flag to install dependencies with constraints, default True",
+    },
 )
-def deps(ctx: Context, markers: list[str], constraints: bool = True):
+def deps(
+    ctx: Context,
+    markers: list[str],
+    requirements_dev: list[str],
+    constraints: bool = True,
+):
     """
     Install dependencies for development and testing.
 
@@ -801,12 +810,17 @@ def deps(ctx: Context, markers: list[str], constraints: bool = True):
     cmds = ["pip", "install"]
     req_files: list[str] = ["requirements.txt"]
 
+    for name in requirements_dev:
+        req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
+        assert req_path.exists(), f"Requirement file {req_path} does not exist"
+        req_files.append(str(req_path))
+
     for marker_string in markers:
         for marker_token in marker_string.split(" or "):
             if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
                 req_files.extend(marker_depedencies)
 
-    if not markers:
+    if not markers and not requirements_dev:
         req_files.append("reqs/requirements-dev-contrib.txt")
 
     for req_file in req_files:
