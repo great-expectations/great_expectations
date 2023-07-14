@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from ast import parse
 from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
-from build.lib.great_expectations.compatibility.not_imported import is_version_less_than
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
-     pandas_read_sql_query,
+    pandas_read_sql_query,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     read_sql_table_as_df,
@@ -60,7 +58,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(  # noqa: PLR0912, PLR0913, PLR0915
+    def _sqlalchemy(  # noqa: PLR0913
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
@@ -81,32 +79,31 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        if is_version_less_than(pd.__version__, "1.4.0"):
-            if (table_name is None) or (
-                sqlalchemy._anonymous_label
-                and isinstance(table_name, sqlalchemy._anonymous_label)
-            ):
-                # no named table
-                # either custom query 
-                # or temp_table = False 
-                df = _sqlalchemy_without_named_table(
-                    execution_engine=execution_engine,
-                    dialect=dialect,
-                    selectable=selectable,
-                    metric_value_kwargs=metric_value_kwargs,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    n_rows=n_rows
-                )
-            else:
-                # named table
-                # temp_table = True
-                df = _sqlalchemy_with_named_table(
-                    execution_engine=execution_engine,
-                    selectable=selectable,
-                    metric_value_kwargs=metric_value_kwargs,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    n_rows=n_rows
-                )
+        if (table_name is None) or (
+            sqlalchemy._anonymous_label
+            and isinstance(table_name, sqlalchemy._anonymous_label)
+        ):
+            # no named table
+            # either custom query
+            # or temp_table = False
+            df = _sqlalchemy_without_named_table(
+                execution_engine=execution_engine,
+                dialect=dialect,
+                selectable=selectable,
+                metric_value_kwargs=metric_value_kwargs,
+                metric_domain_kwargs=metric_domain_kwargs,
+                n_rows=n_rows,
+            )
+        else:
+            # named table
+            # temp_table = True
+            df = _sqlalchemy_with_named_table(
+                execution_engine=execution_engine,
+                selectable=selectable,
+                metric_value_kwargs=metric_value_kwargs,
+                metric_domain_kwargs=metric_domain_kwargs,
+                n_rows=n_rows,
+            )
         return df
 
     @staticmethod
@@ -223,8 +220,8 @@ def _sqlalchemy_without_named_table(  # noqa: PLR0913
         else:
             with execution_engine.get_connection() as con:
                 # passing chunksize causes the Iterator to be returned
-                    # is this it!!!!!! It might be!!
-                    # TODO: make sure the n_rows passed in
+                # is this it!!!!!! It might be!!
+                # TODO: make sure the n_rows passed in
                 df_chunk_iterator = read_sql_table_as_df(
                     table_name=getattr(selectable, "name", None),
                     schema=getattr(selectable, "schema", None),
