@@ -2,14 +2,12 @@ from __future__ import annotations
 
 import logging
 import pathlib
+from pprint import pformat as pf
+from typing import Final
+
 import pytest
 import tomli
-from typing import Final
-from pprint import pformat as pf
-
-
 from tasks import MARKER_MAPPINGS
-
 
 pytestmarks = [pytest.mark.project]
 
