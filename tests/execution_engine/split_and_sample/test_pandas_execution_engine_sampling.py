@@ -9,7 +9,7 @@ from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.execution_engine import PandasExecutionEngine
 
 
-@pytest.mark.big
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "underscore_prefix",
     [
