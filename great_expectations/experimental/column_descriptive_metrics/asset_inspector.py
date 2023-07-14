@@ -5,7 +5,6 @@ from great_expectations.experimental.column_descriptive_metrics.metrics import (
     Metrics,
     Value,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class AssetInspector:
@@ -21,16 +20,19 @@ class AssetInspector:
         pass
 
     def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
-        self._batch_request_to_batch(batch_request=batch_request)
+        batch = self._batch_request_to_batch(batch_request=batch_request)
+        table_row_count = self._get_table_row_count_metric(batch=batch)
+        metrics = Metrics(metrics=[table_row_count])
+        return metrics
 
     def _get_table_row_count_metric(self, batch: Batch) -> Metric:
-        (
-            MetricConfiguration(
-                metric_name="table.row_count",
-                metric_domain_kwargs={"batch_id": batch.id},
-                metric_value_kwargs={},
-            ),
-        )
+        # (
+        #     MetricConfiguration(
+        #         metric_name="table.row_count",
+        #         metric_domain_kwargs={"batch_id": batch.id},
+        #         metric_value_kwargs={},
+        #     ),
+        # )
         # TODO: Implementation, use metric calculator etc. Metric below is just a placeholder.
         return Metric(
             id="47d3f290-809f-4d94-a3ef-a5a510c3d2d9",
