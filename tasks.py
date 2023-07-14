@@ -793,8 +793,8 @@ MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
 @invoke.task(
     iterable=["markers", "requirements_dev"],
     help={
-        "markers": "Optional list of markers to install dependencies for",
-        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc.",
+        "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
