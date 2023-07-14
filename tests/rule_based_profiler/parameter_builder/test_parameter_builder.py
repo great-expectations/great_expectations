@@ -172,6 +172,32 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
         runtime_configuration=None,
     )
 
+    """
+    These assertions show that both "ParameterBuilder" dependencies computed their values (and these values were stored
+    in shared memory), but dependent "ParameterBuilder" has not yet computed its value (and it is not in shared memory).
+    """
+    # First evaluation "ParameterBuilder" dependency computed its value and it was stored in shared memory.
+    assert (
+        my_evaluation_dependency_0_parameter_builder.raw_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+        and my_evaluation_dependency_0_parameter_builder.json_serialized_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+    )
+    # Second evaluation "ParameterBuilder" dependency computed its value and it was stored in shared memory.
+    assert (
+        my_evaluation_dependency_1_parameter_builder.raw_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+        and my_evaluation_dependency_1_parameter_builder.json_serialized_fully_qualified_parameter_name
+        in dependencies_fully_qualified_parameter_names
+    )
+    # Dependent "ParameterBuilder" has not yet computed its value and it is not found in shared memory.
+    assert (
+        my_dependent_parameter_builder.raw_fully_qualified_parameter_name
+        not in dependencies_fully_qualified_parameter_names
+        or my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
+        not in dependencies_fully_qualified_parameter_names
+    )
+
     all_fully_qualified_parameter_names: List[
         str
     ] = get_fully_qualified_parameter_names(
@@ -180,28 +206,6 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
         parameters=parameters,
     )
 
-    """
-    These assertions show that both "ParameterBuilder" dependencies computed their values, but dependent
-    "ParameterBuilder" has not yet computed its value.
-    """
-    assert (
-        my_evaluation_dependency_0_parameter_builder.raw_fully_qualified_parameter_name
-        in dependencies_fully_qualified_parameter_names
-        and my_evaluation_dependency_0_parameter_builder.json_serialized_fully_qualified_parameter_name
-        in dependencies_fully_qualified_parameter_names
-    )
-    assert (
-        my_evaluation_dependency_1_parameter_builder.raw_fully_qualified_parameter_name
-        in dependencies_fully_qualified_parameter_names
-        and my_evaluation_dependency_1_parameter_builder.json_serialized_fully_qualified_parameter_name
-        in dependencies_fully_qualified_parameter_names
-    )
-    assert (
-        my_dependent_parameter_builder.raw_fully_qualified_parameter_name
-        not in dependencies_fully_qualified_parameter_names
-        or my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
-        not in dependencies_fully_qualified_parameter_names
-    )
     """
     No "ParameterBuilder" dependencies need to be executed, because None are specified (hence,
     "my_dependent_parameter_builder.resolve_evaluation_dependencies()" has no effect), but their values exist, because
