@@ -3,8 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Sequence, Tuple
 
 import pytest
+import sqlalchemy
 
-from great_expectations.compatibility import sqlalchemy
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.compatibility import sqlalchemy as sqlalchemy_compatibility
+
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import (
     _verify_table_name_exists_and_get_normalized_typed_name_map,
@@ -33,7 +37,7 @@ def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
 
 @pytest.mark.unit
 def test_table_quoted_name_type_does_not_exist(sa):
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str | sqlalchemy_compatibility.quoted_name] = [
         "table_name_0",
         "table_name_1",
         "table_name_2",
@@ -53,7 +57,7 @@ def test_table_quoted_name_type_does_not_exist(sa):
 
 @pytest.mark.unit
 def test_table_quoted_name_type_all_upper_case_normalizion_is_noop(sa):
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str | sqlalchemy_compatibility.quoted_name] = [
         "ACTORS",
         "ARTISTS",
         "ATHLETES",
@@ -68,7 +72,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop(sa):
 
     name: str
     normalized_table_name_mappings: Sequence[
-        Tuple[str, str | sqlalchemy.quoted_name] | None
+        Tuple[str, str | sqlalchemy_compatibility.quoted_name] | None
     ] = [
         _verify_table_name_exists_and_get_normalized_typed_name_map(
             name=name,
@@ -78,14 +82,16 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop(sa):
     ]
 
     idx: int
-    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
+    normalized_table_name_mapping: Tuple[
+        str, str | sqlalchemy_compatibility.quoted_name
+    ] | None
     for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
         assert normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
 
 
 @pytest.mark.unit
 def test_table_quoted_name_type_all_lower_case_normalizion_full(sa):
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str | sqlalchemy_compatibility.quoted_name] = [
         "actors",
         "artists",
         "athletes",
@@ -100,13 +106,13 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full(sa):
 
     name: str
 
-    quoted_table_names: list[sqlalchemy.quoted_name] = [
-        sqlalchemy.quoted_name(value=name, quote=True)
+    quoted_table_names: list[sqlalchemy_compatibility.quoted_name] = [
+        sqlalchemy_compatibility.quoted_name(value=name, quote=True)
         for name in table_names_in_dbms_schema
     ]
 
     normalized_table_name_mappings: Sequence[
-        Tuple[str, str | sqlalchemy.quoted_name] | None
+        Tuple[str, str | sqlalchemy_compatibility.quoted_name] | None
     ] = [
         _verify_table_name_exists_and_get_normalized_typed_name_map(
             name=name,
@@ -116,10 +122,14 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full(sa):
     ]
 
     idx: int
-    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
+    normalized_table_name_mapping: Tuple[
+        str, str | sqlalchemy_compatibility.quoted_name
+    ] | None
     for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
         assert (
-            isinstance(normalized_table_name_mapping[1], sqlalchemy.quoted_name)
+            isinstance(
+                normalized_table_name_mapping[1], sqlalchemy_compatibility.quoted_name
+            )
             and normalized_table_name_mapping[1].quote is True
             and normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
         )
