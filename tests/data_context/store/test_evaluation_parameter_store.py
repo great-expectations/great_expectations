@@ -345,7 +345,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
 )
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.external_cloud_client
 def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,

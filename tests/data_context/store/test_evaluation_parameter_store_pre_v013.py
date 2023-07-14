@@ -190,7 +190,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
     assert value == metric_value
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?

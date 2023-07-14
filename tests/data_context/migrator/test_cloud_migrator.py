@@ -124,7 +124,6 @@ def assert_stdout_is_accurate_and_properly_ordered(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-@pytest.mark.cloud
 def test__send_configuration_bundle_sends_valid_http_request(
     serialized_configuration_bundle: dict,
     migrator_with_mock_context: CloudMigrator,
@@ -194,8 +193,8 @@ def test__send_validation_results_sends_valid_http_request(
     assert mock_post.call_count == 5
 
 
-@pytest.mark.unit
 @pytest.mark.cloud
+@pytest.mark.unit
 class TestUsageStats:
     def test_migrate_successful_event(
         self, ge_cloud_organization_id: str, mock_successful_migration: Callable
@@ -403,6 +402,7 @@ def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test__migrate_to_cloud_bad_validations_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
     capsys,

@@ -352,7 +352,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
 
 @mock_s3
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.external_cloud_client
 def test_TupleS3StoreBackend_store_backend_id():
     # TupleS3StoreBackend
@@ -556,7 +556,7 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
 
 
 @mock_s3
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.external_cloud_client
 def test_TupleS3StoreBackend_with_prefix():
     """
@@ -758,7 +758,7 @@ def test_TupleS3StoreBackend_with_prefix():
 
 
 @mock_s3
-@pytest.mark.unit
+@pytest.mark.integration
 @pytest.mark.external_cloud_client
 def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
     bucket = "my_bucket"
@@ -948,7 +948,8 @@ def test_tuple_s3_store_backend_slash_conditions():  # noqa: PLR0915
 
 
 @mock_s3
-@pytest.mark.unit
+@pytest.mark.external_cloud_client
+@pytest.mark.integration
 def test_TupleS3StoreBackend_with_empty_prefixes():
     """
     What does this test test and why?
