@@ -151,6 +151,11 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     )
     assert my_evaluation_dependency_1_parameter_builder.call_count == 1
 
+    """
+    Instead of defining constant list of known fully qualified parameter names, here,
+    "get_fully_qualified_parameter_names()" is used as utility in order to faithfully track actual contents of shared
+    memory as ParameterBuilders are executed; otherwise, initial state of shared memory would not be known exactly.
+    """
     dependencies_fully_qualified_parameter_names: List[
         str
     ] = get_fully_qualified_parameter_names(
