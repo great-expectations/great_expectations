@@ -41,7 +41,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.validator import Validator
-from tests.render.test_util import load_notebook_from_path
+from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
 # module level markers

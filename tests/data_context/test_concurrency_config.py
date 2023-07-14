@@ -1,9 +1,13 @@
+import pytest
+
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.util import get_context
+
+pytestmark = pytest.mark.unit
 
 
 def test_concurrency_disabled_by_default():
