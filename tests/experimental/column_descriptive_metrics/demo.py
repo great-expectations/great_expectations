@@ -22,12 +22,22 @@ def test_demo_asset_inspector():
     name = "dataframe"
     data_asset = datasource.add_dataframe_asset(name=name)
     my_batch_request = data_asset.build_batch_request(dataframe=df)
-    my_batch = data_asset.get_batch_list_from_batch_request(
-        batch_request=my_batch_request
+    # my_batch = data_asset.get_batch_list_from_batch_request(
+    #     batch_request=my_batch_request
+    # )[0]
+
+    # From here down assume we just have the batch request from the agent action:
+    datasource_from_action = context.get_datasource(my_batch_request.datasource_name)
+    data_asset_from_action = datasource_from_action.get_data_asset(
+        my_batch_request.data_asset_name
+    )
+    batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
+        my_batch_request
     )[0]
 
     asset_inspector = AssetInspector()
-    metrics = asset_inspector.get_column_descriptive_metrics(
-        batch_request=my_batch_request
-    )
+    # metrics = asset_inspector.get_column_descriptive_metrics(
+    #     batch_request=my_batch_request
+    # )
+    metrics = asset_inspector.get_column_descriptive_metrics(batch=batch_from_action)
     print(metrics)

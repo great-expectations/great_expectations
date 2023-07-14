@@ -19,8 +19,13 @@ class AssetInspector:
         #  we use the Batch in the AssetInspector methods that we get outside of the AssetInspector.
         pass
 
-    def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
-        batch = self._batch_request_to_batch(batch_request=batch_request)
+    # def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
+    #     batch = self._batch_request_to_batch(batch_request=batch_request)
+    #     table_row_count = self._get_table_row_count_metric(batch=batch)
+    #     metrics = Metrics(metrics=[table_row_count])
+    #     return metrics
+
+    def get_column_descriptive_metrics(self, batch: Batch) -> Metrics:
         table_row_count = self._get_table_row_count_metric(batch=batch)
         metrics = Metrics(metrics=[table_row_count])
         return metrics
