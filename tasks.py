@@ -819,9 +819,7 @@ def deps(  # noqa: PLR0913
     Installing the needed dependencies for running the `external_sqldialect` tests and
     the 'requirements-dev-cloud.txt' dependencies.
 
-    ```
-    invoke deps -m external_sqldialect -r cloud
-    ```
+    $ invoke deps -m external_sqldialect -r cloud
     """
     cmds = ["pip", "install"]
     if editable_install:
