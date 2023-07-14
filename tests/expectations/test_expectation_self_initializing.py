@@ -3,6 +3,9 @@ import pytest
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.expectations.expectation import Expectation
 
+# module level markers
+pytestmark = [pytest.mark.unit]
+
 
 def test_expectation_is_expectation_self_initializing(capsys):
     with pytest.raises(gx_exceptions.ExpectationNotFoundError):
