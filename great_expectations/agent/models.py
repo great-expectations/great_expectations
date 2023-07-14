@@ -14,7 +14,7 @@ class EventBase(AgentBaseModel):
 
 
 class RunOnboardingDataAssistantEvent(EventBase):
-    # TODO: Deprecate once event is no longer being emitted
+    # TODO(https://greatexpectations.atlassian.net/browse/DX-652): Deprecate once event is no longer being emitted
     type: Literal[
         "onboarding_data_assistant_request.received"
     ] = "onboarding_data_assistant_request.received"
