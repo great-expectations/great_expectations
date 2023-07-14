@@ -26,7 +26,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Prerequisites
 
-- <PythonVersion>
+- <PythonVersion />
 - pip
 - An internet browser
 
