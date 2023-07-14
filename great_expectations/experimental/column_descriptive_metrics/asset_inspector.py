@@ -82,13 +82,13 @@ class AssetInspector:
         metrics = Metrics(metrics=[table_row_count, column_names])
         return metrics
 
-    def _get_table_row_count_metric(self, batch: Batch, run_id: uuid.UUID) -> Metric:
+    def _get_metric(self, metric_name: str, batch: Batch, run_id: uuid.UUID) -> Metric:
         metrics_calculator = MetricsCalculator(
             execution_engine=batch.datasource.get_execution_engine()
         )
 
         metric_config = MetricConfiguration(
-            metric_name="table.row_count",
+            metric_name=metric_name,
             metric_domain_kwargs={},
             metric_value_kwargs={},
         )
@@ -103,25 +103,11 @@ class AssetInspector:
         )
 
         return metric
+
+    def _get_table_row_count_metric(self, batch: Batch, run_id: uuid.UUID) -> Metric:
+        return self._get_metric(
+            metric_name="table.row_count", batch=batch, run_id=run_id
+        )
 
     def _get_column_names_metric(self, batch: Batch, run_id: uuid.UUID) -> Metric:
-        metrics_calculator = MetricsCalculator(
-            execution_engine=batch.datasource.get_execution_engine()
-        )
-
-        metric_config = MetricConfiguration(
-            metric_name="table.columns",
-            metric_domain_kwargs={},
-            metric_value_kwargs={},
-        )
-
-        raw_metric = metrics_calculator.get_metric(metric_config)
-
-        metric = self._metric_converter.convert_raw_metric_to_metric_object(
-            raw_metric=raw_metric,
-            metric_config=metric_config,
-            run_id=run_id,
-            batch=batch,
-        )
-
-        return metric
+        return self._get_metric(metric_name="table.columns", batch=batch, run_id=run_id)
