@@ -18,7 +18,7 @@ import shutil
 import sys
 from collections.abc import Mapping
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Union
+from typing import TYPE_CHECKING, Callable, Final, NamedTuple, Union
 
 import invoke
 
@@ -782,13 +782,18 @@ def show_automerges(ctx: Context):
         print("\tNo PRs set to automerge")
 
 
-MARKER_MAPPINGS: Final[Mapping[str, tuple[str, ...]]] = {
-    "athena": ("reqs/requirements-dev-athena.txt",),
-    "cloud": ("reqs/requirements-dev-cloud.txt",),
-    "external_sqldialect": ("reqs/requirements-dev-sqlalchemy.txt",),
-    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
-    "postgres": ("reqs/requirements-dev-postgresql.txt",),
-    "spark": ("reqs/requirements-dev-spark.txt",),
+class TestDependencies(NamedTuple):
+    requirement_files: tuple[str, ...]
+    service_setup_fncs: tuple[Callable[[Context], None], ...] = tuple()
+
+
+MARKER_MAPPINGS: Final[Mapping[str, TestDependencies]] = {
+    "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "cloud": TestDependencies(("reqs/requirements-dev-cloud.txt",)),
+    "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
+    "postgres": TestDependencies(("reqs/requirements-dev-postgresql.txt",)),
+    "spark": TestDependencies(("reqs/requirements-dev-spark.txt",)),
 }
 
 
@@ -834,7 +839,7 @@ def deps(  # noqa: PLR0913
     for marker_string in markers:
         for marker_token in marker_string.split(" or "):
             if marker_depedencies := MARKER_MAPPINGS.get(marker_token):
-                req_files.extend(marker_depedencies)
+                req_files.extend(marker_depedencies.requirement_files)
 
     for name in requirements_dev:
         req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
