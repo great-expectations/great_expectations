@@ -198,7 +198,8 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+            pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines "pandas<2.0.0"
           displayName: 'Install dependencies'
         - task: DownloadSecureFile@1
           name: gcp_authkey
@@ -299,7 +300,8 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[test, redshift]" pytest-azurepipelines
+            # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_redshift] when pandas>=2.0
+            pip install --constraint constraints-dev.txt ".[test, redshift]" pytest-azurepipelines "pandas<2.0.0"
           displayName: 'Install dependencies'
         - script: |
             pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
