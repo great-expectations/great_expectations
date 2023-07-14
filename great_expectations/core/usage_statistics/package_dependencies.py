@@ -132,6 +132,7 @@ class GXDependencies:
         "pytest-cov",
         "pytest-order",
         "pytest-random-order",
+        "tomli",
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",
