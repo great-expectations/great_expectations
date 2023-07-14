@@ -34,8 +34,8 @@ def pytest_markers(pyproject_toml_dict: dict) -> list[str]:
 
 def test_marker_mappings_are_registered(pytest_markers: list[str]):
     """
-    Check that all pytest marker mappings are acutallly valid, and have been registered
-    with pytest.
+    Check that all pytest marker mappings are acutallly valid,
+    and have been registered with pytest.
     """
     print(f"pytest_markers:\n----------\n{pf(pytest_markers)}")
 
