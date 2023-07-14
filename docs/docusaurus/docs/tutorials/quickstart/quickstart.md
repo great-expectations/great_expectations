@@ -4,6 +4,7 @@ title: Quickstart
 tag: [tutorial, getting started]
 ---
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import PythonVersion from '/docs/components/prerequisites/_python_version.md'
 import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
@@ -25,7 +26,7 @@ Windows support for the open source Python version of GX is currently unavailabl
 
 ## Prerequisites
 
-- Python versions 3.8 to 3.10. See [Python downloads](https://www.python.org/downloads/).
+- <PythonVersion>
 - pip
 - An internet browser
 
@@ -37,9 +38,9 @@ Windows support for the open source Python version of GX is currently unavailabl
     pip install great_expectations
     ```
 
-    It can take several minutes for the installation to complete. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
+    It can take several minutes for the installation to complete.
 
-2. Open Jupyter Notebook or Terminal and then run the following command to import the `great_expectations` module:
+2. In Python run the following command to import the `great_expectations` module:
 
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
@@ -88,18 +89,6 @@ The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be 
 
 If you're ready to continue your Great Expectations journey, the following topics can help you implement a tailored solution for your specific environment and business requirements:
 
-- Install GX in a specific environment and connect to a source data system:
-    - [How to install Great Expectations locally](../../guides/setup/installation/local.md)
-    - [How to set up GX to work with data on AWS S3](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-    - [How to set up GX to work with data in Azure Blob Storage](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-    - [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
-    - [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
-    - [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-    - [How to use Great Expectations in Databricks](../getting_started/how_to_use_great_expectations_in_databricks.md)
+- [Install GX in a specific environment with support for a specific source data system](/docs/guides/setup/installation/install_gx).
+- [Initialize, instantiate, and save a Data Contex](/docs/guides/setup/configure_data_contexts_lp).
 
-- Initialize, instantiate, and save a Data Contex:
-    - [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-    - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
-    - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
-    - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-    - [How to convert an Ephemeral Data Context to a Filesystem Data Context](../../guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)
