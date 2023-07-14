@@ -23,6 +23,8 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
+@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "save_changes",
     [
@@ -155,6 +157,8 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
+@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -269,6 +273,8 @@ def test_data_context_in_cloud_mode_add_datasource(
 
 
 @pytest.mark.cloud
+@pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "config_includes_name_setting",
     [
@@ -386,6 +392,7 @@ def test_cloud_data_context_add_datasource(
 
 
 @pytest.mark.cloud
+@pytest.mark.e2e
 def test_cloud_context_datasource_crud_e2e() -> None:
     context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
     datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
