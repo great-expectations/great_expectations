@@ -391,8 +391,8 @@ def test_cloud_data_context_add_datasource(
         assert stored_data_connector.name == data_connector_name
 
 
-@pytest.mark.cloud
 @pytest.mark.e2e
+@pytest.mark.cloud
 def test_cloud_context_datasource_crud_e2e() -> None:
     context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
     datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"

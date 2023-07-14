@@ -693,6 +693,7 @@ def test_cloud_backed_data_context_update_non_existent_checkpoint_when_id_not_pr
 
 
 @pytest.mark.cloud
+@pytest.mark.integration
 def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_id: str,
@@ -760,8 +761,8 @@ def test_cloud_backed_data_context_update_checkpoint_updates_when_id_not_present
     run=True,
     strict=True,
 )
+@pytest.mark.e2e
 @pytest.mark.cloud
-@pytest.mark.integration
 @mock.patch("great_expectations.data_context.DataContext._save_project_config")
 def test_cloud_backed_data_context_add_checkpoint_e2e(
     mock_save_project_config: mock.MagicMock,
@@ -785,8 +786,8 @@ def test_cloud_backed_data_context_add_checkpoint_e2e(
 @pytest.mark.xfail(
     reason="GX Cloud E2E tests are currently failing due to a migration to a new CI environment",
 )
-@pytest.mark.cloud
 @pytest.mark.e2e
+@pytest.mark.cloud
 def test_cloud_data_context_run_checkpoint_e2e():
     """
     What does this test do and why?
@@ -976,6 +977,7 @@ def mock_get_all_checkpoints_json(
     return mock_json
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_list_checkpoints(
     empty_ge_cloud_data_context_config: DataContextConfig,

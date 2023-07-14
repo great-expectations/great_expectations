@@ -8,8 +8,9 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 
 
-@pytest.mark.cloud
 @pytest.mark.big
+@pytest.mark.integration
+@pytest.mark.cloud
 def test_view_validation_result(
     empty_cloud_data_context: CloudDataContext,
     checkpoint_result: CheckpointResult,
