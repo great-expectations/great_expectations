@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 def get_table_columns_metric(
     execution_engine: ExecutionEngine,
-) -> List[MetricConfiguration, dict]:
+) -> [MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
