@@ -797,11 +797,13 @@ def show_automerges(ctx: Context):
         "constraints": "Optional flag to install dependencies with constraints, default True",
     },
 )
-def deps(
+def deps(  # noqa: PLR0913
     ctx: Context,
     markers: list[str],
     requirements_dev: list[str],
     constraints: bool = True,
+    gx_install: bool = False,
+    editable_install: bool = False,
 ):
     """
     Install dependencies for development and testing.
@@ -809,17 +811,22 @@ def deps(
     If no markers are specified, the dev-contrib and core requirements are installed.
     """
     cmds = ["pip", "install"]
-    req_files: list[str] = ["requirements.txt"]
+    if editable_install:
+        cmds.append("-e .")
+    elif gx_install:
+        cmds.append(".")
 
-    for name in requirements_dev:
-        req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
-        assert req_path.exists(), f"Requirement file {req_path} does not exist"
-        req_files.append(str(req_path))
+    req_files: list[str] = ["requirements.txt"]
 
     for marker_string in markers:
         for marker_token in marker_string.split(" or "):
             if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
                 req_files.extend(marker_depedencies)
+
+    for name in requirements_dev:
+        req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
+        assert req_path.exists(), f"Requirement file {req_path} does not exist"
+        req_files.append(str(req_path))
 
     if not markers and not requirements_dev:
         req_files.append("reqs/requirements-dev-contrib.txt")

@@ -86,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps -m '${{ matrix.markers }}' -r test
+          invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
         run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
