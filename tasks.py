@@ -42,13 +42,6 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
 _PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
 
 
-MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
-    "athena": ("reqs/requirements-dev-athena.txt",),
-    "cloud": ("reqs/requirements-dev-cloud.txt",),
-    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
-}
-
-
 @invoke.task(
     help={
         "check": _CHECK_HELP_DESC,
@@ -789,6 +782,14 @@ def show_automerges(ctx: Context):
         print("\tNo PRs set to automerge")
 
 
+MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
+    "athena": ("reqs/requirements-dev-athena.txt",),
+    "cloud": ("reqs/requirements-dev-cloud.txt",),
+    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
+    "external_sqldialect": ("reqs/requirements-dev-sqlalchemy.txt",),
+}
+
+
 @invoke.task(
     iterable=["markers", "requirements_dev"],
     help={
@@ -808,7 +809,19 @@ def deps(  # noqa: PLR0913
     """
     Install dependencies for development and testing.
 
-    If no markers are specified, the dev-contrib and core requirements are installed.
+    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    `invoke deps` will always check for and use these when installing dependencies.
+
+    If no `markers` or `requirements-dev` are specified, the dev-contrib and
+    core requirements are installed.
+
+    Example usage:
+    Installing the needed dependencies for running the `external_sqldialect` tests and
+    the 'requirements-dev-cloud.txt' dependencies.
+
+    ```
+    invoke deps -m external_sqldialect -r cloud
+    ```
     """
     cmds = ["pip", "install"]
     if editable_install:
