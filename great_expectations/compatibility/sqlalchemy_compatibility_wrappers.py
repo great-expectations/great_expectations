@@ -49,8 +49,6 @@ def read_sql_table_as_df(  # noqa: PLR0913
             rows to include in each chunk.
         dialect: we need to handle `sqlite` differently, so dialect is now optionally passed in.
     """
-    print("hi wil")
-    breakpoint()
     if is_version_less_than(pd.__version__, "2.0.0"):
         with warnings.catch_warnings():
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
