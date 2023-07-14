@@ -782,11 +782,13 @@ def show_automerges(ctx: Context):
         print("\tNo PRs set to automerge")
 
 
-MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
+MARKER_MAPPINGS: Final[Mapping[str, tuple[str, ...]]] = {
     "athena": ("reqs/requirements-dev-athena.txt",),
     "cloud": ("reqs/requirements-dev-cloud.txt",),
-    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
     "external_sqldialect": ("reqs/requirements-dev-sqlalchemy.txt",),
+    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
+    "postgres": ("reqs/requirements-dev-postgresql.txt",),
+    "spark": ("reqs/requirements-dev-spark.txt",),
 }
 
 
@@ -831,7 +833,7 @@ def deps(  # noqa: PLR0913
 
     for marker_string in markers:
         for marker_token in marker_string.split(" or "):
-            if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
+            if marker_depedencies := MARKER_MAPPINGS.get(marker_token):
                 req_files.extend(marker_depedencies)
 
     for name in requirements_dev:
