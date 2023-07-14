@@ -88,7 +88,7 @@ class AssetInspector:
 
         metric_config = MetricConfiguration(
             metric_name="table.row_count",
-            metric_domain_kwargs={"batch_id": batch.id},
+            metric_domain_kwargs={},
             metric_value_kwargs={},
         )
 

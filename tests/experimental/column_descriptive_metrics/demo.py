@@ -105,9 +105,7 @@ def test_demo_asset_inspector(
                     batch_name="default_pandas_datasource-#ephemeral_pandas_asset",
                 ),
                 metric_name="table.row_count",
-                metric_domain_kwargs={
-                    "batch_id": "default_pandas_datasource-#ephemeral_pandas_asset"
-                },
+                metric_domain_kwargs={},
                 metric_value_kwargs={},
                 column=None,
                 value=Value(value=10000),
