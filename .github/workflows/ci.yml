@@ -68,6 +68,7 @@ jobs:
           - cloud
           - filesystem
           - openpyxl or pyarrow or project or sqlite
+          - external_sqldialect
         python-version: ["3.8"]
 
     runs-on: ubuntu-latest
