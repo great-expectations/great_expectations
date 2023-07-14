@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from great_expectations.agent.actions.agent_action import (
     ActionResult,
@@ -7,57 +7,63 @@ from great_expectations.agent.actions.agent_action import (
 )
 from great_expectations.agent.models import (
     CreatedResource,
+    RunDataAssistantEvent,
     RunOnboardingDataAssistantEvent,
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
-from great_expectations.exceptions import StoreBackendError
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
 
 
-class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEvent]):
-    def run(self, event: RunOnboardingDataAssistantEvent, id: str) -> ActionResult:
-        expectation_suite_name = f"{event.data_asset_name} onboarding assistant suite"
-        checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
-
+# TODO(https://greatexpectations.atlassian.net/browse/DX-652): Remove RunOnboardingDataAssistantEvent after fully deprecating it
+class RunDataAssistantAction(
+    AgentAction[Union[RunDataAssistantEvent, RunOnboardingDataAssistantEvent]]
+):
+    def run(
+        self,
+        event: Union[RunDataAssistantEvent, RunOnboardingDataAssistantEvent],
+        id: str,
+    ) -> ActionResult:
         # build tz aware timestamp
         tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
         timestamp = datetime.now(tz=tz)
 
+        assistant_name = (
+            "onboarding"
+            if isinstance(event, RunOnboardingDataAssistantEvent)
+            else event.assistant_name
+        )
         # ensure we have unique names for created resources
-        try:
-            self._context.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name
-            )
-            # if that didn't error, this name exists, so we add the timestamp
-            expectation_suite_name = f"{expectation_suite_name} {timestamp}"
-        except StoreBackendError:
-            # resource is unique
-            pass
-
-        try:
-            self._context.get_checkpoint(name=checkpoint_name)
-            # if that didn't error, this name exists, so we add the timestamp
-            checkpoint_name = f"{checkpoint_name} {timestamp}"
-        except StoreBackendError:
-            # resource is unique
-            pass
+        expectation_suite_name = (
+            f"{event.data_asset_name} {assistant_name} assistant suite {timestamp}"
+        )
+        checkpoint_name = (
+            f"{event.data_asset_name} {assistant_name} assistant checkpoint {timestamp}"
+        )
 
         datasource = self._context.get_datasource(datasource_name=event.datasource_name)
         if not isinstance(datasource, FluentDatasource):
             raise ValueError(
-                "The RunOnboardingDataAssistant Action can only be used with a fluent-style datasource."
+                "The RunDataAssistant Action can only be used with a fluent-style datasource."
             )
+
         asset = datasource.get_asset(asset_name=event.data_asset_name)
         try:
             batch_request = asset.build_batch_request()
         except ValueError as e:
             raise ValueError(
-                "The RunOnboardingDataAssistant Action cannot be used with an in-memory dataframe asset."
+                "The RunDataAssistant Action cannot be used with an in-memory dataframe asset."
             ) from e
 
-        data_assistant_result = self._context.assistants.onboarding.run(
+        try:
+            data_assistant = getattr(self._context.assistants, assistant_name)
+        except AttributeError as e:
+            raise ValueError(
+                f'The RunDataAssistant Action cannot be used with an unknown assistant "{assistant_name}".'
+            ) from e
+
+        data_assistant_result = data_assistant.run(
             batch_request=batch_request,
         )
         expectation_suite: ExpectationSuite = (

@@ -14,11 +14,19 @@ class EventBase(AgentBaseModel):
 
 
 class RunOnboardingDataAssistantEvent(EventBase):
+    # TODO: Deprecate once event is no longer being emitted
     type: Literal[
         "onboarding_data_assistant_request.received"
     ] = "onboarding_data_assistant_request.received"
     datasource_name: str
     data_asset_name: str
+
+
+class RunDataAssistantEvent(EventBase):
+    type: Literal["data_assistant_request.received"] = "data_assistant_request.received"
+    datasource_name: str
+    data_asset_name: str
+    assistant_name: str
 
 
 class RunCheckpointEvent(EventBase):
@@ -30,7 +38,12 @@ class UnknownEvent(EventBase):
 
 
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Union[
+        RunOnboardingDataAssistantEvent,
+        RunDataAssistantEvent,
+        RunCheckpointEvent,
+        UnknownEvent,
+    ],
     Field(discriminator="type"),
 ]
 
