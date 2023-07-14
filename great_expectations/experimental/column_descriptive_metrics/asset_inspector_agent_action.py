@@ -2,7 +2,6 @@ from typing import Literal
 
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.models import CreatedResource, EventBase
-from great_expectations.core.batch import BatchRequest
 from great_expectations.experimental.column_descriptive_metrics.asset_inspector import (
     AssetInspector,
 )
@@ -25,14 +24,19 @@ class RunAssetInspectorEvent(EventBase):
 
 class RunAssetInspectorAction(AgentAction[RunAssetInspectorEvent]):
     def run(self, event: RunAssetInspectorEvent, id: str) -> ActionResult:
-        asset_inspector = AssetInspector()
+        asset_inspector = AssetInspector(organization_id=self._context.organization_id)
+
+        datasource_from_action = self._context.get_datasource(event.datasource_name)
+        data_asset_from_action = datasource_from_action.get_asset(event.data_asset_name)
+        # TODO: Do we allow passing options to the batch request?
+        batch_request_from_action = data_asset_from_action.build_batch_request()
+        batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
+            batch_request=batch_request_from_action
+        )[0]
+        # TODO: Emit warning if more than one batch that we are only using the first one.
 
         metrics = asset_inspector.get_column_descriptive_metrics(
-            batch_request=BatchRequest(
-                datasource_name=event.datasource_name,
-                data_asset_name=event.data_asset_name,
-                batch_name=event.batch_name,
-            )
+            batch=batch_from_action
         )
 
         cloud_data_store = CloudDataStore(
