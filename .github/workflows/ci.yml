@@ -84,7 +84,9 @@ jobs:
             setup.py
 
       - name: Install dependencies
-        run: invoke deps -m '${{ matrix.markers }}'
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps -m '${{ matrix.markers }}'
 
       - name: Run the tests
         run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
