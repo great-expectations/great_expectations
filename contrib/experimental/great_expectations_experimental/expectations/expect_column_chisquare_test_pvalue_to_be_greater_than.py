@@ -8,12 +8,9 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
@@ -26,9 +23,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 import scipy.stats as stats
 
 
-# This class defines a Metric to support your Expectation.
-# For most BatchExpectations, the main business logic for calculation will live in this class.
-class ExpectColumnChisquareTestPValueToBeGreaterThan(TableMetricProvider):
+class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.p_value_meets_threshold"
     value_keys = (
@@ -76,13 +71,9 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(TableMetricProvider):
         }
 
 
-# This class defines the Expectation itself
-# The main business logic for calculation lives here.
 class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
     """This expectation calculates chi squared value of two numeric columns provided and checks if the p-value is greater than the threshold provided by the user."""
 
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {"x": [30, 45, 25, 20], "y": [40, 40, 20, 20]},
