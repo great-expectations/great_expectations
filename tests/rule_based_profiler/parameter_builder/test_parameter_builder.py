@@ -4,7 +4,6 @@ import pytest
 from unittest import mock
 
 from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -30,21 +29,6 @@ on other "ParameterBuilder" objects for its evaluation, then "ParameterBuilder.r
 process these dependencies recursively.  Hence, bebefore/after tests are provided for behavior of this method.  Utility
 method "get_fully_qualified_parameter_names()", whose thoroughly tests are elsewhere, is used to query shared memory.
 """
-
-
-class DummyDomain(Domain):
-    """
-    To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
-    """
-
-    def __init__(self, domain_type=MetricDomainTypes.TABLE):
-        super().__init__(domain_type=domain_type)
-
-    @property
-    def id(
-        self,
-    ) -> str:
-        return "my_id"
 
 
 class DummyParameterBuilder(ParameterBuilder):
@@ -99,29 +83,31 @@ class DummyParameterBuilder(ParameterBuilder):
         )
 
 
-# noinspection PyTypeChecker
-@pytest.fixture
-def empty_domain() -> Domain:
-    return DummyDomain()
-
-
-@pytest.fixture
-def empty_parameters(empty_domain: Domain) -> Dict[str, ParameterContainer]:
-    parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
-        empty_domain.id: parameter_container,
-    }
-    return parameters
-
-
-@pytest.fixture
-def empty_rule_state(
-    empty_domain: Domain, empty_parameters: Dict[str, ParameterContainer]
-) -> Dict[str, Union[Domain, Dict[str, ParameterContainer]]]:
-    return {
-        "domain": empty_domain,
-        "parameters": empty_parameters,
-    }
+#
+#
+# # noinspection PyTypeChecker
+# @pytest.fixture
+# def empty_domain() -> Domain:
+#     return DummyDomain()
+#
+#
+# @pytest.fixture
+# def empty_parameters(empty_domain: Domain) -> Dict[str, ParameterContainer]:
+#     parameter_container = ParameterContainer(parameter_nodes=None)
+#     parameters: Dict[str, ParameterContainer] = {
+#         empty_domain.id: parameter_container,
+#     }
+#     return parameters
+#
+#
+# @pytest.fixture
+# def empty_rule_state(
+#     empty_domain: Domain, empty_parameters: Dict[str, ParameterContainer]
+# ) -> Dict[str, Union[Domain, Dict[str, ParameterContainer]]]:
+#     return {
+#         "domain": empty_domain,
+#         "parameters": empty_parameters,
+#     }
 
 
 def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_specified(
