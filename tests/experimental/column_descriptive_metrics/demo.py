@@ -110,6 +110,43 @@ def test_demo_asset_inspector(
                 column=None,
                 value=Value(value=10000),
                 details={},
-            )
+            ),
+            Metric(
+                id=metric_id,
+                organization_id=cloud_org_id,
+                run_id=run_id,
+                batch_pointer=BatchPointer(
+                    datasource_name="default_pandas_datasource",
+                    data_asset_name="#ephemeral_pandas_asset",
+                    batch_name="default_pandas_datasource-#ephemeral_pandas_asset",
+                ),
+                metric_name="table.columns",
+                metric_domain_kwargs={},
+                metric_value_kwargs={},
+                column=None,
+                value=Value(
+                    value=[
+                        "vendor_id",
+                        "pickup_datetime",
+                        "dropoff_datetime",
+                        "passenger_count",
+                        "trip_distance",
+                        "rate_code_id",
+                        "store_and_fwd_flag",
+                        "pickup_location_id",
+                        "dropoff_location_id",
+                        "payment_type",
+                        "fare_amount",
+                        "extra",
+                        "mta_tax",
+                        "tip_amount",
+                        "tolls_amount",
+                        "improvement_surcharge",
+                        "total_amount",
+                        "congestion_surcharge",
+                    ]
+                ),
+                details={},
+            ),
         ]
     )
