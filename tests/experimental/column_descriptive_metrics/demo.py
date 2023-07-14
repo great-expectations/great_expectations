@@ -58,7 +58,8 @@ def test_demo_asset_inspector(
 
     batch_request = data_asset.build_batch_request()
 
-    # Not working with dataframe:
+    # Not working with simple dataframe, probably user error on my part:
+    # The code sample for this doc works: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas
     # context = gx.get_context()
     # datasource = context.sources.add_pandas(name="my_pandas_datasource")
     #

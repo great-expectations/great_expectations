@@ -1,6 +1,8 @@
-import uuid
+from __future__ import annotations
 
-from great_expectations.datasource.fluent.interfaces import Batch
+import uuid
+from typing import TYPE_CHECKING
+
 from great_expectations.experimental.column_descriptive_metrics.metrics import (
     BatchPointer,
     Metric,
@@ -9,6 +11,9 @@ from great_expectations.experimental.column_descriptive_metrics.metrics import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class MetricConverter:  # TODO: Name this better
@@ -32,8 +37,8 @@ class MetricConverter:  # TODO: Name this better
     def convert_raw_metric_to_metric_object(
         self,
         batch: Batch,
-        run_id: uuid.UUID,  # TODO: Should this be a separate type?
-        raw_metric: int,  # TODO: What are the possible types of raw_metric?
+        run_id: uuid.UUID,  # TODO: Should run_id be a separate type?
+        raw_metric: int | list,  # TODO: What are the possible types of raw_metric?
         metric_config: MetricConfiguration,
     ) -> Metric:
         """Convert a dict of a single metric to a Metric object.
@@ -55,7 +60,7 @@ class MetricConverter:  # TODO: Name this better
             batch_pointer=BatchPointer(
                 datasource_name=batch.datasource.name,
                 data_asset_name=batch.data_asset.name,
-                batch_name=batch.id,  # TODO: Where should the name come from?
+                batch_name=batch.id,
             ),
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,
