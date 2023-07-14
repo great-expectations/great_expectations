@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from responses import RequestsMock
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize("include_rendered_content", [False, True])
 def test_run_checkpoint_and_data_doc(
     datasource_test_data: tuple[
@@ -51,7 +51,7 @@ def test_run_checkpoint_and_data_doc(
     )
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.slow  # sql: 7s  # pandas: 4s
 def test_run_data_assistant_and_checkpoint(
     datasource_test_data: tuple[
@@ -61,7 +61,7 @@ def test_run_data_assistant_and_checkpoint(
     run_data_assistant_and_checkpoint(datasource_test_data=datasource_test_data)
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the multibatch_datasource_test_data fixture.
 @pytest.mark.slow  # sql: 33s  # pandas: 9s
 def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test_data):
     """Test using data assistants to create expectation suite using multiple batches and to run checkpoint"""
@@ -70,7 +70,7 @@ def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test
     )
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 @pytest.mark.parametrize(
     ["n_rows", "fetch_all", "success"],
     [
@@ -110,7 +110,7 @@ def test_batch_head(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_sql_query_data_asset(empty_data_context):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -134,7 +134,7 @@ def test_sql_query_data_asset(empty_data_context):
     assert result.success
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.parametrize(
     ["base_directory", "batching_regex", "raises_test_connection_error"],
     [
@@ -204,7 +204,7 @@ def test_filesystem_data_asset_batching_regex(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 @pytest.mark.parametrize(
     [
         "database",
@@ -374,7 +374,7 @@ def test_splitter(
     assert specified_batches[-1].metadata == last_specified_batch_metadata
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_simple_checkpoint_run(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
@@ -409,7 +409,7 @@ def test_simple_checkpoint_run(
     assert result["checkpoint_config"]["class_name"] == "SimpleCheckpoint"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
     context = empty_data_context
     path = pathlib.Path(
@@ -454,7 +454,7 @@ def test_simple_checkpoint_run_with_nonstring_path_option(empty_data_context):
         ),
     ],
 )
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_asset_specified_metadata(
     empty_data_context, add_asset_method, add_asset_kwarg
 ):
@@ -475,7 +475,7 @@ def test_asset_specified_metadata(
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
 
 
-@pytest.mark.integration
+# This is marked by the various backend used in testing in the datasource_test_data fixture.
 def test_batch_request_error_messages(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
@@ -515,7 +515,7 @@ def test_batch_request_error_messages(
         batch_request.batch_slice = True  # type: ignore[assignment]
 
 
-@pytest.mark.integration
+@pytest.mark.cloud
 def test_pandas_data_adding_dataframe_in_cloud_context(
     cloud_api_fake: RequestsMock,
     empty_cloud_context_fluent: CloudDataContext,
@@ -531,7 +531,7 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
     assert dataframe_asset.dataframe.equals(df)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     empty_file_context: FileDataContext,
 ):
@@ -552,7 +552,7 @@ def test_pandas_data_adding_dataframe_in_file_reloaded_context(
     assert dataframe_asset.dataframe.equals(df)
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_data_adding_dataframe_in_cloud_context(
     spark_session,
     spark_df_from_pandas_df,
@@ -571,7 +571,7 @@ def test_spark_data_adding_dataframe_in_cloud_context(
     assert dataframe_asset.dataframe.toPandas().equals(df)
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_data_adding_dataframe_in_file_reloaded_context(
     spark_session,
     spark_df_from_pandas_df,
