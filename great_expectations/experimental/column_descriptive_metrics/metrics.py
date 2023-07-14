@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Sequence
+from typing import Any, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -42,7 +42,7 @@ class Metric(CDMRBaseModel):
     metric_name: str = Field(description="Metric name")
     metric_domain_kwargs: dict = Field(description="Metric domain kwargs")
     metric_value_kwargs: dict = Field(description="Metric value kwargs")
-    column: str = Field(description="Column name")
+    column: Union[str, None] = Field(description="Column name for column metrics")
     value: Value = Field(description="Metric value")
     details: dict = Field(description="Metric details")
 
