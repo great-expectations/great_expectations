@@ -31,7 +31,8 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
+GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
 REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
@@ -286,11 +287,11 @@ def type_check(  # noqa: PLR0913, PLR0912
 
     if check_stub_sources:
         # see --help docs for explanation of this flag
-        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+        for stub_file in GX_PACKAGE_DIR.glob("**/*.pyi"):
             source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
                 f"{stub_file.name[:-1]}"
             )
-            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
 
     cmds = [
@@ -542,7 +543,7 @@ def type_schema(
     )
 
     schema_dir_root: Final[pathlib.Path] = (
-        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
+        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     )
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
