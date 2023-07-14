@@ -26,7 +26,7 @@ calling its own interface method, "ParameterBuilder.build_parameters()".  One ke
 "parameters: Dict[str, ParameterContainer]", whose "ParameterContainer" stores computation results of every
 "ParameterBuilder", evaluated within scope of given "Domain" object.  When one "ParameterBuilder" specifies dependencies
 on other "ParameterBuilder" objects for its evaluation, then "ParameterBuilder.resolve_evaluation_dependencies()" will
-process these dependencies recursively.  Hence, bebefore/after tests are provided for behavior of this method.  Utility
+process these dependencies recursively.  Hence, before/after tests are provided for behavior of this method.  Utility
 method "get_fully_qualified_parameter_names()", whose thoroughly tests are elsewhere, is used to query shared memory.
 """
 
