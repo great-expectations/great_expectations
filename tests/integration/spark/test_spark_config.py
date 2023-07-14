@@ -1,12 +1,11 @@
 import logging
 from typing import Any, Dict, List
 
+import pytest
 from packaging.version import Version
 from packaging.version import parse as parse_version
 
 from great_expectations.compatibility import pyspark
-
-import pytest
 
 logger = logging.getLogger(__name__)
 
