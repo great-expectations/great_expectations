@@ -66,6 +66,7 @@ jobs:
           - big
           - cli
           - cloud
+          - e2e
           - filesystem
           - openpyxl or pyarrow or project or sqlite
           # - external_sqldialect # tests being skipped likely due to flagging system
