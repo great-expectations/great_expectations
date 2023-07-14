@@ -65,6 +65,7 @@ jobs:
         markers:
           - big
           - cli
+          - cloud
           - filesystem
           - openpyxl or pyarrow or project or sqlite
         python-version: ["3.8"]
