@@ -123,6 +123,8 @@ def assert_stdout_is_accurate_and_properly_ordered(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
+@pytest.mark.cloud
 def test__send_configuration_bundle_sends_valid_http_request(
     serialized_configuration_bundle: dict,
     migrator_with_mock_context: CloudMigrator,
@@ -151,6 +153,7 @@ def test__send_configuration_bundle_sends_valid_http_request(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test__send_validation_results_sends_valid_http_request(
     migrator_with_mock_context: CloudMigrator,
     ge_cloud_base_url: str,
@@ -192,6 +195,7 @@ def test__send_validation_results_sends_valid_http_request(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 class TestUsageStats:
     def test_migrate_successful_event(
         self, ge_cloud_organization_id: str, mock_successful_migration: Callable
@@ -240,10 +244,11 @@ class TestUsageStats:
         mock_send_usage_message.assert_not_called()
 
 
+@pytest.mark.unit
+@pytest.mark.cloud
 @pytest.mark.parametrize("test_migrate", [True, False])
 @pytest.mark.parametrize("include_datasources", [True, False])
 @pytest.mark.parametrize("enable_usage_stats", [True, False])
-@pytest.mark.unit
 def test__migrate_to_cloud_outputs_warnings(
     migrator_factory: Callable,
     test_migrate: bool,
@@ -293,6 +298,8 @@ def test__migrate_to_cloud_outputs_warnings(
     assert len(actual_logs) == expected_log_count
 
 
+@pytest.mark.unit
+@pytest.mark.cloud
 @pytest.mark.parametrize(
     "test_migrate,expected_statements",
     [
@@ -354,6 +361,7 @@ def test__migrate_to_cloud_happy_path_prints_to_stdout(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test__migrate_to_cloud_bad_bundle_request_prints_to_stdout(
     migrator_with_stub_base_data_context: CloudMigrator,
     capsys,

@@ -247,6 +247,7 @@ def test_checkpoint_store(empty_data_context):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 @pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
@@ -410,6 +411,7 @@ def test_delete_checkpoint(
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_delete_checkpoint_with_cloud_id(
     checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
 ) -> None:

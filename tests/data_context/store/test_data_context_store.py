@@ -16,6 +16,7 @@ def test_serialize(basic_data_context_config: DataContextConfig):
     assert actual == expected
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
     store = DataContextStore(store_name="data_context_store")

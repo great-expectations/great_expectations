@@ -16,6 +16,7 @@ from tests.data_context.conftest import MockResponse
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_datasource_store_set(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -73,6 +74,7 @@ def test_datasource_store_set(
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -112,6 +114,7 @@ def test_datasource_store_get_by_id(
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
@@ -157,6 +160,7 @@ def test_datasource_store_get_by_name(
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_datasource_store_delete_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,

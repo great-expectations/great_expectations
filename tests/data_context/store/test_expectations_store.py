@@ -17,6 +17,7 @@ from tests.core.usage_statistics.util import (
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_expectations_store(empty_data_context):
     context: DataContext = empty_data_context
     my_store = ExpectationsStore()
@@ -54,6 +55,7 @@ def test_expectations_store(empty_data_context):
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     context: DataContext = empty_data_context
     # Use sqlite so we don't require postgres for this test.
@@ -139,6 +141,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -201,6 +204,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -239,6 +243,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = ExpectationsStore(store_name="expectations_store")

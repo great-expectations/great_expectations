@@ -48,6 +48,7 @@ def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_basic_query(basic_sqlalchemy_query_store):
     assert (
         basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
@@ -62,6 +63,7 @@ def test_basic_query(basic_sqlalchemy_query_store):
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_query_connection_string(basic_sqlalchemy_query_store_connection_string):
     assert (
         basic_sqlalchemy_query_store_connection_string.get("q1")
@@ -70,6 +72,7 @@ def test_query_connection_string(basic_sqlalchemy_query_store_connection_string)
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type):
     default_result = sqlalchemy_query_store_specified_return_type.get_query_result("q1")
     list_result = sqlalchemy_query_store_specified_return_type.get_query_result("q2")
@@ -96,6 +99,7 @@ def test_init_query_store_with_dict_credentials(mock_sqlalchemy):
 
 
 @pytest.mark.filesystem
+@pytest.mark.integration
 def test_query_store_store_backend_id(basic_sqlalchemy_query_store):
     """
     What does this test and why?

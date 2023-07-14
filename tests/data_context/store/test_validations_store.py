@@ -359,6 +359,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.unit
 @pytest.mark.cloud
 def test_ge_cloud_response_json_to_object_dict() -> None:
     store = ValidationsStore(store_name="validations_store")

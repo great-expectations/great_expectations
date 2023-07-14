@@ -15,6 +15,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 pytestmark = [pytest.mark.cloud]
 
 
+@pytest.mark.unit
 def test_ge_cloud_store_backend_is_alias_of_gx_cloud_store_backend(
     ge_cloud_access_token: str,
 ) -> None:
@@ -33,6 +34,7 @@ def test_ge_cloud_store_backend_is_alias_of_gx_cloud_store_backend(
     assert isinstance(backend, GXCloudStoreBackend)
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "key",
     [
