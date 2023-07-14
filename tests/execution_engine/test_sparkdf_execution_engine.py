@@ -23,6 +23,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
+pytestmark = [pytest.mark.spark]
+
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     engine = basic_spark_df_execution_engine
