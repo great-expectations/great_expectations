@@ -16,9 +16,9 @@ import os
 import pathlib
 import shutil
 import sys
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Mapping, Sequence
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable, Final, NamedTuple, Union
+from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
@@ -784,7 +784,8 @@ def show_automerges(ctx: Context):
 
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
-    service_setup_fncs: tuple[Callable[[Context], None], ...] = tuple()
+    services: tuple[str, ...] = tuple()
+    # service_setup_fncs: tuple[Callable[[Context], None], ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
@@ -798,7 +799,9 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgres": TestDependencies(
-        ("reqs/requirements-dev-postgresql.txt",), exta_pytest_args=("--postgresql",)
+        ("reqs/requirements-dev-postgresql.txt",),
+        services=("postgres",),
+        exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",), exta_pytest_args=("--spark",)
@@ -901,8 +904,6 @@ def ci_tests(
     reports: bool = False,
 ):
     """Run tests in CI."""
-    service(ctx, markers=[marker], names=service_names)
-
     pytest_cmds = [
         "pytest",
         "-m",
@@ -919,16 +920,24 @@ def ci_tests(
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
-        for service_setup_fnc in test_deps.service_setup_fncs:
-            service_setup_fnc(ctx)
+        if test_deps.services:
+            service(ctx, names=test_deps.services)
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
 
 @invoke.task(
-    iterable=["markers", "names"],
+    iterable=["names"],
 )
-def service(ctx: Context, markers: list[str], names: list[str]):
-    for service_name in names:
-        print(f"Starting {service_name} service ...")
-    # TODO: implement this
+def service(ctx: Context, names: Sequence[str]):
+    """Startup a service."""
+    cmds = ["docker-compose", "up", "-d"]
+
+    service_names = names
+    if service_names:
+        cmds.extend(service_names)
+        print(f"  Starting services for {', '.join(service_names)} ...")
+        ctx.run(" ".join(cmds), echo=True, pty=True)
+    else:
+        # TODO: allow looking up service to start from marker??
+        print("  No matching services to start")
