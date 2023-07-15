@@ -16,7 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
-from collections.abc import Mapping
+from collections.abc import Generator, Mapping
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable, Final, NamedTuple, Union
 
@@ -804,6 +804,31 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 }
 
 
+# TODO: return list & lru_cache this??
+def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
+    """
+    Split a marker string on ' or ' and ' and ' and return an iterable of tokens.
+    Exclude parts of the string after ' not '.
+    """
+    remaining_str, _, _ = marker_string.partition(" not ")
+    for partially_tokenized in remaining_str.split(" and "):
+        for token in partially_tokenized.split(" or "):
+            yield token
+
+
+def _get_marker_dependencies(markers: str | list[str]) -> list[TestDependencies]:
+    if isinstance(markers, str):
+        markers = [markers]
+
+    dependencies: list[TestDependencies] = []
+    for marker_string in markers:
+        for marker_token in _tokenize_marker_string(marker_string):
+            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
+                LOGGER.debug(f"'{marker_token}' has dependencies")
+                dependencies.append(marker_depedencies)
+    return dependencies
+
+
 @invoke.task(
     iterable=["markers", "requirements_dev"],
     help={
@@ -843,10 +868,8 @@ def deps(  # noqa: PLR0913
 
     req_files: list[str] = ["requirements.txt"]
 
-    for marker_string in markers:
-        for marker_token in marker_string.split(" or "):
-            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
-                req_files.extend(marker_depedencies.requirement_files)
+    for test_deps in _get_marker_dependencies(markers):
+        req_files.extend(test_deps.requirement_files)
 
     for name in requirements_dev:
         req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
@@ -882,16 +905,15 @@ def ci_tests(
         "pytest",
         "-m",
         f"'{marker}'",
-        "--cov=great_expectations",
         "-rEf",
     ]
     if reports:
-        pytest_cmds.extend(["--cov-report=xml"])
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
 
     if verbose:
         pytest_cmds.append("-vv")
 
-    if test_deps := MARKER_DEPENDENDENCY_MAP.get(marker):
+    for test_deps in _get_marker_dependencies(marker):
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
