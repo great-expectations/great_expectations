@@ -92,4 +92,4 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests ${{ matrix.markers }} --verbose
+        run: invoke ci-tests '${{ matrix.markers }}' --verbose
