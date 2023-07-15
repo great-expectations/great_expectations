@@ -797,7 +797,9 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
-    "postgres": TestDependencies(("reqs/requirements-dev-postgresql.txt",)),
+    "postgres": TestDependencies(
+        ("reqs/requirements-dev-postgresql.txt",), exta_pytest_args=("--postgresql",)
+    ),
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",), exta_pytest_args=("--spark",)
     ),
