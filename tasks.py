@@ -866,11 +866,12 @@ def deps(  # noqa: PLR0913
 @invoke.task(
     iterable=["service_names"],
 )
-def ci_test(
+def ci_tests(
     ctx: Context,
     marker: str,
     service_names: list[str],
     verbose: bool = False,
+    reports: bool = False,
 ):
     """Run tests in CI."""
     service(ctx, markers=[marker], names=service_names)
@@ -878,11 +879,12 @@ def ci_test(
     pytest_cmds = [
         "pytest",
         "-m",
-        f"'{marker}'",
+        f"'{marker} and not unit'",
         "--cov=great_expectations",
-        "--cov-report=xml",
         "-rEf",
     ]
+    if reports:
+        pytest_cmds.extend(["--cov-report=xml"])
 
     if verbose:
         pytest_cmds.append("-vv")
