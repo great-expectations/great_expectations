@@ -879,7 +879,7 @@ def ci_tests(
     pytest_cmds = [
         "pytest",
         "-m",
-        f"'{marker} and not unit'",
+        f"{marker}",
         "--cov=great_expectations",
         "-rEf",
     ]
