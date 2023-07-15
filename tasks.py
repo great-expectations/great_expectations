@@ -808,9 +808,9 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     """
     Split a marker string on ' or ' and ' and ' and return an iterable of tokens.
-    Exclude parts of the string after ' not '.
+    Exclude parts of the string after ' and not '.
     """
-    remaining_str, _, _ = marker_string.partition(" not ")
+    remaining_str, _, _ = marker_string.partition(" and not ")
     for partially_tokenized in remaining_str.split(" and "):
         for token in partially_tokenized.split(" or "):
             yield token
