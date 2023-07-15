@@ -891,9 +891,7 @@ class TableAsset(_SQLAsset):
         engine: sqlalchemy.Engine,
         inspector: sqlalchemy.Inspector,
     ) -> None:
-        table_exists: bool
-
-        table_exists = sa.inspect(engine).has_table(
+        table_exists: bool = sa.inspect(engine).has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
