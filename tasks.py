@@ -785,6 +785,9 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     service_setup_fncs: tuple[Callable[[Context], None], ...] = tuple()
+    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+        str, ...
+    ] = tuple()
 
 
 MARKER_MAPPINGS: Final[Mapping[str, TestDependencies]] = {
@@ -793,7 +796,9 @@ MARKER_MAPPINGS: Final[Mapping[str, TestDependencies]] = {
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgres": TestDependencies(("reqs/requirements-dev-postgresql.txt",)),
-    "spark": TestDependencies(("reqs/requirements-dev-spark.txt",)),
+    "spark": TestDependencies(
+        ("reqs/requirements-dev-spark.txt",), exta_pytest_args=("--spark",)
+    ),
 }
 
 
@@ -856,3 +861,46 @@ def deps(  # noqa: PLR0913
         cmds.append("-c constraints-dev.txt")
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    iterable=["service_names"],
+)
+def ci_test(
+    ctx: Context,
+    marker: str,
+    service_names: list[str],
+    verbose: bool = False,
+):
+    """Run tests in CI."""
+    service(ctx, markers=[marker], names=service_names)
+
+    pytest_cmds = [
+        "pytest",
+        "-m",
+        f"'{marker}'",
+        "--cov=great_expectations",
+        "--cov-report=xml",
+        "-rEf",
+    ]
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    if test_deps := MARKER_MAPPINGS.get(marker):
+        for extra_pytest_arg in test_deps.exta_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+        for service_setup_fnc in test_deps.service_setup_fncs:
+            service_setup_fnc(ctx)
+
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    iterable=["markers", "names"],
+)
+def service(ctx: Context, markers: list[str], names: list[str]):
+    for service_name in names:
+        print(f"Starting {service_name} service ...")
+    # TODO: implement this
