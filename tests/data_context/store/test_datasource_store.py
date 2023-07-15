@@ -170,6 +170,7 @@ def test__assert_serialized_datasource_configs_are_equal(
         )
 
 
+@pytest.mark.unit
 @pytest.mark.integration
 def test_datasource_store_retrieval(
     empty_datasource_store: DatasourceStore,
@@ -194,6 +195,7 @@ def test_datasource_store_retrieval(
     )
 
 
+@pytest.mark.cloud
 @pytest.mark.integration
 def test_datasource_store_set_cloud_mode(
     block_config_datasource_config: DatasourceConfig,
@@ -260,6 +262,7 @@ def test_datasource_store_set_cloud_mode(
         ) == json_serializer.serialize(datasource_config_with_names_and_ids)
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_datasource_store_with_inline_store_backend(
     block_config_datasource_config: DatasourceConfig, empty_data_context: DataContext
@@ -335,6 +338,7 @@ def test_datasource_store_set(
     )
 
 
+@pytest.mark.unit
 @pytest.mark.integration
 def test_datasource_store_retrieve_by_name(
     fake_datasource_name,
@@ -374,6 +378,7 @@ def test_datasource_store_delete(
     assert len(datasource_store_with_single_datasource.list_keys()) == 0
 
 
+@pytest.mark.unit
 @pytest.mark.integration
 def test_datasource_store_update_by_name(
     fake_datasource_name,
@@ -427,6 +432,7 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     )
 
 
+@pytest.mark.unit
 @pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_datasource_name(
     datasource_config_with_names: DatasourceConfig,
@@ -473,6 +479,7 @@ def test_datasource_store_with_inline_store_backend_config_with_names_does_not_s
     assert "name" not in context_config_from_disk["datasources"]["my_datasource"]
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_datasource_store_with_inline_store_backend_config_with_names_does_not_store_dataconnector_name(
     datasource_config_with_names: DatasourceConfig,

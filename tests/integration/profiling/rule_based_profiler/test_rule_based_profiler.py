@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 def test_batches_are_accessible(
     multibatch_generic_csv_generator,
     multibatch_generic_csv_generator_context,
@@ -138,6 +139,7 @@ def test_batches_are_accessible(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 2.04s
+@pytest.mark.filesystem
 def test_profile_includes_citations(
     mock_emit,
     alice_columnar_table_single_batch_context,
@@ -188,6 +190,7 @@ def test_profile_includes_citations(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 2.16s
+@pytest.mark.filesystem
 def test_profile_get_expectation_suite(
     mock_emit,
     alice_columnar_table_single_batch_context,
