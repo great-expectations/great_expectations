@@ -790,9 +790,11 @@ class TestDependencies(NamedTuple):
     ] = tuple()
 
 
-MARKER_MAPPINGS: Final[Mapping[str, TestDependencies]] = {
+MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
-    "cloud": TestDependencies(("reqs/requirements-dev-cloud.txt",)),
+    "cloud": TestDependencies(
+        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+    ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgres": TestDependencies(("reqs/requirements-dev-postgresql.txt",)),
@@ -843,7 +845,7 @@ def deps(  # noqa: PLR0913
 
     for marker_string in markers:
         for marker_token in marker_string.split(" or "):
-            if marker_depedencies := MARKER_MAPPINGS.get(marker_token):
+            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
                 req_files.extend(marker_depedencies.requirement_files)
 
     for name in requirements_dev:
@@ -889,7 +891,7 @@ def ci_tests(
     if verbose:
         pytest_cmds.append("-vv")
 
-    if test_deps := MARKER_MAPPINGS.get(marker):
+    if test_deps := MARKER_DEPENDENDENCY_MAP.get(marker):
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
