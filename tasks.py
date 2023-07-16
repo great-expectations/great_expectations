@@ -787,19 +787,19 @@ def show_automerges(ctx: Context):
 
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
-    # NOTE: We probably don't need both `services` and `setup_funcs`
-    # but it's not clear to me which one is better
-    # `services` is simpler because it's just a list of services to up with docker-compose
-    # but `setup_funcs` is more flexible because it allows us to do more complex setup
-    # It could do the same docker-compose up or anything else
     services: tuple[str, ...] = tuple()
-    # setup_funcs is a tuple of functions that take a an `invoke.Context` and return an invoke `Result` or `None`
-    # The invoke context can be used to run CLI subcommands or can be ignored.
-    # More arguments could be added to this interface if needed.
     setup_funcs: tuple[Callable[[Context], Result | None], ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
+    # NOTE: We probably don't need both `services` and `setup_funcs`
+    # but it's not clear to me which one is better
+    # `services` is simpler because it's just a list of services to up with docker-compose
+    # but `setup_funcs` is more flexible because it allows us to do more complex setup
+    # It could do the same docker-compose up or anything else.
+    # setup_funcs is a tuple of functions that take a an `invoke.Context` and return an invoke `Result` or `None`
+    # The invoke context can be used to run CLI subcommands or can be ignored.
+    # More arguments could be added to this `Callable` interface if needed.
 
 
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
@@ -811,6 +811,8 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgres": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
+        # example of using a simple service lookup and a setup function to do the same thing
+        # we can remove one of these methods if one seems obviously better
         services=("postgres",),
         setup_funcs=(
             lambda ctx: print("Dummy setup function"),
@@ -969,6 +971,10 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
     Startup a service, by referencing its name directly or by looking up a pytest marker.
 
     If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+
+    Note:
+        The main reason this is a separate task is to make it easy to start services
+        when running tests locally.
     """
     cmds = ["docker-compose", "up", "-d"]
 
