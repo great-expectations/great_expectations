@@ -16,7 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Callable, Generator, Mapping, Sequence
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
@@ -27,6 +27,7 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
+    from invoke.runners import Result
 
 
 LOGGER = logging.getLogger(__name__)
@@ -387,6 +388,8 @@ def tests(  # noqa: PLR0913
     Run tests. Runs unit tests by default.
 
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+
+    See also, the newer `invoke ci-tests --help`.
     """
     markers = []
     if integration:
@@ -784,8 +787,16 @@ def show_automerges(ctx: Context):
 
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
+    # NOTE: We probably don't need both `services` and `setup_funcs`
+    # but it's not clear to me which one is better
+    # `services` is simpler because it's just a list of services to up with docker-compose
+    # but `setup_funcs` is more flexible because it allows us to do more complex setup
+    # It could do the same docker-compose up or anything else
     services: tuple[str, ...] = tuple()
-    # service_setup_fncs: tuple[Callable[[Context], None], ...] = tuple()
+    # setup_funcs is a tuple of functions that take a an `invoke.Context` and return an invoke `Result` or `None`
+    # The invoke context can be used to run CLI subcommands or can be ignored.
+    # More arguments could be added to this interface if needed.
+    setup_funcs: tuple[Callable[[Context], Result | None], ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
@@ -801,10 +812,16 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "postgres": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         services=("postgres",),
+        setup_funcs=(
+            lambda ctx: print("Dummy setup function"),
+            # lambda ctx: ctx.run("docker-compose up -d postgres"),
+        ),
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
-        ("reqs/requirements-dev-spark.txt",), exta_pytest_args=("--spark",)
+        ("reqs/requirements-dev-spark.txt",),
+        # services=("spark",),
+        exta_pytest_args=("--spark",),
     ),
 }
 
@@ -821,7 +838,7 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
             yield token
 
 
-def _get_marker_dependencies(markers: str | list[str]) -> list[TestDependencies]:
+def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
     if isinstance(markers, str):
         markers = [markers]
 
@@ -899,11 +916,22 @@ def deps(  # noqa: PLR0913
 def ci_tests(
     ctx: Context,
     marker: str,
-    service_names: list[str],
     verbose: bool = False,
     reports: bool = False,
+    up_services: bool = False,
 ):
-    """Run tests in CI."""
+    """
+    Run tests in CI.
+
+    This method looks up the pytest marker provided and runs the tests for that marker,
+    as well as looking up any required services, testing dependencies and extra CLI flags
+    that are need and starting them if `up_services` is True.
+
+    `up_services` is False by default to avoid starting services which may already be up
+    when running tests locally.
+
+    Defined this as a new invoke task to avoid some of the baggage of our old test setup.
+    """
     pytest_cmds = [
         "pytest",
         "-m",
@@ -920,24 +948,39 @@ def ci_tests(
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
-        if test_deps.services:
-            service(ctx, names=test_deps.services)
+        for setup_func in test_deps.setup_funcs:
+            setup_func(ctx)
+
+        if test_deps.services and up_services:
+            service(
+                ctx,
+                names=test_deps.services,
+                markers=(marker,) if marker else tuple(),
+            )
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
 
 @invoke.task(
-    iterable=["names"],
+    iterable=["names", "markers"],
 )
-def service(ctx: Context, names: Sequence[str]):
-    """Startup a service."""
+def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
+    """
+    Startup a service, by referencing its name directly or by looking up a pytest marker.
+
+    If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+    """
     cmds = ["docker-compose", "up", "-d"]
 
-    service_names = names
+    service_names = set(names)
+
+    if markers:
+        for test_deps in _get_marker_dependencies(markers):
+            service_names.update(test_deps.services)
+
     if service_names:
         cmds.extend(service_names)
         print(f"  Starting services for {', '.join(service_names)} ...")
         ctx.run(" ".join(cmds), echo=True, pty=True)
     else:
-        # TODO: allow looking up service to start from marker??
         print("  No matching services to start")
