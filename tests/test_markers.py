@@ -9,10 +9,14 @@ import pytest
 import tomli
 from tasks import MARKER_DEPENDENDENCY_MAP
 
+from great_expectations.core.yaml_handler import YAMLHandler
+
 pytestmarks = [pytest.mark.project]
 
 LOGGER: Final = logging.getLogger(__name__)
-PYPROJECT_TOML: Final = pathlib.Path(__file__).parent.parent / "pyproject.toml"
+PROJECT_ROOT: Final = pathlib.Path(__file__).parent.parent
+PYPROJECT_TOML: Final = PROJECT_ROOT / "pyproject.toml"
+DOCKER_COMPOSE_YAML: Final = PROJECT_ROOT / "docker-compose.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -41,6 +45,24 @@ def test_marker_mappings_are_registered(pytest_markers: list[str]):
 
     for marker in MARKER_DEPENDENDENCY_MAP:
         assert marker in pytest_markers
+
+
+@pytest.fixture(scope="module")
+def docker_compose_services() -> dict[str, dict]:
+    assert DOCKER_COMPOSE_YAML.exists()
+    docker_compose_yaml: dict = YAMLHandler().load(DOCKER_COMPOSE_YAML.read_text())
+    services: dict[str, dict] = docker_compose_yaml["services"]  # type: ignore[return-value] # will allways be a dict
+    LOGGER.debug(f"docker compose services ->\n{pf(services, depth=1)}")
+    return services
+
+
+def test_service_mappings_are_real(docker_compose_services: dict):
+    """
+    Ensure that any service mappings are real services defined in the docker-compose.yml file.
+    """
+    for test_dep in MARKER_DEPENDENDENCY_MAP.values():
+        for service_name in test_dep.services:
+            assert service_name in docker_compose_services
 
 
 if __name__ == "__main__":
