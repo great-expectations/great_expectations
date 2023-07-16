@@ -34,6 +34,11 @@ def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
 
 @pytest.mark.unit
 def test_table_quoted_name_type_does_not_exist():
+    """
+    DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
+    standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
+    quoted names must occur.  This test ensures that mechanism for detection of non-existent table_nam" works correctly.
+    """
     table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
         "table_name_0",
         "table_name_1",
@@ -54,6 +59,11 @@ def test_table_quoted_name_type_does_not_exist():
 
 @pytest.mark.unit
 def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
+    """
+    DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
+    standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
+    quoted names must occur.  This test ensures that all upper case entity usage does not undergo any conversion.
+    """
     table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
         "ACTORS",
         "ARTISTS",
@@ -86,6 +96,11 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
 
 @pytest.mark.unit
 def test_table_quoted_name_type_all_lower_case_normalizion_full():
+    """
+    DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
+    standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
+    quoted names must occur.  This test ensures that all lower case entity usage undergo conversion to quoted literals.
+    """
     table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
         "actors",
         "artists",
