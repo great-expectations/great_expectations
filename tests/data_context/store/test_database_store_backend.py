@@ -10,6 +10,9 @@ from tests import test_utils
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
+# module level markers
+pytestmark = [pytest.mark.postgres]
+
 
 @pytest.mark.integration
 def test_database_store_backend_schema_spec(caplog, sa, test_backends):

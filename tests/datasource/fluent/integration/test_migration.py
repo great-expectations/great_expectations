@@ -11,7 +11,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 from tests.test_utils import working_directory
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_convert_to_file_context(
     tmp_path: pathlib.Path,
     ephemeral_context_with_defaults: EphemeralDataContext,
