@@ -470,6 +470,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         CommonlyUsedParameterBuilders()
     )
 
+    # When DataAssistant subclasses are instantiated, they are registered in the DataAssistantDispatcher
+    # if __alias__ is defined and does not start with underscore _. This is handled by MetaDataAssistant.
     __alias__: Optional[str] = None
 
     def __init__(
