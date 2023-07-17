@@ -802,7 +802,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: Union[str, sqlalchemy.quoted_name] = pydantic.Field(
+    table_name: Union[str] = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
     )
@@ -817,9 +817,7 @@ class TableAsset(_SQLAsset):
         )
 
     @pydantic.validator("table_name", pre=True, always=True)
-    def _default_table_name(
-        cls, table_name: str, values: dict, **kwargs
-    ) -> str | sqlalchemy.quoted_name:
+    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
         if not (validated_table_name := table_name or values.get("name")):
             raise ValueError(
                 "table_name cannot be empty and should default to name if not provided"
