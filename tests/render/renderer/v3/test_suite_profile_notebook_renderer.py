@@ -24,10 +24,12 @@ from great_expectations.rule_based_profiler.config.base import (
 )
 from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.render.test_util import find_code_in_notebook, run_notebook
+from tests.render.util import find_code_in_notebook, run_notebook
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
 
 SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
     # Imports

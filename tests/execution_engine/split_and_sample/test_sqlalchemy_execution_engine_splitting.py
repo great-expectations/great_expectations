@@ -56,7 +56,10 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @mock.patch(
