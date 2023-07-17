@@ -71,4 +71,4 @@ The available Execution Engine classes are `PandasExecutionEngine`, `SparkDFExec
 
 If additional configuration is required by the Execution Engine, it will also be specified in the `execution_engine` configuration.  For example, the `SqlAlchemyExecutionEngine` will also expect the key `connection_string` as part of its configuration.
 
-For specifics on the required keys for a given Execution Engine, see [how-to guides for Connecting to Data](../guides/connecting_to_your_data/index.md).
+For specifics on the required keys for a given Execution Engine, see [how-to guides for Connecting to Data](../guides/connecting_to_your_data/connect_to_data_lp.md).
