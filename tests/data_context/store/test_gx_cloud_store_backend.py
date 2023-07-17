@@ -16,7 +16,6 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudRESTResource,
@@ -27,6 +26,9 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     construct_url,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+
+# module level markers
+pytestmark = [pytest.mark.cloud]
 
 
 @pytest.fixture
@@ -71,8 +73,6 @@ def construct_ge_cloud_store_backend(
         ),
     ],
 )
-@pytest.mark.unit
-@pytest.mark.cloud
 def test_construct_url(
     base_url: str,
     organization_id: str,
@@ -185,8 +185,6 @@ def test_construct_url(
         ),
     ],
 )
-@pytest.mark.unit
-@pytest.mark.cloud
 def test_construct_json_payload(
     resource_type: str,
     organization_id: str,
@@ -207,8 +205,6 @@ def test_construct_json_payload(
     )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_set(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -249,7 +245,7 @@ def test_set(
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
                                 ("batch_request", {}),
-                                ("action_list", list(Checkpoint.DEFAULT_ACTION_LIST)),
+                                ("action_list", []),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
                                 ("validations", []),
@@ -264,8 +260,6 @@ def test_set(
         )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_list_keys(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -281,8 +275,6 @@ def test_list_keys(
         )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_remove_key_with_only_id(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -315,8 +307,6 @@ def test_remove_key_with_only_id(
         )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_remove_key_with_id_and_name(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -346,8 +336,6 @@ def test_remove_key_with_id_and_name(
         )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_remove_key_with_only_name(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -367,8 +355,6 @@ def test_remove_key_with_only_name(
         )
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
@@ -394,8 +380,6 @@ def test_appropriate_casting_of_str_resource_type_to_GXCloudRESTResource(
         ),
     ],
 )
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_allowed_set_kwargs(
     resource_type: GXCloudRESTResource,
     expected_set_kwargs: Set[str],
@@ -434,8 +418,6 @@ def test_allowed_set_kwargs(
         ),
     ],
 )
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_validate_set_kwargs(
     kwargs: dict,
     expected: Union[bool, None],
@@ -449,8 +431,6 @@ def test_validate_set_kwargs(
     assert store_backend.validate_set_kwargs(kwargs) == expected
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
 def test_config_property_and_defaults(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend

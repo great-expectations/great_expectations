@@ -23,6 +23,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
+pytestmark = [pytest.mark.spark]
+
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     engine = basic_spark_df_execution_engine
@@ -684,7 +686,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
 
     metrics.update(results)
 
@@ -1120,7 +1122,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(execution_engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(

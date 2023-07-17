@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 import logging
 import uuid
+import warnings
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -20,8 +21,6 @@ from typing import (
     Union,
 )
 
-from typing_extensions import TypeAlias
-
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.constants import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -32,6 +31,7 @@ from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pydantic
+    from typing_extensions import TypeAlias
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource import BaseDatasource, LegacyDatasource
@@ -72,7 +72,7 @@ def _get_field_details(
 
 class CrudMethodType(str, Enum):
     ADD = "ADD"
-    DELETE = "DELETE"
+    DELETE = "DELETE"  # Deprecated as we don't care about backend-specific deletion
     UPDATE = "UPDATE"
     ADD_OR_UPDATE = "ADD_OR_UPDATE"
 
@@ -440,7 +440,7 @@ class _SourceFactories:
         if (
             name_or_datasource
             and isinstance(name_or_datasource, str)
-            and "name" not in "kwargs"
+            and "name" not in "kwargs"  # noqa: PLR0133
         ) or (
             name_or_datasource is None
             and "name" in kwargs
@@ -614,6 +614,16 @@ class _SourceFactories:
         delete_datasource.__signature__ = inspect.signature(delete_datasource)  # type: ignore[attr-defined]
         return delete_datasource
 
+    @public_api
+    def delete(self, name: str) -> None:
+        """
+        Deletes a datasource by name.
+
+        Args:
+            name: The name of the given datasource.
+        """
+        self._data_context.delete_datasource(datasource_name=name)
+
     def __getattr__(self, attr_name: str):
         try:
             crud_method_info = self.__crud_registry[attr_name]
@@ -626,6 +636,11 @@ class _SourceFactories:
             elif crud_method_type == CrudMethodType.ADD_OR_UPDATE:
                 return self.create_add_or_update_crud_method(datasource_type, docstring)
             elif crud_method_type == CrudMethodType.DELETE:
+                # deprecated-v0.17.2
+                warnings.warn(
+                    f"`{attr_name}` is deprecated as of v0.17.2 and will be removed in v0.19. Please use `.sources.delete` moving forward.",
+                    DeprecationWarning,
+                )
                 return self.create_delete_crud_method(datasource_type, docstring)
             else:
                 raise TypeRegistrationError(

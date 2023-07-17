@@ -4,7 +4,6 @@ import os
 import pytest
 from freezegun import freeze_time
 
-import tests.test_utils as test_utils
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -15,6 +14,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from tests import test_utils
 
 
 @pytest.fixture(
@@ -79,6 +79,7 @@ def in_memory_param_store(request, test_backends):
     )
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store,
@@ -167,6 +168,7 @@ def test_evaluation_parameter_store_methods(
     }
 
 
+@pytest.mark.postgres
 @pytest.mark.integration
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
@@ -202,6 +204,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.postgres
 @pytest.mark.integration
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.

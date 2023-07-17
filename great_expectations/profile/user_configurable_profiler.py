@@ -103,7 +103,7 @@ class UserConfigurableProfiler:
         ValueError: If an invalid `primary_or_compound_key` is provided.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913, PLR0912, PLR0915
         self,
         profile_dataset: Union[Batch, Dataset, Validator],
         excluded_expectations: Optional[List[str]] = None,
@@ -125,7 +125,8 @@ class UserConfigurableProfiler:
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
                 execution_engine=cast(
-                    ExecutionEngine, self.profile_dataset.data.execution_engine
+                    ExecutionEngine,
+                    self.profile_dataset.data.execution_engine,  # type: ignore[union-attr] # execution_engine
                 ),
                 batches=[self.profile_dataset],
             )
@@ -727,7 +728,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return expectation_suite
 
-    def _display_suite_by_column(self, suite):
+    def _display_suite_by_column(self, suite):  # noqa: PLR0912
         """
         Displays the expectations of a suite by column, along with the column cardinality, and semantic or data type so
         that a user can easily see which expectations were created for which columns
@@ -828,7 +829,9 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
 
         return profile_dataset
 
-    def _build_expectations_numeric(self, profile_dataset, column):  # noqa: C901 - 17
+    def _build_expectations_numeric(  # noqa: C901, PLR0912, PLR0915
+        self, profile_dataset, column
+    ):
         """
         Adds a set of numeric expectations for a given column
         Args:
@@ -1141,7 +1144,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             )
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
-                if unexpected_percent >= 50 and not self.not_null_only:
+                if unexpected_percent >= 50 and not self.not_null_only:  # noqa: PLR2004
                     potential_mostly_value = math.floor(unexpected_percent) / 100.0
                     # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
                     # value of 0 when we round

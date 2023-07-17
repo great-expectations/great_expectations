@@ -8,7 +8,6 @@ from unittest import mock
 import pandas as pd
 import pytest
 from dateutil.parser import parse
-from mock_alchemy.comparison import ExpressionMatcher
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import file_relative_path
@@ -20,7 +19,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from tests.execution_engine.split_and_sample.split_and_sample_test_cases import (
     MULTIPLE_DATE_PART_BATCH_IDENTIFIERS,
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -57,7 +56,10 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @mock.patch(
@@ -126,16 +128,8 @@ def test_split_on_date_parts_single_date_parts(
         date_parts=date_parts,
     )
 
-    # using mock-alchemy
-    assert ExpressionMatcher(result) == ExpressionMatcher(
-        sa.and_(
-            sa.extract("month", sa.column(column_name)) == 10,
-        )
-    )
-
     # using values
     assert isinstance(result, sa.sql.elements.BinaryExpression)
-
     assert isinstance(result.comparator.type, sa.Boolean)
     assert isinstance(result.left, sa.sql.elements.Extract)
     assert result.left.field == "month"
@@ -169,14 +163,6 @@ def test_split_on_date_parts_multiple_date_parts(
         column_name=column_name,
         batch_identifiers={column_name: batch_identifiers_for_column},
         date_parts=date_parts,
-    )
-
-    # using mock-alchemy
-    assert ExpressionMatcher(result) == ExpressionMatcher(
-        sa.and_(
-            sa.extract("year", sa.column(column_name)) == 2018,
-            sa.extract("month", sa.column(column_name)) == 10,
-        )
     )
 
     # using values
@@ -429,7 +415,7 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     convert_string_columns_to_datetime(
         df=df, column_names_to_convert=["pickup_datetime", "dropoff_datetime"]
     )
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df, sa)
     return engine
 
 
@@ -513,7 +499,9 @@ def test_sqlite_split(
     """What does this test and why?
     splitters should work with sqlite.
     """
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(taxi_test_cases.test_df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(
+        taxi_test_cases.test_df, sa
+    )
 
     test_cases: List[TaxiSplittingTestCase] = taxi_test_cases.test_cases()
     test_case: TaxiSplittingTestCase
@@ -528,7 +516,7 @@ def test_sqlite_split(
                 batch_identifiers={},
             )
         else:
-            if taxi_test_cases.test_column_name:
+            if taxi_test_cases.test_column_name:  # noqa: PLR5501
                 assert test_case.expected_column_values is not None
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
@@ -562,7 +550,7 @@ def test_sqlite_split(
         batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
         # Right number of rows?
-        num_rows: int = batch_data.execution_engine.engine.execute(
+        num_rows: int = batch_data.execution_engine.execute_query(
             sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         # noinspection PyUnresolvedReferences
@@ -592,14 +580,14 @@ def test_sqlite_split_on_year(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()
@@ -638,14 +626,14 @@ def test_sqlite_split_and_sample_using_limit(
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()

@@ -6,7 +6,6 @@ import pytest
 from freezegun import freeze_time
 from moto import mock_s3
 
-import tests.test_utils as test_utils
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -14,6 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
+from tests import test_utils
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -25,6 +25,7 @@ from tests.core.usage_statistics.util import (
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.big
 @pytest.mark.integration
 def test_ValidationsStore_with_TupleS3StoreBackend():
     bucket = "test_validation_store_bucket"
@@ -101,6 +102,7 @@ def test_ValidationsStore_with_TupleS3StoreBackend():
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.big
 @pytest.mark.integration
 def test_ValidationsStore_with_InMemoryStoreBackend():
     my_store = ValidationsStore(
@@ -157,6 +159,7 @@ def test_ValidationsStore_with_InMemoryStoreBackend():
     assert test_utils.validate_uuid4(my_store.store_backend_id)
 
 
+@pytest.mark.big
 @pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.filterwarnings(
@@ -252,6 +255,7 @@ def test_ValidationsStore_with_TupleFileSystemStoreBackend(tmp_path_factory):
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.big
 @pytest.mark.integration
 def test_ValidationsStore_with_DatabaseStoreBackend(sa):
     # Use sqlite so we don't require postgres for this test.
@@ -315,6 +319,7 @@ def test_ValidationsStore_with_DatabaseStoreBackend(sa):
 @pytest.mark.filterwarnings(
     "ignore:String run_ids are deprecated*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
+@pytest.mark.big
 @pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled

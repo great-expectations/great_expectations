@@ -108,7 +108,7 @@ class MapMetricProvider(MetricProvider):
     filter_column_isnull = True
 
     @classmethod
-    def _register_metric_functions(cls):  # noqa: C901 - 28
+    def _register_metric_functions(cls):  # noqa: C901, PLR0912, PLR0915
         if not (
             hasattr(cls, "function_metric_name")
             or hasattr(cls, "condition_metric_name")

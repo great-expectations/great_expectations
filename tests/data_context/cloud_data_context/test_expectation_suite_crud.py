@@ -456,11 +456,13 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
     suite_id = "abc123"
 
-    with pytest.raises(StoreBackendError):
+    with pytest.raises(ValueError) as e:
         with mock.patch(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
             context.get_expectation_suite(ge_cloud_id=suite_id)
+
+    assert "abc123" in str(e.value)
 
 
 @pytest.mark.unit
@@ -660,7 +662,7 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
     ) as mock_put:
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
-    mock_get.assert_called_once()  # check if resource exists
+    assert mock_get.call_count == 2  # check if resource exists, get updated resource
     mock_put.assert_called_once()  # persist resource
 
 

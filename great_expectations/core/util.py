@@ -32,7 +32,6 @@ import numpy as np
 import pandas as pd
 import pydantic
 from IPython import get_ipython
-from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark, sqlalchemy
@@ -51,6 +50,8 @@ from great_expectations.types.base import SerializableDotDict
 from great_expectations.util import convert_decimal_to_float
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
@@ -245,8 +246,8 @@ def convert_to_json_serializable(
     ...
 
 
-@public_api  # noqa: C901 - complexity 32
-def convert_to_json_serializable(  # noqa: C901 - complexity 32
+@public_api  # - complexity 32
+def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     data: JSONConvertable,
 ) -> JSONValues:
     """Converts an object to one that is JSON-serializable.
@@ -415,7 +416,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     )
 
 
-def ensure_json_serializable(data):  # noqa: C901 - complexity 21
+def ensure_json_serializable(data):  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert an object to one that is json serializable
     Args:
@@ -537,8 +538,8 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj = datetime_obj or datetime.datetime.now()
-    if isinstance(data, dict) or isinstance(data, OrderedDict):
+    datetime_obj = datetime_obj or datetime.datetime.now()  # noqa: DTZ005
+    if isinstance(data, dict) or isinstance(data, OrderedDict):  # noqa: PLR1701
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
             for k, v in data.items()
@@ -573,7 +574,9 @@ def parse_string_to_datetime(
             """
         )
 
-    return datetime.datetime.strptime(datetime_string, datetime_format_string)
+    return datetime.datetime.strptime(  # noqa: DTZ007
+        datetime_string, datetime_format_string
+    )
 
 
 def datetime_to_int(dt: datetime.date) -> int:
@@ -933,7 +936,7 @@ def get_sql_dialect_floating_point_infinity_value(
         else:
             return np.inf
     else:
-        if negative:
+        if negative:  # noqa: PLR5501
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]

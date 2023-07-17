@@ -183,6 +183,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
           GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -196,7 +198,6 @@ stages:
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SQLALCHEMY_WARN_20=true "
               CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}
@@ -229,6 +230,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -411,6 +414,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
         services:
           postgres: postgres
         variables:
@@ -449,10 +454,9 @@ stages:
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
-              PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
-              PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
-              PYTEST+="--constraint $(constraints) && "
-              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
+              PYTEST+="pip install --no-cache-dir --requirement reqs/requirements-dev-test.txt "
+              PYTEST+="--constraint constraints-dev.txt --constraint $(constraints) && "
+              PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistics "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}
               eval ${PYTEST}
@@ -533,6 +537,8 @@ stages:
              python.version: '3.9'
            Python310:
              python.version: '3.10'
+           Python311:
+             python.version: '3.11'
 
         steps:
          - task: UsePythonVersion@0
@@ -609,6 +615,8 @@ stages:
               python.version: '3.9'
             Python310:
               python.version: '3.10'
+            Python311:
+              python.version: '3.11'
 
         steps:
           - task: UsePythonVersion@0
@@ -636,6 +644,8 @@ stages:
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
+            env:
+              NODE_OPTIONS: --max_old_space_size=4096
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isRelease, true))

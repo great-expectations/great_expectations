@@ -25,7 +25,7 @@ class SqlAlchemyQueryStore(Store):
 
     _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         credentials,
         queries=None,

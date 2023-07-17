@@ -22,6 +22,9 @@ except ImportError:
     from unittest import mock
 
 
+pytestmark = [pytest.mark.cli]
+
+
 @pytest.fixture
 def titanic_sqlite_db_file(sa, tmp_path_factory):
     temp_dir = str(tmp_path_factory.mktemp("foo_path"))
@@ -31,9 +34,10 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     shutil.copy(fixture_db_path, db_path)
 
     engine = sa.create_engine(f"sqlite:///{db_path}", pool_recycle=3600)
-    assert engine.execute(sa.text(f"select count(*) from titanic")).fetchall()[0] == (
-        1313,
-    )
+    with engine.connect() as connection:
+        assert connection.execute(sa.text(f"select count(*) from titanic")).fetchall()[
+            0
+        ] == (1313,)
     return db_path
 
 

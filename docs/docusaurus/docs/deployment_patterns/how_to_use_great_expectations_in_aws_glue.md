@@ -1,64 +1,18 @@
 ---
-title: How to Use Great Expectations in AWS Glue
+title: Use Great Expectations with AWS Glue
+description: AWS Glue
+sidebar_label: "AWS Glue"
+sidebar_custom_props: { icon: 'img/integrations/aws_glue_icon.svg' }
 ---
-import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
-import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
+AWS Glue is a serverless data integration service by Amazon.  It makes it easier to prepare, move, and integrate data from multiple sources.  It has applications for analytics, machine learning, and application development.
 
-<InProgress />
+:::info 
 
-This Guide demonstrates how to set up, initialize and run validations against your data on AWS Glue Spark Job.
-We will cover case with RuntimeDataConnector and use S3 as metadata store.
+The most recent version of GX that supports this integration is GX 0.15.50
 
-### 0. Pre-requirements
+To use Great Expectations (GX) with AWS Glue, see [How to use GX in AWS Glue](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_aws_glue) in version 0.15.50 of the documentation.
 
-- Configure great_expectations.yaml and upload to your S3 bucket or generate it dynamically from code
-```yaml name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml"
-```
+For more information about implementing and using AWS Glue, see the [AWS Glue site](https://aws.amazon.com/glue/).
 
-
-### 1. Install Great Expectations
-You need to add to your AWS Glue Spark Job Parameters to install great expectations module. Glue at least v2
-```bash
-  — additional-python-modules great_expectations
-```
-Then import necessary libs:
-```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py imports"
-```
-
-### 2. Set up Great Expectations
-Here we initialize a Spark and Glue, and read great_expectations.yaml
-```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py set up gx"
-```
-
-### 3. Connect to your data
-```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py connect to data"
-```
-
-### 4. Create Expectations
-```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py create expectations"
-```
-
-### 5. Validate your data
-```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py validate your data"
-```
-
-### 6. Congratulations!
-Your data docs built on S3 and you can see index.html at the bucket
-
-
-<details>
-  <summary>This documentation has been contributed by Bogdan Volodarskiy from Provectus</summary>
-  <div>
-    <p>
-      Our links:
-    </p>
-    <ul>
-      <li> <a href="https://www.linkedin.com/in/bogdan-volodarskiy-652498108/">Author's Linkedin</a> </li>
-      <li> <a href="https://medium.com/@bvolodarskiy">Author's Blog</a> </li>
-      <li> <a href="https://provectus.com/">About Provectus</a> </li>
-      <li> <a href="https://provectus.com/data-quality-assurance/">About Provectus Data QA Expertise</a> </li>
-</ul>
-  </div>
-</details>
+:::

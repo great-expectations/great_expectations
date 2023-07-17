@@ -15,6 +15,9 @@ from tests.cli.utils import (
 )
 
 
+pytestmark = [pytest.mark.cli]
+
+
 @pytest.fixture
 def titanic_data_context_clean_usage_stats_enabled(
     tmp_path_factory, monkeypatch

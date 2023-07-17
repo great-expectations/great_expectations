@@ -41,6 +41,9 @@ yaml = YAMLHandler()
 logger = logging.getLogger(__name__)
 
 
+pytestmark = [pytest.mark.cli]
+
+
 # TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_sql_datasource(
@@ -1305,20 +1308,6 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                     "anonymized_name": "ca68117150c32e08330af3cebad565ce",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -1762,20 +1751,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -1989,20 +1964,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -2218,20 +2179,6 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -2451,20 +2398,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -2668,20 +2601,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -2892,20 +2811,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -3120,20 +3025,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -3333,20 +3224,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {
@@ -3560,20 +3437,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
                     "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
                     "anonymized_validations": [
                         {
                             "anonymized_batch_request": {

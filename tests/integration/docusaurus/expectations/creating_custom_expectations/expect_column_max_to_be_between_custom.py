@@ -71,11 +71,10 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        sqlalchemy_engine = execution_engine.engine
         # </snippet>
         # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query">
         query = sa.select(sa.func.max(column)).select_from(selectable)
-        result = sqlalchemy_engine.execute(query).fetchone()
+        result = execution_engine.execute_query(query).fetchone()
 
         return result[0]
 
@@ -103,6 +102,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     examples = [
         {
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -129,20 +129,6 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
                         "strict_max": True,
                     },
                     "out": {"success": False},
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

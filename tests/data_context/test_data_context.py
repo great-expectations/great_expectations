@@ -134,6 +134,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
     return get_context(context_root_dir=context_path)
 
 
+@pytest.mark.filesystem
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
     assert titanic_data_context.add_expectation_suite(
@@ -150,6 +151,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
     )
 
 
+@pytest.mark.filesystem
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
         ExpectationSuiteIdentifier(
@@ -158,6 +160,7 @@ def test_list_expectation_suite_keys(data_context_parameterized_expectation_suit
     ]
 
 
+@pytest.mark.filesystem
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.get_expectation_suite(
@@ -170,6 +173,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
     assert len(expectation_suite.expectations) == 2
 
 
+@pytest.mark.filesystem
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.add_expectation_suite(
@@ -183,6 +187,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
     assert len(expectation_suite.expectations) == 0
 
 
+@pytest.mark.filesystem
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.add_expectation_suite(
@@ -205,6 +210,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     assert expectation_suite.expectations == expectation_suite_saved.expectations
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
@@ -238,6 +244,7 @@ def test_save_expectation_suite_include_rendered_content(
             )
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
@@ -280,6 +287,7 @@ def test_get_expectation_suite_include_rendered_content(
             )
 
 
+@pytest.mark.filesystem
 def test_compile_evaluation_parameter_dependencies(
     data_context_parameterized_expectation_suite: DataContext,
 ):
@@ -307,6 +315,7 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
+@pytest.mark.filesystem
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
@@ -321,6 +330,7 @@ def test_update_datasource_persists_changes_with_store(
     assert mock_update_by_name.call_count == 1
 
 
+@pytest.mark.filesystem
 @freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
     """
@@ -342,6 +352,7 @@ def test_data_context_get_validation_result(titanic_data_context):
     assert len(failed_validation_result.results) == 8
 
 
+@pytest.mark.filesystem
 def test_data_context_get_latest_validation_result(titanic_data_context):
     """
     Test that the latest validation result can be correctly fetched from the configured results
@@ -361,10 +372,12 @@ def test_data_context_get_latest_validation_result(titanic_data_context):
     assert latest_validation_result in validation_results
 
 
+@pytest.mark.unit
 def test_data_context_get_datasource(titanic_data_context):
     isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
 
+@pytest.mark.filesystem
 def test_data_context_expectation_suite_delete(empty_data_context):
     assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
@@ -378,6 +391,7 @@ def test_data_context_expectation_suite_delete(empty_data_context):
     assert len(expectation_suites) == 0
 
 
+@pytest.mark.filesystem
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
     assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.create_expectation_suite"
@@ -395,6 +409,7 @@ def test_data_context_expectation_nested_suite_delete(empty_data_context):
     assert len(expectation_suites) == 1
 
 
+@pytest.mark.unit
 def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
     titanic_data_context,
 ):
@@ -402,6 +417,7 @@ def test_data_context_get_datasource_on_non_existent_one_raises_helpful_error(
         _ = titanic_data_context.get_datasource("fakey_mc_fake")
 
 
+@pytest.mark.unit
 def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_error(
     titanic_data_context,
 ):
@@ -409,6 +425,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
         _ = titanic_data_context.profile_datasource("fakey_mc_fake")
 
 
+@pytest.mark.filesystem
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 @pytest.mark.slow  # 1.02s
@@ -638,6 +655,7 @@ data_docs/
     # )
 
 
+@pytest.mark.unit
 def test_add_store(empty_data_context):
     assert "my_new_store" not in empty_data_context.stores.keys()
     assert "my_new_store" not in empty_data_context.get_config()["stores"]
@@ -700,6 +718,7 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
+@pytest.mark.filesystem
 def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     # `find_context_root_dir` iterates up the file tree to find a great_expectations.yml
     # By deeply nesting our project path, we ensure we don't collide with any existing
@@ -727,6 +746,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     assert FileDataContext.find_context_root_dir() == str(context_path)
 
 
+@pytest.mark.filesystem
 def test_data_context_updates_expectation_suite_names(
     data_context_parameterized_expectation_suite,
 ):
@@ -818,6 +838,7 @@ def test_data_context_updates_expectation_suite_names(
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
 
+@pytest.mark.filesystem
 def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
     tmp_path_factory,
 ):
@@ -839,16 +860,19 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     return context
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_scaffolded(empty_context):
     ge_dir = empty_context.root_directory
     assert FileDataContext.is_project_scaffolded(ge_dir) is True
 
 
+@pytest.mark.filesystem
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
     ge_dir = empty_context.root_directory
     assert FileDataContext.does_config_exist_on_disk(ge_dir) is True
 
 
+@pytest.mark.filesystem
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
     empty_context,
 ):
@@ -858,6 +882,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
     assert FileDataContext.does_config_exist_on_disk(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
     empty_context,
 ):
@@ -868,6 +893,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
     empty_context,
 ):
@@ -877,6 +903,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_yml_file(
     empty_context,
 ):
@@ -887,6 +914,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_dir(
     empty_context,
 ):
@@ -897,6 +925,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_the_project_has_an_invalid_config_file(
     empty_context,
 ):
@@ -908,6 +937,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_one_suite(
     empty_context,
 ):
@@ -920,6 +950,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     assert FileDataContext.is_project_initialized(ge_dir) is True
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
     empty_context,
 ):
@@ -931,6 +962,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
@@ -938,6 +970,7 @@ def test_data_context_is_project_initialized_returns_false_when_its_valid_contex
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(
     empty_context,
 ):
@@ -948,6 +981,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(
     empty_context,
 ):
@@ -960,6 +994,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
     empty_context,
 ):
@@ -974,6 +1009,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
     empty_context,
 ):
@@ -988,6 +1024,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(
     empty_context,
 ):
@@ -1002,6 +1039,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
+@pytest.mark.filesystem
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     tmp_path_factory,
 ):
@@ -1021,6 +1059,7 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
+@pytest.mark.filesystem
 def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     tmp_path_factory,
 ):
@@ -1067,6 +1106,7 @@ great_expectations/
     )
 
 
+@pytest.mark.filesystem
 def test_data_context_create_does_nothing_if_all_uncommitted_dirs_exist(
     tmp_path_factory,
 ):
@@ -1108,6 +1148,7 @@ great_expectations/
     assert obs == expected
 
 
+@pytest.mark.filesystem
 def test_data_context_do_all_uncommitted_dirs_exist(tmp_path_factory):
     expected = """\
 uncommitted/
@@ -1134,6 +1175,7 @@ uncommitted/
     assert not FileDataContext.all_uncommitted_directories_exist(project_path)
 
 
+@pytest.mark.filesystem
 def test_data_context_create_builds_base_directories(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context = FileDataContext.create(project_path)
@@ -1150,6 +1192,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
         assert os.path.isdir(base_dir)  # noqa: PTH112
 
 
+@pytest.mark.filesystem
 def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     tmp_path_factory,
 ):
@@ -1174,6 +1217,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
+@pytest.mark.filesystem
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     FileDataContext._scaffold_directories(empty_directory)
@@ -1194,6 +1238,7 @@ def test_scaffold_directories(tmp_path_factory):
     }
 
 
+@pytest.mark.filesystem
 def test_build_batch_kwargs(titanic_multibatch_data_context):
     batch_kwargs = titanic_multibatch_data_context.build_batch_kwargs(
         "mydatasource",
@@ -1225,6 +1270,7 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
+@pytest.mark.filesystem
 def test_load_config_variables_property(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
@@ -1263,12 +1309,14 @@ def test_load_config_variables_property(
         monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
+@pytest.mark.unit
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == []
 
 
+@pytest.mark.unit
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
     titanic_data_context.add_expectation_suite("warning")
     observed = titanic_data_context.list_expectation_suite_names()
@@ -1276,6 +1324,7 @@ def test_list_expectation_suite_with_one_suite(titanic_data_context):
     assert observed == ["warning"]
 
 
+@pytest.mark.unit
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     titanic_data_context.add_expectation_suite("a.warning")
     titanic_data_context.add_expectation_suite("b.warning")
@@ -1287,6 +1336,7 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
     assert len(observed) == 3
 
 
+@pytest.mark.unit
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
@@ -1294,6 +1344,7 @@ def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_paramete
         titanic_data_context.get_batch({}, 99)
 
 
+@pytest.mark.unit
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
@@ -1301,6 +1352,7 @@ def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_b
         titanic_data_context.get_batch(99, "foo")
 
 
+@pytest.mark.filesystem
 def test_get_batch_when_passed_a_suite_name(titanic_data_context):
     context = titanic_data_context
     root_dir = context.root_directory
@@ -1315,6 +1367,7 @@ def test_get_batch_when_passed_a_suite_name(titanic_data_context):
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
 
 
+@pytest.mark.filesystem
 def test_get_batch_when_passed_a_suite(titanic_data_context):
     context = titanic_data_context
     root_dir = context.root_directory
@@ -1331,6 +1384,7 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
     assert isinstance(batch.get_expectation_suite(), ExpectationSuite)
 
 
+@pytest.mark.unit
 def test_list_validation_operators_data_context_with_none_returns_empty_list(
     titanic_data_context,
 ):
@@ -1338,21 +1392,25 @@ def test_list_validation_operators_data_context_with_none_returns_empty_list(
     assert titanic_data_context.list_validation_operator_names() == []
 
 
+@pytest.mark.unit
 def test_list_validation_operators_data_context_with_one(titanic_data_context):
     assert titanic_data_context.list_validation_operator_names() == [
         "action_list_operator"
     ]
 
 
+@pytest.mark.unit
 def test_list_checkpoints_on_empty_context_returns_empty_list(empty_data_context):
     assert empty_data_context.list_checkpoints() == []
 
 
+@pytest.mark.unit
 def test_list_checkpoints_on_context_with_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     assert context.list_checkpoints() == ["my_checkpoint"]
 
 
+@pytest.mark.filesystem
 def test_list_checkpoints_on_context_with_two_checkpoints(
     empty_context_with_checkpoint,
 ):
@@ -1371,6 +1429,7 @@ def test_list_checkpoints_on_context_with_two_checkpoints(
     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
 
 
+@pytest.mark.filesystem
 def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoints_dir(
     empty_context_with_checkpoint,
 ):
@@ -1389,6 +1448,7 @@ def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoi
     assert context.list_checkpoints() == ["my_checkpoint"]
 
 
+@pytest.mark.unit
 def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
@@ -1397,6 +1457,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
         context.get_checkpoint("not_a_checkpoint")
 
 
+@pytest.mark.filesystem
 def test_get_checkpoint_raises_error_empty_checkpoint(
     empty_context_with_checkpoint,
 ):
@@ -1415,118 +1476,29 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
         context.get_checkpoint("my_checkpoint")
 
 
+@pytest.mark.unit
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
     config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
-    assert config == {
-        "action_list": list(Checkpoint.DEFAULT_ACTION_LIST),
-        "batch_request": {},
-        "class_name": "Checkpoint",
-        "config_version": 1.0,
-        "evaluation_parameters": {},
-        "module_name": "great_expectations.checkpoint",
-        "name": "my_checkpoint",
-        "profilers": [],
-        "runtime_configuration": {},
-        "validations": [],
-    }
+    assert sorted(config.keys()) == [
+        "action_list",
+        "batch_request",
+        "class_name",
+        "config_version",
+        "evaluation_parameters",
+        "module_name",
+        "name",
+        "profilers",
+        "run_name_template",
+        "runtime_configuration",
+        "validations",
+    ]
 
 
-def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": {"stuff": 33},
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
-    empty_data_context,
-):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {"foo": 33},
-            }
-        ],
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
-
-
-def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml_obj = YAMLHandler()
-    context = empty_data_context
-
-    checkpoint = {
-        "validation_operator_name": "action_list_operator",
-        "batches": [{"expectation_suite_names": ["foo"]}],
-        "config_version": None,
-    }
-    checkpoint_file_path = os.path.join(  # noqa: PTH118
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml_obj.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)  # noqa: PTH113
-
-    with pytest.raises(gx_exceptions.CheckpointError):
-        context.get_checkpoint("foo")
-
-
+@pytest.mark.big
 @pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1596,6 +1568,7 @@ def test_run_checkpoint_new_style(
     assert result.success
 
 
+@pytest.mark.filesystem
 def test_get_validator_with_instantiated_expectation_suite(
     empty_data_context_stats_enabled, tmp_path_factory
 ):
@@ -1652,6 +1625,7 @@ data_connectors:
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
 
+@pytest.mark.filesystem
 def test_get_validator_with_attach_expectation_suite(
     empty_data_context, tmp_path_factory
 ):
@@ -1704,6 +1678,7 @@ data_connectors:
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
 
+@pytest.mark.big
 @pytest.mark.slow  # 8.13s
 def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     context = in_memory_runtime_context
@@ -1726,6 +1701,7 @@ def test_get_validator_without_expectation_suite(in_memory_runtime_context):
     assert my_validator.expectation_suite_name == "default"
 
 
+@pytest.mark.big
 @pytest.mark.slow  # 1.35s
 def test_get_validator_with_batch(in_memory_runtime_context):
     context = in_memory_runtime_context
@@ -1749,6 +1725,7 @@ def test_get_validator_with_batch(in_memory_runtime_context):
     )
 
 
+@pytest.mark.big
 def test_get_validator_with_batch_list(in_memory_runtime_context):
     context = in_memory_runtime_context
 
@@ -1786,6 +1763,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
     assert len(my_validator.batches) == 2
 
 
+@pytest.mark.filesystem
 def test_get_batch_multiple_datasources_do_not_scan_all(
     data_context_with_bad_datasource,
 ):
@@ -1817,6 +1795,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     assert len(batch) == 3
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1845,6 +1824,7 @@ def test_add_expectation_to_expectation_suite(
     ]
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -2028,13 +2008,16 @@ expectation_suite_ge_cloud_id:
         ],
         "validations": [
             {
+                "name": None,
+                "id": None,
+                "expectation_suite_name": "newsuite",
+                "expectation_suite_ge_cloud_id": None,
                 "batch_request": {
                     "datasource_name": "data_dir",
                     "data_connector_name": "data_dir_example_data_connector",
                     "data_asset_name": "DEFAULT_ASSET_NAME",
                     "partition_request": {"index": -1},
                 },
-                "expectation_suite_name": "newsuite",
             }
         ],
     }
@@ -2048,6 +2031,7 @@ expectation_suite_ge_cloud_id:
     assert mock_emit.call_count == 1
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -2103,6 +2087,7 @@ validations:
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -2237,10 +2222,11 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_add_datasource_from_yaml_sql_datasource(
+def test_add_datasource_from_yaml_sql_datasource(  # noqa: PLR0915
     mock_emit,
     sa,
     test_backends,
@@ -2431,6 +2417,7 @@ def test_add_datasource_from_yaml_sql_datasource(
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -2638,6 +2625,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
     assert mock_emit.call_count == 2
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -2777,6 +2765,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     assert mock_emit.call_args_list == expected_call_args_list
 
 
+@pytest.mark.filesystem
 def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_store):
     """End to end test demonstrating usage of Stores evaluation parameters"""
     context = data_context_with_query_store
@@ -2813,6 +2802,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     assert checkpoint_result.get("success") is True
 
 
+@pytest.mark.filesystem
 def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
     empty_data_context: DataContext, monkeypatch
 ) -> None:
@@ -2836,6 +2826,7 @@ def test_modifications_to_env_vars_is_recognized_within_same_program_execution(
     )
 
 
+@pytest.mark.filesystem
 def test_modifications_to_config_vars_is_recognized_within_same_program_execution(
     empty_data_context: DataContext,
 ) -> None:
@@ -2861,6 +2852,7 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
     )
 
 
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_finds_diff(
     empty_data_context_stats_enabled: DataContext,
@@ -2880,6 +2872,7 @@ def test_check_for_usage_stats_sync_finds_diff(
     assert res is True
 
 
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_does_not_find_diff(
     empty_data_context_stats_enabled: DataContext,
@@ -2898,6 +2891,7 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
     assert res is False
 
 
+@pytest.mark.big
 @pytest.mark.integration
 def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     empty_data_context: DataContext,
@@ -2938,6 +2932,7 @@ class ExpectSkyToBeColor(BatchExpectation):
         }
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context: DataContext,

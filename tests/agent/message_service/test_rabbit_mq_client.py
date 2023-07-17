@@ -4,6 +4,8 @@ from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def pika(mocker):

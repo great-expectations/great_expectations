@@ -3,12 +3,15 @@ import os
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
+from tests import test_utils
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
+# module level markers
+pytestmark = [pytest.mark.postgres]
 
 
 @pytest.mark.integration

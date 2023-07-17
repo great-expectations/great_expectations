@@ -1,7 +1,9 @@
 import logging
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from packaging.version import Version, parse as parse_version
+import pytest
+from packaging.version import Version
+from packaging.version import parse as parse_version
 
 from great_expectations.compatibility import pyspark
 
@@ -17,6 +19,9 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."
     )
+
+# module level markers
+pytestmark = [pytest.mark.spark]
 
 
 def test_current_pyspark_version_installed(spark_session):

@@ -89,7 +89,9 @@ class SerializableDataContext(AbstractDataContext):
         """
         raise NotImplementedError
 
-    def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
+    def _check_for_usage_stats_sync(  # noqa: PLR0911
+        self, project_config: DataContextConfig
+    ) -> bool:
         """
         If there are differences between the DataContextConfig used to instantiate
         the DataContext and the DataContextConfig assigned to `self.config`, we want
@@ -274,7 +276,7 @@ class SerializableDataContext(AbstractDataContext):
                 os.makedirs(plugins_dir, exist_ok=True)  # noqa: PTH103
                 os.makedirs(  # noqa: PTH103
                     os.path.join(plugins_dir, "custom_data_docs"),  # noqa: PTH118
-                    exist_ok=True,  # noqa: PTH118
+                    exist_ok=True,
                 )
                 os.makedirs(  # noqa: PTH103
                     os.path.join(  # noqa: PTH118
@@ -334,7 +336,7 @@ class SerializableDataContext(AbstractDataContext):
             )
             if os.path.isdir(  # noqa: PTH112
                 gx_home_environment
-            ) and os.path.isfile(  # noqa: PTH112, PTH113
+            ) and os.path.isfile(  # noqa: PTH113
                 os.path.join(gx_home_environment, cls.GX_YML)  # noqa: PTH118
             ):
                 result = gx_home_environment

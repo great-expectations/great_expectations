@@ -11,6 +11,7 @@ from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as gx
+from great_expectations.compatibility import trino
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
@@ -75,12 +76,13 @@ def datetime_dataset(test_backend):
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(
-    is_library_loadable(library_name="trino"),
+    trino.trino and is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
 )
 @pytest.mark.xfail(
     reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
 )
+@pytest.mark.external_sqldialect
 def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
     columns = datetime_dataset.get_table_columns()
     column_cache = {}
@@ -113,12 +115,13 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(
-    is_library_loadable(library_name="trino"),
+    trino.trino and is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
 )
 @pytest.mark.xfail(
     reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
 )
+@pytest.mark.external_sqldialect
 def test__create_expectations_for_datetime_column(datetime_dataset):
     column = "datetime"
 
@@ -140,6 +143,7 @@ def test__create_expectations_for_datetime_column(datetime_dataset):
     }
 
 
+@pytest.mark.unit
 def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_expectations(
     pandas_dataset,
 ):
@@ -153,6 +157,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_ex
         )
 
 
+@pytest.mark.unit
 def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_columns(
     pandas_dataset,
 ):
@@ -189,6 +194,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas
 @pytest.mark.filterwarnings(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
@@ -267,6 +273,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
 @pytest.mark.filterwarnings(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
+@pytest.mark.filesystem
 def test_context_profiler(filesystem_csv_data_context):
     """
     This just validates that it's possible to profile using the datasource hook,
@@ -333,6 +340,7 @@ def test_context_profiler(filesystem_csv_data_context):
     "ignore:String run_ids*:DeprecationWarning:great_expectations.profile.base"
 )
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.filesystem
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.
@@ -401,6 +409,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
@@ -620,6 +629,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
@@ -725,6 +735,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
@@ -794,6 +805,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
@@ -844,6 +856,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_columns", FALSEY_VALUES)
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
     included_columns, pandas_dataset, empty_data_context
 ):
@@ -881,6 +894,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
     included_expectations, pandas_dataset, empty_data_context
 ):
@@ -908,6 +922,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
     excluded_expectations, pandas_dataset, empty_data_context
 ):
@@ -1133,6 +1148,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
+@pytest.mark.filesystem
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
     excluded_columns, pandas_dataset, empty_data_context
 ):
@@ -1187,6 +1203,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_fals
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.unit
 def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_included_expectations_on_pandas(
     pandas_dataset,
 ):
@@ -1204,6 +1221,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_incl
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.unit
 def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excluded_expectations_on_pandas(
     pandas_dataset,
 ):
@@ -1224,6 +1242,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_not_real_expectations_in_excl
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.unit
 def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuration():
     """
     A snapshot regression test for BasicSuiteBuilderProfiler.

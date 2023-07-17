@@ -2,7 +2,6 @@
   "expectation_type": "expect_table_row_count_to_equal_other_table",
   "datasets": [
     {
-      "dataset_name": "expect_table_row_count_to_equal_other_table_data_0",
       "data": [
         {
           "dataset_name": "expect_table_row_count_to_equal_other_table_data_1",

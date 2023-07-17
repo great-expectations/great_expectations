@@ -2,9 +2,9 @@ import os
 
 import pytest
 
-import tests.test_utils as test_utils
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.util import instantiate_class_from_config
+from tests import test_utils
 
 
 @pytest.fixture(

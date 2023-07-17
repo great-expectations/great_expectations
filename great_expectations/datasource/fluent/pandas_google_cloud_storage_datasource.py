@@ -10,7 +10,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
     _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -22,6 +22,7 @@ from great_expectations.datasource.fluent.pandas_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.google import Client
     from great_expectations.datasource.fluent.file_path_data_asset import (
         _FilePathDataAsset,
     )
@@ -39,6 +40,12 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     data_connector_type: ClassVar[
         Type[GoogleCloudStorageDataConnector]
     ] = GoogleCloudStorageDataConnector
+    # these fields should not be passed to the execution engine
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "bucket_or_name",
+        "gcs_options",
+        "max_results",
+    }
 
     # instance attributes
     type: Literal["pandas_gcs"] = "pandas_gcs"
@@ -47,7 +54,8 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     bucket_or_name: str
     gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
-    _gcs_client: Union[google.Client, None] = pydantic.PrivateAttr(default=None)
+    # on 3.11 the annotation must be type-checking import otherwise it will fail at import time
+    _gcs_client: Union[Client, None] = pydantic.PrivateAttr(default=None)
 
     def _get_gcs_client(self) -> google.Client:
         gcs_client: Union[google.Client, None] = self._gcs_client
@@ -118,12 +126,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             for asset in self.assets:
                 asset.test_connection()
 
-    def _build_data_connector(
+    def _build_data_connector(  # noqa: PLR0913
         self,
         data_asset: _FilePathDataAsset,
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
+        gcs_recursive_file_discovery: bool = False,
         **kwargs,
     ) -> None:
         """Builds and attaches the `GoogleCloudStorageDataConnector` to the asset."""
@@ -140,6 +149,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix=gcs_prefix,
             delimiter=gcs_delimiter,
             max_results=gcs_max_results,
+            recursive_file_discovery=gcs_recursive_file_discovery,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -151,5 +161,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                 bucket_or_name=self.bucket_or_name,
                 prefix=gcs_prefix,
                 delimiter=gcs_delimiter,
+                recursive_file_discovery=gcs_recursive_file_discovery,
             )
         )

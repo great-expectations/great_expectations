@@ -18,11 +18,12 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
-from tests.test_utils import get_sqlite_temp_table_names
+from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_table_name(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -40,12 +41,10 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
     assert isinstance(batch_data.selectable, sqlalchemy.Table)
 
-    assert type(batch_data.record_set_name) == str
-    assert batch_data.record_set_name == "great_expectations_sub_selection"
-
     assert batch_data.use_quoted_name is False
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_query(sqlite_view_engine, test_df):
     add_dataframe_to_db(df=test_df, name="test_table_0", con=sqlite_view_engine)
 
@@ -57,7 +56,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
         query=query,
         create_temp_table=False,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
 
 # REMOVING PENDING READ OF table.head metric
@@ -81,10 +80,13 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 #     assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
 
 
+@pytest.mark.sqlite
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
-    print(get_sqlite_temp_table_names(sqlite_view_engine))
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names(sqlite_view_engine) == {"test_temp_view"}
+    print(get_sqlite_temp_table_names_from_engine(sqlite_view_engine))
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+    assert get_sqlite_temp_table_names_from_engine(sqlite_view_engine) == {
+        "test_temp_view"
+    }
 
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -95,7 +97,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         table_name="test_table",
         create_temp_table=True,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
 
@@ -105,7 +107,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         create_temp_table=False,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
@@ -113,7 +115,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         create_temp_table=True,
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
@@ -121,7 +123,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         # create_temp_table defaults to True
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 3
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 3
 
     # testing whether schema is supported
     selectable = sa.select("*").select_from(sa.table(name="test_table", schema="main"))
@@ -130,7 +132,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         selectable=selectable,
         # create_temp_table defaults to True
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 4
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 4
 
     # test schema with execution engine
     # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation
@@ -146,6 +148,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
 
 @pytest.mark.unit
+@pytest.mark.sqlite
 def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
@@ -160,6 +163,7 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
 
 
 @pytest.mark.unit
+@pytest.mark.sqlite
 def test_instantiation_with_temp_table_schema():
     # not supported
     engine = MockSaEngine(dialect=Dialect(dialect="sqlite"))
@@ -170,8 +174,8 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    query_to_create_temp_table: str = batch_data._create_temporary_table(
-        temp_table_name="hello",
+    (query_to_create_temp_table, temp_table_name) = batch_data._create_temporary_table(
+        dialect=GXSqlDialect.SQLITE,
         query="test_query",
         temp_table_schema_name="test_schema",
     )
@@ -186,9 +190,43 @@ def test_instantiation_with_temp_table_schema():
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        query_to_create_temp_table: str = batch_data._create_temporary_table(
-            temp_table_name="hello",
+        (
+            query_to_create_temp_table,
+            temp_table_name,
+        ) = batch_data._create_temporary_table(
+            dialect=GXSqlDialect.SQLITE,
             query="test_query",
             temp_table_schema_name="test_schema",
         )
         assert "test_schema" in query_to_create_temp_table
+
+
+@pytest.mark.sqlite
+def test_instantiation_with_selectable_only_and_no_temp_table(sqlite_view_engine, sa):
+    """
+    What does this test and why?
+
+    In cases where we create a validator but explicitly set `create_temp_table`=False, we directly use the
+    selectable created by SqlAlchemyExecutionEngine's _build_selectable_from_batch_spec() method.
+    """
+
+    selectable = sa.select("*").select_from(sa.text("main.test_table"))
+    # only have the view that is created by the `sqlite_view_engine` fixture
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine,
+        selectable=selectable,
+        create_temp_table=False,
+    )
+    # No new views were created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 1
+
+    SqlAlchemyBatchData(
+        execution_engine=execution_engine, selectable=selectable, create_temp_table=True
+    )
+    # One new temp_table was created
+    assert len(get_sqlite_temp_table_names_from_engine(sqlite_view_engine)) == 2

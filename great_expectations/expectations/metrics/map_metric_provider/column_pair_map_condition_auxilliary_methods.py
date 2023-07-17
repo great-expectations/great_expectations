@@ -187,7 +187,7 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     unexpected_list = [
         (val.unexpected_values_A, val.unexpected_values_B)
-        for val in execution_engine.engine.execute(query).fetchall()
+        for val in execution_engine.execute_query(query).fetchall()
     ]
     return unexpected_list
 
@@ -222,7 +222,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
-    return execution_engine.engine.execute(
+    return execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(selectable)
     ).scalar()
 

@@ -22,7 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.self_check.util import build_sa_engine
+from great_expectations.self_check.util import build_sa_execution_engine
 from great_expectations.util import import_library_module
 
 try:
@@ -30,7 +30,10 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @pytest.mark.parametrize(
@@ -264,7 +267,7 @@ def test_sqlite_sample_using_limit(sa):
         ),
     )
     df: pd.DataFrame = pd.read_csv(csv_path)
-    engine: SqlAlchemyExecutionEngine = build_sa_engine(df, sa)
+    engine: SqlAlchemyExecutionEngine = build_sa_execution_engine(df, sa)
 
     n: int = 10
     batch_spec: SqlAlchemyDatasourceBatchSpec = SqlAlchemyDatasourceBatchSpec(
@@ -276,14 +279,14 @@ def test_sqlite_sample_using_limit(sa):
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.engine.execute(
+    num_rows: int = batch_data.execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.engine.execute(
+        batch_data.execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
         .mappings()
@@ -324,22 +327,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
+    rows_0: List[tuple] = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
+    rows_1: List[tuple] = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
@@ -363,22 +366,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_0 = batch_data.execution_engine.engine.execute(
+    rows_0 = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.engine.execute(
+    num_rows = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_1 = batch_data.execution_engine.engine.execute(
+    rows_1 = batch_data.execution_engine.execute_query(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 

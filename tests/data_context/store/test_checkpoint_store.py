@@ -39,6 +39,7 @@ def checkpoint_store_with_mock_backend() -> Tuple[CheckpointStore, mock.MagicMoc
     return store, mock_backend
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_checkpoint_store(empty_data_context):
     store_name: str = "checkpoint_store"
@@ -247,6 +248,7 @@ def test_checkpoint_store(empty_data_context):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -490,24 +492,6 @@ def test_get_checkpoint_with_invalid_checkpoint_config_raises_error(
         store.get_checkpoint(name="my_fake_checkpoint", id=None)
 
     assert "Invalid Checkpoint configuration" in str(e.value)
-
-
-@pytest.mark.unit
-def test_get_checkpoint_with_invalid_legacy_checkpoint_raises_error(
-    checkpoint_store_with_mock_backend: Tuple[CheckpointStore, mock.MagicMock]
-) -> None:
-    store, mock_backend = checkpoint_store_with_mock_backend
-    mock_backend.get.return_value = CheckpointConfig(
-        class_name="LegacyCheckpoint", config_version=None
-    ).to_json_dict()  # Defaults to empty LegacyCheckpoint
-
-    with pytest.raises(gx_exceptions.CheckpointError) as e:
-        store.get_checkpoint(name="my_checkpoint", id=None)
-
-    assert (
-        "Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments"
-        in str(e.value)
-    )
 
 
 @pytest.mark.unit

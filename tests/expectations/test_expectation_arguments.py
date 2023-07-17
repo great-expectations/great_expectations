@@ -40,6 +40,7 @@ def test_spark_df(test_pandas_df, spark_session):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_no_exceptions(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -154,6 +155,7 @@ def test_catch_exceptions_no_exceptions(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -271,6 +273,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -420,6 +423,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_result_format_configured_no_set_default_override(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -642,6 +646,7 @@ def test_result_format_configured_no_set_default_override(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.spark
 def test_result_format_configured_with_set_default_override(
     mock_emit, in_memory_runtime_context, test_spark_df
 ):
@@ -811,6 +816,7 @@ def test_result_format_configured_with_set_default_override(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.filesystem
 def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     mock_emit, in_memory_runtime_context, test_pandas_df
 ):
@@ -820,6 +826,7 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
     handler = UsageStatisticsHandler(
         data_context=context,
         data_context_id=context._data_context_id,
+        oss_id=None,
         usage_statistics_url="http://fakeendpoint.com",
     )
     context._usage_statistics_handler = handler

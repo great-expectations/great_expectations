@@ -108,9 +108,7 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param(
-                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
-            ),
+            param("read_fwf"),
             param("read_gbq", marks=pytest.mark.xfail(reason="not path based")),
             param("read_hdf"),
             param("read_html"),
@@ -583,6 +581,9 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert expected_year_month == batch_year_month
 
 
+@pytest.mark.timeout(
+    6.0  # this test can take longer than the default timeout, try to reduce it
+)
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "order_by",
@@ -669,7 +670,7 @@ def test_pandas_sorter(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "batch_slice,expected_batch_count",
+    "batch_slice, expected_batch_count",
     [
         ("[-3:]", 3),
         ("[5:9]", 4),
@@ -760,6 +761,9 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error)
 
 
+@pytest.mark.timeout(
+    5,  # deepcopy operation can be slow. Try to eliminate it in the future.
+)
 @pytest.mark.unit
 def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,

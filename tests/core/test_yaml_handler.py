@@ -49,6 +49,7 @@ def test_load_incorrect_input(yaml_handler: YAMLHandler) -> None:
         yaml_handler.load(12345)
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 def test_file_output(tmp_path: Path, yaml_handler: YAMLHandler) -> None:
     simplest_yaml: str = "abc: 1"

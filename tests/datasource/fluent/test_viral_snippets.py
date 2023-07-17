@@ -5,18 +5,19 @@ import logging
 import pathlib
 import random
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
 from great_expectations import get_context
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context import CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
+    from pytest_mock import MockerFixture
+
     from great_expectations.datasource.fluent import SqliteDatasource
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -187,10 +188,7 @@ def test_sources_delete_removes_datasource_from_yaml(
 ):
     print(f"Delete -> '{random_datasource.name}'\n")
 
-    ds_delete_method: Callable[[str], None] = getattr(
-        seeded_file_context.sources, f"delete_{random_datasource.type}"
-    )
-    ds_delete_method(random_datasource.name)
+    seeded_file_context.sources.delete(random_datasource.name)
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
@@ -217,8 +215,12 @@ def test_ctx_delete_removes_datasource_from_yaml(
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
 
 
-def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext):
-    context = seeded_file_context
+def test_checkpoint_with_validator_workflow(
+    seeded_contexts: CloudDataContext | FileDataContext,
+):
+    context = seeded_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
 
     datasource_name = "sqlite_taxi"
     asset_name = "my_asset"
@@ -237,8 +239,13 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
 
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
 
-    assert checkpoint.validations == [
+    actual_validations = [v.to_dict() for v in checkpoint.validations]
+    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
+
+    assert actual_validations == [
         {
+            "name": None,
+            "id": None,
             "batch_request": {
                 "data_asset_name": asset_name,
                 "datasource_name": datasource_name,
@@ -246,6 +253,7 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
                     "month": month,
                     "year": year,
                 },
+                "batch_slice": None,
             },
             "expectation_suite_name": "default",
         },
@@ -254,6 +262,52 @@ def test_checkpoint_with_validator_workflow(seeded_file_context: FileDataContext
     result = checkpoint.run()
 
     assert result.success
+
+
+def test_quickstart_workflow(
+    empty_contexts: CloudDataContext | FileDataContext,
+    csv_path: pathlib.Path,
+    mocker: MockerFixture,
+):
+    """
+    What does this test do and why?
+
+    Tests the Quickstart workflow noted in our docs: https://docs.greatexpectations.io/docs/tutorials/quickstart/
+
+    In particular, this test covers the file-backend and cloud-backed usecases with this script.
+    The ephemeral usecase is covered in: tests/integration/docusaurus/tutorials/quickstart/quickstart.py
+    """
+    # Slight deviation from the Quickstart here:
+    #   1. Using existing contexts instead of `get_context`
+    #   2. Using `read_csv` on a local file instead of making a network request
+    #
+    # These changes should be functionally equivalent to the real workflow but be better for testing
+    context = empty_contexts
+    if isinstance(context, CloudDataContext):
+        pytest.xfail("Checkpoint run fails in some cases on GE Cloud")
+
+    filepath = csv_path / "yellow_tripdata_sample_2019-01.csv"
+    assert filepath.exists()
+
+    validator = context.sources.pandas_default.read_csv(filepath)
+
+    # Create Expectations
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
+    validator.save_expectation_suite()
+
+    # Validate data
+    checkpoint = context.add_or_update_checkpoint(
+        name="my_quickstart_checkpoint",
+        validator=validator,
+    )
+    checkpoint_result = checkpoint.run()
+
+    # View results
+    mock_open = mocker.patch("webbrowser.open")
+    context.view_validation_result(checkpoint_result)
+
+    mock_open.assert_called_once()
 
 
 if __name__ == "__main__":

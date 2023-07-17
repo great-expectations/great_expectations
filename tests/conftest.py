@@ -112,6 +112,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark
+    from great_expectations.compatibility.sqlalchemy import Engine
 
 yaml = YAMLHandler()
 ###
@@ -129,7 +130,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")
+    pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = get_or_create_spark_application(
@@ -232,6 +233,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against snowflake",
     )
     parser.addoption(
+        "--clickhouse",
+        action="store_true",
+        help="If set, execute tests against clickhouse",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -296,6 +302,7 @@ def build_test_backends_list_v3_api(metafunc):
     include_redshift: bool = metafunc.config.getoption("--redshift")
     include_athena: bool = metafunc.config.getoption("--athena")
     include_snowflake: bool = metafunc.config.getoption("--snowflake")
+    include_clickhouse: bool = metafunc.config.getoption("--clickhouse")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -310,6 +317,7 @@ def build_test_backends_list_v3_api(metafunc):
         include_redshift=include_redshift,
         include_athena=include_athena,
         include_snowflake=include_snowflake,
+        include_clickhouse=include_clickhouse,
     )
     return test_backend_names
 
@@ -800,11 +808,9 @@ def postgresql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"postgresql://postgres@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -818,11 +824,9 @@ def mysql_engine(test_backend):
             import sqlalchemy as sa
 
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            engine = sa.create_engine(
-                f"mysql+pymysql://root@{db_hostname}/test_ci"
-            ).connect()
+            engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
             yield engine
-            engine.close()
+            engine.dispose()
         except ImportError:
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
@@ -1644,7 +1648,8 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     df = pd.read_csv(filepath_or_buffer=csv_source_path)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1698,7 +1703,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2068,7 +2074,8 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+    asset = datasource.add_dataframe_asset(name=dataframe_asset_name)
+    _ = asset.build_batch_request(dataframe=spark_df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -2306,7 +2313,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 @pytest.fixture(scope="module")
 def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
     try:
-        from pyspark.sql import DataFrame
+        from pyspark.sql import DataFrame  # noqa: TCH002
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -2971,7 +2978,7 @@ def evr_success():
 
 
 @pytest.fixture
-def sqlite_view_engine(test_backends):
+def sqlite_view_engine(test_backends) -> Engine:
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
         try:
@@ -3593,10 +3600,11 @@ def cloud_data_context_with_datasource_pandas_engine(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         side_effect=set_side_effect,
     ):
-        context.add_datasource(
-            "my_datasource",
-            **config,
-        )
+        with pytest.deprecated_call():  # non-FDS datasources discouraged in Cloud
+            context.add_datasource(
+                "my_datasource",
+                **config,
+            )
     return context
 
 
@@ -4332,7 +4340,10 @@ def alice_columnar_table_single_batch_context(
     # <WILL> 20220630 - this is part of the DataContext Refactor and will be removed
     # (ie. adjusted to be context._usage_statistics_handler)
     context._usage_statistics_handler = UsageStatisticsHandler(
-        context, "00000000-0000-0000-0000-00000000a004", "N/A"
+        data_context=context,
+        data_context_id="00000000-0000-0000-0000-00000000a004",
+        usage_statistics_url="N/A",
+        oss_id=None,
     )
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
@@ -7806,11 +7817,12 @@ def multibatch_generic_csv_generator():
     """
 
     def _multibatch_generic_csv_generator(
-        data_path: str,
+        data_path: str | pathlib.Path,
         start_date: Optional[datetime.datetime] = None,
         num_event_batches: Optional[int] = 20,
         num_events_per_batch: Optional[int] = 5,
     ) -> List[str]:
+        data_path = pathlib.Path(data_path)
         if start_date is None:
             start_date = datetime.datetime(2000, 1, 1)
 
@@ -7848,7 +7860,7 @@ def multibatch_generic_csv_generator():
             file_list.append(filename)
             # noinspection PyTypeChecker
             df.to_csv(
-                os.path.join(data_path, filename),  # noqa: PTH118
+                data_path / filename,
                 index_label="intra_batch_index",
             )
 

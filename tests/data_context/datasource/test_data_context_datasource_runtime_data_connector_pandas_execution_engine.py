@@ -1,6 +1,5 @@
-from typing import Dict, List
+from typing import TYPE_CHECKING, Dict, List
 
-import pandas as pd
 import pytest
 
 import great_expectations
@@ -12,6 +11,9 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    import pandas as pd
+
 yaml = YAMLHandler()
 
 #########################################
@@ -20,6 +22,7 @@ yaml = YAMLHandler()
 
 
 # Tests with PandasExecutionEngine : batch_data
+@pytest.mark.unit
 def test_batch_data_get_batch_successful_specification_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -39,6 +42,7 @@ def test_batch_data_get_batch_successful_specification_pandas_engine(
     assert isinstance(batch_list[0], Batch)
 
 
+@pytest.mark.unit
 def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -61,6 +65,7 @@ def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset
     assert batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
+@pytest.mark.unit
 def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset_two_batch_requests(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -98,6 +103,7 @@ def test_batch_data_get_batch_successful_specification_pandas_engine_named_asset
     assert batch_2.batch_definition.batch_identifiers == batch_identifiers
 
 
+@pytest.mark.unit
 def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -119,6 +125,7 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_pandas_engine(
         )
 
 
+@pytest.mark.unit
 def test_batch_data_get_validator_successful_specification_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -140,6 +147,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine(
     assert isinstance(my_validator, Validator)
 
 
+@pytest.mark.unit
 def test_batch_data_get_validator_successful_specification_pandas_engine_named_asset(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -167,6 +175,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine_named_a
     )
 
 
+@pytest.mark.unit
 def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -194,6 +203,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
         )
 
 
+@pytest.mark.unit
 def test_get_validator_wrong_type_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -218,6 +228,7 @@ def test_get_validator_wrong_type_pandas_engine(
         )
 
 
+@pytest.mark.unit
 def test_batch_data_get_validator_wrong_runtime_parameters_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
 ):
@@ -247,6 +258,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_pandas_engine(
 
 
 # Tests with Pandas Execution Engine
+@pytest.mark.filesystem
 def test_file_path_get_batch_successful_specification_pandas(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
@@ -272,6 +284,7 @@ def test_file_path_get_batch_successful_specification_pandas(
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
+@pytest.mark.filesystem
 def test_file_path_get_batch_successful_specification_pandas_file_path_no_headers(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
@@ -300,6 +313,7 @@ def test_file_path_get_batch_successful_specification_pandas_file_path_no_header
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
+@pytest.mark.filesystem
 def test_file_path_get_batch_pandas_not_supported_directory(
     data_context_with_datasource_pandas_engine, taxi_test_file_directory
 ):
@@ -318,6 +332,7 @@ def test_file_path_get_batch_pandas_not_supported_directory(
         )
 
 
+@pytest.mark.filesystem
 def test_get_batch_pandas_wrong_path(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
@@ -334,6 +349,7 @@ def test_get_batch_pandas_wrong_path(data_context_with_datasource_pandas_engine)
         )
 
 
+@pytest.mark.filesystem
 def test_file_path_get_batch_pandas_wrong_reader_method(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
@@ -353,6 +369,7 @@ def test_file_path_get_batch_pandas_wrong_reader_method(
         )
 
 
+@pytest.mark.filesystem
 def test_file_path_get_batch_successful_specification_pandas_engine_named_asset(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
@@ -374,6 +391,7 @@ def test_file_path_get_batch_successful_specification_pandas_engine_named_asset(
     assert batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
+@pytest.mark.filesystem
 def test_file_path_get_batch_successful_specification_pandas_engine_named_asset_two_batch_requests(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
@@ -410,6 +428,7 @@ def test_file_path_get_batch_successful_specification_pandas_engine_named_asset_
     assert batch_2.batch_definition.batch_identifiers == batch_identifiers
 
 
+@pytest.mark.filesystem
 def test_file_path_get_validator_successful_specification_pandas_engine_named_asset(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
