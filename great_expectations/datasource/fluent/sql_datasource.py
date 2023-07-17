@@ -904,7 +904,7 @@ class TableAsset(_SQLAsset):
         "self.table_name" exists (i.e., if inspection finds this name, identical, possibly short of quotation marks), in
         database schema), then quoted version of supplied "self.table_name" is returned, and this property is updated.
         """
-        table_exists: bool = sa.inspect(engine).has_table(
+        table_exists: bool = inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
