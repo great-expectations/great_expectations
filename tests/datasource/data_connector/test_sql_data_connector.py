@@ -1726,6 +1726,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     assert len(batch_definition_list) == 1
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_no_splitter_no_sampler(
@@ -1770,6 +1771,7 @@ def test_simple_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_w
     assert len(validator.head(fetch_all=True)) == 123
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnector_with_default_splitter_sampler_asset_override(
@@ -1829,6 +1831,7 @@ def test_full_config_instantiation_and_execution_of_ConfiguredAssetSqlDataConnec
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("splitter_method_name_prefix", ["_", ""])
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnector_with_default_splitter_sampler_asset_override(
@@ -1891,6 +1894,7 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
     assert len(validator.head(fetch_all=True)) == 5
 
 
+@pytest.mark.sqlite
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
@@ -2061,6 +2065,7 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
     assert last_3_batch_identifiers_actual == last_3_batch_identifiers_expected
 
 
+@pytest.mark.sqlite
 @pytest.mark.integration
 @pytest.mark.parametrize(
     "data_connector_yaml,expected_batch_identifiers_list",
@@ -2151,6 +2156,7 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
     assert expected == sorted_batch_definition_list
 
 
+@pytest.mark.sqlite
 @pytest.mark.integration
 def test_introspect_db(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
@@ -2473,6 +2479,7 @@ def test_introspect_db(
     ]
 
 
+@pytest.mark.mysql
 @pytest.mark.integration
 def test_include_schema_name_introspection(mysql_engine):
     execution_engine = SqlAlchemyExecutionEngine(
@@ -2515,6 +2522,7 @@ def test_include_schema_name_introspection(mysql_engine):
         } in introspected_tables
 
 
+@pytest.mark.mysql
 @pytest.mark.integration
 def test_include_schema_name_get_available_data_assets(
     mysql_engine,
