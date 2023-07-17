@@ -3,8 +3,8 @@ from typing import Literal, Sequence, Union
 from pydantic import BaseModel, Extra, Field
 from typing_extensions import Annotated
 
-from great_expectations.experimental.column_descriptive_metrics.asset_inspector_agent_action import (
-    RunAssetInspectorEvent,
+from great_expectations.experimental.column_descriptive_metrics.batch_inspector_agent_action import (
+    RunBatchInspectorEvent,
 )
 
 
@@ -39,7 +39,7 @@ Event = Annotated[
     Union[
         RunOnboardingDataAssistantEvent,
         RunCheckpointEvent,
-        RunAssetInspectorEvent,
+        RunBatchInspectorEvent,
         UnknownEvent,
     ],
     Field(discriminator="type"),

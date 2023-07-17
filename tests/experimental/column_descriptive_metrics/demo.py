@@ -6,7 +6,7 @@ import uuid
 from unittest import mock
 
 import pytest
-from great_expectations.experimental.column_descriptive_metrics.asset_inspector import (
+from great_expectations.experimental.column_descriptive_metrics.batch_inspector import (
     BatchInspector,
 )
 from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
@@ -38,7 +38,7 @@ def run_id() -> uuid.UUID:
     return uuid.UUID("2a24847b-dae4-43c7-8027-1bd1cd572690")
 
 
-def test_demo_asset_inspector(
+def test_demo_batch_inspector(
     cloud_org_id: uuid.UUID, metric_id: uuid.UUID, run_id: uuid.UUID
 ):
     """This is a demo of how to get column descriptive metrics,
@@ -91,8 +91,8 @@ def test_demo_asset_inspector(
         f"{MetricConverter.__module__}.{MetricConverter.__name__}._generate_metric_id",
         return_value=metric_id,
     ):
-        asset_inspector = BatchInspector(organization_id=cloud_org_id)
-        metrics = asset_inspector.get_column_descriptive_metrics(
+        batch_inspector = BatchInspector(organization_id=cloud_org_id)
+        metrics = batch_inspector.get_column_descriptive_metrics(
             batch=batch_from_action
         )
 

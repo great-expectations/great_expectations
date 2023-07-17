@@ -2,7 +2,7 @@ from typing import Literal
 
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.models import CreatedResource, EventBase
-from great_expectations.experimental.column_descriptive_metrics.asset_inspector import (
+from great_expectations.experimental.column_descriptive_metrics.batch_inspector import (
     BatchInspector,
 )
 from great_expectations.experimental.column_descriptive_metrics.cloud_data_store import (
@@ -13,18 +13,18 @@ from great_expectations.experimental.column_descriptive_metrics.column_descripti
 )
 
 
-class RunAssetInspectorEvent(EventBase):
+class RunBatchInspectorEvent(EventBase):
     type: Literal[
-        "asset_inspector_request.received"
-    ] = "asset_inspector_request.received"
+        "batch_inspector_request.received"
+    ] = "batch_inspector_request.received"
     datasource_name: str
     data_asset_name: str
     batch_name: str
 
 
-class RunAssetInspectorAction(AgentAction[RunAssetInspectorEvent]):
-    def run(self, event: RunAssetInspectorEvent, id: str) -> ActionResult:
-        asset_inspector = BatchInspector(organization_id=self._context.organization_id)
+class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
+    def run(self, event: RunBatchInspectorEvent, id: str) -> ActionResult:
+        batch_inspector = BatchInspector(organization_id=self._context.organization_id)
 
         datasource_from_action = self._context.get_datasource(event.datasource_name)
         data_asset_from_action = datasource_from_action.get_asset(event.data_asset_name)
@@ -35,7 +35,7 @@ class RunAssetInspectorAction(AgentAction[RunAssetInspectorEvent]):
         )[0]
         # TODO: Emit warning if more than one batch that we are only using the first one.
 
-        metrics = asset_inspector.get_column_descriptive_metrics(
+        metrics = batch_inspector.get_column_descriptive_metrics(
             batch=batch_from_action
         )
 
