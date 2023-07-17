@@ -26,6 +26,7 @@ class Value(CDMRBaseModel):
     value: Any  # TODO: Better than Any
 
 
+# TODO: Does BatchPointer add value at this time or should it be flattened?
 class BatchPointer(CDMRBaseModel):  # TODO: Better name
     datasource_name: str = Field(description="Datasource name")
     data_asset_name: str = Field(description="Data asset name")
