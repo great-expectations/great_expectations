@@ -42,7 +42,7 @@ A Data Context includes basic create, read, update, and delete (CRUD) operations
 
 The Data Context doesn't just give you convenient ways to access and configure components.  It also provides the ability to *create* top-level components such as Datasources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-For production deployments you will want to define these components according to your source data systems and production environment.  This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and source data systems, see [Reference Architecture guides](/docs/category/integrations.md).
+For production deployments you will want to define these components according to your source data systems and production environment.  This may include storing information about those components in something other than your local environment. To view implementation examples for specific environments and source data systems, see [Reference Architecture guides](https://docs.greatexpectations.io/docs/category/integrations).
 
 If the exact deployment pattern you want to follow isn't documented in a Reference Architecture, you can see details for configuring specific components that component's related how-to guides.
 
