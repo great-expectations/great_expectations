@@ -15,25 +15,28 @@ def get_extras_require():
         "gcp": "bigquery",
         "s3": "boto",
     }
+    sqla1x_only_keys = (
+        "bigquery",  # https://github.com/googleapis/python-bigquery-sqlalchemy/blob/main/setup.py
+        "clickhouse",  # https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/setup.py
+        "redshift",  # https://github.com/sqlalchemy-redshift/sqlalchemy-redshift/blob/main/setup.py
+        "snowflake",  # https://github.com/snowflakedb/snowflake-sqlalchemy/blob/main/setup.cfg
+        "teradata",  # https://pypi.org/project/teradatasqlalchemy   https://support.teradata.com/knowledge?id=kb_article_view&sys_kb_id=a5a869149729251ced863fe3f153af27
+    )
     sqla_keys = (
-        "athena",
-        "bigquery",
-        "clickhouse",
-        "dremio",
-        "mssql",
-        "mysql",
-        "postgresql",
-        "redshift",
-        "snowflake",
-        "teradata",
-        "trino",
-        "vertica",
+        "athena",  # https://github.com/laughingman7743/PyAthena/blob/master/pyproject.toml
+        "dremio",  # https://github.com/narendrans/sqlalchemy_dremio/blob/master/setup.py
+        "hive",  # https://github.com/dropbox/PyHive/blob/master/setup.py
+        "mssql",  # https://github.com/mkleehammer/pyodbc/blob/master/setup.py
+        "mysql",  # https://github.com/PyMySQL/PyMySQL/blob/main/pyproject.toml
+        "postgresql",  # https://github.com/psycopg/psycopg2/blob/master/setup.py
+        "trino",  # https://github.com/trinodb/trino-python-client/blob/master/setup.py
+        "vertica",  # https://github.com/bluelabsio/sqlalchemy-vertica-python/blob/master/setup.py
     )
     ignore_keys = (
         "sqlalchemy",
         "test",
         "tools",
-        "sqlalchemy-alchemy-less-than-2" "all-contrib-expectations",
+        "all-contrib-expectations",
     )
 
     requirements_dir = "reqs"
@@ -58,20 +61,24 @@ def get_extras_require():
     contrib = results.pop("contrib")
     docs_test = results.pop("api-docs-test")
     cloud = results["cloud"]
-    arrow = results.pop("arrow")
+    arrow = results["arrow"]
     results["boto"] = [req for req in lite if req.startswith("boto")]
-    results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
+    results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
     results["test"] = lite + contrib + docs_test + cloud + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
+    for key in sqla1x_only_keys:
+        results[key] += results["sqlalchemy1"]
     for key in sqla_keys:
-        results[key] += results["sqlalchemy"]
+        results[key] += results["sqlalchemy2"]
 
     results.pop("boto")
-    all_requirements_set = set()
-    [all_requirements_set.update(vals) for vals in results.values()]
-    results["dev"] = sorted(all_requirements_set)
+    results.pop("sqlalchemy1")
+    results.pop("sqlalchemy2")
+    # all_requirements_set = set()
+    # [all_requirements_set.update(vals) for vals in results.values()]
+    # results["dev"] = sorted(all_requirements_set)
     return results
 
 

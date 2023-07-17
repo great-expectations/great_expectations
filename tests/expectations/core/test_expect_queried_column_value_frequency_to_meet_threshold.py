@@ -46,6 +46,7 @@ sqlite_batch_request: BatchRequest = BatchRequest(
     ],
 )
 @pytest.mark.slow  # 3.02s
+@pytest.mark.filesystem
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
@@ -130,6 +131,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     ],
 )
 @pytest.mark.slow  # 3.92s
+@pytest.mark.filesystem
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     query,
@@ -180,6 +182,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
         (True, 0.6614626129827444, 'col("Age")>17', True),
     ],
 )
+@pytest.mark.spark
 def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     success,
     observed,
@@ -246,6 +249,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
         ),
     ],
 )
+@pytest.mark.spark
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_spark(
     query,
     success,
@@ -295,6 +299,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     )
 
 
+@pytest.mark.big
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite_multi_value(
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):

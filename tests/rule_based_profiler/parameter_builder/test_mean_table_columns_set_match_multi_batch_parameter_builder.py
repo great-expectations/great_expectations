@@ -19,8 +19,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
+# module level markers
+pytestmark = [pytest.mark.integration]
 
-@pytest.mark.integration
+
 def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -37,7 +39,6 @@ def test_instantiation_mean_table_columns_set_match_multi_batch_parameter_builde
     )
 
 
-@pytest.mark.integration
 def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

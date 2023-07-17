@@ -12,6 +12,7 @@ except ImportError:
     MultiPolygon = None
 
 
+@pytest.mark.unit
 @pytest.mark.skipif(Polygon is None, reason="Requires shapely.geometry.Polygon")
 def test_serialization_of_shapely_polygon():
     polygon = Polygon([(0, 0), (2, 0), (2, 2), (0, 2)])
@@ -20,6 +21,7 @@ def test_serialization_of_shapely_polygon():
     )
 
 
+@pytest.mark.unit
 @pytest.mark.skipif(
     any([MultiPolygon is None, Polygon is None]),
     reason="Requires shapely.geometry.Polygon and MultiPolygon",
@@ -32,23 +34,27 @@ def test_serialization_of_shapely_multipolygon():
     )
 
 
+@pytest.mark.unit
 @pytest.mark.skipif(Point is None, reason="Requires shapely.geometry.Point")
 def test_serialization_of_shapely_point():
     point = Point(1, 2)
     assert convert_to_json_serializable(point) == "POINT (1 2)"
 
 
+@pytest.mark.unit
 @pytest.mark.skipif(LineString is None, reason="Requires shapely.geometry.LineString")
 def test_serialization_of_shapely_linestring():
     point = LineString([(0, 0), (1, 1), (1, -1)])
     assert convert_to_json_serializable(point) == "LINESTRING (0 0, 1 1, 1 -1)"
 
 
+@pytest.mark.unit
 def test_serialization_of_bytes():
     data = b"\xC0\xA8\x00\x01"
     assert convert_to_json_serializable(data) == "b'\\xc0\\xa8\\x00\\x01'"
 
 
+@pytest.mark.unit
 def test_serialization_numpy_datetime():
     datetime_to_test = "2022-12-08T12:56:23.423"
     data = np.datetime64(datetime_to_test)

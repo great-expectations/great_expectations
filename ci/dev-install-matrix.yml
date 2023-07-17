@@ -26,8 +26,7 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
-            pip install .
+            pip install --constraint constraints-dev.txt ".[test]"
           displayName: 'Install dependencies'
 
         - script: |
@@ -69,11 +68,7 @@ jobs:
           displayName: 'Checkout latest tag'
 
         - script: |
-            pip install \
-              --requirement requirements.txt \
-              --requirement reqs/requirements-dev-test.txt \
-              --constraint constraints-dev.txt \
-              --editable .
+            pip install --constraint constraints-dev.txt --editable ".[test]"
           displayName: 'Install dependencies'
 
         - script: |

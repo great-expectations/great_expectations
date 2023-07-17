@@ -54,6 +54,7 @@ def generate_messages_with_defaults(
     return output_list
 
 
+@pytest.mark.unit
 def test_generate_messages_with_defaults():
     defaults = {
         "success": True,
@@ -2887,7 +2888,7 @@ for message_type, messages in valid_usage_statistics_messages.items():
         message_test_ids += [f"{message_type}_{idx}"]
 
 
-@pytest.mark.aws_integration
+@pytest.mark.aws_creds
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(
     message: dict, requests_session_with_retries: requests.Session

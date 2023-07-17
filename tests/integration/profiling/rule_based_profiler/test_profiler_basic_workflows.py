@@ -71,6 +71,7 @@ def data_context_with_taxi_data(empty_data_context):
     return context
 
 
+@pytest.mark.big
 def test_domain_builder(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -147,6 +148,7 @@ def test_domain_builder(data_context_with_taxi_data):
     ]
 
 
+@pytest.mark.big
 def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -193,6 +195,7 @@ def test_add_rule_and_run_profiler(data_context_with_taxi_data):
     assert len(expectation_configurations) == 4
 
 
+@pytest.mark.big
 def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     """
     What does this test and why?
@@ -248,6 +251,7 @@ def test_profiler_parameter_builder_added(data_context_with_taxi_data):
     assert len(expectation_configurations) == 4
 
 
+@pytest.mark.big
 def test_profiler_save_and_load(data_context_with_taxi_data):
     """
     What does this test and why?
