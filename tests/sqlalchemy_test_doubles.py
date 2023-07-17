@@ -8,9 +8,6 @@ class MockSaInspector:
     def get_columns(self) -> List[Dict[str, Any]]:  # type: ignore[empty-body]
         ...
 
-    def get_columns(self) -> List[Dict[str, Any]]:  # type: ignore[empty-body]
-        ...
-
     def get_schema_names(self) -> List[str]:  # type: ignore[empty-body]
         ...
 
