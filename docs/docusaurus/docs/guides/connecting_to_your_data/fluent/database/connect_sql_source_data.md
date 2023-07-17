@@ -24,6 +24,7 @@ Use the information provided here to connect to Source Data stored on SQL databa
   {label: 'SQL', value:'sql'},
   {label: 'PostgreSQL', value:'postgresql'},
   {label: 'SQLite', value:'sqlite'},
+  {label: 'Snowflake', value:'snowflake'},
   ]}>
 <TabItem value="sql">
 
@@ -260,6 +261,8 @@ The following code is an example of a PostgreSQL connection string format:
 Repeat the previous steps to add additional Data Assets.
 
 
+</TabItem>
+<TabItem value="snowflake">
 </TabItem>
 </Tabs>
 
