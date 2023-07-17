@@ -895,8 +895,8 @@ class TableAsset(_SQLAsset):
         considers all lowercase object names to be case-insensitive.  Hence, SQLAlchemy converts object name case during
         schema-level communication, i.e. during table and index reflection.  If uppercase object names are used,
         SQLAlchemy assumes they are case-sensitive and encloses the names with quotes.  This behavior will cause
-        mismatches agaisnt data dictionary data received from such DBMS, so unless identifier names have been created as
-        truly case sensitive using quotes, e.g., "TestDb", all lowercase names should be used on SQLAlchemy side.
+        mismatches against data dictionary data received from such DBMS, so unless identifier names have been created as
+        truly case-sensitive using quotes, e.g., "TestDb", all lowercase names should be used on SQLAlchemy side.
 
         This method starts with assumption that table_name has correct casing.  If this assumption is incorrect, then
         hypothesis is made that table_name is at least correct within quotation marks.  To validate this assumption, if
