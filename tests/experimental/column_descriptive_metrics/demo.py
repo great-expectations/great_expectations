@@ -8,6 +8,8 @@ from unittest import mock
 import pytest
 from great_expectations.experimental.column_descriptive_metrics.asset_inspector import (
     AssetInspector,
+)
+from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
     MetricConverter,
 )
 
