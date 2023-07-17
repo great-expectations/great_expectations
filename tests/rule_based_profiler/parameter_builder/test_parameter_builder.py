@@ -15,6 +15,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     get_fully_qualified_parameter_names,
+    RAW_PARAMETER_KEY,
+    PARAMETER_KEY,
 )
 
 
@@ -173,10 +175,10 @@ def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_spec
     dependency "ParameterBuilder" object).  Consequently, shared memory namespace became filled with dependency results.
     """
     assert all_fully_qualified_parameter_names == [
-        "$parameter.raw.my_evaluation_dependency_parameter_name_1",
-        "$parameter.raw.my_evaluation_dependency_parameter_name_0",
-        "$parameter.my_evaluation_dependency_parameter_name_1",
-        "$parameter.my_evaluation_dependency_parameter_name_0",
+        f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+        f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
+        f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+        f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
     ]
 
 
@@ -356,12 +358,12 @@ def test_parameter_builder_dependencies_evaluated_in_parameter_builder_if_not_pr
     """
     assert sorted(all_fully_qualified_parameter_names) == sorted(
         [
-            "$parameter.raw.my_evaluation_dependency_parameter_name_1",
-            "$parameter.raw.my_evaluation_dependency_parameter_name_0",
-            "$parameter.my_evaluation_dependency_parameter_name_1",
-            "$parameter.my_evaluation_dependency_parameter_name_0",
-            "$parameter.raw.my_dependent_parameter_builder",
-            "$parameter.my_dependent_parameter_builder",
+            f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+            f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
+            f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+            f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
+            f"{RAW_PARAMETER_KEY}my_dependent_parameter_builder",
+            f"{PARAMETER_KEY}my_dependent_parameter_builder",
         ]
     )
 
@@ -424,8 +426,8 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     dependency and dependent "ParameterBuilder" have not yet computed their values (as can be seen by parameter names).
     """
     assert dependencies_fully_qualified_parameter_names == [
-        "$parameter.raw.my_evaluation_dependency_parameter_name_0",
-        "$parameter.my_evaluation_dependency_parameter_name_0",
+        f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
+        f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_0",
     ]
 
     my_dependent_parameter_builder.build_parameters(
@@ -452,9 +454,9 @@ def test_parameter_builder_should_only_evaluate_dependencies_that_are_not_precom
     assert sorted(all_fully_qualified_parameter_names) == sorted(
         dependencies_fully_qualified_parameter_names
         + [
-            "$parameter.raw.my_evaluation_dependency_parameter_name_1",
-            "$parameter.my_evaluation_dependency_parameter_name_1",
-            "$parameter.raw.my_dependent_parameter_builder",
-            "$parameter.my_dependent_parameter_builder",
+            f"{RAW_PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+            f"{PARAMETER_KEY}my_evaluation_dependency_parameter_name_1",
+            f"{RAW_PARAMETER_KEY}my_dependent_parameter_builder",
+            f"{PARAMETER_KEY}my_dependent_parameter_builder",
         ]
     )
