@@ -909,9 +909,9 @@ class TableAsset(_SQLAsset):
             schema=self.schema_name,
         )
         if not table_exists:
-            typed_names: list[
-                str | sqlalchemy.quoted_name
-            ] = inspector.get_table_names()
+            typed_names: list[str | sqlalchemy.quoted_name] = inspector.get_table_names(
+                schema=self.schema_name
+            )
             normalized_table_name_mapping: Tuple[
                 str, str | sqlalchemy.quoted_name
             ] | None = _verify_table_name_exists_and_get_normalized_typed_name_map(

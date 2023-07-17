@@ -1038,6 +1038,10 @@ def test_test_connection_failures(
     get_schema_names.return_value = ["good_schema"]
     has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
     has_table.return_value = False
+    get_table_names = mocker.patch(
+        "tests.sqlalchemy_test_doubles.MockSaInspector.get_table_names"
+    )
+    get_table_names.return_value = ["good_table", "bad_table"]
 
     with pytest.raises(TestConnectionError):
         bad_configuration_datasource.test_connection()
