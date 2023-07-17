@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch
 
 
-class AssetInspector:
+class BatchInspector:
     def __init__(self, organization_id: uuid.UUID):
         self._metric_converter = MetricConverter(organization_id=organization_id)
 

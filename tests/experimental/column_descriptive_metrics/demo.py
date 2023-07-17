@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 from great_expectations.experimental.column_descriptive_metrics.asset_inspector import (
-    AssetInspector,
+    BatchInspector,
 )
 from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
     MetricConverter,
@@ -85,13 +85,13 @@ def test_demo_asset_inspector(
     )[0]
 
     with mock.patch(
-        f"{AssetInspector.__module__}.{AssetInspector.__name__}._generate_run_id",
+        f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
         return_value=run_id,
     ), mock.patch(
         f"{MetricConverter.__module__}.{MetricConverter.__name__}._generate_metric_id",
         return_value=metric_id,
     ):
-        asset_inspector = AssetInspector(organization_id=cloud_org_id)
+        asset_inspector = BatchInspector(organization_id=cloud_org_id)
         metrics = asset_inspector.get_column_descriptive_metrics(
             batch=batch_from_action
         )
