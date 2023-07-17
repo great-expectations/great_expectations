@@ -89,7 +89,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     ]
 
     normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
-    for normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+    for normalized_table_name_mapping in normalized_table_name_mappings:
         assert normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
 
 
@@ -139,7 +139,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     ]
 
     normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
-    for normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+    for normalized_table_name_mapping in normalized_table_name_mappings:
         assert (
             isinstance(normalized_table_name_mapping[1], sqlalchemy.quoted_name)
             and normalized_table_name_mapping[1].quote is True
