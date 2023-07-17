@@ -21,13 +21,15 @@ from great_expectations.rule_based_profiler.parameter_container import (
 """
 Tests in this module focus on behavior aspects of "ParameterBuilder.build_parameters()" -- this public method assesses
 dependencies on evaluation "ParameterBuilder" objects (if any specified), and resolves these dependencies, prior to
-calling its own interface method, "ParameterBuilder.build_parameters()".  One key method that is under test is
-"ParameterBuilder.resolve_evaluation_dependencies()" in terms of how it affects contents of shared memory object --
-"parameters: Dict[str, ParameterContainer]", whose "ParameterContainer" stores computation results of every
-"ParameterBuilder", evaluated within scope of given "Domain" object.  When one "ParameterBuilder" specifies dependencies
-on other "ParameterBuilder" objects for its evaluation, then "ParameterBuilder.resolve_evaluation_dependencies()" will
-process these dependencies recursively.  Hence, before/after tests are provided for behavior of this method.  Utility
-method "get_fully_qualified_parameter_names()", whose thoroughly tests are elsewhere, is used to query shared memory.
+calling its own interface method, "ParameterBuilder.build_parameters()".
+
+Method "ParameterBuilder.resolve_evaluation_dependencies()" is used inside "ParameterBuilder.build_parameters()"; its
+execution affects contents of shared memory object, "parameters: Dict[str, ParameterContainer]", whose
+"ParameterContainer" stores computation results of every "ParameterBuilder", evaluated within scope of given "Domain"
+object.  When one "ParameterBuilder" specifies dependencies on other "ParameterBuilder" objects for its evaluation, then
+"ParameterBuilder.resolve_evaluation_dependencies()" will process these dependencies recursively.  Hence, tests are
+provided for behavior of this method.  Utility method "get_fully_qualified_parameter_names()", whose thorough tests
+are elsewhere, is used to query shared memory.
 """
 
 
@@ -81,33 +83,6 @@ class DummyParameterBuilder(ParameterBuilder):
                 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: {"environment": "test"},
             }
         )
-
-
-#
-#
-# # noinspection PyTypeChecker
-# @pytest.fixture
-# def empty_domain() -> Domain:
-#     return DummyDomain()
-#
-#
-# @pytest.fixture
-# def empty_parameters(empty_domain: Domain) -> Dict[str, ParameterContainer]:
-#     parameter_container = ParameterContainer(parameter_nodes=None)
-#     parameters: Dict[str, ParameterContainer] = {
-#         empty_domain.id: parameter_container,
-#     }
-#     return parameters
-#
-#
-# @pytest.fixture
-# def empty_rule_state(
-#     empty_domain: Domain, empty_parameters: Dict[str, ParameterContainer]
-# ) -> Dict[str, Union[Domain, Dict[str, ParameterContainer]]]:
-#     return {
-#         "domain": empty_domain,
-#         "parameters": empty_parameters,
-#     }
 
 
 def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_specified(
@@ -313,7 +288,7 @@ def test_parameter_builder_should_not_recompute_evaluation_parameter_builders_if
     assert (
         my_dependent_parameter_builder.raw_fully_qualified_parameter_name
         in all_fully_qualified_parameter_names
-        or my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
+        and my_dependent_parameter_builder.json_serialized_fully_qualified_parameter_name
         in all_fully_qualified_parameter_names
     )
 
