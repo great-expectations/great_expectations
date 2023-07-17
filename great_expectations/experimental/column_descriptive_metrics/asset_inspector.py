@@ -60,7 +60,7 @@ class MetricConverter:  # TODO: Name this better
             batch_pointer=BatchPointer(
                 datasource_name=batch.datasource.name,
                 data_asset_name=batch.data_asset.name,
-                batch_name=batch.id,
+                batch_id=batch.id,
             ),
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,

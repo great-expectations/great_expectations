@@ -103,7 +103,7 @@ def test_demo_asset_inspector(
                 batch_pointer=BatchPointer(
                     datasource_name="default_pandas_datasource",
                     data_asset_name="#ephemeral_pandas_asset",
-                    batch_name="default_pandas_datasource-#ephemeral_pandas_asset",
+                    batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
                 ),
                 metric_name="table.row_count",
                 metric_domain_kwargs={},
@@ -119,7 +119,7 @@ def test_demo_asset_inspector(
                 batch_pointer=BatchPointer(
                     datasource_name="default_pandas_datasource",
                     data_asset_name="#ephemeral_pandas_asset",
-                    batch_name="default_pandas_datasource-#ephemeral_pandas_asset",
+                    batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
                 ),
                 metric_name="table.columns",
                 metric_domain_kwargs={},

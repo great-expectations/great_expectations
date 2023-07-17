@@ -29,7 +29,7 @@ class Value(CDMRBaseModel):
 class BatchPointer(CDMRBaseModel):  # TODO: Better name
     datasource_name: str = Field(description="Datasource name")
     data_asset_name: str = Field(description="Data asset name")
-    batch_name: str = Field(description="Batch name")
+    batch_id: str = Field(description="Batch id")
 
 
 class Metric(CDMRBaseModel):
