@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
+from unittest import mock
 
 import pytest
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import SQLDatasource
-from great_expectations.datasource.fluent.sql_datasource import (
-    _verify_table_name_exists_and_get_normalized_typed_name_tuple,
-)
+from great_expectations.datasource.fluent.sql_datasource import TableAsset
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -33,28 +32,35 @@ def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
 
 
 @pytest.mark.unit
-def test_table_quoted_name_type_does_not_exist():
+def test_table_quoted_name_type_does_not_exist(
+    mocker,
+):
     """
     DBMS entity names (table, column, etc.) must adhere to correct case insensitivity standards.  All upper case is
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that mechanism for detection of non-existent table_nam" works correctly.
     """
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str] = [
         "table_name_0",
         "table_name_1",
         "table_name_2",
         "table_name_3",
     ]
 
-    with pytest.raises(ValueError) as eee:
-        _ = _verify_table_name_exists_and_get_normalized_typed_name_tuple(
-            name="nonexistent_table_name",
-            typed_names=table_names_in_dbms_schema,
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        new_callable=mock.PropertyMock,
+        return_value=SQLDatasource(
+            name="my_snowflake_datasource",
+            connection_string="snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>",
+        ),
+    ):
+        table_asset = TableAsset(
+            name="my_table_asset",
+            table_name="nonexistent_table_name",
+            schema_name="my_schema",
         )
-        assert (
-            str(eee.value)
-            == 'Error: The table "nonexistent_table_name" does not exist.'
-        )
+        assert table_asset.table_name not in table_names_in_dbms_schema
 
 
 @pytest.mark.unit
@@ -64,7 +70,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all upper case entity usage does not undergo any conversion.
     """
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str] = [
         "ACTORS",
         "ARTISTS",
         "ATHLETES",
@@ -77,20 +83,29 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
         "LITERARY_PROFESSIONALS",
     ]
 
-    name: str
-    normalized_table_name_mappings: Sequence[
-        tuple[str, str | sqlalchemy.quoted_name] | None
-    ] = [
-        _verify_table_name_exists_and_get_normalized_typed_name_tuple(
-            name=name,
-            typed_names=table_names_in_dbms_schema,
-        )
-        for name in table_names_in_dbms_schema
-    ]
+    asset_name: str
+    table_name: str
 
-    normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
-    for normalized_table_name_mapping in normalized_table_name_mappings:
-        assert normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        new_callable=mock.PropertyMock,
+        return_value=SQLDatasource(
+            name="my_snowflake_datasource",
+            connection_string="snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>",
+        ),
+    ):
+        for table_name in table_names_in_dbms_schema:
+            asset_name = f"{table_name}_asset"
+            table_asset = TableAsset(
+                name=asset_name,
+                table_name=table_name,
+                schema_name="my_schema",
+            )
+            assert str(table_asset.table_name) == table_name
+            assert str(table_asset.table_name.casefold()) != table_name
+            assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
+            assert table_asset.table_name.quote is True
+            assert table_asset.table_name in table_names_in_dbms_schema
 
 
 @pytest.mark.unit
@@ -100,7 +115,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     standard for Oracle, DB2, and Snowflake, while all lowercase is standard for SQLAlchemy; hence, proper conversion to
     quoted names must occur.  This test ensures that all lower case entity usage undergo conversion to quoted literals.
     """
-    table_names_in_dbms_schema: list[str | sqlalchemy.quoted_name] = [
+    table_names_in_dbms_schema: list[str] = [
         "actors",
         "artists",
         "athletes",
@@ -128,23 +143,30 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
         sqlalchemy.quoted_name(value="literary_professionals", quote=True),
     ]
 
-    normalized_table_name_mappings: Sequence[
-        tuple[str, str | sqlalchemy.quoted_name] | None
-    ] = [
-        _verify_table_name_exists_and_get_normalized_typed_name_tuple(
-            name=name,
-            typed_names=quoted_table_names,
-        )
-        for name in table_names_in_dbms_schema
-    ]
+    asset_name: str
+    table_name: str
 
-    normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
-    for normalized_table_name_mapping in normalized_table_name_mappings:
-        assert (
-            isinstance(normalized_table_name_mapping[1], sqlalchemy.quoted_name)
-            and normalized_table_name_mapping[1].quote is True
-            and normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
-        )
+    with mock.patch(
+        "great_expectations.datasource.fluent.sql_datasource.TableAsset.datasource",
+        new_callable=mock.PropertyMock,
+        return_value=SQLDatasource(
+            name="my_snowflake_datasource",
+            connection_string="snowflake://<user_login_name>:<password>@<account_identifier>/<database_name>/<schema_name>?warehouse=<warehouse_name>&role=<role_name>",
+        ),
+    ):
+        for table_name in table_names_in_dbms_schema:
+            asset_name = f"{table_name}_asset"
+            table_asset = TableAsset(
+                name=asset_name,
+                table_name=table_name,
+                schema_name="my_schema",
+            )
+            assert str(table_asset.table_name) == table_name
+            assert str(table_asset.table_name.casefold()) == table_name
+            assert isinstance(table_asset.table_name, sqlalchemy.quoted_name)
+            assert table_asset.table_name.quote is True
+            assert table_asset.table_name in table_names_in_dbms_schema
+            assert table_asset.table_name in quoted_table_names
 
 
 if __name__ == "__main__":

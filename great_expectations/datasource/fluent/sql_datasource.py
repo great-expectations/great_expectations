@@ -19,6 +19,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -50,7 +51,6 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from great_expectations.compatibility import sqlalchemy
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -802,7 +802,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str = pydantic.Field(
+    table_name: Union[str, sqlalchemy.quoted_name] = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
     )
@@ -817,13 +817,15 @@ class TableAsset(_SQLAsset):
         )
 
     @pydantic.validator("table_name", pre=True, always=True)
-    def _default_table_name(cls, table_name: str, values: dict, **kwargs) -> str:
+    def _default_table_name(
+        cls, table_name: str, values: dict, **kwargs
+    ) -> str | sqlalchemy.quoted_name:
         if not (validated_table_name := table_name or values.get("name")):
             raise ValueError(
                 "table_name cannot be empty and should default to name if not provided"
             )
 
-        return validated_table_name
+        return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -841,13 +843,10 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        self._normalize_table_name_if_not_exists(engine=engine, inspector=inspector)
-
-        table_exists: bool = inspector.has_table(
+        if not inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
-        )
-        if not table_exists:
+        ):
             raise TestConnectionError(
                 f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
@@ -884,41 +883,6 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
-
-    def _normalize_table_name_if_not_exists(
-        self,
-        engine: sqlalchemy.Engine,
-        inspector: sqlalchemy.Inspector,
-    ) -> None:
-        """
-        Oracle, DB2, and Snowflake store all case-insensitive object names in uppercase text.  In contrast, SQLAlchemy
-        considers all lowercase object names to be case-insensitive.  Hence, SQLAlchemy converts object name case during
-        schema-level communication, i.e. during table and index reflection.  If uppercase object names are used,
-        SQLAlchemy assumes they are case-sensitive and encloses the names with quotes.  This behavior will cause
-        mismatches against data dictionary data received from such DBMS, so unless identifier names have been created as
-        truly case-sensitive using quotes, e.g., "TestDb", all lowercase names should be used on SQLAlchemy side.
-
-        This method starts with assumption that table_name has correct casing.  If this assumption is incorrect, then
-        hypothesis is made that table_name is at least correct within quotation marks.  To validate this assumption, if
-        "self.table_name" exists (i.e., if inspection finds this name, identical, possibly short of quotation marks), in
-        database schema), then quoted version of supplied "self.table_name" is returned, and this property is updated.
-        """
-        table_exists = inspector.has_table(
-            table_name=self.table_name,
-            schema=self.schema_name,
-        )
-        if not table_exists:
-            typed_names: list[str | sqlalchemy.quoted_name] = inspector.get_table_names(
-                schema=self.schema_name
-            )
-            normalized_table_name_mapping: tuple[
-                str, str | sqlalchemy.quoted_name
-            ] = _verify_table_name_exists_and_get_normalized_typed_name_tuple(
-                name=self.table_name,
-                typed_names=typed_names,
-            )
-            if normalized_table_name_mapping:
-                self.table_name = normalized_table_name_mapping[1]
 
 
 @public_api
@@ -1075,39 +1039,3 @@ class SQLDatasource(Datasource):
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
-
-
-def _verify_table_name_exists_and_get_normalized_typed_name_tuple(
-    name: str,
-    typed_names: List[str | sqlalchemy.quoted_name],
-) -> tuple[str, str | sqlalchemy.quoted_name]:
-    """
-    Verifies that table name exists.
-
-    Args:
-        name: string-valued name
-        typed_names: Properly typed names (e.g., output of "inspector.get_table_names()" SQLAlchemy method call)
-
-    Returns:
-        Single tuple holding mapping from string-valued name to typed name.
-    """
-
-    normalized_table_name_mapping: tuple[
-        str, str | sqlalchemy.quoted_name
-    ] | None = None
-
-    typed_name_cursor: str | sqlalchemy.quoted_name
-    for typed_name_cursor in typed_names:
-        if (
-            (type(typed_name_cursor) == str)
-            and (name.casefold() == typed_name_cursor.casefold())
-            or (name == str(typed_name_cursor))
-        ):
-            normalized_table_name_mapping = (name, typed_name_cursor)
-            break
-
-    if not normalized_table_name_mapping:
-        error_message_template = 'Error: The table "{table_name:s}" does not exist.'
-        raise ValueError(error_message_template.format(table_name=name))
-
-    return normalized_table_name_mapping
