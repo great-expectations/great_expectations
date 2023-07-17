@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Sequence, Tuple
+from typing import TYPE_CHECKING, Sequence
 
 import pytest
 
@@ -79,7 +79,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
 
     name: str
     normalized_table_name_mappings: Sequence[
-        Tuple[str, str | sqlalchemy.quoted_name] | None
+        tuple[str, str | sqlalchemy.quoted_name] | None
     ] = [
         _verify_table_name_exists_and_get_normalized_typed_name_map(
             name=name,
@@ -88,9 +88,8 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
         for name in table_names_in_dbms_schema
     ]
 
-    idx: int
-    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
-    for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+    normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
+    for normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
         assert normalized_table_name_mapping[0] == normalized_table_name_mapping[1]
 
 
@@ -130,7 +129,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     ]
 
     normalized_table_name_mappings: Sequence[
-        Tuple[str, str | sqlalchemy.quoted_name] | None
+        tuple[str, str | sqlalchemy.quoted_name] | None
     ] = [
         _verify_table_name_exists_and_get_normalized_typed_name_map(
             name=name,
@@ -139,9 +138,8 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
         for name in table_names_in_dbms_schema
     ]
 
-    idx: int
-    normalized_table_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
-    for idx, normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
+    normalized_table_name_mapping: tuple[str, str | sqlalchemy.quoted_name] | None
+    for normalized_table_name_mapping in enumerate(normalized_table_name_mappings):
         assert (
             isinstance(normalized_table_name_mapping[1], sqlalchemy.quoted_name)
             and normalized_table_name_mapping[1].quote is True
