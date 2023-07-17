@@ -1080,7 +1080,6 @@ class SQLDatasource(Datasource):
 def _verify_table_name_exists_and_get_normalized_typed_name_map(
     name: str,
     typed_names: List[str | sqlalchemy.quoted_name],
-    error_message_template: str = 'Error: The table "{table_name:s}" does not exist.',
 ) -> tuple[str, str | sqlalchemy.quoted_name]:
     """
     Verifies that table name exists.
@@ -1088,31 +1087,27 @@ def _verify_table_name_exists_and_get_normalized_typed_name_map(
     Args:
         name: string-valued name
         typed_names: Properly typed names (e.g., output of "inspector.get_table_names()" SQLAlchemy method call)
-        error_message_template: String template to output error message if name cannot be found in typed_names list
 
     Returns:
         Single tuple holding mapping from string-valued name to typed name.
     """
 
-    def _get_normalized_table_name_mapping_if_exists(
-        name: str,
-    ) -> tuple[str, str | sqlalchemy.quoted_name] | None:
-        typed_name_cursor: str | sqlalchemy.quoted_name
-        for typed_name_cursor in typed_names:
-            if (
-                (type(typed_name_cursor) == str)
-                and (name.casefold() == typed_name_cursor.casefold())
-                or (name == str(typed_name_cursor))
-            ):
-                return name, typed_name_cursor
-
-        return None
-
     normalized_table_name_mapping: tuple[
         str, str | sqlalchemy.quoted_name
-    ] | None = _get_normalized_table_name_mapping_if_exists(name=name)
+    ] | None = None
 
-    if normalized_table_name_mapping is None:
+    typed_name_cursor: str | sqlalchemy.quoted_name
+    for typed_name_cursor in typed_names:
+        if (
+            (type(typed_name_cursor) == str)
+            and (name.casefold() == typed_name_cursor.casefold())
+            or (name == str(typed_name_cursor))
+        ):
+            normalized_table_name_mapping = (name, typed_name_cursor)
+            break
+
+    if not normalized_table_name_mapping:
+        error_message_template = 'Error: The table "{table_name:s}" does not exist.'
         raise ValueError(error_message_template.format(table_name=name))
 
     return normalized_table_name_mapping

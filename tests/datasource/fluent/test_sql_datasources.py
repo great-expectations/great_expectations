@@ -117,8 +117,16 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     name: str
 
     quoted_table_names: list[sqlalchemy.quoted_name] = [
-        sqlalchemy.quoted_name(value=name, quote=True)
-        for name in table_names_in_dbms_schema
+        sqlalchemy.quoted_name(value="actors", quote=True),
+        sqlalchemy.quoted_name(value="artists", quote=True),
+        sqlalchemy.quoted_name(value="athletes", quote=True),
+        sqlalchemy.quoted_name(value="business_people", quote=True),
+        sqlalchemy.quoted_name(value="healthcare_workers", quote=True),
+        sqlalchemy.quoted_name(value="engineers", quote=True),
+        sqlalchemy.quoted_name(value="lawyers", quote=True),
+        sqlalchemy.quoted_name(value="musicians", quote=True),
+        sqlalchemy.quoted_name(value="scientists", quote=True),
+        sqlalchemy.quoted_name(value="literary_professionals", quote=True),
     ]
 
     normalized_table_name_mappings: Sequence[
