@@ -7,6 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.render.renderer.renderer import Renderer
 
 
+@pytest.mark.unit
 def test_render():
     # noinspection PyUnusedLocal
     with pytest.raises(NotImplementedError):

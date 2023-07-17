@@ -231,7 +231,13 @@ def multibatch_spark_data(
 
 
 @pytest.fixture(
-    params=[pandas_data, sql_data, spark_data, default_pandas_data, pandas_sql_data]
+    params=[
+        pytest.param(pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(sql_data, marks=pytest.mark.sqlite),
+        pytest.param(spark_data, marks=pytest.mark.spark),
+        pytest.param(default_pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(pandas_sql_data, marks=pytest.mark.filesystem),
+    ]
 )
 def datasource_test_data(
     test_backends, empty_data_context, request
@@ -243,7 +249,11 @@ def datasource_test_data(
 
 
 @pytest.fixture(
-    params=[multibatch_pandas_data, multibatch_sql_data, multibatch_spark_data]
+    params=[
+        pytest.param(multibatch_pandas_data, marks=pytest.mark.filesystem),
+        pytest.param(multibatch_sql_data, marks=pytest.mark.sqlite),
+        pytest.param(multibatch_spark_data, marks=pytest.mark.spark),
+    ]
 )
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request

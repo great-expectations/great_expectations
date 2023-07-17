@@ -109,6 +109,7 @@ def mock_failed_migration(
     return _build_mock_migrate
 
 
+@pytest.mark.unit
 def assert_stdout_is_accurate_and_properly_ordered(
     stdout: str, statements: List[str]
 ) -> None:

@@ -7,6 +7,9 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 
+# module level markers
+pytestmark = [pytest.mark.unit]
+
 
 @pytest.mark.skip(
     "This is broken because Expectation._get_execution_engine_diagnostics is broken"
