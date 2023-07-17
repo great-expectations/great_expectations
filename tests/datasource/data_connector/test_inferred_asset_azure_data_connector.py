@@ -19,6 +19,9 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 
+# module level markers
+pytestmark = [pytest.mark.external_cloud_client]
+
 yaml = YAMLHandler()
 
 

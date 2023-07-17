@@ -19,6 +19,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 
 
+@pytest.mark.unit
 def test_batch_definition_matches_batch_request():
     my_batch_definition = BatchDefinition(
         datasource_name="test_environment",
@@ -102,6 +103,7 @@ def test_batch_definition_matches_batch_request():
     )
 
 
+@pytest.mark.unit
 def test_map_data_reference_string_to_batch_definition_list_using_regex():
     # regex_pattern does not match --> None
     data_reference = "alex_20200809_1000.csv"
@@ -175,6 +177,7 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     ]
 
 
+@pytest.mark.unit
 def test_convert_data_reference_string_to_batch_identifiers_using_regex():
     data_reference = "alex_20200809_1000.csv"
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
@@ -232,6 +235,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
     )
 
 
+@pytest.mark.unit
 def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_named_groups(
     caplog,
 ):
@@ -267,6 +271,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_nam
     assert "The named group 'price' must explicitly be stated" in caplog.text
 
 
+@pytest.mark.unit
 def test_map_batch_definition_to_data_reference_string_using_regex():
     # not BatchDefinition
     my_batch_definition = "I_am_a_string"
@@ -319,6 +324,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     assert my_data_reference == "eugene_20200809_1500.csv"
 
 
+@pytest.mark.unit
 def test_convert_batch_identifiers_to_data_reference_string_using_regex():
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
@@ -378,6 +384,7 @@ def test_convert_batch_identifiers_to_data_reference_string_using_regex():
 
 
 # TODO: <Alex>Why does this method name have 2 underscores?</Alex>
+@pytest.mark.unit
 def test__invert_regex_to_data_reference_template():
     returned = _invert_regex_to_data_reference_template(
         regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
@@ -463,6 +470,7 @@ def test__invert_regex_to_data_reference_template():
         )
 
 
+@pytest.mark.unit
 def test_build_sorters_from_config_good_config():
     sorters_config = [
         {
@@ -493,6 +501,7 @@ def test_build_sorters_from_config_good_config():
         _ = sorters["i_dont_exist"]
 
 
+@pytest.mark.unit
 def test_build_sorters_from_config_bad_config():
     # 1. class_name is bad
     sorters_config = [
@@ -522,6 +531,7 @@ def test_build_sorters_from_config_bad_config():
     reason="Could not import 'storage' from google.cloud",
 )
 @mock.patch("great_expectations.compatibility.google.Client")
+@pytest.mark.external_cloud_client
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}

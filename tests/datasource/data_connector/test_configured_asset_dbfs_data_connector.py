@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 yaml = YAMLHandler()
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.05s
 def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     """
@@ -140,6 +140,7 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     assert batch_spec.path == f"{base_directory}/test_dir_0/A/B/C/logfile_0.csv"
 
 
+@pytest.mark.spark
 @pytest.mark.integration
 def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs):
     """

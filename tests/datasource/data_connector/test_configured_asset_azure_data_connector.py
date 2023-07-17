@@ -28,6 +28,10 @@ if not (azure.storage and azure.BlobServiceClient):
     )
 
 
+# module level markers
+pytestmark = [pytest.mark.external_cloud_client]
+
+
 @pytest.fixture
 def expected_config_dict():
     """Used to validate `self_check()` and `test_yaml_config()` outputs."""
