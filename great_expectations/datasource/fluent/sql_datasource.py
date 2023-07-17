@@ -918,7 +918,8 @@ class TableAsset(_SQLAsset):
                 name=self.table_name,
                 typed_names=typed_names,
             )
-            self.table_name = normalized_table_name_mapping[1]
+            if normalized_table_name_mapping:
+                self.table_name = normalized_table_name_mapping[1]
 
 
 @public_api
