@@ -243,3 +243,14 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
     assert self_check_results["data_asset_count"] == 3
     # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
     # assert self_check_results["example_data_reference"]["n_rows"] == 3
+
+
+def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
+    # noinspection PyProtectedMember
+    data_references: list = (
+        basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+            data_asset_name="my_asset_name"
+        )
+    )
+    assert len(data_references) == 0
+    assert data_references == []

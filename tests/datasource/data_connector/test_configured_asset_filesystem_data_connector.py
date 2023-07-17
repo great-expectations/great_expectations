@@ -1573,17 +1573,6 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
     assert len(data_asset_names["default_configured_data_connector_name"]) == 1
 
 
-def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
-    # noinspection PyProtectedMember
-    data_references: list = (
-        basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-            data_asset_name="my_asset_name"
-        )
-    )
-    assert len(data_references) == 0
-    assert data_references == []
-
-
 def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")

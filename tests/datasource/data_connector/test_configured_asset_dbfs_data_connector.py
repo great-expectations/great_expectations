@@ -26,6 +26,7 @@ yaml = YAMLHandler()
 
 
 @pytest.mark.big
+@pytest.mark.integration
 @pytest.mark.slow  # 1.05s
 def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     """
