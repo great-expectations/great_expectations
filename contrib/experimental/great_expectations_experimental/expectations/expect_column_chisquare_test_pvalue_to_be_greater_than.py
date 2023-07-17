@@ -1,9 +1,3 @@
-"""
-This is a template for creating custom BatchExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations
-"""
-
 from typing import Dict, Optional
 
 import scipy.stats as stats
@@ -12,12 +6,18 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import BatchExpectation
-from great_expectations.expectations.metrics.metric_provider import MetricConfiguration, metric_value
-from great_expectations.expectations.metrics.table_metric_provider import TableMetricProvider
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricConfiguration,
+    metric_value,
+)
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
+
 
 class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
     # This is the id string that will be used to reference your Metric.
-    metric_name = "column.p_value_meets_threshold"
+    metric_name = "column.p_value_greater_than_threshold"
     value_keys = (
         "observed_column",
         "expected_column",
@@ -64,7 +64,7 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
 
 
 class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
-    """This expectation calculates chi squared value of two numeric columns provided and checks if the p-value is greater than the threshold provided by the user."""
+    """Calculates chi-squared of 2 columns, checks if p-value > user threshold."""
 
     examples = [
         {
@@ -98,7 +98,7 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
     ]
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    metric_dependencies = ("column.p_value_meets_threshold",)
+    metric_dependencies = ("column.p_value_greater_than_threshold",)
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = (
@@ -136,7 +136,7 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         threshold = configuration["kwargs"].get("p_value_threshold")
-        chi2, p_value = metrics.get("column.p_value_meets_threshold")
+        chi2, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
 
