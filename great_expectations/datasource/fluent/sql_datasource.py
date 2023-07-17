@@ -913,7 +913,7 @@ class TableAsset(_SQLAsset):
             )
             normalized_table_name_mapping: tuple[
                 str, str | sqlalchemy.quoted_name
-            ] = _verify_table_name_exists_and_get_normalized_typed_name_map(
+            ] = _verify_table_name_exists_and_get_normalized_typed_name_tuple(
                 name=self.table_name,
                 typed_names=typed_names,
             )
@@ -1077,7 +1077,7 @@ class SQLDatasource(Datasource):
         return self._add_asset(asset)
 
 
-def _verify_table_name_exists_and_get_normalized_typed_name_map(
+def _verify_table_name_exists_and_get_normalized_typed_name_tuple(
     name: str,
     typed_names: List[str | sqlalchemy.quoted_name],
 ) -> tuple[str, str | sqlalchemy.quoted_name]:

@@ -8,7 +8,7 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.datasource.fluent import SQLDatasource
 from great_expectations.datasource.fluent.sql_datasource import (
-    _verify_table_name_exists_and_get_normalized_typed_name_map,
+    _verify_table_name_exists_and_get_normalized_typed_name_tuple,
 )
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ def test_table_quoted_name_type_does_not_exist():
     ]
 
     with pytest.raises(ValueError) as eee:
-        _ = _verify_table_name_exists_and_get_normalized_typed_name_map(
+        _ = _verify_table_name_exists_and_get_normalized_typed_name_tuple(
             name="nonexistent_table_name",
             typed_names=table_names_in_dbms_schema,
         )
@@ -81,7 +81,7 @@ def test_table_quoted_name_type_all_upper_case_normalizion_is_noop():
     normalized_table_name_mappings: Sequence[
         tuple[str, str | sqlalchemy.quoted_name] | None
     ] = [
-        _verify_table_name_exists_and_get_normalized_typed_name_map(
+        _verify_table_name_exists_and_get_normalized_typed_name_tuple(
             name=name,
             typed_names=table_names_in_dbms_schema,
         )
@@ -131,7 +131,7 @@ def test_table_quoted_name_type_all_lower_case_normalizion_full():
     normalized_table_name_mappings: Sequence[
         tuple[str, str | sqlalchemy.quoted_name] | None
     ] = [
-        _verify_table_name_exists_and_get_normalized_typed_name_map(
+        _verify_table_name_exists_and_get_normalized_typed_name_tuple(
             name=name,
             typed_names=quoted_table_names,
         )
