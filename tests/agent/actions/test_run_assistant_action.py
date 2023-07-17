@@ -1,16 +1,16 @@
-import pytest
-
-from unittest.mock import MagicMock
-from freezegun import freeze_time
 from datetime import datetime
+from unittest.mock import MagicMock
+
+import pytest
+from freezegun import freeze_time
 
 from great_expectations.agent.actions import (
     CreatedResource,
     RunDataAssistantAction,
 )
 from great_expectations.agent.models import (
-    RunOnboardingDataAssistantEvent,
     RunDataAssistantEvent,
+    RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import LegacyDatasource
@@ -84,7 +84,7 @@ def test_run_data_assistant_event_creates_checkpoint(context, event):
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
     expectation_suite_id = "084a6e0f-c014-4e40-b6b7-b2f57cb9e176"
-    tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
+    tz = datetime.now().astimezone().tzinfo
     timestamp = datetime.now(tz=tz)
     expectation_suite_name = (
         f"{event.data_asset_name} onboarding assistant suite {timestamp}"

@@ -5,8 +5,8 @@ import pytest
 from great_expectations.agent.event_handler import EventHandler, UnknownEventError
 from great_expectations.agent.models import (
     RunCheckpointEvent,
-    RunOnboardingDataAssistantEvent,
     RunDataAssistantEvent,
+    RunOnboardingDataAssistantEvent,
     UnknownEvent,
 )
 from great_expectations.data_context import CloudDataContext
