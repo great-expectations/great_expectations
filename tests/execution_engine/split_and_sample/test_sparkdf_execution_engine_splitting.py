@@ -42,6 +42,9 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
+# module level markers
+pytestmark = [pytest.mark.spark]
+
 
 @pytest.fixture
 def simple_multi_year_spark_df(spark_session):

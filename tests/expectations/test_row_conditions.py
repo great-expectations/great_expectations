@@ -3,6 +3,10 @@ from great_expectations.expectations.row_conditions import (
     parse_condition_to_spark,
     parse_condition_to_sqlalchemy,
 )
+import pytest
+
+# module level markers
+pytestmark = [pytest.mark.unit]
 
 
 def test_notnull_parser():
