@@ -844,7 +844,7 @@ class TableAsset(_SQLAsset):
 
         self._normalize_table_name_if_not_exists(engine=engine, inspector=inspector)
 
-        table_exists: bool = sa.inspect(engine).has_table(
+        table_exists: bool = inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
