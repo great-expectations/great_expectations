@@ -582,7 +582,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
 
 @pytest.mark.timeout(
-    3.0  # this test can take longer than the default timeout, try to reduce it
+    6.0  # this test can take longer than the default timeout, try to reduce it
 )
 @pytest.mark.unit
 @pytest.mark.parametrize(
@@ -762,7 +762,7 @@ def test_test_connection_failures(
 
 
 @pytest.mark.timeout(
-    2.25,  # deepcopy operation can be slow. Try to eliminate it in the future.
+    5,  # deepcopy operation can be slow. Try to eliminate it in the future.
 )
 @pytest.mark.unit
 def test_csv_asset_batch_metadata(

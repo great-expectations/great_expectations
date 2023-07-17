@@ -19,6 +19,9 @@ if TYPE_CHECKING:
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
+
 
 @pytest.fixture
 def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):

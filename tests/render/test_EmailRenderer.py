@@ -1,8 +1,13 @@
+import pytest
+
 from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.render.renderer import EmailRenderer
+
+# module level markers
+pytestmark = [pytest.mark.big]
 
 
 def test_EmailRenderer_validation_results_with_datadocs():
