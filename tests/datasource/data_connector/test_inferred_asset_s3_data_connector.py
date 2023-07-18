@@ -24,6 +24,9 @@ from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 @mock_s3
 def test_basic_instantiation():
