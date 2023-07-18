@@ -15,12 +15,6 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
-    # TODO: <Alex>ALEX</Alex>
-    # get_dbms_compatible_column_names,
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # verify_column_names_exist,
-    # TODO: <Alex>ALEX</Alex>
     get_dbms_compatible_metric_domain_kwargs,
 )
 from great_expectations.util import (
@@ -77,13 +71,6 @@ def _pandas_multicolumn_map_condition_values(
         "column_list"
     ]
 
-    # TODO: <Alex>ALEX</Alex>
-    # column_list = get_dbms_compatible_column_names(
-    #     column_names=column_list,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
-
     domain_values = df[column_list]
 
     domain_values = domain_values[
@@ -128,17 +115,6 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    # TODO: <Alex>ALEX</Alex>
-    # column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-    #     "column_list"
-    # ]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # verify_column_names_exist(
-    #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-    # )
-    # TODO: <Alex>ALEX</Alex>
-
     return df.shape[0]
 
 
@@ -179,13 +155,6 @@ def _sqlalchemy_multicolumn_map_condition_values(
     column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
         "column_list"
     ]
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_list = get_dbms_compatible_column_names(
-    #     column_names=column_list,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     column_selector = [sa.column(column_name) for column_name in column_list]
     query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
@@ -229,17 +198,6 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 (_sqlalchemy_multicolumn_map_condition_filtered_row_count).
 """
         )
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-    #     "column_list"
-    # ]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # verify_column_names_exist(
-    #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     selectable = get_sqlalchemy_selectable(selectable)
 
@@ -285,13 +243,6 @@ def _spark_multicolumn_map_condition_values(
     column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
         "column_list"
     ]
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_list = get_dbms_compatible_column_names(
-    #     column_names=column_list,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -350,16 +301,5 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 (_spark_multicolumn_map_condition_filtered_row_count).
 """
         )
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-    #     "column_list"
-    # ]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # verify_column_names_exist(
-    #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     return df.count()

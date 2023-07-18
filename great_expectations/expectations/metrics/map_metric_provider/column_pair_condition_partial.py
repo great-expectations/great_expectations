@@ -32,12 +32,6 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_metric_domain_kwargs,
 )
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.expectations.metrics.util import (
-#     get_dbms_compatible_column_names,
-# )
-# TODO: <Alex>ALEX</Alex>
-
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -111,20 +105,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                # TODO: <Alex>ALEX</Alex>
-                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                #     column_A_name,
-                #     column_B_name,
-                # ]
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # # noinspection PyPep8Naming
-                # column_A_name, column_B_name = get_dbms_compatible_column_names(
-                #     column_names=column_names,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
-
                 meets_expectation_series = metric_fn(
                     cls,
                     df[column_A_name],
@@ -190,20 +170,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 column_A_name = accessor_domain_kwargs["column_A"]
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                #     column_A_name,
-                #     column_B_name,
-                # ]
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # # noinspection PyPep8Naming
-                # column_A_name, column_B_name = get_dbms_compatible_column_names(
-                #     column_names=column_names,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -278,20 +244,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 column_A_name = accessor_domain_kwargs["column_A"]
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                #     column_A_name,
-                #     column_B_name,
-                # ]
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # # noinspection PyPep8Naming
-                # column_A_name, column_B_name = get_dbms_compatible_column_names(
-                #     column_names=column_names,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 expected_condition = metric_fn(
                     cls,

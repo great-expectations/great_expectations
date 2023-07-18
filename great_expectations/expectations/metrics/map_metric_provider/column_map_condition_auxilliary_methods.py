@@ -28,12 +28,6 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.expectations.metrics.util import (
-#     get_dbms_compatible_column_names,
-# )
-# TODO: <Alex>ALEX</Alex>
-
 if TYPE_CHECKING:
     from great_expectations.compatibility import pyspark, sqlalchemy
 
@@ -73,13 +67,6 @@ def _pandas_column_map_condition_values(
         )
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -150,13 +137,6 @@ def _pandas_column_map_series_and_domain_values(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
-
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
     # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -220,13 +200,6 @@ def _pandas_column_map_condition_value_counts(
 (_pandas_column_map_condition_value_counts).
 """
         )
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -299,13 +272,6 @@ def _sqlalchemy_column_map_condition_values(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
-
     query = sa.select(sa.column(column_name).label("unexpected_values")).where(
         unexpected_condition
     )
@@ -366,13 +332,6 @@ def _sqlalchemy_column_map_condition_value_counts(
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
-
     column: sa.Column = sa.column(column_name)
 
     query = (
@@ -415,13 +374,6 @@ def _spark_column_map_condition_values(
         )
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -470,12 +422,6 @@ def _spark_column_map_condition_value_counts(
         )
 
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-    # TODO: <Alex>ALEX</Alex>
-    # column_name = get_dbms_compatible_column_names(
-    #     column_names=column_name,
-    #     batch_columns_list=metrics["table.columns"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
 
     # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
     # TODO: <Alex>ALEX-POSITION?</Alex>

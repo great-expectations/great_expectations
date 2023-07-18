@@ -30,13 +30,7 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
 )
 from great_expectations.expectations.metrics.util import (
     compute_unexpected_pandas_indices,
-    # TODO: <Alex>ALEX</Alex>
-    # verify_column_names_exist,
-    # TODO: <Alex>ALEX</Alex>
     get_dbms_compatible_metric_domain_kwargs,
-    # TODO: <Alex>ALEX</Alex>
-    # get_dbms_compatible_column_names,
-    # TODO: <Alex>ALEX</Alex>
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
 )
@@ -125,11 +119,6 @@ def _pandas_map_condition_index(
         column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        # TODO: <Alex>ALEX</Alex>
-        # verify_column_names_exist(
-        #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-        # )
-        # TODO: <Alex>ALEX</Alex>
         domain_column_name_list = column_list
 
     # column pair expectations
@@ -137,11 +126,6 @@ def _pandas_map_condition_index(
         column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
-        # TODO: <Alex>ALEX</Alex>
-        # verify_column_names_exist(
-        #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-        # )
-        # TODO: <Alex>ALEX</Alex>
         domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
@@ -211,12 +195,6 @@ def _pandas_map_condition_query(
             "column"
         ]
 
-        # TODO: <Alex>ALEX</Alex>
-        # column_name = get_dbms_compatible_column_names(
-        #     column_names=column_name,
-        #     batch_columns_list=metrics["table.columns"],
-        # )
-        # TODO: <Alex>ALEX</Alex>
         filter_column_isnull = kwargs.get(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
@@ -224,21 +202,6 @@ def _pandas_map_condition_query(
             domain_records_df = domain_records_df[
                 domain_records_df[column_name].notnull()
             ]
-
-    elif "column_list" in accessor_domain_kwargs:
-        # TODO: <Alex>ALEX</Alex>
-        ...
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        #     "column_list"
-        # ]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # verify_column_names_exist(
-        #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-        # )
-        # TODO: <Alex>ALEX</Alex>
 
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
     index_list = domain_values_df_filtered.index.to_list()
@@ -278,13 +241,6 @@ def _pandas_map_condition_rows(
             "column"
         ]
 
-        # TODO: <Alex>ALEX</Alex>
-        # column_name = get_dbms_compatible_column_names(
-        #     column_names=column_name,
-        #     batch_columns_list=metrics["table.columns"],
-        # )
-        # TODO: <Alex>ALEX</Alex>
-
         ###
         # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
         # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -295,21 +251,6 @@ def _pandas_map_condition_rows(
         )
         if filter_column_isnull:
             df = df[df[column_name].notnull()]
-
-    elif domain_type == MetricDomainTypes.MULTICOLUMN:
-        # TODO: <Alex>ALEX</Alex>
-        ...
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-        #     "column_list"
-        # ]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # verify_column_names_exist(
-        #     column_names=column_list, batch_columns_list=metrics["table.columns"]
-        # )
-        # TODO: <Alex>ALEX</Alex>
 
     result_format = metric_value_kwargs["result_format"]
 

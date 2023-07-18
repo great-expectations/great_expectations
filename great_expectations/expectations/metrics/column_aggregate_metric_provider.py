@@ -25,12 +25,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_metric_domain_kwargs,
 )
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.expectations.metrics.util import (
-#     get_dbms_compatible_column_names,
-# )
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -89,13 +83,6 @@ def column_aggregate_value(
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -184,13 +171,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
 
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
-
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
 
                 dialect = sqlalchemy_engine.dialect
@@ -255,13 +235,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(

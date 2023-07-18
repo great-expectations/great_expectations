@@ -30,12 +30,6 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_metric_domain_kwargs,
 )
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.expectations.metrics.util import (
-#     get_dbms_compatible_column_names,
-# )
-# TODO: <Alex>ALEX</Alex>
-
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -105,13 +99,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -187,13 +174,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
 
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
-
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
@@ -267,13 +247,6 @@ def column_function_partial(  # noqa: C901, PLR0915
                 column_name: Union[
                     str, sqlalchemy.quoted_name
                 ] = accessor_domain_kwargs["column"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_name = get_dbms_compatible_column_names(
-                #     column_names=column_name,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 column = data[column_name]
                 column_function = metric_fn(

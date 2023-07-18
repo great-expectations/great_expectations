@@ -33,12 +33,6 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_metric_domain_kwargs,
 )
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.expectations.metrics.util import (
-#     get_dbms_compatible_column_names,
-# )
-# TODO: <Alex>ALEX</Alex>
-
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -108,13 +102,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     Union[str, sqlalchemy.quoted_name]
                 ] = accessor_domain_kwargs["column_list"]
 
-                # TODO: <Alex>ALEX</Alex>
-                # column_list = get_dbms_compatible_column_names(
-                #     column_names=column_list,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
-
                 values = metric_fn(
                     cls,
                     df[column_list],
@@ -172,13 +159,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                 ] = accessor_domain_kwargs["column_list"]
 
                 table_columns = metrics["table.columns"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_list = get_dbms_compatible_column_names(
-                #     column_names=column_list,
-                #     batch_columns_list=table_columns,
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
@@ -250,13 +230,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                 column_list: List[
                     Union[str, sqlalchemy.quoted_name]
                 ] = accessor_domain_kwargs["column_list"]
-
-                # TODO: <Alex>ALEX</Alex>
-                # column_list = get_dbms_compatible_column_names(
-                #     column_names=column_list,
-                #     batch_columns_list=metrics["table.columns"],
-                # )
-                # TODO: <Alex>ALEX</Alex>
 
                 multicolumn_function = metric_fn(
                     cls,
