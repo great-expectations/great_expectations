@@ -966,7 +966,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
             if datasource and name:
                 error_message += " (but not both)"
-            raise ValueError(error_message)
+            raise TypeError(error_message)
 
     def _add_datasource(
         self,
