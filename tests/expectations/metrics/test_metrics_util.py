@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from _pytest import monkeypatch
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.compatibility.sqlalchemy import (
@@ -15,6 +16,7 @@ from great_expectations.expectations.metrics.util import (
     get_unexpected_indices_for_multiple_pandas_named_indices,
     get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 from tests.test_utils import (
     get_awsathena_connection_url,
@@ -272,3 +274,159 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         "Error: The list of domain columns is currently empty. Please check your "
         "configuration."
     )
+
+
+# TODO: <Alex>ALEX</Alex>
+"""
+def get_dbms_compatible_metric_domain_kwargs(
+    metric_domain_kwargs: dict,
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
+) -> dict:
+"""
+# TODO: <Alex>ALEX</Alex>
+
+
+def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
+    test_column_names: list[str] = [
+        "actors",
+        "artists",
+        "athletes",
+        "business_people",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "musicians",
+        "scientists",
+        "literary_professionals",
+    ]
+
+    with pytest.raises(gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
+        _ = get_dbms_compatible_metric_domain_kwargs(
+            metric_domain_kwargs={"column": "non_existent_column"},
+            batch_columns_list=test_column_names,
+        )
+    assert (
+        str(eee.value)
+        == f'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
+
+
+def test_get_dbms_compatible_metric_domain_column_kwargs(sa):
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    test_column_names: list[str] = [
+        "ACTORS",
+        "ARTISTS",
+        "ATHLETES",
+        "BUSINESS_PEOPLE",
+        "HEALTHCARE_WORKERS",
+        "ENGINEERS",
+        "LAWYERS",
+        "MUSICIANS",
+        "SCIENTISTS",
+        "LITERARY_PROFESSIONALS",
+        quoted_column_name,
+    ]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column": "ACTORS"},
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column"] == "ACTORS"
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column": quoted_column_name},
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column"] == quoted_column_name
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column": "travel_agents"},
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column"] == quoted_column_name
+    assert metric_domain_kwargs["column"] != "TRAVEL_AGENTS"
+
+
+def test_get_dbms_compatible_metric_domain_column_pair_kwargs():
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    test_column_names: list[str] = [
+        "ACTORS",
+        "ARTISTS",
+        "ATHLETES",
+        "BUSINESS_PEOPLE",
+        "HEALTHCARE_WORKERS",
+        "ENGINEERS",
+        "LAWYERS",
+        "MUSICIANS",
+        "SCIENTISTS",
+        "LITERARY_PROFESSIONALS",
+        quoted_column_name,
+    ]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column_A": "ACTORS", "column_B": quoted_column_name},
+        batch_columns_list=test_column_names,
+    )
+    assert (
+        metric_domain_kwargs["column_A"] == "ACTORS"
+        and metric_domain_kwargs["column_B"] == quoted_column_name
+    )
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column_A": "ACTORS", "column_B": "travel_agents"},
+        batch_columns_list=test_column_names,
+    )
+    assert (
+        metric_domain_kwargs["column_A"] == "ACTORS"
+        and metric_domain_kwargs["column_B"] == quoted_column_name
+    )
+
+
+def test_get_dbms_compatible_metric_domain_column_list_kwargs():
+    quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="FarmAnimals", quote=True
+    )
+    quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="Household_Pets", quote=True
+    )
+    test_column_names: list[str] = [
+        "ACTORS",
+        quoted_column_name_0,
+        "ARTISTS",
+        quoted_column_name_1,
+        "ATHLETES",
+        "BUSINESS_PEOPLE",
+        "HEALTHCARE_WORKERS",
+        "ENGINEERS",
+        "LAWYERS",
+        "MUSICIANS",
+        "SCIENTISTS",
+        "LITERARY_PROFESSIONALS",
+        quoted_column_name_2,
+    ]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={
+            "column_list": ["ACTORS", "travel_agents", "FarmAnimals", "Household_Pets"]
+        },
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column_list"] == [
+        "ACTORS",
+        quoted_column_name_0,
+        quoted_column_name_1,
+        quoted_column_name_2,
+    ]
