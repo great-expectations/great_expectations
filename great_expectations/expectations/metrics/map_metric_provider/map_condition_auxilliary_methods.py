@@ -19,7 +19,6 @@ from great_expectations.compatibility.pyspark import pyspark
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -78,8 +77,7 @@ def _pandas_map_condition_index(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    domain_type: MetricDomainTypes
-    domain_type, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -94,7 +92,7 @@ def _pandas_map_condition_index(
     )
     domain_column_name_list: List[str] = list()
     # column map expectations
-    if domain_type == MetricDomainTypes.COLUMN:
+    if "column" in accessor_domain_kwargs:
         column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
             "column"
         ]
@@ -114,18 +112,18 @@ def _pandas_map_condition_index(
 
         domain_column_name_list.append(column_name)
 
-    # multi-column map expectations
-    elif domain_type == MetricDomainTypes.MULTICOLUMN:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-            "column_list"
-        ]
-        domain_column_name_list = column_list
-
     # column pair expectations
-    elif domain_type == MetricDomainTypes.COLUMN_PAIR:
+    elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
         column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
+        domain_column_name_list = column_list
+
+    # multi-column map expectations
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
         domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
@@ -175,8 +173,7 @@ def _pandas_map_condition_query(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    domain_type: MetricDomainTypes
-    domain_type, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -190,7 +187,7 @@ def _pandas_map_condition_query(
         domain_kwargs=domain_kwargs
     )
 
-    if domain_type == MetricDomainTypes.COLUMN:
+    if "column" in accessor_domain_kwargs:
         column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
             "column"
         ]
@@ -223,8 +220,7 @@ def _pandas_map_condition_rows(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    domain_type: MetricDomainTypes
-    domain_type, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -236,7 +232,7 @@ def _pandas_map_condition_rows(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    if domain_type == MetricDomainTypes.COLUMN:
+    if "column" == accessor_domain_kwargs:
         column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
             "column"
         ]

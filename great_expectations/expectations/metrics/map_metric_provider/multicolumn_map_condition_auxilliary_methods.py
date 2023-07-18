@@ -48,7 +48,7 @@ def _pandas_multicolumn_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -96,7 +96,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -133,7 +133,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -180,7 +180,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -221,7 +221,7 @@ def _spark_multicolumn_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -283,7 +283,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )

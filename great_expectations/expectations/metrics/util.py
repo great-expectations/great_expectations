@@ -13,7 +13,6 @@ from great_expectations.compatibility import aws, sqlalchemy, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -610,7 +609,7 @@ def column_reflection_fallback(
 def get_dbms_compatible_metric_domain_kwargs(
     metric_domain_kwargs: dict,
     batch_columns_list: List[str | sqlalchemy.quoted_name],
-) -> tuple[MetricDomainTypes, dict]:
+) -> dict:
     """
     This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
     column name in "Batch" column list is quoted, then corresponding column name in "metric_domain_kwargs" is also quoted.
@@ -621,18 +620,14 @@ def get_dbms_compatible_metric_domain_kwargs(
 
     Returns:
         metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
-        domain_type: Type of "MetricDomainTypes" detected by examining original "metric_domain_kwargs" dictionary.
     """
-    domain_type: MetricDomainTypes
     if "column" in metric_domain_kwargs:
-        domain_type = MetricDomainTypes.COLUMN
         column_name = get_dbms_compatible_column_names(
             column_names=metric_domain_kwargs["column"],
             batch_columns_list=batch_columns_list,
         )
         metric_domain_kwargs["column"] = column_name
     elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
-        domain_type = MetricDomainTypes.COLUMN_PAIR
         column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
         column_B_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_B"]
         column_names: List[str | sqlalchemy.quoted_name] = [
@@ -648,7 +643,6 @@ def get_dbms_compatible_metric_domain_kwargs(
             metric_domain_kwargs["column_B"],
         ) = column_names
     elif "column_list" in metric_domain_kwargs:
-        domain_type = MetricDomainTypes.MULTICOLUMN
         column_names: List[str | sqlalchemy.quoted_name] = metric_domain_kwargs[
             "column_list"
         ]
@@ -657,10 +651,8 @@ def get_dbms_compatible_metric_domain_kwargs(
             batch_columns_list=batch_columns_list,
         )
         metric_domain_kwargs["column_list"] = column_names
-    else:
-        domain_type = MetricDomainTypes.TABLE
 
-    return domain_type, metric_domain_kwargs
+    return metric_domain_kwargs
 
 
 @overload

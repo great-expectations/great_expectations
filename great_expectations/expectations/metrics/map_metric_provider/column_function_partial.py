@@ -83,7 +83,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -149,7 +149,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -223,7 +223,7 @@ def column_function_partial(  # noqa: C901, PLR0915
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )

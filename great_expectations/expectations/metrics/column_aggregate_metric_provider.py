@@ -71,7 +71,7 @@ def column_aggregate_value(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -147,7 +147,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -211,7 +211,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
 
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )

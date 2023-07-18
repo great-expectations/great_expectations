@@ -77,7 +77,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -135,7 +135,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )
@@ -197,7 +197,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
-                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
                     metric_domain_kwargs=metric_domain_kwargs,
                     batch_columns_list=metrics["table.columns"],
                 )

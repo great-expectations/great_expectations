@@ -51,7 +51,7 @@ def _pandas_column_map_condition_values(
     ) = metrics["unexpected_condition"]
 
     # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -120,7 +120,7 @@ def _pandas_column_map_series_and_domain_values(
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -184,7 +184,7 @@ def _pandas_column_map_condition_value_counts(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -253,7 +253,7 @@ def _sqlalchemy_column_map_condition_values(
         "unexpected_condition"
     )
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -313,7 +313,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         "unexpected_condition"
     )
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -358,7 +358,7 @@ def _spark_column_map_condition_values(
         "unexpected_condition"
     )
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
@@ -409,7 +409,7 @@ def _spark_column_map_condition_value_counts(
         "unexpected_condition"
     )
 
-    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
