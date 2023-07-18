@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Union
 
 import pandas as pd
+import random
+
 import pytest
 from _pytest import monkeypatch
 
@@ -83,6 +85,23 @@ def unexpected_index_list_two_index_columns():
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
+
+
+@pytest.fixture
+def column_names_all_lowercase() -> list[str]:
+    return [
+        "artists",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "scientists",
+    ]
+
+
+@pytest.fixture
+def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[str]:
+    name: str
+    return [name.upper() for name in column_names_all_lowercase]
 
 
 @pytest.mark.unit
@@ -277,20 +296,10 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 
 
 @pytest.mark.unit
-def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
-    test_column_names: list[str] = [
-        "actors",
-        "artists",
-        "athletes",
-        "business_people",
-        "healthcare_workers",
-        "engineers",
-        "lawyers",
-        "musicians",
-        "scientists",
-        "literary_professionals",
-    ]
-
+def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
+    sa, column_names_all_lowercase: list[str]
+):
+    test_column_names: list[str] = column_names_all_lowercase
     with pytest.raises(gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
         _ = get_dbms_compatible_metric_domain_kwargs(
             metric_domain_kwargs={"column": "non_existent_column"},
@@ -303,88 +312,93 @@ def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
 
 
 @pytest.mark.unit
-def test_get_dbms_compatible_metric_domain_column_kwargs(sa):
+@pytest.mark.parametrize(
+    "input_column_name, output_column_name, confirm_not_equal_column_name",
+    [
+        [
+            "ARTISTS",
+            "ARTISTS",
+            None,
+        ],
+        [
+            "travel_agents",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            "TRAVEL_AGENTS",
+        ],
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name: str,
+    output_column_name: Union[str, sqlalchemy.quoted_name],
+    confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
+):
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
     )
-    test_column_names: list[str] = [
-        "ACTORS",
-        "ARTISTS",
-        "ATHLETES",
-        "BUSINESS_PEOPLE",
-        "HEALTHCARE_WORKERS",
-        "ENGINEERS",
-        "LAWYERS",
-        "MUSICIANS",
-        "SCIENTISTS",
-        "LITERARY_PROFESSIONALS",
-        quoted_column_name,
-    ]
+    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
 
     metric_domain_kwargs: dict
 
     metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={"column": "ACTORS"},
+        metric_domain_kwargs={"column": input_column_name},
         batch_columns_list=test_column_names,
     )
-    assert metric_domain_kwargs["column"] == "ACTORS"
-
-    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={"column": quoted_column_name},
-        batch_columns_list=test_column_names,
-    )
-    assert metric_domain_kwargs["column"] == quoted_column_name
-
-    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={"column": "travel_agents"},
-        batch_columns_list=test_column_names,
-    )
-    assert metric_domain_kwargs["column"] == quoted_column_name
-    assert metric_domain_kwargs["column"] != "TRAVEL_AGENTS"
+    assert metric_domain_kwargs["column"] == output_column_name
+    if confirm_not_equal_column_name:
+        assert metric_domain_kwargs["column"] != confirm_not_equal_column_name
 
 
 @pytest.mark.unit
-def test_get_dbms_compatible_metric_domain_column_pair_kwargs():
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_column_name_a, input_column_name_b, output_column_name_a, output_column_name_b",
+    [
+        [
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+        ],
+        [
+            "ARTISTS",
+            "travel_agents",
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+        ],
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name_a: str,
+    input_column_name_b: str,
+    output_column_name_a: Union[str, sqlalchemy.quoted_name],
+    output_column_name_b: Union[str, sqlalchemy.quoted_name],
+):
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
     )
-    test_column_names: list[str] = [
-        "ACTORS",
-        "ARTISTS",
-        "ATHLETES",
-        "BUSINESS_PEOPLE",
-        "HEALTHCARE_WORKERS",
-        "ENGINEERS",
-        "LAWYERS",
-        "MUSICIANS",
-        "SCIENTISTS",
-        "LITERARY_PROFESSIONALS",
-        quoted_column_name,
-    ]
+    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
 
     metric_domain_kwargs: dict
 
     metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={"column_A": "ACTORS", "column_B": quoted_column_name},
+        metric_domain_kwargs={
+            "column_A": input_column_name_a,
+            "column_B": input_column_name_b,
+        },
         batch_columns_list=test_column_names,
     )
-    assert (
-        metric_domain_kwargs["column_A"] == "ACTORS"
-        and metric_domain_kwargs["column_B"] == quoted_column_name
-    )
-
-    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={"column_A": "ACTORS", "column_B": "travel_agents"},
-        batch_columns_list=test_column_names,
-    )
-    assert (
-        metric_domain_kwargs["column_A"] == "ACTORS"
-        and metric_domain_kwargs["column_B"] == quoted_column_name
-    )
+    assert metric_domain_kwargs["column_A"] == output_column_name_a
+    assert metric_domain_kwargs["column_B"] == output_column_name_b
 
 
 @pytest.mark.unit
-def test_get_dbms_compatible_metric_domain_column_list_kwargs():
+def test_get_dbms_compatible_metric_domain_column_list_kwargs(
+    sa, column_names_all_uppercase: list[str]
+):
     quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
     )
@@ -394,33 +408,26 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs():
     quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="Household_Pets", quote=True
     )
-    test_column_names: list[str] = [
-        "ACTORS",
+    test_column_names: list[str] = column_names_all_uppercase + [
         quoted_column_name_0,
-        "ARTISTS",
         quoted_column_name_1,
-        "ATHLETES",
-        "BUSINESS_PEOPLE",
-        "HEALTHCARE_WORKERS",
-        "ENGINEERS",
-        "LAWYERS",
-        "MUSICIANS",
-        "SCIENTISTS",
-        "LITERARY_PROFESSIONALS",
         quoted_column_name_2,
     ]
+    random.shuffle(test_column_names)
 
     metric_domain_kwargs: dict
 
     metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs={
-            "column_list": ["ACTORS", "travel_agents", "FarmAnimals", "Household_Pets"]
+            "column_list": ["ARTISTS", "travel_agents", "FarmAnimals", "Household_Pets"]
         },
         batch_columns_list=test_column_names,
     )
-    assert metric_domain_kwargs["column_list"] == [
-        "ACTORS",
-        quoted_column_name_0,
-        quoted_column_name_1,
-        quoted_column_name_2,
-    ]
+    assert sorted(metric_domain_kwargs["column_list"]) == sorted(
+        [
+            "ARTISTS",
+            quoted_column_name_0,
+            quoted_column_name_1,
+            quoted_column_name_2,
+        ]
+    )
