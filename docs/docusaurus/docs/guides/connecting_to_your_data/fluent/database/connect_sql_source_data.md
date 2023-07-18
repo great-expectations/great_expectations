@@ -287,23 +287,27 @@ The following code examples use a Snowflake connection string. A SQLite connecti
 
 The following code is an example of a Snowflake connection string format:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
+```python
+ my_connection_string = "snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>"
 ```
 
 ### Create a Snowflake Datasource
 
 1. Run the following Python code to set the `name` and `connection_string` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
+    ```python
+    datasource_name = "my_snowflake_datasource"
     ```
 
 2. Run the following Python code to create a Snowflake Datasource:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
+    ```python 
+    datasource = context.sources.add_snowflake(
+        name=datasource_name, connection_string=my_connection_string
+    )
     ```
 
-    TODO: DELETE
-    :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
+    :::info Using `add_sql(...)` instead of `add_sqlite(...)`
 
     The SQL Datasource created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
 
@@ -316,23 +320,29 @@ The following code is an example of a Snowflake connection string format:
 
 1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
+    ```python
+    asset_name = "my_asset"
+    asset_table_name = my_table_name
     ```
 
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
+    ```python
+    table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
     ```
 
 ### Connect to the data in a query (Optional)
 
 1. Run the following Python code to define a Query Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
+    ```python
+    asset_name = "my_query_asset"
+    query = "SELECT * from yellow_tripdata_sample_2019_01"
     ```
 2. Run the following Python code to create the Data Asset:
 
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
+    ```python
+    query_asset = datasource.add_query_asset(name=asset_name, query=query)
     ```
 
 ### Add additional tables or queries (Optional)
