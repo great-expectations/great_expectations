@@ -621,8 +621,9 @@ def get_dbms_compatible_metric_domain_kwargs(
     Returns:
         metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
     """
+    column_names: List[str | sqlalchemy.quoted_name]
     if "column" in metric_domain_kwargs:
-        column_name = get_dbms_compatible_column_names(
+        column_name: str | sqlalchemy.quoted_name = get_dbms_compatible_column_names(
             column_names=metric_domain_kwargs["column"],
             batch_columns_list=batch_columns_list,
         )
@@ -630,7 +631,7 @@ def get_dbms_compatible_metric_domain_kwargs(
     elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
         column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
         column_B_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_B"]
-        column_names: List[str | sqlalchemy.quoted_name] = [
+        column_names = [
             column_A_name,
             column_B_name,
         ]
@@ -643,9 +644,7 @@ def get_dbms_compatible_metric_domain_kwargs(
             metric_domain_kwargs["column_B"],
         ) = column_names
     elif "column_list" in metric_domain_kwargs:
-        column_names: List[str | sqlalchemy.quoted_name] = metric_domain_kwargs[
-            "column_list"
-        ]
+        column_names = metric_domain_kwargs["column_list"]
         column_names = get_dbms_compatible_column_names(
             column_names=column_names,
             batch_columns_list=batch_columns_list,
