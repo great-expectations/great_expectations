@@ -36,7 +36,7 @@ Connect GX to a SQL database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
+- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a SQL database
 
 </Prerequisites> 
@@ -194,7 +194,7 @@ Connect GX to a SQLite database to access source data.
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- [An installation of GX set up to work with SQLite](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a SQLite database
 
 </Prerequisites> 
@@ -299,22 +299,34 @@ The following code is an example of a Snowflake connection string format:
     datasource_name = "my_snowflake_datasource"
     ```
 
+    :::info Passing individual connection arguments instead of `connection_string`
+
+    Although a connection string is the standard way to yield a connection to a database, the Snowflake datasource supports 
+    individual connection arguments to be passed in as an alternative.
+
+    The following arguments are supported:
+      - `account`
+      - `user`
+      - `password`
+      - `database`
+      - `schema`
+      - `warehouse`
+      - `role`
+      - `numpy`
+
+    Passing these values as keyword args to `add_snowflake` is functionally equivalent to passing in a `connection_string`.
+
+    For more information, check out Snowflake's official documentation on [the Snowflake SQLAlchemy toolkit](https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy).
+    :::
+
 2. Run the following Python code to create a Snowflake Datasource:
 
     ```python 
     datasource = context.sources.add_snowflake(
-        name=datasource_name, connection_string=my_connection_string
+        name=datasource_name, 
+        connection_string=my_connection_string, # Or alternatively, individual connection args
     )
     ```
-
-    :::info Using `add_sql(...)` instead of `add_sqlite(...)`
-
-    The SQL Datasource created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
-
-    SQLite stores datetime values as strings.  Because of this, a general SQL Datasource sees datetime columns as string columns. A SQLite Datasource has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
-
-    If you are working with SQLite source data, use `add_sqlite(...)` to create your Datasource.
-    :::
 
 ### Connect to the data in a table (Optional)
 
