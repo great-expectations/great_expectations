@@ -19,7 +19,6 @@ class RunBatchInspectorEvent(EventBase):
     ] = "batch_inspector_request.received"
     datasource_name: str
     data_asset_name: str
-    batch_name: str
 
 
 class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
@@ -28,12 +27,11 @@ class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
 
         datasource_from_action = self._context.get_datasource(event.datasource_name)
         data_asset_from_action = datasource_from_action.get_asset(event.data_asset_name)
-        # TODO: Do we allow passing options to the batch request?
         batch_request_from_action = data_asset_from_action.build_batch_request()
         batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
             batch_request=batch_request_from_action
         )[0]
-        # TODO: Emit warning if more than one batch that we are only using the first one.
+        # TODO: Emit warning if more than one batch found that we are only using the first one.
 
         metrics = batch_inspector.get_column_descriptive_metrics(
             batch=batch_from_action
