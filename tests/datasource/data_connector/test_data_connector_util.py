@@ -531,7 +531,7 @@ def test_build_sorters_from_config_bad_config():
     reason="Could not import 'storage' from google.cloud",
 )
 @mock.patch("great_expectations.compatibility.google.Client")
-@pytest.mark.external_cloud_client
+@pytest.mark.big
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}

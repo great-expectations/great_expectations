@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
 # module level markers
-pytestmark = [pytest.mark.external_cloud_client]
+pytestmark = [pytest.mark.big]
 
 
 @pytest.mark.integration

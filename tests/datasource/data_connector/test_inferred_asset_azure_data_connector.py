@@ -20,7 +20,7 @@ from great_expectations.execution_engine import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.external_cloud_client]
+pytestmark = [pytest.mark.big]
 
 yaml = YAMLHandler()
 

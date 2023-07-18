@@ -29,7 +29,7 @@ if not (azure.storage and azure.BlobServiceClient):
 
 
 # module level markers
-pytestmark = [pytest.mark.external_cloud_client]
+pytestmark = [pytest.mark.big]
 
 
 @pytest.fixture

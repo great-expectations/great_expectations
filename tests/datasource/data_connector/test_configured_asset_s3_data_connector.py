@@ -28,7 +28,7 @@ from great_expectations.execution_engine import PandasExecutionEngine
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.external_cloud_client]
+pytestmark = [pytest.mark.big]
 
 
 @mock_s3

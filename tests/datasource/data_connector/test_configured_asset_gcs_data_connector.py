@@ -26,7 +26,7 @@ if not google.storage:
     )
 
 # module level markers
-pytestmark = [pytest.mark.external_cloud_client]
+pytestmark = [pytest.mark.big]
 
 
 @pytest.fixture
