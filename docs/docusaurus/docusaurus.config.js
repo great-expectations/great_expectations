@@ -99,8 +99,8 @@ module.exports = {
               to: 'https://greatexpectations.io/community'
             },
             {
-              label: 'SLACK',
-              to: 'https://greatexpectations.io/slack'
+              label: 'COMMUNITY FORUM',
+              to: 'https://discourse.greatexpectations.io/'
             },
             {
               label: 'GITHUB',
