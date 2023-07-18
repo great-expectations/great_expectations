@@ -556,21 +556,24 @@ stages:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
-  - stage: airflow_provider
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # 2023-07-18 - Chetan - these are being disabled due to a test failure introduced by the provider
+  # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
 
-    jobs:
-      - job: run_airflow_provider_tests
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+  # - stage: airflow_provider
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-          - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
-            name: CheckMinAirflowDependencyCompatibility
+  #   jobs:
+  #     - job: run_airflow_provider_tests
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.8'
+  #           displayName: 'Use Python 3.8'
 
-          - script: ./ci/checks/run_gx_airflow_operator_tests.sh
-            name: RunAirflowProviderTests
+  #         - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
+  #           name: CheckMinAirflowDependencyCompatibility
+
+  #         - script: ./ci/checks/run_gx_airflow_operator_tests.sh
+  #           name: RunAirflowProviderTests
