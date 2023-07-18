@@ -299,26 +299,6 @@ The following code is an example of a Snowflake connection string format:
     datasource_name = "my_snowflake_datasource"
     ```
 
-    :::info Passing individual connection arguments instead of `connection_string`
-
-    Although a connection string is the standard way to yield a connection to a database, the Snowflake datasource supports 
-    individual connection arguments to be passed in as an alternative.
-
-    The following arguments are supported:
-      - `account`
-      - `user`
-      - `password`
-      - `database`
-      - `schema`
-      - `warehouse`
-      - `role`
-      - `numpy`
-
-    Passing these values as keyword args to `add_snowflake` is functionally equivalent to passing in a `connection_string`.
-
-    For more information, check out Snowflake's official documentation on [the Snowflake SQLAlchemy toolkit](https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy).
-    :::
-
 2. Run the following Python code to create a Snowflake Datasource:
 
     ```python 
@@ -327,6 +307,26 @@ The following code is an example of a Snowflake connection string format:
         connection_string=my_connection_string, # Or alternatively, individual connection args
     )
     ```
+:::info Passing individual connection arguments instead of `connection_string`
+
+Although a connection string is the standard way to yield a connection to a database, the Snowflake datasource supports 
+individual connection arguments to be passed in as an alternative.
+
+The following arguments are supported:
+    - `account`
+    - `user`
+    - `password`
+    - `database`
+    - `schema`
+    - `warehouse`
+    - `role`
+    - `numpy`
+
+Passing these values as keyword args to `add_snowflake` is functionally equivalent to passing in a `connection_string`.
+
+For more information, check out Snowflake's official documentation on [the Snowflake SQLAlchemy toolkit](https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy).
+:::
+
 
 ### Connect to the data in a table (Optional)
 
