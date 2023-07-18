@@ -1,8 +1,8 @@
 ---
-sidebar_label: "Connect to SQL database Source Data"
-title: "Connect to SQL database Source Data"
+sidebar_label: "Connect to SQL database source data"
+title: "Connect to SQL database source data"
 id: connect_sql_source_data
-description: Connect to Source Data stored on SQL databases.
+description: Connect to source data stored on SQL databases.
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 ---
@@ -15,7 +15,7 @@ import PostgreSqlConfigureCredentialsInConfigVariablesYml from '/docs/components
 import TabItem from '@theme/TabItem';
 import Tabs from '@theme/Tabs';
 
-Use the information provided here to connect to Source Data stored on SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL Source Data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+Use the information provided here to connect to source data stored in SQL databases. Great Expectations (GX) uses SQLAlchemy to connect to SQL source data, and most of the SQL dialects supported by SQLAlchemy are also supported by GX. For more information about the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 <Tabs
   groupId="connect-sql-source-data"
@@ -30,14 +30,14 @@ Use the information provided here to connect to Source Data stored on SQL databa
 
 ## SQL
 
-Connect GX to a SQL database to access Source Data.
+Connect GX to a SQL database to access source data.
 
 ### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - An installation of GX set up to work with SQL
-- Source Data stored in a SQL database
+- Source data stored in a SQL database
 
 </Prerequisites> 
 
@@ -72,7 +72,7 @@ Run the following code to store the connection string in the `connection_string`
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
 ```
 
-:::tip Is there a more secure way to include my credentials?
+:::tip Is there a more secure way to include my credentialsu
 
 You can use environment variables or a key in `config_variables.yml` to store connection string passwords.  After you define your password, you reference it in your connection string similar to this example:
 
@@ -101,14 +101,14 @@ Run the following Python code to create a SQL Datasource:
 
 ## PostgreSQL
 
-Connect GX to a PostgreSQL database to access Source Data.
+Connect GX to a PostgreSQL database to access source data.
 
 ### Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
-- Source Data stored in a PostgreSQL database
+- Source data stored in a PostgreSQL database
 
 </Prerequisites> 
 
@@ -188,7 +188,7 @@ Repeat the previous steps to add additional Data Assets.
 
 ## SQLite
 
-Connect GX to a SQLite database to access Source Data.
+Connect GX to a SQLite database to access source data.
 
 ### Prerequisites
 
@@ -230,7 +230,7 @@ The following code is an example of a PostgreSQL connection string format:
 
     SQLite stores datetime values as strings.  Because of this, a general SQL Datasource sees datetime columns as string columns. A SQLite Datasource has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
 
-    If you are working with SQLite Source Data, use `add_sqlite(...)` to create your Datasource.
+    If you are working with SQLite source data, use `add_sqlite(...)` to create your Datasource.
     :::
 
 ### Connect to the data in a table (Optional)
@@ -275,6 +275,3 @@ Repeat the previous steps to add additional Data Assets.
 - [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
 
 - [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
-
-
-
