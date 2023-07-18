@@ -15,9 +15,15 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
-    verify_column_names_exist,
+    get_dbms_compatible_metric_domain_kwargs,
 )
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.expectations.metrics.util import (
+#     get_dbms_compatible_column_names,
+#     verify_column_names_exist,
+# )
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.util import (
     get_sqlalchemy_selectable,
 )
@@ -48,6 +54,12 @@ def _pandas_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -71,11 +83,13 @@ def _pandas_column_pair_map_condition_values(
         column_A_name,
         column_B_name,
     ]
-    # noinspection PyPep8Naming
-    column_A_name, column_B_name = get_dbms_compatible_column_names(
-        column_names=column_names,
-        batch_columns_list=metrics["table.columns"],
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name, column_B_name = get_dbms_compatible_column_names(
+    #     column_names=column_names,
+    #     batch_columns_list=metrics["table.columns"],
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     domain_values = df[column_names]
 
@@ -107,6 +121,12 @@ def _pandas_column_pair_map_condition_filtered_row_count(
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -121,18 +141,24 @@ def _pandas_column_pair_map_condition_filtered_row_count(
 """
         )
 
-    # noinspection PyPep8Naming
-    column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
-    column_B_name = accessor_domain_kwargs["column_B"]
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name = accessor_domain_kwargs["column_A"]
+    # # noinspection PyPep8Naming
+    # column_B_name = accessor_domain_kwargs["column_B"]
+    # TODO: <Alex>ALEX</Alex>
 
-    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-        column_A_name,
-        column_B_name,
-    ]
-    verify_column_names_exist(
-        column_names=column_names, batch_columns_list=metrics["table.columns"]
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+    #     column_A_name,
+    #     column_B_name,
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # verify_column_names_exist(
+    #     column_names=column_names, batch_columns_list=metrics["table.columns"]
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     return df.shape[0]
 
@@ -151,6 +177,12 @@ def _sqlalchemy_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -163,15 +195,19 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-        column_A_name,
-        column_B_name,
-    ]
-    # noinspection PyPep8Naming
-    column_A_name, column_B_name = get_dbms_compatible_column_names(
-        column_names=column_names,
-        batch_columns_list=metrics["table.columns"],
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+    #     column_A_name,
+    #     column_B_name,
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name, column_B_name = get_dbms_compatible_column_names(
+    #     column_names=column_names,
+    #     batch_columns_list=metrics["table.columns"],
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     query = sa.select(
         sa.column(column_A_name).label("unexpected_values_A"),
@@ -202,6 +238,12 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -209,18 +251,24 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    # noinspection PyPep8Naming
-    column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
-    column_B_name = accessor_domain_kwargs["column_B"]
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name = accessor_domain_kwargs["column_A"]
+    # # noinspection PyPep8Naming
+    # column_B_name = accessor_domain_kwargs["column_B"]
+    # TODO: <Alex>ALEX</Alex>
 
-    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-        column_A_name,
-        column_B_name,
-    ]
-    verify_column_names_exist(
-        column_names=column_names, batch_columns_list=metrics["table.columns"]
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+    #     column_A_name,
+    #     column_B_name,
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # verify_column_names_exist(
+    #     column_names=column_names, batch_columns_list=metrics["table.columns"]
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     return execution_engine.execute_query(
         sa.select(sa.func.count()).select_from(selectable)
@@ -241,6 +289,12 @@ def _spark_column_pair_map_condition_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -253,15 +307,19 @@ def _spark_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-        column_A_name,
-        column_B_name,
-    ]
-    # noinspection PyPep8Naming
-    column_A_name, column_B_name = get_dbms_compatible_column_names(
-        column_names=column_names,
-        batch_columns_list=metrics["table.columns"],
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+    #     column_A_name,
+    #     column_B_name,
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name, column_B_name = get_dbms_compatible_column_names(
+    #     column_names=column_names,
+    #     batch_columns_list=metrics["table.columns"],
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -303,6 +361,12 @@ def _spark_column_pair_map_condition_filtered_row_count(
 ):
     """Return record counts from the specified domain that match the map-style metric in the metrics dictionary."""
     _, compute_domain_kwargs, accessor_domain_kwargs = metrics["unexpected_condition"]
+
+    _, accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -310,17 +374,23 @@ def _spark_column_pair_map_condition_filtered_row_count(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    # noinspection PyPep8Naming
-    column_A_name = accessor_domain_kwargs["column_A"]
-    # noinspection PyPep8Naming
-    column_B_name = accessor_domain_kwargs["column_B"]
-
-    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-        column_A_name,
-        column_B_name,
-    ]
-    verify_column_names_exist(
-        column_names=column_names, batch_columns_list=metrics["table.columns"]
-    )
+    # TODO: <Alex>ALEX</Alex>
+    # # noinspection PyPep8Naming
+    # column_A_name = accessor_domain_kwargs["column_A"]
+    # # noinspection PyPep8Naming
+    # column_B_name = accessor_domain_kwargs["column_B"]
+    # TODO: <Alex>ALEX</Alex>
+    #
+    # TODO: <Alex>ALEX</Alex>
+    # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+    #     column_A_name,
+    #     column_B_name,
+    # ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # verify_column_names_exist(
+    #     column_names=column_names, batch_columns_list=metrics["table.columns"]
+    # )
+    # TODO: <Alex>ALEX</Alex>
 
     return df.count()

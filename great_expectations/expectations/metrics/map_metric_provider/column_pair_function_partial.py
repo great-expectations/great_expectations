@@ -3,14 +3,11 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
-    List,
     Optional,
     Type,
-    Union,
 )
 
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -29,14 +26,16 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.util import (
-    get_dbms_compatible_column_names,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.expectations.metrics.util import (
+#     get_dbms_compatible_column_names,
+# )
+# TODO: <Alex>ALEX</Alex>
+
 logger = logging.getLogger(__name__)
-
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility import sqlalchemy
 
 
 @public_api
@@ -84,6 +83,11 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     df,
                     compute_domain_kwargs,
@@ -97,15 +101,19 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                    column_A_name,
-                    column_B_name,
-                ]
-                # noinspection PyPep8Naming
-                column_A_name, column_B_name = get_dbms_compatible_column_names(
-                    column_names=column_names,
-                    batch_columns_list=metrics["table.columns"],
-                )
+                # TODO: <Alex>ALEX</Alex>
+                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+                #     column_A_name,
+                #     column_B_name,
+                # ]
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # # noinspection PyPep8Naming
+                # column_A_name, column_B_name = get_dbms_compatible_column_names(
+                #     column_names=column_names,
+                #     batch_columns_list=metrics["table.columns"],
+                # )
+                # TODO: <Alex>ALEX</Alex>
 
                 values = metric_fn(
                     cls,
@@ -147,6 +155,11 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     selectable,
                     compute_domain_kwargs,
@@ -160,15 +173,19 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                    column_A_name,
-                    column_B_name,
-                ]
-                # noinspection PyPep8Naming
-                column_A_name, column_B_name = get_dbms_compatible_column_names(
-                    column_names=column_names,
-                    batch_columns_list=metrics["table.columns"],
-                )
+                # TODO: <Alex>ALEX</Alex>
+                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+                #     column_A_name,
+                #     column_B_name,
+                # ]
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # # noinspection PyPep8Naming
+                # column_A_name, column_B_name = get_dbms_compatible_column_names(
+                #     column_names=column_names,
+                #     batch_columns_list=metrics["table.columns"],
+                # )
+                # TODO: <Alex>ALEX</Alex>
 
                 column_pair_function = metric_fn(
                     cls,
@@ -214,6 +231,11 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 metrics: Dict[str, Any],
                 runtime_configuration: dict,
             ):
+                _, metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
                 (
                     data,
                     compute_domain_kwargs,
@@ -227,15 +249,19 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
-                    column_A_name,
-                    column_B_name,
-                ]
+                # TODO: <Alex>ALEX</Alex>
+                # column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+                #     column_A_name,
+                #     column_B_name,
+                # ]
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
                 # noinspection PyPep8Naming
-                column_A_name, column_B_name = get_dbms_compatible_column_names(
-                    column_names=column_names,
-                    batch_columns_list=metrics["table.columns"],
-                )
+                # column_A_name, column_B_name = get_dbms_compatible_column_names(
+                #     column_names=column_names,
+                #     batch_columns_list=metrics["table.columns"],
+                # )
+                # TODO: <Alex>ALEX</Alex>
 
                 column_pair_function = metric_fn(
                     cls,
