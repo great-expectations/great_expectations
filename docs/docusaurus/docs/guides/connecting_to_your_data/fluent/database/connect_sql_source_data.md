@@ -57,7 +57,7 @@ The following are some of the connection strings that are available for differen
 - BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>?credentials_path=/path/to/your/credentials.json`
 - MSSQL: `mssql+pyodbc://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?driver=<DRIVER>&charset=utf&autocommit=true`
 - MySQL: `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
-- PostGreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
+- PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
 - Redshift: `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
 - Snowflake: `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
 - SQLite: `sqlite:///<PATH_TO_DB_FILE>`
@@ -65,7 +65,7 @@ The following are some of the connection strings that are available for differen
 
 :::
 
-The following code examples use a PostGreSQL connection string. A PostGreSQL connection string connects GX to the SQL database.
+The following code examples use a PostgreSQL connection string. A PostgreSQL connection string connects GX to the SQL database.
 
 Run the following code to store the connection string in the `connection_string` variable with plain text credentials:
 
@@ -118,11 +118,11 @@ Connect GX to a PostgreSQL database to access source data.
 
 ### Determine your connection string
 
-The following code examples use a PostGreSQL connection string. A PostGreSQL connection string connects GX to the PostGreSQL database.
+The following code examples use a PostgreSQL connection string. A PostgreSQL connection string connects GX to the PostgreSQL database.
 
 The following code is an example of a PostgreSQL connection string format:
 
-```pythonname="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgreql_data.py connection_string"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_postgreql_data.py connection_string"
 ```
 
 :::tip Is there a more secure way to store my credentials than plain text in a connection string?
@@ -205,7 +205,7 @@ Connect GX to a SQLite database to access source data.
 
 ### Determine your connection string
 
-The following code examples use a PostGreSQL connection string. A PostGreSQL connection string connects GX to the SQLite database.
+The following code examples use a SQLite connection string. A SQLite connection string connects GX to the SQLite database.
 
 The following code is an example of a PostgreSQL connection string format:
 
@@ -263,6 +263,83 @@ Repeat the previous steps to add additional Data Assets.
 
 </TabItem>
 <TabItem value="snowflake">
+
+## Snowflake
+
+Connect GX to a Snowflake database to access source data.
+
+### Prerequisites
+
+<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- Source data stored in a Snowflake database
+
+</Prerequisites> 
+
+### Import GX and instantiate a Data Context
+
+<ImportGxAndInstantiateADataContext />
+
+### Determine your connection string
+
+The following code examples use a Snowflake connection string. A SQLite connection string connects GX to the Snowflake database.
+
+The following code is an example of a Snowflake connection string format:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
+```
+
+### Create a Snowflake Datasource
+
+1. Run the following Python code to set the `name` and `connection_string` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource_name"
+    ```
+
+2. Run the following Python code to create a Snowflake Datasource:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py datasource"
+    ```
+
+    TODO: DELETE
+    :::caution Using `add_sql(...)` instead of `add_sqlite(...)`
+
+    The SQL Datasource created with `add_sql` can connect to data in a SQLite database. However, `add_sqlite(...)` is the preferred method.
+
+    SQLite stores datetime values as strings.  Because of this, a general SQL Datasource sees datetime columns as string columns. A SQLite Datasource has additional handling in place for these fields, and also has additional error reporting for SQLite specific issues.
+
+    If you are working with SQLite source data, use `add_sqlite(...)` to create your Datasource.
+    :::
+
+### Connect to the data in a table (Optional)
+
+1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
+    ```
+
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py table_asset"
+    ```
+
+### Connect to the data in a query (Optional)
+
+1. Run the following Python code to define a Query Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_query"
+    ```
+2. Run the following Python code to create the Data Asset:
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py query_table_asset"
+    ```
+
+### Add additional tables or queries (Optional)
+
+Repeat the previous steps to add additional Data Assets.
+
+
 </TabItem>
 </Tabs>
 
