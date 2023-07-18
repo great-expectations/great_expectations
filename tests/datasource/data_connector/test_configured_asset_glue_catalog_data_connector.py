@@ -15,6 +15,9 @@ from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 def test_instantiation_with_partitions_in_connector(glue_titanic_catalog):
     config = yaml.load(
