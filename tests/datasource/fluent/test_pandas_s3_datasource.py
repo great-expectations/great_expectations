@@ -136,12 +136,12 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_construct_pandas_s3_datasource(pandas_s3_datasource: PandasS3Datasource):
     assert pandas_s3_datasource.name == "pandas_s3_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource):
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -154,7 +154,7 @@ def test_add_csv_asset_to_datasource(pandas_s3_datasource: PandasS3Datasource):
     assert m1 is not None
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
@@ -168,7 +168,7 @@ def test_construct_csv_asset_directly():
     assert m1 is not None
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource):
     with pytest.raises(pydantic.ValidationError) as exc_info:
         pandas_s3_datasource.add_csv_asset(  # type: ignore[call-arg]
@@ -272,7 +272,7 @@ def test_asset_connect_options_in_repr(
         assert "connect_options" not in asset_as_str
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_csv_asset_with_batching_regex_unnamed_parameters(
     pandas_s3_datasource: PandasS3Datasource,
 ):
@@ -289,7 +289,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_csv_asset_with_batching_regex_named_parameters(
     pandas_s3_datasource: PandasS3Datasource,
 ):
@@ -306,7 +306,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_csv_asset_with_some_batching_regex_named_parameters(
     pandas_s3_datasource: PandasS3Datasource,
 ):
@@ -323,7 +323,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
     pandas_s3_datasource: PandasS3Datasource,
 ):
@@ -338,7 +338,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_get_batch_list_from_fully_specified_batch_request(
     pandas_s3_datasource: PandasS3Datasource,
 ):
@@ -377,7 +377,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_test_connection_failures(
     s3_mock,
     pandas_s3_datasource: PandasS3Datasource,
@@ -408,7 +408,7 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error_message)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     pandas_s3_datasource: PandasS3Datasource,
 ):

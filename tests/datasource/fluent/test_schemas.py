@@ -122,6 +122,7 @@ def test_vcs_schemas_match(
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
 
 
+@pytest.mark.big
 @pytest.mark.skipif(
     _PANDAS_SCHEMA_VERSION != PANDAS_VERSION,
     reason=f"schemas generated with pandas {_PANDAS_SCHEMA_VERSION}",
