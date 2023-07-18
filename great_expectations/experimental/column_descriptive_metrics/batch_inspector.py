@@ -32,15 +32,17 @@ class BatchInspector:
         return metrics
 
     def _get_metric(self, metric_name: str, batch: Batch, run_id: uuid.UUID) -> Metric:
-        metrics_calculator = MetricsCalculator(
-            execution_engine=batch.datasource.get_execution_engine()
-        )
+        execution_engine = batch.datasource.get_execution_engine()
+
+        metrics_calculator = MetricsCalculator(execution_engine)
 
         # TODO: Thu - do we need the MetricConfiguration or can we just pass in the metric name?
         #  E.g. metrics_calculator.get_table_metric(metric_name)
         metric_config = MetricConfiguration(
             metric_name=metric_name,
-            metric_domain_kwargs={},
+            metric_domain_kwargs={
+                # "batch_id": execution_engine.batch_manager.active_batch_id
+            },
             metric_value_kwargs={},
         )
 

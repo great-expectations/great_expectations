@@ -4,7 +4,6 @@ import uuid
 from typing import TYPE_CHECKING
 
 from great_expectations.experimental.column_descriptive_metrics.metrics import (
-    BatchPointer,
     Metric,
     Metrics,
     Value,
@@ -58,12 +57,7 @@ class MetricConverter:  # TODO: Name this better
             id=self._generate_metric_id(),
             organization_id=self._organization_id,
             run_id=run_id,
-            # batch=batch,
-            batch_pointer=BatchPointer(
-                datasource_name=batch.datasource.name,
-                data_asset_name=batch.data_asset.name,
-                batch_id=batch.id,
-            ),
+            batch=batch,
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,
             metric_value_kwargs=metric_config.metric_value_kwargs,

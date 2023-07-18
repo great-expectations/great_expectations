@@ -18,7 +18,6 @@ import pandas as pd
 import great_expectations as gx
 from great_expectations.experimental.column_descriptive_metrics.metrics import (
     Metric,
-    BatchPointer,
     Value,
     Metrics,
 )
@@ -87,12 +86,15 @@ def test_demo_batch_inspector(
     cloud_org_id: uuid.UUID,
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
+    ephemeral_context_with_simple_dataframe,
     ephemeral_context_with_pandas_default,
 ):
     """This is a demo of how to get column descriptive metrics,
     this should be replaced with proper tests."""
 
+    # TODO: This is working but we want the ephemeral_context_with_simple_dataframe to work as well:
     context, batch_request = ephemeral_context_with_pandas_default
+    # context, batch_request = ephemeral_context_with_simple_dataframe
 
     # From here down assume we just have the batch request from the agent action
     # (using the datasource and data asset names from the batch request for convenience):
@@ -106,7 +108,7 @@ def test_demo_batch_inspector(
 
     batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
         batch_request
-    )[0]
+    )[-1]
 
     with mock.patch(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
@@ -126,11 +128,7 @@ def test_demo_batch_inspector(
                 id=metric_id,
                 organization_id=cloud_org_id,
                 run_id=run_id,
-                batch_pointer=BatchPointer(
-                    datasource_name="default_pandas_datasource",
-                    data_asset_name="#ephemeral_pandas_asset",
-                    batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
-                ),
+                batch=batch_from_action,
                 metric_name="table.row_count",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
@@ -142,11 +140,7 @@ def test_demo_batch_inspector(
                 id=metric_id,
                 organization_id=cloud_org_id,
                 run_id=run_id,
-                batch_pointer=BatchPointer(
-                    datasource_name="default_pandas_datasource",
-                    data_asset_name="#ephemeral_pandas_asset",
-                    batch_id="default_pandas_datasource-#ephemeral_pandas_asset",
-                ),
+                batch=batch_from_action,
                 metric_name="table.columns",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},

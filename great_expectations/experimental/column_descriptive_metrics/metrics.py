@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class CDMRBaseModel(BaseModel):  # TODO: Better name
@@ -26,23 +29,13 @@ class Value(CDMRBaseModel):
     value: Any  # TODO: Better than Any
 
 
-# TODO: Does BatchPointer add value at this time or should it be flattened?
-class BatchPointer(CDMRBaseModel):  # TODO: Better name
-    datasource_name: str = Field(description="Datasource name")
-    data_asset_name: str = Field(description="Data asset name")
-    batch_id: str = Field(description="Batch id")
-
-
 class Metric(CDMRBaseModel):
     id: uuid.UUID = Field(description="Metric id")
     organization_id: uuid.UUID = Field(
         description="Organization id"
     )  # TODO: Is this filled in by the backend?
     run_id: uuid.UUID = Field(description="Run id")
-    # TODO: Consider just having Batch as a parameter and serializing the parts we want
-    #  (e.g. datasource_name, data_asset_name, batch_id):
-    # batch: Batch = Field(description="Batch")
-    batch_pointer: BatchPointer = Field(description="Batch pointer")
+    batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
     metric_domain_kwargs: dict = Field(description="Metric domain kwargs")
     metric_value_kwargs: dict = Field(description="Metric value kwargs")
