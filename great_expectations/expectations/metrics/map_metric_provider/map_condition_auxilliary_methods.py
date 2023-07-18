@@ -232,7 +232,7 @@ def _pandas_map_condition_rows(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    if "column" == accessor_domain_kwargs:
+    if "column" in accessor_domain_kwargs:
         column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
             "column"
         ]
