@@ -276,6 +276,7 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     )
 
 
+@pytest.mark.unit
 def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
     test_column_names: list[str] = [
         "actors",
@@ -301,6 +302,7 @@ def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
     )
 
 
+@pytest.mark.unit
 def test_get_dbms_compatible_metric_domain_column_kwargs(sa):
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
@@ -341,6 +343,7 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(sa):
     assert metric_domain_kwargs["column"] != "TRAVEL_AGENTS"
 
 
+@pytest.mark.unit
 def test_get_dbms_compatible_metric_domain_column_pair_kwargs():
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
@@ -380,6 +383,7 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs():
     )
 
 
+@pytest.mark.unit
 def test_get_dbms_compatible_metric_domain_column_list_kwargs():
     quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
