@@ -145,6 +145,7 @@ stages:
 
     jobs:
     - job: static_type_check
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       variables:
         python.version: '3.8'
       steps:
@@ -164,54 +165,32 @@ stages:
           invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
     - job: docstring_linter
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       steps:
       - script: |
           pip install --requirement reqs/requirements-dev-test.txt
           invoke docstrings
         name: DocstringLinter
-
     - job: unused_import_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       steps:
       - script: |
           pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
           # https://www.flake8rules.com/rules/F401.html
           ruff --select F401 great_expectations tests
         name: UnusedImportChecker
-
     - job: check_repo_root_size
       steps:
         - script: ./ci/checks/check_repo_root_size.sh
           name: CheckRepoRootSize
-
-    - job: docs_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-      - script: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
-        name: DocsSnippetChecker
-
-    - job: line_number_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
-
-
-    - job: name_tag_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-        - script: |
-            python ci/checks/check_only_name_tag_snippets.py
-          name: NameTagSnippetChecker
-
     - job: public_api_report
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
       steps:
         - script: |
             pip install --requirement reqs/requirements-dev-test.txt
             invoke public-api
           name: PublicAPIReport
+
 
   - stage: import_ge
     dependsOn: scope_check

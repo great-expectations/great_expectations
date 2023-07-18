@@ -1,14 +1,19 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pytest
 from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
 
 """This module is for tests related to ensuring that test_yaml_config() emits the correct usage stats messages. Many of the tests for usage stats messages are implemented in other tests, noted below in the checklist"""
 
@@ -35,6 +40,7 @@ from tests.core.usage_statistics.util import (
 # See test_datasource_anonymizer.test_anonymize_datasource_info_v2_api_custom_subclass
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -68,6 +74,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -79,7 +86,7 @@ def test_test_yaml_config_usage_stats_custom_type(
     We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message.
     """
-    data_context: DataContext = empty_data_context_stats_enabled
+    data_context: FileDataContext = empty_data_context_stats_enabled
     _ = data_context.test_yaml_config(
         yaml_config="""
 module_name: tests.data_context.fixtures.plugins
@@ -119,6 +126,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -153,6 +161,7 @@ module_name: great_expectations.data_context.store.expectations_store
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -164,7 +173,7 @@ def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
     If a class_name is not provided, and we have run into an error state in test_yaml_config() (likely because of the missing class_name) then we should report descriptive diagnostic info.
     This should be the case even if we are passing in a custom config.
     """
-    data_context: DataContext = empty_data_context_stats_enabled
+    data_context: FileDataContext = empty_data_context_stats_enabled
     with pytest.raises((MarkedYAMLError, KeyError)):
         _ = data_context.test_yaml_config(
             yaml_config="""
@@ -192,6 +201,7 @@ store_backend:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -203,7 +213,7 @@ def test_test_yaml_config_usage_stats_custom_type_not_ge_subclass(
     We should be able to discern the GX parent class for a custom type and construct
     a useful usage stats event message.
     """
-    data_context: DataContext = empty_data_context_stats_enabled
+    data_context: FileDataContext = empty_data_context_stats_enabled
     _ = data_context.test_yaml_config(
         yaml_config="""
 module_name: tests.data_context.fixtures.plugins
@@ -228,6 +238,7 @@ class_name: MyCustomNonCoreGeClass
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -245,7 +256,7 @@ def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
             "test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass requires postgresql"
         )
 
-    data_context: DataContext = empty_data_context_stats_enabled
+    data_context: FileDataContext = empty_data_context_stats_enabled
     _ = data_context.test_yaml_config(
         yaml_config="""
 module_name: tests.data_context.fixtures.plugins.my_custom_simple_sqlalchemy_datasource_class
@@ -302,6 +313,7 @@ credentials:
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
+@pytest.mark.filesystem
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )

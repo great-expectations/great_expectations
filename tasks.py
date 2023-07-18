@@ -16,6 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
+from collections.abc import Mapping
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, Union
 
@@ -30,7 +31,9 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent
+GX_PACKAGE_DIR: Final = GX_ROOT_DIR / "great_expectations"
+REQS_DIR: Final = GX_ROOT_DIR / "reqs"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -116,20 +119,23 @@ def fmt(  # noqa: PLR0913
 @invoke.task(
     help={
         "path": _PATH_HELP_DESC,
+        "fmt": "Disable formatting. Runs by default.",
         "fix": "Attempt to automatically fix lint violations.",
         "watch": "Run in watch mode by re-running whenever files change.",
         "pty": _PTY_HELP_DESC,
     }
 )
-def lint(
+def lint(  # noqa: PLR0913
     ctx: Context,
     path: str = ".",
+    fmt_: bool = True,
     fix: bool = False,
     watch: bool = False,
     pty: bool = True,
 ):
     """Run formatter (black) and linter (ruff)"""
-    fmt(ctx, path, check=not fix, pty=pty)
+    if fmt_:
+        fmt(ctx, path, check=not fix, pty=pty)
 
     # Run code linter (ruff)
     cmds = ["ruff", path]
@@ -274,11 +280,11 @@ def type_check(  # noqa: PLR0913, PLR0912
 
     if check_stub_sources:
         # see --help docs for explanation of this flag
-        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+        for stub_file in GX_PACKAGE_DIR.glob("**/*.pyi"):
             source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
                 f"{stub_file.name[:-1]}"
             )
-            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            relative_path = source_file.relative_to(GX_ROOT_DIR)
             ge_pkgs.append(str(relative_path))
 
     cmds = [
@@ -346,7 +352,7 @@ def mv_usage_stats_json(ctx: Context):
     print(f"'{outfile}' copied to dbfs.")
 
 
-UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
+UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 
 
 @invoke.task(
@@ -375,6 +381,7 @@ def tests(  # noqa: PLR0913
     timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
     package: str | None = None,
     full_cov: bool = False,
+    verbose: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -398,8 +405,10 @@ def tests(  # noqa: PLR0913
         f"--durations={slowest}",
         cov_param,
         "--cov-report term",
-        "-vv",
+        "-rEf",  # show extra test summary info for errors & failed tests
     ]
+    if verbose:
+        cmds.append("-vv")
     if not ignore_markers:
         cmds += ["-m", f"'{marker_text}'"]
     if unit and not ignore_markers:
@@ -527,7 +536,7 @@ def type_schema(
     )
 
     schema_dir_root: Final[pathlib.Path] = (
-        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
+        GX_PACKAGE_DIR / "datasource" / "fluent" / "schemas"
     )
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
@@ -771,3 +780,72 @@ def show_automerges(ctx: Context):
             print(f"{i}. @{pr['user']['login']} {pr['title']} {pr['html_url']}")
     else:
         print("\tNo PRs set to automerge")
+
+
+MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
+    "athena": ("reqs/requirements-dev-athena.txt",),
+    "cloud": ("reqs/requirements-dev-cloud.txt",),
+    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
+    "external_sqldialect": ("reqs/requirements-dev-sqlalchemy.txt",),
+}
+
+
+@invoke.task(
+    iterable=["markers", "requirements_dev"],
+    help={
+        "markers": "Optional marker to install dependencies for. Can be specified multiple times.",
+        "requirements_dev": "Short name of `requirements-dev-*.txt` file to install, e.g. test, spark, cloud etc. Can be specified multiple times.",
+        "constraints": "Optional flag to install dependencies with constraints, default True",
+    },
+)
+def deps(  # noqa: PLR0913
+    ctx: Context,
+    markers: list[str],
+    requirements_dev: list[str],
+    constraints: bool = True,
+    gx_install: bool = False,
+    editable_install: bool = False,
+):
+    """
+    Install dependencies for development and testing.
+
+    Specific requirement files needed for a specific test maker can be registered in `MARKER_REQ_MAPPING`,
+    `invoke deps` will always check for and use these when installing dependencies.
+
+    If no `markers` or `requirements-dev` are specified, the dev-contrib and
+    core requirements are installed.
+
+    Example usage:
+    Installing the needed dependencies for running the `external_sqldialect` tests and
+    the 'requirements-dev-cloud.txt' dependencies.
+
+    $ invoke deps -m external_sqldialect -r cloud
+    """
+    cmds = ["pip", "install"]
+    if editable_install:
+        cmds.append("-e .")
+    elif gx_install:
+        cmds.append(".")
+
+    req_files: list[str] = ["requirements.txt"]
+
+    for marker_string in markers:
+        for marker_token in marker_string.split(" or "):
+            if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
+                req_files.extend(marker_depedencies)
+
+    for name in requirements_dev:
+        req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
+        assert req_path.exists(), f"Requirement file {req_path} does not exist"
+        req_files.append(str(req_path))
+
+    if not markers and not requirements_dev:
+        req_files.append("reqs/requirements-dev-contrib.txt")
+
+    for req_file in req_files:
+        cmds.append(f"-r {req_file}")
+
+    if constraints:
+        cmds.append("-c constraints-dev.txt")
+
+    ctx.run(" ".join(cmds), echo=True, pty=True)

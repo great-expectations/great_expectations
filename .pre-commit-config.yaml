@@ -12,6 +12,8 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
+      - id: no-commit-to-branch
+        args: [--branch, develop, --branch, main]
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:

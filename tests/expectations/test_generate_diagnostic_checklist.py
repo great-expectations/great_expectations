@@ -5,6 +5,10 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
+from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
+
+# module level markers
+pytestmark = [pytest.mark.unit]
 
 
 @pytest.mark.skip(
@@ -33,8 +37,8 @@ def test_print_diagnostic_checklist__second_iteration():
 
     assert (
         output_message
-        == """\
-Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration (EXPERIMENTAL):
+        == f"""\
+Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
  ✔ Has a docstring, including a one-line short description
     ✔ "Expect values in this column to equal the number three."
@@ -60,8 +64,8 @@ def test_print_diagnostic_checklist__third_iteration():
 
     assert (
         output_message
-        == """\
-Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration (EXPERIMENTAL):
+        == f"""\
+Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration ({Maturity.EXPERIMENTAL}):
  ✔ Has a valid library_metadata object
    Has a docstring, including a one-line short description
  ✔ Has at least one positive and negative example case, and all test cases pass

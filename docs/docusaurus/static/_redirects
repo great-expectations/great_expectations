@@ -368,3 +368,5 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 /docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset /docs/guides/connecting_to_your_data/fluent/database/sql_data_assets
 
+# Redirects for pages removed as no longer applicable
+/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint

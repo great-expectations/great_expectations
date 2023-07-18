@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import aws, pyspark, trino
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -53,18 +53,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-try:
-    import sqlalchemy_redshift.dialect
-except ImportError:
-    sqlalchemy_redshift = None
-
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 BIGQUERY_GEO_SUPPORT = False
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     GEOGRAPHY,
     bigquery_types_tuple,
 )
-from great_expectations.compatibility.sqlalchemy_bigquery import (
+from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as BigQueryDialect,
 )
 
@@ -85,12 +80,6 @@ try:
 except (ImportError, KeyError):
     clickhouse_sqlalchemy = None
     ch_types = None
-
-try:
-    import trino.sqlalchemy.datatype as trinotypes
-    import trino.sqlalchemy.dialect
-except ImportError:
-    trino = None
 
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
@@ -546,14 +535,14 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
-    try:
-        # Redshift does not (yet) export types to top level; only recognize base SA types
-        if isinstance(
-            execution_engine.dialect_module,
-            sqlalchemy_redshift.dialect.RedshiftDialect,
-        ):
-            return execution_engine.dialect_module.sa
-    except (TypeError, AttributeError):
+
+    # Redshift does not (yet) export types to top level; only recognize base SA types
+    if aws.redshiftdialect and isinstance(
+        execution_engine.dialect_module,
+        aws.redshiftdialect.RedshiftDialect,
+    ):
+        return execution_engine.dialect_module.sa
+    else:
         pass
 
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
@@ -597,13 +586,14 @@ def _get_dialect_type_module(  # noqa: PLR0911, PLR0912
     # Trino types module
     try:
         if (
-            isinstance(
+            trino.trinodialect
+            and trino.trinotypes
+            and isinstance(
                 execution_engine.dialect,
-                trino.sqlalchemy.dialect.TrinoDialect,
+                trino.trinodialect.TrinoDialect,
             )
-            and trinotypes is not None
         ):
-            return trinotypes
+            return trino.trinotypes
     except (TypeError, AttributeError):
         pass
 

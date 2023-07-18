@@ -17,6 +17,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.util import gen_directory_tree_str
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 @freeze_time("09/26/2019 13:42:41")
 def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
@@ -95,6 +96,7 @@ def test_HtmlSiteStore_filesystem_backend(tmp_path_factory):
 
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
+@pytest.mark.big
 @pytest.mark.integration
 def test_HtmlSiteStore_S3_backend():
     bucket = "test_validation_store_bucket"

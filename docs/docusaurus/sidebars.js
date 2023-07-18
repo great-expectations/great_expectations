@@ -2,15 +2,22 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
+      type: 'category',
+      label: 'Get started with GX',
+      link: { type: 'doc', id: 'guides/setup/get_started_lp'},
+      items: [
+        'tutorials/quickstart/quickstart',
+        'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
+        'tutorials/getting_started/how_to_use_great_expectations_with_sql',
+      ]
     },
     {
       type: 'category',
-      label: 'Set up your GX environment',
+      label: 'Configure your GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview_lp' },
       items: [
+        'guides/setup/setup_overview',
         'guides/setup/installation/install_gx',
-        'guides/setup/optional_dependencies/cloud/connect_gx_source_data_system',
         {
           type: 'category',
           label: 'Configure Data Contexts',
@@ -29,7 +36,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Connect to data',
+      label: 'Connect to Source Data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_lp' },
       items: [
         'guides/connecting_to_your_data/fluent/filesystem/connect_filesystem_source_data',
@@ -145,22 +152,24 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Integrate',
+      label: 'Integrations',
       link: {
         type: 'generated-index',
-        title: 'Integrate',
+        title: 'Integrations',
         description: 'Integrate Great Expectations (GX) with commonly used data engineering tools.',
       },
       items: [
         {
           type: 'category',
-          label: 'Integrate with AWS',
+          label: 'Amazon Web Services (AWS)',
           link: {
             type: 'doc',
             id: 'deployment_patterns/aws_lp',
           },
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
+            'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
+            'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark',
             'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena',
@@ -168,9 +177,7 @@ module.exports = {
           ],
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
-        'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'integrations/integration_datahub',
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
         'deployment_patterns/how_to_use_great_expectations_in_flyte',
@@ -178,7 +185,6 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
         'deployment_patterns/how_to_use_great_expectations_with_prefect',
         'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
-        'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
         'integrations/integration_zenml',
       ]
     },

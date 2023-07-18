@@ -15,7 +15,7 @@ To use code to create a Data Context, see [How to instantiate an Ephemeral Data 
 To configure a Data Context for a specific environment, see one of the following resources:
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](./how_to_use_great_expectations_in_databricks.md)
+- [How to use Great Expectations in Databricks](../tutorials/getting_started/how_to_use_great_expectations_in_databricks.md)
 
 ## Create Expectation Suites and add Expectations
 
@@ -38,7 +38,7 @@ To configure your Expectation store to load a Suite at a later time, see one of 
 
 ## Run validation
 
-To use an Expectation Suite you've created to validate data, see [How to validate data without a Checkpoint](../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md).
+To create and run a Checkpoint in code, see [How to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).  In a hosted environment you will not be able to store the Checkpoint for repeated use across Python sessions, but you can recreate it each time your scripts run.
 
 ## Use Data Docs
 

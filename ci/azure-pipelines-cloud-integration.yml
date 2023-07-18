@@ -27,8 +27,7 @@ stages:
 
           # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
-              pip install chardet==3.0.4
+              pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -89,8 +88,7 @@ stages:
 
           # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
-              pip install chardet==3.0.4
+              pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -131,9 +129,7 @@ stages:
 
           # includes explicit install of grpcio-status and chardet, which was causing errors in pipeline
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-              pip install chardet==3.0.4
-              pip install grpcio-status
+              pip install --constraint constraints-dev.txt ".[test, snowflake]" pytest-azurepipelines chardet==3.0.4 grpcio-status
             displayName: 'Install dependencies'
 
           - script: |

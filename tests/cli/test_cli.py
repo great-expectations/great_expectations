@@ -14,6 +14,9 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAMLHandler()
 
 
+pytestmark = [pytest.mark.cli]
+
+
 @pytest.mark.parametrize("invocation", [None, "--help"])
 def test_cli_command_help(caplog, invocation):
     runner = CliRunner(mix_stderr=True)

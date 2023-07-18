@@ -12,6 +12,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.util import get_context
 
 
+@pytest.mark.filesystem
 def test_build_init_payload(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -39,6 +40,7 @@ def test_build_init_payload(
     assert init_payload["expectation_suites"] == []
 
 
+@pytest.mark.unit
 def test_usage_statistics_handler_build_envelope(
     in_memory_data_context_config_usage_stats_enabled, sample_partial_message
 ):
