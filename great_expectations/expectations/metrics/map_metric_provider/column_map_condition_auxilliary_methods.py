@@ -50,15 +50,6 @@ def _pandas_column_map_condition_values(
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
 
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-    # TODO: <Alex>ALEX</Alex>
-
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -66,7 +57,14 @@ def _pandas_column_map_condition_values(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -120,14 +118,6 @@ def _pandas_column_map_series_and_domain_values(
         accessor_domain_kwargs == accessor_domain_kwargs_2
     ), "map_series and condition must have the same accessor kwargs"
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -135,7 +125,14 @@ def _pandas_column_map_series_and_domain_values(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -184,14 +181,6 @@ def _pandas_column_map_condition_value_counts(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     if "column" not in accessor_domain_kwargs:
@@ -200,6 +189,13 @@ def _pandas_column_map_condition_value_counts(
 (_pandas_column_map_condition_value_counts).
 """
         )
+
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -253,16 +249,6 @@ def _sqlalchemy_column_map_condition_values(
         "unexpected_condition"
     )
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -270,7 +256,16 @@ def _sqlalchemy_column_map_condition_values(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
+    )
 
     query = sa.select(sa.column(column_name).label("unexpected_values")).where(
         unexpected_condition
@@ -313,16 +308,6 @@ def _sqlalchemy_column_map_condition_value_counts(
         "unexpected_condition"
     )
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    selectable = execution_engine.get_domain_records(
-        domain_kwargs=compute_domain_kwargs
-    )
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -330,9 +315,18 @@ def _sqlalchemy_column_map_condition_value_counts(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     column: sa.Column = sa.column(column_name)
+
+    selectable = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
+    )
 
     query = (
         sa.select(column, sa.func.count(column))
@@ -358,14 +352,6 @@ def _spark_column_map_condition_values(
         "unexpected_condition"
     )
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -373,7 +359,14 @@ def _spark_column_map_condition_values(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+
+    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
@@ -409,11 +402,6 @@ def _spark_column_map_condition_value_counts(
         "unexpected_condition"
     )
 
-    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs=accessor_domain_kwargs,
-        batch_columns_list=metrics["table.columns"],
-    )
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -421,10 +409,13 @@ def _spark_column_map_condition_value_counts(
 """
         )
 
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
-    # TODO: <Alex>ALEX-WHY_NOT_FULL_DOMAIN_KWARGS?</Alex>
-    # TODO: <Alex>ALEX-POSITION?</Alex>
     df: pyspark.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
