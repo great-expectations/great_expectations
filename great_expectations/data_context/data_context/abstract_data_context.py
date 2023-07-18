@@ -2256,7 +2256,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         if not ((checkpoint is None) ^ (name is None)):
-            error_message = "Must either pass in an existing checkpoint or individual constructor arguments"
+            error_message = "Must either pass in an existing 'checkpoint' or individual constructor arguments"
             if checkpoint and name:
                 error_message += " (but not both)"
             raise ValueError(error_message)
