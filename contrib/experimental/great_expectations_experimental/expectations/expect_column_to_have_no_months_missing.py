@@ -171,14 +171,14 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
         month_set = {
             min_month + relativedelta(months=n_month) for n_month in range(months_diff)
         }
-        missing_months = sorted(month_set - set(distinct_months_sorted))
+        n_missing_months = len(month_set - set(distinct_months_sorted))
 
         threshold = self.get_success_kwargs(configuration).get("threshold")
-        success: bool = len(missing_months) <= threshold
+        success: bool = n_missing_months <= threshold
         return {
             "success": success,
             "result": {
-                "Number of missing months": len(missing_months),
+                "Number of missing months": n_missing_months,
                 "Total unique months": len(distinct_months_sorted),
                 "Threshold": threshold,
                 "Min date": min_month,
