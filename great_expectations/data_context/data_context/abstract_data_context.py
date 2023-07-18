@@ -2259,7 +2259,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             error_message = "Must either pass in an existing 'checkpoint' or individual constructor arguments"
             if checkpoint and name:
                 error_message += " (but not both)"
-            raise ValueError(error_message)
+            raise TypeError(error_message)
 
         action_list = action_list or self._determine_default_action_list()
 
