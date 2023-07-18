@@ -52,10 +52,13 @@ class MetricConverter:  # TODO: Name this better
 
         print("converting metric dict to metric object")
 
+        # TODO: Consider just having Batch as a parameter and serializing the parts we want
+        #  (e.g. datasource_name, data_asset_name, batch_id).
         metric = Metric(
             id=self._generate_metric_id(),
             organization_id=self._organization_id,
             run_id=run_id,
+            # batch=batch,
             batch_pointer=BatchPointer(
                 datasource_name=batch.datasource.name,
                 data_asset_name=batch.data_asset.name,
