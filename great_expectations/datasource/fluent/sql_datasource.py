@@ -802,7 +802,7 @@ class TableAsset(_SQLAsset):
 
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: Union[str] = pydantic.Field(
+    table_name: str = pydantic.Field(
         "",
         description="Name of the SQL table. Will default to the value of `name` if not provided.",
     )
