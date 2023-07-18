@@ -72,7 +72,7 @@ Run the following code to store the connection string in the `connection_string`
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sql_data.py sql_connection_string"
 ```
 
-:::tip Is there a more secure way to include my credentialsu
+:::tip Is there a more secure way to include my credentials?
 
 You can use environment variables or a key in `config_variables.yml` to store connection string passwords.  After you define your password, you reference it in your connection string similar to this example:
 
