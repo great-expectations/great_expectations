@@ -963,7 +963,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
-            error_message = "Must either pass in an existing datasource or individual constructor arguments"
+            error_message = "Must either pass in an existing 'datasource' or individual constructor arguments"
             if datasource and name:
                 error_message += " (but not both)"
             raise ValueError(error_message)
