@@ -12,6 +12,7 @@ from great_expectations.experimental.column_descriptive_metrics.batch_inspector 
 from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
     MetricConverter,
 )
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 import pandas as pd
 import great_expectations as gx
@@ -70,6 +71,18 @@ def ephemeral_context_with_simple_dataframe():
     return context, batch_request
 
 
+def _create_mock_agent_action(batch_request: BatchRequest):
+    class MockAgentAction:
+        def __init__(self, datasource_name, data_asset_name):
+            self.datasource_name = datasource_name
+            self.data_asset_name = data_asset_name
+
+    mock_agent_action = MockAgentAction(
+        batch_request.datasource_name, batch_request.data_asset_name
+    )
+    return mock_agent_action
+
+
 def test_demo_batch_inspector(
     cloud_org_id: uuid.UUID,
     metric_id: uuid.UUID,
@@ -81,11 +94,16 @@ def test_demo_batch_inspector(
 
     context, batch_request = ephemeral_context_with_pandas_default
 
-    # From here down assume we just have the batch request from the agent action:
-    datasource_from_action = context.get_datasource(batch_request.datasource_name)
+    # From here down assume we just have the batch request from the agent action
+    # (using the datasource and data asset names from the batch request for convenience):
+    mock_agent_action = _create_mock_agent_action(batch_request)
+
+    datasource_from_action = context.get_datasource(mock_agent_action.datasource_name)
+
     data_asset_from_action = datasource_from_action.get_asset(
-        batch_request.data_asset_name
+        mock_agent_action.data_asset_name
     )
+
     batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
         batch_request
     )[0]
