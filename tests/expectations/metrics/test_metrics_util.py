@@ -351,7 +351,6 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
 
 
 @pytest.mark.unit
-@pytest.mark.unit
 @pytest.mark.parametrize(
     "input_column_name_a, input_column_name_b, output_column_name_a, output_column_name_b",
     [
@@ -396,8 +395,26 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
 
 
 @pytest.mark.unit
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_column_list, output_column_list",
+    [
+        [
+            ["ARTISTS", "travel_agents", "FarmAnimals", "Household_Pets"],
+            [
+                "ARTISTS",
+                sqlalchemy.quoted_name(value="travel_agents", quote=True),
+                sqlalchemy.quoted_name(value="FarmAnimals", quote=True),
+                sqlalchemy.quoted_name(value="Household_Pets", quote=True),
+            ],
+        ],
+    ],
+)
 def test_get_dbms_compatible_metric_domain_column_list_kwargs(
-    sa, column_names_all_uppercase: list[str]
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_list: list[str],
+    output_column_list: list[Union[str, sqlalchemy.quoted_name]],
 ):
     quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="travel_agents", quote=True
@@ -418,16 +435,7 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
     metric_domain_kwargs: dict
 
     metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
-        metric_domain_kwargs={
-            "column_list": ["ARTISTS", "travel_agents", "FarmAnimals", "Household_Pets"]
-        },
+        metric_domain_kwargs={"column_list": input_column_list},
         batch_columns_list=test_column_names,
     )
-    assert sorted(metric_domain_kwargs["column_list"]) == sorted(
-        [
-            "ARTISTS",
-            quoted_column_name_0,
-            quoted_column_name_1,
-            quoted_column_name_2,
-        ]
-    )
+    assert sorted(metric_domain_kwargs["column_list"]) == sorted(output_column_list)
