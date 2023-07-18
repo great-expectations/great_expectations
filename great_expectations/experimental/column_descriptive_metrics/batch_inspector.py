@@ -32,7 +32,13 @@ class BatchInspector:
         return metrics
 
     def _get_metric(self, metric_name: str, batch: Batch, run_id: uuid.UUID) -> Metric:
+        # TODO: Move to get_column_descriptive_metrics:
         execution_engine = batch.datasource.get_execution_engine()
+
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
+
+        # TODO: alternatively, get a validator from the batch request and use that to compute metrics.
+        # context.get_validator(batch_request=batch_request)
 
         metrics_calculator = MetricsCalculator(execution_engine)
 

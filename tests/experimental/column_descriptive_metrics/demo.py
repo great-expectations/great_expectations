@@ -93,8 +93,8 @@ def test_demo_batch_inspector(
     this should be replaced with proper tests."""
 
     # TODO: This is working but we want the ephemeral_context_with_simple_dataframe to work as well:
-    context, batch_request = ephemeral_context_with_pandas_default
-    # context, batch_request = ephemeral_context_with_simple_dataframe
+    # context, batch_request = ephemeral_context_with_pandas_default
+    context, batch_request = ephemeral_context_with_simple_dataframe
 
     # From here down assume we just have the batch request from the agent action
     # (using the datasource and data asset names from the batch request for convenience):
@@ -134,7 +134,7 @@ def test_demo_batch_inspector(
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
                 column=None,
-                value=Value(value=10000),
+                value=Value(value=2),
                 details={},
             ),
             Metric(
@@ -147,28 +147,7 @@ def test_demo_batch_inspector(
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
                 column=None,
-                value=Value(
-                    value=[
-                        "vendor_id",
-                        "pickup_datetime",
-                        "dropoff_datetime",
-                        "passenger_count",
-                        "trip_distance",
-                        "rate_code_id",
-                        "store_and_fwd_flag",
-                        "pickup_location_id",
-                        "dropoff_location_id",
-                        "payment_type",
-                        "fare_amount",
-                        "extra",
-                        "mta_tax",
-                        "tip_amount",
-                        "tolls_amount",
-                        "improvement_surcharge",
-                        "total_amount",
-                        "congestion_surcharge",
-                    ]
-                ),
+                value=Value(value=["col1", "col2"]),
                 details={},
             ),
         ]
