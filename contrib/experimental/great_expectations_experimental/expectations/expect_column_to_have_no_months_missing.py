@@ -179,7 +179,7 @@ class ExpectColumnToHaveNoMonthsMissing(ColumnAggregateExpectation):
             "success": success,
             "result": {
                 "Number of missing days": len(missing_months),
-                "Total unique days": len(distinct_months_sorted),
+                "Total unique months": len(distinct_months_sorted),
                 "Threshold": threshold,
                 "Min date": min_month,
                 "Max date": max_month,
