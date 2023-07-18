@@ -31,7 +31,7 @@ module.exports = {
       appId: 'B4HD9FJQCB',
 
       // Public API key: it is safe to commit it
-      apiKey: '16dae2c1fabc515311cada8ace06060a',
+      apiKey: '4f0951c44b2d9b26c88bcac0b14ebdfd',
 
       indexName: 'docs-greatexpectations',
 
@@ -259,7 +259,7 @@ module.exports = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '0.17.2',
+              label: '0.17.5',
               path: ''
             }
           }

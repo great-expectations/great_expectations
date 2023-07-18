@@ -21,6 +21,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 ### Tests for _get_augmented_library_metadata
 
 
+@pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_object():
     augmented_library_metadata = (
         ExpectColumnValuesToEqualThree()._get_augmented_library_metadata()
@@ -37,6 +38,7 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
     )
 
 
+@pytest.mark.unit
 def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadata_object():
     augmented_library_metadata = (
         ExpectColumnValuesToEqualThree__SecondIteration()._get_augmented_library_metadata()
@@ -55,10 +57,12 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
 ### Tests for _get_examples
 
 
+@pytest.mark.unit
 def test__get_examples_from_a_class_with_no_examples():
     assert ExpectColumnValuesToEqualThree()._get_examples() == []
 
 
+@pytest.mark.unit
 def test__get_examples_from_a_class_with_some_examples():
     examples = ExpectColumnValuesToEqualThree__SecondIteration()._get_examples()
     assert len(examples) == 1
@@ -71,6 +75,7 @@ def test__get_examples_from_a_class_with_some_examples():
     assert len(first_example.tests) == 1
 
 
+@pytest.mark.unit
 def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_false():
     examples = ExpectColumnValuesToEqualThree__SecondIteration()._get_examples(
         return_only_gallery_examples=False
@@ -88,6 +93,7 @@ def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_fal
 ### Tests for _get_description_diagnostics
 
 
+@pytest.mark.unit
 def test__get_description_diagnostics():
     class ExpectColumnValuesToBeAwesome(ColumnMapExpectation):
         """Lo, here is a docstring
@@ -110,6 +116,7 @@ def test__get_description_diagnostics():
 
 
 ### Tests for _get_metric_diagnostics_list
+@pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     _config = None
     metric_diagnostics_list = (
@@ -124,6 +131,7 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     )
 
 
+@pytest.mark.unit
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
     _config = None
     metric_diagnostics_list = (
@@ -146,6 +154,7 @@ We should be verifying that all expectations test cases run on any given Executi
 Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
 """
 )
+@pytest.mark.unit
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
     assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
         metric_diagnostics_list=[],
@@ -164,6 +173,7 @@ We should be verifying that all expectations test cases run on any given Executi
 Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
 """
 )
+@pytest.mark.unit
 def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
     metrics_diagnostics_list = [
         ExpectationMetricDiagnostics(
@@ -188,6 +198,7 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
+@pytest.mark.external_sqldialect
 def test__get_test_results():
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",

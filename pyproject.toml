@@ -169,13 +169,13 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/util\.py',  # 17
     'render/view/view\.py',  # 11
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
     'rule_based_profiler/helpers/util\.py',  # 46
+    'rule_based_profiler/parameter_builder/unexpected_count_statistics_multi_batch_parameter_builder\.py',  # 69
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15
     'rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder\.py',  # 27
@@ -186,7 +186,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/validator\.py', # 54
     # tests
     'tests/datasource/fluent/tasks\.py',
 ]
@@ -423,8 +422,6 @@ filterwarnings = [
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
 
     # python
-    # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
-    'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
     'ignore: divide by zero encountered:RuntimeWarning',
@@ -521,20 +518,43 @@ filterwarnings = [
     # Example Actual Warning:
     # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
     "ignore: Exception ignored in:UserWarning",
+    # jsonschema (altair dependency)
+    # Example Actual Warning:
+    # DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the
+    # https://github.com/python-jsonschema/referencing library,
+    # which provides more compliant referencing behavior as well as more flexible APIs for customization.
+    # A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+    "ignore: jsonschema.RefResolver is deprecated as of v4.18.0:DeprecationWarning",
+    # Example Actual Warning:
+    # DeprecationWarning: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.
+    "ignore: Importing ErrorTree directly from the jsonschema package is deprecated and will become an ImportError. Import it from jsonschema.exceptions instead.:DeprecationWarning"
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
 markers = [
+    "aws_creds: mark all tests that require aws credentials",
+    "big: mark tests that don't have external dependencies but aren't unit tests",
+    "cli: mark all tests in the /cli directory.",
     "cloud: mark test as being relevant to Great Expectations Cloud.",
     "docs: mark a test as a docs test.",
     "e2e: mark test as an E2E test.",
     "external_sqldialect: mark test as requiring install of an external sql dialect.",
+    "external_cloud_client: mark test as requiring install of an external cloud client.",
+    "filesystem: mark tests using the filesystem as the storage backend.",
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
+    "clickhouse: mark a test as Clickhouse-dependent.",
+    "athena: mark a test as AWS Athena-dependent.",
+    "spark: mark a test as Spark-dependent.",
+    "postgres: mark a test as postgres-dependent.",
+    "project: mark a test that verifies properties of the gx project",
+    "pyarrow: mark a test as PyArrow-dependent.",
+    "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
+    "sqlite: mark test requiring sqlite",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`

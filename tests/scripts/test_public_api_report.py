@@ -381,6 +381,7 @@ from a.b.c import some_method as sm
 """
 
 
+@pytest.mark.unit
 def test__get_import_names(various_imports: str):
     """Make sure the actual class and module names are returned."""
     tree = ast.parse(various_imports)

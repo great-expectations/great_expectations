@@ -22,4 +22,4 @@ title: "Validate Data: Index"
 ## Advanced
 - [How to deploy a scheduled Checkpoint with cron](../../guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md)
 - [How to get Data Docs URLs for use in custom Validation Actions](../../guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions.md)
-- [How to validate data without a Checkpoint](../../guides/validation/advanced/how_to_validate_data_without_a_checkpoint.md)
+

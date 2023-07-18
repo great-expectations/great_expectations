@@ -5,7 +5,7 @@ import logging
 import pathlib
 import random
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -188,10 +188,7 @@ def test_sources_delete_removes_datasource_from_yaml(
 ):
     print(f"Delete -> '{random_datasource.name}'\n")
 
-    ds_delete_method: Callable[[str], None] = getattr(
-        seeded_file_context.sources, f"delete_{random_datasource.type}"
-    )
-    ds_delete_method(random_datasource.name)
+    seeded_file_context.sources.delete(random_datasource.name)
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
@@ -242,10 +239,13 @@ def test_checkpoint_with_validator_workflow(
 
     checkpoint = context.add_checkpoint(name="my_checkpoint", validator=validator)
 
-    _: str | None = checkpoint.validations[0].pop("expectation_suite_ge_cloud_id", None)  # type: ignore[union-attr]
+    actual_validations = [v.to_dict() for v in checkpoint.validations]
+    actual_validations[0].pop("expectation_suite_ge_cloud_id", None)
 
-    assert checkpoint.validations == [
+    assert actual_validations == [
         {
+            "name": None,
+            "id": None,
             "batch_request": {
                 "data_asset_name": asset_name,
                 "datasource_name": datasource_name,
@@ -253,6 +253,7 @@ def test_checkpoint_with_validator_workflow(
                     "month": month,
                     "year": year,
                 },
+                "batch_slice": None,
             },
             "expectation_suite_name": "default",
         },
