@@ -13,7 +13,10 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.exceptions.exceptions import GXCloudConfigurationError
+from great_expectations.exceptions.exceptions import (
+    GitIgnoreScaffoldingError,
+    GXCloudConfigurationError,
+)
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
@@ -274,3 +277,48 @@ def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathli
 
     assert isinstance(context, FileDataContext)
     assert context_root_dir.exists()
+    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+
+
+@pytest.mark.filesystem
+@pytest.mark.integration
+def test_get_context_with_context_root_dir_scaffolds_existing_gitignore(
+    clear_env_vars, tmp_path
+):
+    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir.mkdir()
+    with open(context_root_dir / ".gitignore", "w") as f:
+        f.write("asdf")
+
+    context = gx.get_context(context_root_dir=context_root_dir)
+
+    assert isinstance(context, FileDataContext)
+    assert (context_root_dir / ".gitignore").read_text() == "asdf\nuncommitted/"
+
+
+@pytest.mark.filesystem
+@pytest.mark.integration
+def test_get_context_with_context_root_dir_scaffolds_new_gitignore(
+    clear_env_vars, tmp_path
+):
+    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir.mkdir()
+
+    context = gx.get_context(context_root_dir=context_root_dir)
+
+    assert isinstance(context, FileDataContext)
+    assert (context_root_dir / ".gitignore").read_text() == "\nuncommitted/"
+
+
+@pytest.mark.filesystem
+@pytest.mark.integration
+def test_get_context_with_context_root_dir_gitignore_error(clear_env_vars, tmp_path):
+    context_root_dir = tmp_path / "great_expectations"
+    context_root_dir.mkdir()
+
+    with mock.patch(
+        "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._scaffold_gitignore",
+        side_effect=OSError("Error"),
+    ):
+        with pytest.raises(GitIgnoreScaffoldingError):
+            gx.get_context(context_root_dir=context_root_dir)
