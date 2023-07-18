@@ -598,34 +598,37 @@ stages:
                 --cov-report=html
             displayName: 'Pytest mssql'
 
-  - stage: airflow_provider
-    dependsOn: [lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # 2023-07-18 - Chetan - these are being disabled due to a test failure introduced by the provider
+  # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
 
-    jobs:
-      - job: run_airflow_provider_tests
-        condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+  # - stage: airflow_provider
+  #   dependsOn: [lint, import_ge, custom_checks]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-        strategy:
-          matrix:
-            Python38:
-              python.version: '3.8'
-            Python39:
-              python.version: '3.9'
-            Python310:
-              python.version: '3.10'
-            Python311:
-              python.version: '3.11'
+  #   jobs:
+  #     - job: run_airflow_provider_tests
+  #       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       strategy:
+  #         matrix:
+  #           Python38:
+  #             python.version: '3.8'
+  #           Python39:
+  #             python.version: '3.9'
+  #           Python310:
+  #             python.version: '3.10'
+  #           Python311:
+  #             python.version: '3.11'
 
-          - script: ./ci/checks/run_gx_airflow_operator_tests.sh
-            name: RunAirflowProviderTests
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
+
+  #         - script: ./ci/checks/run_gx_airflow_operator_tests.sh
+  #           name: RunAirflowProviderTests
 
   - stage: test_build_docs
     dependsOn: [lint, import_ge, custom_checks]
