@@ -276,16 +276,6 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-"""
-def get_dbms_compatible_metric_domain_kwargs(
-    metric_domain_kwargs: dict,
-    batch_columns_list: List[str | sqlalchemy.quoted_name],
-) -> dict:
-"""
-# TODO: <Alex>ALEX</Alex>
-
-
 def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found():
     test_column_names: list[str] = [
         "actors",

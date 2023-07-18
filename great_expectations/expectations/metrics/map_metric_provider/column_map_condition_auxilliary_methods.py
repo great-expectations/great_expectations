@@ -181,8 +181,6 @@ def _pandas_column_map_condition_value_counts(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -194,6 +192,8 @@ def _pandas_column_map_condition_value_counts(
         metric_domain_kwargs=accessor_domain_kwargs,
         batch_columns_list=metrics["table.columns"],
     )
+
+    column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
