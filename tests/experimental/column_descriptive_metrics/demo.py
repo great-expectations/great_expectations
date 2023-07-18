@@ -128,7 +128,8 @@ def test_demo_batch_inspector(
                 id=metric_id,
                 organization_id=cloud_org_id,
                 run_id=run_id,
-                batch=batch_from_action,
+                # TODO: reimplement batch param
+                # batch=batch_from_action,
                 metric_name="table.row_count",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
@@ -140,7 +141,8 @@ def test_demo_batch_inspector(
                 id=metric_id,
                 organization_id=cloud_org_id,
                 run_id=run_id,
-                batch=batch_from_action,
+                # TODO: reimplement batch param
+                # batch=batch_from_action,
                 metric_name="table.columns",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},

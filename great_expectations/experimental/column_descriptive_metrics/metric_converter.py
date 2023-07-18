@@ -57,7 +57,8 @@ class MetricConverter:  # TODO: Name this better
             id=self._generate_metric_id(),
             organization_id=self._organization_id,
             run_id=run_id,
-            batch=batch,
+            # TODO: reimplement batch param
+            # batch=batch,
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,
             metric_value_kwargs=metric_config.metric_value_kwargs,
