@@ -12,7 +12,7 @@ class MetricRepository:
         self._data_store = data_store
 
     def create(self, metrics: Metrics) -> None:
-        print("Creating metric in ColumnDescriptiveMetricsRepository")
+        print("Creating metric in MetricsRepository")
         self._data_store.create(
             value_type=Metrics, value=metrics
         )  # TODO: How to annotate/implement?

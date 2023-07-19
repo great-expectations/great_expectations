@@ -83,10 +83,6 @@ class BatchInspector:
         Returns:
             Metric object.
         """
-        # TODO: Add the rest of the metric fields, convert value to Value object:
-
-        print("converting metric dict to metric object")
-
         # TODO: Consider just having Batch as a parameter and serializing the parts we want
         #  (e.g. datasource_name, data_asset_name, batch_id).
         metric = Metric(
