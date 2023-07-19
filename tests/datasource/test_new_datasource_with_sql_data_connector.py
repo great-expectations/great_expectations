@@ -32,9 +32,6 @@ from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
-pytestmark = pytest.mark.sqlite
-
-
 yaml = YAMLHandler()
 
 
@@ -98,7 +95,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     return context
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
     random.seed(0)
 
@@ -181,7 +178,7 @@ data_connectors:
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
@@ -251,7 +248,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
@@ -344,7 +341,7 @@ data_connectors:
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_splitting_and_sampling(
     sa, empty_data_context
 ):
@@ -434,7 +431,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     }
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_SimpleSqlalchemyDatasource(empty_data_context):
     context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
@@ -737,7 +734,7 @@ tables:
     not sqla_bigquery,
     reason="sqlalchemy_bigquery is not installed",
 )
-@pytest.mark.integration
+@pytest.mark.big
 def test_basic_instantiation_with_bigquery_creds(sa):
     # bigquery driver is invoked upon datasource instantiation, and validates credentials_info
     instantiate_class_from_config(
@@ -765,7 +762,7 @@ def test_basic_instantiation_with_bigquery_creds(sa):
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
     with pytest.raises(ExecutionEngineError):
         # private key is valid but useless so an exception should be raised.
@@ -793,7 +790,7 @@ def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa):
         )
 
 
-@pytest.mark.integration
+@pytest.mark.sqlite
 def test_skip_inapplicable_tables(empty_data_context):
     context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
