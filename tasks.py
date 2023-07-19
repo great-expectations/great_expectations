@@ -811,11 +811,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        # example of using a simple service lookup and a setup function to do the same thing
-        # we can remove one of these methods if one seems obviously better
-        # services=("postgresql",),
         setup_funcs=(
-            # lambda ctx: print("Dummy setup function"),
             lambda ctx: ctx.run(
                 "docker-compose -f assets/docker/postgresql/docker-compose.yml up -d"
             ),
