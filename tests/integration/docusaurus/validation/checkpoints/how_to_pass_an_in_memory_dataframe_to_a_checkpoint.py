@@ -1,7 +1,6 @@
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py setup">
 import pandas
 import great_expectations as gx
-from great_expectations.checkpoint import SimpleCheckpoint
 
 context = gx.get_context()
 # </snippet>
@@ -38,9 +37,8 @@ context.add_or_update_expectation_suite("my_expectation_suite")
 
 batch_request = dataframe_asset.build_batch_request()
 
-checkpoint = SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="my_taxi_dataframe_checkpoint",
-    data_context=context,
     batch_request=batch_request,
     expectation_suite_name="my_expectation_suite",
 )
