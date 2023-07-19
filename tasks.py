@@ -787,19 +787,10 @@ def show_automerges(ctx: Context):
 
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
-    services: tuple[str, ...] = tuple()
     setup_funcs: tuple[Callable[[Context], Result | None], ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
-    # NOTE: We probably don't need both `services` and `setup_funcs`
-    # but it's not clear to me which one is better
-    # `services` is simpler because it's just a list of services to up with docker-compose
-    # but `setup_funcs` is more flexible because it allows us to do more complex setup
-    # It could do the same docker-compose up or anything else.
-    # setup_funcs is a tuple of functions that take a an `invoke.Context` and return an invoke `Result` or `None`
-    # The invoke context can be used to run CLI subcommands or can be ignored.
-    # More arguments could be added to this `Callable` interface if needed.
 
 
 MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
@@ -820,18 +811,43 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "spark": TestDependencies(
         ("reqs/requirements-dev-spark.txt",),
-        # services=("spark",),
         exta_pytest_args=("--spark",),
     ),
 }
 
 
-# TODO: return list & lru_cache this??
 def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
+    """_summary_
+
+    Args:
+        marker_string (str): _description_
+
+    Yields:
+        Generator[str, None, None]: _description_
+    """
+    tokens = marker_string.split()
+    if len(tokens) == 1:
+        yield tokens[0]
+    elif marker_string == "cloud and not e2e":
+        yield "cloud"
+    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
+    else:
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
+
+
+def old_tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
     """
     Split a marker string on ' or ' and ' and ' and return an iterable of tokens.
     Exclude parts of the string after ' and not '.
     """
+    # These rules are fragile
+    # just one word -> return it
+    #
+
     remaining_str, _, _ = marker_string.partition(" and not ")
     for partially_tokenized in remaining_str.split(" and "):
         for token in partially_tokenized.split(" or "):
@@ -839,9 +855,10 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
 
 
 def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
+    print(markers)
     if isinstance(markers, str):
         markers = [markers]
-
+    print("~~~~~~~~")
     dependencies: list[TestDependencies] = []
     for marker_string in markers:
         for marker_token in _tokenize_marker_string(marker_string):
@@ -950,13 +967,6 @@ def ci_tests(
 
         for setup_func in test_deps.setup_funcs:
             setup_func(ctx)
-
-        if test_deps.services and up_services:
-            service(
-                ctx,
-                names=test_deps.services,
-                markers=(marker,) if marker else tuple(),
-            )
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
