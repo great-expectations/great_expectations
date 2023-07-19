@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This file contains demo code for the column_descriptive_metrics module.
 Unit, integration and end-to-end tests should be written to replace this code.
@@ -44,7 +46,9 @@ def run_id() -> uuid.UUID:
 
 
 @pytest.fixture
-def cloud_context_with_simple_dataframe(empty_cloud_context_fluent: CloudDataContext):
+def cloud_context_and_batch_request_with_simple_dataframe(
+    empty_cloud_context_fluent: CloudDataContext,
+):
     context = empty_cloud_context_fluent
     datasource = context.sources.add_pandas(name="my_pandas_datasource")
 
@@ -57,59 +61,18 @@ def cloud_context_with_simple_dataframe(empty_cloud_context_fluent: CloudDataCon
     return context, batch_request
 
 
-@pytest.fixture
-def cloud_context_with_simple_dataframe_and_validator(
-    cloud_context_with_simple_dataframe,
-):
-    context, batch_request = cloud_context_with_simple_dataframe
-    validator = context.get_validator(
-        datasource_name=batch_request.datasource_name,
-        data_asset_name=batch_request.data_asset_name,
-        batch_request=batch_request,
-    )
-    return context, batch_request, validator
-
-
-def _create_mock_agent_action(batch_request: BatchRequest):
-    class MockAgentAction:
-        def __init__(self, datasource_name, data_asset_name):
-            self.datasource_name = datasource_name
-            self.data_asset_name = data_asset_name
-
-    mock_agent_action = MockAgentAction(
-        batch_request.datasource_name, batch_request.data_asset_name
-    )
-    return mock_agent_action
-
-
 def test_demo_batch_inspector(
     cloud_org_id: uuid.UUID,
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
-    cloud_context_with_simple_dataframe_and_validator,
+    cloud_context_and_batch_request_with_simple_dataframe: tuple[
+        CloudDataContext, BatchRequest
+    ],
 ):
     """This is a demo of how to get column descriptive metrics,
     this should be replaced with proper tests."""
 
-    (
-        context,
-        batch_request,
-        validator,
-    ) = cloud_context_with_simple_dataframe_and_validator
-
-    # From here down assume we just have the batch request from the agent action
-    # (using the datasource and data asset names from the batch request for convenience):
-    mock_agent_action = _create_mock_agent_action(batch_request)
-
-    datasource_from_action = context.get_datasource(mock_agent_action.datasource_name)
-
-    data_asset_from_action = datasource_from_action.get_asset(
-        mock_agent_action.data_asset_name
-    )
-    batch_request_from_action = data_asset_from_action.build_batch_request()
-    validator_from_action = context.get_validator(
-        batch_request=batch_request_from_action
-    )
+    context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
 
     event = RunBatchInspectorEvent(
         datasource_name=batch_request.datasource_name,
