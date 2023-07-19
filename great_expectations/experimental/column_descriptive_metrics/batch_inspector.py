@@ -28,7 +28,7 @@ class BatchInspector:
             run_id=run_id, validator=validator
         )
         column_names = self._get_column_names_metric(run_id=run_id, validator=validator)
-        metrics = Metrics(metrics=[table_row_count, column_names])
+        metrics = Metrics(id=run_id, metrics=[table_row_count, column_names])
         return metrics
 
     def _get_metric(

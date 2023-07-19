@@ -40,4 +40,6 @@ class Metric(CDMRBaseModel):
 class Metrics(CDMRBaseModel):
     """Collection of Metric objects."""
 
+    id: uuid.UUID = Field(description="Run id")
+    # created_at, created_by filled in by the backend.
     metrics: Sequence[Metric]

@@ -94,6 +94,7 @@ def test_demo_batch_inspector(
     metrics_stored = mock_create.call_args[0][0]
 
     assert metrics_stored == Metrics(
+        id=run_id,
         metrics=[
             Metric(
                 id=metric_id,
@@ -119,5 +120,5 @@ def test_demo_batch_inspector(
                 value=Value(value=["col1", "col2"]),
                 details={},
             ),
-        ]
+        ],
     )
