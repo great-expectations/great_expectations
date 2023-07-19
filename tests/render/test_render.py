@@ -27,6 +27,9 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
 )
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
@@ -91,8 +94,6 @@ def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
         return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     with open(
@@ -108,8 +109,6 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     assert len(rendered.sections) > 5
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_1):
     # Group EVRs by column
     evrs = {}
@@ -142,8 +141,6 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
             )
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
     with open(
@@ -158,8 +155,6 @@ def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     assert len(rendered.sections) > 5
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_validation_results_column_section_renderer(titanic_profiler_evrs):
     # Group EVRs by column
     evrs = {}
@@ -192,14 +187,11 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
             )
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_expectation_suite_column_section_renderer(
     titanic_profiled_expectations_1,
 ):
     # Group expectations by column
     exp_groups = {}
-    # print(json.dumps(titanic_profiled_expectations_1, indent=2))
     for exp in titanic_profiled_expectations_1.expectations:
         try:
             column = exp.kwargs["column"]
@@ -286,8 +278,6 @@ def test_content_block_list_available_expectations():
     )
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite(
     titanic_dataset_profiler_expectations,
 ):
@@ -310,8 +300,6 @@ def test_render_profiled_fixture_expectation_suite(
     assert rendered_page[-7:] == "</html>"
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_profiled_fixture_expectation_suite_with_distribution(
     titanic_dataset_profiler_expectations_with_distribution,
 ):
@@ -335,8 +323,6 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(
     assert rendered_page[-7:] == "</html>"
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_content = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
@@ -353,8 +339,6 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     assert rendered_page[-7:] == "</html>"
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_content = ValidationResultsPageRenderer().render(titanic_profiled_evrs_1)
     rendered_page = DefaultJinjaPageView().render(rendered_content)
@@ -378,8 +362,6 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     #        in rendered_page
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_smoke_render_profiling_results_page_renderer_with_exception(
     titanic_profiler_evrs_with_exception,
 ):
@@ -403,8 +385,6 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
     assert "exception" in rendered_page
 
 
-@pytest.mark.smoketest
-@pytest.mark.rendered_output
 def test_full_oobe_flow():
     df = gx.read_csv(file_relative_path(__file__, "../../examples/data/Titanic.csv"))
     df.data_asset_name = "my_datasource/my_generator/my_asset"

@@ -12,6 +12,9 @@ from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
+
 
 @pytest.fixture()
 def create_files_and_instantiate_data_connector(tmp_path_factory):

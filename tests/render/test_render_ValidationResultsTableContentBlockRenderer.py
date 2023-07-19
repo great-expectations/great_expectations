@@ -16,6 +16,9 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 
+# module level markers
+pytestmark = [pytest.mark.big]
+
 
 @pytest.fixture
 def evr_failed_with_exception():
