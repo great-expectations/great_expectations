@@ -322,15 +322,15 @@ def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
     ],
     [
         pytest.param(
-            "ARTISTS",
-            "ARTISTS",
+            "SHOULD_NOT_BE_QUOTED",
+            "SHOULD_NOT_BE_QUOTED",
             None,
             id="column_does_not_need_to_be_quoted",
         ),
         pytest.param(
             "should_be_quoted",
             sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
-            "TRAVEL_AGENTS",
+            "SHOULD_NOT_BE_QUOTED",
             id="column_must_be_quoted",
         ),
     ],
@@ -342,10 +342,14 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
     output_column_name: Union[str, sqlalchemy.quoted_name],
     confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
 ):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="should_be_quoted", quote=True
     )
-    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
+    test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
+        quoted_column_name,
+    ]
 
     metric_domain_kwargs: dict
 
@@ -368,16 +372,16 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
     ],
     [
         pytest.param(
-            "ARTISTS",
+            "SHOULD_NOT_BE_QUOTED",
             sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
-            "ARTISTS",
+            "SHOULD_NOT_BE_QUOTED",
             sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
             id="column_a_does_not_need_to_be_quoted_column_b_must_remain_as_quoted",
         ),
         pytest.param(
-            "ARTISTS",
+            "SHOULD_NOT_BE_QUOTED",
             "should_be_quoted",
-            "ARTISTS",
+            "SHOULD_NOT_BE_QUOTED",
             sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
             id="column_a_does_not_need_to_be_quoted_column_b_needs_to_be_quoted",
         ),
@@ -391,10 +395,14 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
     output_column_name_a: Union[str, sqlalchemy.quoted_name],
     output_column_name_b: Union[str, sqlalchemy.quoted_name],
 ):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="should_be_quoted", quote=True
     )
-    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
+    test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
+        quoted_column_name,
+    ]
 
     metric_domain_kwargs: dict
 
@@ -419,13 +427,13 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
     [
         pytest.param(
             [
-                "ARTISTS",
+                "SHOULD_NOT_BE_QUOTED",
                 "should_be_quoted_0",
                 "should_be_quoted_1",
                 "should_be_quoted_2",
             ],
             [
-                "ARTISTS",
+                "SHOULD_NOT_BE_QUOTED",
                 sqlalchemy.quoted_name(value="should_be_quoted_0", quote=True),
                 sqlalchemy.quoted_name(value="should_be_quoted_1", quote=True),
                 sqlalchemy.quoted_name(value="should_be_quoted_2", quote=True),
@@ -440,6 +448,7 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
     input_column_list: list[str],
     output_column_list: list[Union[str, sqlalchemy.quoted_name]],
 ):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
     quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
         value="should_be_quoted_0", quote=True
     )
@@ -450,6 +459,7 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
         value="should_be_quoted_2", quote=True
     )
     test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
         quoted_column_name_0,
         quoted_column_name_1,
         quoted_column_name_2,
