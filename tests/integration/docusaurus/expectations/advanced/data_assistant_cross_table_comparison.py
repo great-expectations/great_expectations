@@ -80,7 +80,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     data_context=context,
     validations=[
         {
-            "batch_request": pg_batch_request,
+            "batch_request": mysql_batch_request,
             "expectation_suite_name": expectation_suite_name,
         }
     ],
