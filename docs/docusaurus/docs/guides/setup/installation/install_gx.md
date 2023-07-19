@@ -84,7 +84,7 @@ Install Great Expectations (GX) locally.
 
 Great Expectations can be deployed in environments such as Databricks, Amazon EMR, or Google Cloud Composer. These environments do not always have a file system that allows a Great Expectations installation. To install Great Expectations in a hosted environment, see one of the following guides:
 
-- [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+- [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks/)
 - [How to instantiate a Data Context on an EMR Spark cluster](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
 
 </TabItem>
