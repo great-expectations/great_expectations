@@ -4895,8 +4895,7 @@ def test_checkpoint_conflicting_validator_and_validation_args_raises_error(
     )
 
 
-# Marking this as "big" instead of "unit" since it fails intermittently due to the timeout. We've seen it take over 7s.
-@pytest.mark.big
+@pytest.mark.unit
 def test_context_checkpoint_crud_conflicting_validator_and_validation_args_raises_error(
     ephemeral_context_with_defaults,
     validator_with_mock_execution_engine,
