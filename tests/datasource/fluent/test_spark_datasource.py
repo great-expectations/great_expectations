@@ -29,6 +29,7 @@ def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
     return csv_path / "yellow_tripdata_sample_2018-03.csv"
 
 
+@pytest.mark.spark
 def test_dataframe_asset(
     empty_data_context: AbstractDataContext,
     spark_session,
@@ -69,6 +70,7 @@ def test_dataframe_asset(
     )
 
 
+@pytest.mark.spark
 def test_spark_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext,
     valid_file_path: pathlib.Path,
@@ -109,6 +111,7 @@ def test_spark_data_asset_batch_metadata(
     assert batch_list[0].metadata == substituted_batch_metadata
 
 
+@pytest.mark.spark
 def test_spark_config_passed_to_execution_engine(
     empty_data_context: AbstractDataContext,
     spark_session,
@@ -133,6 +136,7 @@ def test_spark_config_passed_to_execution_engine(
     )
 
 
+@pytest.mark.spark
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
     spark_session,
