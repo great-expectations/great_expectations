@@ -15,10 +15,8 @@ validator = context.sources.add_pandas("taxi_datasource").read_dataframe(
     df, asset_name="taxi_frame", batch_metadata={"year": "2019", "month": "01"}
 )
 
-checkpoint = SimpleCheckpoint(
-    name="my_taxi_validator_checkpoint",
-    data_context=context,
-    validator=validator,
+checkpoint = context.add_or_update_checkpoint(
+    name="my_taxi_validator_checkpoint", validator=validator
 )
 
 checkpoint_result = checkpoint.run()
