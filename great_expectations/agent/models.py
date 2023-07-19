@@ -23,7 +23,7 @@ class RunOnboardingDataAssistantEvent(EventBase):
 
 
 class RunDataAssistantEvent(EventBase):
-    type: Literal["data_assistant_request.received"] = "data_assistant_request.received"
+    type: Literal["data_assistant_request"] = "data_assistant_request.received"
     datasource_name: str
     data_asset_name: str
     assistant_name: str
