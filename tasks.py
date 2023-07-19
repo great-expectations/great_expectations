@@ -803,9 +803,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         setup_funcs=(
-            lambda ctx: ctx.run(
-                "docker-compose -f assets/docker/postgresql/docker-compose.yml up -d"
-            ),
+            lambda ctx: service(ctx, names=["postgresql"]),
         ),
         exta_pytest_args=("--postgresql",),
     ),
