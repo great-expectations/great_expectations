@@ -63,7 +63,7 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         }
 
 
-class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
+class ExpectColumnChisquareSimpleTestPValueToBeGreaterThan(BatchExpectation):
     """Calculates chi-squared of 2 columns, checks if p-value > user threshold."""
 
     examples = [
@@ -156,4 +156,4 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnChisquareTestPValueToBeGreaterThan().print_diagnostic_checklist()
+    ExpectColumnChisquareSimpleTestPValueToBeGreaterThan().print_diagnostic_checklist()
