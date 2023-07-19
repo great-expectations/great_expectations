@@ -79,7 +79,7 @@ jobs:
           - filesystem
           - openpyxl or pyarrow or project or sqlite
           #- spark
-          - postgres
+          - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
 
