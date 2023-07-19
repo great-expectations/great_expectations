@@ -16,7 +16,7 @@ from great_expectations.experimental.column_descriptive_metrics.batch_inspector_
     RunBatchInspectorAction,
 )
 from great_expectations.experimental.column_descriptive_metrics.column_descriptive_metrics_repository import (
-    ColumnDescriptiveMetricsRepository,
+    MetricRepository,
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 
@@ -124,7 +124,7 @@ def test_demo_batch_inspector(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_metric_id",
         return_value=metric_id,
     ), mock.patch(
-        f"{ColumnDescriptiveMetricsRepository.__module__}.{ColumnDescriptiveMetricsRepository.__name__}.create",
+        f"{MetricRepository.__module__}.{MetricRepository.__name__}.create",
     ) as mock_create:
         action.run(event, "some_event_id")
 

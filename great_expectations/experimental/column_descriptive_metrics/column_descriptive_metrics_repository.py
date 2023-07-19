@@ -4,7 +4,7 @@ from great_expectations.experimental.column_descriptive_metrics.cloud_data_store
 from great_expectations.experimental.column_descriptive_metrics.metrics import Metrics
 
 
-class ColumnDescriptiveMetricsRepository:
+class MetricRepository:
     pass
     # TODO: Add methods
 

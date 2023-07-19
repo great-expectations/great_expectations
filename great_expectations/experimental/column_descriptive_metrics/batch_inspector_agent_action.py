@@ -10,7 +10,7 @@ from great_expectations.experimental.column_descriptive_metrics.cloud_data_store
     CloudDataStore,
 )
 from great_expectations.experimental.column_descriptive_metrics.column_descriptive_metrics_repository import (
-    ColumnDescriptiveMetricsRepository,
+    MetricRepository,
 )
 
 
@@ -28,7 +28,7 @@ class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
         metrics = batch_inspector.get_column_descriptive_metrics(validator_from_action)
 
         cloud_data_store = CloudDataStore(context=self._context)
-        column_descriptive_metrics_repository = ColumnDescriptiveMetricsRepository(
+        column_descriptive_metrics_repository = MetricRepository(
             data_store=cloud_data_store
         )
         column_descriptive_metrics_repository.create(metrics)
