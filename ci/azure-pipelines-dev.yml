@@ -203,10 +203,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             # versionSpec: '3.8'
-             versionSpec: '3.11'
-           # displayName: 'Use Python 3.8'
-           displayName: 'Use Python 3.11'
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
 
          - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
