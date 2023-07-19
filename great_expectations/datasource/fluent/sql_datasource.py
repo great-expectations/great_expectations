@@ -823,7 +823,10 @@ class TableAsset(_SQLAsset):
                 "table_name cannot be empty and should default to name if not provided"
             )
 
-        return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
+        if sqlalchemy.quoted_name:
+            return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
+
+        return validated_table_name
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
