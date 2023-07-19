@@ -97,8 +97,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             _usage_statistics_handler=data_assistant_result._usage_statistics_handler,
         )
 
-    @staticmethod
-    def _build_column_value_missing_rule() -> Rule:
+    def _build_column_value_missing_rule(self) -> Rule:
         """
         This method builds "Rule" object focused on emitting "ExpectationConfiguration" objects for columns missingness.
         """
@@ -110,6 +109,8 @@ class ColumnValueMissingDataAssistant(DataAssistant):
         # Step-3.2: Set up "UnexpectedCountStatisticsMultiBatchParameterBuilder" to compute "mostly" for emitting "ExpectationConfiguration" (based on "Domain" data).
         # Step-4: Pass "validation" "ParameterBuilderConfig" objects to every "DefaultExpectationConfigurationBuilder", responsible for emitting "ExpectationConfiguration" (with specified "expectation_type").
         # Step-5: Instantiate and return "Rule" object, comprised of "variables", "domain_builder", "parameter_builders", and "expectation_configuration_builders" components.
+
+        is_multi_batch: bool = len(self._batches or []) > 1
 
         column_type_domain_builder: DomainBuilder = ColumnDomainBuilder(
             include_column_names=None,
@@ -170,12 +171,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
-        # TODO: <Alex>ALEX</Alex>
+        mode = "auto" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_not_be_null"
 
@@ -243,12 +239,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        # TODO: <Alex>ALEX</Alex>
-        # mode = "auto"
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        mode = "single_batch"
-        # TODO: <Alex>ALEX</Alex>
+        mode = "auto" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_be_null"
 
