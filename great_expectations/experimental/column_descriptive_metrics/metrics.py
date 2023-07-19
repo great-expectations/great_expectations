@@ -7,18 +7,18 @@ import pydantic
 from pydantic import BaseModel, Field
 
 
-class CDMRBaseModel(BaseModel):  # TODO: Better name
-    """Base class for all ColumnDescriptiveMetricRepository related models."""
+class MetricRepositoryBaseModel(BaseModel):
+    """Base class for all MetricRepository related models."""
 
     class Config:
         extra = pydantic.Extra.forbid
 
 
-class Value(CDMRBaseModel):
+class Value(MetricRepositoryBaseModel):
     value: Any  # TODO: Better than Any
 
 
-class Metric(CDMRBaseModel):
+class Metric(MetricRepositoryBaseModel):
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
     # TODO: reimplement batch param
@@ -31,7 +31,7 @@ class Metric(CDMRBaseModel):
     details: dict = Field(description="Metric details")
 
 
-class Metrics(CDMRBaseModel):
+class Metrics(MetricRepositoryBaseModel):
     """Collection of Metric objects."""
 
     id: uuid.UUID = Field(description="Run id")
