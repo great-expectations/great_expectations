@@ -99,7 +99,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install $(grep -E '^(invoke)' reqs/requirements-dev-test.txt)
+          pip install -c constraints-dev.txt ".[test]"
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
