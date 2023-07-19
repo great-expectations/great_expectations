@@ -91,8 +91,6 @@ class BatchInspector:
         #  (e.g. datasource_name, data_asset_name, batch_id).
         metric = Metric(
             id=self._generate_metric_id(),
-            # TODO: Consider removing organization id and only adding when serializing in the store
-            # organization_id=self._organization_id,
             run_id=run_id,
             # TODO: reimplement batch param
             # batch=batch,

@@ -97,7 +97,6 @@ def test_demo_batch_inspector(
         metrics=[
             Metric(
                 id=metric_id,
-                # organization_id=cloud_org_id,
                 run_id=run_id,
                 # TODO: reimplement batch param
                 # batch=batch_from_action,
@@ -110,7 +109,6 @@ def test_demo_batch_inspector(
             ),
             Metric(
                 id=metric_id,
-                # organization_id=cloud_org_id,
                 run_id=run_id,
                 # TODO: reimplement batch param
                 # batch=batch_from_action,
