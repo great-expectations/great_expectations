@@ -19,6 +19,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -50,7 +51,6 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from great_expectations.compatibility import sqlalchemy
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -823,7 +823,7 @@ class TableAsset(_SQLAsset):
                 "table_name cannot be empty and should default to name if not provided"
             )
 
-        return validated_table_name
+        return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -841,11 +841,10 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        table_exists = sa.inspect(engine).has_table(
+        if not inspector.has_table(
             table_name=self.table_name,
             schema=self.schema_name,
-        )
-        if not table_exists:
+        ):
             raise TestConnectionError(
                 f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
@@ -933,13 +932,7 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                model_dict = self.dict(
-                    exclude=self._get_exec_engine_excludes(),
-                    config_provider=self._config_provider,
-                )
-                connection_string = model_dict.pop("connection_string")
-                kwargs = model_dict.pop("kwargs", {})
-                self._engine = sa.create_engine(connection_string, **kwargs)
+                self._engine = self._create_engine()
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -950,6 +943,15 @@ class SQLDatasource(Datasource):
                 ) from e
             self._cached_connection_string = self.connection_string
         return self._engine
+
+    def _create_engine(self) -> sqlalchemy.Engine:
+        model_dict = self.dict(
+            exclude=self._get_exec_engine_excludes(),
+            config_provider=self._config_provider,
+        )
+        connection_string = model_dict.pop("connection_string")
+        kwargs = model_dict.pop("kwargs", {})
+        return sa.create_engine(connection_string, **kwargs)
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.

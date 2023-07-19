@@ -7,13 +7,14 @@ Ipython>=7.16.3
 ipywidgets>=7.5.1
 jinja2>=2.10
 jsonpatch>=1.22
-jsonschema>=2.5.1
+jsonschema>=2.5.1,<4.18.1 # 4.18.1 caused issues
 makefun>=1.7.0,<2
 marshmallow>=3.7.1,<4.0.0
 mistune>=0.8.4
 nbformat>=5.0
 notebook>=6.4.10
-numpy>=1.19.5; python_version == "3.8" or python_version == "3.9"
+numpy>=1.20.3; python_version == "3.8"
+numpy>=1.21.6; python_version == "3.9"
 numpy>=1.22.4; python_version >= "3.10"
 packaging
 pandas>=1.1.0; python_version <= "3.8"

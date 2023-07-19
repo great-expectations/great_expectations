@@ -76,7 +76,7 @@ class MetaDataAssistant(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         """
-        Instantiate class as part of descentants calling "__init__()" and register its type in "DataAssistant" registry.
+        Instantiate class as part of descendants calling "__init__()" and register its type in "DataAssistant" registry.
         """
         newclass = super().__new__(cls, clsname, bases, attrs)
 
@@ -85,12 +85,14 @@ class MetaDataAssistant(ABCMeta):
             # Only particular "DataAssistant" implementations must be registered.
             newclass.data_assistant_type = camel_to_snake(name=clsname)
 
-            from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
-                DataAssistantDispatcher,
-            )
+            alias: Optional[str] = getattr(newclass, "__alias__", None)
+            if alias and not alias.startswith("_"):
+                from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
+                    DataAssistantDispatcher,
+                )
 
-            # noinspection PyTypeChecker
-            DataAssistantDispatcher._register_data_assistant(data_assistant=newclass)
+                # noinspection PyTypeChecker
+                DataAssistantDispatcher._register(name=alias, data_assistant=newclass)
 
         return newclass
 
@@ -468,6 +470,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         CommonlyUsedParameterBuilders()
     )
 
+    # When DataAssistant subclasses are instantiated, they are registered in the DataAssistantDispatcher
+    # if __alias__ is defined and does not start with underscore _. This is handled by MetaDataAssistant.
     __alias__: Optional[str] = None
 
     def __init__(
@@ -917,7 +921,6 @@ def build_map_metric_rule(  # noqa: PLR0913
     variables: dict = {
         "success_ratio": 7.5e-1,
     }
-
     expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
         expect_column_values_to_be_attribute_expectation_configuration_builder,
     ]

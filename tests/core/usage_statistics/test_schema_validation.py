@@ -16,6 +16,7 @@ from great_expectations.core.usage_statistics.schemas import (
 )
 
 
+@pytest.mark.unit
 def test_anonymized_name_validation():
     string = "aa41efe0a1b3eeb9bf303e4561ff8392"
     jsonschema.validators.Draft202012Validator(
@@ -30,6 +31,7 @@ def test_anonymized_name_validation():
         ).validate(string[:5])
 
 
+@pytest.mark.unit
 def test_anonymized_datasource_validation():
     record = {
         "anonymized_name": "aa41efe0a1b3eeb9bf303e4561ff8392",
@@ -61,6 +63,7 @@ def test_anonymized_datasource_validation():
     ).validate(record)
 
 
+@pytest.mark.unit
 def test_init_payload_validation():
     payload = {
         "platform.system": "Darwin",
@@ -148,6 +151,7 @@ def test_init_payload_validation():
     ).validate(payload)
 
 
+@pytest.mark.unit
 def test_run_val_op_message():
     message = {
         "event_payload": {
@@ -169,6 +173,7 @@ def test_run_val_op_message():
     ).validate(message)
 
 
+@pytest.mark.unit
 def test_anonymized_domain_builder_schema():
     messages: List[dict] = [
         {
@@ -197,6 +202,7 @@ def test_anonymized_domain_builder_schema():
         ).validate(message)
 
 
+@pytest.mark.unit
 def test_anonymized_parameter_builder_schema() -> None:
     messages: List[dict] = [
         {
@@ -228,6 +234,7 @@ def test_anonymized_parameter_builder_schema() -> None:
         ).validate(message)
 
 
+@pytest.mark.unit
 def test_anonymized_expectation_configuration_builder_schema() -> None:
     messages: List[dict] = [
         {
@@ -256,6 +263,7 @@ def test_anonymized_expectation_configuration_builder_schema() -> None:
         )
 
 
+@pytest.mark.unit
 def test_anonymized_rule_schema():
     message = {
         "anonymized_name": "asdf932jwdf823r9ozsf9j20zsdfjas9",
@@ -290,6 +298,7 @@ def test_anonymized_rule_schema():
     ).validate(message)
 
 
+@pytest.mark.unit
 def test_anonymized_rule_based_profiler_validation():
     message: dict = {
         "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
@@ -361,6 +370,7 @@ def test_anonymized_rule_based_profiler_validation():
     ).validate(message)
 
 
+@pytest.mark.unit
 def test_uuid_format_validation_success():
     message = {
         "event_payload": {
@@ -385,6 +395,7 @@ def test_uuid_format_validation_success():
         assert False, e.message
 
 
+@pytest.mark.unit
 def test_uuid_format_validation_failure():
     message = {
         "event_payload": {
