@@ -809,14 +809,16 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
-    "postgres": TestDependencies(
+    "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
         # example of using a simple service lookup and a setup function to do the same thing
         # we can remove one of these methods if one seems obviously better
-        services=("postgres",),
+        # services=("postgresql",),
         setup_funcs=(
-            lambda ctx: print("Dummy setup function"),
-            # lambda ctx: ctx.run("docker-compose up -d postgres"),
+            # lambda ctx: print("Dummy setup function"),
+            lambda ctx: ctx.run(
+                "docker-compose -f assets/docker/postgresql/docker-compose.yml up -d"
+            ),
         ),
         exta_pytest_args=("--postgresql",),
     ),
@@ -976,8 +978,6 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
         The main reason this is a separate task is to make it easy to start services
         when running tests locally.
     """
-    cmds = ["docker-compose", "up", "-d"]
-
     service_names = set(names)
 
     if markers:
@@ -985,8 +985,15 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
             service_names.update(test_deps.services)
 
     if service_names:
-        cmds.extend(service_names)
         print(f"  Starting services for {', '.join(service_names)} ...")
-        ctx.run(" ".join(cmds), echo=True, pty=True)
+        for service_name in service_names:
+            cmds = [
+                "docker-compose",
+                "-f",
+                f"assets/docker/{service_name}/docker-compose.yml",
+                "up",
+                "-d",
+            ]
+            ctx.run(" ".join(cmds), echo=True, pty=True)
     else:
         print("  No matching services to start")

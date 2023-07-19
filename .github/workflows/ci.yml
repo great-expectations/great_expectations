@@ -60,6 +60,15 @@ jobs:
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
 
   marker-tests:
+    services:
+      postgres:
+        # Docker hub image
+        image: postgres:13.3
+        env:
+          POSTGRES_USER: postgresql
+          POSTGRES_DB: test_ci # required by postgres image
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
     strategy:
       matrix:
         markers:
@@ -69,7 +78,7 @@ jobs:
           - cloud and not e2e
           - filesystem
           - openpyxl or pyarrow or project or sqlite
-          # - spark
+          #- spark
           - postgres
           # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
@@ -94,4 +103,4 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests '${{ matrix.markers }} and not unit' --up-services --verbose
+        run: invoke ci-tests '${{ matrix.markers }} and not unit, cloud ' --up-services --verbose

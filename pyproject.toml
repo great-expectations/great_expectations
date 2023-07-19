@@ -548,7 +548,7 @@ markers = [
     "clickhouse: mark a test as Clickhouse-dependent.",
     "athena: mark a test as AWS Athena-dependent.",
     "spark: mark a test as Spark-dependent.",
-    "postgres: mark a test as postgres-dependent.",
+    "postgresql: mark a test as postgresql-dependent.",
     "project: mark a test that verifies properties of the gx project",
     "pyarrow: mark a test as PyArrow-dependent.",
     "openpyxl: mark a test for openpyxl-dependent, which is for Excel files.",
