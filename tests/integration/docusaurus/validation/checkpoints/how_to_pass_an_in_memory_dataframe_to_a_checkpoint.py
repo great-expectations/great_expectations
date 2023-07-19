@@ -5,7 +5,7 @@ import great_expectations as gx
 context = gx.get_context()
 # </snippet>
 
-context.add_or_update_expectation_suite("my_expectation_suite")
+# context.add_or_update_expectation_suite("my_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py read_dataframe">
 df = pandas.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
@@ -13,6 +13,7 @@ df = pandas.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 validator = context.sources.add_pandas("taxi_datasource").read_dataframe(
     df, asset_name="taxi_frame", batch_metadata={"year": "2019", "month": "01"}
 )
+validator.save_expectation_suite()
 
 checkpoint = context.add_or_update_checkpoint(
     name="my_taxi_validator_checkpoint", validator=validator
