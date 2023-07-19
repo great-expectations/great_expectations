@@ -9,7 +9,7 @@ from great_expectations.experimental.column_descriptive_metrics.batch_inspector 
 from great_expectations.experimental.column_descriptive_metrics.cloud_data_store import (
     CloudDataStore,
 )
-from great_expectations.experimental.column_descriptive_metrics.column_descriptive_metrics_repository import (
+from great_expectations.experimental.column_descriptive_metrics.metric_repository import (
     MetricRepository,
 )
 

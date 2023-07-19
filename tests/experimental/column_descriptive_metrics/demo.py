@@ -15,7 +15,7 @@ from great_expectations.experimental.column_descriptive_metrics.batch_inspector 
 from great_expectations.experimental.column_descriptive_metrics.batch_inspector_agent_action import (
     RunBatchInspectorAction,
 )
-from great_expectations.experimental.column_descriptive_metrics.column_descriptive_metrics_repository import (
+from great_expectations.experimental.column_descriptive_metrics.metric_repository import (
     MetricRepository,
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequest
