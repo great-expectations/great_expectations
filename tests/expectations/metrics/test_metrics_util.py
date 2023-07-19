@@ -89,23 +89,6 @@ def unexpected_index_list_two_index_columns():
     ]
 
 
-@pytest.fixture
-def column_names_all_lowercase() -> list[str]:
-    return [
-        "artists",
-        "healthcare_workers",
-        "engineers",
-        "lawyers",
-        "scientists",
-    ]
-
-
-@pytest.fixture
-def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[str]:
-    name: str
-    return [name.upper() for name in column_names_all_lowercase]
-
-
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "backend_name,connection_string",
@@ -297,6 +280,23 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
     )
 
 
+@pytest.fixture
+def column_names_all_lowercase() -> list[str]:
+    return [
+        "artists",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "scientists",
+    ]
+
+
+@pytest.fixture
+def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[str]:
+    name: str
+    return [name.upper() for name in column_names_all_lowercase]
+
+
 @pytest.mark.unit
 def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
     sa, column_names_all_lowercase: list[str]
@@ -315,18 +315,24 @@ def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "input_column_name, output_column_name, confirm_not_equal_column_name",
     [
-        [
+        "input_column_name",
+        "output_column_name",
+        "confirm_not_equal_column_name",
+    ],
+    [
+        pytest.param(
             "ARTISTS",
             "ARTISTS",
             None,
-        ],
-        [
-            "travel_agents",
-            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            id="column_does_not_need_to_be_quoted",
+        ),
+        pytest.param(
+            "should_be_quoted",
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
             "TRAVEL_AGENTS",
-        ],
+            id="column_must_be_quoted",
+        ),
     ],
 )
 def test_get_dbms_compatible_metric_domain_column_kwargs(
@@ -337,7 +343,7 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
     confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
 ):
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="travel_agents", quote=True
+        value="should_be_quoted", quote=True
     )
     test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
 
@@ -354,20 +360,27 @@ def test_get_dbms_compatible_metric_domain_column_kwargs(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "input_column_name_a, input_column_name_b, output_column_name_a, output_column_name_b",
     [
-        [
+        "input_column_name_a",
+        "input_column_name_b",
+        "output_column_name_a",
+        "output_column_name_b",
+    ],
+    [
+        pytest.param(
             "ARTISTS",
-            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
             "ARTISTS",
-            sqlalchemy.quoted_name(value="travel_agents", quote=True),
-        ],
-        [
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            id="column_a_does_not_need_to_be_quoted_column_b_must_remain_as_quoted",
+        ),
+        pytest.param(
             "ARTISTS",
-            "travel_agents",
+            "should_be_quoted",
             "ARTISTS",
-            sqlalchemy.quoted_name(value="travel_agents", quote=True),
-        ],
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            id="column_a_does_not_need_to_be_quoted_column_b_needs_to_be_quoted",
+        ),
     ],
 )
 def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
@@ -379,7 +392,7 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
     output_column_name_b: Union[str, sqlalchemy.quoted_name],
 ):
     quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="travel_agents", quote=True
+        value="should_be_quoted", quote=True
     )
     test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
 
@@ -399,17 +412,26 @@ def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
 @pytest.mark.unit
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "input_column_list, output_column_list",
     [
-        [
-            ["ARTISTS", "travel_agents", "FarmAnimals", "Household_Pets"],
+        "input_column_list",
+        "output_column_list",
+    ],
+    [
+        pytest.param(
             [
                 "ARTISTS",
-                sqlalchemy.quoted_name(value="travel_agents", quote=True),
-                sqlalchemy.quoted_name(value="FarmAnimals", quote=True),
-                sqlalchemy.quoted_name(value="Household_Pets", quote=True),
+                "should_be_quoted_0",
+                "should_be_quoted_1",
+                "should_be_quoted_2",
             ],
-        ],
+            [
+                "ARTISTS",
+                sqlalchemy.quoted_name(value="should_be_quoted_0", quote=True),
+                sqlalchemy.quoted_name(value="should_be_quoted_1", quote=True),
+                sqlalchemy.quoted_name(value="should_be_quoted_2", quote=True),
+            ],
+            id="column_list_has_three_columns_that_must_be_quoted",
+        ),
     ],
 )
 def test_get_dbms_compatible_metric_domain_column_list_kwargs(
@@ -419,19 +441,23 @@ def test_get_dbms_compatible_metric_domain_column_list_kwargs(
     output_column_list: list[Union[str, sqlalchemy.quoted_name]],
 ):
     quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="travel_agents", quote=True
+        value="should_be_quoted_0", quote=True
     )
     quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="FarmAnimals", quote=True
+        value="should_be_quoted_1", quote=True
     )
     quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
-        value="Household_Pets", quote=True
+        value="should_be_quoted_2", quote=True
     )
     test_column_names: list[str] = column_names_all_uppercase + [
         quoted_column_name_0,
         quoted_column_name_1,
         quoted_column_name_2,
     ]
+    """
+    This shuffle intersperses input "column_list" so to ensure that there is no dependency on position of column names
+    that must be quoted.  Sorting in assertion below ensures that types are correct, regardless of column order.
+    """
     random.shuffle(test_column_names)
 
     metric_domain_kwargs: dict
