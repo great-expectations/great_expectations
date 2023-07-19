@@ -1,6 +1,5 @@
 import great_expectations as gx
 import os
-from pyinstrument import Profiler
 
 
 def test_bigquery_head(empty_data_context):
