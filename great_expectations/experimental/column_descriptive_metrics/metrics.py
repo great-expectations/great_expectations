@@ -14,12 +14,6 @@ class CDMRBaseModel(BaseModel):  # TODO: Better name
         extra = pydantic.Extra.forbid
 
 
-# TODO: Is run id just the "Metrics" id? ie the collection of metrics associated with a run?
-class RunId(CDMRBaseModel):
-    id: uuid.UUID = Field(description="Run id")
-    # created_at, created_by filled in by the backend.
-
-
 class Value(CDMRBaseModel):
     value: Any  # TODO: Better than Any
 
