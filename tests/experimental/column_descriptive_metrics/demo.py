@@ -125,6 +125,9 @@ def test_demo_batch_inspector(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
         return_value=run_id,
     ), mock.patch(
+        f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_metric_id",
+        return_value=metric_id,
+    ), mock.patch(
         f"{MetricConverter.__module__}.{MetricConverter.__name__}._generate_metric_id",
         return_value=metric_id,
     ), mock.patch(
