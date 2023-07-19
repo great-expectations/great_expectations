@@ -39,25 +39,7 @@ def run_id() -> uuid.UUID:
 
 
 @pytest.fixture
-def ephemeral_context_with_pandas_default():
-    # NOTE: This works, probably because in the process of getting a validator the batch list in the batch manager is created.
-    context = gx.get_context()
-
-    validator = context.sources.pandas_default.read_csv(
-        "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-    )
-    datasource = context.get_datasource("default_pandas_datasource")
-
-    data_asset = datasource.assets[0]
-
-    batch_request = data_asset.build_batch_request()
-    return context, batch_request
-
-
-@pytest.fixture
 def ephemeral_context_with_simple_dataframe():
-    # Not working with simple dataframe, probably user error on my part:
-    # The code sample for this doc works: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas
     context = gx.get_context()
     datasource = context.sources.add_pandas(name="my_pandas_datasource")
 
@@ -68,6 +50,19 @@ def ephemeral_context_with_simple_dataframe():
     data_asset = datasource.add_dataframe_asset(name=name)
     batch_request = data_asset.build_batch_request(dataframe=df)
     return context, batch_request
+
+
+@pytest.fixture
+def ephemeral_context_with_simple_dataframe_and_validator(
+    ephemeral_context_with_simple_dataframe,
+):
+    context, batch_request = ephemeral_context_with_simple_dataframe
+    validator = context.get_validator(
+        datasource_name=batch_request.datasource_name,
+        data_asset_name=batch_request.data_asset_name,
+        batch_request=batch_request,
+    )
+    return context, batch_request, validator
 
 
 def _create_mock_agent_action(batch_request: BatchRequest):
@@ -86,15 +81,16 @@ def test_demo_batch_inspector(
     cloud_org_id: uuid.UUID,
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
-    ephemeral_context_with_simple_dataframe,
-    ephemeral_context_with_pandas_default,
+    ephemeral_context_with_simple_dataframe_and_validator,
 ):
     """This is a demo of how to get column descriptive metrics,
     this should be replaced with proper tests."""
 
-    # TODO: This is working but we want the ephemeral_context_with_simple_dataframe to work as well:
-    # context, batch_request = ephemeral_context_with_pandas_default
-    context, batch_request = ephemeral_context_with_simple_dataframe
+    (
+        context,
+        batch_request,
+        validator,
+    ) = ephemeral_context_with_simple_dataframe_and_validator
 
     # From here down assume we just have the batch request from the agent action
     # (using the datasource and data asset names from the batch request for convenience):
@@ -105,10 +101,10 @@ def test_demo_batch_inspector(
     data_asset_from_action = datasource_from_action.get_asset(
         mock_agent_action.data_asset_name
     )
-
-    batch_from_action = data_asset_from_action.get_batch_list_from_batch_request(
-        batch_request
-    )[-1]
+    batch_request_from_action = data_asset_from_action.build_batch_request()
+    validator_from_action = context.get_validator(
+        batch_request=batch_request_from_action
+    )
 
     with mock.patch(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
@@ -119,7 +115,7 @@ def test_demo_batch_inspector(
     ):
         batch_inspector = BatchInspector(organization_id=cloud_org_id)
         metrics = batch_inspector.get_column_descriptive_metrics(
-            batch=batch_from_action
+            validator=validator_from_action
         )
 
     assert metrics == Metrics(
