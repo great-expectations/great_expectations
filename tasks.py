@@ -839,26 +839,9 @@ def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
         raise ValueError(f"Unable to tokenize marker string: {marker_string}")
 
 
-def old_tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
-    """
-    Split a marker string on ' or ' and ' and ' and return an iterable of tokens.
-    Exclude parts of the string after ' and not '.
-    """
-    # These rules are fragile
-    # just one word -> return it
-    #
-
-    remaining_str, _, _ = marker_string.partition(" and not ")
-    for partially_tokenized in remaining_str.split(" and "):
-        for token in partially_tokenized.split(" or "):
-            yield token
-
-
 def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
-    print(markers)
     if isinstance(markers, str):
         markers = [markers]
-    print("~~~~~~~~")
     dependencies: list[TestDependencies] = []
     for marker_string in markers:
         for marker_token in _tokenize_marker_string(marker_string):
