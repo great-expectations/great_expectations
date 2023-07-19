@@ -1,4 +1,9 @@
+import pytest
+
 from great_expectations.datasource.data_connector.util import sanitize_prefix
+
+# module level markers
+pytestmark = [pytest.mark.unit]
 
 
 def test_sanitize_prefix_with_properly_formatted_dirname_input():
