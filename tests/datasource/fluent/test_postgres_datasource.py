@@ -636,6 +636,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
             asset.get_batch_list_from_batch_request(batch_request)
 
 
+@pytest.mark.unit
 def test_get_bad_batch_request(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -1047,7 +1048,7 @@ def test_test_connection_failures(
         bad_configuration_datasource.test_connection()
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_query_data_asset(empty_data_context, create_source):
     query = "SELECT * FROM my_table"
 
@@ -1081,6 +1082,7 @@ def test_non_select_query_data_asset(create_source):
             source.add_query_asset(name="query_asset", query="* FROM my_table")
 
 
+@pytest.mark.filesystem
 def test_adding_splitter_persists_results(
     empty_data_context: FileDataContext,
     mock_test_connection,
