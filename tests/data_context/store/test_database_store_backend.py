@@ -11,7 +11,7 @@ from tests import test_utils
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 # module level markers
-pytestmark = [pytest.mark.postgresql]
+pytestmark = pytest.mark.postgresql
 
 
 @pytest.mark.integration

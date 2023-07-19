@@ -72,7 +72,7 @@ validator.expectation_suite = result.get_expectation_suite(
 """
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 def test_suite_help_output(caplog):

@@ -13,7 +13,7 @@ from great_expectations.data_context.util import (
 from great_expectations.datasource import SimpleSqlalchemyDatasource
 
 # module level markers
-pytestmark = [pytest.mark.sqlite]
+pytestmark = pytest.mark.sqlite
 
 
 @pytest.fixture()

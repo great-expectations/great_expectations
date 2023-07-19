@@ -6,7 +6,7 @@ from great_expectations.expectations.row_conditions import (
 import pytest
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_notnull_parser():

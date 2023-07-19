@@ -9,7 +9,7 @@ import pytest
 import tomli
 from tasks import MARKER_DEPENDENDENCY_MAP
 
-pytestmarks = [pytest.mark.project]
+pytestmarks = pytest.mark.project
 
 LOGGER: Final = logging.getLogger(__name__)
 PROJECT_ROOT: Final = pathlib.Path(__file__).parent.parent
