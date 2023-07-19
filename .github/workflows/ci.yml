@@ -103,4 +103,4 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: invoke ci-tests '${{ matrix.markers }} and not unit, cloud ' --up-services --verbose
+        run: invoke ci-tests '${{ matrix.markers }} and not unit ' --up-services --verbose
