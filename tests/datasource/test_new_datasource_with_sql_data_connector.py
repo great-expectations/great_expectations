@@ -32,6 +32,9 @@ from great_expectations.compatibility.bigquery import (
     sqlalchemy_bigquery as sqla_bigquery,
 )
 
+pytestmark = pytest.mark.sqlite
+
+
 yaml = YAMLHandler()
 
 
