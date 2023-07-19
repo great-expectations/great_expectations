@@ -606,6 +606,54 @@ def column_reflection_fallback(
         return col_info_dict_list
 
 
+def get_dbms_compatible_metric_domain_kwargs(
+    metric_domain_kwargs: dict,
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
+) -> dict:
+    """
+    This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
+    column name in "Batch" column list is quoted, then corresponding column name in "metric_domain_kwargs" is also quoted.
+
+    Args:
+        metric_domain_kwargs: Original "metric_domain_kwargs" dictionary of attribute key-value pairs.
+        batch_columns_list: Actual "Batch" column list (e.g., output of "table.columns" metric).
+
+    Returns:
+        metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
+    """
+    column_names: List[str | sqlalchemy.quoted_name]
+    if "column" in metric_domain_kwargs:
+        column_name: str | sqlalchemy.quoted_name = get_dbms_compatible_column_names(
+            column_names=metric_domain_kwargs["column"],
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column"] = column_name
+    elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
+        column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
+        column_B_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_B"]
+        column_names = [
+            column_A_name,
+            column_B_name,
+        ]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        (
+            metric_domain_kwargs["column_A"],
+            metric_domain_kwargs["column_B"],
+        ) = column_names
+    elif "column_list" in metric_domain_kwargs:
+        column_names = metric_domain_kwargs["column_list"]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column_list"] = column_names
+
+    return metric_domain_kwargs
+
+
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
