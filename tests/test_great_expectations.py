@@ -321,6 +321,7 @@ def test_stats_mixed_expectations():
     assert expected == actual
 
 
+@pytest.mark.filesystem
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
