@@ -93,4 +93,4 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ## Configure
 
-Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling thier methods for adding splitters  For detailed guidance on configuring Data Assets for various environments and source data systems, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
+Data Assets are configured by providing parameters when they are created.  SQL-based Data Assets can be further configured after creation by calling thier methods for adding splitters. To configure Data Assets for various environments and source data systems, see [Connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md).
