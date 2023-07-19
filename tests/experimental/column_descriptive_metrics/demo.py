@@ -106,6 +106,14 @@ def test_demo_batch_inspector(
         batch_request=batch_request_from_action
     )
 
+    # TODO: Use real event and action.run() instead of reproducting that code here.
+    #  (first address circular import issues)
+    # event = RunOnboardingDataAssistantEvent(
+    #     datasource_name=batch_request.datasource_name,
+    #     data_asset_name=batch_request.data_asset_name,
+    # )
+    # action = RunOnboardingDataAssistantAction(event)
+
     with mock.patch(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
         return_value=run_id,
