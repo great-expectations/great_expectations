@@ -802,7 +802,11 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        setup_funcs=(lambda ctx: service(ctx, names=["postgresql"]),),
+        setup_funcs=(
+            lambda ctx: ctx.run(
+                "docker-compose -f assets/docker/postgresql/docker-compose.yml up -d"
+            ),
+        ),
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
