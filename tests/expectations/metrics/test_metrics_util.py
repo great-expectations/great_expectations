@@ -1,9 +1,14 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, Union
 
 import pandas as pd
+import random
+
 import pytest
 from _pytest import monkeypatch
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.compatibility.sqlalchemy import (
@@ -15,6 +20,7 @@ from great_expectations.expectations.metrics.util import (
     get_unexpected_indices_for_multiple_pandas_named_indices,
     get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 from tests.test_utils import (
     get_awsathena_connection_url,
@@ -81,6 +87,23 @@ def unexpected_index_list_two_index_columns():
         {"animals": "lion", "pk_1": 4, "pk_2": "four"},
         {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
     ]
+
+
+@pytest.fixture
+def column_names_all_lowercase() -> list[str]:
+    return [
+        "artists",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "scientists",
+    ]
+
+
+@pytest.fixture
+def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[str]:
+    name: str
+    return [name.upper() for name in column_names_all_lowercase]
 
 
 @pytest.mark.unit
@@ -272,3 +295,149 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         "Error: The list of domain columns is currently empty. Please check your "
         "configuration."
     )
+
+
+@pytest.mark.unit
+def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
+    sa, column_names_all_lowercase: list[str]
+):
+    test_column_names: list[str] = column_names_all_lowercase
+    with pytest.raises(gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
+        _ = get_dbms_compatible_metric_domain_kwargs(
+            metric_domain_kwargs={"column": "non_existent_column"},
+            batch_columns_list=test_column_names,
+        )
+    assert (
+        str(eee.value)
+        == f'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_column_name, output_column_name, confirm_not_equal_column_name",
+    [
+        [
+            "ARTISTS",
+            "ARTISTS",
+            None,
+        ],
+        [
+            "travel_agents",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            "TRAVEL_AGENTS",
+        ],
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name: str,
+    output_column_name: Union[str, sqlalchemy.quoted_name],
+    confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
+):
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column": input_column_name},
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column"] == output_column_name
+    if confirm_not_equal_column_name:
+        assert metric_domain_kwargs["column"] != confirm_not_equal_column_name
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_column_name_a, input_column_name_b, output_column_name_a, output_column_name_b",
+    [
+        [
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+        ],
+        [
+            "ARTISTS",
+            "travel_agents",
+            "ARTISTS",
+            sqlalchemy.quoted_name(value="travel_agents", quote=True),
+        ],
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name_a: str,
+    input_column_name_b: str,
+    output_column_name_a: Union[str, sqlalchemy.quoted_name],
+    output_column_name_b: Union[str, sqlalchemy.quoted_name],
+):
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [quoted_column_name]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={
+            "column_A": input_column_name_a,
+            "column_B": input_column_name_b,
+        },
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column_A"] == output_column_name_a
+    assert metric_domain_kwargs["column_B"] == output_column_name_b
+
+
+@pytest.mark.unit
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "input_column_list, output_column_list",
+    [
+        [
+            ["ARTISTS", "travel_agents", "FarmAnimals", "Household_Pets"],
+            [
+                "ARTISTS",
+                sqlalchemy.quoted_name(value="travel_agents", quote=True),
+                sqlalchemy.quoted_name(value="FarmAnimals", quote=True),
+                sqlalchemy.quoted_name(value="Household_Pets", quote=True),
+            ],
+        ],
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_list_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_list: list[str],
+    output_column_list: list[Union[str, sqlalchemy.quoted_name]],
+):
+    quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="travel_agents", quote=True
+    )
+    quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="FarmAnimals", quote=True
+    )
+    quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="Household_Pets", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [
+        quoted_column_name_0,
+        quoted_column_name_1,
+        quoted_column_name_2,
+    ]
+    random.shuffle(test_column_names)
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column_list": input_column_list},
+        batch_columns_list=test_column_names,
+    )
+    assert sorted(metric_domain_kwargs["column_list"]) == sorted(output_column_list)
