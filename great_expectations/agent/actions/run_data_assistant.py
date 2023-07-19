@@ -53,7 +53,7 @@ class RunDataAssistantAction(
             batch_request = asset.build_batch_request()
         except ValueError as e:
             raise ValueError(
-                "The RunDataAssistant Action cannot be used with an in-memory dataframe asset."
+                f"The RunDataAssistant Action for {assistant_name} data assistant cannot be used with an in-memory dataframe asset."
             ) from e
 
         try:
