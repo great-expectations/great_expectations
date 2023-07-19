@@ -4,46 +4,20 @@ title: Custom Expectations overview
 import Prerequisites from './components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-You can extend the functionality of Great Expectations by creating your own <TechnicalTag tag="custom_expectation" text="Custom Expectations" />. You can also enrich Great Expectations as a shared standard for data quality by contributing new <TechnicalTag tag="expectation" text="Expectations" /> to the open source project.
+You can create your own <TechnicalTag tag="custom_expectation" text="Custom Expectations" /> to extend the functionality of Great Expectations (GX). You can also contribute new <TechnicalTag tag="expectation" text="Expectations" /> to the open source project to enrich GX as a shared standard for data quality.
 
-These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a Custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
+## Custom Expectation types
 
-<Prerequisites>
-</Prerequisites>
+The following table lists the Custom Expectations types.
 
-## Creating Custom Expectations
+| Expectation Type              | Description                            |
+|-------------------------------|----------------------------------------|
+| Experimental             | <ul><li>Has a valid `library_metadata` object</li><li>Has a docstring, including a one-line short description</li><li>Has at least one positive and negative example case, and all test cases pass</li><li>Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" /></li><li>Passes all linting checks</li></ul>                  |
+| Beta                     |<ul><li>Has basic input validation and type checking</li><li>Has both Statement Renderers: prescriptive and diagnostic</li><li>Has core logic that passes tests for all applicable Execution Engines and SQL dialects</li></ul>                |
+| Production                                                | <ul><li>Has a robust suite of tests, as determined by a code owner</li><li>Has passed a manual review by a code owner for code standards and style guides</li></ul> |
 
-A fully-developed, Production-ready Expectation needs to do a lot of things:
-* Execute consistently across many types of data infrastructure
-* Render itself and its <TechnicalTag tag="validation_result" text="Validation Results" /> into several formats
-* Support <TechnicalTag tag="profiling" text="Profiling" /> against new data
-* Be maintainable, with good tests, documentation, linting, type hints, etc.
 
-In order to make development of Expectations as easy as possible, we've broken up the steps to create Custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
-
-Grouped together, they constitute a Definition of Done for Expectations at each [Level of Maturity](../../../contributing/contributing_maturity.md).
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
-<i class="fas fa-circle" style={{color: "#dc3545"}}></i> An Experimental Expectation...
-
-* Has a valid `library_metadata` object
-* Has a docstring, including a one-line short description
-* Has at least one positive and negative example case, and all test cases pass
-* Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" />
-* Passes all linting checks
-
-<i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
-
-* Has basic input validation and type checking
-* Has both Statement Renderers: prescriptive and diagnostic
-<!-- * Has default `Parameter Builders` and Domain hooks to support Profiling -->
-* Has core logic that passes tests for all applicable Execution Engines and SQL dialects
-
-<i class="fas fa-check-circle" style={{color: "#28a745"}}></i> A Production Expectation...
-
-<!--  * Has all applicable Renderers, with fully typed and styled output -->
-* Has a robust suite of tests, as determined by a code owner
-* Has passed a manual review by a code owner for code standards and style guides
+For more information about Feature and code readiness levels, see [Feature and code readiness](../../../contributing/contributing_maturity.md).
 
 ### How these docs are organized
 
