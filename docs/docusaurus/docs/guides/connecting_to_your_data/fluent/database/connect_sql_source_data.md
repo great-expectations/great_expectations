@@ -314,14 +314,14 @@ Although a connection string is the standard way to yield a connection to a data
 individual connection arguments to be passed in as an alternative.
 
 The following arguments are supported:
-    - `account`
-    - `user`
-    - `password`
-    - `database`
-    - `schema`
-    - `warehouse`
-    - `role`
-    - `numpy`
+  - `account`
+  - `user`
+  - `password`
+  - `database`
+  - `schema`
+  - `warehouse`
+  - `role`
+  - `numpy`
 
 Passing these values as keyword args to `add_snowflake` is functionally equivalent to passing in a `connection_string`.
 
