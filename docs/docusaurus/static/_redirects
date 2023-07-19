@@ -379,6 +379,4 @@ docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure
 /docs/guides/validation/index /docs/guides/validation/validate_data_lp
 /docs/deployment_patterns/index /docs/category/integrations
 /docs/guides/validation/validate_data_overview /docs/guides/validation/validate_data_lp
-/docs/guides/expectations/create_expectations_overview /docs/guides/expectations/expectations_lp
 /docs/guides/connecting_to_your_data/connect_to_data_overview /docs/guides/connecting_to_your_data/connect_to_data_lp
-/docs/guides/setup/setup_overview /docs/guides/setup/setup_overview_lp
