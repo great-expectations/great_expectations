@@ -19,7 +19,6 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -51,6 +50,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -822,6 +822,8 @@ class TableAsset(_SQLAsset):
             raise ValueError(
                 "table_name cannot be empty and should default to name if not provided"
             )
+
+        from great_expectations.compatibility import sqlalchemy
 
         if sqlalchemy.quoted_name:
             return sqlalchemy.quoted_name(value=validated_table_name, quote=True)
