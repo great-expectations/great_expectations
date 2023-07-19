@@ -137,7 +137,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_account_url_and_credential():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -151,7 +151,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
     monkeypatch: pytest.MonkeyPatch, empty_file_context: FileDataContext
 ):
@@ -180,7 +180,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -194,7 +194,7 @@ def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_name():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -208,7 +208,7 @@ def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_name():
     pandas_abs_datasource = PandasAzureBlobStorageDatasource(
         name="pandas_abs_datasource",
@@ -222,7 +222,7 @@ def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_nam
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error():
     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
     with pytest.raises(PandasAzureBlobStorageDatasourceError):
@@ -238,7 +238,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -263,7 +263,7 @@ def test_add_csv_asset_to_datasource(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -284,7 +284,7 @@ def test_construct_csv_asset_directly(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -311,7 +311,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -338,7 +338,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -365,7 +365,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
@@ -389,7 +389,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on azure.storage.blob using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
@@ -446,7 +446,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_test_connection_failures(
     pandas_abs_datasource: PandasAzureBlobStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
@@ -478,7 +478,7 @@ def test_test_connection_failures(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )

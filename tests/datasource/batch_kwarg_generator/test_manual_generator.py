@@ -1,8 +1,11 @@
+import pytest
+
 from great_expectations.datasource.batch_kwargs_generator.manual_batch_kwargs_generator import (
     ManualBatchKwargsGenerator,
 )
 
 
+@pytest.mark.unit
 def test_manual_generator(basic_pandas_datasource):
     generator = ManualBatchKwargsGenerator(
         datasource=basic_pandas_datasource,
