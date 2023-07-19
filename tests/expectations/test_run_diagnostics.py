@@ -171,7 +171,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a docstring, including a one-line short description",
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
                     "passed": False,
                     "sub_messages": [],
                 },
