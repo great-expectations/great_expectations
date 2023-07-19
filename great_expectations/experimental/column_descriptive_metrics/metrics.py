@@ -14,6 +14,7 @@ class CDMRBaseModel(BaseModel):  # TODO: Better name
         extra = pydantic.Extra.forbid
 
 
+# TODO: Is run id just the "Metrics" id? ie the collection of metrics associated with a run?
 class RunId(CDMRBaseModel):
     id: uuid.UUID = Field(description="Run id")
     organization_id: uuid.UUID = Field(
@@ -28,9 +29,9 @@ class Value(CDMRBaseModel):
 
 class Metric(CDMRBaseModel):
     id: uuid.UUID = Field(description="Metric id")
-    organization_id: uuid.UUID = Field(
-        description="Organization id"
-    )  # TODO: Is this filled in by the backend?
+    # organization_id: uuid.UUID = Field(
+    #     description="Organization id"
+    # )  # TODO: Is this filled in by the backend? Or when serializing?
     run_id: uuid.UUID = Field(description="Run id")
     # TODO: reimplement batch param
     # batch: Batch = Field(description="Batch")

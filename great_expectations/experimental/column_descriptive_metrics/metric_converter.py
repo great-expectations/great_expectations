@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 
 
 class MetricConverter:  # TODO: Name this better
-    def __init__(self, organization_id: uuid.UUID):
-        self._organization_id = organization_id
+    def __init__(self):
+        pass
 
     def _generate_metric_id(self) -> uuid.UUID:
         return uuid.uuid4()
@@ -55,7 +55,8 @@ class MetricConverter:  # TODO: Name this better
         #  (e.g. datasource_name, data_asset_name, batch_id).
         metric = Metric(
             id=self._generate_metric_id(),
-            organization_id=self._organization_id,
+            # TODO: Consider removing organization id and only adding when serializing in the store
+            # organization_id=self._organization_id,
             run_id=run_id,
             # TODO: reimplement batch param
             # batch=batch,
