@@ -115,12 +115,12 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_spark_s3_datasource(spark_s3_datasource: SparkS3Datasource):
     assert spark_s3_datasource.name == "spark_s3_datasource"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
@@ -138,7 +138,7 @@ def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
     assert asset.batch_metadata == asset_specified_metadata
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
@@ -152,7 +152,7 @@ def test_construct_csv_asset_directly():
     assert m1 is not None
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_batching_regex_unnamed_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -171,7 +171,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -190,7 +190,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_some_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -209,7 +209,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_csv_asset_with_non_string_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
@@ -226,7 +226,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on moto.mock_s3 using Spark is not working (this test is conducted using Jupyter notebook manually)."
 )
@@ -273,7 +273,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_test_connection_failures(
     s3_mock,
     spark_s3_datasource: SparkS3Datasource,
@@ -304,7 +304,7 @@ def test_test_connection_failures(
     assert str(e.value) == str(test_connection_error_message)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_add_csv_asset_with_recursive_file_discovery_to_datasource(
     spark_s3_datasource: SparkS3Datasource,
 ):
