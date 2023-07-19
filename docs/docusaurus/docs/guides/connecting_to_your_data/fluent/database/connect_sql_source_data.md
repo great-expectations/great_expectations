@@ -207,7 +207,7 @@ Connect GX to a SQLite database to access source data.
 
 The following code examples use a SQLite connection string. A SQLite connection string connects GX to the SQLite database.
 
-The following code is an example of a PostgreSQL connection string format:
+The following code is an example of a SQLite connection string format:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py connection_string"
 ```
