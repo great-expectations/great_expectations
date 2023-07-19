@@ -1,13 +1,75 @@
 from numbers import Number
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
 import pytest
 import scipy.stats as stats
 
+from great_expectations.core import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
+
 RANDOM_SEED: int = 43792
 RANDOM_STATE: np.random.Generator = np.random.Generator(np.random.PCG64(RANDOM_SEED))
+
+
+class DummyDomain(Domain):
+    """
+    To set up execution of "ParameterBuilder.build_parameters()" only "id" property of "Domain" is required.
+    """
+
+    def __init__(self, domain_type=MetricDomainTypes.TABLE):
+        super().__init__(domain_type=domain_type)
+
+    @property
+    def id(
+        self,
+    ) -> str:
+        return "my_id"
+
+
+# noinspection PyTypeChecker
+@pytest.fixture
+def empty_domain() -> Domain:
+    return DummyDomain()
+
+
+@pytest.fixture
+def empty_parameters(empty_domain: Domain) -> Dict[str, ParameterContainer]:
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer] = {
+        empty_domain.id: parameter_container,
+    }
+    return parameters
+
+
+@pytest.fixture
+def empty_rule_state(
+    empty_domain: Domain, empty_parameters: Dict[str, ParameterContainer]
+) -> Dict[str, Union[Domain, Dict[str, ParameterContainer]]]:
+    return {
+        "domain": empty_domain,
+        "parameters": empty_parameters,
+    }
+
+
+@pytest.fixture
+def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
+    false_positive_rate: np.float64 = np.float64(0.01)
+    distribution_parameters: Dict[
+        str, Dict[str, Number]
+    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
+    distribution_samples: pd.DataFrame = generate_distribution_samples(
+        distribution_parameters=distribution_parameters, size=1000
+    )
+    return {
+        "false_positive_rate": false_positive_rate,
+        "distribution_parameters": distribution_parameters,
+        "distribution_samples": distribution_samples,
+    }
 
 
 def generate_distribution_parameters(
@@ -160,19 +222,3 @@ def generate_distribution_samples(
         ),
     }
     return pd.DataFrame(data)
-
-
-@pytest.fixture
-def bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive():
-    false_positive_rate: np.float64 = np.float64(0.01)
-    distribution_parameters: Dict[
-        str, Dict[str, Number]
-    ] = generate_distribution_parameters(false_positive_rate=false_positive_rate)
-    distribution_samples: pd.DataFrame = generate_distribution_samples(
-        distribution_parameters=distribution_parameters, size=1000
-    )
-    return {
-        "false_positive_rate": false_positive_rate,
-        "distribution_parameters": distribution_parameters,
-        "distribution_samples": distribution_samples,
-    }

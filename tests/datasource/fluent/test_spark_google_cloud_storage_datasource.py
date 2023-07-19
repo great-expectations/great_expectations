@@ -115,7 +115,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     return regex, test_connection_error_message
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_construct_spark_gcs_datasource_without_gcs_options():
     google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
     if not google_cred_file:
@@ -133,7 +133,7 @@ def test_construct_spark_gcs_datasource_without_gcs_options():
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -156,7 +156,7 @@ def test_construct_spark_gcs_datasource_with_filename_in_gcs_options(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -179,7 +179,7 @@ def test_construct_spark_gcs_datasource_with_info_in_gcs_options(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -206,7 +206,7 @@ def test_add_csv_asset_to_datasource(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -227,7 +227,7 @@ def test_construct_csv_asset_directly(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -253,7 +253,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -279,7 +279,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -305,7 +305,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -328,7 +328,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.xfail(
     reason="Accessing objects on google.cloud.storage using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
@@ -385,7 +385,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert len(batches) == 2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_test_connection_failures(
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
     bad_regex_config: tuple[re.Pattern, str],
@@ -416,7 +416,7 @@ def test_test_connection_failures(
 
 
 # noinspection PyUnusedLocal
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
