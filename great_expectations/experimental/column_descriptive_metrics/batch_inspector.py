@@ -42,7 +42,6 @@ class BatchInspector:
             metric_value_kwargs={},
         )
 
-        # raw_metric = metrics_calculator.get_metric(metric_config)
         raw_metric = validator.get_metric(metric_config)
 
         metric = self._convert_raw_metric_to_metric_object(
