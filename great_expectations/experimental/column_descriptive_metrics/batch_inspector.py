@@ -3,9 +3,6 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
-    MetricConverter,
-)
 from great_expectations.experimental.column_descriptive_metrics.metrics import (
     Metric,
     Metrics,
@@ -13,14 +10,15 @@ from great_expectations.experimental.column_descriptive_metrics.metrics import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
+        MetricConverter,
+    )
     from great_expectations.validator.validator import Validator
-
-    pass
 
 
 class BatchInspector:
-    def __init__(self, organization_id: uuid.UUID):
-        self._metric_converter = MetricConverter(organization_id=organization_id)
+    def __init__(self, metric_converter: MetricConverter):
+        self._metric_converter = metric_converter
 
     def _generate_run_id(self) -> uuid.UUID:
         return uuid.uuid4()

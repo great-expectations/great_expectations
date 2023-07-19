@@ -113,7 +113,8 @@ def test_demo_batch_inspector(
         f"{MetricConverter.__module__}.{MetricConverter.__name__}._generate_metric_id",
         return_value=metric_id,
     ):
-        batch_inspector = BatchInspector(organization_id=cloud_org_id)
+        metric_converter = MetricConverter(organization_id=cloud_org_id)
+        batch_inspector = BatchInspector(metric_converter)
         metrics = batch_inspector.get_column_descriptive_metrics(
             validator=validator_from_action
         )
