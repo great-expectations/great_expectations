@@ -4,7 +4,7 @@ from great_expectations.agent.message_service.asyncio_rabbit_mq_client import (
     AsyncRabbitMQClient,
 )
 
-pytestmark = [pytest.mark.unit, pytest.mark.cloud]
+pytestmark = pytest.mark.cloud
 
 
 @pytest.fixture

@@ -20,7 +20,7 @@ from great_expectations.agent.models import (
     RunOnboardingDataAssistantEvent,
 )
 
-pytestmark = [pytest.mark.unit, pytest.mark.cloud]
+pytestmark = pytest.mark.cloud
 
 
 @pytest.fixture(autouse=True)

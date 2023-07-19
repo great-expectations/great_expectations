@@ -16,7 +16,9 @@ pytestmarks = [pytest.mark.project]
 LOGGER: Final = logging.getLogger(__name__)
 PROJECT_ROOT: Final = pathlib.Path(__file__).parent.parent
 PYPROJECT_TOML: Final = PROJECT_ROOT / "pyproject.toml"
-DOCKER_COMPOSE_YAML: Final = PROJECT_ROOT / "docker-compose.yaml"
+DOCKER_COMPOSE_YAML: Final = (
+    PROJECT_ROOT / "assets/docker/postgresql/docker-compose.yaml"
+)
 
 
 @pytest.fixture(scope="module")
