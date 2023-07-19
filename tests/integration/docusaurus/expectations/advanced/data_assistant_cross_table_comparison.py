@@ -64,7 +64,7 @@ pg_batch_request = pg_datasource.get_asset("postgres_taxi_data").build_batch_req
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_assistant">
 data_assistant_result = context.assistants.onboarding.run(
-    batch_request=mysql_batch_request, exclude_column_names=["VendorID"]
+    batch_request=pg_batch_request, exclude_column_names=["VendorID"]
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py build_suite">
@@ -80,7 +80,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     data_context=context,
     validations=[
         {
-            "batch_request": mysql_batch_request,
+            "batch_request": pg_batch_request,
             "expectation_suite_name": expectation_suite_name,
         }
     ],
