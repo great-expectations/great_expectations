@@ -18,13 +18,9 @@ from great_expectations.experimental.column_descriptive_metrics.batch_inspector_
 from great_expectations.experimental.column_descriptive_metrics.column_descriptive_metrics_repository import (
     ColumnDescriptiveMetricsRepository,
 )
-from great_expectations.experimental.column_descriptive_metrics.metric_converter import (
-    MetricConverter,
-)
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 import pandas as pd
-import great_expectations as gx
 from great_expectations.experimental.column_descriptive_metrics.metrics import (
     Metric,
     Value,
@@ -126,9 +122,6 @@ def test_demo_batch_inspector(
         return_value=run_id,
     ), mock.patch(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_metric_id",
-        return_value=metric_id,
-    ), mock.patch(
-        f"{MetricConverter.__module__}.{MetricConverter.__name__}._generate_metric_id",
         return_value=metric_id,
     ), mock.patch(
         f"{ColumnDescriptiveMetricsRepository.__module__}.{ColumnDescriptiveMetricsRepository.__name__}.create",
