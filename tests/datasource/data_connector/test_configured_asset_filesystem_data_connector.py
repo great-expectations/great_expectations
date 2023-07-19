@@ -24,6 +24,9 @@ from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.filesystem]
+
 
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
@@ -1568,3 +1571,60 @@ def test_one_year_as_1_data_asset_12_batches(empty_data_context, tmp_path_factor
         "default_configured_data_connector_name": ["report_2018"]
     }
     assert len(data_asset_names["default_configured_data_connector_name"]) == 1
+
+
+def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "pretend/path/A-100.csv",
+            "pretend/path/A-101.csv",
+            "pretend/directory/B-1.csv",
+            "pretend/directory/B-2.csv",
+        ],
+    )
+
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE",
+        execution_engine=PandasExecutionEngine(),
+        base_directory=base_directory,
+        glob_directive="*/*/*.csv",
+        default_regex={
+            "pattern": "(.*).csv",
+            "group_names": ["name"],
+        },
+        assets={"stuff": {}},
+    )
+
+    assert my_data_connector.get_data_reference_count() == 0
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
+
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_data_reference_count() == 4
+
+
+def test_basic_instantiation_with_empty_datasource(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("basic_data_connector__filesystem_data_connector")
+    )
+
+    # noinspection PyUnusedLocal
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(  # noqa: F841
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE",
+        execution_engine=PandasExecutionEngine(),
+        base_directory=base_directory,
+        glob_directive="*.csv",
+        default_regex={
+            "pattern": "(.*)",
+            "group_names": ["file_name"],
+        },
+        assets={"my_asset_name": {}},
+    )

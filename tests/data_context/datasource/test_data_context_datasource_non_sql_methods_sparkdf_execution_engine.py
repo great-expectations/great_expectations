@@ -21,6 +21,9 @@ if TYPE_CHECKING:
 
 yaml = YAMLHandler()
 
+# module level markers
+pytestmark = [pytest.mark.spark]
+
 
 @pytest.fixture
 def schema_for_spark_testset(spark_session):

@@ -30,7 +30,10 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @pytest.mark.parametrize(
