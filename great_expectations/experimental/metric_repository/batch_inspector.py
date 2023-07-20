@@ -26,7 +26,7 @@ class BatchInspector:
 
     def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
         run_id = self._generate_run_id()
-        self._context.get_validator(batch_request=batch_request)
+
         table_row_count = self._get_table_row_count_metric(
             run_id=run_id, batch_request=batch_request
         )
@@ -37,29 +37,18 @@ class BatchInspector:
         metrics = Metrics(id=run_id, metrics=metrics_list)
         return metrics
 
-    def _get_raw_table_metric(
-        self, metric_name: str, batch_request: BatchRequest
+    def _get_table_row_count_metric(
+        self, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
+        metric_name = "table.row_count"
         validator = self._context.get_validator(batch_request=batch_request)
-        # TODO: Thu - do we need the MetricConfiguration or can we just pass in the metric name?
-        #  E.g. metrics_calculator.get_table_metric(metric_name)
         metric_config = MetricConfiguration(
             metric_name=metric_name,
             metric_domain_kwargs={},
             metric_value_kwargs={},
         )
-
         raw_metric = validator.get_metric(metric_config)
 
-        return raw_metric
-
-    def _get_table_row_count_metric(
-        self, run_id: uuid.UUID, batch_request: BatchRequest
-    ) -> Metric:
-        metric_name = "table.row_count"
-        raw_metric = self._get_raw_table_metric(
-            metric_name=metric_name, batch_request=batch_request
-        )
         return NumericTableMetric(
             id=self._generate_metric_id(),
             run_id=run_id,
@@ -74,9 +63,14 @@ class BatchInspector:
         self, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
         metric_name = "table.columns"
-        raw_metric = self._get_raw_table_metric(
-            metric_name=metric_name, batch_request=batch_request
+        validator = self._context.get_validator(batch_request=batch_request)
+        metric_config = MetricConfiguration(
+            metric_name=metric_name,
+            metric_domain_kwargs={},
+            metric_value_kwargs={},
         )
+        raw_metric = validator.get_metric(metric_config)
+
         return StringListTableMetric(
             id=self._generate_metric_id(),
             run_id=run_id,
