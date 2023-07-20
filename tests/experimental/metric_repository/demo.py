@@ -28,6 +28,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     Value,
     Metrics,
     TableMetric,
+    NumericTableMetric,
 )
 
 
@@ -91,7 +92,7 @@ def test_demo_batch_inspector(
     assert metrics_stored == Metrics(
         id=run_id,
         metrics=[
-            TableMetric(
+            NumericTableMetric(
                 id=metric_id,
                 run_id=run_id,
                 # TODO: reimplement batch param
@@ -99,20 +100,20 @@ def test_demo_batch_inspector(
                 metric_name="table.row_count",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
-                value=Value(value=2),
+                value=2,
                 details={},
             ),
-            TableMetric(
-                id=metric_id,
-                run_id=run_id,
-                # TODO: reimplement batch param
-                # batch=batch_from_action,
-                metric_name="table.columns",
-                metric_domain_kwargs={},
-                metric_value_kwargs={},
-                value=Value(value=["col1", "col2"]),
-                details={},
-            ),
+            # TableMetric(
+            #     id=metric_id,
+            #     run_id=run_id,
+            #     # TODO: reimplement batch param
+            #     # batch=batch_from_action,
+            #     metric_name="table.columns",
+            #     metric_domain_kwargs={},
+            #     metric_value_kwargs={},
+            #     value=Value(value=["col1", "col2"]),
+            #     details={},
+            # ),
         ],
     )
 

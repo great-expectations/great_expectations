@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Metrics,
+    NumericTableMetric,
     TableMetric,
-    Value,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -29,10 +29,11 @@ class BatchInspector:
         table_row_count = self._get_table_row_count_metric(
             run_id=run_id, batch_request=batch_request
         )
-        column_names = self._get_column_names_metric(
-            run_id=run_id, batch_request=batch_request
-        )
-        metrics = Metrics(id=run_id, metrics=[table_row_count, column_names])
+        # column_names = self._get_column_names_metric(
+        #     run_id=run_id, batch_request=batch_request
+        # )
+        metrics_list = [table_row_count]  # , column_names]
+        metrics = Metrics(id=run_id, metrics=metrics_list)
         return metrics
 
     def _get_table_metric(
@@ -49,7 +50,7 @@ class BatchInspector:
 
         raw_metric = validator.get_metric(metric_config)
 
-        metric = self._convert_table_metric(
+        metric = self._convert_numeric_table_metric(
             raw_metric=raw_metric,
             metric_config=metric_config,
             run_id=run_id,
@@ -75,7 +76,7 @@ class BatchInspector:
     def _generate_metric_id(self) -> uuid.UUID:
         return uuid.uuid4()
 
-    def _convert_table_metric(
+    def _convert_numeric_table_metric(
         self,
         batch: Batch,
         run_id: uuid.UUID,  # TODO: Should run_id be a separate type?
@@ -92,7 +93,7 @@ class BatchInspector:
         """
         # TODO: Consider just having Batch as a parameter and serializing the parts we want
         #  (e.g. datasource_name, data_asset_name, batch_id).
-        metric = TableMetric(
+        metric = NumericTableMetric(
             id=self._generate_metric_id(),
             run_id=run_id,
             # TODO: reimplement batch param
@@ -100,8 +101,7 @@ class BatchInspector:
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,
             metric_value_kwargs=metric_config.metric_value_kwargs,
-            # column=metric_config.metric_domain_kwargs.get("column"),
-            value=Value(value=raw_metric),
+            value=raw_metric,
             details={},  # TODO: Pass details through
         )
 

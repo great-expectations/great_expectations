@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC
-from typing import Any, Sequence
+from typing import Any, List, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -27,7 +27,6 @@ class Metric(MetricRepositoryBaseModel, ABC):
     metric_name: str = Field(description="Metric name")
     metric_domain_kwargs: dict = Field(description="Metric domain kwargs")
     metric_value_kwargs: dict = Field(description="Metric value kwargs")
-    value: Value = Field(description="Metric value")
     details: dict = Field(description="Metric details")
 
 
@@ -35,11 +34,32 @@ class TableMetric(Metric):
     pass
 
 
+class NumericTableMetric(TableMetric):
+    value: Union[int, float] = Field(description="Metric value")
+
+
 class ColumnMetric(Metric):
     column: str = Field(description="Column name")
 
 
 # TODO: Add ColumnPairMetric, MultiColumnMetric
+
+
+# TODO: Add metric type specific metrics e.g. with value kwargs and value
+#  specific to the metric and subclassing from one of the domain type metrics
+#  e.g. QuantileValues(ColumnMetric)
+
+
+class NumericColumnMetric(ColumnMetric):
+    value: float = Field(description="Metric value")
+
+
+class QuantileValues(ColumnMetric):
+    quantiles: List[float] = Field(description="Quantiles to compute")
+    allow_relative_error: Union[str, float] = Field(
+        description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
+    )
+    value: List[float] = Field(description="Metric value")
 
 
 class Metrics(MetricRepositoryBaseModel):
