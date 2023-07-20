@@ -181,7 +181,8 @@ class DataProfilerProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange
 class ExpectProfileNumericColumnsPercentDiffBetweenInclusiveThresholdRange(
     ProfileNumericColumnsDiffExpectation
 ):
-    """
+    """Expect a statistic's percent delta for a given column of a DataProfiler percent difference report to be within the specified threshold, inclusive.
+
     This expectation takes the percent difference report between the data it is called on and a DataProfiler profile of the same schema loaded from a provided path.
     Each numerical column percent delta will be checked against a user provided dictionary of columns paired with dictionaries of statistics containing lower and upper bounds.
     This function builds upon the custom ProfileNumericColumnsDiff Expectation of Capital One's DataProfiler Expectations.

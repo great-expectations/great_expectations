@@ -16,7 +16,7 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueryToHaveNoDuplicateValueCombinations(QueryExpectation):
-    """Expect the data points given primary keys via columns to be unique"""
+    """Expect the data points given primary keys via columns to be unique."""
 
     metric_dependencies = ("query.multiple_columns",)
 
