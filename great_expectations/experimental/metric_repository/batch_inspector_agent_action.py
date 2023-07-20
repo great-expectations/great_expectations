@@ -27,7 +27,7 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
         column_descriptive_metrics_repository = MetricRepository(
             data_store=cloud_data_store
         )
-        column_descriptive_metrics_repository.create(metrics)
+        column_descriptive_metrics_repository.add(metrics)
 
         # TODO: Reconcile this with storing multiple metrics (eg metrics.id):
         return ActionResult(

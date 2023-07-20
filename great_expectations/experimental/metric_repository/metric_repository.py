@@ -1,18 +1,13 @@
-from great_expectations.experimental.metric_repository.cloud_data_store import (
-    CloudDataStore,
-)
+from great_expectations.experimental.metric_repository.data_store import DataStore
 from great_expectations.experimental.metric_repository.metrics import Metrics
 
 
 class MetricRepository:
     pass
-    # TODO: Add methods
+    # TODO: Add methods, docstrings
 
-    def __init__(self, data_store: CloudDataStore):
+    def __init__(self, data_store: DataStore):
         self._data_store = data_store
 
-    def create(self, metrics: Metrics) -> None:
-        print("Creating metric in MetricsRepository")
-        self._data_store.create(
-            value_type=Metrics, value=metrics
-        )  # TODO: How to annotate/implement?
+    def add(self, metrics: Metrics) -> Metrics:
+        return self._data_store.add(value=metrics)

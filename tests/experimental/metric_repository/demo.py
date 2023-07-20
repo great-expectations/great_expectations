@@ -82,11 +82,11 @@ def test_demo_batch_inspector(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_metric_id",
         return_value=metric_id,
     ), mock.patch(
-        f"{MetricRepository.__module__}.{MetricRepository.__name__}.create",
-    ) as mock_create:
+        f"{MetricRepository.__module__}.{MetricRepository.__name__}.add",
+    ) as mock_add:
         action.run(event, "some_event_id")
 
-    metrics_stored = mock_create.call_args[0][0]
+    metrics_stored = mock_add.call_args[0][0]
 
     assert metrics_stored == Metrics(
         id=run_id,
