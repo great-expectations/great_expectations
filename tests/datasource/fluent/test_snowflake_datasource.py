@@ -112,6 +112,7 @@ def test_invalid_connection_string_raises_dsn_error(
     assert expected_errors == exc_info.value.errors()
 
 
+@pytest.mark.unit
 def test_get_execution_engine_succeeds():
     connection_string = "snowflake://my_user:password@my_account"
     datasource = SnowflakeDatasource(
