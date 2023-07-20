@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC
-from typing import List, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -15,13 +15,24 @@ class MetricRepositoryBaseModel(BaseModel, ABC):
         extra = pydantic.Extra.forbid
 
 
+class MetricException(MetricRepositoryBaseModel):
+    exception_type: Optional[str] = Field(
+        description="Exception type if an exception is thrown", default=None
+    )
+    exception_message: Optional[str] = Field(
+        description="Exception message if an exception is thrown", default=None
+    )
+
+
 class Metric(MetricRepositoryBaseModel, ABC):
+    """Abstract computed metric. Domain, value and parameters are metric dependent."""
+
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
     # TODO: reimplement batch param
     # batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
-    details: dict = Field(description="Metric details")
+    exception: MetricException = Field(description="Exception info if thrown")
 
 
 class TableMetric(Metric, ABC):

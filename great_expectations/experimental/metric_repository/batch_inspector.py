@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
+    MetricException,
     Metrics,
     NumericTableMetric,
     TableMetric,
@@ -100,7 +101,7 @@ class BatchInspector:
             # batch=batch,
             metric_name=metric_config.metric_name,
             value=raw_metric,
-            details={},  # TODO: Pass details through
+            exception=MetricException(),  # TODO: Pass through
         )
 
         return metric

@@ -27,6 +27,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Metrics,
     NumericTableMetric,
+    MetricException,
 )
 
 
@@ -97,7 +98,7 @@ def test_demo_batch_inspector(
                 # batch=batch_from_action,
                 metric_name="table.row_count",
                 value=2,
-                details={},
+                exception=MetricException(),
             ),
             # TableMetric(
             #     id=metric_id,
