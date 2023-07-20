@@ -80,7 +80,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
 
 
 @pytest.mark.unit
-def test_column_value_missing_data_assistant_uses_auto_mode_for_multi_batch(
+def test_column_value_missing_data_assistant_uses_multi_batch_mode_for_multi_batch(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
@@ -107,7 +107,7 @@ def test_column_value_missing_data_assistant_uses_auto_mode_for_multi_batch(
             "validation_parameter_builder_configs"
         ]
         assert len(validation_parameter_builder_configs) == 1
-        assert validation_parameter_builder_configs[0]["mode"] == "auto"
+        assert validation_parameter_builder_configs[0]["mode"] == "multi_batch"
 
 
 @pytest.mark.unit

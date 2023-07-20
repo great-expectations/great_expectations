@@ -171,7 +171,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        mode = "auto" if is_multi_batch else "single_batch"
+        mode = "multi_batch" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_not_be_null"
 
@@ -191,11 +191,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 **column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
         ]
-        # TODO: <Alex>ALEX</Alex>
-        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
-        # &
-        # ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
-        # TODO: <Alex>ALEX</Alex>
+
         condition = f"""
         ({column_values_nonnull_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
         &
@@ -239,7 +235,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
             data_context=None,
         )
 
-        mode = "auto" if is_multi_batch else "single_batch"
+        mode = "multi_batch" if is_multi_batch else "single_batch"
 
         expectation_type = "expect_column_values_to_be_null"
 
@@ -259,11 +255,7 @@ class ColumnValueMissingDataAssistant(DataAssistant):
                 **column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.to_json_dict()
             ),
         ]
-        # TODO: <Alex>ALEX</Alex>
-        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}mostly > {VARIABLES_KEY}min_mostly))
-        # &
-        # ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}error_rate < {VARIABLES_KEY}max_error_rate))
-        # TODO: <Alex>ALEX</Alex>
+
         condition = f"""\
         ({column_values_null_unexpected_count_fraction_multi_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}single_batch_mode == True
         &

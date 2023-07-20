@@ -43,7 +43,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
     RECOGNIZED_UNEXPECTED_RATIO_AGGREGATION_METHODS: set = {
         "unexpected_count_fraction_values",
         "single_batch",
-        "auto",
+        "multi_batch",
     }
 
     def __init__(  # noqa: PLR0913
@@ -222,7 +222,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
                     self._expectation_type, expected_fraction
                 )
                 result["error_rate"] = np.float64(0.0)
-            else:
+            elif mode == "multi_batch":
                 # Obtain max_error_rate directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
                 max_error_rate: float = get_parameter_value_and_validate_return_type(
                     domain=domain,
