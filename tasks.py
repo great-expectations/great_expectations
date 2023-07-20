@@ -788,7 +788,7 @@ def show_automerges(ctx: Context):
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
     setup_funcs: tuple[Callable[[Context], Result | None], ...] = tuple()
-    service: tuple[str, ...] = tuple()
+    services: tuple[str, ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
     ] = tuple()
@@ -803,7 +803,7 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        service=(lambda ctx: service(ctx, names=["postgresql"]),),
+        services=["postgresql"],
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
@@ -908,14 +908,14 @@ def deps(  # noqa: PLR0913
 
 
 @invoke.task(
-    iterable=["service_names"],
+    iterable=["service_names", "up_services", "verbose"],
 )
 def ci_tests(
     ctx: Context,
     marker: str,
+    up_services: bool = False,
     verbose: bool = False,
     reports: bool = False,
-    up_services: bool = False,
 ):
     """
     Run tests in CI.
@@ -942,6 +942,9 @@ def ci_tests(
         pytest_cmds.append("-vv")
 
     for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
 
