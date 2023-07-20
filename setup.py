@@ -62,12 +62,11 @@ def get_extras_require():
     docs_test = results.pop("api-docs-test")
     cloud = results["cloud"]
     arrow = results["arrow"]
-    sqlalchemy = results["sqlalchemy"]
-    spark = results["spark"]
+    snowflake = results["snowflake"]
 
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test + cloud + arrow + sqlalchemy + spark
+    results["test"] = lite + contrib + docs_test + cloud + arrow + snowflake
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -79,6 +78,7 @@ def get_extras_require():
     results.pop("boto")
     results.pop("sqlalchemy1")
     results.pop("sqlalchemy2")
+
     # all_requirements_set = set()
     # [all_requirements_set.update(vals) for vals in results.values()]
     # results["dev"] = sorted(all_requirements_set)
