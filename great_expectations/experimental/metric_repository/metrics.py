@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Sequence, Union
+from abc import ABC
+from typing import Any, Sequence
 
 import pydantic
 from pydantic import BaseModel, Field
 
 
-class MetricRepositoryBaseModel(BaseModel):
+class MetricRepositoryBaseModel(BaseModel, ABC):
     """Base class for all MetricRepository related models."""
 
     class Config:
@@ -18,7 +19,7 @@ class Value(MetricRepositoryBaseModel):
     value: Any  # TODO: Better than Any
 
 
-class Metric(MetricRepositoryBaseModel):
+class Metric(MetricRepositoryBaseModel, ABC):
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
     # TODO: reimplement batch param
@@ -26,9 +27,19 @@ class Metric(MetricRepositoryBaseModel):
     metric_name: str = Field(description="Metric name")
     metric_domain_kwargs: dict = Field(description="Metric domain kwargs")
     metric_value_kwargs: dict = Field(description="Metric value kwargs")
-    column: Union[str, None] = Field(description="Column name for column metrics")
     value: Value = Field(description="Metric value")
     details: dict = Field(description="Metric details")
+
+
+class TableMetric(Metric):
+    pass
+
+
+class ColumnMetric(Metric):
+    column: str = Field(description="Column name")
+
+
+# TODO: Add ColumnPairMetric, MultiColumnMetric
 
 
 class Metrics(MetricRepositoryBaseModel):

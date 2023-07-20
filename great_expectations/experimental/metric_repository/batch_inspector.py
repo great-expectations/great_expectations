@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Metrics,
+    TableMetric,
     Value,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -34,7 +35,7 @@ class BatchInspector:
         metrics = Metrics(id=run_id, metrics=[table_row_count, column_names])
         return metrics
 
-    def _get_metric(
+    def _get_table_metric(
         self, metric_name: str, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
         validator = self._context.get_validator(batch_request=batch_request)
@@ -48,7 +49,7 @@ class BatchInspector:
 
         raw_metric = validator.get_metric(metric_config)
 
-        metric = self._convert_raw_metric_to_metric_object(
+        metric = self._convert_table_metric(
             raw_metric=raw_metric,
             metric_config=metric_config,
             run_id=run_id,
@@ -60,27 +61,27 @@ class BatchInspector:
     def _get_table_row_count_metric(
         self, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
-        return self._get_metric(
+        return self._get_table_metric(
             metric_name="table.row_count", run_id=run_id, batch_request=batch_request
         )
 
     def _get_column_names_metric(
         self, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
-        return self._get_metric(
+        return self._get_table_metric(
             metric_name="table.columns", run_id=run_id, batch_request=batch_request
         )
 
     def _generate_metric_id(self) -> uuid.UUID:
         return uuid.uuid4()
 
-    def _convert_raw_metric_to_metric_object(
+    def _convert_table_metric(
         self,
         batch: Batch,
         run_id: uuid.UUID,  # TODO: Should run_id be a separate type?
         raw_metric: int | list,  # TODO: What are the possible types of raw_metric?
         metric_config: MetricConfiguration,
-    ) -> Metric:
+    ) -> TableMetric:
         """Convert a dict of a single metric to a Metric object.
         Args:
             raw_metric: Dict of a single metric, where keys are metric names and values are metrics.
@@ -91,7 +92,7 @@ class BatchInspector:
         """
         # TODO: Consider just having Batch as a parameter and serializing the parts we want
         #  (e.g. datasource_name, data_asset_name, batch_id).
-        metric = Metric(
+        metric = TableMetric(
             id=self._generate_metric_id(),
             run_id=run_id,
             # TODO: reimplement batch param
@@ -99,7 +100,7 @@ class BatchInspector:
             metric_name=metric_config.metric_name,
             metric_domain_kwargs=metric_config.metric_domain_kwargs,
             metric_value_kwargs=metric_config.metric_value_kwargs,
-            column=metric_config.metric_domain_kwargs.get("column"),
+            # column=metric_config.metric_domain_kwargs.get("column"),
             value=Value(value=raw_metric),
             details={},  # TODO: Pass details through
         )

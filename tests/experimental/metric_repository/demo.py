@@ -27,12 +27,8 @@ from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Value,
     Metrics,
+    TableMetric,
 )
-
-
-@pytest.fixture
-def cloud_org_id() -> uuid.UUID:
-    return uuid.uuid4()
 
 
 @pytest.fixture
@@ -62,7 +58,6 @@ def cloud_context_and_batch_request_with_simple_dataframe(
 
 
 def test_demo_batch_inspector(
-    cloud_org_id: uuid.UUID,
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
     cloud_context_and_batch_request_with_simple_dataframe: tuple[
@@ -96,7 +91,7 @@ def test_demo_batch_inspector(
     assert metrics_stored == Metrics(
         id=run_id,
         metrics=[
-            Metric(
+            TableMetric(
                 id=metric_id,
                 run_id=run_id,
                 # TODO: reimplement batch param
@@ -104,10 +99,31 @@ def test_demo_batch_inspector(
                 metric_name="table.row_count",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
-                column=None,
                 value=Value(value=2),
                 details={},
             ),
+            TableMetric(
+                id=metric_id,
+                run_id=run_id,
+                # TODO: reimplement batch param
+                # batch=batch_from_action,
+                metric_name="table.columns",
+                metric_domain_kwargs={},
+                metric_value_kwargs={},
+                value=Value(value=["col1", "col2"]),
+                details={},
+            ),
+        ],
+    )
+
+
+def test_cant_init_abstract_metric(
+    metric_id: uuid.UUID,
+    run_id: uuid.UUID,
+):
+    # TODO: Which exception?
+    with pytest.raises():
+        _ = (
             Metric(
                 id=metric_id,
                 run_id=run_id,
@@ -116,9 +132,7 @@ def test_demo_batch_inspector(
                 metric_name="table.columns",
                 metric_domain_kwargs={},
                 metric_value_kwargs={},
-                column=None,
                 value=Value(value=["col1", "col2"]),
                 details={},
             ),
-        ],
-    )
+        )
