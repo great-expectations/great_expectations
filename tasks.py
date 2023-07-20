@@ -16,7 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
-from collections.abc import Callable, Generator, Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
@@ -27,7 +27,6 @@ from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBu
 
 if TYPE_CHECKING:
     from invoke.context import Context
-    from invoke.runners import Result
 
 
 LOGGER = logging.getLogger(__name__)
@@ -787,7 +786,6 @@ def show_automerges(ctx: Context):
 
 class TestDependencies(NamedTuple):
     requirement_files: tuple[str, ...]
-    setup_funcs: tuple[Callable[[Context], Result | None], ...] = tuple()
     services: tuple[str, ...] = tuple()
     exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
         str, ...
@@ -947,9 +945,6 @@ def ci_tests(
 
         for extra_pytest_arg in test_deps.exta_pytest_args:
             pytest_cmds.append(extra_pytest_arg)
-
-        for setup_func in test_deps.setup_funcs:
-            setup_func(ctx)
 
     ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
 
