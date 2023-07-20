@@ -494,7 +494,7 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_profiled_dataset_passes_own_validation(
     cardinality_dataset, titanic_data_context
 ):
