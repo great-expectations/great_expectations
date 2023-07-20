@@ -24,7 +24,7 @@ class Metric(MetricRepositoryBaseModel, ABC):
     details: dict = Field(description="Metric details")
 
 
-class TableMetric(Metric):
+class TableMetric(Metric, ABC):
     pass
 
 
@@ -32,7 +32,7 @@ class NumericTableMetric(TableMetric):
     value: Union[int, float] = Field(description="Metric value")
 
 
-class ColumnMetric(Metric):
+class ColumnMetric(Metric, ABC):
     column: str = Field(description="Column name")
 
 
@@ -48,7 +48,7 @@ class NumericColumnMetric(ColumnMetric):
     value: float = Field(description="Metric value")
 
 
-class QuantileValues(ColumnMetric):
+class QuantileValuesColumnMetric(ColumnMetric):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[str, float] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
