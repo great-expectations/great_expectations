@@ -56,8 +56,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
-    """
-    Expect a column to contain values from a specified type list.
+    """Expect a column to contain values from a specified type list.
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
