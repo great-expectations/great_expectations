@@ -320,7 +320,6 @@ extend-exclude = [
 "great_expectations/compatibility/pyarrow.py" = [
     "TID251",  # flake8-banned-api
 ]
-"tests/datasource/test_new_datasource_with_sql_data_connector.py" = []
 
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
