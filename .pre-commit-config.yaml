@@ -15,7 +15,6 @@ repos:
       - id: no-commit-to-branch
         args: [--branch, develop, --branch, main]
       - id: detect-private-key
-        exclude: tests/datasource/test_new_datasource_with_sql_data_connector.py
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
