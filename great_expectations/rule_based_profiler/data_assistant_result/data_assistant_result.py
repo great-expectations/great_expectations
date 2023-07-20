@@ -18,6 +18,7 @@ from typing import (
     Set,
     Union,
 )
+import uuid
 
 import altair as alt
 import ipywidgets as widgets
@@ -232,6 +233,12 @@ class DataAssistantResult(SerializableDictDot):
 
         """
         if send_usage_event:
+            if not expectation_suite_name:
+                component_name: str = self.__class__.__name__
+                expectation_suite_name = (
+                    f"tmp.{component_name}.suite.{str(uuid.uuid4())[:8]}"
+                )
+
             return self._get_expectation_suite_with_usage_statistics(
                 expectation_suite_name=expectation_suite_name,
                 include_profiler_config=include_profiler_config,
@@ -520,8 +527,8 @@ class DataAssistantResult(SerializableDictDot):
                 for key, value in citation.items()
                 if key != "profiler_config"
             }
-
-        expectation_suite.add_citation(**citation)
+        if citation:
+            expectation_suite.add_citation(**citation)
 
         return expectation_suite
 
