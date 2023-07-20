@@ -1,5 +1,5 @@
 altair>=4.2.1,<5.0.0
-Click>=7.1.2
+Click>=7.1.2,<=8.1.3 # 8.1.4 introduced mypy typing issues (https://github.com/pallets/click/issues/2558)
 colorama>=0.4.3
 cryptography>=3.2
 Ipython>=7.16.3
