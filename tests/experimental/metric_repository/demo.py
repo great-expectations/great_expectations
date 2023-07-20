@@ -28,6 +28,7 @@ from great_expectations.experimental.metric_repository.metrics import (
     Metrics,
     NumericTableMetric,
     MetricException,
+    StringListTableMetric,
 )
 
 
@@ -100,15 +101,15 @@ def test_demo_batch_inspector(
                 value=2,
                 exception=MetricException(),
             ),
-            # TableMetric(
-            #     id=metric_id,
-            #     run_id=run_id,
-            #     # TODO: reimplement batch param
-            #     # batch=batch_from_action,
-            #     metric_name="table.columns",
-            #     value=Value(value=["col1", "col2"]),
-            #     details={},
-            # ),
+            StringListTableMetric(
+                id=metric_id,
+                run_id=run_id,
+                # TODO: reimplement batch param
+                # batch=batch_from_action,
+                metric_name="table.columns",
+                value=["col1", "col2"],
+                exception=MetricException(),
+            ),
         ],
     )
 

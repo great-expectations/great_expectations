@@ -39,12 +39,11 @@ class Metric(MetricRepositoryBaseModel, ABC):
     exception: MetricException = Field(description="Exception info if thrown")
 
 
+# Metric domain types
+
+
 class TableMetric(Metric, ABC):
     pass
-
-
-class NumericTableMetric(TableMetric):
-    value: Union[int, float] = Field(description="Metric value")
 
 
 class ColumnMetric(Metric, ABC):
@@ -54,21 +53,38 @@ class ColumnMetric(Metric, ABC):
 # TODO: Add ColumnPairMetric, MultiColumnMetric
 
 
-# TODO: Add metric type specific metrics e.g. with value kwargs and value
-#  specific to the metric and subclassing from one of the domain type metrics
-#  e.g. QuantileValues(ColumnMetric)
+class NumericMetric(Metric, ABC):
+    value: Union[int, float] = Field(description="Metric value")
 
 
-class NumericColumnMetric(ColumnMetric):
-    value: float = Field(description="Metric value")
+class NumericListMetric(Metric, ABC):
+    value: List[float] = Field(description="Metric value")
 
 
-class QuantileValuesColumnMetric(ColumnMetric):
+class StringListMetric(Metric, ABC):
+    value: List[str] = Field(description="Metric value")
+
+
+# Concrete Metrics
+# This is where the concrete metric types are defined that
+# bring together a domain type, value type and any parameters (aka metric_value_kwargs)
+
+# TODO: Add metrics here for all Column Descriptive Metrics
+
+
+class NumericTableMetric(TableMetric, NumericMetric):
+    pass
+
+
+class StringListTableMetric(TableMetric, StringListMetric):
+    pass
+
+
+class QuantileValuesColumnMetric(ColumnMetric, NumericListMetric):
     quantiles: List[float] = Field(description="Quantiles to compute")
     allow_relative_error: Union[str, float] = Field(
         description="Relative error interpolation type (pandas) or limit (e.g. spark) depending on data source"
     )
-    value: List[float] = Field(description="Metric value")
 
 
 class Metrics(MetricRepositoryBaseModel):
