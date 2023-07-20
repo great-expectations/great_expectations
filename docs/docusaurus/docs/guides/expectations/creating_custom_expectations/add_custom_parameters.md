@@ -38,9 +38,11 @@ condition_domain_keys = (
    "ignore_row_if",   
 )   
 condition_value_keys = ("sum_total",)
+```
 
 ColumnAggregateMetrics, TableMetrics, and QueryMetrics can similarly define a value_keys tuple or a domain_keys tuple:
 
+```python
 value_keys = ("column",)
 domain_keys = ("query",)
 ```
