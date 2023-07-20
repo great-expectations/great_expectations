@@ -25,7 +25,6 @@ class Metric(MetricRepositoryBaseModel, ABC):
     # TODO: reimplement batch param
     # batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
-    metric_domain_kwargs: dict = Field(description="Metric domain kwargs")
     metric_value_kwargs: dict = Field(description="Metric value kwargs")
     details: dict = Field(description="Metric details")
 

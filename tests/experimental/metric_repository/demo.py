@@ -98,7 +98,6 @@ def test_demo_batch_inspector(
                 # TODO: reimplement batch param
                 # batch=batch_from_action,
                 metric_name="table.row_count",
-                metric_domain_kwargs={},
                 metric_value_kwargs={},
                 value=2,
                 details={},
@@ -109,7 +108,6 @@ def test_demo_batch_inspector(
             #     # TODO: reimplement batch param
             #     # batch=batch_from_action,
             #     metric_name="table.columns",
-            #     metric_domain_kwargs={},
             #     metric_value_kwargs={},
             #     value=Value(value=["col1", "col2"]),
             #     details={},

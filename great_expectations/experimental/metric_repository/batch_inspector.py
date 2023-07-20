@@ -99,7 +99,6 @@ class BatchInspector:
             # TODO: reimplement batch param
             # batch=batch,
             metric_name=metric_config.metric_name,
-            metric_domain_kwargs=metric_config.metric_domain_kwargs,
             metric_value_kwargs=metric_config.metric_value_kwargs,
             value=raw_metric,
             details={},  # TODO: Pass details through
