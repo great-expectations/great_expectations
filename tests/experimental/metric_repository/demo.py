@@ -32,17 +32,17 @@ from great_expectations.experimental.metric_repository.metrics import (
 
 @pytest.fixture
 def cloud_org_id() -> uuid.UUID:
-    return uuid.UUID("6e9c4af6-7616-43c3-9b40-a1a9e100c4a0")
+    return uuid.uuid4()
 
 
 @pytest.fixture
 def metric_id() -> uuid.UUID:
-    return uuid.UUID("0fa72ac7-df72-4bf2-9fe5-e6b01eed6e95")
+    return uuid.uuid4()
 
 
 @pytest.fixture
 def run_id() -> uuid.UUID:
-    return uuid.UUID("2a24847b-dae4-43c7-8027-1bd1cd572690")
+    return uuid.uuid4()
 
 
 @pytest.fixture
