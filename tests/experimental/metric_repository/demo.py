@@ -25,9 +25,7 @@ from great_expectations.datasource.fluent.batch_request import BatchRequest
 import pandas as pd
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
-    Value,
     Metrics,
-    TableMetric,
     NumericTableMetric,
 )
 
@@ -116,22 +114,22 @@ def test_demo_batch_inspector(
     )
 
 
-def test_cant_init_abstract_metric(
-    metric_id: uuid.UUID,
-    run_id: uuid.UUID,
-):
-    # TODO: Which exception?
-    with pytest.raises():
-        _ = (
-            Metric(
-                id=metric_id,
-                run_id=run_id,
-                # TODO: reimplement batch param
-                # batch=batch_from_action,
-                metric_name="table.columns",
-                metric_domain_kwargs={},
-                metric_value_kwargs={},
-                value=Value(value=["col1", "col2"]),
-                details={},
-            ),
-        )
+# def test_cant_init_abstract_metric(
+#     metric_id: uuid.UUID,
+#     run_id: uuid.UUID,
+# ):
+#     # TODO: Which exception?
+#     with pytest.raises():
+#         _ = (
+#             Metric(
+#                 id=metric_id,
+#                 run_id=run_id,
+#                 # TODO: reimplement batch param
+#                 # batch=batch_from_action,
+#                 metric_name="table.columns",
+#                 metric_domain_kwargs={},
+#                 metric_value_kwargs={},
+#                 value=Value(value=["col1", "col2"]),
+#                 details={},
+#             ),
+#         )

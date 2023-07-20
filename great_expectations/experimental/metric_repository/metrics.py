@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC
-from typing import Any, List, Sequence, Union
+from typing import List, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
@@ -13,10 +13,6 @@ class MetricRepositoryBaseModel(BaseModel, ABC):
 
     class Config:
         extra = pydantic.Extra.forbid
-
-
-class Value(MetricRepositoryBaseModel):
-    value: Any  # TODO: Better than Any
 
 
 class Metric(MetricRepositoryBaseModel, ABC):
