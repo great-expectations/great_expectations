@@ -85,10 +85,13 @@ class TableHead(TableMetricProvider):
             warnings.warn(
                 "fetch_all loads all of the rows into memory. This may cause performance issues."
             )
-            df = cls._fetch_all_sqlalchemy(
-                execution_engine, selectable, dialect, table_name
+            df = TableHead._return_full_sql_table_as_head(
+                table_name=table_name,
+                execution_engine=execution_engine,
+                selectable=selectable,
+                dialect=dialect,
             )
-
+            return df
         try:
             if table_name and not isinstance(table_name, sqlalchemy._anonymous_label):
                 # named table.
@@ -179,7 +182,7 @@ class TableHead(TableMetricProvider):
 
         return df
 
-    @classmethod
+    @staticmethod
     def _return_full_sql_table_as_head(
         table_name: str,
         execution_engine: SqlAlchemyExecutionEngine,
