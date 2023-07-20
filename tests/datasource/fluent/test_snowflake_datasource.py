@@ -110,3 +110,12 @@ def test_invalid_connection_string_raises_dsn_error(
         _ = SnowflakeDatasource(name="my_snowflake", connection_string=connection_string)  # type: ignore[arg-type] # Pydantic coerces connection_string to SnowflakeDsn
 
     assert expected_errors == exc_info.value.errors()
+
+
+def test_get_execution_engine_succeeds():
+    connection_string = "snowflake://my_user:password@my_account"
+    datasource = SnowflakeDatasource(
+        name="my_snowflake", connection_string=connection_string
+    )
+    # testing that this doesn't raise an exception
+    datasource.get_execution_engine()
