@@ -5927,10 +5927,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ValueError: Invalid arguments.
         """
         if expectation_suite_name is not None and expectation_suite is not None:
-            raise ValueError(
+            raise TypeError(
                 "Only one of expectation_suite_name or expectation_suite may be specified."
             )
         if expectation_suite_name is None and expectation_suite is None:
-            raise ValueError(
+            raise TypeError(
                 "One of expectation_suite_name or expectation_suite must be specified."
             )
