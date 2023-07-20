@@ -62,9 +62,12 @@ def get_extras_require():
     docs_test = results.pop("api-docs-test")
     cloud = results["cloud"]
     arrow = results["arrow"]
+    sqlalchemy = results["sqlalchemy"]
+    spark = results["spark"]
+
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test + cloud + arrow
+    results["test"] = lite + contrib + docs_test + cloud + arrow + sqlalchemy + spark
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]

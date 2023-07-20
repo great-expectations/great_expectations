@@ -3,5 +3,3 @@
 --requirement requirements-dev-contrib.txt
 --requirement requirements-dev-api-docs-test.txt
 --requirement requirements-dev-cloud.txt
---requirement requirements-dev-sqlalchemy.txt
---requirement requirements-dev-spark.txt
