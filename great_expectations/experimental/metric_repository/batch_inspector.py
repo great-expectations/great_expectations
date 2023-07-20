@@ -11,29 +11,33 @@ from great_expectations.experimental.metric_repository.metrics import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch
-    from great_expectations.validator.validator import Validator
+    from great_expectations import DataContext
+    from great_expectations.datasource.fluent.interfaces import Batch, BatchRequest
 
 
 class BatchInspector:
-    def __init__(self):
-        pass
+    def __init__(self, context: DataContext):
+        self._context = context
 
     def _generate_run_id(self) -> uuid.UUID:
         return uuid.uuid4()
 
-    def get_column_descriptive_metrics(self, validator: Validator) -> Metrics:
+    def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
         run_id = self._generate_run_id()
+        self._context.get_validator(batch_request=batch_request)
         table_row_count = self._get_table_row_count_metric(
-            run_id=run_id, validator=validator
+            run_id=run_id, batch_request=batch_request
         )
-        column_names = self._get_column_names_metric(run_id=run_id, validator=validator)
+        column_names = self._get_column_names_metric(
+            run_id=run_id, batch_request=batch_request
+        )
         metrics = Metrics(id=run_id, metrics=[table_row_count, column_names])
         return metrics
 
     def _get_metric(
-        self, metric_name: str, run_id: uuid.UUID, validator: Validator
+        self, metric_name: str, run_id: uuid.UUID, batch_request: BatchRequest
     ) -> Metric:
+        validator = self._context.get_validator(batch_request=batch_request)
         # TODO: Thu - do we need the MetricConfiguration or can we just pass in the metric name?
         #  E.g. metrics_calculator.get_table_metric(metric_name)
         metric_config = MetricConfiguration(
@@ -53,16 +57,18 @@ class BatchInspector:
 
         return metric
 
-    def _get_table_row_count_metric(self, run_id: uuid.UUID, validator) -> Metric:
+    def _get_table_row_count_metric(
+        self, run_id: uuid.UUID, batch_request: BatchRequest
+    ) -> Metric:
         return self._get_metric(
-            metric_name="table.row_count",
-            run_id=run_id,
-            validator=validator,
+            metric_name="table.row_count", run_id=run_id, batch_request=batch_request
         )
 
-    def _get_column_names_metric(self, run_id: uuid.UUID, validator) -> Metric:
+    def _get_column_names_metric(
+        self, run_id: uuid.UUID, batch_request: BatchRequest
+    ) -> Metric:
         return self._get_metric(
-            metric_name="table.columns", run_id=run_id, validator=validator
+            metric_name="table.columns", run_id=run_id, batch_request=batch_request
         )
 
     def _generate_metric_id(self) -> uuid.UUID:

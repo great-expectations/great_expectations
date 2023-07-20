@@ -16,17 +16,14 @@ from great_expectations.experimental.metric_repository.metric_repository import 
 
 class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
     def run(self, event: RunBatchInspectorEvent, id: str) -> ActionResult:
-        datasource_from_action = self._context.get_datasource(event.datasource_name)
-        data_asset_from_action = datasource_from_action.get_asset(event.data_asset_name)
-        batch_request_from_action = data_asset_from_action.build_batch_request()
-        validator_from_action = self._context.get_validator(
-            batch_request=batch_request_from_action
-        )
+        datasource = self._context.get_datasource(event.datasource_name)
+        data_asset = datasource.get_asset(event.data_asset_name)
+        batch_request = data_asset.build_batch_request()
 
-        batch_inspector = BatchInspector()
-        metrics = batch_inspector.get_column_descriptive_metrics(validator_from_action)
+        batch_inspector = BatchInspector(self._context)
+        metrics = batch_inspector.get_column_descriptive_metrics(batch_request)
 
-        cloud_data_store = CloudDataStore(context=self._context)
+        cloud_data_store = CloudDataStore(self._context)
         column_descriptive_metrics_repository = MetricRepository(
             data_store=cloud_data_store
         )
