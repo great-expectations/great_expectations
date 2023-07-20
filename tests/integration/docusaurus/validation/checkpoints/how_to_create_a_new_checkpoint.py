@@ -35,9 +35,8 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="my_checkpoint",
-    data_context=context,
     validations=[
         {
             "batch_request": batch_request,
@@ -46,6 +45,8 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     ],
 )
 # </snippet>
+
+assert context.list_checkpoints() == ["my_checkpoint"]
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint batch_request">
 checkpoint_result = checkpoint.run()
@@ -56,12 +57,6 @@ assert checkpoint_result.success
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs">
 context.build_data_docs()
 # </snippet>
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py add checkpoint">
-context.add_checkpoint(checkpoint=checkpoint)
-# </snippet>
-
-assert context.list_checkpoints() == ["my_checkpoint"]
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get checkpoint">
 retrieved_checkpoint = context.get_checkpoint(name="my_checkpoint")
