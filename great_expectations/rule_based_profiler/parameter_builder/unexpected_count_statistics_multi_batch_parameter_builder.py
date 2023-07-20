@@ -86,6 +86,8 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             unexpected_count_parameter_builder_name
         )
         self._mode = mode
+        self.single_batch_mode: bool = mode == "single_batch"
+
         self._expectation_type = expectation_type
 
         if max_error_rate is None:
