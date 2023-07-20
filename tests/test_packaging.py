@@ -62,7 +62,7 @@ def parse_requirements_files_to_specs(files: list[pathlib.Path]) -> dict:
     return req_set_dict
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_requirements_files():
     """requirements.txt should be a subset of requirements-dev.txt"""
 
