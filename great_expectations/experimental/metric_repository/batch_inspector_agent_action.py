@@ -3,13 +3,13 @@ from great_expectations.agent.models import (
     CreatedResource,
     RunBatchInspectorEvent,
 )
-from great_expectations.experimental.column_descriptive_metrics.batch_inspector import (
+from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
-from great_expectations.experimental.column_descriptive_metrics.cloud_data_store import (
+from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
 )
-from great_expectations.experimental.column_descriptive_metrics.metric_repository import (
+from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
 )
 

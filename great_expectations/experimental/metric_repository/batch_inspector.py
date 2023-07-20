@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from great_expectations.experimental.column_descriptive_metrics.metrics import (
+from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Metrics,
     Value,

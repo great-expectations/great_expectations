@@ -1,7 +1,7 @@
-from great_expectations.experimental.column_descriptive_metrics.cloud_data_store import (
+from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
 )
-from great_expectations.experimental.column_descriptive_metrics.metrics import Metrics
+from great_expectations.experimental.metric_repository.metrics import Metrics
 
 
 class MetricRepository:

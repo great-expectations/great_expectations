@@ -3,7 +3,7 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 from great_expectations.data_context import CloudDataContext
-from great_expectations.experimental.column_descriptive_metrics.metrics import Metrics
+from great_expectations.experimental.metric_repository.metrics import Metrics
 
 CloudStorableTypes: TypeAlias = Union[Metrics,]  # TODO: are there better approaches?
 

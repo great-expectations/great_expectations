@@ -11,19 +11,19 @@ import pytest
 
 from great_expectations.agent.models import RunBatchInspectorEvent
 from great_expectations.data_context import CloudDataContext
-from great_expectations.experimental.column_descriptive_metrics.batch_inspector import (
+from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
-from great_expectations.experimental.column_descriptive_metrics.batch_inspector_agent_action import (
+from great_expectations.experimental.metric_repository.batch_inspector_agent_action import (
     RunBatchInspectorAction,
 )
-from great_expectations.experimental.column_descriptive_metrics.metric_repository import (
+from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 import pandas as pd
-from great_expectations.experimental.column_descriptive_metrics.metrics import (
+from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     Value,
     Metrics,
