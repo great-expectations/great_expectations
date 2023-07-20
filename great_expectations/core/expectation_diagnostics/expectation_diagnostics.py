@@ -111,12 +111,19 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has an informative docstring"""
 
-        message = "Has a docstring, including a one-line short description"
+        message = 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period'
         if "short_description" in description:
             short_description = description["short_description"]
         else:
             short_description = None
-        if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
+        if short_description in {"", "\n", "TODO: Add a docstring here", None}:
+            return ExpectationDiagnosticCheckMessage(
+                message=message,
+                passed=False,
+            )
+        elif short_description.startswith("Expect ") and short_description.endswith(
+            "."
+        ):
             return ExpectationDiagnosticCheckMessage(
                 message=message,
                 sub_messages=[
@@ -127,10 +134,15 @@ class ExpectationDiagnostics(SerializableDictDot):
                 ],
                 passed=True,
             )
-
         else:
             return ExpectationDiagnosticCheckMessage(
                 message=message,
+                sub_messages=[
+                    {
+                        "message": f'"{short_description}"',
+                        "passed": False,
+                    }
+                ],
                 passed=False,
             )
 
