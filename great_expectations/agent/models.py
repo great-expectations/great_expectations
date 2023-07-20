@@ -25,10 +25,10 @@ class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
 
 
-class RunBatchInspectorEvent(EventBase):
+class RunColumnDescriptiveMetricsEvent(EventBase):
     type: Literal[
-        "batch_inspector_request.received"
-    ] = "batch_inspector_request.received"
+        "column_descriptive_metrics_request.received"
+    ] = "column_descriptive_metrics_request.received"
     datasource_name: str
     data_asset_name: str
 
@@ -43,7 +43,7 @@ Event = Annotated[
     Union[
         RunOnboardingDataAssistantEvent,
         RunCheckpointEvent,
-        RunBatchInspectorEvent,
+        RunColumnDescriptiveMetricsEvent,
         UnknownEvent,
     ],
     Field(discriminator="type"),

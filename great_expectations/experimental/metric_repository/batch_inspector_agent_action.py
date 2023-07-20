@@ -1,7 +1,7 @@
 from great_expectations.agent.actions import ActionResult, AgentAction
 from great_expectations.agent.models import (
     CreatedResource,
-    RunBatchInspectorEvent,
+    RunColumnDescriptiveMetricsEvent,
 )
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
@@ -14,8 +14,8 @@ from great_expectations.experimental.metric_repository.metric_repository import 
 )
 
 
-class RunBatchInspectorAction(AgentAction[RunBatchInspectorEvent]):
-    def run(self, event: RunBatchInspectorEvent, id: str) -> ActionResult:
+class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEvent]):
+    def run(self, event: RunColumnDescriptiveMetricsEvent, id: str) -> ActionResult:
         datasource = self._context.get_datasource(event.datasource_name)
         data_asset = datasource.get_asset(event.data_asset_name)
         batch_request = data_asset.build_batch_request()

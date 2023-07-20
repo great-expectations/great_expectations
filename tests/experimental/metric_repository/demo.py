@@ -9,13 +9,13 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.agent.models import RunBatchInspectorEvent
+from great_expectations.agent.models import RunColumnDescriptiveMetricsEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
 from great_expectations.experimental.metric_repository.batch_inspector_agent_action import (
-    RunBatchInspectorAction,
+    ColumnDescriptiveMetricsAction,
 )
 from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
@@ -74,11 +74,11 @@ def test_demo_batch_inspector(
 
     context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
 
-    event = RunBatchInspectorEvent(
+    event = RunColumnDescriptiveMetricsEvent(
         datasource_name=batch_request.datasource_name,
         data_asset_name=batch_request.data_asset_name,
     )
-    action = RunBatchInspectorAction(context)
+    action = ColumnDescriptiveMetricsAction(context)
 
     with mock.patch(
         f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
