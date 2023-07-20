@@ -34,7 +34,7 @@ A minimum of one supporting Metric is required by every Expectation. For example
 - `column_values.in_set.unexpected_values`
 - `column_values.in_set.unexpected_value_counts`
 
-To allow Expectations to work with multiple backends, methods for calculating Metrics need to be implemented for each ExecutionEngine. For example the `aggregate_fn` utility that is used with SQL and Spark requires the `column_values.in_set.unexpected_count.aggregate_fn` Metric. 
+To allow Expectations to work with multiple backends, methods for calculating Metrics need to be implemented for each ExecutionEngine. For example, pandas is implemented by calling the built-in pandas `.mean()` method on the column, Spark is implemented with a built-in Spark `mean` function, and SQLAlchemy is implemented with a SQLAlchemy generic function.
 
 Metrics can help you incorporate conditional statements in Expectations that support conditional evaluations. For example, `column_values.in_set.condition`.
 
