@@ -86,7 +86,6 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             unexpected_count_parameter_builder_name
         )
         self._mode = mode
-        self.single_batch_mode: bool = mode == "single_batch"
 
         self._expectation_type = expectation_type
 
@@ -210,6 +209,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
             result = unexpected_count_fraction_values
         else:
             result = {
+                "single_batch_mode": mode == "single_batch",
                 "unexpected_count_fraction_active_batch_value": unexpected_count_fraction_values[
                     -1
                 ],
