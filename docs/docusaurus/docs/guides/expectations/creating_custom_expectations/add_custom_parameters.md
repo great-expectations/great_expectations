@@ -81,11 +81,11 @@ GX recommends using custom parameters to create validations and optimize workflo
 
 To use `kwarg` syntax to define Metrics for your Expectations, you need to set the `kwargs` with a value_keys tuple first.
 
-## Allowable parameters
+## Default parameters
 
-The following table lists the allowable parameters that are available for each Expectation class.
+The following table lists the default parameters that are available for each Expectation class.
 
-| Expectation class                 | Allowable parameters           |
+| Expectation class                 | Default parameters           |
 | ----------------------------------| -------------------------------|
 | BatchExpectation                  | See [BatchExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/BatchExpectation_class)             |
 | ColumnAggregateExpectation        | See [ColumnAggregateExpectation](https://docs.greatexpectations.io/docs/reference/api/expectations/expectation/ColumnAggregateExpectation_class)              |
