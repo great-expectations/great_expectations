@@ -27,6 +27,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
+from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
@@ -315,6 +317,66 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
             else {}
         ).keys()
     )
+
+
+@pytest.mark.integration
+def test_onboarding_data_assistant_should_fail_forward(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+    rule_state_with_domains_and_parameters,
+):
+    """When one rule fails, the rest of the rules should still be executed."""
+    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+    }
+
+    num_rules = 8  # There are 8 rules in the onboarding data assistant.
+    with mock.patch(
+        "great_expectations.rule_based_profiler.rule.rule.Rule.run",
+    ) as mock_run:
+        # Set first rule to fail and the rest to pass.
+        call_count = 0
+
+        def side_effect(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise ValueError("This rule failed.")
+            return rule_state_with_domains_and_parameters
+
+        mock_run.side_effect = side_effect
+
+        data_assistant_result: DataAssistantResult = context.assistants.onboarding.run(
+            batch_request=batch_request,
+            estimation="flag_outliers",
+            numeric_columns_rule={
+                "round_decimals": 15,
+                "false_positive_rate": 0.1,
+                "random_seed": 43792,
+            },
+            datetime_columns_rule={
+                "truncate_values": {
+                    "lower_bound": 0,
+                    "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
+                },
+                "round_decimals": 0,
+            },
+            text_columns_rule={
+                "strict_min": True,
+                "strict_max": True,
+                "success_ratio": 0.8,
+            },
+            categorical_columns_rule={
+                "false_positive_rate": 0.1,
+                # "round_decimals": 4,
+            },
+        )
+        # Although the first rule fails, the rest of the rules should still be executed.
+        assert mock_run.call_count == num_rules
+        assert call_count == num_rules
 
 
 @pytest.mark.integration
