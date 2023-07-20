@@ -77,8 +77,6 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-lite.txt"]
         | req_set_dict["requirements-dev-api-docs-test.txt"]
         | req_set_dict["requirements-dev-cloud.txt"]
-        | req_set_dict["requirements-dev-sqlalchemy.txt"]
-        | req_set_dict["requirements-dev-spark.txt"]
         == req_set_dict["requirements-dev-test.txt"]
     )
 
@@ -187,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 88
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 83
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -221,7 +219,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ),
         ("requirements-dev-sqlalchemy1.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev-teradata.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
-        ("requirements-dev-test.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev-test.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-test.txt", "black", (("==", "23.3.0"),)),
         ("requirements-dev-test.txt", "docstring-parser", (("==", "0.15"),)),
@@ -229,12 +226,8 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-test.txt", "mypy", (("==", "1.3.0"),)),
         ("requirements-dev-test.txt", "pika", (("==", "1.3.1"),)),
-        ("requirements-dev-test.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-dev-test.txt", "ruff", (("==", "0.0.271"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
-        ("requirements-dev-test.txt", "sqlalchemy", (("<", "2.0.0"),)),
-        ("requirements-dev-test.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
-        ("requirements-dev-test.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements-dev.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-dev.txt", "adr-tools-python", (("==", "1.0.3"),)),
