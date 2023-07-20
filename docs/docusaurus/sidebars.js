@@ -212,7 +212,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Glossary of Terms',
+          label: 'Glossary',
           link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',
