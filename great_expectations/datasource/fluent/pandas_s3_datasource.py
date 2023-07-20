@@ -58,7 +58,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def _get_s3_client(self) -> BaseClient:
         s3_client: Union[BaseClient, None] = self._s3_client
         if not s3_client:
-            # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
+            # Validate that "boto3" library was successfully imported and attempt to create "s3_client" handle.
             if aws.boto3:
                 _check_config_substitutions_needed(
                     self, self.boto3_options, raise_warning_if_provider_not_present=True
