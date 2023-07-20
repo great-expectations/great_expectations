@@ -4,6 +4,7 @@ import copy
 import datetime
 import json
 import os
+import uuid
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -18,7 +19,6 @@ from typing import (
     Set,
     Union,
 )
-import uuid
 
 import altair as alt
 import ipywidgets as widgets
