@@ -25,7 +25,11 @@ class MetricException(MetricRepositoryBaseModel):
 
 
 class Metric(MetricRepositoryBaseModel, ABC):
-    """Abstract computed metric. Domain, value and parameters are metric dependent."""
+    """Abstract computed metric. Domain, value and parameters are metric dependent.
+
+    Note: This implementation does not currently take into account
+    other domain modifiers, e.g. row_condition, condition_parser, ignore_row_if
+    """
 
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
