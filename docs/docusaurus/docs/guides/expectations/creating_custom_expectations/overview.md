@@ -27,7 +27,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 <i class="fas fa-circle" style={{color: "#dc3545"}}></i> An Experimental Expectation...
 
 * Has a valid `library_metadata` object
-* Has a docstring, including a one-line short description
+* Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
 * Has at least one positive and negative example case, and all test cases pass
 * Has core logic and passes tests on at least one <TechnicalTag tag="execution_engine" text="Execution Engine" />
 * Passes all linting checks
