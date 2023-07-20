@@ -199,7 +199,7 @@ Great Expectations works with the tools and systems that you're already using wi
 				<img height="40" src="./docs/readme_assets/og-databricks.jpg" />
 			</td>
 			<td style="width: 200px;">
-				<a href="https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/">
+				<a href="https://docs.greatexpectations.io/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks/">
 					Databricks
 				</a>
 			</td>
