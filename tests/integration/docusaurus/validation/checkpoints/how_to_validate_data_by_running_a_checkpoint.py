@@ -36,9 +36,8 @@ validator.expect_column_values_to_not_be_null("pickup_datetime")
 context.add_expectation_suite("yellow_tripdata_suite")
 
 # create a checkpoint
-checkpoint = gx.checkpoint.SimpleCheckpoint(
+checkpoint = context.add_or_update_checkpoint(
     name="my_checkpoint",
-    data_context=context,
     expectation_suite_name="yellow_tripdata_suite",
 )
 
