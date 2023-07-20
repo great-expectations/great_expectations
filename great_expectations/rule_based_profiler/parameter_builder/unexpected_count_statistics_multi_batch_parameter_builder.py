@@ -207,11 +207,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
         if mode == "unexpected_count_fraction_values":
             result = unexpected_count_fraction_values
         else:
-            num_batches: int = len(total_count_values)
-            single_batch_mode: bool = num_batches == 1 or mode == "single_batch"
-
             result = {
-                "single_batch_mode": single_batch_mode,
                 "unexpected_count_fraction_active_batch_value": unexpected_count_fraction_values[
                     -1
                 ],
@@ -219,7 +215,7 @@ class UnexpectedCountStatisticsMultiBatchParameterBuilder(ParameterBuilder):
 
             mostly: np.float64
 
-            if single_batch_mode:
+            if mode == "single_batch":
                 unexpected_fraction: np.float64 = unexpected_count_fraction_values[-1]
                 expected_fraction: np.float64 = np.float64(1.0 - unexpected_fraction)
                 result["mostly"] = _standardize_mostly_for_single_batch(
