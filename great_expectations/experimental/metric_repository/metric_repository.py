@@ -4,7 +4,7 @@ from great_expectations.experimental.metric_repository.metrics import Metrics
 
 class MetricRepository:
     pass
-    # TODO: Add methods, docstrings
+    # TODO: Add docstrings
 
     def __init__(self, data_store: DataStore):
         self._data_store = data_store
