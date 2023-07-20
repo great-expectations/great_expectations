@@ -14,7 +14,7 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
-from great_expectations.experimental.metric_repository.batch_inspector_agent_action import (
+from great_expectations.agent.actions.run_column_descriptive_metrics_action import (
     ColumnDescriptiveMetricsAction,
 )
 from great_expectations.experimental.metric_repository.metric_repository import (
