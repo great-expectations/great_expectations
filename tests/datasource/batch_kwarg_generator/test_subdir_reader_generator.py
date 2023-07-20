@@ -8,6 +8,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 from great_expectations.exceptions import BatchKwargsError
 
 
+@pytest.mark.filesystem
 def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test_subdir_reader_path_partitioning")
@@ -95,6 +96,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
     assert len(asset_2_kwargs[0].keys()) == 2
 
 
+@pytest.mark.filesystem
 def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test_subdir_reader_file_partitioning")
@@ -152,6 +154,7 @@ def test_subdir_reader_file_partitioning(basic_pandas_datasource, tmp_path_facto
     assert kwargs["reader_options"]["nrows"] == 10
 
 
+@pytest.mark.filesystem
 def test_subdir_reader_configurable_reader_method(
     basic_pandas_datasource, tmp_path_factory
 ):
