@@ -30,7 +30,7 @@ A Batch Request can only retrieve multiple Batches from a Data Asset that has be
 
 When working with a Filesystem Data Source and organizing Batches, the `batching_regex` argument determines the inclusion of multiple Batches into a single Data Asset, with each file that matches the `batching_regex` resulting in a single Batch.
 
-On the other hand, when utilizing a SQL Datasource, Data Assets include a single Batch by default, which can then be split into multiple Batches using splitters.
+SQL Datasource Data Assets include a single Batch by default. You can use splitters to split the single Batch into multiple Batches.
 
 For more information on partitioning a Data Asset into Batches, see [Manage Data Assets](/docs/guides/connecting_to_your_data/manage_data_assets_lp).
 :::
