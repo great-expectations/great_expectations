@@ -21,7 +21,7 @@ except ImportError:
     )
 
 # module level markers
-pytestmark = [pytest.mark.spark]
+pytestmark = pytest.mark.spark
 
 
 def test_current_pyspark_version_installed(spark_session):

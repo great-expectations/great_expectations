@@ -22,7 +22,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.integration
 
 
 @pytest.mark.slow  # 1.11s

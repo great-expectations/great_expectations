@@ -20,7 +20,7 @@ from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import get_context
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def assert_how_to_buttons(
