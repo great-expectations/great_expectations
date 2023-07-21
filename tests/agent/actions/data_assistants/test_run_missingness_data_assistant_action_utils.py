@@ -24,7 +24,7 @@ def context():
 @pytest.fixture
 def missingness_event():
     return RunMissingnessDataAssistantEvent(
-        type="data_missing_assistant_request.received",
+        type="missingness_data_assistant_request.received",
         datasource_name="test-datasource",
         data_asset_name="test-data-asset",
     )

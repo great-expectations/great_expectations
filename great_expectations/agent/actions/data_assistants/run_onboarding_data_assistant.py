@@ -25,4 +25,5 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             context=self._context,
             event=event,
             data_assistant_result=data_assistant_result,
+            id=id,
         )

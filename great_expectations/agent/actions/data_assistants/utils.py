@@ -9,14 +9,15 @@ from great_expectations.agent.models import (
     RunDataAssistantEvent,
 )
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.exceptions import StoreBackendError
+from great_expectations.data_context.data_context import CloudDataContext
+from great_expectations.core.batch import BatchRequest
+from great_expectations.rule_based_profiler.data_assistant_result.data_assistant_result import (
+    DataAssistantResult,
+)
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationSuite
-    from great_expectations.core.batch import BatchRequest
-    from great_expectations.rule_based_profiler.data_assistant_result.data_assistant_result import (
-        DataAssistantResult,
-    )
-    from great_expectations.data_context.data_context import CloudDataContext
 
 
 def build_batch_request(
@@ -44,14 +45,31 @@ def build_action_result(
     context: CloudDataContext,
     event: RunDataAssistantEvent,
     data_assistant_result: DataAssistantResult,
+    id: str,
 ) -> ActionResult:
+    expectation_suite_name = f"{event.type} {event.data_asset_name} assistant suite"
+    checkpoint_name = f"{event.type} {event.data_asset_name} assistant checkpoint"
+
     # build tz aware timestamp
     tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
     timestamp = datetime.now(tz=tz)
 
     # ensure we have unique names for created resources
-    expectation_suite_name = f"{event.type} {event.data_asset_name} suite {timestamp}"
-    checkpoint_name = f"{event.type} {event.data_asset_name} checkpoint {timestamp}"
+    try:
+        context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+        # if that didn't error, this name exists, so we add the timestamp
+        expectation_suite_name = f"{expectation_suite_name} {timestamp}"
+    except StoreBackendError:
+        # resource is unique
+        pass
+
+    try:
+        context.get_checkpoint(name=checkpoint_name)
+        # if that didn't error, this name exists, so we add the timestamp
+        checkpoint_name = f"{checkpoint_name} {timestamp}"
+    except StoreBackendError:
+        # resource is unique
+        pass
 
     expectation_suite: ExpectationSuite = data_assistant_result.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -74,7 +92,7 @@ def build_action_result(
         "class_name": "Checkpoint",
     }
 
-    checkpoint = self._context.add_checkpoint(**checkpoint_config)  # type: ignore[arg-type]
+    checkpoint = context.add_checkpoint(**checkpoint_config)  # type: ignore[arg-type]
 
     expectation_suite_id = expectation_suite.ge_cloud_id
     checkpoint_id = checkpoint.ge_cloud_id

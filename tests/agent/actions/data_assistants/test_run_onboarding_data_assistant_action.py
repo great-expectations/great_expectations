@@ -70,7 +70,6 @@ def test_run_onboarding_data_assistant_event_creates_expectation_suite(
     )
 
 
-@freeze_time("2021-01-01")
 def test_run_onboarding_data_assistant_event_creates_checkpoint(
     context, onboarding_event
 ):
@@ -79,10 +78,10 @@ def test_run_onboarding_data_assistant_event_creates_checkpoint(
     context.get_expectation_suite.side_effect = StoreBackendError("test-message")
     context.get_checkpoint.side_effect = StoreBackendError("test-message")
     expectation_suite_id = "084a6e0f-c014-4e40-b6b7-b2f57cb9e176"
-    tz = datetime.now().astimezone().tzinfo
-    timestamp = datetime.now(tz=tz)
-    expectation_suite_name = f"{onboarding_event.type} {onboarding_event.data_asset_name} assistant suite {timestamp}"
-    checkpoint_name = f"{onboarding_event.type} {onboarding_event.data_asset_name} assistant checkpoint {timestamp}"
+    expectation_suite_name = (
+        f"{onboarding_event.type} {onboarding_event.data_asset_name} assistant suite"
+    )
+    checkpoint_name = f"{onboarding_event.type} {onboarding_event.data_asset_name} assistant checkpoint"
     checkpoint_id = "f5d32bbf-1392-4248-bc40-a3966fab2e0e"
     expectation_suite = context.assistants.onboarding.run().get_expectation_suite()
     expectation_suite.ge_cloud_id = expectation_suite_id
