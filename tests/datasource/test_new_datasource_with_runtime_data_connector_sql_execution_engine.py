@@ -138,7 +138,6 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
     assert len(batch_list[0].head().columns) == 11
 
 
-# this is the test that is enabled
 def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):

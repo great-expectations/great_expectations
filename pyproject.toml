@@ -559,7 +559,7 @@ markers = [
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
 # https://pytest-mock.readthedocs.io/en/latest/configuration.html#use-standalone-mock-package
-# mock_use_standalone_module = false
+mock_use_standalone_module = false
 # https://docs.pytest.org/en/7.1.x/how-to/logging.html#how-to-manage-logging
 # uncomment to adjust captured log levels
 # WARNING some cli v012 tests may fail if this is altered
