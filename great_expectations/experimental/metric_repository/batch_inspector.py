@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
     MetricException,
-    Metrics,
+    MetricRun,
     NumericTableMetric,
     StringListTableMetric,
 )
@@ -24,12 +24,12 @@ class BatchInspector:
     def _generate_run_id(self) -> uuid.UUID:
         return uuid.uuid4()
 
-    def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> Metrics:
+    def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> MetricRun:
         run_id = self._generate_run_id()
 
         table_metrics_list = self._get_table_metrics(batch_request, run_id)
 
-        metrics = Metrics(id=run_id, metrics=table_metrics_list)
+        metrics = MetricRun(id=run_id, metrics=table_metrics_list)
 
         return metrics
 

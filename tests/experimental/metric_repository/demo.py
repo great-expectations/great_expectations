@@ -25,7 +25,7 @@ from great_expectations.datasource.fluent.batch_request import BatchRequest
 import pandas as pd
 from great_expectations.experimental.metric_repository.metrics import (
     Metric,
-    Metrics,
+    MetricRun,
     NumericTableMetric,
     MetricException,
     StringListTableMetric,
@@ -89,7 +89,7 @@ def test_demo_batch_inspector(
 
     metrics_stored = mock_add.call_args[0][0]
 
-    assert metrics_stored == Metrics(
+    assert metrics_stored == MetricRun(
         id=run_id,
         metrics=[
             NumericTableMetric(

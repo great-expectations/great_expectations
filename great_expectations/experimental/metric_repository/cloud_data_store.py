@@ -3,9 +3,9 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 from great_expectations.experimental.metric_repository.data_store import DataStore
-from great_expectations.experimental.metric_repository.metrics import Metrics
+from great_expectations.experimental.metric_repository.metrics import MetricRun
 
-StorableTypes: TypeAlias = Union[Metrics,]  # TODO: are there better approaches?
+StorableTypes: TypeAlias = Union[MetricRun,]  # TODO: are there better approaches?
 
 
 class CloudDataStore(DataStore):

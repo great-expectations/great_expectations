@@ -87,8 +87,8 @@ class QuantileValuesColumnMetric(ColumnMetric, NumericListMetric):
     )
 
 
-class Metrics(MetricRepositoryBaseModel):
-    """Collection of Metric objects."""
+class MetricRun(MetricRepositoryBaseModel):
+    """Collection of Metric objects produced during the same execution run."""
 
     id: uuid.UUID = Field(description="Run id")
     # created_at, created_by filled in by the backend.
