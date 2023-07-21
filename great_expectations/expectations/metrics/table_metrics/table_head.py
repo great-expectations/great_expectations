@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import warnings
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Any, Iterator, Optional
 
 import pandas as pd
 
@@ -88,7 +87,6 @@ class TableHead(TableMetricProvider):
         if is_version_less_than(pd.__version__, "1.4.0"):
             df = TableHead._sqlalchemy_head_pandas_less_than14(
                 selectable=selectable,
-                table_name=table_name,
                 execution_engine=execution_engine,
                 metric_value_kwargs=metric_value_kwargs,
                 n_rows=n_rows,
@@ -96,9 +94,6 @@ class TableHead(TableMetricProvider):
             return df
 
         if metric_value_kwargs["fetch_all"]:
-            warnings.warn(
-                "fetch_all loads all of the rows into memory. This may cause performance issues."
-            )
             df = TableHead._return_full_sql_table_as_head(
                 table_name=table_name,
                 execution_engine=execution_engine,
@@ -198,7 +193,7 @@ class TableHead(TableMetricProvider):
 
     @staticmethod
     def _return_full_sql_table_as_head(
-        table_name: str,
+        table_name: Optional[Any],
         execution_engine: SqlAlchemyExecutionEngine,
         selectable: sa.sql.selectable.Selectable,
         dialect: str,
@@ -225,7 +220,6 @@ class TableHead(TableMetricProvider):
     @staticmethod
     def _sqlalchemy_head_pandas_less_than14(
         selectable: sa.sql.selectable.Selectable,
-        table_name: str,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_value_kwargs: dict,
         n_rows: int,

@@ -85,17 +85,13 @@ def test_head_table_name_fetch_all(sqlalchemy_test_engine):
     table_name = "test_table"
     fetch_all = True
 
-    with pytest.warns(
-        UserWarning,
-        match="fetch_all loads all of the rows into memory. This may cause performance issues.",
-    ):
-        res = table_head._sqlalchemy(
-            execution_engine=execution_engine,
-            metric_domain_kwargs={},
-            metric_value_kwargs={"fetch_all": fetch_all},
-            metrics={},
-            runtime_configuration={},
-        )
-        assert res.shape == (4, 2)
-        assert res.columns.tolist() == ["a", "b"]
-        assert res.values.tolist() == [[1, 2], [2, 3], [3, 4], [4, 5]]
+    res = table_head._sqlalchemy(
+        execution_engine=execution_engine,
+        metric_domain_kwargs={},
+        metric_value_kwargs={"fetch_all": fetch_all},
+        metrics={},
+        runtime_configuration={},
+    )
+    assert res.shape == (4, 2)
+    assert res.columns.tolist() == ["a", "b"]
+    assert res.values.tolist() == [[1, 2], [2, 3], [3, 4], [4, 5]]
