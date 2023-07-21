@@ -6,7 +6,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx';
 
 
 
-By default, a Checkpoint will only validate the last Batch included in a Batch Request. This guide will demonstrate how to validate multiple Batches identified by a single Batch Request using a Python loop and a Checkpoint's `validations` parameter. 
+By default, a Checkpoint only validates the last Batch included in a Batch Request. Use the information provided here to learn how you can use a Python loop and the Checkpoint `validations` parameter to validate multiple Batches identified by a single Batch Request. 
 
 ## Prerequisites
 
