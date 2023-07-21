@@ -20,7 +20,7 @@ By default, a Checkpoint will only validate the last Batch included in a Batch R
 
 ## Create a Batch Request with multiple Batches
 
-The following Python code will create a Batch Request that includes every available Batch in a Data Asset named `asset`:
+The following Python code creates a Batch Request that includes every available Batch in a Data Asset named `asset`:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py build_a_batch_request_with_multiple_batches"
 ```
