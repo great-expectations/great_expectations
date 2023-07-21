@@ -26,7 +26,7 @@ if not google.storage:
     )
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture

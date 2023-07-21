@@ -45,7 +45,7 @@ from tests.render.util import load_notebook_from_path
 from tests.test_utils import find_strings_in_nested_obj
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.integration
 
 
 @pytest.fixture
