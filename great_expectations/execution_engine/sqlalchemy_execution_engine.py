@@ -36,8 +36,8 @@ from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
-    Subquery,
 )
+from great_expectations.compatibility.sqlalchemy import Subquery
 from great_expectations.core._docs_decorators import new_method_or_class, public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
