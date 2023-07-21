@@ -44,7 +44,7 @@ Use the same Data Asset that your Batch Request was built from to retrieve a lis
 
 ## Convert the list of Batches into a list of Batch Requests
 
-Since a Checkpoint validates Batch Requests, but only validates the last Batch found in a Batch Request, the next step in this process is to convert the list of Batches into a list of Batch Requests that return the corresponding individual Batch.
+A Checkpoint validates Batch Requests, but only validates the last Batch found in a Batch Request. You'll need to convert the list of Batches into a list of Batch Requests that return the corresponding individual Batch.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py batch_request_list"
 ```
