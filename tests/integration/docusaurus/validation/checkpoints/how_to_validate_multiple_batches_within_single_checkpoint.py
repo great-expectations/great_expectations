@@ -39,8 +39,8 @@ validations = [
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_checkpoint">
-checkpoint = gx.checkpoint.SimpleCheckpoint(
-    name="example_checkpoint", data_context=context, validations=validations
+checkpoint = context.add_or_update_checkpoint(
+    name="my_taxi_validator_checkpoint", validations = validations
 )
 
 checkpoint_result = checkpoint.run()
