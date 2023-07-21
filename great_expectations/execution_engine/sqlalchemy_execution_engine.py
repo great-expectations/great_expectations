@@ -36,6 +36,7 @@ from great_expectations.compatibility import aws, snowflake, sqlalchemy, trino
 from great_expectations.compatibility.not_imported import is_version_greater_or_equal
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
+    Subquery
 )
 from great_expectations.core._docs_decorators import new_method_or_class, public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -722,7 +723,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
             # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
-            if not isinstance(selectable, sa.Table):
+            if not isinstance(selectable, sa.Table) and not isinstance(selectable, Subquery):
                 selectable = selectable.subquery()
 
             selectable = (

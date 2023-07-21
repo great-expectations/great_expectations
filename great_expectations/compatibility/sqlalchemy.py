@@ -9,8 +9,10 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 
 try:
     import sqlalchemy
+    from sqlalchemy.sql.selectable import Subquery
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    Subquery = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy import engine
