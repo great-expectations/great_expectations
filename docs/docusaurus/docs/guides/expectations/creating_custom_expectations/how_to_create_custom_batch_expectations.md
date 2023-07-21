@@ -75,7 +75,7 @@ This guide will walk you through the first five steps, the minimum for a functio
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
   ✔ Has a valid library_metadata object
-    Has a docstring, including a one-line short description
+    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -122,7 +122,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -164,7 +164,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
@@ -276,7 +276,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -305,7 +305,7 @@ $ python expect_batch_columns_to_be_unique.py
 
 Completeness checklist for ExpectBatchColumnsToBeUnique:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
   ✔ Passes all linting checks

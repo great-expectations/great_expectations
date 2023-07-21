@@ -66,7 +66,7 @@ def test_pandas_expect_column_value_z_scores_to_be_less_than_impl(
     assert result == z_score_validation_result
 
 
-@pytest.mark.postgres
+@pytest.mark.postgresql
 def test_sa_expect_column_value_z_scores_to_be_less_than_impl(
     z_score_validation_result, test_backends
 ):
