@@ -32,7 +32,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from great_expectations.cli import cli
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 def _run_notebook(context: FileDataContext) -> None:

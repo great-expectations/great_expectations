@@ -20,7 +20,7 @@ from great_expectations.cli.datasource import (
 from great_expectations.datasource.types import DatasourceTypes
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.mark.unit

@@ -2,7 +2,7 @@ import pytest
 
 from great_expectations.agent import run_agent
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.cloud
 
 
 def test_run_calls_gx_agent(mocker):
