@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING, Any, Iterator
 import pandas as pd
 
 from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import (
+    is_version_greater_or_equal,
+)
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     pandas_read_sql,
@@ -80,55 +83,25 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-
-        if metric_value_kwargs["fetch_all"]:
-            warnings.warn(
-                "fetch_all loads all of the rows into memory. This may cause performance issues."
-            )
-            df = TableHead._return_full_sql_table_as_head(
+        if is_version_greater_or_equal(pd.__version__, "1.4.0"):
+            df = TableHead._sqlalchemy_head_pandas_greater_than14(
+                selectable=selectable,
                 table_name=table_name,
                 execution_engine=execution_engine,
-                selectable=selectable,
+                metric_value_kwargs=metric_value_kwargs,
+                metric_domain_kwargs=metric_domain_kwargs,
                 dialect=dialect,
+                n_rows=n_rows,
             )
-            return df
-        try:
-            if table_name and not isinstance(table_name, sqlalchemy._anonymous_label):
-                # named table.
-                with execution_engine.get_connection() as con:
-                    # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = read_sql_table_as_df(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=con,
-                        chunksize=abs(n_rows),
-                        dialect=dialect,
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
-            else:
-                # passing chunksize causes the Iterator to be returned
-                with execution_engine.get_connection() as con:
-                    # convert subquery into query using select_from()
-                    if not selectable.supports_execution:
-                        selectable = sa.select(sa.text("*")).select_from(selectable)
-                    df_chunk_iterator = pandas_read_sql_query(
-                        sql=selectable,
-                        con=con,
-                        execution_engine=execution_engine,
-                        chunksize=abs(n_rows),
-                    )
-                    df = TableHead._get_head_df_from_df_iterator(
-                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
-        except StopIteration:
-            # empty table. At least try to get the column names
-            validator = Validator(execution_engine=execution_engine)
-            columns = validator.get_metric(
-                MetricConfiguration("table.columns", metric_domain_kwargs)
+        else:
+            df = TableHead._sqlalchemy_head_pandas_less_than14(
+                selectable=selectable,
+                table_name=table_name,
+                execution_engine=execution_engine,
+                metric_value_kwargs=metric_value_kwargs,
+                n_rows=n_rows,
             )
-            df = pd.DataFrame(columns=columns)
+
         return df
 
     @staticmethod
@@ -205,5 +178,116 @@ class TableHead(TableMetricProvider):
                     sql=selectable,
                     con=con,
                     execution_engine=execution_engine,
+                )
+        return df
+
+    @staticmethod
+    def _sqlalchemy_head_pandas_greater_than14(  # noqa: PLR0913
+        selectable: sa.sql.selectable.Selectable,
+        table_name: str,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_value_kwargs: dict,
+        metric_domain_kwargs: dict,
+        dialect: str,
+        n_rows: int,
+    ) -> pd.DataFrame:
+        if metric_value_kwargs["fetch_all"]:
+            warnings.warn(
+                "fetch_all loads all of the rows into memory. This may cause performance issues."
+            )
+            df = TableHead._return_full_sql_table_as_head(
+                table_name=table_name,
+                execution_engine=execution_engine,
+                selectable=selectable,
+                dialect=dialect,
+            )
+            return df
+        try:
+            if table_name and not isinstance(table_name, sqlalchemy._anonymous_label):
+                # named table.
+                with execution_engine.get_connection() as con:
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator = read_sql_table_as_df(
+                        table_name=getattr(selectable, "name", None),
+                        schema=getattr(selectable, "schema", None),
+                        con=con,
+                        chunksize=abs(n_rows),
+                        dialect=dialect,
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
+            else:
+                # passing chunksize causes the Iterator to be returned
+                with execution_engine.get_connection() as con:
+                    # convert subquery into query using select_from()
+                    if not selectable.supports_execution:
+                        selectable = sa.select(sa.text("*")).select_from(selectable)
+                    df_chunk_iterator = pandas_read_sql_query(
+                        sql=selectable,
+                        con=con,
+                        execution_engine=execution_engine,
+                        chunksize=abs(n_rows),
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
+        except StopIteration:
+            # empty table. At least try to get the column names
+            validator = Validator(execution_engine=execution_engine)
+            columns = validator.get_metric(
+                MetricConfiguration("table.columns", metric_domain_kwargs)
+            )
+            df = pd.DataFrame(columns=columns)
+        return df
+
+    @staticmethod
+    def _sqlalchemy_head_pandas_less_than14(
+        selectable: sa.sql.selectable.Selectable,
+        table_name: str,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_value_kwargs: dict,
+        n_rows: int,
+    ) -> pd.DataFrame:
+        # we want to compile our selectable
+        stmt = sa.select("*").select_from(selectable)
+        fetch_all = metric_value_kwargs["fetch_all"]
+        if fetch_all:
+            sql = stmt.compile(
+                dialect=execution_engine.engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+        elif execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
+            # limit doesn't compile properly for mssql
+            sql = str(
+                stmt.compile(
+                    dialect=execution_engine.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
+            )
+            if n_rows > 0:
+                sql = f"SELECT TOP {n_rows}{sql[6:]}"
+        else:
+            if n_rows > 0:
+                stmt = stmt.limit(n_rows)
+
+            sql = stmt.compile(
+                dialect=execution_engine.engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+
+        # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
+        if n_rows <= 0 and not fetch_all:
+            with execution_engine.get_connection() as con:
+                df_chunk_iterator = pandas_read_sql(
+                    sql=sql, con=con, chunksize=abs(n_rows)
+                )
+                df = TableHead._get_head_df_from_df_iterator(
+                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                )
+        else:
+            with execution_engine.get_connection() as con:
+                df = pandas_read_sql_query(
+                    sql=sql, con=con, execution_engine=execution_engine
                 )
         return df
