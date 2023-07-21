@@ -8,7 +8,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 from great_expectations.core.expectation_diagnostics.supporting_types import Maturity
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.skip(

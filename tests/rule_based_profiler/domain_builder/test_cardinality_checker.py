@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.domain_builder.categorical_column_do
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_cardinality_checker_instantiation_valid_cardinality_limit_mode_parameter_absolute():

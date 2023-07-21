@@ -1061,7 +1061,7 @@ def test_profiler_all_expectation_types_spark(
     reason="requires sqlalchemy to be installed",
 )
 @pytest.mark.slow  # 4.70s
-@pytest.mark.postgres
+@pytest.mark.postgresql
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
