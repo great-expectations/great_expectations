@@ -723,7 +723,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             # SQLAlchemy 2.0 deprecated select_from() from a non-Table asset without a subquery.
             # Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated.
-            if not isinstance(selectable, sa.Table) and not isinstance(selectable, Subquery):
+            if not isinstance(selectable, sa.Table) and not isinstance(
+                selectable, Subquery
+            ):
                 selectable = selectable.subquery()
 
             selectable = (
