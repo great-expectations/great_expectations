@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import uuid
 from abc import ABC
-from typing import List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import pydantic
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class MetricRepositoryBaseModel(BaseModel, ABC):
@@ -33,8 +36,7 @@ class Metric(MetricRepositoryBaseModel, ABC):
 
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
-    # TODO: reimplement batch param
-    # batch: Batch = Field(description="Batch")
+    batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
     exception: MetricException = Field(description="Exception info if thrown")
 

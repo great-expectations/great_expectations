@@ -56,8 +56,7 @@ class BatchInspector:
             NumericTableMetric(
                 id=self._generate_metric_id(),
                 run_id=run_id,
-                # TODO: reimplement batch param
-                # batch=batch,
+                batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[(metric_name, tuple(), tuple())],
                 exception=MetricException(),  # TODO: Pass through
@@ -68,8 +67,7 @@ class BatchInspector:
             StringListTableMetric(
                 id=self._generate_metric_id(),
                 run_id=run_id,
-                # TODO: reimplement batch param
-                # batch=batch,
+                batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[(metric_name, tuple(), tuple())],
                 exception=MetricException(),  # TODO: Pass through
