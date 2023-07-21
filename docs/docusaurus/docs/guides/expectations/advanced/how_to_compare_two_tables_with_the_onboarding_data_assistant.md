@@ -65,10 +65,13 @@ And use the results from the Data Assistant to build and save an Expectation Sui
 
 <details>
 <summary><code>exclude_column_names</code>?</summary>
-Above, we excluded <code>"VendorID",</code>, so Expectations won't be set against this column.
+Above, we excluded several cloumns, including <code>"VendorID",</code>, so Expectations won't be set against these columns.
+
+Some dialects of SQL handle data types in different ways, which can lead to (among other things) mismatches in precision on some numbers.
+
+For our hypothetical use case, we're willing to tolerate those slight inconsistencies, and so aren't setting expectations against the columns likely to generate those errors.
 
 This is one example of the ways in which we can customize the Suite built by our Data Assistant.
-
 For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 </details>
 
