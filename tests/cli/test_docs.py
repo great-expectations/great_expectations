@@ -12,7 +12,7 @@ from tests.cli.utils import (
 )
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 def test_docs_help_output(caplog):

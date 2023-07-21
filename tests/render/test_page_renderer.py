@@ -17,7 +17,7 @@ from great_expectations.render.renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
