@@ -67,7 +67,7 @@ And use the results from the Data Assistant to build and save an Expectation Sui
 <summary><code>exclude_column_names</code>?</summary>
 In the previous example, specific columns were excluded to prevent Expectations from being set against them.
 
-Some dialects of SQL handle data types in different ways, which can lead to (among other things) mismatches in precision on some numbers.
+Some SQL dialects handle data types in different ways, and this can cause precision mismatches on some numbers.
 
 In our hypothetical use case these inconsistencies are tolerated, and therefore Expectations are not set against the columns likely to generate the errors.
 
