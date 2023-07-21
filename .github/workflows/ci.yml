@@ -8,6 +8,12 @@ on:
   workflow_dispatch:  # allows manual triggering with branch picker
 
 jobs:
+  ci-does-not-run-on-draft-pull-requests:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    steps:
+      - run: echo "CI jobs are not running because this is a draft pull request."
+
   static-analysis:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
