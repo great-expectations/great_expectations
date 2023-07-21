@@ -62,7 +62,7 @@ def get_extras_require():
     docs_test = results.pop("api-docs-test")
     cloud = results["cloud"]
     arrow = results["arrow"]
-    snowflake = results["snowflake"]
+    results["snowflake"]
 
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
