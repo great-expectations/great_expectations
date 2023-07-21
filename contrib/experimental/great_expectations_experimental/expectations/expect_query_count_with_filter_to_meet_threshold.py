@@ -19,7 +19,7 @@ from great_expectations.expectations.expectation import (
 
 
 class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
-    """Expect Query given filter to contain at least as many entries as a given threshold"""
+    """Expect Query given filter to contain at least as many entries as a given threshold."""
 
     metric_dependencies = ("query.template_values",)
 
