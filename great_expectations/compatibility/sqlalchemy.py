@@ -14,7 +14,7 @@ except ImportError:
 
 try:
     from sqlalchemy.sql.selectable import Subquery
-except ImportError:
+except (ImportError, AttributeError):
     Subquery = SQLALCHEMY_NOT_IMPORTED
 
 try:
