@@ -47,6 +47,7 @@ def mocked_glob_kwargs(basic_pandas_datasource):
     return kwargs
 
 
+@pytest.mark.unit
 def test_glob_reader_generator_returns_typed_kwargs(mocked_glob_kwargs):
     # Returned Kwargs should be PathKwargs.
     assert all(isinstance(kwargs, PathBatchKwargs) for kwargs in mocked_glob_kwargs)

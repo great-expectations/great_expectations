@@ -24,7 +24,7 @@ If you are still working on developing your Custom Expectation, you will access 
 
 ## Create
 
-We provide extensive documentation on how to create Custom Expectations.  If you are interested in doing so, we advise you reference [our guides on how to create Custom Expectations](../guides/expectations/index.md#creating-custom-expectations).
+We provide extensive documentation on how to create Custom Expectations.  If you are interested in doing so, we advise you reference [our guides on how to create Custom Expectations](../guides/expectations/expectations_lp.md).
 
 ## Contribute
 

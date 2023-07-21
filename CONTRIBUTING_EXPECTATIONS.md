@@ -62,7 +62,7 @@ To generate the Expectation checklist, add the `print_diagnostic_checklist()` in
 
 ```console
 ✔ Has a valid library_metadata object
-✔ Has a docstring, including a one-line short description
+✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ...
 ✔ Has at least one positive and negative example case, and all test cases pass
 ✔ Has core logic and passes tests on at least one Execution Engine

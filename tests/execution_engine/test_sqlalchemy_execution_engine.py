@@ -52,7 +52,10 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
@@ -1080,7 +1083,7 @@ class TestExecuteQuery:
             pd_dataframe, sa
         )
 
-        select_all = "SELECT * FROM test;"
+        select_all = f"SELECT * FROM {sa.text('test')};"
         result = execution_engine.execute_query(sa.text(select_all)).fetchall()
 
         expected = [(1, 4), (2, 4)]
@@ -1091,7 +1094,7 @@ class TestExecuteQuery:
             pd_dataframe, sa
         )
 
-        select_all = "SELECT * FROM test;"
+        select_all = f"SELECT * FROM {sa.text('test')};"
         result = execution_engine.execute_query_in_transaction(
             sa.text(select_all)
         ).fetchall()

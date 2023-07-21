@@ -18,6 +18,9 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.mark.integration
 def test__get_full_file_path_pandas(fs: FakeFilesystem):

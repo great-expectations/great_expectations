@@ -1,4 +1,8 @@
 from great_expectations.expectations.expectation import _format_map_output
+import pytest
+
+# module level markers
+pytestmark = pytest.mark.unit
 
 
 def test_format_map_output_with_numbers():

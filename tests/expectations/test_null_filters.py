@@ -1,8 +1,10 @@
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+import pytest
 
 
+@pytest.mark.spark
 def test_spark_null_filters(spark_session):
     import pandas as pd
     import pyspark
@@ -59,6 +61,7 @@ def test_spark_null_filters(spark_session):
     )
 
 
+@pytest.mark.filesystem
 def test_sa_null_filters(sa):
     import pandas as pd
 

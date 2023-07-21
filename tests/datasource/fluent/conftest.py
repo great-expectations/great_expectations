@@ -235,7 +235,11 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 
 
 @pytest.fixture(
-    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+    params=[
+        pytest.param("empty_cloud_context_fluent", marks=pytest.mark.cloud),
+        pytest.param("empty_file_context", marks=pytest.mark.filesystem),
+    ],
+    ids=["cloud", "file"],
 )
 def empty_contexts(
     request: FixtureRequest,
@@ -398,7 +402,12 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
-@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
+@pytest.fixture(
+    params=[
+        pytest.param("seeded_file_context", marks=pytest.mark.filesystem),
+        pytest.param("seeded_cloud_context", marks=pytest.mark.cloud),
+    ]
+)
 def seeded_contexts(
     request: FixtureRequest,
 ):
