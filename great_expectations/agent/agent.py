@@ -53,6 +53,12 @@ class GXAgentConfig(AgentBaseModel):
     gx_cloud_access_token: str
 
 
+class GxAgentConfigSettings(pydantic.BaseSettings):
+    gx_cloud_base_url: str = "https://api.greatexpectations.io"
+    gx_cloud_organization_id: str
+    gx_cloud_access_token: str
+
+
 class GXAgent:
     """
     Run GX in any environment from GX Cloud.
@@ -217,11 +223,6 @@ class GXAgent:
         """Construct GXAgentConfig."""
 
         # ensure we have all required env variables, and provide a useful error if not
-
-        class GxAgentConfigSettings(pydantic.BaseSettings):
-            gx_cloud_base_url: str = "https://api.greatexpectations.io"
-            gx_cloud_organization_id: str
-            gx_cloud_access_token: str
 
         try:
             config = GxAgentConfigSettings()
