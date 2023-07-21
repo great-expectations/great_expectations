@@ -207,6 +207,13 @@ local_tests = [
         backend_dependencies=[],
     ),
     IntegrationTestFixture(
+        name="how_to_create_an_expectation_suite_with_the_missingness_data_assistant",
+        user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        backend_dependencies=[],
+    ),
+    IntegrationTestFixture(
         name="data_docs",
         user_flow_script="tests/integration/docusaurus/reference/glossary/data_docs.py",
         data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
