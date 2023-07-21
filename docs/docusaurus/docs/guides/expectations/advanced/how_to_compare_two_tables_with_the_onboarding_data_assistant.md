@@ -65,7 +65,7 @@ And use the results from the Data Assistant to build and save an Expectation Sui
 
 <details>
 <summary><code>exclude_column_names</code>?</summary>
-Above, we excluded several cloumns, including <code>"VendorID",</code>, so Expectations won't be set against these columns.
+In the previous example, specific columns were excluded to prevent Expectations from being set against them.
 
 Some dialects of SQL handle data types in different ways, which can lead to (among other things) mismatches in precision on some numbers.
 
