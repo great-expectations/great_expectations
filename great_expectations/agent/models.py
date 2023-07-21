@@ -13,20 +13,22 @@ class EventBase(AgentBaseModel):
     type: str
 
 
-class RunOnboardingDataAssistantEvent(EventBase):
-    # TODO(https://greatexpectations.atlassian.net/browse/DX-652): Deprecate once event is no longer being emitted
+class RunDataAssistantEvent(EventBase):
+    type: str
+    datasource_name: str
+    data_asset_name: str
+
+
+class RunOnboardingDataAssistantEvent(RunDataAssistantEvent):
     type: Literal[
         "onboarding_data_assistant_request.received"
     ] = "onboarding_data_assistant_request.received"
-    datasource_name: str
-    data_asset_name: str
 
 
-class RunDataAssistantEvent(EventBase):
-    type: Literal["data_assistant_request"] = "data_assistant_request.received"
-    datasource_name: str
-    data_asset_name: str
-    assistant_name: str
+class RunMissingnessDataAssistantEvent(RunDataAssistantEvent):
+    type: Literal[
+        "missingness_data_assistant_request.received"
+    ] = "missingness_data_assistant_request.received"
 
 
 class RunCheckpointEvent(EventBase):
