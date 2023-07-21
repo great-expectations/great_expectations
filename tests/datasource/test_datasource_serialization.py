@@ -190,6 +190,7 @@ class TestDatasourceConfigSerialization:
                 )
 
 
+@pytest.mark.unit
 def test_yaml_ready_dict_datasource_config_serializer(
     datasource_config_with_names: DatasourceConfig,
 ):
