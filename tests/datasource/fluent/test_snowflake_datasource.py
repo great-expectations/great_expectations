@@ -3,6 +3,7 @@ from __future__ import annotations
 import pydantic
 import pytest
 
+from great_expectations.compatibility.snowflake import snowflake
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.snowflake_datasource import (
     SnowflakeDatasource,
@@ -112,6 +113,10 @@ def test_invalid_connection_string_raises_dsn_error(
     assert expected_errors == exc_info.value.errors()
 
 
+# TODO: Cleanup how we install test dependencies and remove this skipif
+@pytest.mark.skipif(
+    True if not snowflake else False, reason="snowflake is not installed"
+)
 @pytest.mark.unit
 def test_get_execution_engine_succeeds():
     connection_string = "snowflake://my_user:password@my_account"
