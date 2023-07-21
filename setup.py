@@ -66,7 +66,7 @@ def get_extras_require():
 
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy2"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib + docs_test + cloud + arrow + snowflake
+    results["test"] = lite + contrib + docs_test + cloud + arrow
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]

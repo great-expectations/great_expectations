@@ -128,7 +128,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, snowflake, sqlalchemy1]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
