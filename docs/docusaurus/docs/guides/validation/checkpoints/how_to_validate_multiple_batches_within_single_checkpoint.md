@@ -1,50 +1,64 @@
 ---
-title: Validate Multiple Batches within a Single Checkpoint Using a Batch Request List
+title: Validate multiple Batches from a Batch Request with a single Checkpoint
 ---
 
-import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import Prerequisites from '/docs/components/_prerequisites.jsx';
 
-By following this guide, you can efficiently process multiple batches of data using a simple approach. This method eliminates the need to create multiple versions of checkpoints gand assets, streamlining the process. By adhering to the steps outlined below, you can ensure that all batches from a list stored in the asset are processed, preventing any potential issue of only processing the last batch. 
+
+
+By default, a Checkpoint will only validate the last Batch included in a Batch Request. This guide will demonstrate how to validate multiple Batches identified by a single Batch Request using a Python loop and a Checkpoint's `validations` parameter. 
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Configure a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Create a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_lp).
-- [Create an Expectation Suite](/docs/guides/expectations/expectations_lp). 
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [A Data Asset with multiple Batches](/docs/guides/connecting_to_your_data/connect_to_data_lp).
+- [An Expectation Suite](/docs/guides/expectations/expectations_lp). 
 
 </Prerequisites>
 
-## Create Batch Request with Multiple Batches
+## Create a Batch Request with multiple Batches
 
-:::tip
-When working with a Filesystem Data Source and organizing batches, the **batching_regex** argument enables the loading of multiple batches onto a single asset. On the other hand, when utilizing SQL Datasource, the asset generates a single batch by default, which can then be split into multiple batches using splitters.
-
-This SQL-based asset can either be a merged table resulting from multiple tables joined through a SQL query (using the `add_query_asset` function), or an entire table loaded as a single batch using the `add_table_asset` function.
-:::
+The following Python code will create a Batch Request that includes every available Batch in a Data Asset named `asset`:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py build_a_batch_request_with_multiple_batches"
 ```
 
-## Create Batch Request List
+:::tip
+A Batch Request can only retrieve multiple Batches from a Data Asset that has been configured to include more than the default single Batch.
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_batch_list"
+When working with a Filesystem Data Source and organizing Batches, the `batching_regex` argument determines the inclusion of multiple Batches into a single Data Asset, with each file that matches the `batching_regex` resulting in a single Batch.
+
+On the other hand, when utilizing a SQL Datasource, Data Assets include a single Batch by default, which can then be split into multiple Batches using splitters.
+
+For more information on partitioning a Data Asset into Batches, see [Manage Data Assets](/docs/guides/connecting_to_your_data/manage_data_assets_lp).
+:::
+
+## Get a list of Batches from the Batch Request
+
+Use the same Data Asset that your Batch Request was built from to retrieve a list of Batches with the following code:
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py batch_list"
 ```
-In this scenario, the asset's build batch request combines all the data into a single batch, which is then linked to a corresponding batch request. Following that, in the second line, we utilize the `get_batch_list_from_batch_request` function to divide the single batch into multiple individual batches, forming a list. Moving on to the third line, each split-apart batch is associated with its respective batch request. Ultimately, we compile these batch requests, along with their corresponding batches, into a `batch_request_list`.
 
-### Build a Validations List 
+## Convert the list of Batches into a list of Batch Requests
+
+Since a Checkpoint validates Batch Requests, but only validates the last Batch found in a Batch Request, the next step in this process is to convert the list of Batches into a list of Batch Requests that return the corresponding individual Batch.
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py batch_request_list"
+```
+
+## Build a validations list 
+
+A Checkpoint class's `validations` parameter consists of a list of dictionaries.  Each dictionary pairs one Batch Request with the Expectation Suite it should be validated against.  The following code creates a valid `validations` list where each Batch Request is associated with an Expectation Suite named `example_suite`.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_validations"
 ```
-Next, we initiate the creation of a`validations` object. In this particular instance, we associate each batch request with its corresponding expectation suite. 
 
 ## Run Checkpoint
 
-Subsequently, we provide the validations object, containing the pairings of batch requests and expectation suites, to a single checkpoint object. 
+The `validations` list, containing the pairings of Batch Requests and Expectation Suites, can now be passed to a single Checkpoint instance which will validate each Batch Request against its corresponding Expectation Suite.  This effectively validates each Batch included in the original multiple-Batch Batch Request.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_checkpoint"
 ```
-
-This `checkpoint` object effectively handles and processes all the batch requests and their respective batches.
-
-This approach allows us to streamline the processing of multiple data batches by utilizing just one asset and one checkpoint. Consequently, there is no need to create multiple assets and checkpoints to accomplish this task.

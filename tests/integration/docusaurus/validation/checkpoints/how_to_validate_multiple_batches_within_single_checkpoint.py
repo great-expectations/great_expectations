@@ -23,8 +23,11 @@ suite = context.add_expectation_suite(
 batch_request = asset.build_batch_request()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_batch_list">
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py batch_list">
 batch_list = asset.get_batch_list_from_batch_request(batch_request)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py batch_request_list">
 batch_request_list = [batch.batch_request for batch in batch_list]
 # </snippet>
 
@@ -41,7 +44,9 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 
 checkpoint_result = checkpoint.run()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py review data_docs">
 context.build_data_docs()
 context.open_data_docs()
 # </snippet>
