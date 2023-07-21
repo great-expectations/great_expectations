@@ -27,6 +27,9 @@ from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
+pytestmark = pytest.mark.filesystem
+
+
 yaml = YAMLHandler()
 
 
