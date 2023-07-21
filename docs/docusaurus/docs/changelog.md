@@ -11,6 +11,7 @@ title: Changelog
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
 ### 0.17.5
+* I have changed
 * [FEATURE] Airflow reference environment ([#8257](https://github.com/great-expectations/great_expectations/pull/8257))
 * [FEATURE] Missingness DataAssistant initial implementation ([#8268](https://github.com/great-expectations/great_expectations/pull/8268))
 * [FEATURE] DatabricksSQL FDS ([#8184](https://github.com/great-expectations/great_expectations/pull/8184))
