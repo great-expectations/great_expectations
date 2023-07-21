@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from abc import ABC
 from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import pydantic
@@ -11,7 +10,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch
 
 
-class MetricRepositoryBaseModel(BaseModel, ABC):
+class MetricRepositoryBaseModel(BaseModel):
     """Base class for all MetricRepository related models."""
 
     class Config:
@@ -27,12 +26,18 @@ class MetricException(MetricRepositoryBaseModel):
     )
 
 
-class Metric(MetricRepositoryBaseModel, ABC):
+class Metric(MetricRepositoryBaseModel):
     """Abstract computed metric. Domain, value and parameters are metric dependent.
 
     Note: This implementation does not currently take into account
     other domain modifiers, e.g. row_condition, condition_parser, ignore_row_if
     """
+
+    def __new__(cls, *args, **kwargs):
+        if cls is Metric:
+            raise NotImplementedError("Metric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
 
     id: uuid.UUID = Field(description="Metric id")
     run_id: uuid.UUID = Field(description="Run id")
@@ -40,30 +45,69 @@ class Metric(MetricRepositoryBaseModel, ABC):
     metric_name: str = Field(description="Metric name")
     exception: MetricException = Field(description="Exception info if thrown")
 
+    @classmethod
+    def update_forward_refs(cls):
+        from great_expectations.datasource.fluent.interfaces import Batch
+
+        super().update_forward_refs(
+            Batch=Batch,
+        )
+
 
 # Metric domain types
 
 
-class TableMetric(Metric, ABC):
-    pass
+class TableMetric(Metric):
+    def __new__(cls, *args, **kwargs):
+        if cls is TableMetric:
+            raise NotImplementedError("TableMetric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
 
 
-class ColumnMetric(Metric, ABC):
+class ColumnMetric(Metric):
+    def __new__(cls, *args, **kwargs):
+        if cls is ColumnMetric:
+            raise NotImplementedError("ColumnMetric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
+
     column: str = Field(description="Column name")
 
 
 # TODO: Add ColumnPairMetric, MultiColumnMetric
 
 
-class NumericMetric(Metric, ABC):
+# Metric value types
+
+
+class NumericMetric(Metric):
+    def __new__(cls, *args, **kwargs):
+        if cls is NumericMetric:
+            raise NotImplementedError("NumericMetric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
+
     value: Union[int, float] = Field(description="Metric value")
 
 
-class NumericListMetric(Metric, ABC):
+class NumericListMetric(Metric):
+    def __new__(cls, *args, **kwargs):
+        if cls is NumericListMetric:
+            raise NotImplementedError("NumericListMetric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
+
     value: List[float] = Field(description="Metric value")
 
 
-class StringListMetric(Metric, ABC):
+class StringListMetric(Metric):
+    def __new__(cls, *args, **kwargs):
+        if cls is StringListMetric:
+            raise NotImplementedError("StringListMetric is an abstract class.")
+        instance = super().__new__(cls)
+        return instance
+
     value: List[str] = Field(description="Metric value")
 
 

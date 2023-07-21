@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 """
 This file contains demo code for the column_descriptive_metrics module.
 Unit, integration and end-to-end tests should be written to replace this code.
@@ -21,6 +23,7 @@ from great_expectations.experimental.metric_repository.metric_repository import 
     MetricRepository,
 )
 from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent.interfaces import Batch
 
 import pandas as pd
 from great_expectations.experimental.metric_repository.metrics import (
@@ -29,6 +32,11 @@ from great_expectations.experimental.metric_repository.metrics import (
     NumericTableMetric,
     MetricException,
     StringListTableMetric,
+    TableMetric,
+    ColumnMetric,
+    NumericMetric,
+    NumericListMetric,
+    StringListMetric,
 )
 
 
@@ -59,7 +67,7 @@ def cloud_context_and_batch_request_with_simple_dataframe(
 
 
 @pytest.mark.xfail(
-    reason="This test is more of a demo and currently fails due to differing batch data object ids and ge_load_time batch marker"
+    reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
 )
 def test_demo_batch_inspector(
     metric_id: uuid.UUID,
@@ -119,20 +127,40 @@ def test_demo_batch_inspector(
     )
 
 
-# def test_cant_init_abstract_metric(
-#     metric_id: uuid.UUID,
-#     run_id: uuid.UUID,
-# ):
-#     # TODO: Which exception?
-#     with pytest.raises():
-#         _ = (
-#             Metric(
-#                 id=metric_id,
-#                 run_id=run_id,
-#                 # TODO: reimplement batch param
-#                 # batch=batch_from_action,
-#                 metric_name="table.columns",
-#                 value=Value(value=["col1", "col2"]),
-#                 details={},
-#             ),
-#         )
+@pytest.mark.parametrize(
+    "metric_type",
+    [
+        Metric,
+        TableMetric,
+        ColumnMetric,
+        NumericMetric,
+        NumericListMetric,
+        StringListMetric,
+    ],
+)
+def test_cannot_init_abstract_metric(
+    metric_id: uuid.UUID,
+    run_id: uuid.UUID,
+    cloud_context_and_batch_request_with_simple_dataframe: tuple[
+        CloudDataContext, BatchRequest
+    ],
+    metric_type: type(Metric),
+):
+    """This is a demo, we should implement better tests e.g. mocking Batch."""
+
+    context, batch_request = cloud_context_and_batch_request_with_simple_dataframe
+
+    # Get pointer to batch
+    validator = context.get_validator(batch_request=batch_request)
+    batch = validator.active_batch
+
+    metric_type.update_forward_refs()
+
+    with pytest.raises(NotImplementedError):
+        metric_type(
+            id=metric_id,
+            run_id=run_id,
+            batch=batch,
+            metric_name="table.columns",
+            exception=MetricException(),
+        )

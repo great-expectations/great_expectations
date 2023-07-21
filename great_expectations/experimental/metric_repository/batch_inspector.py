@@ -52,6 +52,8 @@ class BatchInspector:
         # Convert computed_metrics
         metrics = []
         metric_name = "table.row_count"
+        NumericTableMetric.update_forward_refs()
+        StringListTableMetric.update_forward_refs()
         metrics.append(
             NumericTableMetric(
                 id=self._generate_metric_id(),
