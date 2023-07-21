@@ -18,7 +18,7 @@ Validation Result Stores can be used to store and retrieve Validation Results an
 
 When you initialize your Data Context for the first time, a configuration for a local Validation Result Store will automatically be added to `great_expectations.yml`. You may change this configuration to work with different environments. 
 
-- For more information on configuring a Validation Results Store for a specific environment, please refer to our [in-depth guides on Validation Result Store configurations.](../guides/setup/index.md#validation-result-stores)
+- For more information on configuring a Validation Results Store for a specific environment, see [in-depth guides on Validation Result Store configurations.](../guides/setup//configuring_metadata_stores/configure_result_stores.md)
 
 When interactively creating Expectations that rely on Evaluation Parameters, it is possible to use existing Validation Results that have stored Metrics to populate those parameters.  If these Validation Results are not available in memory, then the only way to access them is by retrieving them through a Validation Result Store (if they were stored previously).
 

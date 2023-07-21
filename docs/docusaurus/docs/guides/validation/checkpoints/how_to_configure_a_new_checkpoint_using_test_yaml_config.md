@@ -15,7 +15,7 @@ Use the information provided here to learn how to configure a <TechnicalTag tag=
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- [Connected to Data](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+- [Connected to Data](/docs/guides/connecting_to_your_data/connect_to_data_lp)
 - [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
 
 </Prerequisites>
