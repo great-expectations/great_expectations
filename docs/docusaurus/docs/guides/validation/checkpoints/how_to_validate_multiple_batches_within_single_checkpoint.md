@@ -51,7 +51,7 @@ A Checkpoint validates Batch Requests, but only validates the last Batch found i
 
 ## Build a validations list 
 
-A Checkpoint class's `validations` parameter consists of a list of dictionaries.  Each dictionary pairs one Batch Request with the Expectation Suite it should be validated against.  The following code creates a valid `validations` list where each Batch Request is associated with an Expectation Suite named `example_suite`.
+A Checkpoint class's `validations` parameter consists of a list of dictionaries.  Each dictionary pairs one Batch Request with the Expectation Suite it should be validated against.  The following code creates a valid `validations` list and associates each Batch Request with an Expectation Suite named `example_suite`.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_validations"
 ```
