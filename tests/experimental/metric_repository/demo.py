@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from great_expectations.agent.actions import ActionResult
 from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
@@ -14,37 +12,35 @@ Unit, integration and end-to-end tests should be written to replace this code.
 import uuid
 from unittest import mock
 
+import pandas as pd
 import pytest
 
-from great_expectations.agent.models import (
-    RunColumnDescriptiveMetricsEvent,
-    CreatedResource,
-)
-from great_expectations.data_context import CloudDataContext
-from great_expectations.experimental.metric_repository.batch_inspector import (
-    BatchInspector,
-)
 from great_expectations.agent.actions.run_column_descriptive_metrics_action import (
     ColumnDescriptiveMetricsAction,
+)
+from great_expectations.agent.models import (
+    CreatedResource,
+    RunColumnDescriptiveMetricsEvent,
+)
+from great_expectations.data_context import CloudDataContext
+from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.experimental.metric_repository.batch_inspector import (
+    BatchInspector,
 )
 from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
-from great_expectations.datasource.fluent.interfaces import Batch
-
-import pandas as pd
 from great_expectations.experimental.metric_repository.metrics import (
+    ColumnMetric,
     Metric,
-    MetricRun,
-    NumericTableMetric,
     MetricException,
+    MetricRun,
+    NumericListMetric,
+    NumericMetric,
+    NumericTableMetric,
+    StringListMetric,
     StringListTableMetric,
     TableMetric,
-    ColumnMetric,
-    NumericMetric,
-    NumericListMetric,
-    StringListMetric,
 )
 
 
