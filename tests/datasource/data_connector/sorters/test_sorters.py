@@ -13,7 +13,7 @@ from great_expectations.datasource.data_connector.sorter import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_sorter_instantiation_base():

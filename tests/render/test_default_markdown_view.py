@@ -27,7 +27,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 )
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture()

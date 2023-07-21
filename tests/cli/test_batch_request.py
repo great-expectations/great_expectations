@@ -11,7 +11,7 @@ from great_expectations.cli.batch_request import (
 )
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @mock.patch("great_expectations.cli.batch_request.BaseDatasource")

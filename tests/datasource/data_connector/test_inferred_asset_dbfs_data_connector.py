@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.mark.integration

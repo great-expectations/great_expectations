@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():

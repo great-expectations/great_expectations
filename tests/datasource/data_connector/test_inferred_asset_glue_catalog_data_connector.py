@@ -15,7 +15,7 @@ from great_expectations.validator.validator import Validator
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 def test_basic_instantiation(glue_titanic_catalog):
