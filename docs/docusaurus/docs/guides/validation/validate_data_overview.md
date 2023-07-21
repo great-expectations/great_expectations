@@ -32,7 +32,7 @@ For more information on adding Batch Requests and Expectation Suites to a Checkp
 
 ### Checkpoints and Actions
 
-Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Validation Actions](./index.md#validation-actions).
+Actions are optional and are executed after a Checkpoint validates data. Some of the more common Actions include updating Data Docs, sending emails, posting Slack notifications, or sending custom notifications. You can create custom Actions to complete business specific actions after a Checkpoint Validates. For more information about Actions, see [Configure Actions](./validation_actions/actions_lp.md).
 
 ## Run your Checkpoint
 

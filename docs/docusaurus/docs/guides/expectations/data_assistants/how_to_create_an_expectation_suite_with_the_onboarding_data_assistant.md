@@ -13,7 +13,7 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_overview.md).
+- An understanding of how to [configure a Datasource](../../connecting_to_your_data/connect_to_data_lp.md).
 - An understanding of how to [configure a Batch Request](/docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 </Prerequisites>
