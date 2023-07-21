@@ -42,7 +42,7 @@ class UnknownEvent(EventBase):
 Event = Annotated[
     Union[
         RunOnboardingDataAssistantEvent,
-        RunDataAssistantEvent,
+        RunMissingnessDataAssistantEvent,
         RunCheckpointEvent,
         UnknownEvent,
     ],
