@@ -199,7 +199,6 @@ module.exports = {
         'contributing/contributing_maturity',
         'reference/customize_your_deployment',
         'reference/usage_statistics',
-        'conceptual_guides/expectation_classes',
         {
           type: 'category',
           label: 'API documentation',
@@ -270,6 +269,15 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-    'contributing/contributing'
+    'contributing/contributing',
+    {
+      type: 'category',
+      label: 'Learn',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
+      ]
+    },
   ]
 }
