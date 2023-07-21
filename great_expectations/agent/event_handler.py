@@ -10,6 +10,15 @@ from great_expectations.agent.models import (
     RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
+from great_expectations.experimental.metric_repository.batch_inspector import (
+    BatchInspector,
+)
+from great_expectations.experimental.metric_repository.cloud_data_store import (
+    CloudDataStore,
+)
+from great_expectations.experimental.metric_repository.metric_repository import (
+    MetricRepository,
+)
 
 
 class EventHandler:
@@ -26,7 +35,16 @@ class EventHandler:
         if isinstance(event, RunOnboardingDataAssistantEvent):
             action = RunOnboardingDataAssistantAction(context=self._context)
         elif isinstance(event, RunColumnDescriptiveMetricsEvent):
-            action = ColumnDescriptiveMetricsAction(context=self._context)
+            batch_inspector = BatchInspector(self._context)
+            cloud_data_store = CloudDataStore(self._context)
+            column_descriptive_metrics_repository = MetricRepository(
+                data_store=cloud_data_store
+            )
+            action = ColumnDescriptiveMetricsAction(
+                context=self._context,
+                batch_inspector=batch_inspector,
+                metric_repository=column_descriptive_metrics_repository,
+            )
         elif isinstance(event, RunCheckpointEvent):
             raise NotImplementedError
         else:

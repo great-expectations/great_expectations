@@ -2,6 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from great_expectations.agent.actions import ActionResult
+from great_expectations.experimental.metric_repository.cloud_data_store import (
+    CloudDataStore,
+)
+
 """
 This file contains demo code for the column_descriptive_metrics module.
 Unit, integration and end-to-end tests should be written to replace this code.
@@ -11,7 +16,10 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.agent.models import RunColumnDescriptiveMetricsEvent
+from great_expectations.agent.models import (
+    RunColumnDescriptiveMetricsEvent,
+    CreatedResource,
+)
 from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
@@ -85,18 +93,26 @@ def test_demo_batch_inspector(
         datasource_name=batch_request.datasource_name,
         data_asset_name=batch_request.data_asset_name,
     )
-    action = ColumnDescriptiveMetricsAction(context)
+
+    batch_inspector = BatchInspector(context)
+    cloud_data_store = CloudDataStore(context)
+    column_descriptive_metrics_repository = MetricRepository(
+        data_store=cloud_data_store
+    )
+    action = ColumnDescriptiveMetricsAction(
+        context=context,
+        batch_inspector=batch_inspector,
+        metric_repository=column_descriptive_metrics_repository,
+    )
+
+    # Override batch_inspector generate id methods to return consistent ids for the test
+    batch_inspector._generate_run_id = lambda: run_id
+    batch_inspector._generate_metric_id = lambda: metric_id
 
     with mock.patch(
-        f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_run_id",
-        return_value=run_id,
-    ), mock.patch(
-        f"{BatchInspector.__module__}.{BatchInspector.__name__}._generate_metric_id",
-        return_value=metric_id,
-    ), mock.patch(
         f"{MetricRepository.__module__}.{MetricRepository.__name__}.add",
     ) as mock_add:
-        action.run(event, "some_event_id")
+        run_result = action.run(event, "some_event_id")
 
     metrics_stored = mock_add.call_args[0][0]
 
@@ -125,6 +141,15 @@ def test_demo_batch_inspector(
             ),
         ],
     )
+
+    expected_action_result = ActionResult(
+        id="some_event_id",
+        type=event.type,
+        created_resources=[
+            CreatedResource(resource_id=str(run_id), type="MetricRun"),
+        ],
+    )
+    assert run_result == expected_action_result
 
 
 @pytest.mark.parametrize(
