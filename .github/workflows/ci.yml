@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true
     steps:
-      - run: echo "CI jobs are not running because this is a draft pull request."
+      - run: echo "CI jobs won't run because this is a draft pull request."
 
   static-analysis:
     runs-on: ubuntu-latest
