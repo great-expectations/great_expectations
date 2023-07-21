@@ -8,7 +8,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 from great_expectations.expectations.registry import get_expectation_impl
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_registry_basics():

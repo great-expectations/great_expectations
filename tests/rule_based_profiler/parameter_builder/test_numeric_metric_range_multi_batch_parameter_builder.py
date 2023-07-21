@@ -23,7 +23,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.integration
 
 
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(

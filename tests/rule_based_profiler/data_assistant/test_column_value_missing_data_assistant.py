@@ -40,6 +40,7 @@ def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     context = ephemeral_context_with_defaults
     datasource = context.sources.add_or_update_pandas("my_datasource")
     asset = datasource.add_dataframe_asset("my_asset")
+    # noinspection PyTypeChecker
     df = pd.DataFrame(
         {
             "non-null": [i for i in range(100)],
