@@ -125,5 +125,7 @@ def pandas_read_sql_query(
                 sql=sql, con=con, chunksize=chunksize, **kwargs
             )
     else:
-        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+        return_value = pd.read_sql_query(
+            sql=sql, con=con, chunksize=chunksize, **kwargs
+        )
     return return_value
