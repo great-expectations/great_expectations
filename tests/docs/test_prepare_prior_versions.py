@@ -133,13 +133,13 @@ import CLIRemoval from './components/warnings/_cli_removal.md'
 
 @pytest.mark.unit
 def test__prepend_version_info_to_name_for_md_relative_links():
-    contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/guides/validation/index.md#checkpoints)."""
+    contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
 
     version = "0.16.16"
     updated_contents = _prepend_version_info_to_name_for_md_relative_links(
         contents, version
     )
-    expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/0.16.16/guides/validation/#checkpoints)."""
+    expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
     assert updated_contents == expected_contents
 
 

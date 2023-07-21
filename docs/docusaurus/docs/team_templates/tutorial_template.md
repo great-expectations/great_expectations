@@ -13,7 +13,7 @@ title: <!-- Add the topic title here -->
 <!-- List the existing knowledge a user should have before they start the tutorial. Link to relevant information if it's available. What follows is an example provided for your reference. If existing knowledge isn't required, remove this section.-->
 
 - [An understanding of Great Expectations functionality](../guides/setup/setup_overview.md)
-- [How to create Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
+- [How to connect to source data](../guides/connecting_to_your_data/connect_to_data_lp.md)
 - [How to create an Expectation Suite](../guides/expectations/create_expectations_overview.md)
 
 ## First task 
