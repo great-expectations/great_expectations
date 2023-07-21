@@ -37,8 +37,6 @@ class UnknownEvent(EventBase):
     type: Literal["unknown_event"] = "unknown_event"
 
 
-# TODO: Can these Events be registered or should they be hardcoded here?
-
 Event = Annotated[
     Union[
         RunOnboardingDataAssistantEvent,
