@@ -5,6 +5,7 @@ on:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
+  workflow_dispatch:  # allows manual triggering with branch picker
 
 jobs:
   static-analysis:
