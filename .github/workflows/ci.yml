@@ -8,6 +8,7 @@ on:
   workflow_dispatch:  # allows manual triggering with branch picker
 
 jobs:
+  if: github.event.pull_request.draft == false
   ci-does-not-run-on-draft-pull-requests:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == true
@@ -16,7 +17,6 @@ jobs:
 
   static-analysis:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
 
     steps:
       - name: Checkout
@@ -42,7 +42,6 @@ jobs:
           invoke type-check --ci --pretty  --check-stub-sources
 
   unit-tests:
-    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -69,7 +68,6 @@ jobs:
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
 
   marker-tests:
-    if: github.event.pull_request.draft == false
     services:
       postgres:
         # Docker hub image
