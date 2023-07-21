@@ -1,9 +1,12 @@
-from great_expectations.agent.actions import RunDataAssistantAction
 from great_expectations.agent.actions.agent_action import ActionResult
+from great_expectations.agent.actions.data_assistants import (
+    RunMissingnessDataAssistantAction,
+    RunOnboardingDataAssistantAction,
+)
 from great_expectations.agent.models import (
     Event,
     RunCheckpointEvent,
-    RunDataAssistantEvent,
+    RunMissingnessDataAssistantEvent,
     RunOnboardingDataAssistantEvent,
 )
 from great_expectations.data_context import CloudDataContext
@@ -20,9 +23,10 @@ class EventHandler:
     def handle_event(self, event: Event, id: str) -> ActionResult:
         """Transform an Event into an ActionResult."""
 
-        if isinstance(event, (RunDataAssistantEvent, RunOnboardingDataAssistantEvent)):
-            # TODO(https://greatexpectations.atlassian.net/browse/DX-652): Remove RunOnboardingDataAssistantEvent after fully deprecating it
-            action = RunDataAssistantAction(context=self._context)
+        if isinstance(event, RunOnboardingDataAssistantEvent):
+            action = RunOnboardingDataAssistantAction(context=self._context)
+        elif isinstance(event, RunMissingnessDataAssistantEvent):
+            action = RunMissingnessDataAssistantAction(context=self._context)
         elif isinstance(event, RunCheckpointEvent):
             raise NotImplementedError
         else:
