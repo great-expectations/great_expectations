@@ -74,7 +74,7 @@ The template file is set up so that this will run the Expectation's `print_diagn
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeRegex:
   ✔ Has a valid library_metadata object
-    Has a docstring, including a one-line short description
+    Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -124,7 +124,7 @@ $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -165,7 +165,7 @@ $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
 ...
 	Has core logic that passes tests for all applicable Execution Engines and SQL dialects
 		  Only 0 / 2 tests for pandas are passing
@@ -231,7 +231,7 @@ $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
     Passes all linting checks
@@ -260,7 +260,7 @@ $ python expect_column_values_to_only_contain_vowels.py
 
 Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
   ✔ Has a valid library_metadata object
-  ✔ Has a docstring, including a one-line short description
+  ✔ Has a docstring, including a one-line short description that begins with "Expect" and ends with a period
   ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
   ✔ Passes all linting checks
