@@ -8,10 +8,10 @@ from great_expectations.agent.models import (
     CreatedResource,
     RunDataAssistantEvent,
 )
+from great_expectations.core.batch import BatchRequest
+from great_expectations.data_context.data_context import CloudDataContext
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
 from great_expectations.exceptions import StoreBackendError
-from great_expectations.data_context.data_context import CloudDataContext
-from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.data_assistant_result.data_assistant_result import (
     DataAssistantResult,
 )
@@ -35,7 +35,7 @@ def build_batch_request(
         batch_request = asset.build_batch_request()
     except ValueError as e:
         raise ValueError(
-            f"The RunDataAssistant Action for data assistant cannot be used with an in-memory dataframe asset."
+            "The RunDataAssistant Action for data assistant cannot be used with an in-memory dataframe asset."
         ) from e
 
     return batch_request
