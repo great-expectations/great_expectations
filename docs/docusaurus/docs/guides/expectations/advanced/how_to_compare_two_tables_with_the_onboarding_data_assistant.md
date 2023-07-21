@@ -71,7 +71,7 @@ Some dialects of SQL handle data types in different ways, which can lead to (amo
 
 In our hypothetical use case these inconsistencies are tolerated, and therefore Expectations are not set against the columns likely to generate the errors.
 
-This is one example of the ways in which we can customize the Suite built by our Data Assistant.
+This is an example of how an Expectation Suite created by the Data Assistant can be customized.
 For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
 </details>
 
