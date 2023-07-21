@@ -62,3 +62,10 @@ The `validations` list, containing the pairings of Batch Requests and Expectatio
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_checkpoint"
 ```
+
+## Review the Validation Results
+
+Once the validations have been run, the following code can be used to build and view the Validation Results as Data Docs:
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py review data_docs"
+```
