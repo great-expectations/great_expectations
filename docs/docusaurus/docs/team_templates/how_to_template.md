@@ -20,7 +20,7 @@ To complete this how-to, you'll complete the following tasks:
 <!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section. -->
 
 - [A Great Expectations instance](../guides/setup/setup_overview.md)
-- [A Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
+- [A Data Connection](../guides/connecting_to_your_data/connect_to_data_lp.md)
 - [An Expectation Suite](../guides/expectations/create_expectations_overview.md)
 
 
