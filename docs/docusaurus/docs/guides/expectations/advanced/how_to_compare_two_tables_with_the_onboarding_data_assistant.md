@@ -69,7 +69,7 @@ In the previous example, specific columns were excluded to prevent Expectations 
 
 Some dialects of SQL handle data types in different ways, which can lead to (among other things) mismatches in precision on some numbers.
 
-For our hypothetical use case, we're willing to tolerate those slight inconsistencies, and so aren't setting expectations against the columns likely to generate those errors.
+In our hypothetical use case these inconsistencies are tolerated, and therefore Expectations are not set against the columns likely to generate the errors.
 
 This is one example of the ways in which we can customize the Suite built by our Data Assistant.
 For more on these configurations, see our [guide on the `OnboardingDataAssistant](../../../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md).
