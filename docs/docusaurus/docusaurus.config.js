@@ -27,31 +27,15 @@ module.exports = {
 
   themeConfig: {
     algolia: {
-      // If Algolia did not provide you any appId, use 'BH4D9OD16A'
-      appId: 'B4HD9FJQCB',
-
-      // Public API key: it is safe to commit it
-      apiKey: '4f0951c44b2d9b26c88bcac0b14ebdfd',
-
-      indexName: 'docs-greatexpectations',
-
+      // See: https://docusaurus.io/docs/search#connecting-algolia
+      appId: 'PFK639M3JK', 
+      apiKey: 'fc3e3b1588b46d8d476aca9c1cadd53f',
+      indexName: 'greatexpectations',
       searchPagePath: 'search',
-      // schedule is in UTC
-      schedule: 'every 1 day at 5:00 pm'
-
-      // Optional: see doc section below
-      // contextualSearch: true,
-
-      // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
-      // externalUrlRegex: 'external\\.com|domain\\.com',
-
-      // Optional: see doc section below
-      // appId: 'YOUR_APP_ID',
-
-      // Optional: Algolia search parameters
-      // searchParameters: {},
-
-      // ... other Algolia params
+      contextualSearch: true,
+      searchParameters: {
+        facetFilters: ['version:current'],
+      }
     },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')

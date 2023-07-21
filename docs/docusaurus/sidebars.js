@@ -7,6 +7,9 @@ module.exports = {
       link: { type: 'doc', id: 'guides/setup/get_started_lp'},
       items: [
         'tutorials/quickstart/quickstart',
+        {
+          type: 'doc', id: 'conceptual_guides/gx_overview', label: 'GX Overview'
+        },
         'tutorials/getting_started/how_to_use_great_expectations_in_databricks',
         'tutorials/getting_started/how_to_use_great_expectations_with_sql',
       ]
@@ -193,10 +196,9 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-    'contributing/contributing_maturity',
-    'reference/customize_your_deployment',
-    'reference/usage_statistics',
-    'conceptual_guides/expectation_classes',
+        'contributing/contributing_maturity',
+        'reference/customize_your_deployment',
+        'reference/usage_statistics',
         {
           type: 'category',
           label: 'API documentation',
@@ -210,7 +212,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Glossary of Terms',
+          label: 'Glossary',
           link: { type: 'doc', id: 'glossary' },
           items: [
             'terms/action',
@@ -268,5 +270,14 @@ module.exports = {
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
     'contributing/contributing',
+    {
+      type: 'category',
+      label: 'Learn',
+      link: { type: 'doc', id: 'conceptual_guides/learn_lp' }, 
+      items: [
+        'conceptual_guides/expectation_classes',
+        'conceptual_guides/metricproviders',
+      ]
+    },
   ]
 }

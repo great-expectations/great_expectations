@@ -12,6 +12,9 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.datasource import SimpleSqlalchemyDatasource
 
+# module level markers
+pytestmark = pytest.mark.sqlite
+
 
 @pytest.fixture()
 def create_db_and_instantiate_simple_sql_datasource():
