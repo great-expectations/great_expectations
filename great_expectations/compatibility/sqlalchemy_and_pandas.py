@@ -116,12 +116,14 @@ def pandas_read_sql_query(
     ):
         warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
 
-    with warnings.catch_warnings():
-        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
-        # but using the base class here since sqlalchemy is an optional dependency and this
-        # warning type only exists in sqlalchemy < 2.0.
-        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-        return_value = pd.read_sql_query(
-            sql=sql, con=con, chunksize=chunksize, **kwargs
-        )
-        return return_value
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            return_value = pd.read_sql_query(
+                sql=sql, con=con, chunksize=chunksize, **kwargs
+            )
+    else:
+        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+    return return_value
