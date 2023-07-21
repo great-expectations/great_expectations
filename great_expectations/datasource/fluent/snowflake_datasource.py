@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional, Union
 
 import pydantic
 from pydantic import AnyUrl, errors
@@ -89,6 +89,17 @@ class SnowflakeDatasource(SQLDatasource):
     role: Optional[str] = None
     numpy: bool = False
 
+    _EXTRA_EXCLUDED_EXEC_ENG_ARGS: ClassVar[set] = {
+        "role",
+        "account",
+        "schema_",
+        "database",
+        "user",
+        "password",
+        "numpy",
+        "warehouse",
+    }
+
     @pydantic.root_validator
     def _check_xor_input_args(cls, values: dict) -> dict:
         # Method 1 - connection string
@@ -103,12 +114,6 @@ class SnowflakeDatasource(SQLDatasource):
                 "Must provide either a connection string or a combination of account, user, and password."
             )
         return values
-
-    @classmethod
-    def _get_exec_engine_excludes(cls) -> set[str]:
-        sql_datasource_fields: set[str] = set(SQLDatasource.__fields__.keys())
-        snowflake_fields: set[str] = set(SnowflakeDatasource.__fields__.keys())
-        return snowflake_fields.difference(sql_datasource_fields)
 
     def _get_connect_args(self) -> dict[str, str | bool]:
         excluded_fields: set[str] = set(SQLDatasource.__fields__.keys())
