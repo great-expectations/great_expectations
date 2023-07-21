@@ -58,7 +58,7 @@ A Checkpoint class's `validations` parameter consists of a list of dictionaries.
 
 ## Run Checkpoint
 
-The `validations` list, containing the pairings of Batch Requests and Expectation Suites, can now be passed to a single Checkpoint instance which will validate each Batch Request against its corresponding Expectation Suite.  This effectively validates each Batch included in the original multiple-Batch Batch Request.
+The `validations` list, containing the pairings of Batch Requests and Expectation Suites, can now be passed to a single Checkpoint instance which validates each Batch Request against its corresponding Expectation Suite. This effectively validates each Batch included in the original multiple-Batch Batch Request.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py add_checkpoint"
 ```
