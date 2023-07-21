@@ -65,7 +65,7 @@ The `validations` list, containing the pairings of Batch Requests and Expectatio
 
 ## Review the Validation Results
 
-Once the validations have been run, the following code can be used to build and view the Validation Results as Data Docs:
+After the validations run, use the following code to build and view the Validation Results as Data Docs.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py review data_docs"
 ```
