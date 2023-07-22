@@ -675,7 +675,6 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 @click.command()
 @click.option(
     "--only-combine",
-    "-O",
     "only_combine",
     is_flag=True,
     default=False,
