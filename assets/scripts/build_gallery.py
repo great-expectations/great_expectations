@@ -21,6 +21,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.expectations.expectation import Expectation
+from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -302,11 +303,22 @@ def get_expectation_instances(expectations_info):
                 expectation_tracebacks.write(traceback.format_exc())
                 continue
 
-        expectation_instances[
-            expectation_name
-        ] = great_expectations.expectations.registry.get_expectation_impl(
-            expectation_name
-        )()
+        try:
+            expectation_instances[
+                expectation_name
+            ] = great_expectations.expectations.registry.get_expectation_impl(
+                expectation_name
+            )()
+        except ExpectationNotFoundError:
+            logger.error(
+                f"Failed to get Expectation implementation from registry: {expectation_name}"
+            )
+            print(traceback.format_exc())
+            expectation_tracebacks.write(
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+            continue
     return expectation_instances
 
 
