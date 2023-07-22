@@ -67,7 +67,6 @@ title: Changelog
 * [CONTRIB] Add KS test custom expectation ([#8344](https://github.com/great-expectations/great_expectations/pull/8344))
 
 ### 0.17.5
-* I have changed
 * [FEATURE] Airflow reference environment ([#8257](https://github.com/great-expectations/great_expectations/pull/8257))
 * [FEATURE] Missingness DataAssistant initial implementation ([#8268](https://github.com/great-expectations/great_expectations/pull/8268))
 * [FEATURE] DatabricksSQL FDS ([#8184](https://github.com/great-expectations/great_expectations/pull/8184))
