@@ -20,6 +20,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
@@ -302,11 +303,22 @@ def get_expectation_instances(expectations_info):
                 expectation_tracebacks.write(traceback.format_exc())
                 continue
 
-        expectation_instances[
-            expectation_name
-        ] = great_expectations.expectations.registry.get_expectation_impl(
-            expectation_name
-        )()
+        try:
+            expectation_instances[
+                expectation_name
+            ] = great_expectations.expectations.registry.get_expectation_impl(
+                expectation_name
+            )()
+        except ExpectationNotFoundError:
+            logger.error(
+                f"Failed to get Expectation implementation from registry: {expectation_name}"
+            )
+            print(traceback.format_exc())
+            expectation_tracebacks.write(
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+            continue
     return expectation_instances
 
 
@@ -676,7 +688,6 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 @click.command()
 @click.option(
     "--only-combine",
-    "-O",
     "only_combine",
     is_flag=True,
     default=False,
@@ -725,13 +736,37 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--backends",
     "-b",
     "backends",
-    help="Backends to consider running tests against (comma-separated)",
+    help=(
+        "Comma-separated names of backends (in a single string) to consider "
+        "running tests against (bigquery, mssql, mysql, pandas, postgresql, "
+        "redshift, snowflake, spark, sqlite, trino)"
+    ),
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
+    """Find Expectations, run their diagnostics methods, and generate JSON files with test result summaries for each backend
 
     - args: snake_name of specific Expectations to include (useful for testing)
+
+    By default, all core and contrib Expectations are found and tested against
+    every backend that can be connected to. If any specific Expectation names
+    are passed in, only those Expectations will be tested.
+
+    If all Expectations are included and there are no test running modifiers
+    specified, the JSON files with tests result summaries will have the "full"
+    suffix. If test running modifiers are specified (--ignore-suppress or
+    --ignore-only-for), the JSON files will have the "nonstandard" suffix. If
+    any Expectations are excluded, the JSON files will have the "partial"
+    suffix.
+
+    If all {backend}_full.json files are present and the --only-combine option
+    is used, then the complete JSON file for the expectation gallery (including
+    a lot of metadata for each Expectation) will be written to outfile_name
+    (default: expectation_library_v2--staging.json).
+
+    If running locally (i.e. not in CI), you can run docker containers for
+    mssql, mysql, postgresql, and trino. Simply navigate to
+    assets/docker/{backend} and run `docker-compose up -d`
     """
     backends = []
     if kwargs["backends"]:
