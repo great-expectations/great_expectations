@@ -159,9 +159,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             "column map expectation",
             "special characters",
         ],
-        "contributors": [
-            "@jaibirsingh",
-        ],
+        "contributors": ["@jaibirsingh", "@calvingdu"],
     }
 
     # This is the id string of the Metric used by this Expectation.
