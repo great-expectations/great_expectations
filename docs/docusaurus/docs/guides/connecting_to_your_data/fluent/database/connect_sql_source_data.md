@@ -25,6 +25,7 @@ Use the information provided here to connect to source data stored in SQL databa
   {label: 'PostgreSQL', value:'postgresql'},
   {label: 'SQLite', value:'sqlite'},
   {label: 'Snowflake', value:'snowflake'},
+  {label: 'Databricks SQL', value:'databricks'},
   ]}>
 <TabItem value="sql">
 
@@ -283,7 +284,7 @@ Connect GX to a Snowflake database to access source data.
 
 ### Determine your connection string
 
-The following code examples use a Snowflake connection string. A SQLite connection string connects GX to the Snowflake database.
+The following code examples use a Snowflake connection string. A Snowflake connection string connects GX to the Snowflake database.
 
 The following code is an example of a Snowflake connection string format:
 
@@ -363,6 +364,86 @@ For more information, check out Snowflake's official documentation on [the Snowf
 
 Repeat the previous steps to add additional Data Assets.
 
+
+</TabItem>
+<TabItem value="databricks">
+
+## Databricks SQL
+
+Connect GX to Databricks to access source data.
+
+### Prerequisites
+
+<Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+
+- [An installation of GX set up to work with SQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
+- Source data stored in a Databricks cluster
+
+</Prerequisites> 
+
+### Import GX and instantiate a Data Context
+
+<ImportGxAndInstantiateADataContext />
+
+### Determine your connection string
+
+The following code examples use a Databricks SQL connection string. A connection string connects GX to Databricks.
+
+The following code is an example of a Databricks SQL connection string format:
+
+```python
+my_connection_string = "databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>"
+```
+
+### Create a Databricks SQL Datasource
+
+1. Run the following Python code to set the `name` and `connection_string` variables:
+
+    ```python
+    datasource_name = "my_databricks_sql_datasource"
+    ```
+
+2. Run the following Python code to create a Snowflake Datasource:
+
+    ```python 
+    datasource = context.sources.add_databricks_sql(
+        name=datasource_name, 
+        connection_string=my_connection_string,
+    )
+    ```
+
+### Connect to the data in a table (Optional)
+
+1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
+
+    ```python
+    asset_name = "my_asset"
+    asset_table_name = my_table_name
+    ```
+
+2. Run the following Python code to create the Data Asset:
+
+    ```python
+    table_asset = datasource.add_table_asset(name=asset_name, table_name=asset_table_name)
+    ```
+
+### Connect to the data in a query (Optional)
+
+1. Run the following Python code to define a Query Data Asset:
+
+    ```python
+    asset_name = "my_query_asset"
+    query = "SELECT * from yellow_tripdata_sample_2019_01"
+    ```
+2. Run the following Python code to create the Data Asset:
+
+    ```python
+    query_asset = datasource.add_query_asset(name=asset_name, query=query)
+    ```
+
+### Add additional tables or queries (Optional)
+
+Repeat the previous steps to add additional Data Assets.
 
 </TabItem>
 </Tabs>
