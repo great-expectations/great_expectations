@@ -20,8 +20,8 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.expectations.expectation import Expectation
 from great_expectations.exceptions.exceptions import ExpectationNotFoundError
+from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
