@@ -37,7 +37,9 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, allowed_characters, **kwargs):
         def not_contain_special_character(val, *special_characters):
-            special_characters = [char for char in special_characters if char not in allowed_characters]
+            special_characters = [
+                char for char in special_characters if char not in allowed_characters
+            ]
 
             for c in special_characters:
                 if c in str(val):
@@ -121,9 +123,10 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "mostly_no_special_character", 
+                        "column": "mostly_no_special_character",
                         "allowed_characters": ["@", "$", "%", "!"],
-                        "mostly": 1},
+                        "mostly": 1,
+                    },
                     "out": {
                         "success": True,
                         "unexpected_index_list": [],
@@ -135,9 +138,10 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "mostly_no_special_character", 
+                        "column": "mostly_no_special_character",
                         "allowed_characters": ["@"],
-                        "mostly": 1},
+                        "mostly": 1,
+                    },
                     "out": {
                         "success": False,
                         "unexpected_index_list": [1, 2],
@@ -145,7 +149,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     },
                 },
             ],
-        }
+        },
     ]
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -155,7 +159,9 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             "column map expectation",
             "special characters",
         ],
-        "contributors": ["@jaibirsingh", ],
+        "contributors": [
+            "@jaibirsingh",
+        ],
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -165,11 +171,8 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("mostly", "allowed_characters")
 
-    default_kwarg_values = {
-        "mostly": 1,
-        "allowed_characters": []
-    }
-    
+    default_kwarg_values = {"mostly": 1, "allowed_characters": []}
+
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -187,7 +190,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-            
+
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
         #     assert (
@@ -219,7 +222,13 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "allowed_characters", "mostly", "row_condition", "condition_parser"],
+            [
+                "column",
+                "allowed_characters",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+            ],
         )
 
         template_str = "values must not contain special characters"
