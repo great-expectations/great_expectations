@@ -649,7 +649,8 @@ def format_docstring_to_markdown(docstr: str) -> str:
                 # Determine the number of spaces indenting the first line of code so they can be removed from all lines
                 # in the code block without wrecking the hierarchical indentation levels of future lines.
                 if (
-                    first_code_indentation is None and line.strip() != ""  # noqa: PLC1901
+                    first_code_indentation is None
+                    and line.strip() != ""  # noqa: PLC1901
                 ):
                     first_code_indentation = len(
                         re.match(r"\s*", original_line, re.UNICODE).group(0)
