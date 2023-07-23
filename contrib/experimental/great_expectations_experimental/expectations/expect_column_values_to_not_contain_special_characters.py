@@ -1,11 +1,16 @@
 import string
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -35,7 +40,7 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, allowed_characters, **kwargs):
+    def _pandas(cls, column, allowed_characters: list or set, **kwargs):
         def not_contain_special_character(val, *special_characters):
             special_characters = [
                 char for char in special_characters if char not in allowed_characters
@@ -49,6 +54,32 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
         return column.apply(
             not_contain_special_character, args=(list(string.punctuation))
         )
+
+    # This method defines the business logic for evaluating the metric when using a SparkExecutionEngine
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, allowed_characters: list or set, **kwargs):
+        def not_contain_special_character(val, *special_characters):
+            special_characters = [
+                char
+                for char in list(string.punctuation)
+                if char not in allowed_characters
+            ]
+
+            for c in special_characters:
+                if c in str(val):
+                    return False
+            return True
+
+        # Register the UDF
+        not_contain_special_character_udf = F.udf(
+            not_contain_special_character, types.BooleanType()
+        )
+
+        # Apply the UDF to the column
+        result_column = F.when(
+            not_contain_special_character_udf(column, F.lit(string.punctuation)), True
+        ).otherwise(False)
+        return result_column
 
 
 # This class defines the Expectation itself
@@ -119,7 +150,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "positive_test_with_allowed_special_character",
+                    "title": "positive_test_with_allowed_special_character_list",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -134,12 +165,42 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "negative_test_with_allowed_special_character",
+                    "title": "negative_test_with_allowed_special_character_list",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_no_special_character",
                         "allowed_characters": ["@"],
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [1, 2],
+                        "unexpected_list": ["pear$!", "%banana%"],
+                    },
+                },
+                {
+                    "title": "positive_test_with_allowed_special_character_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": {"@", "$", "%", "!"},
+                        "mostly": 1,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_allowed_special_character_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_no_special_character",
+                        "allowed_characters": {"@"},
                         "mostly": 1,
                     },
                     "out": {
@@ -188,17 +249,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
 
         return True
 
