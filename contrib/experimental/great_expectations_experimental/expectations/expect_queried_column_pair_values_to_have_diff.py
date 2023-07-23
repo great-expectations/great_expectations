@@ -70,7 +70,7 @@ class ExpectQueriedColumnPairValuesToHaveDiff(QueryExpectation):
         diff: Union[float, int] = configuration["kwargs"].get("diff")
         mostly: str = configuration["kwargs"].get("mostly")
         query_result = metrics.get("query.column_pair")
-        query_result = dict([element.values() for element in query_result])
+        query_result = [tuple(element.values()) for element in query_result]
 
         success = (
             sum([(abs(x[0]) == diff) for x in query_result]) / len(query_result)

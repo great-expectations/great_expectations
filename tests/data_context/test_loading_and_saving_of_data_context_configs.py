@@ -2,7 +2,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 
-pytestmarks = [pytest.mark.filesystem]
+pytestmarks = pytest.mark.filesystem
 
 
 def read_config_from_file(config_filename):

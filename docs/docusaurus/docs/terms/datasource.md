@@ -46,5 +46,5 @@ This next snippet shows how to retrieve the Datasource from the Data Context.
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
 ```
 
-For detailed instructions on how to create Datasources that are configured for various backends, see [our documentation on Connecting to Data](../guides/connecting_to_your_data/index.md).
+For detailed instructions on how to create Datasources that are configured for various backends, see [our documentation on Connecting to Data](../guides/connecting_to_your_data/connect_to_data_lp.md).
 

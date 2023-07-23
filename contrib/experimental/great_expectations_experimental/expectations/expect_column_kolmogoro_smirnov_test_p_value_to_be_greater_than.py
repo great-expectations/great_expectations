@@ -15,12 +15,12 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 
 
-class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
+class ColumnKolmogorovSmirnovTestPValueGreaterThan(TableMetricProvider):
     # This is the id string that will be used to reference your Metric.
     metric_name = "column.p_value_greater_than_threshold"
     value_keys = (
-        "observed_column",
-        "expected_column",
+        "column_a",
+        "column_b",
     )
 
     # This method implements the core logic for the PandasExecutionEngine
@@ -38,15 +38,15 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         )
 
         # metric value kwargs: kwargs passed in through the expectation
-        observed_column = metric_value_kwargs.get("observed_column")
-        expected_column = metric_value_kwargs.get("expected_column")
+        column_a = metric_value_kwargs.get("column_a")
+        column_b = metric_value_kwargs.get("column_b")
 
-        observed_values = df[observed_column].to_list()
-        expected_values = df[expected_column].to_list()
+        column_a_values = df[column_a].to_list()
+        column_b_values = df[column_b].to_list()
 
-        chi2, p_value = stats.chisquare(observed_values, expected_values)
+        test_statistic, p_value = stats.ks_2samp(column_a_values, column_b_values)
 
-        return chi2, p_value
+        return test_statistic, p_value
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -63,12 +63,12 @@ class ColumnChisquareTestPValueGreaterThan(TableMetricProvider):
         }
 
 
-class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
+class ExpectColumnKolmogorovSmirnovTestPValueToBeGreaterThan(BatchExpectation):
     """Calculates chi-squared of 2 columns, checks if p-value > user threshold."""
 
     examples = [
         {
-            "data": {"x": [30, 45, 25, 20], "y": [40, 40, 20, 20]},
+            "data": {"x": [1, 2, 3, 4, 5], "y": [2, 4, 6, 8, 10]},
             "only_for": ["pandas"],
             "tests": [
                 {
@@ -76,8 +76,8 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "observed_column": "x",
-                        "expected_column": "y",
+                        "column_a": "x",
+                        "column_b": "y",
                         "p_value_threshold": 0.1,
                     },
                     "out": {"success": True},
@@ -87,8 +87,8 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "observed_column": "x",
-                        "expected_column": "y",
+                        "column_a": "x",
+                        "column_b": "y",
                         "p_value_threshold": 0.5,
                     },
                     "out": {"success": False},
@@ -103,8 +103,8 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = (
         "p_value_threshold",
-        "observed_column",
-        "expected_column",
+        "column_a",
+        "column_b",
     )
 
     # This dictionary contains default values for any parameters that should have default values.
@@ -136,7 +136,7 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         threshold = configuration["kwargs"].get("p_value_threshold")
-        chi2, p_value = metrics.get("column.p_value_greater_than_threshold")
+        test_statistic, p_value = metrics.get("column.p_value_greater_than_threshold")
 
         success = p_value >= threshold
 
@@ -156,4 +156,4 @@ class ExpectColumnChisquareTestPValueToBeGreaterThan(BatchExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnChisquareTestPValueToBeGreaterThan().print_diagnostic_checklist()
+    ExpectColumnKolmogorovSmirnovTestPValueToBeGreaterThan().print_diagnostic_checklist()

@@ -17,7 +17,7 @@ from great_expectations.render.renderer.inline_renderer import InlineRenderer
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def clean_serialized_rendered_atomic_content_graphs(

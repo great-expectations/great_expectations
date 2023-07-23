@@ -17,7 +17,7 @@ from great_expectations.render.renderer.content_block import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture
