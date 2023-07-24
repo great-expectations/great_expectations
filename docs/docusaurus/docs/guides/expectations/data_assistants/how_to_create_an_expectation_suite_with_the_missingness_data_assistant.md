@@ -5,8 +5,9 @@ title: Create an Expectation Suite with the Missingness Data Assistant
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This guide demonstrates how to use the Missingness Data Assistant to Profile your data and automate the generation of an
-Expectation Suite, which you can then adjust to be suited for your specific needs.
+Use the information provided here to learn how you can use the Missingness Data Assistant to profile your data and automate the creation of an Expectation Suite.
+
+All the code used in the examples is available in GitHub at this location: [how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py).
 
 ## Prerequisites
 
@@ -20,154 +21,126 @@ Expectation Suite, which you can then adjust to be suited for your specific need
 
 ## Prepare your Batch Request
 
-Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
- Request queries will consist of a sample of the New York taxi trip data.
+In the following examples, you'll be using a Batch Request with multiple Batches and the Datasource that the Batch Request queries uses existing New York taxi trip data.
 
-This is the configuration that you will use for your `Datasource`:
+This is the `Datasource` configuration:
  
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py datasource_config"
 ```
 
-And this is the configuration that you will use for your `BatchRequest`:
+This is the `BatchRequest` configuration:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py batch_request"
 ```
 
 :::caution
-The Missingness Data Assistant will run a number volume of queries against your `Datasource`. Data Assistant performance
-  can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is
-  recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long. The Missingness Data Assistant can also be ran on a single batch if the number of null records is expected to be similar across batches.
+The Missingness Data Assistant runs multiple queries against your `Datasource`. Data Assistant performance can vary significantly depending on the number of Batches, the number of records per Batch, and network latency. If Data Assistant runtimes are too long, use a smaller `BatchRequest`. You can also run the Missingness Data Assistant on a single Batch when you expect the number of null records to be similar across Batches.
 :::
 
 ## Prepare a new Expectation Suite
 
-Preparing a new Expectation Suite is done with the Data Context's `add_expectation_suite(...)` method, as seen in
-this code example:
+Run the following code to prepare a new Expectation Suite with the Data Context `add_expectation_suite(...)` method:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py expectation_suite"
 ```
 
 ## Run the Missingness Data Assistant
 
-Running a Data Assistant is as simple as calling the `run(...)` method for the appropriate assistant.
+To run a Data Assistant, you can call the `run(...)` method for the assistant. However, there are numerous parameters available for the `run(...)` method of the Missingness Data Assistant. For instance, the `exclude_column_names` parameter allows you to define the columns that should not be Profiled.
 
-That said, there are numerous parameters available for the `run(...)` method of the Missingness Data Assistant. For
- instance, the `exclude_column_names` parameter allows you to provide a list columns that should not be Profiled.
-
-For this guide, you will exclude the following columns:
+Run the following code to define the columns to exclude:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names"
 ```
 
-The following code shows how to run the Missingness Assistant. In this code block, `context` is an instance of your Data Context.
+Run the following code to run the Missingness Data Assistant:
+
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result"
 ```
 
+In this example, `context` is your Data Context instance.
+
 :::note
-If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the
-  data in the `BatchRequest`, there is no need to alter the command above. You will be using the default `estimation` parameter (`"exact"`).
-  If you want to identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
+If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the data in the `BatchRequest`, you don't need to alter the example code. You're using the default `estimation` parameter (`"exact"`). To identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
 :::
 
 :::note
-The Missingness Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such
-  as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`.
-  For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/column_value_missing_data_assistant.py#L44).
-:::
-
-:::note
-If you would like to learn how to edit the Expectation Suite, please refer to [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
+The Missingness Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. To view the available parameters, see [this information](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/column_value_missing_data_assistant.py#L44).
 :::
 
 ## Save your Expectation Suite
 
-Once you have executed the Missingness Data Assistant's `run(...)` method and generated Expectations for your data, you
- need to load them into your Expectation Suite and save them. You will do this by using the Data Assistant result:
+1. After executing the Missingness Data Assistant's `run(...)` method and generating Expectations for your data, run the following code to load and save them into your Expectation Suite:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py get_expectation_suite"
+  ```
 
-And once the Expectation Suite has been retrieved from the Data Assistant result, you can save it like so:
+2. Run the following code to save the Expectation Suite:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py save_expectation_suite"
+  ```
 
-## Test your Expectation Suite with a `SimpleCheckpoint`
+## Test your Expectation Suite
 
-To verify that your Expectation Suite is working, you can use a `SimpleCheckpoint`. First, you will configure one to
- operate with the Expectation Suite and Batch Request that you have already defined:
+1. Run the following code to use a `SimpleCheckpoint` to operate with the Expectation Suite and Batch Request that you defined:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint_config"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint_config"
+  ```
 
-Once you have our `SimpleCheckpoint`'s configuration defined, you can instantiate a `SimpleCheckpoint` and run it. You
- can check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
+2. Run the following code to instantiate and run a `SimpleCheckpoint`:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py checkpoint"
+  ```
 
-## Plot and inspect the Data Assistant's calculated Metrics and produced Expectations
+  You can check the `"success"` key of the `SimpleCheckpoint`'s results to verify that your Expectation Suite worked.
 
-To see Batch-level visualizations of Metrics computed by the Missingness Data Assistant run:
+## Plot and inspect Metrics and Expectations
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics"
-```
+1. Run the following code to view Batch-level visualizations of the Metrics computed by the Missingness Data Assistant:
 
-![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_metrics"
+  ```
 
-:::note
-Hovering over a data point will provide more information about the Batch and its calculated Metric value in a tooltip.
-:::
+  ![Plot Metrics](../../../images/data_assistant_plot_metrics.png)
 
-To see all Metrics computed by the Missingness Data Assistant run:
+  :::note
+  Hover over a data point to view more information about the Batch and its calculated Metric value.
+  :::
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py metrics_by_domain"
-```
+2. Run the following code to view all Metrics computed by the Missingness Data Assistant:
 
-To plot the Expectations produced, and the associated Metrics calculated by the Missingness Data Assistant run:
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py metrics_by_domain"
+  ```
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_expectations_and_metrics"
-```
+3. Run the following code to plot the Expectations and the associated Metrics calculated by the Missingness Data Assistant:
 
-![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py plot_expectations_and_metrics"
+  ```
 
-:::note
-If no Expectation was produced by the Data Assistant for a given Metric, neither the Expectation nor the Metric will be visualized by the `plot_expectations_and_metrics()` method.
-:::
+  ![Plot Expectations and Metrics](../../../images/data_assistant_plot_expectations_and_metrics.png)
 
-To see the Expectations produced and grouped by Domain run:
+  :::note
+  The Expectation and the Metric are not visualized by the `plot_expectations_and_metrics()` method when an Expectation is not produced by the Missingness Data Assistant for a given Metric.
+  :::
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_domain_type"
-```
+4. Run the following command to view the Expectations produced and grouped by Domain:
 
-To see the Expectations produced and grouped by Expectation type run:
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_domain_type"
+  ```
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
-```
+5. Run the following command to view the Expectations produced and grouped by Expectation type:
 
-## Edit your Expectation Suite, save, and test again (Optional)
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py show_expectations_by_expectation_type"
+  ```
 
-The Missingness Data Assistant will create as many applicable Expectations as it can for the permitted columns. This
- provides a solid base for analyzing your data, but may exceed your needs. It is also possible that you may possess
- some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In either of these
- (or any other) cases, you can edit your Expectation Suite to more closely suite your needs.
+## Edit your Expectation Suite (Optional)
 
-To edit an existing Expectation Suite (such as the one that you just created and saved with the Missingness Data
- Assistant) you need only execute the following console command:
+The Missingness Data Assistant creates as many Expectations as it can for the permitted columns. Although this can help with data analysis, it might be unnecessary.  It is also possible that you may possess some domain knowledge that is not reflected in the data that was sampled for the Profiling process. In these types of scenarios, you can edit your Expectation Suite to better align with your business requirements.
+
+Run the following code to edit an existing Expectation Suite:
 
 ```markdown title="Terminal command"
 great_expectations suite edit NAME_OF_YOUR_SUITE_HERE
 ```
 
-This will open a Jupyter Notebook that will permit you to review, edit, and save changes to the specified Expectation
- Suite.
-
-## Additional Information
-
-:::note Example Code
-
-To view the full script used for example code on this page, see it on GitHub:
-- [how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py)
-
-:::
+A Jupyter Notebook opens. You can review, edit, and save changes to the Expectation Suite.
