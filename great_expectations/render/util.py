@@ -199,7 +199,7 @@ def parse_row_condition_string_pandas_engine(
     conditions_list: list[str] = [
         condition.strip()
         for condition in re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
-        if condition != "" and condition != " "  # noqa: PLC1901
+        if condition != "" and condition != " "  # noqa: PLR1714
     ]
 
     for i, condition in enumerate(conditions_list):
@@ -266,9 +266,9 @@ def build_count_table(
         count: int | None = unexpected_count_dict.get("count")
         if count:
             total_count += count
-        if value is not None and value != "":  # noqa: PLC1901
+        if value is not None and value != "":
             table_rows.append([value, count])
-        elif value == "":  # noqa: PLC1901
+        elif value == "":
             table_rows.append(["EMPTY", count])
         else:
             table_rows.append(["null", count])
@@ -330,10 +330,10 @@ def build_count_and_index_table(
 
         total_count += count
 
-        if unexpected_value is not None and unexpected_value != "":  # noqa: PLC1901
+        if unexpected_value is not None and unexpected_value != "":
             row_list.append(unexpected_value)
             row_list.append(count)
-        elif unexpected_value == "":  # noqa: PLC1901
+        elif unexpected_value == "":
             row_list.append("EMPTY")
             row_list.append(count)
         else:

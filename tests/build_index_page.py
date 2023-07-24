@@ -17,22 +17,20 @@ for f_ in json_files:
         f_.split(".")[-2],
     )
 
-html_file = """
+html_file = f"""
 <html>
 <body>
   <h3>HTML</h3>
   <ul>
-    {}
+    {html_list}
   </ul>
   <br/><br/>
   <h3>JSON</h3>
   <ul>
-    {}
+    {json_list}
   </ul>
 </body>
 </html>
-""".format(
-    html_list, json_list
-)
+"""
 
 print(html_file)
