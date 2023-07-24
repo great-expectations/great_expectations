@@ -6,7 +6,7 @@ id: how_to_use_great_expectations_with_airflow
 sidebar_custom_props: { icon: 'img/integrations/airflow_icon.png' }
 ---
 
-Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs written in Python. DAGs complete work through operators, which are templates that encapsulate a specific type of work. This document explains how to use the `GreatExpectationsOperator` to perform data quality work in an Airflow DAG.
+Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs written in Python. DAGs complete work through operators, which are templates that encapsulate a specific type of work.
 
 :::info 
 
