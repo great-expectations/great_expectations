@@ -5,14 +5,14 @@ import uuid
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from great_expectations import DataContext
+    from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.experimental.metric_repository.metrics import Metric
 
 
 class MetricRetriever(abc.ABC):
     # TODO: Docstrings
-    def __init__(self, context: DataContext):
+    def __init__(self, context: AbstractDataContext):
         self._context = context
 
     @abc.abstractmethod
