@@ -512,7 +512,7 @@ project_path/
     tree_str = gen_directory_tree_str(project_dir)
     assert (
         tree_str
-        == """project_path/
+        == f"""project_path/
     data/
         random/
             f1.csv
@@ -547,10 +547,8 @@ project_path/
                             BasicDatasetProfiler/
                                 profiling/
                                     20190926T134241.000000Z/
-                                        {}.json
-""".format(
-            titanic_profiled_batch_id
-        )
+                                        {titanic_profiled_batch_id}.json
+"""
     )
 
     context.profile_datasource("random")
@@ -578,7 +576,7 @@ project_path/
     observed = gen_directory_tree_str(data_docs_dir)
     assert (
         observed
-        == """\
+        == f"""\
 data_docs/
     local_site/
         index.html
@@ -625,22 +623,20 @@ data_docs/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
+                                    {f1_profiled_batch_id:s}.html
                     f2/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
+                                    {f2_profiled_batch_id:s}.html
             titanic/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler/
                             profiling/
                                 20190926T134241.000000Z/
-                                    {:s}.html
-""".format(
-            f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
-        )
+                                    {titanic_profiled_batch_id:s}.html
+"""
     )
 
     # save data_docs locally if you need to inspect the files manually

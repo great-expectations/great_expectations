@@ -451,7 +451,7 @@ def parse_evaluation_parameter(  # noqa: C901, PLR0912, PLR0915
 
 def _get_parse_results(
     parameter_expression: str,
-) -> Union[ParseResults, Union[ParseResults, list]]:
+) -> Union[ParseResults, list]:
     # Calling get_parser clears the stack
     parser = EXPR.get_parser()
     try:
