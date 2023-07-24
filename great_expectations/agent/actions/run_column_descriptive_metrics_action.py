@@ -25,7 +25,7 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
 
     def run(self, event: RunColumnDescriptiveMetricsEvent, id: str) -> ActionResult:
         datasource = self._context.get_datasource(event.datasource_name)
-        data_asset = datasource.get_asset(event.data_asset_name)
+        data_asset = datasource.get_asset(event.data_asset_name)  # type: ignore[union-attr] # Non fluent datasources BaseDatasource, LegacyDatasource does not have get_asset
         batch_request = data_asset.build_batch_request()
 
         metric_run = self._batch_inspector.compute_metric_run(batch_request)

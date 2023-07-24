@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 from great_expectations.experimental.metric_repository.metric_retriever import (
     MetricRetriever,
@@ -19,12 +19,12 @@ if TYPE_CHECKING:
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
     # TODO: Docstrings
-    def get_metrics(self, batch_request: BatchRequest) -> list[Metric]:
+    def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metrics_list = self._get_table_metrics(batch_request)
 
         return table_metrics_list
 
-    def _get_table_metrics(self, batch_request: BatchRequest) -> list[Metric]:
+    def _get_table_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         table_metric_names = ["table.row_count", "table.columns"]
         table_metric_configs = [
             MetricConfiguration(
@@ -39,7 +39,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         )
 
         # Convert computed_metrics
-        metrics = []
+        metrics: list[Metric] = []
         metric_name = "table.row_count"
         NumericTableMetric.update_forward_refs()
         StringListTableMetric.update_forward_refs()
