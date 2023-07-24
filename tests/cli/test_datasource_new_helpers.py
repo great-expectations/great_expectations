@@ -20,6 +20,9 @@ from great_expectations.cli.datasource import (
 from great_expectations.datasource.types import DatasourceTypes
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.mark.unit
 def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})

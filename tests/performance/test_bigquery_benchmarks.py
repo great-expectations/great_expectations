@@ -29,6 +29,7 @@ from tests.performance import taxi_benchmark_util
 )
 @pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
+@pytest.mark.external_sqldialect
 def test_taxi_trips_benchmark(
     benchmark: BenchmarkFixture,
     tmpdir: py.path.local,

@@ -58,7 +58,7 @@ class ColumnValuesAfterSplitInSet(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesAfterSplitToBeInSet(ColumnMapExpectation):
-    """Expect values in the column after splitting on a delimiter to be in a pre-defined set"""
+    """Expect values in the column after splitting on a delimiter to be in a pre-defined set."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

@@ -17,6 +17,7 @@ from tests.expectations.fixtures.expect_column_values_to_equal_three import (
 )
 
 
+@pytest.mark.unit
 def test_expectation_self_check():
     my_expectation = ExpectColumnValuesToEqualThree()
     expectation_diagnostic = my_expectation.run_diagnostics()
@@ -170,7 +171,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a docstring, including a one-line short description",
+                    "message": 'Has a docstring, including a one-line short description that begins with "Expect" and ends with a period',
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -210,6 +211,7 @@ def test_expectation_self_check():
     }
 
 
+@pytest.mark.unit
 def test_include_in_gallery_flag():
     my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
     report_object = my_expectation.run_diagnostics()
@@ -232,6 +234,7 @@ def test_include_in_gallery_flag():
 
 
 @pytest.mark.skip("This raises a Spark error on my machine.")
+@pytest.mark.spark
 def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
     expectation = _registered_expectations[expectation_name]
@@ -338,6 +341,7 @@ def test_self_check_on_an_existing_expectation():
 @pytest.mark.skip(
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
+@pytest.mark.external_sqldialect
 def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
@@ -507,12 +511,14 @@ def test_expectation__get_renderers():
     }
 
 
+@pytest.mark.unit
 def test_expectation_is_abstract():
     # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 
 
+@pytest.mark.unit
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
     expectation_diagnostics = (
         ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()

@@ -8,13 +8,13 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 
 
 @pytest.fixture
-def test_df():
+def _df():
     return pd.DataFrame({"col_1": [1, 2], "col_2": ["one", "two"]})
 
 
 @pytest.mark.unit
-def test_expectation_suite_extract_false_no_results(test_df):
-    test_ds = PandasDataset(data=test_df)
+def test_expectation_suite_extract_false_no_results(_df):
+    test_ds = PandasDataset(data=_df)
 
     test_ds.expect_column_values_to_be_of_type("col_1", "int")
     test_ds.expect_column_values_to_be_of_type("col_2", "object")
@@ -28,8 +28,8 @@ def test_expectation_suite_extract_false_no_results(test_df):
 
 
 @pytest.mark.unit
-def test_expectation_suite_extract_false_many_results(test_df):
-    test_ds = PandasDataset(data=test_df)
+def test_expectation_suite_extract_false_many_results(_df):
+    test_ds = PandasDataset(data=_df)
 
     test_ds.expect_column_values_to_be_of_type("col_1", "boolean")
     test_ds.expect_column_values_to_be_of_type("col_2", "object")

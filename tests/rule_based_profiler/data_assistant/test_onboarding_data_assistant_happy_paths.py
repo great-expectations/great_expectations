@@ -25,6 +25,7 @@ pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
 
 
+@pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 19s
 def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None:
@@ -128,6 +129,8 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     assert results.success is False
 
 
+@pytest.mark.filesystem
+@pytest.mark.spark
 @pytest.mark.integration
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_onboarding_data_assistant(
@@ -235,6 +238,8 @@ def test_spark_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
+@pytest.mark.postgresql
+@pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_onboarding_data_assistant(
@@ -342,6 +347,7 @@ def test_sql_happy_path_onboarding_data_assistant(
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires Python3.8")
 @pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 6.54 seconds
 def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_values(
     sa,
@@ -390,6 +396,8 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
     assert len(result.expectation_configurations) == 122
 
 
+@pytest.mark.postgresql
+@pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 26.57 seconds
 def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolean_column_unique_proportion_metric_values(

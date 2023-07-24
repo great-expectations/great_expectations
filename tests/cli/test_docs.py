@@ -12,6 +12,9 @@ from tests.cli.utils import (
 )
 
 
+pytestmark = pytest.mark.cli
+
+
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["docs"], catch_exceptions=False)

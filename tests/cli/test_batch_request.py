@@ -11,6 +11,9 @@ from great_expectations.cli.batch_request import (
 )
 
 
+pytestmark = pytest.mark.cli
+
+
 @mock.patch("great_expectations.cli.batch_request.BaseDatasource")
 @mock.patch("great_expectations.cli.batch_request._get_user_response")
 def test_get_data_asset_name_from_data_connector_default_path(

@@ -9,6 +9,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.exceptions import InvalidDataContextKeyError
 
 
+@pytest.mark.unit
 def test_expectation_suite_identifier_to_tuple():
     identifier = ExpectationSuiteIdentifier("test.identifier.name")
     assert identifier.to_tuple() == ("test", "identifier", "name")
@@ -23,6 +24,7 @@ def test_expectation_suite_identifier_to_tuple():
     assert "must be a string, not int" in str(exc.value)
 
 
+@pytest.mark.unit
 @freeze_time("09/26/2019 13:42:41")
 def test_ValidationResultIdentifier_to_tuple(expectation_suite_identifier):
     validation_result_identifier = ValidationResultIdentifier(

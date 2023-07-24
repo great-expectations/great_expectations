@@ -19,6 +19,9 @@ from great_expectations.data_context.util import (
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import get_context
 
+# module level markers
+pytestmark = pytest.mark.filesystem
+
 
 def assert_how_to_buttons(
     context,
@@ -92,7 +95,6 @@ def assert_how_to_buttons(
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.rendered_output
 @pytest.mark.filterwarnings(
     "ignore:String run_ids*:DeprecationWarning:great_expectations.data_context.types.resource_identifiers"
 )
@@ -222,15 +224,12 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
     # #####################
     # assert_how_to_buttons(context, index_page_locator_info, index_links_dict)
     # #####################
-    # print(json.dumps(index_page_locator_info, indent=2))
     assert (
         index_page_locator_info
         == "file://"
         + context.root_directory
         + "/uncommitted/data_docs/local_site/index.html"
     )
-
-    # print(json.dumps(index_links_dict, indent=2))
 
     assert "site_name" in index_links_dict
 
@@ -367,7 +366,6 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.rendered_output
 @pytest.mark.slow  # 3.10s
 def test_configuration_driven_site_builder_skip_and_clean_missing(
     site_builder_data_context_with_html_store_titanic_random,
@@ -506,7 +504,6 @@ def test_configuration_driven_site_builder_skip_and_clean_missing(
     assert validations_set == validation_html_pages
 
 
-@pytest.mark.rendered_output
 @pytest.mark.filterwarnings(
     "ignore:name is deprecated as a batch_parameter*:DeprecationWarning:great_expectations.data_context.data_context"
 )

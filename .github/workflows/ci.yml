@@ -1,0 +1,116 @@
+name: ci
+
+on:
+  pull_request:
+  schedule:
+    # https://crontab.guru/every-3-hours
+    - cron: "0 */3 * * *"
+  workflow_dispatch:  # allows manual triggering with branch picker
+
+jobs:
+  ci-does-not-run-on-draft-pull-requests:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    steps:
+      - run: echo "CI jobs won't run because this is a draft pull request."
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements-types.txt
+            reqs/requirements-dev-contrib.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-types.txt -r reqs/requirements-dev-contrib.txt
+
+      - run: invoke lint --no-fmt
+      - run: invoke fmt --check
+      - name: Type-check
+        run: |
+          invoke type-check --ci --pretty
+          invoke type-check --ci --pretty  --check-stub-sources
+
+  unit-tests:
+    if: github.event.pull_request.draft == false
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Install dependencies
+        run: pip install -c constraints-dev.txt ".[test, snowflake]"
+
+      - name: Run the unit tests
+        run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
+
+  marker-tests:
+    if: github.event.pull_request.draft == false
+    services:
+      postgres:
+        # Docker hub image
+        image: postgres:13.3
+        env:
+          POSTGRES_USER: postgresql
+          POSTGRES_DB: test_ci # required by postgres image
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+    strategy:
+      matrix:
+        markers:
+          - big
+          - cli
+          # `not e2e` because 1 test & 1 fixture need access token
+          - cloud and not e2e
+          - filesystem
+          - openpyxl or pyarrow or project or sqlite
+          #- spark
+          - postgresql
+          # - external_sqldialect # tests being skipped likely due to flagging system
+        python-version: ["3.8"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m '${{ matrix.markers }}' -r test
+
+      - name: Run the tests
+        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose

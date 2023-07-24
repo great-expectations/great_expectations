@@ -53,7 +53,7 @@ prometheus-client==0.8.0
 prompt-toolkit==3.0.38
 ptyprocess==0.6.0
 pycparser==2.20
-Pygments==2.7.4
+Pygments==2.15.0
 pyparsing==2.4.7
 pyrsistent==0.16.0
 python-dateutil==2.8.1
@@ -64,7 +64,7 @@ regex==2020.7.14
 requests==2.31.0
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.0
-scipy==1.5.2
+scipy==1.10.0
 Send2Trash==1.8.0
 six==1.15.0
 smmap==3.0.4

@@ -58,6 +58,5 @@ services:
 networks:
   dbnet:
     driver: bridge
-
 volumes:
   gx_stores:

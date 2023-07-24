@@ -219,14 +219,6 @@ The above pip instruction will install GX with basic SQL support through SqlAlch
 
 :::
 
-:::caution SqlAlchemy version
-
-Great Expectations does not currently support SqlAlchemy 2.0.
-
-If you install SqlAlchemy independently of the above pip commands, be certain to install the most recent SqlAlchemy version prior to 2.0.
-
-:::
-
 ### Verify that GX has been installed correctly
 
 <GxVerifyInstallation />

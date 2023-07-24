@@ -19,8 +19,10 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 
+# module level markers
+pytestmark = pytest.mark.integration
 
-@pytest.mark.integration
+
 @pytest.mark.slow  # 1.29s
 def test_instantiate_with_cardinality_limit_modes_from_class_variable(
     alice_columnar_table_single_batch_context,
@@ -42,7 +44,6 @@ def test_instantiate_with_cardinality_limit_modes_from_class_variable(
     domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.22s
 def test_instantiate_with_cardinality_limit_modes_from_enum(
     alice_columnar_table_single_batch_context,
@@ -64,7 +65,6 @@ def test_instantiate_with_cardinality_limit_modes_from_enum(
     domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.24s
 def test_instantiate_with_cardinality_limit_modes_from_string(
     alice_columnar_table_single_batch_context,
@@ -86,7 +86,6 @@ def test_instantiate_with_cardinality_limit_modes_from_string(
     domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.26s
 def test_instantiate_with_cardinality_limit_modes_from_dictionary(
     alice_columnar_table_single_batch_context,
@@ -112,7 +111,6 @@ def test_instantiate_with_cardinality_limit_modes_from_dictionary(
     domain_builder.get_domains(rule_name="my_rule", batch_request=batch_request)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.24s
 def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -161,7 +159,6 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     assert domains == alice_all_column_domains
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.21s
 def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -205,7 +202,6 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     assert domains == alice_all_column_domains
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.24s
 def test_unsupported_cardinality_limit_from_string(
     alice_columnar_table_single_batch_context,
@@ -230,7 +226,6 @@ def test_unsupported_cardinality_limit_from_string(
     assert "MANY" in str(excinfo.value)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.20s
 def test_unsupported_cardinality_limit_from_dictionary(
     alice_columnar_table_single_batch_context,
@@ -259,7 +254,6 @@ def test_unsupported_cardinality_limit_from_dictionary(
     assert "MANY" in str(excinfo.value)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.20s
 def test_unspecified_cardinality_limit(
     alice_columnar_table_single_batch_context,
@@ -282,7 +276,6 @@ def test_unspecified_cardinality_limit(
     assert "you passed 0 parameters" in str(excinfo.value)
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.33s
 def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -334,7 +327,6 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     assert domains == alice_all_column_domains
 
 
-@pytest.mark.integration
 @pytest.mark.slow  # 1.30s
 def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
@@ -384,7 +376,6 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     assert domains == alice_all_column_domains
 
 
-@pytest.mark.integration
 def test_multi_batch_very_few_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -509,7 +500,6 @@ def test_multi_batch_very_few_cardinality(
     assert observed_domains == expected_domains
 
 
-@pytest.mark.integration
 def test_multi_batch_one_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):

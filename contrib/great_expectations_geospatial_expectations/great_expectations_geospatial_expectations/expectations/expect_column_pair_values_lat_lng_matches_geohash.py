@@ -33,7 +33,7 @@ class ColumnPairValuesLatLngMatchesGeohash(ColumnPairMapMetricProvider):
 
 
 class ExpectColumnPairValuesLatLngMatchesGeohash(ColumnPairMapExpectation):
-    """Expect latlngs in column_A to match with geohashes in column_B.
+    """Expect latlngs in column A to match with geohashes in column B.
 
     The more digits a geohash has, the smaller and more precise of an area it \
     represents. When converting a latlng to a geohash, we are only asserting \
