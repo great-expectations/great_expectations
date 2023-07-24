@@ -54,7 +54,6 @@ def test__get_dependency_names():
 
 
 @pytest.mark.project
-@pytest.mark.integration
 def test_required_dependency_names_match_requirements_file():
     """If there is a mismatch, GXDependencies should change to match our requirements.txt file.
 
@@ -68,7 +67,6 @@ def test_required_dependency_names_match_requirements_file():
 
 
 @pytest.mark.project
-@pytest.mark.integration
 def test_dev_dependency_names_match_requirements_file():
     """If there is a mismatch, GXDependencies should change to match our requirements-dev*.txt files.
 

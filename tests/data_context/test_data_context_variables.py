@@ -527,7 +527,6 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_file_data_context_variables_e2e(
     monkeypatch,
     file_data_context: FileDataContext,
