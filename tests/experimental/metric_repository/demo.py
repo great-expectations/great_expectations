@@ -25,6 +25,7 @@ from great_expectations.agent.models import (
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.experimental.metric_repository.batch_inspector import (
+    ColumnDescriptiveMetricsMetricRetriever,
     BatchInspector,
 )
 from great_expectations.experimental.metric_repository.metric_repository import (
@@ -77,9 +78,9 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     return context, batch_request
 
 
-@pytest.mark.xfail(
-    reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
-)
+# @pytest.mark.xfail(
+#     reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
+# )
 def test_demo_batch_inspector(
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
@@ -97,7 +98,9 @@ def test_demo_batch_inspector(
         data_asset_name=batch_request.data_asset_name,
     )
 
-    batch_inspector = BatchInspector(context)
+    metric_retriever = ColumnDescriptiveMetricsMetricRetriever(context)
+    metric_retrievers = [metric_retriever]
+    batch_inspector = BatchInspector(context, metric_retrievers)
     cloud_data_store = CloudDataStore(context)
     column_descriptive_metrics_repository = MetricRepository(
         data_store=cloud_data_store
@@ -108,9 +111,9 @@ def test_demo_batch_inspector(
         metric_repository=column_descriptive_metrics_repository,
     )
 
-    # Override batch_inspector generate id methods to return consistent ids for the test
+    # Override generate id methods to return consistent ids for the test
     batch_inspector._generate_run_id = lambda: run_id
-    batch_inspector._generate_metric_id = lambda: metric_id
+    metric_retriever._generate_metric_id = lambda: metric_id
 
     with mock.patch(
         f"{MetricRepository.__module__}.{MetricRepository.__name__}.add",
@@ -128,7 +131,6 @@ def test_demo_batch_inspector(
         metrics=[
             NumericTableMetric(
                 id=metric_id,
-                run_id=run_id,
                 batch=batch,
                 metric_name="table.row_count",
                 value=2,
@@ -136,7 +138,6 @@ def test_demo_batch_inspector(
             ),
             StringListTableMetric(
                 id=metric_id,
-                run_id=run_id,
                 batch=batch,
                 metric_name="table.columns",
                 value=["col1", "col2"],

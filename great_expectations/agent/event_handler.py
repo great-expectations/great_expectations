@@ -12,6 +12,7 @@ from great_expectations.agent.models import (
 from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
+    ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.cloud_data_store import (
     CloudDataStore,
@@ -35,7 +36,8 @@ class EventHandler:
         if isinstance(event, RunOnboardingDataAssistantEvent):
             action = RunOnboardingDataAssistantAction(context=self._context)
         elif isinstance(event, RunColumnDescriptiveMetricsEvent):
-            batch_inspector = BatchInspector(self._context)
+            metric_retrievers = [ColumnDescriptiveMetricsMetricRetriever(self._context)]
+            batch_inspector = BatchInspector(self._context, metric_retrievers)
             cloud_data_store = CloudDataStore(self._context)
             column_descriptive_metrics_repository = MetricRepository(
                 data_store=cloud_data_store

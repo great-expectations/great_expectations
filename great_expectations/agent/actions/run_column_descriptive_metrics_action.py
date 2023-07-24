@@ -19,7 +19,7 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
         metric_repository: MetricRepository,
         batch_inspector: BatchInspector,
     ):
-        self._context = context
+        super().__init__(context=context)
         self._metric_repository = metric_repository
         self._batch_inspector = batch_inspector
 
@@ -28,14 +28,14 @@ class ColumnDescriptiveMetricsAction(AgentAction[RunColumnDescriptiveMetricsEven
         data_asset = datasource.get_asset(event.data_asset_name)
         batch_request = data_asset.build_batch_request()
 
-        metrics = self._batch_inspector.get_column_descriptive_metrics(batch_request)
+        metric_run = self._batch_inspector.compute_metric_run(batch_request)
 
-        self._metric_repository.add(metrics)
+        self._metric_repository.add(metric_run)
 
         return ActionResult(
             id=id,
             type=event.type,
             created_resources=[
-                CreatedResource(resource_id=str(metrics.id), type="MetricRun"),
+                CreatedResource(resource_id=str(metric_run.id), type="MetricRun"),
             ],
         )

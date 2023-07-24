@@ -9,5 +9,5 @@ class MetricRepository:
     def __init__(self, data_store: DataStore):
         self._data_store = data_store
 
-    def add(self, metrics: MetricRun) -> MetricRun:
-        return self._data_store.add(value=metrics)
+    def add(self, metric_run: MetricRun) -> MetricRun:
+        return self._data_store.add(value=metric_run)

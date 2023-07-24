@@ -40,7 +40,6 @@ class Metric(MetricRepositoryBaseModel):
         return instance
 
     id: uuid.UUID = Field(description="Metric id")
-    run_id: uuid.UUID = Field(description="Run id")
     batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
     exception: MetricException = Field(description="Exception info if thrown")

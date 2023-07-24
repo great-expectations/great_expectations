@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import uuid
 from typing import TYPE_CHECKING
 
@@ -18,24 +19,42 @@ if TYPE_CHECKING:
 
 
 class BatchInspector:
-    def __init__(self, context: DataContext):
+    def __init__(self, context: DataContext, metric_retrievers: list[MetricRetriever]):
         self._context = context
+        self._metric_retrievers = metric_retrievers
+
+    def compute_metric_run(self, batch_request: BatchRequest) -> MetricRun:
+        run_id = self._generate_run_id()
+
+        metrics = []
+        for metric_retriever in self._metric_retrievers:
+            metrics.extend(metric_retriever.get_metrics(batch_request=batch_request))
+
+        return MetricRun(id=run_id, metrics=metrics)
 
     def _generate_run_id(self) -> uuid.UUID:
         return uuid.uuid4()
 
-    def get_column_descriptive_metrics(self, batch_request: BatchRequest) -> MetricRun:
-        run_id = self._generate_run_id()
 
-        table_metrics_list = self._get_table_metrics(batch_request, run_id)
+class MetricRetriever(abc.ABC):
+    def __init__(self, context: DataContext):
+        self._context = context
 
-        metrics = MetricRun(id=run_id, metrics=table_metrics_list)
+    @abc.abstractmethod
+    def get_metrics(self, batch_request: BatchRequest) -> list[Metric]:
+        raise NotImplementedError
 
-        return metrics
+    def _generate_metric_id(self) -> uuid.UUID:
+        return uuid.uuid4()
 
-    def _get_table_metrics(
-        self, batch_request: BatchRequest, run_id: uuid.UUID
-    ) -> list[Metric]:
+
+class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
+    def get_metrics(self, batch_request: BatchRequest) -> list[Metric]:
+        table_metrics_list = self._get_table_metrics(batch_request)
+
+        return table_metrics_list
+
+    def _get_table_metrics(self, batch_request: BatchRequest) -> list[Metric]:
         table_metric_names = ["table.row_count", "table.columns"]
         table_metric_configs = [
             MetricConfiguration(
@@ -57,7 +76,6 @@ class BatchInspector:
         metrics.append(
             NumericTableMetric(
                 id=self._generate_metric_id(),
-                run_id=run_id,
                 batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[(metric_name, tuple(), tuple())],
@@ -68,7 +86,6 @@ class BatchInspector:
         metrics.append(
             StringListTableMetric(
                 id=self._generate_metric_id(),
-                run_id=run_id,
                 batch=validator.active_batch,
                 metric_name=metric_name,
                 value=computed_metrics[(metric_name, tuple(), tuple())],
@@ -76,6 +93,3 @@ class BatchInspector:
             )
         )
         return metrics
-
-    def _generate_metric_id(self) -> uuid.UUID:
-        return uuid.uuid4()
