@@ -236,7 +236,7 @@ The following code is an example of a SQLite connection string format:
 
 ### Connect to the data in a table (Optional)
 
-1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
+1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
 
     ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_sqlite_data.py asset_name"
     ```
@@ -333,7 +333,7 @@ For more information, check out Snowflake's official documentation on [the Snowf
 
 ### Connect to the data in a table (Optional)
 
-1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
+1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
 
     ```python
     asset_name = "my_asset"
@@ -414,7 +414,7 @@ my_connection_string = "databricks+connector://token:<token>@<host>:<port>/<data
 
 ### Connect to the data in a table (Optional)
 
-1. Run the following Python code to set the `asset_name`and `asset_table_name` variables:
+1. Run the following Python code to set the `asset_name` and `asset_table_name` variables:
 
     ```python
     asset_name = "my_asset"
