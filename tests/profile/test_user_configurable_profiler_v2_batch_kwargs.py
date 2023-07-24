@@ -516,7 +516,7 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
-@pytest.mark.unit
+@pytest.mark.filesystem
 def test_profiler_all_expectation_types(
     titanic_data_context, possible_expectations_set
 ):
