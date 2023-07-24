@@ -81,7 +81,7 @@ def config7():
 def test_expectation_configuration_equality(config1, config2, config3, config4):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
-    assert config1 is config1  # no difference  # noqa: PLR0124
+    assert config1 is config1  # no difference
     assert config1 is not config2  # different instances, but same content
     assert config1 == config2  # different instances, but same content
     assert not (config1 != config2)  # ne works properly
