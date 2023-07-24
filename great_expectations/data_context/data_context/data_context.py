@@ -165,7 +165,8 @@ def _init_context_root_directory(
 ) -> str:
     if cloud_mode and context_root_dir is None:
         context_root_dir = CloudDataContext.determine_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=None,
         )
     else:
         context_root_dir = (

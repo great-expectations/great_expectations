@@ -1737,7 +1737,7 @@ def convert_pandas_series_decimal_to_float_dtype(
 
 
 @overload
-def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
+def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
     project_root_dir: None = ...,
@@ -1751,7 +1751,7 @@ def get_context(  # type: ignore[misc] # overlapping overload false positive?  #
 
 
 @overload
-def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
+def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
     project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
@@ -1768,6 +1768,7 @@ def get_context(  # type: ignore[misc] # overlapping overload false positive?  #
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
+    project_root_dir: None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
@@ -1781,6 +1782,7 @@ def get_context(  # noqa: PLR0913
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr | None = ...,
+    project_root_dir: PathStr | None = ...,
     runtime_environment: dict | None = ...,
     cloud_base_url: str | None = ...,
     cloud_access_token: str | None = ...,
