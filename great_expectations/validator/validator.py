@@ -1842,8 +1842,8 @@ class Validator:
                     if edge.left.id not in maybe_ready_ids:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
-                else:
-                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if edge.left.id not in unmet_dependency_ids:
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 
@@ -1937,8 +1937,8 @@ class Validator:
                 runtime_configuration.pop("result_format")
             else:
                 runtime_configuration.update({"result_format": result_format})
-        else:
-            if result_format is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if result_format is not None:
                 runtime_configuration.update({"result_format": result_format})
 
         return runtime_configuration

@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Dict, Optional
 
 import pydantic
 from pydantic import StrictStr
 from typing_extensions import TypeAlias
 
-if TYPE_CHECKING:
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
 
