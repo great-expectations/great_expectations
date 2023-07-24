@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Hashable
 from typing import TYPE_CHECKING, Sequence
 
 from great_expectations.experimental.metric_repository.metric_retriever import (
@@ -15,6 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
@@ -43,22 +45,36 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
         metric_name = "table.row_count"
         NumericTableMetric.update_forward_refs()
         StringListTableMetric.update_forward_refs()
+
+        assert isinstance(validator.active_batch, Batch)
+        if not isinstance(validator.active_batch, Batch):
+            raise TypeError(
+                f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
+            )
+
+        metric_lookup_key: tuple[str, Hashable, Hashable] = (
+            metric_name,
+            tuple(),
+            tuple(),
+        )
         metrics.append(
             NumericTableMetric(
                 id=self._generate_metric_id(),
                 batch=validator.active_batch,
                 metric_name=metric_name,
-                value=computed_metrics[(metric_name, tuple(), tuple())],
+                value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
                 exception=MetricException(),  # TODO: Pass through
             )
         )
+
         metric_name = "table.columns"
+        metric_lookup_key = (metric_name, tuple(), tuple())
         metrics.append(
             StringListTableMetric(
                 id=self._generate_metric_id(),
                 batch=validator.active_batch,
                 metric_name=metric_name,
-                value=computed_metrics[(metric_name, tuple(), tuple())],
+                value=computed_metrics[metric_lookup_key],  # type: ignore[arg-type] # Pydantic verifies the value type
                 exception=MetricException(),  # TODO: Pass through
             )
         )

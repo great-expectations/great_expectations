@@ -4,6 +4,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from great_expectations.experimental.metric_repository.metrics import (
+    Metric,
     MetricRun,
 )
 
@@ -26,7 +27,7 @@ class BatchInspector:
     def compute_metric_run(self, batch_request: BatchRequest) -> MetricRun:
         run_id = self._generate_run_id()
 
-        metrics = []
+        metrics: list[Metric] = []
         for metric_retriever in self._metric_retrievers:
             metrics.extend(metric_retriever.get_metrics(batch_request=batch_request))
 
