@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Hashable
 from typing import TYPE_CHECKING, Sequence
 
+from great_expectations.datasource.fluent.interfaces import Batch
 from great_expectations.experimental.metric_repository.metric_retriever import (
     MetricRetriever,
 )
@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchRequest
-    from great_expectations.datasource.fluent.interfaces import Batch
+    from great_expectations.validator.metrics_calculator import _MetricKey
 
 
 class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
@@ -52,7 +52,7 @@ class ColumnDescriptiveMetricsMetricRetriever(MetricRetriever):
                 f"validator.active_batch is type {type(validator.active_batch).__name__} instead of type {Batch.__name__}"
             )
 
-        metric_lookup_key: tuple[str, Hashable, Hashable] = (
+        metric_lookup_key: _MetricKey = (
             metric_name,
             tuple(),
             tuple(),

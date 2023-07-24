@@ -69,7 +69,11 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metrics_calculator import MetricsCalculator
+from great_expectations.validator.metrics_calculator import (
+    MetricsCalculator,
+    _MetricKey,
+    _MetricsDict,
+)
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
     MetricEdge,
@@ -104,7 +108,6 @@ if TYPE_CHECKING:
         ParameterContainer,
     )
     from great_expectations.rule_based_profiler.rule import Rule
-    from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -360,9 +363,9 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> Dict[
-        Tuple[str, Hashable, Hashable], MetricValue
-    ]:  # Accepts either strings or tuples for the second and third elements
+    ) -> (
+        _MetricsDict
+    ):  # Accepts either strings or tuples for the second and third elements
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -374,7 +377,7 @@ class Validator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        return self._metrics_calculator.compute_metrics(
+        return self._metrics_calculator.compute_metrics(  # type: ignore[return-value] #
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
@@ -1043,7 +1046,7 @@ class Validator:
             )
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: _MetricsDict
 
         try:
             (
@@ -1196,14 +1199,14 @@ class Validator:
         processed_configurations: List[ExpectationConfiguration],
         show_progress_bars: bool,
     ) -> Tuple[
-        Dict[Tuple[str, str, str], MetricValue],
+        _MetricsDict,
         List[ExpectationValidationResult],
         List[ExpectationConfiguration],
     ]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        resolved_metrics: _MetricsDict
         aborted_metrics_info: Dict[
-            Tuple[str, str, str],
+            _MetricKey,
             Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
         ]
         (
@@ -1829,7 +1832,7 @@ class Validator:
     @staticmethod
     def _parse_validation_graph(
         validation_graph: ValidationGraph,
-        metrics: Dict[Tuple[str, str, str], MetricValue],
+        metrics: _MetricsDict,
     ) -> Tuple[Set[MetricConfiguration], Set[MetricConfiguration]]:
         """Given validation graph, returns the ready and needed metrics necessary for validation using a traversal of
         validation graph (a graph structure of metric ids) edges"""
