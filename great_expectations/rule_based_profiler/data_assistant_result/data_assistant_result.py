@@ -4,6 +4,7 @@ import copy
 import datetime
 import json
 import os
+import uuid
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -55,6 +56,8 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
     PlotResult,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
+    TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX,
+    TEMPORARY_EXPECTATION_SUITE_NAME_STEM,
     get_or_create_expectation_suite,
     sanitize_parameter_name,
 )
@@ -232,6 +235,10 @@ class DataAssistantResult(SerializableDictDot):
 
         """
         if send_usage_event:
+            if not expectation_suite_name:
+                component_name: str = self.__class__.__name__
+                expectation_suite_name = f"{TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX}.{component_name}.{TEMPORARY_EXPECTATION_SUITE_NAME_STEM}.{str(uuid.uuid4())[:8]}"
+
             return self._get_expectation_suite_with_usage_statistics(
                 expectation_suite_name=expectation_suite_name,
                 include_profiler_config=include_profiler_config,
@@ -520,8 +527,8 @@ class DataAssistantResult(SerializableDictDot):
                 for key, value in citation.items()
                 if key != "profiler_config"
             }
-
-        expectation_suite.add_citation(**citation)
+        if citation:
+            expectation_suite.add_citation(**citation)
 
         return expectation_suite
 

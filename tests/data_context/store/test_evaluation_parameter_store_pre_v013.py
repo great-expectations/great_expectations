@@ -168,7 +168,7 @@ def test_evaluation_parameter_store_methods(
     }
 
 
-@pytest.mark.postgres
+@pytest.mark.postgresql
 @pytest.mark.integration
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
@@ -204,7 +204,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.postgres
+@pytest.mark.postgresql
 @pytest.mark.integration
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.

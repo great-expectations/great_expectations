@@ -10,7 +10,7 @@ from great_expectations.data_context.util import file_relative_path
 UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 9
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture

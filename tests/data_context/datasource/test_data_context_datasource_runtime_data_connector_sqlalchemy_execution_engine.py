@@ -16,7 +16,7 @@ yaml = YAMLHandler()
 
 # module level markers
 # these tests use sqlite, which is a filesystem-based db
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def test_get_batch_successful_specification_sqlalchemy_engine(

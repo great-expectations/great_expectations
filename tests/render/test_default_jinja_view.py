@@ -18,7 +18,7 @@ from great_expectations.render.renderer import ProfilingResultsPageRenderer
 from great_expectations.render.view import DefaultJinjaPageView
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 # noinspection PyPep8Naming

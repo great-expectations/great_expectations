@@ -66,7 +66,8 @@ class ColumnValuesGreaterThanOrEqualToProfileMin(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeEqualToOrGreaterThanProfileMin(ColumnMapExpectation):
-    """
+    """Expect the column values to be greater than or equal to the minimum value of the respective column within the DataProfiler report.
+
     This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column;
     namely, is the value greater than or equal to the minimum value of the respective column within the provided profile report generated from the DataProfiler.
 

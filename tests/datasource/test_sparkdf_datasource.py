@@ -16,6 +16,7 @@ from great_expectations.validator.validator import BridgeValidator
 yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 @pytest.fixture(scope="module")
 def test_parquet_folder_connection_path(tmp_path_factory):
     pandas_version = re.match(r"(\d+)\.(\d+)\..+", pd.__version__)
@@ -33,6 +34,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
     return basepath
 
 
+@pytest.mark.spark
 def test_sparkdf_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite,
     test_folder_connection_path_csv,
@@ -97,6 +99,7 @@ def test_sparkdf_datasource_custom_data_asset(
     assert res.success is True
 
 
+@pytest.mark.spark
 def test_force_reuse_spark_context(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
@@ -138,6 +141,7 @@ def test_force_reuse_spark_context(
     spark.stop()
 
 
+@pytest.mark.spark
 def test_spark_kwargs_are_passed_through(
     data_context_parameterized_expectation_suite,
     tmp_path_factory,
@@ -193,6 +197,7 @@ def test_spark_kwargs_are_passed_through(
     assert datasource_config["force_reuse_spark_context"] == True  # noqa: E712
 
 
+@pytest.mark.spark
 def test_create_sparkdf_datasource(
     data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
 ):
@@ -257,6 +262,7 @@ def test_create_sparkdf_datasource(
         assert "          header: false\n" in lines
 
 
+@pytest.mark.spark
 @pytest.mark.skipif(
     not is_library_loadable(library_name="pyarrow")
     and not is_library_loadable(library_name="fastparquet"),
@@ -306,6 +312,7 @@ def test_standalone_spark_parquet_datasource(
     assert batch.data.count() == 2
 
 
+@pytest.mark.spark
 def test_standalone_spark_csv_datasource(
     test_folder_connection_path_csv, test_backends
 ):
@@ -337,6 +344,7 @@ def test_standalone_spark_csv_datasource(
     assert batch.data.head()["col_1"] == "1"
 
 
+@pytest.mark.spark
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
@@ -403,6 +411,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     assert batch.data.head()["a"] == "1"
 
 
+@pytest.mark.spark
 def test_spark_datasource_processes_dataset_options(
     test_folder_connection_path_csv, test_backends, empty_data_context
 ):

@@ -238,7 +238,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
-@pytest.mark.postgres
+@pytest.mark.postgresql
 @pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 104 seconds
@@ -396,7 +396,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
     assert len(result.expectation_configurations) == 122
 
 
-@pytest.mark.postgres
+@pytest.mark.postgresql
 @pytest.mark.filesystem
 @pytest.mark.integration
 @pytest.mark.slow  # 26.57 seconds
