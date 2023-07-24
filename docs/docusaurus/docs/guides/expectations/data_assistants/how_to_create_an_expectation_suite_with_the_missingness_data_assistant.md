@@ -48,25 +48,25 @@ Run the following code to prepare a new Expectation Suite with the Data Context 
 
 To run a Data Assistant, you can call the `run(...)` method for the assistant. However, there are numerous parameters available for the `run(...)` method of the Missingness Data Assistant. For instance, the `exclude_column_names` parameter allows you to define the columns that should not be Profiled.
 
-Run the following code to define the columns to exclude:
+1. Run the following code to define the columns to exclude:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py exclude_column_names"
+  ```
 
-Run the following code to run the Missingness Data Assistant:
+2. Run the following code to run the Missingness Data Assistant:
 
-```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result"
-```
+  ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_missingness_data_assistant.py data_assistant_result"
+  ```
 
-In this example, `context` is your Data Context instance.
+  In this example, `context` is your Data Context instance.
 
-:::note
-If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the data in the `BatchRequest`, you don't need to alter the example code. You're using the default `estimation` parameter (`"exact"`). To identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
-:::
+  :::note
+  If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the data in the `BatchRequest`, you don't need to alter the example code. You're using the default `estimation` parameter (`"exact"`). To identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
+  :::
 
-:::note
-The Missingness Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. To view the available parameters, see [this information](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/column_value_missing_data_assistant.py#L44).
-:::
+  :::note
+  The Missingness Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. To view the available parameters, see [this information](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/column_value_missing_data_assistant.py#L44).
+  :::
 
 ## Save your Expectation Suite
 
@@ -140,7 +140,7 @@ The Missingness Data Assistant creates as many Expectations as it can for the pe
 Run the following code to edit an existing Expectation Suite:
 
 ```markdown title="Terminal command"
-great_expectations suite edit NAME_OF_YOUR_SUITE_HERE
+great_expectations suite edit <expectation_suite_name>
 ```
 
 A Jupyter Notebook opens. You can review, edit, and save changes to the Expectation Suite.
