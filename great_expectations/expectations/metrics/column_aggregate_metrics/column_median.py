@@ -79,9 +79,9 @@ class ColumnMedian(ColumnAggregateMetricProvider):
                 )
                 / 2.0
             )  # Average center values
-        else:
+        else:  # noqa: PLR5501
             # An odd number of column values, we can just take the center value
-            if len(column_values) == 1:  # noqa: PLR5501
+            if len(column_values) == 1:
                 column_median = column_values[0][0]  # The only value
             else:
                 column_median = column_values[1][0]  # True center value
