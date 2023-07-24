@@ -13,7 +13,7 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 ## Create a Checkpoint
 
-The following code examples use the SimpleCheckpoint class. To modify the following code for your use case, replace `batch_request` and `expectation_suite_name` with your own paremeters.
+To modify the following code for your use case, replace `batch_request` and `expectation_suite_name` with your own paremeters.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
@@ -35,12 +35,7 @@ Run the following Python code to build <TechnicalTag tag="data_docs" text="Data 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs"
 ```
 
-## Store your Checkpoint (Optional)
-
-Run the following Python code to store your Checkpoint for later use:
-
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py add checkpoint"
-```
+## Retrieve your Checkpoint (Optional)
 
 Run the following Python code to retrieve the Checkpoint:
 

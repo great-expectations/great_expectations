@@ -6,7 +6,7 @@ from great_expectations import DataContext
 from great_expectations.data_context.types.base import DatasourceConfig
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def test_list_datasources_base_data_context_no_datasources(

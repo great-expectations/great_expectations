@@ -13,7 +13,7 @@ trigger:
 resources:
   containers:
   - container: postgres
-    image: postgres:11
+    image: postgres:15.1
     ports:
     - 5432:5432
     env:

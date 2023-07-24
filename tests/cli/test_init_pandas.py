@@ -21,7 +21,7 @@ except ImportError:
     from unittest import mock
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.mark.xfail(

@@ -14,7 +14,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAMLHandler()
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.mark.parametrize("invocation", [None, "--help"])

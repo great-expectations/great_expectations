@@ -133,13 +133,13 @@ import CLIRemoval from './components/warnings/_cli_removal.md'
 
 @pytest.mark.unit
 def test__prepend_version_info_to_name_for_md_relative_links():
-    contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/guides/validation/index.md#checkpoints)."""
+    contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
 
     version = "0.16.16"
     updated_contents = _prepend_version_info_to_name_for_md_relative_links(
         contents, version
     )
-    expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, please see [our guides on Checkpoints](../../../../docs/0.16.16/guides/validation/#checkpoints)."""
+    expected_contents = """For more information on pre-configuring a Checkpoint with a Batch Request and Expectation Suite, see [Manage Checkpoints](../../../../docs/guides/validation/checkpoints/checkpoint_lp.md)."""
     assert updated_contents == expected_contents
 
 
@@ -147,11 +147,11 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
     @pytest.mark.unit
     def test__prepend_version_info_for_md_absolute_links(self):
         contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-    - [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    - [How to use Great Expectations in Databricks](/docs/tutorials/getting_started/how_to_use_great_expectations_in_databricks)
     """
         version = "0.16.16"
         expected_contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.16.16/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-    - [How to use Great Expectations in Databricks](/docs/0.16.16/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    - [How to use Great Expectations in Databricks](/docs/0.16.16/tutorials/getting_started/how_to_use_great_expectations_in_databricks)
     """
 
         updated_contents = _prepend_version_info_for_md_absolute_links(
@@ -164,11 +164,11 @@ class TestPrependVersionInfoForMdAbsoluteLinks:
         self,
     ):
         contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.15.50/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/tutorials/getting_started/how_to_use_great_expectations_in_databricks)
     """
         version = "0.16.16"
         expected_contents = """- [How to instantiate a Data Context on an EMR Spark Cluster](/docs/0.15.50/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-    - [How to use Great Expectations in Databricks](/docs/0.15.50/deployment_patterns/how_to_use_great_expectations_in_databricks)
+    - [How to use Great Expectations in Databricks](/docs/0.15.50/tutorials/getting_started/how_to_use_great_expectations_in_databricks)
     """
 
         updated_contents = _prepend_version_info_for_md_absolute_links(

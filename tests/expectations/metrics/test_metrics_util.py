@@ -1,9 +1,14 @@
-from typing import List
+from __future__ import annotations
+
+from typing import List, Union
 
 import pandas as pd
+import random
+
 import pytest
 from _pytest import monkeypatch
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.compatibility.sqlalchemy import (
@@ -15,6 +20,7 @@ from great_expectations.expectations.metrics.util import (
     get_unexpected_indices_for_multiple_pandas_named_indices,
     get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
+    get_dbms_compatible_metric_domain_kwargs,
 )
 from tests.test_utils import (
     get_awsathena_connection_url,
@@ -272,3 +278,202 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
         "Error: The list of domain columns is currently empty. Please check your "
         "configuration."
     )
+
+
+@pytest.fixture
+def column_names_all_lowercase() -> list[str]:
+    return [
+        "artists",
+        "healthcare_workers",
+        "engineers",
+        "lawyers",
+        "scientists",
+    ]
+
+
+@pytest.fixture
+def column_names_all_uppercase(column_names_all_lowercase: list[str]) -> list[str]:
+    name: str
+    return [name.upper() for name in column_names_all_lowercase]
+
+
+@pytest.mark.unit
+def test_get_dbms_compatible_metric_domain_column_kwargs_column_not_found(
+    sa, column_names_all_lowercase: list[str]
+):
+    test_column_names: list[str] = column_names_all_lowercase
+    with pytest.raises(gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError) as eee:
+        _ = get_dbms_compatible_metric_domain_kwargs(
+            metric_domain_kwargs={"column": "non_existent_column"},
+            batch_columns_list=test_column_names,
+        )
+    assert (
+        str(eee.value)
+        == f'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    [
+        "input_column_name",
+        "output_column_name",
+        "confirm_not_equal_column_name",
+    ],
+    [
+        pytest.param(
+            "SHOULD_NOT_BE_QUOTED",
+            "SHOULD_NOT_BE_QUOTED",
+            None,
+            id="column_does_not_need_to_be_quoted",
+        ),
+        pytest.param(
+            "should_be_quoted",
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            "SHOULD_NOT_BE_QUOTED",
+            id="column_must_be_quoted",
+        ),
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name: str,
+    output_column_name: Union[str, sqlalchemy.quoted_name],
+    confirm_not_equal_column_name: Union[str, sqlalchemy.quoted_name],
+):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="should_be_quoted", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
+        quoted_column_name,
+    ]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column": input_column_name},
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column"] == output_column_name
+    if confirm_not_equal_column_name:
+        assert metric_domain_kwargs["column"] != confirm_not_equal_column_name
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    [
+        "input_column_name_a",
+        "input_column_name_b",
+        "output_column_name_a",
+        "output_column_name_b",
+    ],
+    [
+        pytest.param(
+            "SHOULD_NOT_BE_QUOTED",
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            "SHOULD_NOT_BE_QUOTED",
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            id="column_a_does_not_need_to_be_quoted_column_b_must_remain_as_quoted",
+        ),
+        pytest.param(
+            "SHOULD_NOT_BE_QUOTED",
+            "should_be_quoted",
+            "SHOULD_NOT_BE_QUOTED",
+            sqlalchemy.quoted_name(value="should_be_quoted", quote=True),
+            id="column_a_does_not_need_to_be_quoted_column_b_needs_to_be_quoted",
+        ),
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_pair_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_name_a: str,
+    input_column_name_b: str,
+    output_column_name_a: Union[str, sqlalchemy.quoted_name],
+    output_column_name_b: Union[str, sqlalchemy.quoted_name],
+):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
+    quoted_column_name: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="should_be_quoted", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
+        quoted_column_name,
+    ]
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={
+            "column_A": input_column_name_a,
+            "column_B": input_column_name_b,
+        },
+        batch_columns_list=test_column_names,
+    )
+    assert metric_domain_kwargs["column_A"] == output_column_name_a
+    assert metric_domain_kwargs["column_B"] == output_column_name_b
+
+
+@pytest.mark.unit
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    [
+        "input_column_list",
+        "output_column_list",
+    ],
+    [
+        pytest.param(
+            [
+                "SHOULD_NOT_BE_QUOTED",
+                "should_be_quoted_0",
+                "should_be_quoted_1",
+                "should_be_quoted_2",
+            ],
+            [
+                "SHOULD_NOT_BE_QUOTED",
+                sqlalchemy.quoted_name(value="should_be_quoted_0", quote=True),
+                sqlalchemy.quoted_name(value="should_be_quoted_1", quote=True),
+                sqlalchemy.quoted_name(value="should_be_quoted_2", quote=True),
+            ],
+            id="column_list_has_three_columns_that_must_be_quoted",
+        ),
+    ],
+)
+def test_get_dbms_compatible_metric_domain_column_list_kwargs(
+    sa,
+    column_names_all_uppercase: list[str],
+    input_column_list: list[str],
+    output_column_list: list[Union[str, sqlalchemy.quoted_name]],
+):
+    not_quoted_column_name = "SHOULD_NOT_BE_QUOTED"
+    quoted_column_name_0: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="should_be_quoted_0", quote=True
+    )
+    quoted_column_name_1: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="should_be_quoted_1", quote=True
+    )
+    quoted_column_name_2: sqlalchemy.quoted_name = sqlalchemy.quoted_name(
+        value="should_be_quoted_2", quote=True
+    )
+    test_column_names: list[str] = column_names_all_uppercase + [
+        not_quoted_column_name,
+        quoted_column_name_0,
+        quoted_column_name_1,
+        quoted_column_name_2,
+    ]
+    """
+    This shuffle intersperses input "column_list" so to ensure that there is no dependency on position of column names
+    that must be quoted.  Sorting in assertion below ensures that types are correct, regardless of column order.
+    """
+    random.shuffle(test_column_names)
+
+    metric_domain_kwargs: dict
+
+    metric_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs={"column_list": input_column_list},
+        batch_columns_list=test_column_names,
+    )
+    assert sorted(metric_domain_kwargs["column_list"]) == sorted(output_column_list)

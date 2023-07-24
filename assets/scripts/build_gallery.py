@@ -20,6 +20,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.exceptions.exceptions import ExpectationNotFoundError
 from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
@@ -302,11 +303,22 @@ def get_expectation_instances(expectations_info):
                 expectation_tracebacks.write(traceback.format_exc())
                 continue
 
-        expectation_instances[
-            expectation_name
-        ] = great_expectations.expectations.registry.get_expectation_impl(
-            expectation_name
-        )()
+        try:
+            expectation_instances[
+                expectation_name
+            ] = great_expectations.expectations.registry.get_expectation_impl(
+                expectation_name
+            )()
+        except ExpectationNotFoundError:
+            logger.error(
+                f"Failed to get Expectation implementation from registry: {expectation_name}"
+            )
+            print(traceback.format_exc())
+            expectation_tracebacks.write(
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
+            )
+            expectation_tracebacks.write(traceback.format_exc())
+            continue
     return expectation_instances
 
 
@@ -617,11 +629,11 @@ def format_docstring_to_markdown(docstr: str) -> str:
         elif line.strip().endswith(":"):
             in_param = True
             # This adds a blank line before the header if one doesn't already exist.
-            if prev_line:
+            if prev_line != "":  # noqa: PLC1901
                 clean_docstr_list.append("")
             # Turn the line into an H4 header
             clean_docstr_list.append(f"#### {line.strip()}")
-        elif line.strip() and prev_line != "::":
+        elif line.strip() == "" and prev_line != "::":  # noqa: PLC1901
             # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
             # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
             # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
@@ -632,25 +644,29 @@ def format_docstring_to_markdown(docstr: str) -> str:
             in_code_block = False
             first_code_indentation = None
             clean_docstr_list.append(line)
-        elif in_code_block:
-            # Determine the number of spaces indenting the first line of code so they can be removed from all lines
-            # in the code block without wrecking the hierarchical indentation levels of future lines.
-            if first_code_indentation is None and line.strip():
-                first_code_indentation = len(
-                    re.match(r"\s*", original_line, re.UNICODE).group(0)
-                )
-            if not line.strip() and prev_line == "::":
-                # If the first line of the code block is a blank one, just skip it.
-                pass
-            else:
-                # Append the line of code, minus the extra indentation from being written in an indented docstring.
-                clean_docstr_list.append(original_line[first_code_indentation:])
-        elif ":" in line.replace(":ref:", "") and in_param:
-            # This indicates a parameter. arg. or other definition.
-            clean_docstr_list.append(f"- {line.strip()}")
         else:
-            # This indicates a regular line of text.
-            clean_docstr_list.append(f"{line.strip()}")
+            if in_code_block:  # noqa: PLR5501
+                # Determine the number of spaces indenting the first line of code so they can be removed from all lines
+                # in the code block without wrecking the hierarchical indentation levels of future lines.
+                if (
+                    first_code_indentation is None
+                    and line.strip() != ""  # noqa: PLC1901
+                ):
+                    first_code_indentation = len(
+                        re.match(r"\s*", original_line, re.UNICODE).group(0)
+                    )
+                if line.strip() == "" and prev_line == "::":  # noqa: PLC1901
+                    # If the first line of the code block is a blank one, just skip it.
+                    pass
+                else:
+                    # Append the line of code, minus the extra indentation from being written in an indented docstring.
+                    clean_docstr_list.append(original_line[first_code_indentation:])
+            elif ":" in line.replace(":ref:", "") and in_param:
+                # This indicates a parameter. arg. or other definition.
+                clean_docstr_list.append(f"- {line.strip()}")
+            else:
+                # This indicates a regular line of text.
+                clean_docstr_list.append(f"{line.strip()}")
         prev_line = line.strip()
     clean_docstr = "\n".join(clean_docstr_list)
     return clean_docstr
@@ -675,7 +691,6 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 @click.command()
 @click.option(
     "--only-combine",
-    "-O",
     "only_combine",
     is_flag=True,
     default=False,
@@ -724,13 +739,37 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--backends",
     "-b",
     "backends",
-    help="Backends to consider running tests against (comma-separated)",
+    help=(
+        "Comma-separated names of backends (in a single string) to consider "
+        "running tests against (bigquery, mssql, mysql, pandas, postgresql, "
+        "redshift, snowflake, spark, sqlite, trino)"
+    ),
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
+    """Find Expectations, run their diagnostics methods, and generate JSON files with test result summaries for each backend
 
     - args: snake_name of specific Expectations to include (useful for testing)
+
+    By default, all core and contrib Expectations are found and tested against
+    every backend that can be connected to. If any specific Expectation names
+    are passed in, only those Expectations will be tested.
+
+    If all Expectations are included and there are no test running modifiers
+    specified, the JSON files with tests result summaries will have the "full"
+    suffix. If test running modifiers are specified (--ignore-suppress or
+    --ignore-only-for), the JSON files will have the "nonstandard" suffix. If
+    any Expectations are excluded, the JSON files will have the "partial"
+    suffix.
+
+    If all {backend}_full.json files are present and the --only-combine option
+    is used, then the complete JSON file for the expectation gallery (including
+    a lot of metadata for each Expectation) will be written to outfile_name
+    (default: expectation_library_v2--staging.json).
+
+    If running locally (i.e. not in CI), you can run docker containers for
+    mssql, mysql, postgresql, and trino. Simply navigate to
+    assets/docker/{backend} and run `docker-compose up -d`
     """
     backends = []
     if kwargs["backends"]:

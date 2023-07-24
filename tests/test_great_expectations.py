@@ -322,12 +322,14 @@ def test_stats_mixed_expectations():
 
 
 class TestIO(unittest.TestCase):
+    @pytest.mark.filesystem
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         _ = gx.read_csv(
             script_path + "/test_sets/Titanic.csv",
         )
 
+    @pytest.mark.filesystem
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_json(
@@ -379,6 +381,7 @@ class TestIO(unittest.TestCase):
         assert isinstance(dfs_dict["Titanic_1"], PandasDataset)
         assert dfs_dict["Titanic_1"]["Name"][0] == "Allen, Miss Elisabeth Walton"
 
+    @pytest.mark.filesystem
     def test_read_table(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
@@ -438,6 +441,7 @@ class TestIO(unittest.TestCase):
         assert df["Name"][1] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.filesystem
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_pickle(
@@ -446,6 +450,7 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    @pytest.mark.filesystem
     def test_read_sas(self):
         script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_sas(

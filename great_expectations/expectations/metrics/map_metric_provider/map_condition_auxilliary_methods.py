@@ -29,10 +29,9 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
 )
 from great_expectations.expectations.metrics.util import (
     compute_unexpected_pandas_indices,
-    get_dbms_compatible_column_names,
+    get_dbms_compatible_metric_domain_kwargs,
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
-    verify_column_names_exist,
 )
 from great_expectations.util import (
     generate_temporary_table_name,
@@ -77,6 +76,12 @@ def _pandas_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
+
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -92,11 +97,6 @@ def _pandas_map_condition_index(
             "column"
         ]
 
-        column_name = get_dbms_compatible_column_names(
-            column_names=column_name,
-            batch_columns_list=metrics["table.columns"],
-        )
-
         ###
         # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
         # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -109,26 +109,21 @@ def _pandas_map_condition_index(
             domain_records_df = domain_records_df[
                 domain_records_df[column_name].notnull()
             ]
-        domain_column_name_list.append(column_name)
 
-    # multi-column map expectations
-    elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-            "column_list"
-        ]
-        verify_column_names_exist(
-            column_names=column_list, batch_columns_list=metrics["table.columns"]
-        )
-        domain_column_name_list = column_list
+        domain_column_name_list.append(column_name)
 
     # column pair expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
         column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
-        verify_column_names_exist(
-            column_names=column_list, batch_columns_list=metrics["table.columns"]
-        )
+        domain_column_name_list = column_list
+
+    # multi-column map expectations
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
         domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
@@ -177,19 +172,26 @@ def _pandas_map_condition_query(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
+
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
+    """
+    In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
+    with all of the available "domain_kwargs" keys.
+    """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
+
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
             "column"
         ]
 
-        column_name = get_dbms_compatible_column_names(
-            column_names=column_name,
-            batch_columns_list=metrics["table.columns"],
-        )
         filter_column_isnull = kwargs.get(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
@@ -197,14 +199,6 @@ def _pandas_map_condition_query(
             domain_records_df = domain_records_df[
                 domain_records_df[column_name].notnull()
             ]
-
-    elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-            "column_list"
-        ]
-        verify_column_names_exist(
-            column_names=column_list, batch_columns_list=metrics["table.columns"]
-        )
 
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
     index_list = domain_values_df_filtered.index.to_list()
@@ -225,6 +219,12 @@ def _pandas_map_condition_rows(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
+
+    accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
+        metric_domain_kwargs=accessor_domain_kwargs,
+        batch_columns_list=metrics["table.columns"],
+    )
+
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -237,11 +237,6 @@ def _pandas_map_condition_rows(
             "column"
         ]
 
-        column_name = get_dbms_compatible_column_names(
-            column_names=column_name,
-            batch_columns_list=metrics["table.columns"],
-        )
-
         ###
         # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
         # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -252,14 +247,6 @@ def _pandas_map_condition_rows(
         )
         if filter_column_isnull:
             df = df[df[column_name].notnull()]
-
-    elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-            "column_list"
-        ]
-        verify_column_names_exist(
-            column_names=column_list, batch_columns_list=metrics["table.columns"]
-        )
 
     result_format = metric_value_kwargs["result_format"]
 
