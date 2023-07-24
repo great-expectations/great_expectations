@@ -25,7 +25,7 @@ from tests.test_utils import create_files_in_directory
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 
 def test_basic_instantiation(tmp_path_factory):

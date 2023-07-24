@@ -43,7 +43,7 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
 ]
 
 # module level markers
-pytestmark = [pytest.mark.spark]
+pytestmark = pytest.mark.spark
 
 
 @pytest.fixture

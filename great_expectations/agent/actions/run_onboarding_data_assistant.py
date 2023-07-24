@@ -22,7 +22,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
         # build tz aware timestamp
-        tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
+        tz = datetime.now().astimezone().tzinfo
         timestamp = datetime.now(tz=tz)
 
         # ensure we have unique names for created resources
@@ -32,7 +32,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             )
             # if that didn't error, this name exists, so we add the timestamp
             expectation_suite_name = f"{expectation_suite_name} {timestamp}"
-        except StoreBackendError:
+        except (StoreBackendError, ValueError):
             # resource is unique
             pass
 
@@ -40,7 +40,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
             self._context.get_checkpoint(name=checkpoint_name)
             # if that didn't error, this name exists, so we add the timestamp
             checkpoint_name = f"{checkpoint_name} {timestamp}"
-        except StoreBackendError:
+        except (StoreBackendError, ValueError):
             # resource is unique
             pass
 

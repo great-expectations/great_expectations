@@ -5,8 +5,15 @@ on:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
+  workflow_dispatch:  # allows manual triggering with branch picker
 
 jobs:
+  ci-does-not-run-on-draft-pull-requests:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    steps:
+      - run: echo "CI jobs won't run because this is a draft pull request."
+
   static-analysis:
     runs-on: ubuntu-latest
 
@@ -54,20 +61,33 @@ jobs:
             setup.py
 
       - name: Install dependencies
-        run: pip install -c constraints-dev.txt ".[test]"
+        run: pip install -c constraints-dev.txt ".[test, snowflake]"
 
       - name: Run the unit tests
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
 
   marker-tests:
+    if: github.event.pull_request.draft == false
+    services:
+      postgres:
+        # Docker hub image
+        image: postgres:13.3
+        env:
+          POSTGRES_USER: postgresql
+          POSTGRES_DB: test_ci # required by postgres image
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
     strategy:
       matrix:
         markers:
           - big
           - cli
-          - cloud
+          # `not e2e` because 1 test & 1 fixture need access token
+          - cloud and not e2e
           - filesystem
           - openpyxl or pyarrow or project or sqlite
+          #- spark
+          - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
 
@@ -91,4 +111,4 @@ jobs:
           invoke deps --gx-install -m '${{ matrix.markers }}' -r test
 
       - name: Run the tests
-        run: pytest -m "${{ matrix.markers }} and not unit" -vv -rEf
+        run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose

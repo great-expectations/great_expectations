@@ -14,7 +14,7 @@ from great_expectations.datasource.data_connector.sorter import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 @pytest.fixture()

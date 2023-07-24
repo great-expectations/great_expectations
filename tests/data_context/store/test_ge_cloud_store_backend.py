@@ -12,7 +12,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.cloud]
+pytestmark = pytest.mark.cloud
 
 
 @pytest.mark.unit

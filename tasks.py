@@ -16,9 +16,9 @@ import os
 import pathlib
 import shutil
 import sys
-from collections.abc import Mapping
+from collections.abc import Generator, Mapping, Sequence
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Final, Union
+from typing import TYPE_CHECKING, Final, NamedTuple, Union
 
 import invoke
 
@@ -387,6 +387,8 @@ def tests(  # noqa: PLR0913
     Run tests. Runs unit tests by default.
 
     Use `invoke tests -p=<TARGET_PACKAGE>` to run tests on a particular package and measure coverage (or lack thereof).
+
+    See also, the newer `invoke ci-tests --help`.
     """
     markers = []
     if integration:
@@ -669,8 +671,8 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
-    else:
-        if start:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
@@ -782,12 +784,66 @@ def show_automerges(ctx: Context):
         print("\tNo PRs set to automerge")
 
 
-MARKER_REQ_MAPPING: Final[Mapping[str, tuple[str, ...]]] = {
-    "athena": ("reqs/requirements-dev-athena.txt",),
-    "cloud": ("reqs/requirements-dev-cloud.txt",),
-    "pyarrow": ("reqs/requirements-dev-arrow.txt",),
-    "external_sqldialect": ("reqs/requirements-dev-sqlalchemy.txt",),
+class TestDependencies(NamedTuple):
+    requirement_files: tuple[str, ...]
+    services: tuple[str, ...] = tuple()
+    exta_pytest_args: tuple[  # TODO: remove this once remove the custom flagging system
+        str, ...
+    ] = tuple()
+
+
+MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
+    "athena": TestDependencies(("reqs/requirements-dev-athena.txt",)),
+    "cloud": TestDependencies(
+        ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
+    ),
+    "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
+    "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
+    "postgresql": TestDependencies(
+        ("reqs/requirements-dev-postgresql.txt",),
+        services=["postgresql"],
+        exta_pytest_args=("--postgresql",),
+    ),
+    "spark": TestDependencies(
+        ("reqs/requirements-dev-spark.txt",),
+        exta_pytest_args=("--spark",),
+    ),
 }
+
+
+def _tokenize_marker_string(marker_string: str) -> Generator[str, None, None]:
+    """_summary_
+
+    Args:
+        marker_string (str): _description_
+
+    Yields:
+        Generator[str, None, None]: _description_
+    """
+    tokens = marker_string.split()
+    if len(tokens) == 1:
+        yield tokens[0]
+    elif marker_string == "cloud and not e2e":
+        yield "cloud"
+    elif marker_string == "openpyxl or pyarrow or project or sqlite":
+        yield "openpyxl"
+        yield "pyarrow"
+        yield "project"
+        yield "sqlite"
+    else:
+        raise ValueError(f"Unable to tokenize marker string: {marker_string}")
+
+
+def _get_marker_dependencies(markers: str | Sequence[str]) -> list[TestDependencies]:
+    if isinstance(markers, str):
+        markers = [markers]
+    dependencies: list[TestDependencies] = []
+    for marker_string in markers:
+        for marker_token in _tokenize_marker_string(marker_string):
+            if marker_depedencies := MARKER_DEPENDENDENCY_MAP.get(marker_token):
+                LOGGER.debug(f"'{marker_token}' has dependencies")
+                dependencies.append(marker_depedencies)
+    return dependencies
 
 
 @invoke.task(
@@ -829,10 +885,8 @@ def deps(  # noqa: PLR0913
 
     req_files: list[str] = ["requirements.txt"]
 
-    for marker_string in markers:
-        for marker_token in marker_string.split(" or "):
-            if marker_depedencies := MARKER_REQ_MAPPING.get(marker_token):
-                req_files.extend(marker_depedencies)
+    for test_deps in _get_marker_dependencies(markers):
+        req_files.extend(test_deps.requirement_files)
 
     for name in requirements_dev:
         req_path: pathlib.Path = REQS_DIR / f"requirements-dev-{name}.txt"
@@ -849,3 +903,81 @@ def deps(  # noqa: PLR0913
         cmds.append("-c constraints-dev.txt")
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    iterable=["service_names", "up_services", "verbose"],
+)
+def ci_tests(
+    ctx: Context,
+    marker: str,
+    up_services: bool = False,
+    verbose: bool = False,
+    reports: bool = False,
+):
+    """
+    Run tests in CI.
+
+    This method looks up the pytest marker provided and runs the tests for that marker,
+    as well as looking up any required services, testing dependencies and extra CLI flags
+    that are need and starting them if `up_services` is True.
+
+    `up_services` is False by default to avoid starting services which may already be up
+    when running tests locally.
+
+    Defined this as a new invoke task to avoid some of the baggage of our old test setup.
+    """
+    pytest_cmds = [
+        "pytest",
+        "-m",
+        f"'{marker}'",
+        "-rEf",
+    ]
+    if reports:
+        pytest_cmds.extend(["--cov=great_expectations", "--cov-report=xml"])
+
+    if verbose:
+        pytest_cmds.append("-vv")
+
+    for test_deps in _get_marker_dependencies(marker):
+        if up_services:
+            service(ctx, names=test_deps.services, markers=test_deps.services)
+
+        for extra_pytest_arg in test_deps.exta_pytest_args:
+            pytest_cmds.append(extra_pytest_arg)
+
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
+@invoke.task(
+    iterable=["names", "markers"],
+)
+def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
+    """
+    Startup a service, by referencing its name directly or by looking up a pytest marker.
+
+    If a marker is specified, the services listed in `MARKER_DEPENDENDENCY_MAP` will be used.
+
+    Note:
+        The main reason this is a separate task is to make it easy to start services
+        when running tests locally.
+    """
+    service_names = set(names)
+
+    if markers:
+        for test_deps in _get_marker_dependencies(markers):
+            service_names.update(test_deps.services)
+
+    if service_names:
+        print(f"  Starting services for {', '.join(service_names)} ...")
+        for service_name in service_names:
+            cmds = [
+                "docker-compose",
+                "-f",
+                f"assets/docker/{service_name}/docker-compose.yml",
+                "up",
+                "-d",
+            ]
+            ctx.run(" ".join(cmds), echo=True, pty=True)
+    else:
+        print("  No matching services to start")
