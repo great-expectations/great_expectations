@@ -367,6 +367,7 @@ def test_build_suite_with_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.unit
 def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
     """
     What does this test do and why?

@@ -1703,6 +1703,7 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     reason="requires numpy version 1.21.0 or newer",
 )
 @pytest.mark.slow  # 2.02s
+@pytest.mark.big
 def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):

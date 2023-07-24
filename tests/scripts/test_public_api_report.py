@@ -330,6 +330,7 @@ class TestCodeParser:
         }
 
 
+@pytest.mark.unit
 def test_parse_docs_contents_for_class_names(
     sample_markdown_doc_with_yaml_file_contents: FileContents,
 ):
@@ -338,6 +339,7 @@ def test_parse_docs_contents_for_class_names(
     ) == {"Datasource", "SqlAlchemyExecutionEngine"}
 
 
+@pytest.mark.filesystem
 def test_get_shortest_dotted_path(monkeypatch):
     """Test path traversal using an example file.
 

@@ -87,6 +87,7 @@ class DummyParameterBuilder(ParameterBuilder):
         )
 
 
+@pytest.mark.unit
 def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_specified(
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
@@ -120,6 +121,7 @@ def test_resolve_evaluation_dependencies_no_parameter_builder_dependencies_speci
     assert not all_fully_qualified_parameter_names
 
 
+@pytest.mark.unit
 def test_resolve_evaluation_dependencies_two_parameter_builder_dependencies_specified(
     empty_rule_state: Dict[str, Union[Domain, Dict[str, ParameterContainer]]],
 ):
