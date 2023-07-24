@@ -363,9 +363,7 @@ class Validator:
         runtime_configuration: Optional[dict] = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
-    ) -> (
-        _MetricsDict
-    ):  # Accepts either strings or tuples for the second and third elements
+    ) -> _MetricsDict:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
 
@@ -377,7 +375,7 @@ class Validator:
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
         """
-        return self._metrics_calculator.compute_metrics(  # type: ignore[return-value] #
+        return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
