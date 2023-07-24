@@ -165,6 +165,13 @@ def pytest_configure(config):
 
 
 def pytest_addoption(parser):
+    parser.addoption(
+        "--verify-marker-coverage-and-exit",
+        action="store_true",
+        help="If set, checks that all tests have one of the markers necessary "
+        "for it to be run.",
+    )
+
     # note: --no-spark will be deprecated in favor of --spark
     parser.addoption(
         "--no-spark",
@@ -328,6 +335,58 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backend", test_backends, scope="module")
     if "test_backends" in metafunc.fixturenames:
         metafunc.parametrize("test_backends", [test_backends], scope="module")
+
+
+def _verify_marker_coverage(session) -> list[tuple[str, str, list[str]]]:
+    REQUIRED_MARKERS = {
+        "sqlite",
+        "filesystem",
+        "spark",
+        "cloud",
+        "unit",
+        "big",
+        "sqlalchemy_version_compatibility",
+        "aws_creds",
+        "cli",
+        "openpyxl",
+        "clickhouse",
+        "project",
+        "postgresql",
+        "external_sqldialect",
+        "pyarrow",
+        "mysql",
+    }
+    uncovered: list[tuple[str, str, list[str]]] = []
+    markers_on_uncovered = set()
+    for test in session.items:
+        markers = {m.name for m in test.iter_markers()}
+        if not REQUIRED_MARKERS.intersection(markers):
+            uncovered.append((test.path, test.name, markers))
+            # breakpoint()
+            # print(f"BAD: {test.name} => {markers}")
+            for m in markers:
+                markers_on_uncovered.add(m)
+    return uncovered, markers_on_uncovered
+
+
+def pytest_collection_finish(session):
+    if session.config.option.verify_marker_coverage_and_exit:
+        uncovered, markers = _verify_marker_coverage(session)
+        if uncovered:
+            print(f"*** {len(uncovered)} tests have no marker coverage ***")
+            for l in uncovered:
+                print(l)
+            print("*** MARKERS ***")
+            for m in markers:
+                print(m)
+            pytest.exit(
+                reason="Marker coverage verification failed",
+                returncode=pytest.ExitCode.TESTS_FAILED,
+            )
+        pytest.exit(
+            reason="Marker coverage verification succeeded",
+            returncode=pytest.ExitCode.OK,
+        )
 
 
 def pytest_collection_modifyitems(config, items):
