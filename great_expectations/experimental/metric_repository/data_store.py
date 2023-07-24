@@ -1,7 +1,7 @@
 import abc
-from typing import Generic, TypeVar
+from typing import TypeVar
 
-from great_expectations import DataContext
+from great_expectations.data_context import AbstractDataContext
 
 T = TypeVar("T")
 
@@ -9,11 +9,11 @@ T = TypeVar("T")
 class DataStore(abc.ABC):
     """Abstract base class for all DataStore implementations."""
 
-    def __init__(self, context: DataContext):
+    def __init__(self, context: AbstractDataContext):
         self._context = context
 
     @abc.abstractmethod
-    def add(self, value: Generic[T]) -> T:
+    def add(self, value: T) -> T:
         """Add a value to the DataStore.
 
         Args:
