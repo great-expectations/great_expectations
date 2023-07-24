@@ -4436,7 +4436,7 @@ def test_column_median_metric_spark(spark_session):
     assert results == {desired_metric.id: 2}
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
@@ -4464,7 +4464,7 @@ def test_value_counts_metric_pd():
     assert pd.Series(index=[1, 2, 3], data=[2, 2, 2]).equals(metrics[desired_metric.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_sa(sa):
     engine = build_sa_execution_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
@@ -4494,7 +4494,7 @@ def test_value_counts_metric_sa(sa):
     ).equals(metrics[desired_metric_b.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_value_counts_metric_spark(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -4534,7 +4534,7 @@ def test_value_counts_metric_spark(spark_session):
     assert pd.Series(index=[], data=[]).equals(metrics[desired_metric.id])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.parametrize(
     "dataframe",
     [
@@ -4627,7 +4627,7 @@ def test_distinct_metric_spark(
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_distinct_metric_sa(
     sa,
 ):
@@ -4715,7 +4715,7 @@ def test_distinct_metric_sa(
     assert metrics[column_distinct_values_count_threshold_metric.id] is True
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_distinct_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
