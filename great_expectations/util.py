@@ -1739,7 +1739,22 @@ def convert_pandas_series_decimal_to_float_dtype(
 @overload
 def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = ...,
-    context_root_dir: PathStr = ...,
+    context_root_dir: PathStr = ...,  # If context_root_dir is provided, project_root_dir shouldn't be
+    project_root_dir: None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Literal[False] | None = ...,
+) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(  # type: ignore[misc] # overlapping overload false positive?  # noqa: PLR0913
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: None = ...,
+    project_root_dir: PathStr = ...,  # If project_root_dir is provided, context_root_dir shouldn't be
     runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
@@ -1809,6 +1824,7 @@ def get_context(  # noqa: PLR0913
 
     Relevant parameters
 
+    - project_root_dir: Provide the project root where a GX project exists or will be scaffolded.
     - context_root_dir: Provide an alternative directory to look for GX config.
     - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
     - runtime_environment: Optionally override specific configuration values.
@@ -1836,6 +1852,7 @@ def get_context(  # noqa: PLR0913
     Args:
         project_config: In-memory configuration for Data Context.
         context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
+        project_root_dir (str or pathlib.Path): Path to project root (contains context root with GX config)
         runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
             These values will override both values from the config variables file and
             from environment variables.
