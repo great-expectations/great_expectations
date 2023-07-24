@@ -408,7 +408,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if manual_steps_required:  # noqa: PLR5501
+            if manual_steps_required:
                 upgrade_report += f"""
 <yellow>\
 The Upgrade Helper does not have any automated upgrade steps to perform as part of upgrading your project to be \

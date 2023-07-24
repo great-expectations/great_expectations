@@ -263,7 +263,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         if os.path.isabs(base_directory):  # noqa: PTH117
             self.full_base_directory = base_directory
         else:
-            if root_directory is None:  # noqa: PLR5501
+            if root_directory is None:
                 raise ValueError(
                     "base_directory must be an absolute path if root_directory is not provided"
                 )
@@ -540,7 +540,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             else:
                 s3_object_key = self._convert_key_to_filepath(key)
         else:
-            if self.prefix:  # noqa: PLR5501
+            if self.prefix:
                 s3_object_key = "/".join(
                     (self.prefix, self._convert_key_to_filepath(key))
                 )
@@ -627,11 +627,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
             else:
-                if self.prefix is None:  # noqa: PLR5501
+                if self.prefix is None:
                     if s3_object_key.startswith("/"):
                         s3_object_key = s3_object_key[1:]
                 else:
-                    if s3_object_key.startswith(f"{self.prefix}/"):  # noqa: PLR5501
+                    if s3_object_key.startswith(f"{self.prefix}/"):
                         s3_object_key = s3_object_key[len(self.prefix) + 1 :]
             if self.filepath_prefix and not s3_object_key.startswith(
                 self.filepath_prefix
@@ -824,7 +824,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             else:
                 gcs_object_key = self._convert_key_to_filepath(key)
         else:
-            if self.prefix:  # noqa: PLR5501
+            if self.prefix:
                 gcs_object_key = "/".join(
                     (self.prefix, self._convert_key_to_filepath(key))
                 )
@@ -943,7 +943,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         if self.prefix:
             path_url = "/".join((self.bucket, self.prefix, path))
         else:
-            if self.base_public_path:  # noqa: PLR5501
+            if self.base_public_path:
                 if self.base_public_path[-1] != "/":
                     path_url = f"/{path}"
                 else:

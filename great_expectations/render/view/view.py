@@ -172,7 +172,7 @@ class DefaultJinjaView:
                         content_block_id=new_content_block_id,
                     )
                 else:
-                    if render_to_markdown:  # noqa: PLR5501
+                    if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
                         rendered_block += f"<span>{str(content_block_el)}</span>"

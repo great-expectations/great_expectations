@@ -189,7 +189,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             else:
                 return f'Are all values in column "{column}" in the set {str(set_)}?'
         else:
-            if set_semantic_name is not None:  # noqa: PLR5501
+            if set_semantic_name is not None:
                 return f'Are at least {mostly * 100}% of values in column "{column}" in {set_semantic_name}: {str(set_)}?'
             else:
                 return f'Are at least {mostly * 100}% of values in column "{column}" in the set {str(set_)}?'
@@ -213,12 +213,12 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                         f'All values in column "{column}" are in the set {str(set_)}.'
                     )
             else:
-                if set_semantic_name is not None:  # noqa: PLR5501
+                if set_semantic_name is not None:
                     return f'At least {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" are in the set {str(set)}.'
         else:
-            if set_semantic_name is not None:  # noqa: PLR5501
+            if set_semantic_name is not None:
                 return f' Less than {mostly * 100}% of values in column "{column}" are in {set_semantic_name}: {str(set_)}.'
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" are in the set {str(set_)}.'

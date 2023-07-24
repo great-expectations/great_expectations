@@ -74,7 +74,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:  # noqa: PLR0912
                 sys.exit(0)
             else:
                 # Prompt to modify the project to add missing files
-                if not ctx.obj.assume_yes:  # noqa: PLR5501
+                if not ctx.obj.assume_yes:
                     if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
                         cli_message(RUN_INIT_AGAIN)
                         sys.exit(0)

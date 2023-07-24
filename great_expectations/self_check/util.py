@@ -1596,7 +1596,7 @@ def build_test_backends_list(  # noqa: C901, PLR0912, PLR0913, PLR0915
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
-                if raise_exceptions_for_backends is True:  # noqa: PLR5501
+                if raise_exceptions_for_backends is True:
                     raise ValueError(
                         f"backend-specific tests are requested, but unable to connect to the database at "
                         f"{connection_string}"
@@ -2524,7 +2524,7 @@ def check_json_test_result(  # noqa: C901, PLR0912, PLR0915
                             rtol=test["tolerance"],
                         )
                 else:
-                    if isinstance(value, dict) and "values" in value:  # noqa: PLR5501
+                    if isinstance(value, dict) and "values" in value:
                         try:
                             assert np.allclose(
                                 result["result"]["observed_value"]["values"],

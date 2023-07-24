@@ -21,7 +21,7 @@ def parse_result_format(result_format):
     if isinstance(result_format, str):
         result_format = {"result_format": result_format, "partial_unexpected_count": 20}
     else:
-        if "partial_unexpected_count" not in result_format:  # noqa: PLR5501
+        if "partial_unexpected_count" not in result_format:
             result_format["partial_unexpected_count"] = 20
 
     return result_format

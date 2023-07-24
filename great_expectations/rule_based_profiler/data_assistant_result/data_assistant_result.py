@@ -1386,7 +1386,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 domain_plot_component=domain_plot_component,
             )
         else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1555,7 +1555,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             )
         else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_expect_domain_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,
@@ -1646,7 +1646,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 domain_plot_component=domain_plot_component,
             )
         else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_interactive_range_chart(
                     df=df,
                     metric_plot_components=metric_plot_components,
@@ -1869,7 +1869,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 predicates=predicates,
             )
         else:
-            if "column_quantile_values" in df.columns:  # noqa: PLR5501
+            if "column_quantile_values" in df.columns:
                 return DataAssistantResult._get_interactive_expect_column_values_to_be_between_range_chart(
                     expectation_type=expectation_type,
                     df=df,

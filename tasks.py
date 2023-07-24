@@ -672,7 +672,7 @@ def docs(
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
     else:
-        if start:  # noqa: PLR5501
+        if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")

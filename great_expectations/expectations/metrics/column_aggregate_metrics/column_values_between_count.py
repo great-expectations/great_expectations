@@ -183,7 +183,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = column >= min_value
 
         else:
-            if strict_min and strict_max:  # noqa: PLR5501
+            if strict_min and strict_max:
                 condition = sa.and_(column > min_value, column < max_value)
             elif strict_min:
                 condition = sa.and_(column > min_value, column <= max_value)
@@ -243,7 +243,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = column >= min_value
 
         else:
-            if strict_min and strict_max:  # noqa: PLR5501
+            if strict_min and strict_max:
                 condition = (column > min_value) & (column < max_value)
             elif strict_min:
                 condition = (column > min_value) & (column <= max_value)

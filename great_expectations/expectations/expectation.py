@@ -247,7 +247,7 @@ def param_method(param_name: str) -> Callable:
                         renderer_configuration=renderer_configuration
                     )
                 else:
-                    if return_type is RendererConfiguration:  # noqa: PLR5501
+                    if return_type is RendererConfiguration:
                         return_obj = renderer_configuration
                     else:
                         return_obj = None

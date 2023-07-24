@@ -137,7 +137,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                             **kwargs,
                         )
             else:
-                if isinstance(obj_, ExpectationValidationResult):  # noqa: PLR5501
+                if isinstance(obj_, ExpectationValidationResult):
                     content_block_fn = (
                         cls._missing_content_block_fn
                         if exception_list_content_block
@@ -263,7 +263,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         **kwargs,
                     )
         else:
-            if isinstance(render_object, ExpectationValidationResult):  # noqa: PLR5501
+            if isinstance(render_object, ExpectationValidationResult):
                 content_block_fn = (
                     cls._missing_content_block_fn
                     if exception_list_content_block

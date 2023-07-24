@@ -314,7 +314,7 @@ class HtmlSiteStore:
             else:
                 return store_backend.get_public_url_for_key(key)
         else:
-            if only_if_exists:  # noqa: PLR5501
+            if only_if_exists:
                 return (
                     store_backend.get_url_for_key(key)
                     if store_backend.has_key(key)

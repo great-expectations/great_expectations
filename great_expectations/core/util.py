@@ -937,7 +937,7 @@ def get_sql_dialect_floating_point_infinity_value(
         else:
             return np.inf
     else:
-        if negative:  # noqa: PLR5501
+        if negative:
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]

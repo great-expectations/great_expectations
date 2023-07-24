@@ -172,7 +172,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
                     "values must not be null, at least $mostly_pct % of the time."
                 )
         else:
-            if include_column_name:  # noqa: PLR5501
+            if include_column_name:
                 template_str = "$column values must never be null."
             else:
                 template_str = "values must never be null."

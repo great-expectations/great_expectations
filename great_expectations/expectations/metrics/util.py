@@ -589,7 +589,7 @@ def column_reflection_fallback(
                 query: sqlalchemy.TextClause = selectable
             else:
                 # noinspection PyUnresolvedReferences
-                if dialect.name.lower() == GXSqlDialect.REDSHIFT:  # noqa: PLR5501
+                if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
                     query = (
                         sa.select(sa.text("*"))
@@ -780,7 +780,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
                 message=error_message_template.format(column_name=column_name)
             )
         else:
-            if not verify_only:  # noqa: PLR5501
+            if not verify_only:
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
     return None if verify_only else normalized_batch_columns_mappings

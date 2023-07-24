@@ -267,22 +267,22 @@ def _standardize_mostly_for_single_batch(  # noqa: PLR0911
     Applies business logic to standardize "mostly" value for single-Batch case.
     """
     if expectation_type == "expect_column_values_to_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:
             return np.float64(0.99)
 
-        if mostly >= 0.975:  # noqa:  PLR0915
+        if mostly >= 0.975:
             return np.float64(0.975)
 
         return mostly
 
     if expectation_type == "expect_column_values_to_not_be_null":
-        if mostly >= 1.0:  # noqa:  PLR0915
+        if mostly >= 1.0:
             return np.float64(1.0)
 
-        if mostly >= 0.99:  # noqa:  PLR0915
+        if mostly >= 0.99:
             return np.float64(0.99)
 
         # round down to nearest 0.025

@@ -652,7 +652,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.batch_manager.batch_data_cache:  # noqa: PLR5501
+            if batch_id in self.batch_manager.batch_data_cache:
                 data_object = cast(
                     SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
                 )
@@ -790,7 +790,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "neither":  # noqa: PLR5501
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -841,7 +841,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if != "never":  # noqa: PLR5501
+                if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
                     )
@@ -1247,7 +1247,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            if self.dialect_name == GXSqlDialect.SQLITE:  # noqa: PLR5501
+            if self.dialect_name == GXSqlDialect.SQLITE:
                 split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()

@@ -246,7 +246,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                 "upper_bound": None,
             }
         else:
-            if not isinstance(truncate_values, str):  # noqa: PLR5501
+            if not isinstance(truncate_values, str):
                 truncate_values_keys: set = set(truncate_values.keys())
                 if (
                     not truncate_values_keys
@@ -666,7 +666,7 @@ detected.
                 metric_value_range[metric_value_range_min_idx] = min_value
                 metric_value_range[metric_value_range_max_idx] = max_value
             else:
-                if round_decimals is None:  # noqa: PLR5501
+                if round_decimals is None:
                     metric_value_range[metric_value_range_min_idx] = np.float64(
                         min_value
                     )

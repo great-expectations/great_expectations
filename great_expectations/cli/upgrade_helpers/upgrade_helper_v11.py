@@ -328,7 +328,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                     "validations_updated"
                 ].append(log_dict)
         else:
-            if exception_message:  # noqa: PLR5501
+            if exception_message:
                 self.upgrade_log["upgraded_docs_site_validations_stores"][site_name][
                     "exceptions"
                 ] = True
@@ -659,7 +659,7 @@ A log detailing the upgrade can be found here:
 </green>\
 """
         else:
-            if exceptions:  # noqa: PLR5501
+            if exceptions:
                 exception_occurred = True
                 upgrade_report += f"""
 <red>\

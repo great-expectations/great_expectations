@@ -284,7 +284,7 @@ def column_condition_partial(  # noqa: C901, PLR0915
                         )
                     unexpected_condition = ~expected_condition
                 else:
-                    if filter_column_isnull:  # noqa: PLR5501
+                    if filter_column_isnull:
                         unexpected_condition = column.isNotNull() & ~expected_condition
                     else:
                         unexpected_condition = ~expected_condition
