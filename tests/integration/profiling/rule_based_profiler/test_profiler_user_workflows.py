@@ -181,7 +181,6 @@ def quentin_validator(
 
 @pytest.mark.slow  # 1.15s
 @pytest.mark.big
-@pytest.mark.integration
 def test_alice_columnar_table_single_batch_batches_are_accessible(
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
@@ -238,7 +237,6 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
 )
 @pytest.mark.slow  # 2.31s
 @pytest.mark.big
-@pytest.mark.integration
 def test_alice_profiler_user_workflow_single_batch(
     mock_emit,
     caplog,
@@ -421,7 +419,6 @@ def test_alice_profiler_user_workflow_single_batch(
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 0.86s
 @pytest.mark.big
-@pytest.mark.integration
 def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -497,7 +494,6 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 1.38s
 @pytest.mark.big
-@pytest.mark.integration
 def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -529,7 +525,6 @@ def test_alice_expect_column_values_to_match_stftime_format_auto_yes_default_pro
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 1.26s
 @pytest.mark.big
-@pytest.mark.integration
 def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     alice_validator: Validator,
 ) -> None:
@@ -564,7 +559,6 @@ def test_alice_expect_column_value_lengths_to_be_between_auto_yes_default_profil
 # noinspection PyUnusedLocal
 @pytest.mark.slow  # 1.16s
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     monkeypatch,
     bobby_columnar_table_multi_batch_deterministic_data_context,
@@ -642,7 +636,6 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 )
 @pytest.mark.slow  # 13.08s
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_column_ranges_rule_quantiles_estimator(
     mock_emit,
     caplog,
@@ -918,7 +911,6 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 )
 @freeze_time(TIMESTAMP)
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobby_validator: Validator,
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
@@ -1067,7 +1059,6 @@ def restore_profiler_config(
 )
 @freeze_time(TIMESTAMP)
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_validator: Validator,
@@ -1295,7 +1286,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 )
 @freeze_time(TIMESTAMP)
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_config_no_custom_profiler_config_yes(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     bobby_validator: Validator,
@@ -1564,7 +1554,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 )
 @pytest.mark.slow  # 4.83s
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstrap_estimator(
     mock_emit,
     caplog,
@@ -1694,7 +1683,6 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 4.24s
 @pytest.mark.big
-@pytest.mark.integration
 def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     bobster_validator: Validator,
 ):
@@ -1715,7 +1703,6 @@ def test_bobster_expect_table_row_count_to_be_between_auto_yes_default_profiler_
     reason="requires numpy version 1.21.0 or newer",
 )
 @pytest.mark.slow  # 2.02s
-@pytest.mark.integration
 def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -1778,7 +1765,6 @@ def test_quentin_expect_expect_table_columns_to_match_set_auto_yes_default_profi
 )
 @pytest.mark.slow  # 15.07s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     mock_emit,
     caplog,
@@ -1928,7 +1914,6 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.40s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_yes(
     quentin_validator: Validator,
 ):
@@ -2116,7 +2101,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.15s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2160,7 +2144,6 @@ def test_quentin_expect_column_values_to_be_in_set_auto_yes_default_profiler_con
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 3.44s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2203,7 +2186,6 @@ def test_quentin_expect_column_min_to_be_between_auto_yes_default_profiler_confi
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.12s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
@@ -2271,7 +2253,6 @@ def test_quentin_expect_column_max_to_be_between_auto_yes_default_profiler_confi
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.24s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2327,7 +2308,6 @@ def test_quentin_expect_column_unique_value_count_to_be_between_auto_yes_default
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.67s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2386,7 +2366,6 @@ def test_quentin_expect_column_proportion_of_unique_values_to_be_between_auto_ye
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.26s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ) -> None:
@@ -2445,7 +2424,6 @@ def test_quentin_expect_column_sum_to_be_between_auto_yes_default_profiler_confi
 @freeze_time(TIMESTAMP)
 @pytest.mark.slow  # 2.29s
 @pytest.mark.big
-@pytest.mark.integration
 def test_quentin_expect_column_stdev_to_be_between_auto_yes_default_profiler_config_yes_custom_profiler_config_no(
     quentin_validator: Validator,
 ):
