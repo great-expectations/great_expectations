@@ -87,7 +87,7 @@ stages:
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration tests/integration/test_script_runner.py
+            pytest -v --docs-tests tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_spark
