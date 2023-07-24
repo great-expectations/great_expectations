@@ -38,7 +38,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
     )
-    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 
@@ -678,11 +677,11 @@ class BatchMarkers(BatchKwargs):
 
 
 class BatchData:
-    def __init__(self, execution_engine: ExecutionEngine) -> None:
+    def __init__(self, execution_engine) -> None:
         self._execution_engine = execution_engine
 
     @property
-    def execution_engine(self) -> ExecutionEngine:
+    def execution_engine(self):
         return self._execution_engine
 
     # noinspection PyMethodMayBeStatic
