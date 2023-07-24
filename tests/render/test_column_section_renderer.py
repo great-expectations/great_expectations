@@ -73,6 +73,7 @@ def titanic_validation_results():
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
+@pytest.mark.unit
 def test_render_profiling_results_column_section_renderer(titanic_validation_results):
     # Group EVRs by column
     evrs = {}
@@ -107,6 +108,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
 
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
+@pytest.mark.unit
 def test_render_expectation_suite_column_section_renderer(titanic_expectations):
     # Group expectations by column
     exp_groups = {}
@@ -297,6 +299,7 @@ def test_ProfilingResultsColumnSectionRenderer_render_bar_chart_table(
         assert json.loads(content_block["graph"])
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_render_header(
     titanic_profiled_name_column_expectations,
 ):
@@ -370,6 +373,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_header(
     assert content_blocks.to_json_dict() == expected
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_notes():
     expectation_with_markdown_meta_notes = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_type_list",
@@ -532,6 +536,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_markdown_meta_no
     assert result_json == expected_result_json
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes_in_dict():
     expectation_with_string_notes_list_in_dict = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_type_list",
@@ -697,6 +702,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     assert result_json == expected_result_json
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note_in_dict():
     expectation_with_single_string_note_in_dict = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_type_list",
@@ -852,6 +858,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     assert result_json == expected_result_json
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta_notes():
     expectation_with_string_list_note = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_type_list",
@@ -1007,6 +1014,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_string_list_meta
     assert result_json == expected_result_json
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_meta_note():
     expectation_with_single_string_note = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_type_list",
@@ -1159,6 +1167,7 @@ def test_ExpectationSuiteColumnSectionRenderer_expectation_with_single_string_me
     assert result_json == expected_result_json
 
 
+@pytest.mark.unit
 def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(
     titanic_profiled_name_column_expectations,
 ):
@@ -1182,6 +1191,7 @@ def test_ExpectationSuiteColumnSectionRenderer_render_bullet_list(
     )
 
 
+@pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_header(
     titanic_profiled_name_column_evrs,
 ):
@@ -1209,6 +1219,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header(
     }
 
 
+@pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped_dollar_sign(
     titanic_profiled_name_column_evrs,
 ):
@@ -1266,6 +1277,7 @@ def test_ValidationResultsColumnSectionRenderer_render_header_evr_with_unescaped
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ValidationResultsColumnSectionRenderer_render_table(
     titanic_profiled_name_column_evrs,
 ):
@@ -1307,6 +1319,7 @@ def test_ValidationResultsColumnSectionRenderer_render_table(
 
 
 # noinspection PyPep8Naming
+@pytest.mark.unit
 def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_happy_path():
     evr = ExpectationValidationResult(
         success=True,

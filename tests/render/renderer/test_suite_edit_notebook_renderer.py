@@ -18,6 +18,8 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import get_context
 
+pytestmark = pytest.mark.filesystem
+
 
 @pytest.fixture
 def data_context_with_bad_notebooks(tmp_path_factory):
