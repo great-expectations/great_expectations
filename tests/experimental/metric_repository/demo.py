@@ -25,8 +25,10 @@ from great_expectations.agent.models import (
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.experimental.metric_repository.batch_inspector import (
-    ColumnDescriptiveMetricsMetricRetriever,
     BatchInspector,
+)
+from great_expectations.experimental.metric_repository.column_descriptive_metrics_metric_retriever import (
+    ColumnDescriptiveMetricsMetricRetriever,
 )
 from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
@@ -78,9 +80,9 @@ def cloud_context_and_batch_request_with_simple_dataframe(
     return context, batch_request
 
 
-# @pytest.mark.xfail(
-#     reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
-# )
+@pytest.mark.xfail(
+    reason="This test is meant as a demo during development and currently fails due to differing batch data object ids and ge_load_time batch marker"
+)
 def test_demo_batch_inspector(
     metric_id: uuid.UUID,
     run_id: uuid.UUID,
