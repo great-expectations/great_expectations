@@ -33,7 +33,7 @@ def DataContext(  # noqa: PLR0913
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
 ) -> FileDataContext:
-    # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
+    # If `context_root_dir` is provided and `cloud_mode` is `False` a `FileDataContext` will always be returned.
     ...
 
 

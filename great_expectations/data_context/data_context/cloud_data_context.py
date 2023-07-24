@@ -11,7 +11,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
     Union,
     cast,
     overload,
@@ -152,31 +151,6 @@ class CloudDataContext(SerializableDataContext):
     ) -> None:
         # Usage statistics are always disabled within Cloud-backed environments.
         self._usage_statistics_handler = None
-
-    @staticmethod
-    def _resolve_cloud_args(  # noqa: PLR0913
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
-        # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        cloud_base_url = (
-            cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-        )
-        cloud_access_token = (
-            cloud_access_token
-            if cloud_access_token is not None
-            else ge_cloud_access_token
-        )
-        cloud_organization_id = (
-            cloud_organization_id
-            if cloud_organization_id is not None
-            else ge_cloud_organization_id
-        )
-        return cloud_base_url, cloud_access_token, cloud_organization_id
 
     def _register_providers(self, config_provider: _ConfigurationProvider) -> None:
         """

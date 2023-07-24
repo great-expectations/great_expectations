@@ -1169,8 +1169,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
-        in order of precedence: ge_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
-        environment variables, config_variables, or ge_cloud_config_variable_defaults (allows certain variables to
+        in order of precedence: gx_cloud_config (for Data Contexts in GX Cloud mode), runtime_environment,
+        environment variables, config_variables, or gx_cloud_config_variable_defaults (allows certain variables to
         be optional in GX Cloud mode).
         """
         if not config:
