@@ -160,7 +160,7 @@ Both are functionally equivalent for purposes of working with a file-backed proj
 :::
 
 :::info What if the folder does not contain a Data Context?
-If the `project_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
+If the root directory provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
 
 The `get_context(...)` method instantiates and returns the newly initialized Data Context.
 :::
