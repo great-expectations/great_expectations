@@ -1,7 +1,7 @@
 """Run integration and docs tests.
 
 Individual tests can be run by setting the '-k' flag and referencing the name of test, like the following example:
-    pytest -v --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+    pytest -v --docs-tests -k "test_docs[quickstart]" tests/integration/test_script_runner.py
 """
 
 import importlib.machinery
