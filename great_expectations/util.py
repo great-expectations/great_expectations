@@ -1824,7 +1824,7 @@ def get_context(  # noqa: PLR0913
 
     Relevant parameters
 
-    - project_root_dir: Provide the project root where a GX project exists or will be scaffolded.
+    - project_root_dir: Provide the project root where a GX project exists or will be scaffolded (contains the context root).
     - context_root_dir: Provide an alternative directory to look for GX config.
     - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
     - runtime_environment: Optionally override specific configuration values.

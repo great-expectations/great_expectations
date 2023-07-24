@@ -46,8 +46,25 @@ We provide our Filesystem Data Context's root folder path to the GX library's `g
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
+:::info Project root vs context root
+Note that there is a subtle distinction between the `project_root_dir` and `context_root_dir` arguments accepted by `get_context(...)`.
+
+Your context root is the directory that contains all your GX config while your project root refers to your actual working directory (and therefore contains the context root).
+
+```bash
+# The overall directory is your project root
+data/
+great_expectations/ # The GX folder with your config is your context root
+  great_expectations.yml
+  ...
+...
+```
+
+Both are functionally equivalent for purposes of working with a file-backed project. 
+:::
+
 :::info What if the folder does not contain a Data Context?
-If the `project_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a new Filesystem Data Context at that location.
+If the root directory provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a new Filesystem Data Context at that location.
 
 The `get_context(...)` method will then instantiate and return the newly initialized Data Context.
 :::
