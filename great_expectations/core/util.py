@@ -193,7 +193,7 @@ ToDict: TypeAlias = Union[
 ]
 
 JSONConvertable: TypeAlias = Union[
-    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None  # noqa: PYI016
 ]
 
 
@@ -936,7 +936,7 @@ def get_sql_dialect_floating_point_infinity_value(
             return -np.inf
         else:
             return np.inf
-    else:
+    else:  # noqa: PLR5501
         if negative:
             return res["NegativeInfinity"]
         else:

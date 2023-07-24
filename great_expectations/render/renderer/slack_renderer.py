@@ -75,7 +75,7 @@ class SlackRenderer(Renderer):
             if validation_result.success:
                 status = "Success :tada:"
 
-            else:
+            else:  # noqa: PLR5501
                 if show_failed_expectations:
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]

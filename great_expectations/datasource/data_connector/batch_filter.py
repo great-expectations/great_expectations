@@ -321,7 +321,7 @@ class BatchFilter:
 
         if self.index is None:
             selected_batch_definitions = selected_batch_definitions[: self.limit]
-        else:
+        else:  # noqa: PLR5501
             if isinstance(self.index, int):
                 selected_batch_definitions = [selected_batch_definitions[self.index]]
             else:

@@ -259,7 +259,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
-            else:
+            else:  # noqa: PLR5501
                 if params.min_value.value != params.max_value.value:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:
@@ -314,7 +314,7 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnAggregateExpectation
                 template_str = (
                     f"fraction of unique values must be {at_least_str} $min_value."
                 )
-            else:
+            else:  # noqa: PLR5501
                 if params["min_value"] != params["max_value"]:
                     template_str = f"fraction of unique values must be {at_least_str} $min_value and {at_most_str} $max_value."
                 else:

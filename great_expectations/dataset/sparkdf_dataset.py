@@ -727,7 +727,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
-        if bins[0] == -np.inf or bins[0] == -float("inf"):
+        if bins[0] == -np.inf or bins[0] == -float("inf"):  # noqa: PLR1714
             added_min = False
             bins[0] = -float("inf")
         else:

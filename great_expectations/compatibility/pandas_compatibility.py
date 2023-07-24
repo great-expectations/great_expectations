@@ -58,7 +58,7 @@ def execute_pandas_to_datetime(  # noqa: PLR0913
             origin=origin,
             cache=cache,
         )
-    else:
+    else:  # noqa: PLR5501
         # pandas is 2.0.0 or greater
         if format is None:
             format = "mixed"

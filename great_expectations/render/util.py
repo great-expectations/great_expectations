@@ -199,7 +199,7 @@ def parse_row_condition_string_pandas_engine(
     conditions_list: list[str] = [
         condition.strip()
         for condition in re.split(r"AND|OR|NOT(?! in)|\(|\)", condition_string)
-        if condition != "" and condition != " "
+        if condition != "" and condition != " "  # noqa: PLR1714
     ]
 
     for i, condition in enumerate(conditions_list):

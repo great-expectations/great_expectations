@@ -453,7 +453,7 @@ class ExpectationSuite(SerializableDictDot):
             if ge_cloud_id is not None:
                 if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
-            else:
+            else:  # noqa: PLR5501
                 if expectation.isEquivalentTo(
                     other=expectation_configuration, match_type=match_type  # type: ignore[arg-type]
                 ):

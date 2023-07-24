@@ -199,7 +199,7 @@ def _get_column_partition_using_metrics(bins: int, n_bins: int, _metrics: dict) 
             iqr < 1.0e-10  # noqa: PLR2004
         ):  # Consider IQR 0 and do not use variance-based estimator
             n_bins = int(np.ceil(sturges))
-        else:
+        else:  # noqa: PLR5501
             if nonnull_count == 0:
                 n_bins = 0
             else:

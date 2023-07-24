@@ -252,7 +252,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
-            else:
+            else:  # noqa: PLR5501
                 if not params.min_value:
                     template_str = f"must have {at_most_str} $max_value unique values."
                 elif not params.max_value:
@@ -300,7 +300,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
 
         if (params["min_value"] is None) and (params["max_value"] is None):
             template_str = "may have any number of unique values."
-        else:
+        else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
@@ -312,7 +312,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnAggregateExpectation):
                     template_str = f"must have {at_least_str} $min_value unique values, at least $mostly_pct % of the time."
                 else:
                     template_str = f"must have {at_least_str} $min_value and {at_most_str} $max_value unique values, at least $mostly_pct % of the time."
-            else:
+            else:  # noqa: PLR5501
                 if params["min_value"] is None:
                     template_str = f"must have {at_most_str} $max_value unique values."
                 elif params["max_value"] is None:

@@ -188,7 +188,7 @@ class DataAsset:
 
                 if "result_format" in argspec:
                     all_args["result_format"] = result_format
-                else:
+                else:  # noqa: PLR5501
                     if "result_format" in all_args:
                         del all_args["result_format"]
 

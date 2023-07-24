@@ -268,7 +268,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
             template_str = (
                 "values must not match a regular expression but none was specified."
             )
-        else:
+        else:  # noqa: PLR5501
             if params["mostly"] is not None and params["mostly"] < 1.0:  # noqa: PLR2004
                 params["mostly_pct"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
@@ -278,7 +278,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
                     template_str = "$column values must not match this regular expression: $regex, at least $mostly_pct % of the time."
                 else:
                     template_str = "values must not match this regular expression: $regex, at least $mostly_pct % of the time."
-            else:
+            else:  # noqa: PLR5501
                 if include_column_name:
                     template_str = (
                         "$column values must not match this regular expression: $regex."

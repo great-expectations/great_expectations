@@ -95,7 +95,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             cardinality = ProfilerCardinality.VERY_MANY
         elif pct_unique > 0.02:  # noqa: PLR2004
             cardinality = ProfilerCardinality.MANY
-        else:
+        else:  # noqa: PLR5501
             if num_unique == 1:
                 cardinality = ProfilerCardinality.ONE
             elif num_unique == 2:  # noqa: PLR2004
@@ -305,7 +305,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                         column, value_set=None, result_format="SUMMARY"
                     )
 
-            else:
+            else:  # noqa: PLR5501
                 if cardinality == ProfilerCardinality.UNIQUE:
                     df.expect_column_values_to_be_unique(column)
 

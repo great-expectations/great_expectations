@@ -373,7 +373,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(
+def column_reflection_fallback(  # noqa: PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -587,7 +587,7 @@ def column_reflection_fallback(
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
-            else:
+            else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
@@ -779,7 +779,7 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
-        else:
+        else:  # noqa: PLR5501
             if not verify_only:
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 

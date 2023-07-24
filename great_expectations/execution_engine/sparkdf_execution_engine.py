@@ -502,7 +502,7 @@ illegal.  Please check your config."""
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
+        else:  # noqa: PLR5501
             if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     SparkDFBatchData, self.batch_manager.batch_data_cache[batch_id]
@@ -557,7 +557,7 @@ illegal.  Please check your config."""
                     F.col(column_A_name).isNull() | F.col(column_B_name).isNull()
                 )
                 data = data.filter(~ignore_condition)
-            else:
+            else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
@@ -580,7 +580,7 @@ illegal.  Please check your config."""
                 ]
                 ignore_condition = reduce(lambda a, b: a | b, conditions)
                 data = data.filter(~ignore_condition)
-            else:
+            else:  # noqa: PLR5501
                 if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'

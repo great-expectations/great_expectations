@@ -521,7 +521,7 @@ not {batch_spec.__class__.__name__}"""
                 raise gx_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
-        else:
+        else:  # noqa: PLR5501
             if batch_id in self.batch_manager.batch_data_cache:
                 data = cast(
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
@@ -572,7 +572,7 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=[column_A_name, column_B_name],
                 )
-            else:
+            else:  # noqa: PLR5501
                 if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
@@ -596,7 +596,7 @@ not {batch_spec.__class__.__name__}"""
                     how="any",
                     subset=column_list,
                 )
-            else:
+            else:  # noqa: PLR5501
                 if ignore_row_if != "never":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'

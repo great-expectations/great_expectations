@@ -407,7 +407,7 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </green>\
 """
-        else:
+        else:  # noqa: PLR5501
             if manual_steps_required:
                 upgrade_report += f"""
 <yellow>\

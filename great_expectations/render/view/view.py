@@ -171,7 +171,7 @@ class DefaultJinjaView:
                         idx,
                         content_block_id=new_content_block_id,
                     )
-                else:
+                else:  # noqa: PLR5501
                     if render_to_markdown:
                         rendered_block += str(content_block_el)
                     else:
