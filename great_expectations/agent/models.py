@@ -13,12 +13,22 @@ class EventBase(AgentBaseModel):
     type: str
 
 
-class RunOnboardingDataAssistantEvent(EventBase):
+class RunDataAssistantEvent(EventBase):
+    type: str
+    datasource_name: str
+    data_asset_name: str
+
+
+class RunOnboardingDataAssistantEvent(RunDataAssistantEvent):
     type: Literal[
         "onboarding_data_assistant_request.received"
     ] = "onboarding_data_assistant_request.received"
-    datasource_name: str
-    data_asset_name: str
+
+
+class RunMissingnessDataAssistantEvent(RunDataAssistantEvent):
+    type: Literal[
+        "missingness_data_assistant_request.received"
+    ] = "missingness_data_assistant_request.received"
 
 
 class RunCheckpointEvent(EventBase):
@@ -30,7 +40,12 @@ class UnknownEvent(EventBase):
 
 
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Union[
+        RunOnboardingDataAssistantEvent,
+        RunMissingnessDataAssistantEvent,
+        RunCheckpointEvent,
+        UnknownEvent,
+    ],
     Field(discriminator="type"),
 ]
 
