@@ -17,7 +17,7 @@ The following table lists the Custom Expectations types.
 | Production                                                | <ul><li>Has a robust suite of tests, as determined by a code owner</li><li>Has passed a manual review by a code owner for code standards and style guides</li></ul> |
 
 
-For more information about Feature and code readiness levels, see [Feature and code readiness](../../../contributing/contributing_maturity.md).
+For more information about feature and code readiness levels, see [Feature and code readiness](../../../contributing/contributing_maturity.md).
 
 ### How these docs are organized
 

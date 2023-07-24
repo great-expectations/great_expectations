@@ -4,7 +4,7 @@ Since we used a `SimpleCheckpoint`, our Checkpoint already contained an `UpdateD
 
 :::tip 
 
-For more information on Actions that Checkpoints can perform and how to add them, please see [our guides on Actions](../../../../docs/guides/validation/index.md#actions).
+For more information on Actions that Checkpoints can perform and how to add them, see [Configure Actions](../../../../docs/guides/validation/validation_actions/actions_lp.md).
 
 :::
 

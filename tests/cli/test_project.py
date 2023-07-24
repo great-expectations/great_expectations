@@ -15,7 +15,7 @@ from tests.cli.utils import (
 )
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @pytest.fixture

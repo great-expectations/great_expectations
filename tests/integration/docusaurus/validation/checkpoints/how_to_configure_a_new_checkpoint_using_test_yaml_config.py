@@ -1,9 +1,10 @@
 import pathlib
+from pprint import pprint
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py setup">
 from ruamel.yaml import YAML
+
 import great_expectations as gx
-from pprint import pprint
 
 yaml = YAML()
 context = gx.get_context()
