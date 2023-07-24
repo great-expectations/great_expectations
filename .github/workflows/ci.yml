@@ -5,10 +5,18 @@ on:
   schedule:
     # https://crontab.guru/every-3-hours
     - cron: "0 */3 * * *"
+  workflow_dispatch:  # allows manual triggering with branch picker
 
 jobs:
+  ci-does-not-run-on-draft-pull-requests:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == true
+    steps:
+      - run: echo "CI jobs won't run because this is a draft pull request."
+
   static-analysis:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
 
     steps:
       - name: Checkout
@@ -34,6 +42,7 @@ jobs:
           invoke type-check --ci --pretty  --check-stub-sources
 
   unit-tests:
+    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -60,6 +69,7 @@ jobs:
         run: invoke tests --cloud --unit --timeout=1.5 --slowest=8
 
   marker-tests:
+    if: github.event.pull_request.draft == false
     services:
       postgres:
         # Docker hub image
