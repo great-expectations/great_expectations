@@ -51,7 +51,7 @@ def build_action_result(
     checkpoint_name = f"{event.type} {event.data_asset_name} assistant checkpoint"
 
     # build tz aware timestamp
-    tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
+    tz = datetime.now().astimezone().tzinfo
     timestamp = datetime.now(tz=tz)
 
     # ensure we have unique names for created resources
