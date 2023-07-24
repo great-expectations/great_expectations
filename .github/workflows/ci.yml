@@ -40,6 +40,10 @@ jobs:
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
 
+      - name: Marker-coverage-check
+        run: |
+          invoke marker-coverage
+
   unit-tests:
     strategy:
       matrix:
