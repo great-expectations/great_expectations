@@ -1,8 +1,10 @@
 import great_expectations as gx
 import os
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.self_check.util import build_sa_execution_engine
 import pandas as pd
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.expectations.metrics.table_metrics.table_head import TableHead
 import pytest
 from great_expectations.compatibility import sqlalchemy
@@ -17,6 +19,7 @@ def sqlalchemy_test_engine(sa):
     )
 
 
+@pytest.mark.sqlite
 def test_head_table_name_not_fetch_all_2_rows(sqlalchemy_test_engine):
     execution_engine: SqlAlchemyExecutionEngine = sqlalchemy_test_engine
     table_head = TableHead()
@@ -36,6 +39,7 @@ def test_head_table_name_not_fetch_all_2_rows(sqlalchemy_test_engine):
     assert res.values.tolist() == [[1, 2], [2, 3]]
 
 
+@pytest.mark.sqlite
 def test_head_no_table_name_not_fetch_all_2_rows(sqlalchemy_test_engine):
     execution_engine: SqlAlchemyExecutionEngine = sqlalchemy_test_engine
     table_head = TableHead()
@@ -57,6 +61,7 @@ def test_head_no_table_name_not_fetch_all_2_rows(sqlalchemy_test_engine):
     assert res.values.tolist() == [[1, 2], [2, 3]]
 
 
+@pytest.mark.sqlite
 def test_head_table_name_is_anonymous_not_fetch_all(sqlalchemy_test_engine):
     execution_engine: SqlAlchemyExecutionEngine = sqlalchemy_test_engine
     table_head = TableHead()
@@ -78,6 +83,7 @@ def test_head_table_name_is_anonymous_not_fetch_all(sqlalchemy_test_engine):
     assert res.values.tolist() == [[1, 2], [2, 3]]
 
 
+@pytest.mark.sqlite
 def test_head_table_name_fetch_all(sqlalchemy_test_engine):
     execution_engine: SqlAlchemyExecutionEngine = sqlalchemy_test_engine
     table_head = TableHead()
