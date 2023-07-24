@@ -797,11 +797,18 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
+    "docs": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        exta_pytest_args=("--docs-tests",),
+    ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        services=["postgresql"],
+        services=("postgresql",),
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
