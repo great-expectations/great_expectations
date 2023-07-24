@@ -404,9 +404,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
                 elif params["max_value"] is None:
                     template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                if (
-                    params["min_value"] is not None and params["max_value"] is not None
-                ):
+                if params["min_value"] is not None and params["max_value"] is not None:
                     template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
                 elif params["min_value"] is None:
