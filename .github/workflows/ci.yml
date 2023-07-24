@@ -16,7 +16,6 @@ jobs:
 
   static-analysis:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
 
     steps:
       - name: Checkout
@@ -42,7 +41,6 @@ jobs:
           invoke type-check --ci --pretty  --check-stub-sources
 
   unit-tests:
-    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         os: [ubuntu-latest]
