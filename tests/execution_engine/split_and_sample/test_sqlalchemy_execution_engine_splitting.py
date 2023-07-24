@@ -308,7 +308,6 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     )
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "date_parts",
     MULTIPLE_DATE_PART_DATE_PARTS,
@@ -419,7 +418,6 @@ def in_memory_sqlite_taxi_ten_trips_per_month_execution_engine(sa):
     return engine
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "taxi_test_cases",
     [
@@ -557,7 +555,6 @@ def test_sqlite_split(
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 
 
-@pytest.mark.integration
 def test_sqlite_split_on_year(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):
@@ -601,7 +598,6 @@ def test_sqlite_split_on_year(
         assert row_date.year == 2018
 
 
-@pytest.mark.integration
 def test_sqlite_split_and_sample_using_limit(
     sa, in_memory_sqlite_taxi_ten_trips_per_month_execution_engine
 ):

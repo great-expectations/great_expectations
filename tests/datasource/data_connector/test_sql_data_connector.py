@@ -1895,7 +1895,6 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
@@ -2066,7 +2065,6 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "data_connector_yaml,expected_batch_identifiers_list",
     [
@@ -2157,7 +2155,6 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 def test_introspect_db(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -2480,7 +2477,6 @@ def test_introspect_db(
 
 
 @pytest.mark.mysql
-@pytest.mark.integration
 def test_include_schema_name_introspection(mysql_engine):
     execution_engine = SqlAlchemyExecutionEngine(
         name="test_sql_execution_engine",
@@ -2523,7 +2519,6 @@ def test_include_schema_name_introspection(mysql_engine):
 
 
 @pytest.mark.mysql
-@pytest.mark.integration
 def test_include_schema_name_get_available_data_assets(
     mysql_engine,
 ):
