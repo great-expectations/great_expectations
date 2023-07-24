@@ -185,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 83
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 80
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -235,7 +235,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "black", (("==", "23.3.0"),)),
         ("requirements-dev.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev.txt", "ipykernel", (("<=", "6.17.1"),)),
-        ("requirements-dev.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements-dev.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
@@ -257,7 +256,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements-types.txt", "black", (("==", "23.3.0"),)),
         ("requirements-types.txt", "ipykernel", (("<=", "6.17.1"),)),
-        ("requirements-types.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements-types.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-types.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-types.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
@@ -273,7 +271,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
-        ("requirements.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
