@@ -1,4 +1,5 @@
 import pathlib
+
 import great_expectations as gx
 
 data_directory = pathlib.Path(
@@ -13,6 +14,7 @@ data_directory = pathlib.Path(
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py setup">
 # setup
 import sys
+
 import great_expectations as gx
 
 context = gx.get_context()
