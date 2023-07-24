@@ -25,7 +25,7 @@ Common developer tasks such as linting, formatting, type-checking are defined in
 To see the available task run `invoke --list` from the project root.
 
 ```console
-$ invoke --list                                                                                                                                                                                                                                                                                                                                               in zsh at 14:47:20
+$ invoke --list
 Available tasks:
 
   fmt             Run code formatter.
@@ -39,7 +39,7 @@ Available tasks:
 For detailed usage guide, `invoke <TASK-NAME> --help`
 
 ```console
-$ invoke fmt --help                                                                                                                                                                                                                                                                                                                                           in zsh at 14:58:01
+$ invoke fmt --help
 Usage: inv[oke] [--core-opts] fmt [--options] [other tasks here ...]
 
 Docstring:
