@@ -6,10 +6,14 @@ pytest -v --docs-tests -m integration -k "how_to_instantiate_a_specific_filesyst
 """
 
 import great_expectations as gx
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+import pathlib
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder">
-path_to_project_root = "/my_gx_project/"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root">
+path_to_project_root = "./my_project/"
 # </snippet>
 
 # Python
@@ -18,4 +22,7 @@ context = gx.get_context(project_root_dir=path_to_project_root)
 # </snippet>
 
 assert context
-assert context.root_directory == str(path_to_project_root)
+
+context_root_dir = pathlib.Path(context.root_directory)
+assert context_root_dir.stem == FileDataContext.GX_DIR
+assert context_root_dir.parent.stem == "my_project"

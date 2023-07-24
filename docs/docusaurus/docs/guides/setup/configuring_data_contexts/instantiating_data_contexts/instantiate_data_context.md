@@ -132,18 +132,18 @@ If you're using GX for multiple projects, you might want to use a different Data
 
 Each Filesystem Data Context has a root folder in which it was initialized.  This root folder identifies the specific Filesystem Data Context to instantiate.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_context_root_folder"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py path_to_project_root"
 ```
 
 ### Run the `get_context(...)` method
 
-You provide the path for your empty folder to the GX library's `get_context(...)` method as the `context_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
+You provide the path for your empty folder to the GX library's `get_context(...)` method as the `project_root_dir` parameter. Because you are providing a path to an empty folder, the `get_context(...)` method instantiates and return the Data Context at that location.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py get_filesystem_data_context"
 ```
 
 :::info What if the folder does not contain a Data Context?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
+If the `project_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context, the `get_context(...)` method initializes a new Filesystem Data Context in that location.
 
 The `get_context(...)` method instantiates and returns the newly initialized Data Context.
 :::
