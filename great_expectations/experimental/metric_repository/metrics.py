@@ -79,6 +79,16 @@ class ColumnMetric(Metric):
 
 # Metric value types
 
+# TODO: Use generics to determine `value` type
+# https://docs.pydantic.dev/1.10/usage/models/#generic-models
+# print(Response[int](data=1))
+# #> data=1 error=None
+# print(Response[str](data='value'))
+# #> data='value' error=None
+# print(Response[str](data='value').dict())
+# #> {'data': 'value', 'error': None}
+# print(Response[DataModel](data=data).dict())
+
 
 class NumericMetric(Metric):
     def __new__(cls, *args, **kwargs):
