@@ -1950,9 +1950,6 @@ def _get_file_context(
 ) -> FileDataContext | None:
     from great_expectations.data_context.data_context import FileDataContext
 
-    if not project_root_dir and not context_root_dir:
-        return None
-
     try:
         return FileDataContext(
             project_config=project_config,

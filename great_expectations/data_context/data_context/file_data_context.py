@@ -79,7 +79,7 @@ class FileDataContext(SerializableDataContext):
         if project_root_dir:
             if context_root_dir:
                 raise TypeError(
-                    "Please pass either 'project_root_dir' or 'context_root_dir' (but not both)"
+                    "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
                 )
             context_root_dir = pathlib.Path(project_root_dir) / self.GX_DIR
 
