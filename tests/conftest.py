@@ -341,22 +341,23 @@ def _verify_marker_coverage(
     session,
 ) -> tuple[list[tuple[str, str, list[str]]], set[str]]:
     REQUIRED_MARKERS = {
-        "sqlite",
-        "filesystem",
-        "spark",
-        "cloud",
-        "unit",
-        "big",
-        "sqlalchemy_version_compatibility",
         "aws_creds",
+        "big",
         "cli",
-        "openpyxl",
         "clickhouse",
-        "project",
-        "postgresql",
+        "cloud",
+        "docs",
         "external_sqldialect",
-        "pyarrow",
+        "filesystem",
         "mysql",
+        "openpyxl",
+        "postgresql",
+        "project",
+        "pyarrow",
+        "spark",
+        "sqlalchemy_version_compatibility",
+        "sqlite",
+        "unit",
     }
     uncovered: list[tuple[str, str, list[str]]] = []
     markers_on_uncovered: set[str] = set()
@@ -374,9 +375,9 @@ def pytest_collection_finish(session):
         uncovered, markers = _verify_marker_coverage(session)
         if uncovered:
             print(f"*** {len(uncovered)} tests have no marker coverage ***")
-            for l in uncovered:
-                print(l)
-            print("*** MARKERS ***")
+            for uncovered_test_info in uncovered:
+                print(uncovered_test_info)
+            print("*** Markers on uncovered tests ***")
             for m in markers:
                 print(m)
             pytest.exit(
