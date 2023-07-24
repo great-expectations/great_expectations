@@ -7,9 +7,8 @@ from typing import Callable
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.util import get_context
+from great_expectations.data_context.util import file_relative_path
 
 pytestmark = pytest.mark.filesystem
 
