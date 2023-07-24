@@ -3,6 +3,7 @@ from great_expectations.agent.actions.agent_action import (
     AgentAction,
     CreatedResource,
 )
-from great_expectations.agent.actions.run_onboarding_data_assistant import (
+from great_expectations.agent.actions.data_assistants import (
+    RunMissingnessDataAssistantAction,
     RunOnboardingDataAssistantAction,
 )
