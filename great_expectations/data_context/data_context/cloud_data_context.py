@@ -119,7 +119,8 @@ class CloudDataContext(SerializableDataContext):
             cloud_organization_id=cloud_organization_id,
         )
         self._context_root_directory = self.determine_context_root_directory(
-            context_root_dir
+            context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
         )
         self._project_config = self._init_project_config(project_config)
 
@@ -200,8 +201,13 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def determine_context_root_directory(
-        cls, context_root_dir: Optional[PathStr]
+        cls,
+        context_root_dir: Optional[PathStr],
+        project_root_dir: Optional[PathStr],
     ) -> str:
+        context_root_dir = cls._resolve_context_root_dir_and_project_root_dir(
+            context_root_dir=context_root_dir, project_root_dir=project_root_dir
+        )
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(

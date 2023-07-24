@@ -89,6 +89,23 @@ class SerializableDataContext(AbstractDataContext):
         """
         raise NotImplementedError
 
+    @classmethod
+    def _resolve_context_root_dir_and_project_root_dir(
+        cls, context_root_dir: PathStr | None, project_root_dir: PathStr | None
+    ) -> PathStr | None:
+        if project_root_dir and context_root_dir:
+            raise TypeError(
+                "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
+            )
+
+        if project_root_dir:
+            project_root_dir = pathlib.Path(project_root_dir).absolute()
+            context_root_dir = pathlib.Path(project_root_dir) / cls.GX_DIR
+        elif context_root_dir:
+            context_root_dir = pathlib.Path(context_root_dir).absolute()
+
+        return context_root_dir
+
     def _check_for_usage_stats_sync(  # noqa: PLR0911
         self, project_config: DataContextConfig
     ) -> bool:

@@ -56,11 +56,6 @@ class FileDataContext(SerializableDataContext):
             runtime_environment (Optional[dict]): a dictionary of config variables that override both those set in
                 config_variables.yml and the environment
         """
-        if project_root_dir:
-            project_root_dir = pathlib.Path(project_root_dir).absolute()
-        if context_root_dir:
-            context_root_dir = pathlib.Path(context_root_dir).absolute()
-
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir=context_root_dir,
             project_root_dir=project_root_dir,
@@ -76,12 +71,9 @@ class FileDataContext(SerializableDataContext):
     def _init_context_root_directory(
         self, context_root_dir: Optional[PathStr], project_root_dir: Optional[PathStr]
     ) -> str:
-        if project_root_dir:
-            if context_root_dir:
-                raise TypeError(
-                    "'project_root_dir' and 'context_root_dir' are conflicting args; please only provide one"
-                )
-            context_root_dir = pathlib.Path(project_root_dir) / self.GX_DIR
+        context_root_dir = self._resolve_context_root_dir_and_project_root_dir(
+            context_root_dir=context_root_dir, project_root_dir=project_root_dir
+        )
 
         if isinstance(context_root_dir, pathlib.Path):
             context_root_dir = str(context_root_dir)
