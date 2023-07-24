@@ -52,7 +52,7 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
-    GX_DIR: ClassVar[str] = "great_expectations"
+    GX_DIR: ClassVar[str] = "gx"
     GX_YML: ClassVar[str] = "great_expectations.yml"
     GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Mapping, Optional, Union
 
 from great_expectations.util import get_context
 
@@ -159,14 +159,6 @@ def BaseDataContext(  # noqa: PLR0913
 
     --ge-feature-maturity-info--
     """
-    # Chetan - 20221208 - not formally deprecating these values until a future date
-    cloud_mode, cloud_config = _resolve_cloud_args(
-        cloud_mode=cloud_mode,
-        cloud_config=cloud_config,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_config=ge_cloud_config,
-    )
-
     project_data_context_config: DataContextConfig = (
         AbstractDataContext.get_or_create_data_context_config(project_config)
     )
@@ -193,15 +185,3 @@ def BaseDataContext(  # noqa: PLR0913
         cloud_organization_id=cloud_organization_id,
         cloud_mode=cloud_mode,
     )
-
-
-def _resolve_cloud_args(
-    cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
-) -> Tuple[bool, Optional[GXCloudConfig]]:
-    cloud_mode = True if cloud_mode or ge_cloud_mode else False
-    cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
-    return cloud_mode, cloud_config

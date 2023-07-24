@@ -98,14 +98,11 @@ class CloudDataContext(SerializableDataContext):
         self,
         project_config: Optional[Union[DataContextConfig, Mapping]] = None,
         context_root_dir: Optional[PathStr] = None,
+        project_root_dir: Optional[PathStr] = None,
         runtime_environment: Optional[dict] = None,
         cloud_base_url: Optional[str] = None,
         cloud_access_token: Optional[str] = None,
         cloud_organization_id: Optional[str] = None,
-        # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
     ) -> None:
         """
         CloudDataContext constructor
@@ -116,20 +113,6 @@ class CloudDataContext(SerializableDataContext):
                 config_variables.yml and the environment
             cloud_config (GXCloudConfig): GXCloudConfig corresponding to current CloudDataContext
         """
-        # Chetan - 20221208 - not formally deprecating these values until a future date
-        (
-            cloud_base_url,
-            cloud_access_token,
-            cloud_organization_id,
-        ) = CloudDataContext._resolve_cloud_args(
-            cloud_base_url=cloud_base_url,
-            cloud_access_token=cloud_access_token,
-            cloud_organization_id=cloud_organization_id,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_access_token=ge_cloud_access_token,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-        )
-
         self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
