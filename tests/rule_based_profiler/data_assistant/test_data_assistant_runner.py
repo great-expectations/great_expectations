@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -46,7 +46,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_allowed(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_runner_top_level_kwargs_override(
     bobby_columnar_table_multi_batch_probabilistic_data_context,
 ):
@@ -70,7 +70,7 @@ def test_onboarding_data_assistant_runner_top_level_kwargs_override(
     assert not any([column_name.endswith("ID") for column_name in columns_used])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_runner_top_level_kwargs_explicit_none(
     data_context_with_datasource_pandas_engine,
 ):

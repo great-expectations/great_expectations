@@ -3,7 +3,7 @@ import pytest
 from great_expectations.core import ExpectationSuite
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_alice_fixture_generation(
     alice_columnar_table_single_batch,
 ):
@@ -26,7 +26,7 @@ def test_alice_fixture_generation(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_bobby_fixture_generation(
     bobby_columnar_table_multi_batch,
 ):
