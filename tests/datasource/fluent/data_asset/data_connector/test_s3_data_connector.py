@@ -325,7 +325,7 @@ def test_return_all_batch_definitions_unsorted():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted():
 #     region_name: str = "us-east-1"
@@ -815,7 +815,7 @@ def test_foxtrot():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock_s3
 # def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
 #     tmp_path_factory,
