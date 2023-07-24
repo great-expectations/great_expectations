@@ -64,6 +64,8 @@ from tests.integration.test_definitions.trino.integration_tests import (
     trino_integration_tests,
 )
 
+pytestmark = pytest.mark.docs
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -486,8 +488,6 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-@pytest.mark.docs
-@pytest.mark.integration
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
@@ -495,7 +495,6 @@ def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.mark.slow  # 79.77s
