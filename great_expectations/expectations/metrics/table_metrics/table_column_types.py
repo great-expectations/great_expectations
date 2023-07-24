@@ -109,7 +109,7 @@ def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     cols = []
-    if parent_name != "":  # noqa: PLC1901
+    if parent_name != "":
         parent_name = f"{parent_name}."
 
     if pyspark.types and isinstance(field, pyspark.types.StructType):
