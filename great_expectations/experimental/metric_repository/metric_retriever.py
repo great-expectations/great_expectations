@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import abc
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -16,7 +16,7 @@ class MetricRetriever(abc.ABC):
         self._context = context
 
     @abc.abstractmethod
-    def get_metrics(self, batch_request: BatchRequest) -> list[Metric]:
+    def get_metrics(self, batch_request: BatchRequest) -> Sequence[Metric]:
         raise NotImplementedError
 
     def _generate_metric_id(self) -> uuid.UUID:

@@ -1,15 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from great_expectations.agent.actions import (
     ColumnDescriptiveMetricsAction,
     RunOnboardingDataAssistantAction,
 )
-from great_expectations.agent.actions.agent_action import ActionResult
 from great_expectations.agent.models import (
     Event,
     RunCheckpointEvent,
     RunColumnDescriptiveMetricsEvent,
     RunOnboardingDataAssistantEvent,
 )
-from great_expectations.data_context import CloudDataContext
 from great_expectations.experimental.metric_repository.batch_inspector import (
     BatchInspector,
 )
@@ -22,6 +24,13 @@ from great_expectations.experimental.metric_repository.column_descriptive_metric
 from great_expectations.experimental.metric_repository.metric_repository import (
     MetricRepository,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.agent.actions.agent_action import ActionResult
+    from great_expectations.data_context import CloudDataContext
+    from great_expectations.experimental.metric_repository.metric_retriever import (
+        MetricRetriever,
+    )
 
 
 class EventHandler:
@@ -38,7 +47,9 @@ class EventHandler:
         if isinstance(event, RunOnboardingDataAssistantEvent):
             action = RunOnboardingDataAssistantAction(context=self._context)
         elif isinstance(event, RunColumnDescriptiveMetricsEvent):
-            metric_retrievers = [ColumnDescriptiveMetricsMetricRetriever(self._context)]
+            metric_retrievers: list[MetricRetriever] = [
+                ColumnDescriptiveMetricsMetricRetriever(self._context)
+            ]
             batch_inspector = BatchInspector(self._context, metric_retrievers)
             cloud_data_store = CloudDataStore(self._context)
             column_descriptive_metrics_repository = MetricRepository(
