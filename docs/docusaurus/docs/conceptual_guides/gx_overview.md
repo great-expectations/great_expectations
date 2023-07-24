@@ -73,7 +73,7 @@ For more information, see [Manage Data Assets](/docs/guides/connecting_to_your_d
 
 A Batch Request specifies one or more Batches within the Data Asset.  Batch Requests are the primary way of retrieving data for use in GX.  Because Batch Requests can retrieve multiple Batches they provide significant flexibility in how you utilize the data in a single Data Asset.
 
-As an example, GX can automate the process of running statistical analyzes for multiple Batches of data.  This is possible because you can provide a Batch Request that corresponds to multiple Batches in a Data Asset.  Alternatively, you can specify a single Batch from that same Data Asset so that you do not need to re-run the analyzes on all of your data when you are only interested in a single subset.
+As an example, GX can automate the process of running statistical analyses for multiple Batches of data.  This is possible because you can provide a Batch Request that corresponds to multiple Batches in a Data Asset.  Alternatively, you can specify a single Batch from that same Data Asset so that you do not need to re-run the analyses on all of your data when you are only interested in a single subset.
 
 Taking the example of a Data Asset that has been partitioned into Batches by months, this would let you build a statistical model off of each month of your existing data by providing all of the Batches in a single Batch Request.  Then, after an update, you could specify that you only wanted to run your analysis on the most recent month's data by providing a Batch Request that only indicates that one Batch.
 
