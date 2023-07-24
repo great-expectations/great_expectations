@@ -32,11 +32,6 @@ def DataContext(  # noqa: PLR0913
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
-    # Deprecated as of 0.15.37
-    ge_cloud_mode: Literal[False] = ...,
-    ge_cloud_base_url: None = ...,
-    ge_cloud_access_token: None = ...,
-    ge_cloud_organization_id: None = ...,
 ) -> FileDataContext:
     # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
     ...
@@ -50,11 +45,6 @@ def DataContext(  # noqa: PLR0913
     cloud_base_url: Optional[str] = ...,
     cloud_access_token: Optional[str] = ...,
     cloud_organization_id: Optional[str] = ...,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_mode: bool = ...,
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
 ) -> AbstractDataContext:
     ...
 

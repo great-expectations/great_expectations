@@ -8,7 +8,6 @@ from great_expectations.util import get_context
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
-from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -18,17 +17,12 @@ from great_expectations.data_context.types.base import (
 )
 
 
-@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
-def BaseDataContext(  # noqa: PLR0913
+def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
     cloud_mode: bool = False,
     cloud_config: Optional[GXCloudConfig] = None,
-    # Deprecated as of 0.15.37
-    ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
     """A lightweight wrapper around `get_context()`.
 
@@ -51,9 +45,6 @@ def BaseDataContext(  # noqa: PLR0913
             from environment variables.
         cloud_config: GX Cloud credentials (base URL, access token, and org id)
         cloud_mode: Whether to run GX in Cloud mode (default is None).
-            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
-        ge_cloud_config: GX Cloud credentials (base URL, access token, and org id)
-        ge_cloud_mode: Whether to run GX in Cloud mode (default is None).
             If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
 
     Returns:
