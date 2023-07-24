@@ -43,6 +43,13 @@ from great_expectations.experimental.metric_repository.metrics import (
     TableMetric,
 )
 
+# Import and use fixtures defined in tests/datasource/fluent/conftest.py
+from tests.datasource.fluent.conftest import (
+    cloud_api_fake,  # noqa: F401  # used as a fixture
+    cloud_details,  # noqa: F401  # used as a fixture
+    empty_cloud_context_fluent,  # noqa: F401  # used as a fixture
+)
+
 
 @pytest.fixture
 def metric_id() -> uuid.UUID:
@@ -56,7 +63,7 @@ def run_id() -> uuid.UUID:
 
 @pytest.fixture
 def cloud_context_and_batch_request_with_simple_dataframe(
-    empty_cloud_context_fluent: CloudDataContext,
+    empty_cloud_context_fluent: CloudDataContext,  # noqa: F811  # used as a fixture
 ):
     context = empty_cloud_context_fluent
     datasource = context.sources.add_pandas(name="my_pandas_datasource")
