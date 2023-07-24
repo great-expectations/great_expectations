@@ -378,7 +378,6 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="how_to_instantiate_a_specific_filesystem_data_context",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_instantiate_a_specific_filesystem_data_context.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[],
     ),
     IntegrationTestFixture(

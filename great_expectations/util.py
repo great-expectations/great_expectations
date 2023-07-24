@@ -59,7 +59,7 @@ from packaging import version
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
@@ -1792,23 +1792,15 @@ def get_context(  # noqa: PLR0913
 
 
 @public_api
-@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
-@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 def get_context(  # noqa: PLR0913
     project_config: DataContextConfig | Mapping | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
     cloud_base_url: str | None = None,
     cloud_access_token: str | None = None,
     cloud_organization_id: str | None = None,
     cloud_mode: bool | None = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: str | None = None,
-    ge_cloud_access_token: str | None = None,
-    ge_cloud_organization_id: str | None = None,
-    ge_cloud_mode: bool | None = None,
 ) -> AbstractDataContext:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
@@ -1820,9 +1812,7 @@ def get_context(  # noqa: PLR0913
     This method returns the appropriate Data Context based on which parameters you've passed and / or your environment configuration:
 
     - FileDataContext: Configuration stored in a file.
-
     - EphemeralDataContext: Configuration passed in at runtime.
-
     - CloudDataContext: Configuration stored in Great Expectations Cloud.
 
     Read on for more details about each of the Data Context types:
@@ -1830,17 +1820,13 @@ def get_context(  # noqa: PLR0913
     **FileDataContext:** A Data Context configured via a yaml file. Returned by default if you have no cloud configuration set up and pass no parameters. If you pass context_root_dir, we will look for a great_expectations.yml configuration there. If not we will look at the following locations:
 
     - Path defined in a GX_HOME environment variable.
-
     - The current directory.
-
     - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
 
     Relevant parameters
 
     - context_root_dir: Provide an alternative directory to look for GX config.
-
     - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
-
     - runtime_environment: Optionally override specific configuration values.
 
     **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline. The default if you pass in only a project_config and have no cloud configuration set up.
@@ -1848,7 +1834,6 @@ def get_context(  # noqa: PLR0913
     Relevant parameters
 
     - project_config: Used to configure the Data Context.
-
     - runtime_environment: Optionally override specific configuration values.
 
     **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
@@ -1858,15 +1843,10 @@ def get_context(  # noqa: PLR0913
     Relevant parameters
 
     - cloud_base_url: Override env var or great_expectations.conf file.
-
     - cloud_access_token: Override env var or great_expectations.conf file.
-
     - cloud_organization_id: Override env var or great_expectations.conf file.
-
     - cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
-
     - project_config: Optionally override the cloud configuration.
-
     - runtime_environment: Optionally override specific configuration values.
 
     Args:
@@ -1879,11 +1859,6 @@ def get_context(  # noqa: PLR0913
         cloud_access_token: access_token for GX Cloud account.
         cloud_organization_id: org_id for GX Cloud account.
         cloud_mode: whether to run GX in Cloud mode (default is None).
-            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
-        ge_cloud_base_url: url for GX Cloud endpoint.
-        ge_cloud_access_token: access_token for GX Cloud account.
-        ge_cloud_organization_id: org_id for GX Cloud account.
-        ge_cloud_mode: whether to run GX in Cloud mode (default is None).
             If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
 
     Returns:
@@ -1900,15 +1875,12 @@ def get_context(  # noqa: PLR0913
     cloud_context = _get_cloud_context(
         project_config=project_config,
         context_root_dir=context_root_dir,
+        project_root_dir=project_root_dir,
         runtime_environment=runtime_environment,
         cloud_mode=cloud_mode,
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
         cloud_organization_id=cloud_organization_id,
-        ge_cloud_mode=ge_cloud_mode,
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_access_token=ge_cloud_access_token,
-        ge_cloud_organization_id=ge_cloud_organization_id,
     )
     if cloud_context:
         return cloud_context
@@ -1917,6 +1889,7 @@ def get_context(  # noqa: PLR0913
     file_context = _get_file_context(
         project_config=project_config,
         context_root_dir=context_root_dir,
+        project_root_dir=project_root_dir,
         runtime_environment=runtime_environment,
     )
     if file_context:
@@ -2032,6 +2005,7 @@ def _resolve_cloud_args(  # noqa: PLR0913
 def _get_file_context(
     project_config: DataContextConfig | None = None,
     context_root_dir: PathStr | None = None,
+    project_root_dir: PathStr | None = None,
     runtime_environment: dict | None = None,
 ) -> FileDataContext | None:
     from great_expectations.data_context.data_context import FileDataContext
@@ -2042,11 +2016,13 @@ def _get_file_context(
         except gx_exceptions.ConfigNotFoundError:
             logger.info("Could not find local context root directory")
 
+    # TODO: incorporate project root dir
     if context_root_dir:
         context_root_dir = pathlib.Path(context_root_dir).absolute()
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
+            project_root_dir=project_root_dir,
             runtime_environment=runtime_environment,
         )
 
