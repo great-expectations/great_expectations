@@ -337,7 +337,9 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backends", [test_backends], scope="module")
 
 
-def _verify_marker_coverage(session) -> list[tuple[str, str, list[str]]]:
+def _verify_marker_coverage(
+    session,
+) -> tuple[list[tuple[str, str, list[str]]], set[str]]:
     REQUIRED_MARKERS = {
         "sqlite",
         "filesystem",
@@ -357,13 +359,11 @@ def _verify_marker_coverage(session) -> list[tuple[str, str, list[str]]]:
         "mysql",
     }
     uncovered: list[tuple[str, str, list[str]]] = []
-    markers_on_uncovered = set()
+    markers_on_uncovered: set[str] = set()
     for test in session.items:
         markers = {m.name for m in test.iter_markers()}
         if not REQUIRED_MARKERS.intersection(markers):
             uncovered.append((test.path, test.name, markers))
-            # breakpoint()
-            # print(f"BAD: {test.name} => {markers}")
             for m in markers:
                 markers_on_uncovered.add(m)
     return uncovered, markers_on_uncovered
