@@ -359,7 +359,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
-        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -372,7 +371,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
-    integration: bool = False,
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
@@ -391,9 +389,6 @@ def tests(  # noqa: PLR0913
     See also, the newer `invoke ci-tests --help`.
     """
     markers = []
-    if integration:
-        markers += ["integration"]
-        unit = False
     markers += ["unit" if unit else "not unit"]
 
     marker_text = " and ".join(markers)
