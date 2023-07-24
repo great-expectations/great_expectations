@@ -715,7 +715,21 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Run is not included in the public API.",
         name="run",
         filepath=pathlib.Path(
-            "great_expectations/agent/actions/run_onboarding_data_assistant.py"
+            "great_expectations/agent/actions/data_assistants/run_onboarding_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/data_assistants/run_missingness_data_assistant.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
+        reason="Run is not included in the public API.",
+        name="build_batch_request",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/data_assistants/utils.py"
         ),
     ),
     IncludeExcludeDefinition(

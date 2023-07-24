@@ -345,8 +345,8 @@ class ValidationGraph:
                     if edge.left.id not in maybe_ready_ids:
                         maybe_ready_ids.add(edge.left.id)
                         maybe_ready.add(edge.left)
-                else:
-                    if edge.left.id not in unmet_dependency_ids:  # noqa: PLR5501
+                else:  # noqa: PLR5501
+                    if edge.left.id not in unmet_dependency_ids:
                         unmet_dependency_ids.add(edge.left.id)
                         unmet_dependency.add(edge.left)
 
