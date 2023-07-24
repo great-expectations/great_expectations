@@ -18,7 +18,7 @@ from great_expectations.render.util import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_num_to_str():

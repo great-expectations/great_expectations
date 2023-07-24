@@ -41,7 +41,7 @@ yaml = YAMLHandler()
 logger = logging.getLogger(__name__)
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 # TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>

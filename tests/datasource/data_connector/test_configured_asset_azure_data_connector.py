@@ -29,7 +29,7 @@ if not (azure.storage and azure.BlobServiceClient):
 
 
 # module level markers
-pytestmark = [pytest.mark.big]
+pytestmark = pytest.mark.big
 
 
 @pytest.fixture

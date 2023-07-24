@@ -14,7 +14,7 @@ from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)

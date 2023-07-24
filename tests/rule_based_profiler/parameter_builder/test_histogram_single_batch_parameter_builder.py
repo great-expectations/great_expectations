@@ -21,7 +21,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.integration
 
 
 def test_instantiation_histogram_single_batch_parameter_builder(

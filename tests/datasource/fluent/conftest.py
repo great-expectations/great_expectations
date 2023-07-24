@@ -236,8 +236,8 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 
 @pytest.fixture(
     params=[
-        pytest.param("empty_cloud_context_fluent", marks=[pytest.mark.cloud]),
-        pytest.param("empty_file_context", marks=[pytest.mark.filesystem]),
+        pytest.param("empty_cloud_context_fluent", marks=pytest.mark.cloud),
+        pytest.param("empty_file_context", marks=pytest.mark.filesystem),
     ],
     ids=["cloud", "file"],
 )
