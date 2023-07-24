@@ -22,7 +22,7 @@ class RunOnboardingDataAssistantAction(AgentAction[RunOnboardingDataAssistantEve
         checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
         # build tz aware timestamp
-        tz = datetime.now().astimezone().tzinfo  # noqa: DTZ005
+        tz = datetime.now().astimezone().tzinfo
         timestamp = datetime.now(tz=tz)
 
         # ensure we have unique names for created resources
