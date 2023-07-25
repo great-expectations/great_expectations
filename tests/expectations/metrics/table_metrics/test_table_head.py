@@ -15,10 +15,11 @@ import pandas as pd
 from great_expectations.expectations.metrics.table_metrics.table_head import TableHead
 import pytest
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from tests.test_utils import get_sqlite_temp_table_names_from_engine
 
 
 @pytest.fixture
-def sqlite_engine_with_view():
+def sqlite_engine():
     sqlite_engine = sa.create_engine("sqlite://")
     dataframe = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, 5]})
     add_dataframe_to_db(
@@ -31,9 +32,9 @@ def sqlite_engine_with_view():
 
 
 @pytest.fixture
-def sqlite_batch_with_table_name(sqlite_engine_with_view) -> SqlAlchemyExecutionEngine:
+def sqlite_batch_with_table_name(sqlite_engine) -> SqlAlchemyExecutionEngine:
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine_with_view
+        engine=sqlite_engine
     )
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
@@ -45,10 +46,10 @@ def sqlite_batch_with_table_name(sqlite_engine_with_view) -> SqlAlchemyExecution
 
 @pytest.fixture
 def sqlite_batch_with_selectable_with_temp_table(
-    sqlite_engine_with_view,
+    sqlite_engine,
 ) -> SqlAlchemyExecutionEngine:
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine_with_view
+        engine=sqlite_engine
     )
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
     batch_data = SqlAlchemyBatchData(
@@ -60,10 +61,10 @@ def sqlite_batch_with_selectable_with_temp_table(
 
 @pytest.fixture
 def sqlite_batch_with_selectable_without_temp_table(
-    sqlite_engine_with_view,
+    sqlite_engine,
 ) -> SqlAlchemyExecutionEngine:
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
-        engine=sqlite_engine_with_view
+        engine=sqlite_engine
     )
     selectable = sa.select("*").select_from(sa.text("main.test_table"))
     batch_data = SqlAlchemyBatchData(
@@ -77,7 +78,7 @@ def sqlite_batch_with_selectable_without_temp_table(
 
 @pytest.mark.sqlite
 @pytest.mark.parametrize(
-    "execution_engine, n_rows, fetch_all, expected_shape, expected_columns, expected_values",
+    "execution_engine, n_rows, fetch_all, expected_shape, expected_columns, expected_values, expected_temp_tables",
     [
         (
             "sqlite_batch_with_table_name",
@@ -86,6 +87,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (2, 2),
             ["a", "b"],
             [[1, 2], [2, 3]],
+            0,
         ),
         (
             "sqlite_batch_with_table_name",
@@ -94,6 +96,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (4, 2),
             ["a", "b"],
             [[1, 2], [2, 3], [3, 4], [4, 5]],
+            0,
         ),
         (
             "sqlite_batch_with_selectable_with_temp_table",
@@ -102,6 +105,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (2, 2),
             ["a", "b"],
             [[1, 2], [2, 3]],
+            1,
         ),
         (
             "sqlite_batch_with_selectable_with_temp_table",
@@ -110,6 +114,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (4, 2),
             ["a", "b"],
             [[1, 2], [2, 3], [3, 4], [4, 5]],
+            1,
         ),
         (
             "sqlite_batch_with_selectable_without_temp_table",
@@ -118,6 +123,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (2, 2),
             ["a", "b"],
             [[1, 2], [2, 3]],
+            0,
         ),
         (
             "sqlite_batch_with_selectable_without_temp_table",
@@ -126,6 +132,7 @@ def sqlite_batch_with_selectable_without_temp_table(
             (4, 2),
             ["a", "b"],
             [[1, 2], [2, 3], [3, 4], [4, 5]],
+            0,
         ),
     ],
 )
@@ -137,6 +144,7 @@ def test_table_head_sqlite(
     expected_columns,
     expected_values,
     request,
+    expected_temp_tables,
 ):
     engine = request.getfixturevalue("sqlite_batch_with_table_name")
     table_head = TableHead()
@@ -151,3 +159,4 @@ def test_table_head_sqlite(
     assert res.shape == expected_shape
     assert res.columns.tolist() == expected_columns
     assert res.values.tolist() == expected_values
+    assert len(get_sqlite_temp_table_names_from_engine(engine)) == expected_temp_tables

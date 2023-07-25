@@ -397,6 +397,7 @@ class SqlAlchemyBatchData(BatchData):
         Returns:
             sqlalchemy.Table: SqlAlchemy Table that is Selectable.
         """
+        breakpoint()
         if not create_temp_table:
             return selectable.alias()
 
