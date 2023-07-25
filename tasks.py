@@ -359,7 +359,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
-        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -372,7 +371,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
-    integration: bool = False,
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
@@ -391,9 +389,6 @@ def tests(  # noqa: PLR0913
     See also, the newer `invoke ci-tests --help`.
     """
     markers = []
-    if integration:
-        markers += ["integration"]
-        unit = False
     markers += ["unit" if unit else "not unit"]
 
     marker_text = " and ".join(markers)
@@ -797,11 +792,18 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
+    "docs": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        exta_pytest_args=("--docs-tests",),
+    ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        services=["postgresql"],
+        services=("postgresql",),
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
