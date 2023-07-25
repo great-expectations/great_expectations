@@ -431,7 +431,7 @@ SQL_DIALECT_NAMES = (
     "bigquery",
     "trino",
     "redshift",
-    "clickhouse"
+    "clickhouse",
     # "athena",
     "snowflake",
 )

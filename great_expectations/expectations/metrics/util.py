@@ -122,15 +122,16 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            # if positive:
-            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            # else:
-            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
-
-            # While the snowflake docs mention having regex-related functions, they don't
-            # seem to work with the Python driver
-            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
-            return None
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
+                )
     except (
         AttributeError,
         TypeError,
