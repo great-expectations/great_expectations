@@ -18,10 +18,10 @@ class MetricRepositoryBaseModel(BaseModel):
 
 
 class MetricException(MetricRepositoryBaseModel):
-    exception_type: Optional[str] = Field(
+    exception_type: str = Field(
         description="Exception type if an exception is thrown", default=None
     )
-    exception_message: Optional[str] = Field(
+    exception_message: str = Field(
         description="Exception message if an exception is thrown", default=None
     )
 
@@ -42,7 +42,9 @@ class Metric(MetricRepositoryBaseModel):
     id: uuid.UUID = Field(description="Metric id")
     batch: Batch = Field(description="Batch")
     metric_name: str = Field(description="Metric name")
-    exception: MetricException = Field(description="Exception info if thrown")
+    exception: Optional[MetricException] = Field(
+        description="Exception info if thrown", default=None
+    )
 
     @classmethod
     def update_forward_refs(cls):
