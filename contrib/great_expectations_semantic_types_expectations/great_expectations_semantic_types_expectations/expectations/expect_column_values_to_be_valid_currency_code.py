@@ -2,8 +2,13 @@ from typing import Optional, Tuple
 
 from moneyed import list_all_currencies
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -38,9 +43,18 @@ class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
     #     raise NotImplementedError
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     raise NotImplementedError
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        currency_codes: Tuple[str] = generate_all_currency_codes()
+
+        # Register the UDF
+        is_valid_currency_code_udf = F.udf(is_valid_currency_code, types.BooleanType())
+
+        # Apply the UDF to the column
+        result_column = F.when(
+            is_valid_currency_code_udf(column, F.lit(currency_codes)), True
+        ).otherwise(False)
+        return result_column
 
 
 # This class defines the Expectation itself
