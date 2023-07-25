@@ -114,7 +114,7 @@ jobs:
 
   docs-bigquery:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    #if: github.event.pull_request.draft == false
     env:
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
