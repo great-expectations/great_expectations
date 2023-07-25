@@ -62,7 +62,7 @@ def parse_requirements_files_to_specs(files: list[pathlib.Path]) -> dict:
     return req_set_dict
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_requirements_files():
     """requirements.txt should be a subset of requirements-dev.txt"""
 
@@ -185,7 +185,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 83
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 80
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-athena.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
@@ -193,7 +193,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-contrib.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-contrib.txt", "black", (("==", "23.3.0"),)),
         ("requirements-dev-contrib.txt", "mypy", (("==", "1.3.0"),)),
-        ("requirements-dev-contrib.txt", "ruff", (("==", "0.0.271"),)),
+        ("requirements-dev-contrib.txt", "ruff", (("==", "0.0.280"),)),
         ("requirements-dev-dremio.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev-excel.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
         ("requirements-dev-lite.txt", "ipykernel", (("<=", "6.17.1"),)),
@@ -226,7 +226,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-test.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-test.txt", "mypy", (("==", "1.3.0"),)),
         ("requirements-dev-test.txt", "pika", (("==", "1.3.1"),)),
-        ("requirements-dev-test.txt", "ruff", (("==", "0.0.271"),)),
+        ("requirements-dev-test.txt", "ruff", (("==", "0.0.280"),)),
         ("requirements-dev-test.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements-dev.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
@@ -235,7 +235,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "black", (("==", "23.3.0"),)),
         ("requirements-dev.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev.txt", "ipykernel", (("<=", "6.17.1"),)),
-        ("requirements-dev.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements-dev.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-dev.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-dev.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
@@ -245,7 +244,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
         ("requirements-dev.txt", "pypd", (("==", "1.1.0"),)),
         ("requirements-dev.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
-        ("requirements-dev.txt", "ruff", (("==", "0.0.271"),)),
+        ("requirements-dev.txt", "ruff", (("==", "0.0.280"),)),
         ("requirements-dev.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-dev.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
@@ -257,7 +256,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
         ("requirements-types.txt", "black", (("==", "23.3.0"),)),
         ("requirements-types.txt", "ipykernel", (("<=", "6.17.1"),)),
-        ("requirements-types.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements-types.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-types.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements-types.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
@@ -266,14 +264,13 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "pyathena", (("<", "3"), (">=", "2.0.0"))),
         ("requirements-types.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
         ("requirements-types.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
-        ("requirements-types.txt", "ruff", (("==", "0.0.271"),)),
+        ("requirements-types.txt", "ruff", (("==", "0.0.280"),)),
         ("requirements-types.txt", "snapshottest", (("==", "0.6.0"),)),
         ("requirements-types.txt", "sqlalchemy", (("<", "2.0.0"),)),
         ("requirements-types.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-types.txt", "teradatasqlalchemy", (("==", "17.0.0.5"),)),
         ("requirements.txt", "Click", (("<=", "8.1.3"), (">=", "7.1.2"))),
         ("requirements.txt", "altair", (("<", "5.0.0"), (">=", "4.2.1"))),
-        ("requirements.txt", "jsonschema", (("<", "4.18.1"), (">=", "2.5.1"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),

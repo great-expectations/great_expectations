@@ -13,7 +13,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_semantic_domain_consistency():

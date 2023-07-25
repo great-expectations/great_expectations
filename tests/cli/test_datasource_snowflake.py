@@ -40,7 +40,7 @@ from great_expectations.cli.datasource import (
 #     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-pytestmark = [pytest.mark.cli]
+pytestmark = pytest.mark.cli
 
 
 @patch("click.prompt")

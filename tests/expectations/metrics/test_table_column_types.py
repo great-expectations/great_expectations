@@ -4,8 +4,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.util import get_sqlalchemy_inspector
+import pytest
 
 
+@pytest.mark.sqlite
 def test_table_column_introspection(sa):
     db_file = file_relative_path(
         __file__,

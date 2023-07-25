@@ -236,9 +236,7 @@ class MetaSparkDFDataset(Dataset):
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
                     "`{0}` AS `B_{0}`".format(eval_col_B),
-                    "ISNULL(`{}`) AND ISNULL(`{}`) AS `__null_val`".format(
-                        eval_col_A, eval_col_B
-                    ),
+                    f"ISNULL(`{eval_col_A}`) AND ISNULL(`{eval_col_B}`) AS `__null_val`",
                 )
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = cols_df.selectExpr(
@@ -729,7 +727,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         bins = list(
             copy.deepcopy(bins)
         )  # take a copy since we are inserting and popping
-        if bins[0] == -np.inf or bins[0] == -float("inf"):
+        if bins[0] == -np.inf or bins[0] == -float("inf"):  # noqa: PLR1714
             added_min = False
             bins[0] = -float("inf")
         else:

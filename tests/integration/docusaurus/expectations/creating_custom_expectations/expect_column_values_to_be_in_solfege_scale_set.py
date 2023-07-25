@@ -7,7 +7,7 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring">
-    """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
+    """Expect values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py set">
     set_ = [

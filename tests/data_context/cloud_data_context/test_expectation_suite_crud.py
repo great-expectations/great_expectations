@@ -666,7 +666,7 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
     mock_put.assert_called_once()  # persist resource
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_get_expectation_suite_include_rendered_content_prescriptive(
     empty_data_context,
 ):

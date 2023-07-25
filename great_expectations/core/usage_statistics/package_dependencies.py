@@ -34,7 +34,6 @@ class GXDependencies:
             "Click",
             "colorama",
             "cryptography",
-            "importlib-metadata",
             "Ipython",
             "ipywidgets",
             "jinja2",
@@ -132,6 +131,7 @@ class GXDependencies:
         "pytest-cov",
         "pytest-order",
         "pytest-random-order",
+        "tomli",
         # requirements-dev-lite.txt:
         "flask",
         "freezegun",

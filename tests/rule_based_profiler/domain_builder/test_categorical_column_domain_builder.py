@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.big
 
 
 @pytest.mark.slow  # 1.29s

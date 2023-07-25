@@ -18,7 +18,7 @@ from great_expectations.render.util import (
 )
 
 # module level markers
-pytestmark = [pytest.mark.unit]
+pytestmark = pytest.mark.unit
 
 
 def test_num_to_str():
@@ -506,7 +506,7 @@ def test_build_count_and_index_table_with_column_pair():
         unexpected_index_column_names=unexpected_index_column_names,
     )
     assert header_row == ["Unexpected Value", "Count", "pk_2"]
-    assert table_rows == [
+    assert table_rows == [  # noqa: PLR1714
         ["('desk', 'eraser')", 3, "three, four, five"]
     ] or table_rows == [["('eraser', 'desk')", 3, "three, four, five"]]
 

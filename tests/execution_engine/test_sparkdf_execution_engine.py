@@ -23,7 +23,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
-pytestmark = [pytest.mark.spark]
+pytestmark = pytest.mark.spark
 
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
@@ -37,7 +37,6 @@ def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     assert "<bound method DataFrameReader.csv" in str(fn_new)
 
 
-@pytest.mark.integration
 def test_reader_fn_parameters(
     spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
@@ -1177,7 +1176,6 @@ def test_dataframe_property_given_loaded_batch(spark_session):
     assert engine.dataframe == df
 
 
-@pytest.mark.integration
 def test_schema_properly_added(spark_session):
     schema: pyspark.types.StructType = pyspark.types.StructType(
         [

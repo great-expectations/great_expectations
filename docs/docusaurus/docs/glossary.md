@@ -43,6 +43,8 @@ title: "Glossary"
 
 [**Metric:**](./terms/metric.md) A computed attribute of data such as the mean of a column.
 
+[**MetricProviders:**](./conceptual_guides/metricproviders.md) Generate and register Metrics to support Expectations, and they are an important part of the Expectation software development kit (SDK).
+
 [**Metric Store:**](./terms/metric_store.md) A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 
 [**Plugin:**](./terms/plugin.md) Extends Great Expectations' components and/or functionality.

@@ -80,7 +80,6 @@ def in_memory_param_store(request, test_backends):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite_no_checkpoint_store,
 ):
@@ -168,8 +167,7 @@ def test_evaluation_parameter_store_methods(
     }
 
 
-@pytest.mark.postgres
-@pytest.mark.integration
+@pytest.mark.postgresql
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
         run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -190,7 +188,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
     assert value == metric_value
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
@@ -204,8 +202,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 
 @freeze_time("09/26/2019 13:42:41")
-@pytest.mark.postgres
-@pytest.mark.integration
+@pytest.mark.postgresql
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that

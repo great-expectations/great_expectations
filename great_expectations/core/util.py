@@ -193,7 +193,7 @@ ToDict: TypeAlias = Union[
 ]
 
 JSONConvertable: TypeAlias = Union[
-    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None  # noqa: PYI016
 ]
 
 
@@ -411,6 +411,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
+    # Unable to serialize (unrecognized data type).
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
@@ -935,8 +936,8 @@ def get_sql_dialect_floating_point_infinity_value(
             return -np.inf
         else:
             return np.inf
-    else:
-        if negative:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if negative:
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]

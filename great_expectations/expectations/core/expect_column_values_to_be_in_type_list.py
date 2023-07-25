@@ -56,8 +56,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
-    """
-    Expect a column to contain values from a specified type list.
+    """Expect a column to contain values from a specified type list.
 
     expect_column_values_to_be_in_type_list is a \
     [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations) \
@@ -270,8 +269,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         + values_string
                         + ", at least $mostly_pct % of the time."
                     )
-            else:
-                if include_column_name:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if include_column_name:
                     template_str = (
                         f"$column value types must belong to this set: {values_string}."
                     )
@@ -279,8 +278,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     template_str = (
                         f"value types must belong to this set: {values_string}."
                     )
-        else:
-            if include_column_name:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if include_column_name:
                 template_str = "$column value types may be any value, but observed value will be reported"
             else:
                 template_str = (

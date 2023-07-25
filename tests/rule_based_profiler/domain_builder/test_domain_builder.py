@@ -27,7 +27,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.integration]
+pytestmark = pytest.mark.big
 
 
 # noinspection PyPep8Naming

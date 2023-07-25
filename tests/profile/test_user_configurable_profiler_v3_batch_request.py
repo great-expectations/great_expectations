@@ -308,6 +308,7 @@ def taxi_data_semantic_types():
     }
 
 
+@pytest.mark.big
 def test_profiler_init_no_config(
     cardinality_validator,
 ):
@@ -323,6 +324,7 @@ def test_profiler_init_no_config(
     assert profiler.excluded_expectations == []
 
 
+@pytest.mark.big
 def test_profiler_init_full_config_no_semantic_types(cardinality_validator):
     """
     What does this test do and why?
@@ -348,6 +350,7 @@ def test_profiler_init_full_config_no_semantic_types(cardinality_validator):
     assert "col_one" not in profiler.column_info
 
 
+@pytest.mark.big
 def test_init_with_semantic_types(cardinality_validator):
     """
     What does this test do and why?
@@ -402,6 +405,7 @@ def test_init_with_semantic_types(cardinality_validator):
     }
 
 
+@pytest.mark.big
 def test__validate_config(cardinality_validator):
     """
     What does this test do and why?
@@ -420,6 +424,7 @@ def test__validate_config(cardinality_validator):
 
 
 @pytest.mark.slow  # 1.18s
+@pytest.mark.big
 def test__validate_semantic_types_dict(cardinality_validator):
     """
     What does this test do and why?
@@ -1061,7 +1066,7 @@ def test_profiler_all_expectation_types_spark(
     reason="requires sqlalchemy to be installed",
 )
 @pytest.mark.slow  # 4.70s
-@pytest.mark.postgres
+@pytest.mark.postgresql
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,

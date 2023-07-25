@@ -29,7 +29,7 @@ from tests.render.util import find_code_in_notebook, run_notebook
 yaml = YAMLHandler()
 
 # module level markers
-pytestmark = [pytest.mark.filesystem]
+pytestmark = pytest.mark.filesystem
 
 SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
     # Imports
