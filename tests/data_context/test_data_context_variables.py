@@ -322,6 +322,7 @@ def test_data_context_variables_get(
     _test_variables_get(cloud_data_context_variables)
 
 
+@pytest.mark.unit
 def test_data_context_variables_get_with_substitutions(
     data_context_config_dict: dict,
 ) -> None:
