@@ -55,6 +55,7 @@ def test_expect_column_values_to_be_in_set_fail(
     assert result.success is False
 
 
+@pytest.mark.filesystem
 def test_expect_column_values_in_set_pass(
     data_context_with_datasource_pandas_engine,
 ):

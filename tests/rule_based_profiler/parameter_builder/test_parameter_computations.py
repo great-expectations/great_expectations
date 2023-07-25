@@ -37,7 +37,7 @@ RTOL: float = 1.0e-7
 ATOL: float = 1.0e-2
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.20s
 def test_bootstrap_point_estimate_efficacy(
     bootstrap_distribution_parameters_and_1000_samples_with_01_false_positive,

@@ -322,6 +322,7 @@ def test_data_context_variables_get(
     _test_variables_get(cloud_data_context_variables)
 
 
+@pytest.mark.unit
 def test_data_context_variables_get_with_substitutions(
     data_context_config_dict: dict,
 ) -> None:
@@ -527,7 +528,6 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_file_data_context_variables_e2e(
     monkeypatch,
     file_data_context: FileDataContext,
