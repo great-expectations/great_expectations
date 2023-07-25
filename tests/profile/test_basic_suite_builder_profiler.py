@@ -175,6 +175,7 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_both_included_and_excluded_co
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
+@pytest.mark.unit
 def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas(
     pandas_dataset,
 ):

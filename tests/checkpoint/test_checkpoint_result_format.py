@@ -349,7 +349,6 @@ def _add_expectations_and_checkpoint(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -404,7 +403,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -461,7 +459,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_column_pairs_table: dict,
@@ -516,7 +513,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summary_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_column_pairs_table: dict,
@@ -564,7 +560,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
@@ -634,7 +629,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_summary_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
@@ -685,7 +679,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_no_query(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -738,7 +731,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -789,7 +781,6 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -836,7 +827,6 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -872,7 +862,6 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -936,7 +925,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -983,7 +971,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -1031,7 +1018,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_sql_complete_output_no_id_pk_fallback(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,
@@ -1079,7 +1065,6 @@ def test_sql_complete_output_no_id_pk_fallback(
 
 # pandas
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1129,7 +1114,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1180,7 +1164,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_no_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1228,7 +1211,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1280,7 +1262,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1326,7 +1307,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1365,7 +1345,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1399,7 +1378,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1464,7 +1442,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1514,7 +1491,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1552,7 +1528,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1585,7 +1560,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1619,7 +1593,6 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1676,7 +1649,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1716,7 +1688,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -1756,7 +1727,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 
 # spark
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1805,7 +1775,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1860,7 +1829,6 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1918,7 +1886,6 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -1971,7 +1938,6 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2010,7 +1976,6 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2079,7 +2044,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2130,7 +2094,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output_limit_1(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2188,7 +2151,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2238,7 +2200,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2294,7 +2255,6 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2343,7 +2303,6 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
@@ -2390,7 +2349,6 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2452,7 +2410,6 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summary_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2500,7 +2457,6 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -2546,7 +2502,6 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_spark_complete_output_no_id_pk_fallback(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -2594,7 +2549,6 @@ def test_spark_complete_output_no_id_pk_fallback(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -2641,7 +2595,6 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -2714,7 +2667,6 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -2769,7 +2721,6 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -2843,7 +2794,6 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -2907,7 +2857,6 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -2978,7 +2927,6 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_different_column_specified_in_result_format(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -3036,7 +2984,6 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
@@ -3108,7 +3055,6 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
@@ -3147,7 +3093,6 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index_column_pair: dict,
@@ -3201,7 +3146,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_one_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
@@ -3275,7 +3219,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_two_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
@@ -3349,7 +3292,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum: dict,
@@ -3410,7 +3352,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_one_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: dict,
@@ -3488,7 +3429,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_two_index_column(
     in_memory_runtime_context: AbstractDataContext,
     pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -3576,7 +3516,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
     empty_data_context: AbstractDataContext,
     reference_checkpoint_config_for_unexpected_column_names: dict,

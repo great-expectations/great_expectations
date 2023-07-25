@@ -59,6 +59,7 @@ def test_get_chart_titles():
     assert e.value.message == "All DataAssistantResult charts must have a title."
 
 
+@pytest.mark.unit
 def test_get_expectation_suite_should_use_default_name_if_none():
     data_assistant_result: DataAssistantResult = DataAssistantResult()
 

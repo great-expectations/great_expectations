@@ -16,7 +16,6 @@ jobs:
 
   static-analysis:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
 
     steps:
       - name: Checkout
@@ -36,13 +35,15 @@ jobs:
 
       - run: invoke lint --no-fmt
       - run: invoke fmt --check
+      - name: Marker-coverage-check
+        run: |
+          invoke marker-coverage
       - name: Type-check
         run: |
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
 
   unit-tests:
-    if: github.event.pull_request.draft == false
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -87,6 +88,7 @@ jobs:
           # `not e2e` because 1 test & 1 fixture need access token
           - cloud and not e2e
           - filesystem
+          - docs
           - openpyxl or pyarrow or project or sqlite
           #- spark
           - postgresql

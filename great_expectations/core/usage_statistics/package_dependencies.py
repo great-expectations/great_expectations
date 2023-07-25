@@ -34,7 +34,6 @@ class GXDependencies:
             "Click",
             "colorama",
             "cryptography",
-            "importlib-metadata",
             "Ipython",
             "ipywidgets",
             "jinja2",

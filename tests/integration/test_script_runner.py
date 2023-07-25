@@ -1,7 +1,7 @@
 """Run integration and docs tests.
 
 Individual tests can be run by setting the '-k' flag and referencing the name of test, like the following example:
-    pytest -v --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+    pytest -v --docs-tests -k "test_docs[quickstart]" tests/integration/test_script_runner.py
 """
 
 import importlib.machinery
@@ -64,6 +64,8 @@ from tests.integration.test_definitions.trino.integration_tests import (
     trino_integration_tests,
 )
 
+pytestmark = pytest.mark.docs
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -71,6 +73,12 @@ logger.setLevel(logging.DEBUG)
 docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
+    IntegrationTestFixture(
+        name="how_to_validate_multiple_batches_within_single_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
     IntegrationTestFixture(
         name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
@@ -480,8 +488,6 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-@pytest.mark.docs
-@pytest.mark.integration
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
@@ -489,7 +495,6 @@ def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.mark.slow  # 79.77s

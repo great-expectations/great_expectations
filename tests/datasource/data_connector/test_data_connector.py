@@ -52,38 +52,6 @@ assets:
     return basic_data_connector
 
 
-def test_get_batch_definition_list_from_batch_request():
-    pass
-
-
-def test_build_batch_spec_from_batch_definition():
-    pass
-
-
-def test_get_batch_data_and_metadata():
-    pass
-
-
-def test_convert_batch_data_to_batch():
-    pass
-
-
-def test_refresh_data_references_cache():
-    pass
-
-
-def test_get_unmatched_data_references():
-    pass
-
-
-def test_get_cached_data_reference_count():
-    pass
-
-
-def test_available_data_asset_names():
-    pass
-
-
 # TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
 @pytest.mark.unit
 def test__batch_definition_matches_batch_request():
@@ -245,6 +213,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
     # assert self_check_results["example_data_reference"]["n_rows"] == 3
 
 
+@pytest.mark.filesystem
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
     data_references: list = (
