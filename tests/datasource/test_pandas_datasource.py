@@ -30,6 +30,7 @@ from great_expectations.validator.validator import BridgeValidator
 yaml = YAMLHandler()
 
 
+@pytest.mark.filesystem
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -71,6 +72,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.filesystem
 def test_create_pandas_datasource(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -126,6 +128,7 @@ def test_create_pandas_datasource(
     )
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite, test_folder_connection_path_csv
 ):
@@ -183,6 +186,7 @@ def test_pandas_datasource_custom_data_asset(
     assert res.success is True
 
 
+@pytest.mark.filesystem
 def test_pandas_source_read_csv(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -292,6 +296,7 @@ def test_pandas_source_read_csv(
     reason="pyarrow and fastparquet are not installed",
 )
 @mock_s3
+@pytest.mark.filesystem
 def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite, tmp_path_factory
 ):
@@ -343,6 +348,7 @@ def test_s3_pandas_source_read_parquet(
     assert batch["col_1"][4] == 5
 
 
+@pytest.mark.filesystem
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource(
@@ -396,6 +402,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     assert batch.data["a"][0] == 1
 
 
+@pytest.mark.filesystem
 def test_read_limit(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
@@ -429,6 +436,7 @@ def test_read_limit(test_folder_connection_path_csv):
     assert isinstance(batch.batch_markers, BatchMarkers)
 
 
+@pytest.mark.unit
 def test_process_batch_parameters():
     batch_kwargs = PandasDatasource("test").process_batch_parameters(limit=1)
     assert batch_kwargs == {"reader_options": {"nrows": 1}}
@@ -439,6 +447,7 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
+@pytest.mark.filesystem
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
@@ -464,6 +473,7 @@ def test_pandas_datasource_processes_dataset_options(
     assert dataset.caching is False
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "reader_fn",
     [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle, pd.read_sas],

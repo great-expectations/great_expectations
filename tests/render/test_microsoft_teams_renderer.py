@@ -14,6 +14,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.render.renderer import MicrosoftTeamsRenderer
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.mark.parametrize(
     "result_meta,result_batch_id,",

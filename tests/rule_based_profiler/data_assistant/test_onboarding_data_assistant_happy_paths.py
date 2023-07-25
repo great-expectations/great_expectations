@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import sys
@@ -6,14 +8,13 @@ from typing import List
 import pandas as pd
 import pytest
 
-import great_expectations as gx
-from great_expectations import DataContext
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.util import file_relative_path
 
 yaml: YAMLHandler = YAMLHandler()
@@ -25,7 +26,7 @@ pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING: str = f"postgresql+psycopg2://postgres:@{pg_hostname}/test_ci"
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 19s
 def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None:
     """
@@ -45,7 +46,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Pandas.ipynb`
 
     """
-    data_context: gx.DataContext = empty_data_context
+    data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -128,7 +129,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 @pytest.mark.slow  # 149 seconds
 def test_spark_happy_path_onboarding_data_assistant(
     empty_data_context, spark_session, spark_df_taxi_data_schema
@@ -153,7 +154,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     from great_expectations.compatibility import pyspark
 
     schema: pyspark.types.StructType = spark_df_taxi_data_schema
-    data_context: gx.DataContext = empty_data_context
+    data_context: FileDataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
     )
@@ -235,7 +236,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     assert results.success is False
 
 
-@pytest.mark.integration
+@pytest.mark.postgresql
 @pytest.mark.slow  # 104 seconds
 def test_sql_happy_path_onboarding_data_assistant(
     empty_data_context, test_backends, sa
@@ -262,7 +263,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     else:
         load_data_into_postgres_database(sa)
 
-    data_context: gx.DataContext = empty_data_context
+    data_context: FileDataContext = empty_data_context
 
     datasource_config = {
         "name": "taxi_multi_batch_sql_datasource",
@@ -341,13 +342,13 @@ def test_sql_happy_path_onboarding_data_assistant(
 
 
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires Python3.8")
-@pytest.mark.integration
+@pytest.mark.filesystem
 @pytest.mark.slow  # 6.54 seconds
 def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_values(
     sa,
     empty_data_context,
 ) -> None:
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
 
     db_file = file_relative_path(
         __file__,
@@ -390,7 +391,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
     assert len(result.expectation_configurations) == 122
 
 
-@pytest.mark.integration
+@pytest.mark.postgresql
 @pytest.mark.slow  # 26.57 seconds
 def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolean_column_unique_proportion_metric_values(
     empty_data_context,
@@ -400,7 +401,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
     if "postgresql" not in test_backends:
         pytest.skip("testing data assistant in sql requires postgres backend")
 
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
     postgresql_engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
     # noinspection PyUnusedLocal
     conn: sa.engine.Connection = postgresql_engine.connect()

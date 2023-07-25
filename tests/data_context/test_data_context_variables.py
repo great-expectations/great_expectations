@@ -235,6 +235,7 @@ def include_rendered_content() -> IncludeRenderedContentConfig:
     )
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "target_attr",
     [
@@ -321,6 +322,7 @@ def test_data_context_variables_get(
     _test_variables_get(cloud_data_context_variables)
 
 
+@pytest.mark.unit
 def test_data_context_variables_get_with_substitutions(
     data_context_config_dict: dict,
 ) -> None:
@@ -341,6 +343,7 @@ def test_data_context_variables_get_with_substitutions(
     assert variables.config_version == value_associated_with_env_var
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "input_value,target_attr",
     [
@@ -441,6 +444,7 @@ def test_data_context_variables_set(
     _test_variables_set(cloud_data_context_variables)
 
 
+@pytest.mark.unit
 def test_data_context_variables_save_config(
     data_context_config_dict: dict,
     ephemeral_data_context_variables: EphemeralDataContextVariables,
@@ -523,7 +527,7 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
     assert variables_repr == repr(config)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_file_data_context_variables_e2e(
     monkeypatch,
     file_data_context: FileDataContext,

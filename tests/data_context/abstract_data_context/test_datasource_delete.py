@@ -7,6 +7,7 @@ from great_expectations.data_context import CloudDataContext
 from great_expectations.data_context.types.base import DatasourceConfig
 
 
+@pytest.mark.filesystem
 def test_datasource_delete_removes_from_cache_and_config_data_context(
     empty_data_context: DataContext, block_config_datasource_config: DatasourceConfig
 ):
@@ -37,6 +38,7 @@ def test_datasource_delete_removes_from_cache_and_config_data_context(
         )
 
 
+@pytest.mark.cloud
 def test_datasource_delete_removes_from_cache_and_config_cloud_data_context(
     empty_cloud_data_context: CloudDataContext,
     block_config_datasource_config: DatasourceConfig,

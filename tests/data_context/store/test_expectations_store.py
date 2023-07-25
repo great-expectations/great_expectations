@@ -16,7 +16,7 @@ from tests.core.usage_statistics.util import (
 )
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store(empty_data_context):
     context: DataContext = empty_data_context
     my_store = ExpectationsStore()
@@ -53,7 +53,7 @@ def test_expectations_store(empty_data_context):
     }
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     context: DataContext = empty_data_context
     # Use sqlite so we don't require postgres for this test.
@@ -138,7 +138,7 @@ def test_expectations_store_report_store_backend_id_in_memory_store_backend():
     assert test_utils.validate_uuid4(in_memory_expectations_store.store_backend_id)
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_expectations_store_report_same_id_with_same_configuration_TupleFilesystemStoreBackend(
     tmp_path_factory,
 ):
@@ -200,7 +200,7 @@ def test_expectations_store_report_same_id_with_same_configuration_TupleFilesyst
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):

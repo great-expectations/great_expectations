@@ -48,6 +48,7 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
     }
 
 
+@pytest.mark.unit
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -121,7 +122,6 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         pytest.param("empty_data_context", id="FileDataContext"),
     ],
 )
-@pytest.mark.integration
 def test_all_relevant_context_methods_emit_usage_stats(
     mock_emit: mock.MagicMock,
     enable_usage_stats,  # Needs to be before context fixtures to ensure usage stats handlers are attached

@@ -21,6 +21,9 @@ except ImportError:
     from unittest import mock
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.mark.xfail(
     reason="This command is not yet implemented for the modern API",
     run=True,

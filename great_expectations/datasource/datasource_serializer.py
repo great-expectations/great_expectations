@@ -79,7 +79,7 @@ class JsonDatasourceConfigSerializer(AbstractConfigSerializer):
         """
 
         raw_config: dict = self.schema.dump(obj)
-        loaded_obj: "AbstractConfig" = cast(
+        loaded_obj: AbstractConfig = cast(
             "DatasourceConfig", self.schema.load(raw_config)
         )
         config: dict = self.schema.dump(loaded_obj)

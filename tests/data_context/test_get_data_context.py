@@ -263,7 +263,7 @@ def test_cloud_context_include_rendered_content(
         assert context.variables.include_rendered_content.globally
 
 
-@pytest.mark.integration
+@pytest.mark.filesystem
 def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathlib.Path):
     root = tmp_path / "root"
     context_root_dir = root.joinpath("great_expectations")

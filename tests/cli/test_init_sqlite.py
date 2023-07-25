@@ -22,6 +22,9 @@ except ImportError:
     from unittest import mock
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.fixture
 def titanic_sqlite_db_file(sa, tmp_path_factory):
     temp_dir = str(tmp_path_factory.mktemp("foo_path"))

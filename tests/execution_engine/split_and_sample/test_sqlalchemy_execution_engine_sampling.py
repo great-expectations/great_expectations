@@ -30,7 +30,10 @@ try:
 except ImportError:
     sqlalchemy = None
 
-pytestmark = pytest.mark.sqlalchemy_version_compatibility
+pytestmark = [
+    pytest.mark.sqlalchemy_version_compatibility,
+    pytest.mark.external_sqldialect,
+]
 
 
 @pytest.mark.parametrize(
@@ -252,7 +255,6 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
     assert query_str == expected
 
 
-@pytest.mark.integration
 def test_sqlite_sample_using_limit(sa):
     csv_path: str = file_relative_path(
         os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120

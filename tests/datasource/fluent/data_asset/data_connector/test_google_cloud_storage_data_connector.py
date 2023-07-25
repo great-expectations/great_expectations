@@ -43,7 +43,7 @@ class MockGCSClient:
         return iter([])
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -80,7 +80,7 @@ def test_basic_instantiation(mock_list_keys):
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -117,7 +117,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     assert my_data_connector.get_unmatched_data_reference_count() == 3
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -306,7 +306,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
-# @pytest.mark.integration
+# @pytest.mark.big
 # @mock.patch(
 #     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 # )
@@ -448,7 +448,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 # TODO: <Alex>ALEX</Alex>
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -529,7 +529,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
     assert expected == unsorted_batch_definition_list
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
@@ -591,7 +591,7 @@ def test_alpha(mock_list_keys):
     assert len(my_batch_definition_list) == 1
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )

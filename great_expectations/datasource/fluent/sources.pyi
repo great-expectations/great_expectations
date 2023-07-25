@@ -1,7 +1,6 @@
-from __future__ import annotations
-
+import pathlib
+from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
@@ -15,44 +14,40 @@ from typing import (
     overload,
 )
 
+import pydantic
 from typing_extensions import TypeAlias
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,
 )
+from great_expectations.datasource.fluent import (
+    DatabricksSQLDatasource,
+    PandasAzureBlobStorageDatasource,
+    PandasDatasource,
+    PandasDBFSDatasource,
+    PandasFilesystemDatasource,
+    PandasGoogleCloudStorageDatasource,
+    PandasS3Datasource,
+    PostgresDatasource,
+    SnowflakeDatasource,
+    SparkAzureBlobStorageDatasource,
+    SparkDatasource,
+    SparkDBFSDatasource,
+    SparkFilesystemDatasource,
+    SparkGoogleCloudStorageDatasource,
+    SparkS3Datasource,
+    SQLDatasource,
+    SqliteDatasource,
+)
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.databricks_sql_datasource import DatabricksDsn
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    Datasource,
+)
+from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
-
-if TYPE_CHECKING:
-    import pathlib
-    from logging import Logger
-
-    import pydantic
-
-    from great_expectations.datasource.fluent import (
-        PandasAzureBlobStorageDatasource,
-        PandasDatasource,
-        PandasDBFSDatasource,
-        PandasFilesystemDatasource,
-        PandasGoogleCloudStorageDatasource,
-        PandasS3Datasource,
-        PostgresDatasource,
-        SnowflakeDatasource,
-        SparkAzureBlobStorageDatasource,
-        SparkDatasource,
-        SparkDBFSDatasource,
-        SparkFilesystemDatasource,
-        SparkGoogleCloudStorageDatasource,
-        SparkS3Datasource,
-        SQLDatasource,
-        SqliteDatasource,
-    )
-    from great_expectations.datasource.fluent.config_str import ConfigStr
-    from great_expectations.datasource.fluent.interfaces import (
-        DataAsset,
-        Datasource,
-    )
-    from great_expectations.datasource.fluent.snowflake_datasource import SnowflakeDsn
-    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
@@ -666,6 +661,37 @@ class _SourceFactories:
         numpy: bool = ...,
     ) -> SnowflakeDatasource: ...
     def delete_snowflake(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_databricks_sql(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> DatabricksSQLDatasource: ...
+    def update_databricks_sql(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> DatabricksSQLDatasource: ...
+    def add_or_update_databricks_sql(  # noqa: PLR0913
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, DatabricksDsn, str] = ...,
+        create_temp_table: bool = True,
+    ) -> DatabricksSQLDatasource: ...
+    def delete_databricks_sql(
         self,
         name: str,
     ) -> None: ...

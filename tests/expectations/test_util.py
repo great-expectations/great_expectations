@@ -106,6 +106,7 @@ def expectation_and_runtime_configuration_with_evaluation_parameters():
     return configuration, runtime_configuration_with_eval
 
 
+@pytest.mark.unit
 def test_prescriptive_renderer_no_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -174,6 +175,7 @@ def test_prescriptive_renderer_no_decorator(
     }
 
 
+@pytest.mark.big
 def test_prescriptive_renderer_with_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -330,6 +332,7 @@ def test_prescriptive_renderer_with_decorator(
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.external_sqldialect
 def test_table_column_reflection_fallback(test_backends, sa):
     include_sqlalchemy: bool = "sqlite" in test_backends
     include_postgresql: bool = "postgresql" in test_backends
@@ -441,6 +444,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     sa is None,
     reason="sqlalchemy is not installed",
 )
+@pytest.mark.external_sqldialect
 def test__generate_expectation_tests():
     expectation_type = "whatever"
     data = TestData(stuff=[1, 2, 3, 4, 5])
@@ -480,6 +484,7 @@ def test__generate_expectation_tests():
     assert "spark" not in backends_to_use
 
 
+@pytest.mark.unit
 def test__TestBackend__bad_backends():
     with pytest.raises(AssertionError):
         TestBackend(
@@ -488,6 +493,7 @@ def test__TestBackend__bad_backends():
         )
 
 
+@pytest.mark.unit
 def test__TestBackend__bad_dialects():
     with pytest.raises(AssertionError):
         TestBackend(
@@ -531,6 +537,7 @@ def test__TestBackend__bad_dialects():
     )
 
 
+@pytest.mark.unit
 def test__TestBackend__good_backends_and_dialects():
     tb1 = TestBackend(
         backend="pandas",
@@ -548,6 +555,7 @@ def test__TestBackend__good_backends_and_dialects():
     )
 
 
+@pytest.mark.unit
 def test__should_we_generate_this_test__obvious():
     test_case = ExpectationTestCase(
         title="",
@@ -615,6 +623,8 @@ def test__should_we_generate_this_test__obvious():
     assert should_we_generate_this_test(backend5, test_case5) == True
 
 
+# this is really a series of unit tests
+@pytest.mark.unit
 def test__should_we_generate_this_test__sqlalchemy():
     test_case = ExpectationTestCase(
         title="",
@@ -682,6 +692,7 @@ def test__should_we_generate_this_test__sqlalchemy():
     assert should_we_generate_this_test(backend5, test_case5) == True
 
 
+@pytest.mark.unit
 def test__should_we_generate_this_test__pandas():
     """
     Our CI/CD runs tests against pandas versions 0.23.4, 0.25.3, and latest (1.x currently)

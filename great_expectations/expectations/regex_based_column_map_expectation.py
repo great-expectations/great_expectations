@@ -195,8 +195,8 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                 return f'Are all values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
                 return f'Do all values in column "{column}" match the regular expression {regex}?'
-        else:
-            if semantic_type_name_plural is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if semantic_type_name_plural is not None:
                 return f'Are at least {mostly * 100}% of values in column "{column}" valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}?'
             else:
                 return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
@@ -219,13 +219,13 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
                     return f'All values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'All values in column "{column}" match the regular expression {regex}.'
-            else:
-                if semantic_type_name_plural is not None:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if semantic_type_name_plural is not None:
                     return f'At least {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
                 else:
                     return f'At least {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'
-        else:
-            if semantic_type_name_plural is not None:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if semantic_type_name_plural is not None:
                 return f' Less than {mostly * 100}% of values in column "{column}" are valid {semantic_type_name_plural}, as judged by matching the regular expression {regex}.'
             else:
                 return f'Less than {mostly * 100}% of values in column "{column}" match the regular expression {regex}.'

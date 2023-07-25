@@ -14,6 +14,9 @@ from great_expectations.exceptions import UnsupportedConfigVersionError
 from great_expectations.util import get_context
 
 
+pytestmark = pytest.mark.cli
+
+
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_launch_jupyter_notebook_env_none(mock_subprocess):
     try:

@@ -7,6 +7,8 @@ import pytest
 import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
+pytestmark = pytest.mark.filesystem
+
 logger = logging.getLogger(__name__)
 
 
