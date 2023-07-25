@@ -72,6 +72,8 @@ def column_pair_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO add comment about mypy
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -138,6 +140,8 @@ def column_pair_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO add comment about mypy
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
