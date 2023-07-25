@@ -1,3 +1,3 @@
 snowflake-connector-python>=2.5.0; python_version < "3.11"
-snowflake-connector-python>2.9.0; python_version <= "3.11" # earlier versions fail to build on 3.11
+snowflake-connector-python>2.9.0; python_version >= "3.11" # earlier versions fail to build on 3.11
 snowflake-sqlalchemy>=1.2.3
