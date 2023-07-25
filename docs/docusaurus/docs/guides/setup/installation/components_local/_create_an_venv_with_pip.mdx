@@ -1,11 +1,8 @@
-Once you have confirmed that Python 3 is installed locally, you can create a virtual environment with `venv` before installing your packages with `pip`.
+After you have confirmed that Python 3 is installed locally, you can create a virtual environment with `venv` before installing your packages with `pip`.
 
-Python Virtual Environments
+In the following examples, `venv` is used for virtual environments because it is included with Python 3. You can use alternate tools such as virtualenv and pyenv to install GX in virtual environments.
 
-In the following examples, venv is used for virtual environments because it is included with Python 3. You can use alternate tools such as virtualenv and pyenv to install GX in virtual environments.
-
-
-Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will create your virtual environment by running either:
+Run one of the following commands to create your virtual environment:
 
 ```console title="Terminal command"
 python -m venv my_venv
@@ -17,12 +14,14 @@ or
 python3 -m venv my_venv
 ```
 
-This command will create a new directory called `my_venv` where your virtual environment is located. In order to activate the virtual environment run:
+A new directory named `my_venv` is created in your virtual environment. 
+
+Run the following command to activate the virtual environment:
 
 ```console title="Terminal command"
 source my_venv/bin/activate
 ```
 
 :::tip
-You can name your virtual environment anything you like.  Simply replace `my_venv` in the examples above with the name that you would like to use.
+To change the name of your virtual environment, replace `my_venv` in the example code.
 :::

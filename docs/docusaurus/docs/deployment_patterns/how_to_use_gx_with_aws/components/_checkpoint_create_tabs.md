@@ -5,7 +5,7 @@ import PythonTabCreate from './_checkpoint_create_tab_python.md'
 import YamlTabTest from './_checkpoint_test_tab_yaml.md'
 
 
-First we create the Checkpoint configuration:
+Run the following command to create the Checkpoint configuration:
 
 <Tabs
   groupId="yaml-or-python"
@@ -28,7 +28,7 @@ First we create the Checkpoint configuration:
   </TabItem>
 </Tabs>
 
-Once we have defined our Checkpoint configuration, we can test our syntax using `context.test_yaml_config(...)`:
+Run the following command to use `context.test_yaml_config(...)` to test the syntax:
 
 <Tabs
   groupId="yaml"
@@ -45,4 +45,4 @@ Once we have defined our Checkpoint configuration, we can test our syntax using 
 
 </Tabs>
 
-Note that we get a message that the Checkpoint contains no validations. This is OK because we will pass them in at runtime, as we can see below when we call `context.run_checkpoint(...)`.
+A message appears indicating that the Checkpoint contains no validations. This is expected because they are passed in at runtime with `context.run_checkpoint(...)`.
