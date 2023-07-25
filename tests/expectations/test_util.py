@@ -106,6 +106,7 @@ def expectation_and_runtime_configuration_with_evaluation_parameters():
     return configuration, runtime_configuration_with_eval
 
 
+@pytest.mark.unit
 def test_prescriptive_renderer_no_decorator(
     expectation_and_runtime_configuration_with_evaluation_parameters,
 ):
@@ -622,6 +623,8 @@ def test__should_we_generate_this_test__obvious():
     assert should_we_generate_this_test(backend5, test_case5) == True
 
 
+# this is really a series of unit tests
+@pytest.mark.unit
 def test__should_we_generate_this_test__sqlalchemy():
     test_case = ExpectationTestCase(
         title="",

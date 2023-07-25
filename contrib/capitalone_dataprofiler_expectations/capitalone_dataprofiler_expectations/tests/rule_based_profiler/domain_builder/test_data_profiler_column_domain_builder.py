@@ -34,7 +34,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
@@ -306,7 +306,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_default_reference(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
@@ -579,7 +579,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_default_refere
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
@@ -852,7 +852,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with_exclude_column_names_with_exclude_column_name_suffixes(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
@@ -1060,7 +1060,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     ]
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with_partial_column_list_in_profiler_report(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,

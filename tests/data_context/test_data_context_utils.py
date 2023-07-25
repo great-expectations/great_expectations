@@ -501,6 +501,7 @@ def test_sanitize_config_works_with_list():
     assert res["some_key"][0]["access_token"] == PasswordMasker.MASKED_PASSWORD_STRING
 
 
+@pytest.mark.unit
 def test_parse_substitution_variable():
     """
     What does this test and why?

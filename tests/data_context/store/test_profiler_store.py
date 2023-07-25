@@ -38,7 +38,6 @@ def test_profiler_store_set_adds_valid_key(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_profiler_store_integration(
     empty_data_context: DataContext,
     profiler_store_name: str,

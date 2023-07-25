@@ -5261,7 +5261,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
-            if (expectation_suite_dependency != "*") and (
+            if (expectation_suite_dependency != "*") and (  # noqa: PLR1714
                 expectation_suite_dependency != expectation_suite_name
             ):
                 continue

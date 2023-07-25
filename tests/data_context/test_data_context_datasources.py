@@ -56,7 +56,6 @@ def pandas_enabled_datasource_config() -> dict:
     return config
 
 
-@pytest.mark.integration
 @pytest.mark.cloud
 def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     tmp_path: pathlib.Path,
@@ -82,7 +81,6 @@ def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     tmp_path: pathlib.Path,
     data_context_config_with_datasources: DataContextConfig,
@@ -462,7 +460,6 @@ def test_list_datasources() -> None:
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_available_data_assets_names(empty_data_context) -> None:
     datasource_name = "my_fluent_pandas_datasource"
     datasource = empty_data_context.sources.add_pandas(datasource_name)
