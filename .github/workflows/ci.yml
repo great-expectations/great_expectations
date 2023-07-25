@@ -42,6 +42,10 @@ jobs:
         run: |
           invoke type-check --ci --pretty
           invoke type-check --ci --pretty  --check-stub-sources
+      # TODO: move to separate job?
+      - name: Docstring linter
+        run: |
+          invoke docstrings
 
   unit-tests:
     strategy:
