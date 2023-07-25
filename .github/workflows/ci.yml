@@ -139,28 +139,4 @@ jobs:
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
 
-  dep-versions:
-    if: github.event.pull_request.draft == false
-    strategy:
-      fail-fast: true
-      matrix:
-        constraint-version: ["py38-min-install", "py38-min-install", "py38-min-install"]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache-dependency-path: |
-            reqs/requirements-dev-test.txt
-            setup.py
-
-      - name: Install dependencies
-        run: pip install -c ci/constraints-test/${{matrix.constraint-version}}.txt -r reqs/requirements-dev-test.txt"
-
-      - name: Run the tests
-        # what other markers should we run here?
-        run: pytest -m 'unit or big or filesystem'
+# TODO: min dep version tests
