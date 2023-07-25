@@ -7,6 +7,7 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.validator.exception_info import ExceptionInfo
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.rule.rule import Rule
@@ -16,7 +17,7 @@ class RuleState:
     """
     RuleState maintains state information, resulting from executing "Rule.run()" method by combining passed "Batch" data
     with currently loaded configuration of "Rule" components ("DomainBuilder" object, "ParameterBuilder" objects, and
-    "ExpectationConfigurationBuilder" objects).  Using "RuleState" with correponding flags is sufficient for generating
+    "ExpectationConfigurationBuilder" objects).  Using "RuleState" with corresponding flags is sufficient for generating
     outputs for different purposes (in raw and aggregated form) from available "Domain" objects and computed parameters.
     """
 
@@ -26,6 +27,7 @@ class RuleState:
         domains: Optional[List[Domain]] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        catch_exceptions: Optional[bool] = None,
     ) -> None:
         """
         Args:
@@ -50,6 +52,9 @@ class RuleState:
 
         self._rule_domain_builder_execution_time = 0.0
         self._rule_execution_time = 0.0
+
+        self._catch_exceptions = catch_exceptions
+        self._exception_traceback = None
 
     @property
     def rule(self) -> Optional[Rule]:
@@ -99,15 +104,35 @@ class RuleState:
     def rule_execution_time(self, value: float) -> None:
         self._rule_execution_time = value
 
+    @property
+    def exception_traceback(self) -> Optional[ExceptionInfo]:
+        return self._exception_traceback
+
+    @exception_traceback.setter
+    def exception_traceback(self, value: ExceptionInfo) -> None:
+        self._exception_traceback = value
+
+    @property
+    def catch_exceptions(self) -> Optional[bool]:
+        return self._catch_exceptions
+
+    @catch_exceptions.setter
+    def catch_exceptions(self, value: bool) -> None:
+        self._catch_exceptions = value
+
     def reset(self) -> None:
         self.reset_domains()
         self.reset_parameter_containers()
+        self.reset_exception_traceback()
 
     def reset_domains(self) -> None:
         self.domains = []
 
     def reset_parameter_containers(self) -> None:
         self.parameters = {}
+
+    def reset_exception_traceback(self) -> None:
+        self.exception_traceback = None
 
     def add_domain(
         self,

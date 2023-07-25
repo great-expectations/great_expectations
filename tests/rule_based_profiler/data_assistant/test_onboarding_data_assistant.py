@@ -27,10 +27,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.rule.rule import Rule
-from great_expectations.rule_based_profiler.rule.rule_state import RuleState
-from tests.render.util import load_notebook_from_path
-from tests.test_utils import find_strings_in_nested_obj
 
 
 @pytest.fixture
@@ -377,6 +373,14 @@ def test_onboarding_data_assistant_should_fail_forward(
         # Although the first rule fails, the rest of the rules should still be executed.
         assert mock_run.call_count == num_rules
         assert call_count == num_rules
+
+        result = data_assistant_result.to_json_dict()
+        assert result["rule_exception_tracebacks"]
+        print(result["rule_exception_tracebacks"])
+        assert (
+            result["rule_exception_tracebacks"]["table_rule"]["exception_message"]
+            == "This rule failed."
+        )
 
 
 @pytest.mark.integration
