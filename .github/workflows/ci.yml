@@ -71,15 +71,6 @@ jobs:
 
   marker-tests:
     if: github.event.pull_request.draft == false
-    services:
-      postgres:
-        # Docker hub image
-        image: postgres:13.3
-        env:
-          POSTGRES_USER: postgresql
-          POSTGRES_DB: test_ci # required by postgres image
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
     strategy:
       matrix:
         markers:
