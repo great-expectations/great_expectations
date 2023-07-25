@@ -125,6 +125,26 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
 
+REQUIRED_MARKERS = {
+    "aws_creds",
+    "big",
+    "cli",
+    "clickhouse",
+    "cloud",
+    "docs",
+    "external_sqldialect",
+    "filesystem",
+    "mysql",
+    "openpyxl",
+    "postgresql",
+    "project",
+    "pyarrow",
+    "spark",
+    "sqlalchemy_version_compatibility",
+    "sqlite",
+    "unit",
+}
+
 
 @pytest.mark.order(index=2)
 @pytest.fixture(scope="module")
@@ -339,46 +359,25 @@ def pytest_generate_tests(metafunc):
 
 def _verify_marker_coverage(
     session,
-) -> tuple[list[tuple[str, str, list[str]]], set[str]]:
-    REQUIRED_MARKERS = {
-        "aws_creds",
-        "big",
-        "cli",
-        "clickhouse",
-        "cloud",
-        "docs",
-        "external_sqldialect",
-        "filesystem",
-        "mysql",
-        "openpyxl",
-        "postgresql",
-        "project",
-        "pyarrow",
-        "spark",
-        "sqlalchemy_version_compatibility",
-        "sqlite",
-        "unit",
-    }
-    uncovered: list[tuple[str, str, list[str]]] = []
+) -> list[tuple[str, str, list[str]]]:
+    uncovered: list[tuple[str, str, set[str]]] = []
     markers_on_uncovered: set[str] = set()
     for test in session.items:
         markers = {m.name for m in test.iter_markers()}
         if not REQUIRED_MARKERS.intersection(markers):
-            uncovered.append((test.path, test.name, markers))
-            for m in markers:
-                markers_on_uncovered.add(m)
-    return uncovered, markers_on_uncovered
+            uncovered.append((str(test.path), test.name, markers))
+    return uncovered
 
 
 def pytest_collection_finish(session):
     if session.config.option.verify_marker_coverage_and_exit:
-        uncovered, markers = _verify_marker_coverage(session)
+        uncovered = _verify_marker_coverage(session)
         if uncovered:
             print(f"*** {len(uncovered)} tests have no marker coverage ***")
             for uncovered_test_info in uncovered:
                 print(uncovered_test_info)
-            print("*** Markers on uncovered tests ***")
-            for m in markers:
+            print("\n*** Every test is required to have 1 of the following markers ***")
+            for m in REQUIRED_MARKERS:
                 print(m)
             pytest.exit(
                 reason="Marker coverage verification failed",
