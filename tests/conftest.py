@@ -361,7 +361,6 @@ def _verify_marker_coverage(
     session,
 ) -> list[tuple[str, str, list[str]]]:
     uncovered: list[tuple[str, str, set[str]]] = []
-    markers_on_uncovered: set[str] = set()
     for test in session.items:
         markers = {m.name for m in test.iter_markers()}
         if not REQUIRED_MARKERS.intersection(markers):
