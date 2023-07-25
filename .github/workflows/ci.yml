@@ -90,7 +90,6 @@ jobs:
           - postgresql
           # - external_sqldialect # tests being skipped likely due to flagging system
         python-version: ["3.8"]
-
     runs-on: ubuntu-latest
 
     steps:
@@ -112,3 +111,48 @@ jobs:
 
       - name: Run the tests
         run: invoke ci-tests '${{ matrix.markers }}' --up-services --verbose
+
+  docs-bigquery:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    env:
+      GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
+      GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
+    steps:
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python bigquery
+        uses: actions/setup-python@v4
+        with:
+                python-version: 3.8
+                cache-dependency-path: |
+                  reqs/requirements-dev-test.txt
+                  setup.py
+      - name: Install Google Dependencies
+        run:  |
+          # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
+          curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
+          ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
+          # creating new named configuration
+          ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
+          # setting account config using project and service account info
+          ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(gcp_authkey.secureFilePath)
+          # Pass the configured Cloud SDK authentication to gsutil.
+          ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
+          # Authorize access to Google Cloud with a service account
+          ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
+
+      - name: Install dependencies
+        run: |
+          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
+          invoke deps --gx-install -m 'bigquery' -r test
+
+      - name: Run the tests
+        run: |
+          pytest -v --docs-tests -m integration --bigquery tests/integration/test_script_runner.py
