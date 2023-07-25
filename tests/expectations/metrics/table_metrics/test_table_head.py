@@ -90,14 +90,6 @@ def sqlite_batch_with_selectable_without_temp_table(
     [
         (
             "sqlite_batch_with_table_name",
-            None,
-            False,
-            (2, 2),
-            ["a", "b"],
-            [[1, 2], [2, 3]],
-        ),
-        (
-            "sqlite_batch_with_table_name",
             2,
             False,
             (2, 2),
@@ -114,14 +106,6 @@ def sqlite_batch_with_selectable_without_temp_table(
         ),
         (
             "sqlite_batch_with_selectable_with_temp_table",
-            None,
-            False,
-            (4, 2),
-            ["a", "b"],
-            [[1, 2], [2, 3]],
-        ),
-        (
-            "sqlite_batch_with_selectable_with_temp_table",
             2,
             False,
             (2, 2),
@@ -135,14 +119,6 @@ def sqlite_batch_with_selectable_without_temp_table(
             (4, 2),
             ["a", "b"],
             [[1, 2], [2, 3], [3, 4], [4, 5]],
-        ),
-        (
-            "sqlite_batch_with_selectable_without_temp_table",
-            None,
-            False,
-            (4, 2),
-            ["a", "b"],
-            [[1, 2], [2, 3]],
         ),
         (
             "sqlite_batch_with_selectable_without_temp_table",
