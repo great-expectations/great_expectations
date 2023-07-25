@@ -240,6 +240,7 @@ def _expecation_configuration_to_validation_result_sql(
     return result
 
 
+@pytest.mark.sqlite
 def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     mp = ColumnMax()
     metric = MetricConfiguration(
@@ -276,6 +277,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
 
 
+@pytest.mark.spark
 def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
     mp = ColumnValuesNonNull()
     metric = MetricConfiguration(
@@ -316,6 +318,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
 
+@pytest.mark.unit
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
     metric = MetricConfiguration(
@@ -374,6 +377,7 @@ def test_get_map_metric_dependencies():
     )
 
 
+@pytest.mark.unit
 def test_is_sqlalchemy_metric_selectable():
     with pytest.warns(DeprecationWarning) as record:
         assert MapMetricProvider.is_sqlalchemy_metric_selectable(
@@ -394,6 +398,7 @@ def test_is_sqlalchemy_metric_selectable():
     )
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_basic_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -434,6 +439,7 @@ def test_pandas_unexpected_rows_basic_result_format(
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly_false(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -475,6 +481,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_explicitly
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -521,6 +528,7 @@ def test_pandas_unexpected_rows_summary_result_format_unexpected_rows_including_
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -569,6 +577,7 @@ def test_pandas_unexpected_rows_complete_result_format(
     }
 
 
+@pytest.mark.unit
 def test_expectation_configuration_has_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -598,6 +607,7 @@ def test_expectation_configuration_has_result_format(
     )
 
 
+@pytest.mark.unit
 def test_pandas_default_complete_result_format(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -640,6 +650,7 @@ def test_pandas_default_complete_result_format(
     }
 
 
+@pytest.mark.unit
 def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
@@ -694,6 +705,7 @@ def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
     }
 
 
+@pytest.mark.unit
 def test_pandas_default_to_not_include_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -719,6 +731,7 @@ def test_pandas_default_to_not_include_unexpected_rows(
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
+@pytest.mark.unit
 def test_pandas_specify_not_include_unexpected_rows(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -745,6 +758,7 @@ def test_pandas_specify_not_include_unexpected_rows(
     assert result.result == expected_evr_without_unexpected_rows.result
 
 
+@pytest.mark.unit
 def test_include_unexpected_rows_without_explicit_result_format_raises_error(
     in_memory_runtime_context,
     pandas_animals_dataframe_for_unexpected_rows_and_index,
@@ -785,6 +799,7 @@ def test_include_unexpected_rows_without_explicit_result_format_raises_error(
 
 
 # Spark
+@pytest.mark.spark
 def test_spark_single_column_complete_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -840,6 +855,7 @@ def test_spark_single_column_complete_result_format(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_complete_result_format_with_id_pk(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -911,6 +927,7 @@ def test_spark_single_column_complete_result_format_with_id_pk(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_summary_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -963,6 +980,7 @@ def test_spark_single_column_summary_result_format(
     }
 
 
+@pytest.mark.spark
 def test_spark_single_column_basic_result_format(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
@@ -1010,6 +1028,7 @@ def test_spark_single_column_basic_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_complete_result_format(
     sa,
     in_memory_runtime_context,
@@ -1053,6 +1072,7 @@ def test_sqlite_single_column_complete_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_complete_result_format_id_pk(
     sa,
     in_memory_runtime_context,
@@ -1111,6 +1131,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_summary_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
@@ -1147,6 +1168,7 @@ def test_sqlite_single_column_summary_result_format(
     }
 
 
+@pytest.mark.sqlite
 def test_sqlite_single_column_basic_result_format(
     sa, in_memory_runtime_context, sqlite_table_for_unexpected_rows_with_index
 ):
