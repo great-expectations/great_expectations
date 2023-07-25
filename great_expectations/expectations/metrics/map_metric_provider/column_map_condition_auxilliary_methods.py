@@ -179,7 +179,7 @@ def _pandas_column_map_condition_value_counts(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -245,9 +245,9 @@ def _sqlalchemy_column_map_condition_values(
     Particularly for the purpose of finding unexpected values, returns all the metric values which do not meet an
     expected Expectation condition for ColumnMapExpectation Expectations.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -304,9 +304,9 @@ def _sqlalchemy_column_map_condition_value_counts(
     Returns value counts for all the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -348,9 +348,9 @@ def _spark_column_map_condition_values(
     **kwargs,
 ):
     """Return values from the specified domain that match the map-style metric in the metrics dictionary."""
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -398,9 +398,9 @@ def _spark_column_map_condition_value_counts(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
