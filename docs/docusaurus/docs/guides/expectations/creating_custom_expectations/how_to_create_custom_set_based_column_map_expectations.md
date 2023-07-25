@@ -14,13 +14,9 @@ This guide will walk you through the process of creating a Custom `SetBasedColum
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, all `ColumnMapExpectations`, including `SetBasedColumnMapExpectations`, start with `expect_column_values_`.
 
@@ -29,7 +25,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectColumnValuesToBeInSolfegeScaleSet`
 - `expect_column_values_to_be_in_solfege_scale_set`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -60,7 +56,7 @@ cp set_based_column_map_expectation_template.py /SOME_DIRECTORY/expect_column_va
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -86,7 +82,7 @@ Completeness checklist for ExpectColumnValuesToBeInSomeSet:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -132,7 +128,7 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -180,7 +176,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Define your set and connect it to your Expectation
+## Define your set and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.
 
@@ -237,7 +233,7 @@ Completeness checklist for ExpectColumnValuesToBeInSolfegeScaleSet:
 ...
 ```
 
-### 7. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -273,12 +269,12 @@ Congratulations!<br/>&#127881; You've just built your first Custom Set-Based Col
 </div>
 
 :::note
-If you've already built a [Custom Expectation](./overview.md) of a different type,
+If you've already built a [Custom Expectation](../custom_expectations_lp.md) of a different type,
 you may notice that we didn't explicitly implement a `_validate` method or Metric class here. While we have to explicitly create these for other types of Custom Expectations,
 the `SetBasedColumnMapExpectation` class handles Metric creation and result validation implicitly; no extra work needed!
 :::
 
-### 8. Contribution (Optional)
+## Contribute (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

@@ -13,13 +13,9 @@ This guide will walk you through the process of creating your own custom `BatchE
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+## Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `BatchExpectations` always start with `expect_table_`. 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
@@ -29,7 +25,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectBatchColumnsToBeUnique`
 - `expect_batch_columns_to_be_unique`
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -61,7 +57,7 @@ cp batch_expectation_template.py /SOME_DIRECTORY/expect_batch_columns_to_be_uniq
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -84,7 +80,7 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -131,7 +127,7 @@ Completeness checklist for ExpectBatchColumnsToBeUnique:
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -177,7 +173,7 @@ For more information on tests and example cases, <br/>
 see our guide on [creating example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement your Metric and connect it to your Expectation
+## Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation. 
 To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"/> class, and link it to your Expectation.
@@ -252,7 +248,7 @@ with
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_batch_columns_to_be_unique.py BatchColumnsUnique class_def"
 ```
 
-### 7. Validate
+## Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -283,7 +279,7 @@ Completeness checklist for ExpectBatchColumnsToBeUnique:
 ...
 ```
 
-### 8. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -318,7 +314,8 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </b></p>
 </div>
 
-### 9. Contribution (Optional)
+## 9. Contribute (Optional)
+
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
