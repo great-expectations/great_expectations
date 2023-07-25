@@ -982,7 +982,8 @@ def service(ctx: Context, names: Sequence[str], markers: Sequence[str]):
         print(f"  Starting services for {', '.join(service_names)} ...")
         for service_name in service_names:
             cmds = [
-                "docker-compose",
+                "docker",
+                "compose",
                 "-f",
                 f"assets/docker/{service_name}/docker-compose.yml",
                 "up",
