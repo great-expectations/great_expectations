@@ -9,6 +9,9 @@ from great_expectations.data_context.util import file_relative_path
 
 UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 9
 
+# module level markers
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def regex_for_deprecation_comments() -> Pattern:
@@ -32,6 +35,7 @@ def files_with_deprecation_warnings() -> List[str]:
     return files
 
 
+@pytest.mark.unit
 def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],
@@ -55,6 +59,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
         ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
 
 
+@pytest.mark.unit
 def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
     regex_for_deprecation_comments: Pattern,
     files_with_deprecation_warnings: List[str],

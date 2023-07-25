@@ -97,7 +97,6 @@ def mocked_post_response(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_with_id: RuleBasedProfiler,
@@ -148,7 +147,6 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
 
 
 @pytest.mark.cloud
-@pytest.mark.integration
 def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_without_id: RuleBasedProfiler,

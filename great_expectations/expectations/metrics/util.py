@@ -373,7 +373,7 @@ def get_sqlalchemy_column_metadata(
         return None
 
 
-def column_reflection_fallback(
+def column_reflection_fallback(  # noqa: PLR0915
     selectable: sqlalchemy.Select,
     dialect: sqlalchemy.Dialect,
     sqlalchemy_engine: sqlalchemy.Engine,
@@ -587,9 +587,9 @@ def column_reflection_fallback(
             # if a custom query was passed
             if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
                 query: sqlalchemy.TextClause = selectable
-            else:
+            else:  # noqa: PLR5501
                 # noinspection PyUnresolvedReferences
-                if dialect.name.lower() == GXSqlDialect.REDSHIFT:  # noqa: PLR5501
+                if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                     # Redshift needs temp tables to be declared as text
                     query = (
                         sa.select(sa.text("*"))
@@ -604,6 +604,54 @@ def column_reflection_fallback(
             col_names: List[str] = result_object._metadata.keys
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
+
+
+def get_dbms_compatible_metric_domain_kwargs(
+    metric_domain_kwargs: dict,
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
+) -> dict:
+    """
+    This method checks "metric_domain_kwargs" and updates values of "Domain" keys based on actual "Batch" columns.  If
+    column name in "Batch" column list is quoted, then corresponding column name in "metric_domain_kwargs" is also quoted.
+
+    Args:
+        metric_domain_kwargs: Original "metric_domain_kwargs" dictionary of attribute key-value pairs.
+        batch_columns_list: Actual "Batch" column list (e.g., output of "table.columns" metric).
+
+    Returns:
+        metric_domain_kwargs: Updated "metric_domain_kwargs" dictionary with quoted column names, where appropriate.
+    """
+    column_names: List[str | sqlalchemy.quoted_name]
+    if "column" in metric_domain_kwargs:
+        column_name: str | sqlalchemy.quoted_name = get_dbms_compatible_column_names(
+            column_names=metric_domain_kwargs["column"],
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column"] = column_name
+    elif "column_A" in metric_domain_kwargs and "column_B" in metric_domain_kwargs:
+        column_A_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_A"]
+        column_B_name: str | sqlalchemy.quoted_name = metric_domain_kwargs["column_B"]
+        column_names = [
+            column_A_name,
+            column_B_name,
+        ]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        (
+            metric_domain_kwargs["column_A"],
+            metric_domain_kwargs["column_B"],
+        ) = column_names
+    elif "column_list" in metric_domain_kwargs:
+        column_names = metric_domain_kwargs["column_list"]
+        column_names = get_dbms_compatible_column_names(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+        )
+        metric_domain_kwargs["column_list"] = column_names
+
+    return metric_domain_kwargs
 
 
 @overload
@@ -731,8 +779,8 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
-        else:
-            if not verify_only:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if not verify_only:
                 normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
     return None if verify_only else normalized_batch_columns_mappings

@@ -32,6 +32,9 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from great_expectations.cli import cli
 
 
+pytestmark = pytest.mark.cli
+
+
 def _run_notebook(context: FileDataContext) -> None:
     uncommitted_dir = os.path.join(context.root_directory, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")

@@ -31,7 +31,7 @@ You do not need to re-create a Checkpoint every time you Validate data.  If you 
 
 One of the most powerful features of Checkpoints is that they can be configured to run Actions, which will do some process based on the Validation Results generated when a Checkpoint is run.  Typical uses include sending email, slack, or custom notifications.  Another common use case is updating Data Docs sites.  However, Actions can be created to do anything you are capable of programing in Python.  This gives you an incredibly versatile tool for integrating Checkpoints in your pipeline's workflow!
 
-For in-depth examples of how to set up common Action use cases, see [how-to guides for Actions](../guides/validation/index.md#validation-actions).
+To set up common Action use cases, see [Configure Actions](../guides/validation/validation_actions/actions_lp.md).
 
 The classes that implement Checkpoints are in the `great_expectations.checkpoint` module.
 

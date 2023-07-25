@@ -448,7 +448,6 @@ stages:
 
           - script: |
               pip install \
-                "google-cloud-bigquery-storage" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
                 --constraint constraints-dev.txt

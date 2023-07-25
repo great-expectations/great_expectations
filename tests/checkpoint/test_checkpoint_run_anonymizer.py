@@ -57,6 +57,7 @@ def checkpoint(
     )
 
 
+@pytest.mark.unit
 def test_resolve_config_using_acceptable_arguments(checkpoint):
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 

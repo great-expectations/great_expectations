@@ -26,6 +26,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
+# module level markers
+pytestmark = pytest.mark.big
+
 
 @pytest.fixture()
 def validation_operator_result():

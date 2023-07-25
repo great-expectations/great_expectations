@@ -117,7 +117,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
     return cast(DataProfilerStructuredDataAssistantResult, data_assistant_result)
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow  # 6.90s
 def test_profile_data_profiler_structured_data_assistant_result_serialization(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
@@ -141,7 +141,7 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -168,7 +168,7 @@ def test_profile_data_profiler_structured_data_assistant_result_get_expectation_
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_profile_data_profiler_structured_data_assistant_metrics_count(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ) -> None:
@@ -205,7 +205,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     )  # 2 * ((numeric_rule: 6 int + 9 float + 1 string) + (float_rule: 9 float))
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_profile_data_profiler_structured_data_assistant_result_batch_id_to_batch_identifier_display_name_map_coverage(
     bobby_profile_data_profiler_structured_data_assistant_result: DataProfilerStructuredDataAssistantResult,
 ):

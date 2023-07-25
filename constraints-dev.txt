@@ -4,7 +4,7 @@
 # See also: https://pip.pypa.io/en/stable/user_guide/#constraints-files
 # We use it to place limits on certain packages to help the resolver come to a compatible configuration more quickly
 # To install dev dependencies using the new pip resolver (recommended) please use the following syntax:
-# `python -m pip install -r requirements-dev.txt -c constraints-dev.txt`
+# `python -m pip install -c constraints-dev.txt ".[test, postgresql, spark]"`
 
 # Several capitalone_dataprofiler_expectations that use tensorflow started
 # dying with the following error from site-packates/google/protobuf/descriptor.py

@@ -15,6 +15,9 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+pytestmark = pytest.mark.cli
+
+
 @pytest.mark.parametrize(
     "invocation,input",
     [

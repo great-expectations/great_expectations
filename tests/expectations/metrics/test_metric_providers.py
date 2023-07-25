@@ -36,6 +36,8 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 from great_expectations.expectations import registry
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def mock_registry(monkeypatch: pytest.MonkeyPatch):

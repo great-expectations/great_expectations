@@ -5,18 +5,6 @@ gcs_integration_tests = []
 
 connecting_to_your_data = [
     IntegrationTestFixture(
-        name="gcs_pandas_configured_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_configured_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

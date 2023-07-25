@@ -61,6 +61,9 @@ if TYPE_CHECKING:
     from great_expectations.checkpoint.configurator import ActionDict
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.base import (
+        AnonymizedUsageStatisticsConfig,
+    )
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
@@ -160,6 +163,12 @@ class CloudDataContext(SerializableDataContext):
         )
 
         return self._apply_global_config_overrides(config=project_data_context_config)
+
+    def _initialize_usage_statistics(
+        self, usage_statistics_config: AnonymizedUsageStatisticsConfig
+    ) -> None:
+        # Usage statistics are always disabled within Cloud-backed environments.
+        self._usage_statistics_handler = None
 
     @staticmethod
     def _resolve_cloud_args(  # noqa: PLR0913

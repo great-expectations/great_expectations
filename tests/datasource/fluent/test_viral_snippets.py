@@ -5,7 +5,7 @@ import logging
 import pathlib
 import random
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -19,8 +19,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from great_expectations.datasource.fluent import SqliteDatasource
-# apply markers to entire test module
-pytestmark = [pytest.mark.integration]
 
 
 YAML = YAMLHandler()
@@ -28,6 +26,7 @@ YAML = YAMLHandler()
 logger = logging.getLogger(__file__)
 
 
+@pytest.mark.filesystem
 def test_load_an_existing_config(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
@@ -40,6 +39,7 @@ def test_load_an_existing_config(
     assert context.fluent_config == fluent_only_config
 
 
+@pytest.mark.filesystem
 def test_serialize_fluent_config(
     cloud_storage_get_client_doubles,
     seeded_file_context: FileDataContext,
@@ -59,6 +59,7 @@ def test_serialize_fluent_config(
             assert asset_name in dumped_yaml
 
 
+@pytest.mark.filesystem
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
     datasource = seeded_file_context.get_datasource("sqlite_taxi")
     assert isinstance(datasource, Datasource)
@@ -74,17 +75,20 @@ def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
     assert result["success"] is True
 
 
+@pytest.mark.filesystem
 def test_save_project_does_not_break(seeded_file_context: FileDataContext):
     print(seeded_file_context.fluent_config)
     seeded_file_context._save_project_config()
 
 
+@pytest.mark.filesystem
 def test_variables_save_config_does_not_break(seeded_file_context: FileDataContext):
     print(f"\tcontext.fluent_config ->\n{seeded_file_context.fluent_config}\n")
     print(f"\tcontext.variables ->\n{seeded_file_context.variables}")
     seeded_file_context.variables.save_config()
 
 
+@pytest.mark.filesystem
 def test_save_datacontext_persists_fluent_config(
     file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
 ):
@@ -110,6 +114,7 @@ def test_save_datacontext_persists_fluent_config(
         assert ds_name in final_yaml
 
 
+@pytest.mark.filesystem
 def test_file_context_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
     fluent_only_config: GxConfig,
@@ -140,6 +145,7 @@ def test_file_context_add_and_save_fluent_datasource(
     assert "# Welcome to Great Expectations!" in final_yaml
 
 
+# Test markers come from empty_contexts fixture
 def test_context_add_and_save_fluent_datasource(
     empty_contexts: CloudDataContext | FileDataContext,
     sqlite_database_path: pathlib.Path,
@@ -155,6 +161,7 @@ def test_context_add_and_save_fluent_datasource(
     assert datasource_name in context.datasources
 
 
+# Test markers come from empty_contexts fixture
 def test_context_add_or_update_datasource(
     empty_contexts: CloudDataContext | FileDataContext,
     sqlite_database_path: pathlib.Path,
@@ -182,16 +189,14 @@ def random_datasource(seeded_file_context: FileDataContext) -> Datasource:
     return datasource
 
 
+@pytest.mark.filesystem
 def test_sources_delete_removes_datasource_from_yaml(
     random_datasource: Datasource,
     seeded_file_context: FileDataContext,
 ):
     print(f"Delete -> '{random_datasource.name}'\n")
 
-    ds_delete_method: Callable[[str], None] = getattr(
-        seeded_file_context.sources, f"delete_{random_datasource.type}"
-    )
-    ds_delete_method(random_datasource.name)
+    seeded_file_context.sources.delete(random_datasource.name)
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
@@ -202,6 +207,7 @@ def test_sources_delete_removes_datasource_from_yaml(
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
 
 
+@pytest.mark.filesystem
 def test_ctx_delete_removes_datasource_from_yaml(
     random_datasource: Datasource, seeded_file_context: FileDataContext
 ):
@@ -218,6 +224,7 @@ def test_ctx_delete_removes_datasource_from_yaml(
     assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
 
 
+# Test marker comes from seeded_contexts
 def test_checkpoint_with_validator_workflow(
     seeded_contexts: CloudDataContext | FileDataContext,
 ):
@@ -267,6 +274,7 @@ def test_checkpoint_with_validator_workflow(
     assert result.success
 
 
+# Test markers come from empty_contexts fixture
 def test_quickstart_workflow(
     empty_contexts: CloudDataContext | FileDataContext,
     csv_path: pathlib.Path,

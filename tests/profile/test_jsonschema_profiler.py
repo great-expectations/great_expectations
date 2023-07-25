@@ -225,16 +225,19 @@ def null_fields_schema():
     }
 
 
+@pytest.mark.unit
 def test_instantiable():
     profiler = JsonSchemaProfiler()
     assert isinstance(profiler, JsonSchemaProfiler)
 
 
+@pytest.mark.unit
 def test_validate_returns_true_on_valid_schema(simple_schema):
     profiler = JsonSchemaProfiler()
     assert profiler.validate(simple_schema) is True
 
 
+@pytest.mark.unit
 def test_profile_raises_errors_on_bad_inputs():
     profiler = JsonSchemaProfiler()
     for bad in [1, 1.1, None, "junk"]:
@@ -242,6 +245,7 @@ def test_profile_raises_errors_on_bad_inputs():
             profiler.profile(bad, "foo")
 
 
+@pytest.mark.unit
 def test_profile_raises_error_on_missing_suite_name(simple_schema):
     profiler = JsonSchemaProfiler()
     with pytest.raises(ValueError) as e:
@@ -250,6 +254,7 @@ def test_profile_raises_error_on_missing_suite_name(simple_schema):
     assert "provide a suite name" in message
 
 
+@pytest.mark.unit
 def test_profile_raises_error_on_schema_missing_top_level_type_key():
     profiler = JsonSchemaProfiler()
     schema = {"a_schema": "missing_type"}
@@ -259,6 +264,7 @@ def test_profile_raises_error_on_schema_missing_top_level_type_key():
     assert "This profiler requires a json schema with a top level `type` key" in message
 
 
+@pytest.mark.unit
 def test_profile_raises_error_on_schema_with_top_level_type_other_than_object():
     profiler = JsonSchemaProfiler()
     schema = {"type": "array"}
@@ -271,6 +277,7 @@ def test_profile_raises_error_on_schema_with_top_level_type_other_than_object():
     )
 
 
+@pytest.mark.unit
 def test_profile_enum_with_bad_input_raises_schema_error(enum_types_schema):
     profiler = JsonSchemaProfiler()
     # mangle the enum list
@@ -279,6 +286,7 @@ def test_profile_enum_with_bad_input_raises_schema_error(enum_types_schema):
         profiler.profile(enum_types_schema, "enums")
 
 
+@pytest.mark.filesystem
 def test_profile_simple_schema(empty_data_context, simple_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(simple_schema, "simple_suite")
@@ -386,6 +394,7 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(boolean_types_schema, "bools")
@@ -458,6 +467,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_profile_enum_schema(empty_data_context, enum_types_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(enum_types_schema, "enums")
@@ -543,6 +553,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(string_lengths_schema, "lengths")
@@ -772,6 +783,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(integer_ranges_schema, "integer_ranges")
@@ -1401,6 +1413,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(number_ranges_schema, "number_ranges")
@@ -1832,6 +1845,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_has_profile_create_expectations_from_complex_schema(
     empty_data_context, complex_flat_schema
 ):
@@ -2118,6 +2132,7 @@ def test_has_profile_create_expectations_from_complex_schema(
     context.add_expectation_suite(expectation_suite=obs)
 
 
+@pytest.mark.filesystem
 def test_null_fields_schema(empty_data_context, null_fields_schema):
     profiler = JsonSchemaProfiler()
     obs = profiler.profile(null_fields_schema, "null_fields")

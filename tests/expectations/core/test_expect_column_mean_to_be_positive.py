@@ -1,5 +1,5 @@
 import pandas as pd
-
+import pytest
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.expectations.core.expect_column_mean_to_be_between import (
@@ -33,6 +33,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
 #     </snippet>
 
 
+@pytest.mark.filesystem
 def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
 

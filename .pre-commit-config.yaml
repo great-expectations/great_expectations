@@ -12,12 +12,15 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
+      - id: no-commit-to-branch
+        args: [--branch, develop, --branch, main]
+      - id: detect-private-key
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
       - id: black-jupyter
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.271'
+    rev: "v0.0.280"
     hooks:
       - id: ruff
         files: ^(great_expectations|assets|contrib|scripts|tasks\.py|tests/datasource|tests/agent) # TODO: add tests/  docs/ etc.

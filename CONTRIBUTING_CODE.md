@@ -4,13 +4,9 @@ To modify existing Great Expectations code, you complete the following tasks:
 
 - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
 
-- [Install Python dependencies](#install-python-dependencies)
-
 - [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
 
-- [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
-
-- [Install great_expectations](#install-great_expectations)
+- [Install great_expectations](#install-great-expectations-and-extra-requirements-from-your-local-repository)
 
 - [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
 
@@ -61,52 +57,86 @@ To submit a custom package to Great Expectations for consideration, see [CONTRIB
     ```sh
     git checkout -b <branch-name>
     ```
-## Install Python dependencies
 
-Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a Custom Expectation.
+## Create a virtual environment (optional)
 
-1. Run the following command to create a virtual environment in your local repository using Python versions 3.8 to 3.11, activate the environment, and then install the necessary dependencies:
+A [virtual environment](https://peps.python.org/pep-0405) allows you to install an independent set of Python packages to their own site directory, isolated from the base/system install of Python.
 
-    ```python
-    python3 -m venv gx_dev
+Great Expectations requires a Python version from 3.8 to 3.11.
 
-    source gx_dev/bin/activate
+### Python
 
+1. Run the following command to create a virtual environment named `gx_dev`:
+
+   ```sh
+   python3 -m venv <path_to_environments_folder>/gx_dev
+   ```
+2. Run the following command to activate the virtual environment:
+
+   ```sh
+   source <path_to_environments_folder>/gx_dev/bin/activate
+   ```
+3. Run the following command to upgrade pip, the "package installer" for Python:
+    ```sh
     pip install --upgrade pip
+    ```
+
+### Anaconda
+
+1. Run the following command to create a virtual environment named `gx_dev`:
+
+   ```sh
+   conda create --name gx_dev
+   ```
+2. Run the following command to activate the virtual environment:
+
+   ```sh
+   conda activate gx_dev
+   ```
+
+## Install Great Expectations and extra requirements from your local repository
+
+1. Run the following command from the root of the `great_expectations` repository to install Great Expectations in [editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html), with extra requirements for testing:
+
+    ```sh
 
     pip install -c constraints-dev.txt -e ".[test]"
     ```
-    To specify other dependencies, add a comma after `test` and enter the dependency name. For example, "[test,postgresql,trino]". The supported dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`.
 
-2. Optional. If you're using Amazon Redshift, run the following command to install the `libpq-dev` package:
+    To specify other dependencies, add a comma after `test` and enter the dependency name(s). **For example, ".[test, postgresql, trino]"**.
+
+    The supported extra dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `clickhouse`, `cloud`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `teradata`, `test`, `trino`, `vertica`.
+
+    Check below to see if any of your desired dependencies need system packages installed, **before `pip install`**.
+
+2. Optional. If you're using Amazon Redshift (`redshift`) or PostgreSQL (`postgresql`), run one of the following commands to install the `pg_config` executable, which is required to install the `psycopg2-binary` Python package:
 
     ```sh
     sudo apt-get install -y libpq-dev
     ```
-
-3. Optional. If you're using PostgreSQL, run the following command to install PostgreSQL:
-
+    or
     ```sh
     brew install postgresql
     ```
 
-4. Optional. If you're using the `pyodbc`, `dremio`, or `mssql` modules to connect to ODBC databases, run one of the following commands:
+3. Optional. If you're using Microsoft SQL Server (`mssql`) or Dremio (`dremio`), run one of the following commands to install `unixodbc`, which is required to install the `pyodbc` Python package:
 
     ```sh
     sudo apt-get install -y unixodbc-dev
     ```
     or
     ```sh
-     brew install unixodbc
+    brew install unixodbc
     ```
 
     If your Mac computer has an Apple Silicon chip, you might need to 
     
     1. specify additional compiler or linker options. For example:
 
-    `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
-
-    `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+    ```sh
+    export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"
+    export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
+    ```
 
     2. reinstall pyodbc:
 
@@ -115,73 +145,22 @@ Python dependencies are required to modify Great Expectations code, submit a new
     python -c "import pyodbc; print(pyodbc.version)"
     ```
 
-    3. install the ODSBC 17 driver: https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15
+    3. install the ODBC 17 driver: https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15
 
-5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
+    4. see the following resources for more information:
 
-6. Run the following command to confirm pandas and SQLAlchemy with SQLite tests are passing:
+    - [Installing Microsoft ODBC driver for macOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
+    - [Installing Microsoft ODBC driver for Linux](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)
+
+4. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors.
+
+5. Run the following command to confirm pandas and SQLAlchemy with SQLite tests are passing:
 
    ```sh
     ulimit -n 4096
 
     pytest -v
    ```
-## Create a virtual environment (optional)
-
-A virtual environment allows you to create and test code without affecting the primary Great Expectations codebase.
-
-### Python
-
-1. Run the following command to create a virtual environment named `great_expectations_dev`:
-
-   ```python
-    python3 -m venv <path_to_environments_folder\>/great_expectations_dev
-   ```
-2. Run the following command to activate the virtual environment:
-
-   ```python
-    <source path_to_environments_folder\>/great_expectations_dev/bin/activate
-   ```
-### Anaconda
-
-1. Run the following command to create a virtual environment named `great_expectations_dev`:
-
-   ```python
-    conda create --name great_expectations_dev
-   ```
-2. Run the following command to activate the virtual environment:
-
-   ```python
-    conda activate great_expectations_dev
-   ```
-## Install dependencies from requirements-dev.txt
-
-You need to install dependencies from the Great Expectations `requirements-dev.txt` file to make sure you have the correct libraries installed in your Python environment.
-
-If you're using the macOS operating system, you'll be able to use the `pip` or `pip3` commands to install dependencies from `requirements-dev.txt`. If you're a Windows user using Anaconda, you'll need to install the dependencies in the `requirements-dev.txt` individually.
-
-Run the following command to install dependencies from requirements-dev.txt:
-
-```sh
-pip install -r requirements-dev.txt -c constraints-dev.txt
-```
-
-To add support for Spark or SQLAlchemy tests, you can substitute `requirements-dev-spark.txt` or `requirements-dev-sqlalchemy.txt` for `requirements-dev.txt`. For some database backends such as MSSQL, you might need to install additional drivers. See the following resources for more information:
-
-- [Installing Microsoft ODBC driver for macOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
-
-- [Installing Microsoft ODBC driver for Linux](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)
-
-
-##  Install Great Expectations
-
-Run the following command in the root of the `great_expectations` repository to install Great Expectations in editable mode:
-
-```sh
-pip install -e .
-```
-
-`-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
 
 ## Configure backends for testing (optional)
 
@@ -346,7 +325,7 @@ One of the most significant features of an Expectation is that it produces the s
 
 The following is the test fixture file structure:
 
-````json
+```json
 {
     "expectation_type" : "expect_column_max_to_be_between",
     "datasets" : [{
@@ -355,14 +334,15 @@ The following is the test fixture file structure:
         "tests" : [...]
     }]
 }
-````
+```
+
 Below `datasets` are three entries: `data`, `schemas`, and `tests`.
 
 #### Data
 
 The `data` parameter defines a DataFrame of sample data to apply Expectations against. The DataFrame is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
 
-````console
+```console
 "data" : {
     "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
     "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
@@ -371,12 +351,13 @@ The `data` parameter defines a DataFrame of sample data to apply Expectations ag
     "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", "2/1/2017", null, null, null, null],
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
 },
-````
+```
+
 #### Schemas
 
 The `schema` parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
 
-````console
+```console
 "schemas": {
     "sqlite": {
         "w" : "INTEGER",
@@ -395,7 +376,7 @@ The `schema` parameter defines the types to be used when instantiating tests aga
         "a" : "INTEGER",
     }
 },
-````
+```
 #### Tests
 
 The `tests` parameter defines the tests to be executed against the DataFrame. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
@@ -404,7 +385,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 
 `suppress_test_for` is an optional parameter to disable an Expectation for a specific list of backends. For example:
 
-````sh
+```sh
 "tests" : [{
     "title": "Basic negative test case",
     "exact_match_out" : false,
@@ -423,7 +404,7 @@ The test passes if the values in the expectation Validation Result correspond wi
 ...
 ]
 
-````
+```
 
 The test fixture files are stored in subdirectories of `tests/test_definitions/` corresponding to the class of Expectation:
 

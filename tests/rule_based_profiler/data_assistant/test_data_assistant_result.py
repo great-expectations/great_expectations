@@ -3,6 +3,7 @@ from typing import List, Optional
 import altair as alt
 import pandas as pd
 import pytest
+from great_expectations.core.expectation_suite import ExpectationSuite
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -56,3 +57,23 @@ def test_get_chart_titles():
         DataAssistantResult._get_chart_titles(charts=[layer_a])
 
     assert e.value.message == "All DataAssistantResult charts must have a title."
+
+
+@pytest.mark.unit
+def test_get_expectation_suite_should_use_default_name_if_none():
+    data_assistant_result: DataAssistantResult = DataAssistantResult()
+
+    # Should not raise an error
+    expectation_suite = data_assistant_result.get_expectation_suite(
+        expectation_suite_name=None, send_usage_event=False
+    )
+    assert expectation_suite
+    assert isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite.expectation_suite_name
+
+    expectation_suite = data_assistant_result.get_expectation_suite(
+        expectation_suite_name=None, send_usage_event=True
+    )
+    assert expectation_suite
+    assert isinstance(expectation_suite, ExpectationSuite)
+    assert expectation_suite.expectation_suite_name

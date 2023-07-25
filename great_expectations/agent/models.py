@@ -14,16 +14,34 @@ class EventBase(AgentBaseModel):
     type: str
 
 
-class RunOnboardingDataAssistantEvent(EventBase):
-    type: Literal[
-        "onboarding_data_assistant_request.received"
-    ] = "onboarding_data_assistant_request.received"
+class RunDataAssistantEvent(EventBase):
+    type: str
     datasource_name: str
     data_asset_name: str
 
 
+class RunOnboardingDataAssistantEvent(RunDataAssistantEvent):
+    type: Literal[
+        "onboarding_data_assistant_request.received"
+    ] = "onboarding_data_assistant_request.received"
+
+
+class RunMissingnessDataAssistantEvent(RunDataAssistantEvent):
+    type: Literal[
+        "missingness_data_assistant_request.received"
+    ] = "missingness_data_assistant_request.received"
+
+
 class RunCheckpointEvent(EventBase):
     type: Literal["run_checkpoint_request.received"] = "run_checkpoint_request.received"
+
+
+class RunColumnDescriptiveMetricsEvent(EventBase):
+    type: Literal[
+        "column_descriptive_metrics_request.received"
+    ] = "column_descriptive_metrics_request.received"
+    datasource_name: str
+    data_asset_name: str
 
 
 class TestDatasourceConfig(EventBase):
@@ -36,7 +54,14 @@ class UnknownEvent(EventBase):
 
 
 Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, RunCheckpointEvent, UnknownEvent],
+    Union[
+        RunOnboardingDataAssistantEvent,
+        RunMissingnessDataAssistantEvent,
+        RunCheckpointEvent,
+        RunColumnDescriptiveMetricsEvent,
+        TestDatasourceConfig,
+        UnknownEvent,
+    ],
     Field(discriminator="type"),
 ]
 

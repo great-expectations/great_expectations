@@ -42,6 +42,9 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
+# module level markers
+pytestmark = pytest.mark.spark
+
 
 @pytest.fixture
 def simple_multi_year_spark_df(spark_session):
@@ -65,7 +68,6 @@ def simple_multi_year_spark_df(spark_session):
     return spark_df
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_kwargs_year,num_values_in_df",
     [
@@ -94,7 +96,6 @@ def test_get_batch_with_split_on_year(
     assert len(split_df.columns) == 2
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "column_batch_identifier,num_values_in_df",
     [
@@ -130,7 +131,6 @@ def test_get_batch_with_split_on_date_parts_day(
     assert len(split_df.columns) == 2
 
 
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "batch_identifiers_for_column",
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,

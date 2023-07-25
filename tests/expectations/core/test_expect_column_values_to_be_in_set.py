@@ -17,6 +17,7 @@ class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
 
 
 # </snippet>
+@pytest.mark.big
 def test_expect_column_values_to_be_in_set_fail(
     data_context_with_datasource_pandas_engine,
 ):
@@ -54,6 +55,7 @@ def test_expect_column_values_to_be_in_set_fail(
     assert result.success is False
 
 
+@pytest.mark.filesystem
 def test_expect_column_values_in_set_pass(
     data_context_with_datasource_pandas_engine,
 ):
@@ -100,6 +102,7 @@ def test_expect_column_values_in_set_pass(
     assert result.success is True
 
 
+@pytest.mark.big
 def test_expect_column_values_country_fail(
     data_context_with_datasource_pandas_engine,
 ):
@@ -136,6 +139,7 @@ def test_expect_column_values_country_fail(
     assert result.success is False
 
 
+@pytest.mark.big
 def test_expect_column_values_country_pass(
     data_context_with_datasource_pandas_engine,
 ):
@@ -160,6 +164,7 @@ def test_expect_column_values_country_pass(
     assert result.success is True
 
 
+@pytest.mark.big
 def test_expect_column_values_to_be_in_set_no_set(
     data_context_with_datasource_pandas_engine,
 ):
