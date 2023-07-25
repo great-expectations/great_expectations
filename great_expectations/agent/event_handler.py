@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from great_expectations.agent.actions import ColumnDescriptiveMetricsAction, ListTableNamesAction
+from great_expectations.agent.actions import (
+    ColumnDescriptiveMetricsAction,
+    ListTableNamesAction,
+)
 from great_expectations.agent.actions.data_assistants import (
     RunMissingnessDataAssistantAction,
     RunOnboardingDataAssistantAction,
