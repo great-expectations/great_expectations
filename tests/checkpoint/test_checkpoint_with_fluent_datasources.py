@@ -49,7 +49,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -180,7 +179,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.74s
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     monkeypatch,
@@ -287,7 +285,6 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.75s
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     monkeypatch,
@@ -415,7 +412,6 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 3.10s
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     monkeypatch,
@@ -589,7 +585,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.25s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -628,7 +623,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     store_validation_result_action,
@@ -681,7 +675,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.15s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -711,7 +704,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.15s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -744,7 +736,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 @pytest.mark.slow  # 1.19s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -776,7 +767,6 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 
 @pytest.mark.slow  # 1.19s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -822,7 +812,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.slow  # 1.22s
 def test_newstyle_checkpoint_result_validations_include_rendered_content_data_context_variable(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
@@ -868,7 +857,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "checkpoint_config,expected_validation_id",
     [
@@ -1002,7 +990,6 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1030,7 +1017,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1058,7 +1044,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1090,7 +1075,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1157,7 +1141,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multi_validation_batch_request_sql_asset_objects_in_validations_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1198,7 +1181,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1229,7 +1211,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1260,7 +1241,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_top_level_batch_request_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1293,7 +1273,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1325,7 +1304,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1361,7 +1339,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1397,7 +1374,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1434,7 +1410,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1471,7 +1446,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1508,7 +1482,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1546,7 +1519,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1577,7 +1549,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_sparkdf(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1609,7 +1580,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 
 @pytest.mark.slow  # 1.75s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_pandas(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -1686,7 +1656,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.75s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_spark(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -1763,7 +1732,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.35s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_pandas(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -1858,7 +1826,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.35s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_spark(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -1953,7 +1920,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.91s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_pandas(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -2030,7 +1996,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 1.91s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_spark(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -2107,7 +2072,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.46s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_pandas(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -2202,7 +2166,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 @pytest.mark.slow  # 2.46s
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_spark(
     titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
@@ -2296,7 +2259,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_sql_asset_in_validations_sqlalchemy(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
