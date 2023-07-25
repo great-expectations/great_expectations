@@ -73,6 +73,8 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO same comment
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -137,6 +139,8 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO same comment
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,

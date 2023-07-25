@@ -6,7 +6,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Optional,
     Type,
 )
 
@@ -34,7 +33,9 @@ logger = logging.getLogger(__name__)
 
 @public_api
 def column_pair_function_partial(  # noqa: C901 - 16
-    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
+    engine: Type[ExecutionEngine],
+    partial_fn_type: str | MetricPartialFunctionTypes | None = None,
+    **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -62,6 +63,8 @@ def column_pair_function_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
@@ -120,6 +123,8 @@ def column_pair_function_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
+            assert partial_fn_type is not None  # TODO
+
             @metric_partial(
                 engine=engine,
                 partial_fn_type=partial_fn_type,
