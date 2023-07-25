@@ -11,7 +11,7 @@ class IntegrationTestFixture:
     Configurations for integration tests are defined as IntegrationTestFixture dataclass objects.
 
     Individual tests can also be run by setting the '-k' flag and referencing the name of test, like the following example:
-    pytest -v --docs-tests -m integration -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
+    pytest -v --docs-tests -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
 
     Args:
         name: Name for integration test. Individual tests can be run by using the -k option and specifying the name of the test.

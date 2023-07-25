@@ -474,7 +474,7 @@ How would you like to create your Expectation Suite?
         show_default=False,
     )
     # Default option
-    if suite_create_method == "":  # noqa: PLC1901
+    if suite_create_method == "":
         profile = False
         interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
     elif suite_create_method == "1":
@@ -717,7 +717,7 @@ How would you like to edit your Expectation Suite?
             show_default=False,
         )
         # Default option
-        if suite_edit_method == "":  # noqa: PLC1901
+        if suite_edit_method == "":
             interactive_mode = (
                 CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
             )
