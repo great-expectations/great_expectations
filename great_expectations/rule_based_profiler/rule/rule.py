@@ -1,5 +1,6 @@
 import copy
 import json
+import traceback
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
@@ -40,6 +41,7 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     measure_execution_time,
 )
+from great_expectations.validator.exception_info import ExceptionInfo
 
 
 class Rule(SerializableDictDot):
@@ -52,6 +54,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builders: Optional[
             List[ExpectationConfigurationBuilder]
         ] = None,
+        catch_exceptions: Optional[bool] = None,
     ) -> None:
         """
         Sets Rule name, variables, domain builder, parameters builders, configuration builders, and other instance data.
@@ -62,6 +65,9 @@ class Rule(SerializableDictDot):
             domain_builder: A Domain Builder object used to build rule data domain
             parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters
             expectation_configuration_builders: A list of Expectation Configuration Builders
+            catch_exceptions (boolean or None): \
+                If True, then catch exceptions and include them as part of the result object. \
+                For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions). 
         """
         self._name = name
 
@@ -82,6 +88,7 @@ class Rule(SerializableDictDot):
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
+        self._catch_exceptions = catch_exceptions
 
     @measure_execution_time(
         execution_time_holder_object_reference_name="rule_state",
@@ -112,74 +119,91 @@ class Rule(SerializableDictDot):
         Returns:
             RuleState representing effect of executing Rule
         """
-        if not reconciliation_directives:
-            reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
-
-        variables = build_parameter_container_for_variables(
-            variables_configs=reconcile_rule_variables(
-                variables=self.variables,
-                variables_config=convert_variables_to_dict(variables=variables),
-                reconciliation_strategy=reconciliation_directives.variables,
-            )
-        )
-
         if rule_state is None:
             rule_state = RuleState()
 
-        domains: List[Domain] = self._get_rule_domains(
-            variables=variables,
-            batch_list=batch_list,
-            batch_request=batch_request,
-            rule_state=rule_state,
-            runtime_configuration=runtime_configuration,
-        )
+        try:
+            if not reconciliation_directives:
+                reconciliation_directives = DEFAULT_RECONCILATION_DIRECTIVES
 
-        rule_state.rule = self
-        rule_state.variables = variables
-        rule_state.domains = domains
-
-        rule_state.reset_parameter_containers()
-
-        pbar_method: Callable = determine_progress_bar_method_by_environment()
-
-        domain: Domain
-        for domain in pbar_method(
-            domains,
-            desc="Profiling Dataset:",
-            position=1,
-            leave=False,
-            bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
-        ):
-            rule_state.initialize_parameter_container_for_domain(domain=domain)
-
-            parameter_builders: List[ParameterBuilder] = self.parameter_builders or []
-            parameter_builder: ParameterBuilder
-            for parameter_builder in parameter_builders:
-                parameter_builder.build_parameters(
-                    domain=domain,
-                    variables=variables,
-                    parameters=rule_state.parameters,
-                    parameter_computation_impl=None,
-                    batch_list=batch_list,
-                    batch_request=batch_request,
-                    runtime_configuration=runtime_configuration,
+            variables = build_parameter_container_for_variables(
+                variables_configs=reconcile_rule_variables(
+                    variables=self.variables,
+                    variables_config=convert_variables_to_dict(variables=variables),
+                    reconciliation_strategy=reconciliation_directives.variables,
                 )
+            )
 
-            expectation_configuration_builders: List[
-                ExpectationConfigurationBuilder
-            ] = (self.expectation_configuration_builders or [])
+            domains: List[Domain] = self._get_rule_domains(
+                variables=variables,
+                batch_list=batch_list,
+                batch_request=batch_request,
+                rule_state=rule_state,
+                runtime_configuration=runtime_configuration,
+            )
 
-            expectation_configuration_builder: ExpectationConfigurationBuilder
+            rule_state.rule = self
+            rule_state.variables = variables
+            rule_state.domains = domains
 
-            for expectation_configuration_builder in expectation_configuration_builders:
-                expectation_configuration_builder.resolve_validation_dependencies(
-                    domain=domain,
-                    variables=variables,
-                    parameters=rule_state.parameters,
-                    batch_list=batch_list,
-                    batch_request=batch_request,
-                    runtime_configuration=runtime_configuration,
+            rule_state.reset_parameter_containers()
+
+            pbar_method: Callable = determine_progress_bar_method_by_environment()
+
+            domain: Domain
+            for domain in pbar_method(
+                domains,
+                desc="Profiling Dataset:",
+                position=1,
+                leave=False,
+                bar_format="{desc:25}{percentage:3.0f}%|{bar}{r_bar}",
+            ):
+                rule_state.initialize_parameter_container_for_domain(domain=domain)
+
+                parameter_builders: List[ParameterBuilder] = (
+                    self.parameter_builders or []
                 )
+                parameter_builder: ParameterBuilder
+                for parameter_builder in parameter_builders:
+                    parameter_builder.build_parameters(
+                        domain=domain,
+                        variables=variables,
+                        parameters=rule_state.parameters,
+                        parameter_computation_impl=None,
+                        batch_list=batch_list,
+                        batch_request=batch_request,
+                        runtime_configuration=runtime_configuration,
+                    )
+
+                expectation_configuration_builders: List[
+                    ExpectationConfigurationBuilder
+                ] = (self.expectation_configuration_builders or [])
+
+                expectation_configuration_builder: ExpectationConfigurationBuilder
+
+                for (
+                    expectation_configuration_builder
+                ) in expectation_configuration_builders:
+                    expectation_configuration_builder.resolve_validation_dependencies(
+                        domain=domain,
+                        variables=variables,
+                        parameters=rule_state.parameters,
+                        batch_list=batch_list,
+                        batch_request=batch_request,
+                        runtime_configuration=runtime_configuration,
+                    )
+        except Exception as err:
+            if self._catch_exceptions:
+                rule_state.catch_exceptions = True
+                exception_traceback: str = traceback.format_exc()
+                exception_message: str = str(err)
+                exception_info = ExceptionInfo(
+                    exception_traceback=exception_traceback,
+                    exception_message=exception_message,
+                )
+                rule_state.exception_traceback = exception_info
+            else:
+                raise err
 
         return rule_state
 
