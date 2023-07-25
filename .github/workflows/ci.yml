@@ -150,8 +150,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install $(grep -E '^(invoke)' reqs/requirements-dev-contrib.txt)
-          invoke deps --gx-install -m 'bigquery' -r test
+          # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
+          pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines "pandas<2.0.0"
 
       - name: Run the tests
         run: |
