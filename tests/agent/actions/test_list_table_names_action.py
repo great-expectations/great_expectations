@@ -1,3 +1,4 @@
+import uuid
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -7,9 +8,10 @@ from sqlalchemy.engine import Inspector
 from great_expectations.agent.actions import (
     ListTableNamesAction,
 )
-from great_expectations.agent.models import ListTableNamesEvent
+from great_expectations.agent.models import CreatedResource, ListTableNamesEvent
 from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource.fluent import (
+    Datasource,
     PandasDatasource,
     SQLDatasource,
 )
@@ -51,9 +53,18 @@ def test_run_list_table_names_action_returns_action_result(context, event):
 
     with mock.patch(
         "great_expectations.agent.actions.list_table_names.inspect"
-    ) as mock_inspect:
+    ) as mock_inspect, mock.patch(
+        "requests.Session.patch", autospec=True
+    ) as mock_patch:
         datasource = MagicMock(spec=SQLDatasource)
+        datasource_id = str(uuid.uuid4())
+        datasource.id = datasource_id
         context.get_datasource.return_value = datasource
+
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = ""
+        mock_resp.status_code = 204
+        mock_patch.return_value = mock_resp
 
         table_names = ["table_1", "table_2", "table_3"]
         inspector = MagicMock(spec=Inspector)
@@ -66,4 +77,3 @@ def test_run_list_table_names_action_returns_action_result(context, event):
         assert action_result.type == event.type
         assert action_result.id == id
         assert action_result.created_resources == []
-        assert False
