@@ -44,17 +44,13 @@ jobs:
           invoke type-check --ci --pretty  --check-stub-sources
       # TODO: move to separate job?
       - name: Docstring linter
-        run: |
-          invoke docstrings
+        run: invoke docstrings
       - name: line_number_snippet_checker
-        run: |
-          python ci/checks/check_no_line_number_snippets.py
+        run: python ci/checks/check_no_line_number_snippets.py
       - name: name_tag_snippet_checker
-        run: |
-          python ci/checks/check_only_name_tag_snippets.py
+        run: python ci/checks/check_only_name_tag_snippets.py
       - name: check_repo_root_size
-        run: |
-          ./ci/checks/check_repo_root_size.sh
+        run: sh ./ci/checks/check_repo_root_size.sh
 
   unit-tests:
     strategy:
