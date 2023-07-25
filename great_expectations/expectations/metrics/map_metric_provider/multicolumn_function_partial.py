@@ -126,7 +126,9 @@ def multicolumn_function_partial(  # noqa: C901 - 16
             )
 
         def wrapper(metric_fn: Callable):
-            assert partial_fn_type is not None  # TODO same comment
+            assert (
+                partial_fn_type is not None
+            )  # mypy has trouble type narrowing with closures
 
             @metric_partial(
                 engine=engine,
