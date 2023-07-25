@@ -44,7 +44,7 @@ jobs:
           invoke type-check --ci --pretty  --check-stub-sources
 
   docs:
-    if: github.event.pull_request.draft == true
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
