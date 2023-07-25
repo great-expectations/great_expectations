@@ -9,7 +9,7 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 
 # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
-    """Expects the mean of values in this column to be positive"""
+    """Expect the mean of values in this column to be positive."""
 
     default_kwarg_values = {
         "min_value": 0,
