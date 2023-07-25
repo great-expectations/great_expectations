@@ -13,6 +13,11 @@ except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from sqlalchemy.sql.selectable import Subquery
+except (ImportError, AttributeError):
+    Subquery = SQLALCHEMY_NOT_IMPORTED
+
+try:
     from sqlalchemy import engine
 except ImportError:
     engine = SQLALCHEMY_NOT_IMPORTED

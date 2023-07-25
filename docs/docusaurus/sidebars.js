@@ -134,6 +134,7 @@ module.exports = {
             'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
             'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
             'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
+            'guides/validation/checkpoints/how_to_validate_multiple_batches_within_single_checkpoint',
             'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
             'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
           ]

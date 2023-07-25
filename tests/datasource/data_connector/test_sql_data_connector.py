@@ -616,6 +616,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 #  'table_that_should_be_partitioned_by_random_hash__H']
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__limit(
     in_memory_runtime_context,
@@ -665,6 +666,7 @@ def test_get_batch_data_and_markers_sampling_method__limit(
     ).success
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__random(
     sampler_method_name_prefix,
@@ -691,6 +693,7 @@ def test_get_batch_data_and_markers_sampling_method__random(
     pass
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__mod(
     sampler_method_name_prefix,
@@ -719,6 +722,7 @@ def test_get_batch_data_and_markers_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_get_batch_data_and_markers_sampling_method__a_list(
     sampler_method_name_prefix,
@@ -817,6 +821,7 @@ def test_get_batch_data_and_markers_to_make_sure_splitter_and_sampler_methods_ar
     assert len(validator.head(fetch_all=True)) == 123
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     in_memory_runtime_context,
@@ -880,6 +885,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__limit(
     ).success
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     sampler_method_name_prefix,
@@ -928,6 +934,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__random(
     assert len(validator.head(fetch_all=True)) == 123
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
     sampler_method_name_prefix,
@@ -982,6 +989,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     sampler_method_name_prefix,
@@ -1033,6 +1041,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method__a_list(
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
     sampler_method_name_prefix,
@@ -1084,6 +1093,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__a_list(
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 @pytest.mark.parametrize("sampler_method_name_prefix", ["_", ""])
 def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_asset_override__a_list(
     sampler_method_name_prefix,
@@ -1135,6 +1145,7 @@ def test_ConfiguredAssetSqlDataConnector_assets_sampling_method_default__random_
     assert len(validator.head(fetch_all=True)) == 4
 
 
+@pytest.mark.sqlite
 def test_default_behavior_with_no_splitter(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -1895,7 +1906,6 @@ def test_full_config_instantiation_and_execution_of_InferredAssetSqlDataConnecto
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "splitter_method,splitter_kwargs,table_name,first_3_batch_identifiers_expected,last_3_batch_identifiers_expected",
     [
@@ -2066,7 +2076,6 @@ def test_ConfiguredAssetSqlDataConnector_sorting(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 @pytest.mark.parametrize(
     "data_connector_yaml,expected_batch_identifiers_list",
     [
@@ -2157,7 +2166,6 @@ def test_ConfiguredAssetSqlDataConnector_return_all_batch_definitions_sorted(
 
 
 @pytest.mark.sqlite
-@pytest.mark.integration
 def test_introspect_db(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
@@ -2480,7 +2488,6 @@ def test_introspect_db(
 
 
 @pytest.mark.mysql
-@pytest.mark.integration
 def test_include_schema_name_introspection(mysql_engine):
     execution_engine = SqlAlchemyExecutionEngine(
         name="test_sql_execution_engine",
@@ -2523,7 +2530,6 @@ def test_include_schema_name_introspection(mysql_engine):
 
 
 @pytest.mark.mysql
-@pytest.mark.integration
 def test_include_schema_name_get_available_data_assets(
     mysql_engine,
 ):

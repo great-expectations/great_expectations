@@ -269,8 +269,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         + values_string
                         + ", at least $mostly_pct % of the time."
                     )
-            else:
-                if include_column_name:  # noqa: PLR5501
+            else:  # noqa: PLR5501
+                if include_column_name:
                     template_str = (
                         f"$column value types must belong to this set: {values_string}."
                     )
@@ -278,8 +278,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                     template_str = (
                         f"value types must belong to this set: {values_string}."
                     )
-        else:
-            if include_column_name:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if include_column_name:
                 template_str = "$column value types may be any value, but observed value will be reported"
             else:
                 template_str = (
