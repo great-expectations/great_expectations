@@ -211,6 +211,14 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         )
 
 
+@invoke.task()
+def marker_coverage(
+    ctx: Context,
+):
+    pytest_cmds = ["pytest", "--verify-marker-coverage-and-exit"]
+    ctx.run(" ".join(pytest_cmds), echo=True, pty=True)
+
+
 @invoke.task(
     aliases=["types"],
     iterable=["packages"],
@@ -359,7 +367,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
     aliases=["test"],
     help={
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
-        "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
@@ -372,7 +379,6 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 1.5
 def tests(  # noqa: PLR0913
     ctx: Context,
     unit: bool = True,
-    integration: bool = False,
     ignore_markers: bool = False,
     ci: bool = False,
     html: bool = False,
@@ -391,9 +397,6 @@ def tests(  # noqa: PLR0913
     See also, the newer `invoke ci-tests --help`.
     """
     markers = []
-    if integration:
-        markers += ["integration"]
-        unit = False
     markers += ["unit" if unit else "not unit"]
 
     marker_text = " and ".join(markers)
@@ -671,8 +674,8 @@ def docs(
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
-    else:
-        if start:  # noqa: PLR5501
+    else:  # noqa: PLR5501
+        if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
         else:
             print("Making sure docusaurus dependencies are installed.")
@@ -797,11 +800,18 @@ MARKER_DEPENDENDENCY_MAP: Final[Mapping[str, TestDependencies]] = {
     "cloud": TestDependencies(
         ("reqs/requirements-dev-cloud.txt",), exta_pytest_args=("--cloud",)
     ),
+    "docs": TestDependencies(
+        requirement_files=(
+            "reqs/requirements-dev-test.txt",
+            "reqs/requirements-dev-spark.txt",
+        ),
+        exta_pytest_args=("--docs-tests",),
+    ),
     "external_sqldialect": TestDependencies(("reqs/requirements-dev-sqlalchemy.txt",)),
     "pyarrow": TestDependencies(("reqs/requirements-dev-arrow.txt",)),
     "postgresql": TestDependencies(
         ("reqs/requirements-dev-postgresql.txt",),
-        services=["postgresql"],
+        services=("postgresql",),
         exta_pytest_args=("--postgresql",),
     ),
     "spark": TestDependencies(
