@@ -138,7 +138,7 @@ jobs:
             setup.py
       - name: output Json
         run:
-          RUN echo "$GE_TEST_GCP_CREDENTIALS" | jq > gcp-credentials.json
+          echo "$GE_TEST_GCP_CREDENTIALS" | jq > gcp-credentials.json
 
       # - name: Install Google Dependencies
       #   run:  |
