@@ -26,7 +26,6 @@ yaml = YAMLHandler()
 
 
 @pytest.mark.big
-@pytest.mark.integration
 @pytest.mark.slow  # 1.05s
 def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     """
@@ -142,7 +141,6 @@ def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
 
 
 @pytest.mark.spark
-@pytest.mark.integration
 def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs):
     """
     What does this test and why?

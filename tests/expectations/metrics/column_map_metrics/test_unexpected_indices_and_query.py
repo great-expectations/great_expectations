@@ -321,7 +321,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         )
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_unexpected_index_list_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
@@ -355,7 +355,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk(
         ]
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_unexpected_index_list_metric_without_id_pk(
     spark_session, animal_table_df
 ):
@@ -393,7 +393,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
     assert list(results.values())[0] is None
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_pd_unexpected_index_query_metric_with_id_pk(
     animal_table_df, metric_value_kwargs_complete
 ):
@@ -422,7 +422,7 @@ def test_pd_unexpected_index_query_metric_with_id_pk(
         assert val == "df.filter(items=[3, 4, 5], axis=0)"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_pd_unexpected_index_query_metric_without_id_pk(
     animal_table_df,
 ):
@@ -459,7 +459,7 @@ def test_pd_unexpected_index_query_metric_without_id_pk(
         assert val == "df.filter(items=[3, 4, 5], axis=0)"
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_spark_unexpected_index_query_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
@@ -492,7 +492,7 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_spark_unexpected_index_query_metric_without_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):

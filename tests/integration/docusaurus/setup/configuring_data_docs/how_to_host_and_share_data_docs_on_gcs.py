@@ -9,7 +9,7 @@ GE_TEST_BIGQUERY_DATASET
 
 Then run the following command from the great_expectations directory:
 ```
-GE_TEST_GCP_PROJECT=<YOUR GCP PROJECT> GE_TEST_BIGQUERY_DATASET=<YOUR BIGQUERY DATASET> pytest -v --docs-tests -m integration -k "how_to_host_and_share_data_docs_on_gcs" tests/integration/test_script_runner.py --bigquery
+GE_TEST_GCP_PROJECT=<YOUR GCP PROJECT> GE_TEST_BIGQUERY_DATASET=<YOUR BIGQUERY DATASET> pytest -v --docs-tests -k "how_to_host_and_share_data_docs_on_gcs" tests/integration/test_script_runner.py --bigquery
 ```
 """
 import os
