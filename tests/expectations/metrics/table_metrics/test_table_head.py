@@ -27,15 +27,6 @@ def sqlite_engine_with_view():
         con=sqlite_engine,
         index=False,
     )
-    with sqlite_engine.begin() as connection:
-        connection.execute(
-            sa.text(
-                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-            )
-        )
-        connection.execute(
-            sa.text("CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;")
-        )
     return sqlite_engine
 
 
