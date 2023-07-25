@@ -146,7 +146,7 @@ def test_table_head_sqlite(
     request,
     expected_temp_tables,
 ):
-    engine = request.getfixturevalue("sqlite_batch_with_table_name")
+    engine = request.getfixturevalue(execution_engine)
     table_head = TableHead()
     res = table_head._sqlalchemy(
         execution_engine=engine,
@@ -159,4 +159,7 @@ def test_table_head_sqlite(
     assert res.shape == expected_shape
     assert res.columns.tolist() == expected_columns
     assert res.values.tolist() == expected_values
-    assert len(get_sqlite_temp_table_names_from_engine(engine)) == expected_temp_tables
+    assert (
+        len(get_sqlite_temp_table_names_from_engine(engine.engine))
+        == expected_temp_tables
+    )

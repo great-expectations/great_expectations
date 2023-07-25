@@ -82,6 +82,8 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame | Iterator[pd.DataFrame]
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     else:
+        if not sql.supports_execution:
+            sql = sqlalchemy.Select("*").select_from(sql)
         return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     return return_value
 

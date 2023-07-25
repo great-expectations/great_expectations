@@ -213,7 +213,6 @@ class TableHead(TableMetricProvider):
                 df = pandas_read_sql(
                     sql=selectable,
                     con=con,
-                    execution_engine=execution_engine,
                 )
         return df
 
