@@ -305,9 +305,9 @@ Testing can generate warning messages. These warnings are often caused by depend
 
 ### Marking tests
 
-All tests in Great Expectations is required to be marked with one marker from the list `REQUIRED_MARKERS` defined in [tests/conftest.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/conftest.py).
-One can run test that verifies each test is marked by running `invoke marker-coverage` if [invoke](https://pypi.org/project/invoke/) is installed or by running `pytest --verify-marker-coverage-and-exit`.
-If the test fails, the list of unmarked tests and the required markers will be outputted.
+All tests in Great Expectations are required to be marked with one marker from the list `REQUIRED_MARKERS` defined in [tests/conftest.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/conftest.py).
+One can verify each test is marked by running `invoke marker-coverage` if [invoke](https://pypi.org/project/invoke/) is installed or by running `pytest --verify-marker-coverage-and-exit`.
+If the verification fails, the list of unmarked tests and the required markers will be outputted.
 
 ### BigQuery testing
 
