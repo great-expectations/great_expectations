@@ -138,7 +138,7 @@ class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
     library_metadata = {
         "tags": ["hackathon", "currency", "type-entities", "semantic-types"],
         "contributors": [
-            "@lucasasmith",
+            "@lucasasmith" "@calvingdu",
         ],
         "requirements": ["py-moneyed"],
     }
