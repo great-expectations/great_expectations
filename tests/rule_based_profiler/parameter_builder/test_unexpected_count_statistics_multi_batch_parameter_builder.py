@@ -19,7 +19,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # module level markers
-pytestmark = pytest.mark.integration
+pytestmark = pytest.mark.big
 
 
 def test_instantiation_unexpected_count_statistics_multi_batch_parameter_builder(

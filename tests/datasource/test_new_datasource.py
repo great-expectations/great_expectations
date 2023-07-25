@@ -948,7 +948,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
     assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     tmp_path_factory, spark_session, spark_df_taxi_data_schema
 ):
@@ -1013,7 +1013,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     assert batch_list[0].data.dataframe.schema == spark_df_taxi_data_schema
 
 
-@pytest.mark.integration
+@pytest.mark.spark
 def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     tmp_path_factory, spark_session, spark_df_taxi_data_schema
 ):

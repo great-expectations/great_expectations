@@ -29,7 +29,7 @@ deployment_patterns = [
 
 cross_table_comparisons = [
     IntegrationTestFixture(
-        # Run locally via `pytest -v --mysql --postgresql --docs-tests -m integration -k "test_docs[cross_table_comparisons]" tests/integration/test_script_runner.py`
+        # Run locally via `pytest -v --mysql --postgresql --docs-tests -k "test_docs[cross_table_comparisons]" tests/integration/test_script_runner.py`
         name="cross_table_comparisons",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",

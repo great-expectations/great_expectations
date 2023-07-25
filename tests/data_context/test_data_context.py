@@ -211,7 +211,6 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
@@ -245,7 +244,6 @@ def test_save_expectation_suite_include_rendered_content(
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
@@ -1495,7 +1493,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2849,7 +2846,6 @@ def test_modifications_to_config_vars_is_recognized_within_same_program_executio
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_finds_diff(
     empty_data_context_stats_enabled: DataContext,
     data_context_config_with_datasources: DataContextConfig,
@@ -2869,7 +2865,6 @@ def test_check_for_usage_stats_sync_finds_diff(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_does_not_find_diff(
     empty_data_context_stats_enabled: DataContext,
 ) -> None:
@@ -2888,7 +2883,6 @@ def test_check_for_usage_stats_sync_does_not_find_diff(
 
 
 @pytest.mark.big
-@pytest.mark.integration
 def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     empty_data_context: DataContext,
     data_context_config_with_datasources: DataContextConfig,
@@ -2929,7 +2923,6 @@ class ExpectSkyToBeColor(BatchExpectation):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_unrendered_and_failed_prescriptive_renderer_behavior(
     empty_data_context: DataContext,
 ):
