@@ -319,7 +319,7 @@ def test_onboarding_data_assistant_result_batch_id_to_batch_identifier_display_n
     )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_onboarding_data_assistant_should_fail_forward(
     bobby_columnar_table_multi_batch_deterministic_data_context,
     rule_state_with_domains_and_parameters,
