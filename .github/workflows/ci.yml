@@ -35,6 +35,9 @@ jobs:
 
       - run: invoke lint --no-fmt
       - run: invoke fmt --check
+      - name: Marker-coverage-check
+        run: |
+          invoke marker-coverage
       - name: Type-check
         run: |
           invoke type-check --ci --pretty
