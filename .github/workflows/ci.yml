@@ -116,8 +116,10 @@ jobs:
     runs-on: ubuntu-latest
     #if: github.event.pull_request.draft == false
     env:
+      GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
+      GOOGLE_APPLICATION_CREDENTIALS: gcp-credentials.json
     steps:
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
@@ -130,10 +132,14 @@ jobs:
       - name: Set up Python bigquery
         uses: actions/setup-python@v4
         with:
-                python-version: 3.8
-                cache-dependency-path: |
-                  reqs/requirements-dev-test.txt
-                  setup.py
+          python-version: 3.8
+          cache-dependency-path: |
+            reqs/requirements-dev-test.txt
+            setup.py
+      - name: output Json
+        run:
+          RUN echo "$GE_TEST_GCP_CREDENTIALS" | jq > gcp-credentials.json
+
       # - name: Install Google Dependencies
       #   run:  |
       #     # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
