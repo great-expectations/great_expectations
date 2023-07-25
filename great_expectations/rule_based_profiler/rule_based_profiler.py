@@ -336,7 +336,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 self.rule_states.append(rule_state)
             except Exception as e:
                 logger.error(
-                    f'An exception occurred while running rule "{rule.name}": {e}'
+                    f'An exception occurred while running rule "{rule.name}": {repr(e)}'
                 )
 
         return RuleBasedProfilerResult(
