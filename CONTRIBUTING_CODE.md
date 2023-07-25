@@ -129,8 +129,8 @@ Great Expectations requires a Python version from 3.8 to 3.11.
     brew install unixodbc
     ```
 
-    If your Mac computer has an Apple Silicon chip, you might need to 
-    
+    If your Mac computer has an Apple Silicon chip, you might need to
+
     1. specify additional compiler or linker options. For example:
 
     ```sh
@@ -302,6 +302,12 @@ The following are the supported `pytest` flags for general testing:
 To skip all local backend tests (except pandas), run `pytest --no-sqlalchemy`.
 
 Testing can generate warning messages. These warnings are often caused by dependencies such as pandas or SQLAlchemy. Run `pytest --no-sqlalchemy --disable-pytest-warnings` to suppress these warnings.
+
+### Marking tests
+
+All tests in Great Expectations is required to be marked with one marker from the list `REQUIRED_MARKERS` defined in [tests/conftest.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/conftest.py).
+One can run test that verifies each test is marked by running `invoke marker-coverage` if [invoke](https://pypi.org/project/invoke/) is installed or by running `pytest --verify-marker-coverage-and-exit`.
+If the test fails, the list of unmarked tests and the required markers will be outputted.
 
 ### BigQuery testing
 
