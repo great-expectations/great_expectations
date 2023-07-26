@@ -757,6 +757,13 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         ),
     ),
     IncludeExcludeDefinition(
+        reason="The run method shares a name with a public API method",
+        name="run",
+        filepath=pathlib.Path(
+            "great_expectations/agent/actions/list_table_names.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
         reason="The add method shares a name with a public API method",
         name="add",
         filepath=pathlib.Path(
