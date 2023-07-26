@@ -141,7 +141,7 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
   <summary>Creating Custom Expectations</summary>
   <div>
     <p>
-      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
+      Later, you should also take a look at other workflows for <a href="https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp/">creating Custom Expectations</a>. Creating Custom Expectations is an active area of work in the Great Expectations community. Stay tuned for improvements over time.
     </p>
   </div>
 </details>
