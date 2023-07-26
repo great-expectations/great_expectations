@@ -128,7 +128,7 @@ class DatabricksSQLDatasource(SQLDatasource):
             if isinstance(nested_exception, sa.exc.NoSuchModuleError):
                 raise TestConnectionError(
                     "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."
-                )
+                ) from e
             raise e
 
     def _create_engine(self) -> sqlalchemy.Engine:
