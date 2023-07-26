@@ -5,7 +5,6 @@ from great_expectations.agent.actions.agent_action import (
     AgentAction,
 )
 from great_expectations.agent.models import (
-    CreatedResource,
     ListTableNamesEvent,
 )
 from great_expectations.compatibility.sqlalchemy import inspect
