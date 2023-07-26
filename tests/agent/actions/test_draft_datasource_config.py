@@ -1,4 +1,3 @@
-import os
 from unittest.mock import MagicMock
 from uuid import UUID
 
@@ -35,7 +34,8 @@ def set_required_env_vars(monkeypatch, org_id, token):
         "GX_CLOUD_ORGANIZATION_ID": org_id,
         "GX_CLOUD_ACCESS_TOKEN": token,
     }
-    monkeypatch.setattr(os, "environ", env_vars)
+    for key, val in env_vars.items():
+        monkeypatch.setenv(name=key, value=val)
 
 
 pytestmark = pytest.mark.cloud
