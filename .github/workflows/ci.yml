@@ -119,7 +119,7 @@ jobs:
       GE_TEST_GCP_CREDENTIALS: ${{secrets.GE_TEST_GCP_CREDENTIALS}}
       GE_TEST_GCP_PROJECT: ${{secrets.GE_TEST_GCP_PROJECT}}
       GE_TEST_BIGQUERY_DATASET: ${{secrets.GE_TEST_BIGQUERY_DATASET}}
-      GOOGLE_APPLICATION_CREDENTIALS: gcp-credentials.json
+      GOOGLE_APPLICATION_CREDENTIALS: 'gcp-credentials.json'
     steps:
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v1
