@@ -133,7 +133,7 @@ jobs:
       - name: Install dependencies
         run: pip install-c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: pytest -m unit
+        run: invoke tests --unit
 
   py39-min-versions:
     if: github.event.pull_request.draft == false
@@ -151,7 +151,7 @@ jobs:
       - name: Install dependencies
         run: pip install-c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: pytest -m unit
+        run: invoke tests --unit
 
   py310-min-versions:
     if: github.event.pull_request.draft == false
@@ -169,4 +169,4 @@ jobs:
       - name: Install dependencies
         run: pip install-c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
-        run: pytest -m unit
+        run: invoke tests --unit
