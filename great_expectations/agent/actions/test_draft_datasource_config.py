@@ -43,4 +43,7 @@ class TestDraftDatasourceConfigAction(AgentAction[TestDatasourceConfig]):
                 "TestDraftDatasourceConfigAction encountered an error while connecting to GX-Cloud"
             )
         data = response.json()
-        return data
+        try:
+            return data["data"]["attributes"]["draft_config"]
+        except KeyError:
+            raise RuntimeError("Malformed response received from GX-Cloud")
