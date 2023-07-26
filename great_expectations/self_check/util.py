@@ -1224,9 +1224,8 @@ def build_sa_execution_engine(  # noqa: PLR0913
     if_exists: str = "replace",
     index: bool = False,
     dtype: Optional[dict] = None,
+    table_name: str = "test",
 ) -> SqlAlchemyExecutionEngine:
-    table_name: str = "test"
-
     # noinspection PyUnresolvedReferences
     sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
     add_dataframe_to_db(
