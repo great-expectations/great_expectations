@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import random
@@ -9,10 +11,10 @@ from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -57,7 +59,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     empty_data_context,
     test_db_connection_string,
 ):
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
 
     sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
     # noinspection PyUnusedLocal
@@ -198,7 +200,7 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -361,7 +363,7 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector.
     # It tests that splitter configurations can be saved and loaded to great_expectations.yml by performing a
     # round-trip to the configuration.
-    context: DataContext = empty_data_context
+    context: FileDataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
         os.path.join(  # noqa: PTH118
@@ -854,11 +856,11 @@ introspection:
         )
 
 
-@pytest.mark.integration
+@pytest.mark.big
 def test_batch_request_sql_with_schema(
     data_context_with_sql_data_connectors_including_schema_for_testing_get_batch,
 ):
-    context: DataContext = (
+    context: FileDataContext = (
         data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
     )
 

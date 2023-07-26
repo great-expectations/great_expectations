@@ -34,7 +34,7 @@ def metric_value(
     the value of the requested metric.
 
     ---Documentation---
-        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+        - https://docs.greatexpectations.io/docs/guides/expectations/custom_expectations_lp
 
     Args:
         engine: the *type* of ExecutionEngine that this partial supports

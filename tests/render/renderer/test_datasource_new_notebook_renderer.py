@@ -11,6 +11,8 @@ from great_expectations.render.renderer.datasource_new_notebook_renderer import 
 if TYPE_CHECKING:
     import nbformat
 
+pytestmark = pytest.mark.filesystem
+
 
 @pytest.fixture
 def construct_datasource_new_notebook_assets():

@@ -97,7 +97,6 @@ def test_instantiation_via_url(sa):
     )
 
 
-@pytest.mark.integration
 def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     """Ensure that we can still retrieve data when the dialect is not recognized."""
 

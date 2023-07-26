@@ -629,11 +629,11 @@ def format_docstring_to_markdown(docstr: str) -> str:
         elif line.strip().endswith(":"):
             in_param = True
             # This adds a blank line before the header if one doesn't already exist.
-            if prev_line != "":  # noqa: PLC1901
+            if prev_line != "":
                 clean_docstr_list.append("")
             # Turn the line into an H4 header
             clean_docstr_list.append(f"#### {line.strip()}")
-        elif line.strip() == "" and prev_line != "::":  # noqa: PLC1901
+        elif line.strip() == "" and prev_line != "::":
             # All of our parameter groups end with a line break, but we don't want to exit a parameter block due to a
             # line break in a code block.  However, some code blocks start with a blank first line, so we want to make
             # sure we aren't immediately exiting the code block (hence the test for '::' on the previous line.
@@ -644,18 +644,15 @@ def format_docstring_to_markdown(docstr: str) -> str:
             in_code_block = False
             first_code_indentation = None
             clean_docstr_list.append(line)
-        else:
-            if in_code_block:  # noqa: PLR5501
+        else:  # noqa: PLR5501
+            if in_code_block:
                 # Determine the number of spaces indenting the first line of code so they can be removed from all lines
                 # in the code block without wrecking the hierarchical indentation levels of future lines.
-                if (
-                    first_code_indentation is None
-                    and line.strip() != ""  # noqa: PLC1901
-                ):
+                if first_code_indentation is None and line.strip() != "":
                     first_code_indentation = len(
                         re.match(r"\s*", original_line, re.UNICODE).group(0)
                     )
-                if line.strip() == "" and prev_line == "::":  # noqa: PLC1901
+                if line.strip() == "" and prev_line == "::":
                     # If the first line of the code block is a blank one, just skip it.
                     pass
                 else:

@@ -417,7 +417,6 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
 
 
 @pytest.mark.filesystem
-@pytest.mark.integration
 def test_view_validation_result(
     checkpoint_result: CheckpointResult,
 ):

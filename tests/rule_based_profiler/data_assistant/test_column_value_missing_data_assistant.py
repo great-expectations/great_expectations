@@ -36,7 +36,7 @@ def test_column_value_missing_data_assistant_result_plot_expectations_and_metric
     assert len(column_domain_charts) == 0
 
 
-@pytest.mark.integration
+@pytest.mark.big
 @pytest.mark.slow
 def test_single_batch_multiple_columns(ephemeral_context_with_defaults):
     context = ephemeral_context_with_defaults

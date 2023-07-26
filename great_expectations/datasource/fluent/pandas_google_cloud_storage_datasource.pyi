@@ -2,7 +2,6 @@ import re
 import typing
 from logging import Logger
 from typing import (
-    TYPE_CHECKING,
     Any,
     Dict,
     Hashable,
@@ -14,6 +13,7 @@ from typing import (
     Union,
 )
 
+from great_expectations.compatibility import google
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import GCSUrl as GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
@@ -23,6 +23,14 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector as GoogleCloudStorageDataConnector,
 )
+from great_expectations.datasource.fluent.dynamic_pandas import (
+    CompressionOptions,
+    CSVEngine,
+    FilePath,
+    IndexLabel,
+    StorageOptions,
+)
+from great_expectations.datasource.fluent.interfaces import BatchMetadata
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
@@ -32,33 +40,22 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError as PandasDatasourceError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.compatibility import google
-    from great_expectations.datasource.fluent.dynamic_pandas import (
-        CompressionOptions,
-        CSVEngine,
-        FilePath,
-        IndexLabel,
-        StorageOptions,
-    )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
-    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-        CSVAsset,
-        ExcelAsset,
-        FeatherAsset,
-        FWFAsset,
-        HDFAsset,
-        HTMLAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        PickleAsset,
-        SASAsset,
-        SPSSAsset,
-        StataAsset,
-        XMLAsset,
-    )
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+    CSVAsset,
+    ExcelAsset,
+    FeatherAsset,
+    FWFAsset,
+    HDFAsset,
+    HTMLAsset,
+    JSONAsset,
+    ORCAsset,
+    ParquetAsset,
+    PickleAsset,
+    SASAsset,
+    SPSSAsset,
+    StataAsset,
+    XMLAsset,
+)
 
 logger: Logger
 GCS_IMPORTED: bool

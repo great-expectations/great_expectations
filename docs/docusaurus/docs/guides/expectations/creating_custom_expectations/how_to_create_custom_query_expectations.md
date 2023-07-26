@@ -20,13 +20,9 @@ This guide will walk you through the process of creating your own custom `QueryE
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
-## Steps
-
-### 1. Choose a name for your Expectation
+##  Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `QueryExpectations` always start with `expect_queried_`.
 
@@ -52,7 +48,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 :::
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -82,7 +78,7 @@ cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_table_row_count_
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -110,7 +106,7 @@ Completeness checklist for ExpectQueryToMatchSomeCriteria:
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
 This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 Now we're going to begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -132,7 +128,7 @@ with something like:
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring"
 ```
 
-You'll also need to change the class name at the bottom of the file, by replacing this line:
+Make sure your one-line docstring begins with "Expect " and ends with a period. You'll also need to change the class name at the bottom of the file, by replacing this line:
 ```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist"
 ```
 
@@ -140,7 +136,7 @@ with this one:
 ```python name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist"
 ```
 
-Later, you can go back and write a more thorough docstring.
+Later, you can go back and write a more thorough docstring. See [Expectation Docstring Formatting](https://github.com/great-expectations/great_expectations/blob/develop/docs/expectation_gallery/3-expectation-docstring-formatting.md).
 
 At this point you can re-run your diagnostic checklist. You should see something like this:
 ```
@@ -165,7 +161,7 @@ While you are still able to create a Custom Metric for your Custom Expectation i
 allows us to provide a small number of generic `query.*` Metrics capable of supporting many use-cases.
 </details>
 
-### 5. Add example cases
+## Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -213,7 +209,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement a Query & Connect a Metric to your Expectation
+## Implement a Query & Connect a Metric to your Expectation
 
 The query is the core of a `QueryExpectation`; this query is what defines the scope of your expectations for your data.
 
@@ -277,7 +273,7 @@ Becomes:
   </div>
 </details>
 
-### 7. Validate
+## Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -308,7 +304,7 @@ Completeness checklist for ExpectQueriedTableRowCountToBe:
 ...
 ```
 
-### 8. Linting
+## Linting
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
@@ -350,7 +346,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 :::
 
-### 2. Copy and rename the template file
+## Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -380,7 +376,7 @@ cp query_expectation_template.py /SOME_DIRECTORY/expect_queried_column_value_fre
   </div>
 </details>
 
-### 3. Generate a diagnostic checklist for your Expectation
+## Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -408,7 +404,7 @@ Completeness checklist for ExpectQueriedColumnValueFrequencyToMeetThreshold:
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it.
 This guide will walk you through the first five steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
 
-### 4. Change the Expectation class name and add a docstring
+## Change the Expectation class name and add a docstring
 
 Now we're going to begin laying the groundwork for the functionality of your Custom Expectation.
 
@@ -511,7 +507,7 @@ For more information on tests and example cases, <br/>
 see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-### 6. Implement a Query & Connect a Metric to your Expectation
+## Implement a Query & Connect a Metric to your Expectation
 
 The query is the core of a `QueryExpectation`; this query is what defines the scope of your expectations for your data.
 
@@ -578,7 +574,7 @@ Becomes:
   </div>
 </details>
 
-### 7. Validate
+## Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
@@ -648,7 +644,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom QueryExpectat
 </b></p>
 </div>
 
-### 9. Contribution (Optional)
+## Contribute (Optional)
 
 This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 

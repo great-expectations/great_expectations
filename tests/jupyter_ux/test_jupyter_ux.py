@@ -5,6 +5,8 @@ import pytest
 import great_expectations as gx
 import great_expectations.jupyter_ux as jux
 
+pytestmark = pytest.mark.unit
+
 
 def test_styling_elements_exist():
     assert "<link" in jux.bootstrap_link_element

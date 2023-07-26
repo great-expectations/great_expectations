@@ -277,7 +277,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
         batch.batch_id + ".html",
     )
 
-    ts_last_mod_0 = os.path.getmtime(validation_result_page_path)
+    ts_last_mod_0 = os.path.getmtime(validation_result_page_path)  # noqa: PTH204
 
     run_id = RunIdentifier(run_name="test_run_id_12346")
     operator_result = context.run_validation_operator(
@@ -299,7 +299,7 @@ def test_configuration_driven_site_builder(  # noqa: PLR0915
     ].full_base_directory
 
     # verify that the validation result HTML file rendered in the previous run was NOT updated
-    ts_last_mod_1 = os.path.getmtime(validation_result_page_path)
+    ts_last_mod_1 = os.path.getmtime(validation_result_page_path)  # noqa: PTH204
 
     assert ts_last_mod_0 == ts_last_mod_1
 
