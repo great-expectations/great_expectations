@@ -10,20 +10,16 @@ This guide will walk you through the process of creating Parameterized <Technica
 
 <Prerequisites>
 
-- Completion of the [overview for creating Custom Expectations](./overview.md).
-
 </Prerequisites>
 
 A Parameterized <TechnicalTag tag="expectation" text="Expectation"/> is a capability unlocked by Modular Expectations. Now that Expectations are structured in class form, it is easy to inherit from these classes and build similar Expectations that are adapted to your own needs.
 
-## Steps
-
-### 1. Select an Expectation to inherit from
+## Select an Expectation to inherit from
 
 For the purpose of this exercise, we will implement the Expectations `expect_column_mean_to_be_positive` and `expect_column_values_to_be_two_letter_country_code` - realistic Expectations
 of the data that can easily inherit from `expect_column_mean_to_be_between` and `expect_column_values_to_be_in_set` respectively.
 
-### 2. Select default values for your class
+## Select default values for your class
 
 Our first implementation will be `expect_column_mean_to_be_positive`.
 
@@ -48,15 +44,13 @@ In this case, we will only be changing our `value_set`:
 ```python name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
 ```
 
-That's all there is to it - really!
-
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
 Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;
 </b></p>
 </div>
 
-### 3. Contribution (Optional)
+## Contribute (Optional)
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
 

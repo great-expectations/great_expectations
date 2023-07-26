@@ -26,8 +26,8 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here’s how to handle each of those cases:
 
-* [How to configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
-* [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+* [Configure credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+* [Instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/instantiate_data_context)
 
 ## Options for storing Expectations
 Many teams find it convenient to store Expectations in Git. Essentially, this approach treats Expectations like test fixtures: they live adjacent to code and are stored within version control. Git acts as a collaboration tool and source of record.
