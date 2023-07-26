@@ -78,76 +78,8 @@ stages:
               invoke lint || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
-  - stage: custom_checks
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-    - job: static_type_check
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
-      - script: |
-          python -m pip install --upgrade pip
-          pip install --requirement requirements-types.txt
-        name: InstallDependencies
-      - script: |
-          invoke type-check --ci --pretty
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
-        name: TypeCheckStubSourceFiles
-    - job: docstring_linter
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
-
-    - job: unused_import_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
-          ruff --select F401 great_expectations tests
-        name: UnusedImportChecker
-
-    - job: line_number_snippet_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
-
-    - job: name_tag_snippet_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python ci/checks/check_only_name_tag_snippets.py
-          name: NameTagSnippetChecker
-
-    - job: check_repo_root_size
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: ./ci/checks/check_repo_root_size.sh
-          name: CheckRepoRootSize
-
-    - job: public_api_report
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            pip install --requirement reqs/requirements-dev-test.txt
-            invoke public-api
-          name: PublicAPIReport
-
   - stage: docker_tests
-    dependsOn: [lint, custom_checks]
+    dependsOn: [lint]
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
@@ -560,7 +492,7 @@ stages:
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     jobs:
       - job: mssql
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -602,7 +534,7 @@ stages:
   # GitHub issue requiring resolution: https://github.com/astronomer/airflow-provider-great-expectations/issues/114
 
   # - stage: airflow_provider
-  #   dependsOn: [lint, import_ge, custom_checks]
+  #   dependsOn: [lint, import_ge]
   #   pool:
   #     vmImage: 'ubuntu-latest'
 
@@ -631,7 +563,7 @@ stages:
   #           name: RunAirflowProviderTests
 
   - stage: test_build_docs
-    dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -654,7 +586,7 @@ stages:
     condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, lint, db_integration, docker_tests]
+    dependsOn: [import_ge, lint, db_integration, docker_tests]
     jobs:
       - job: deploy
         variables:
