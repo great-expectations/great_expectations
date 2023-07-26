@@ -55,7 +55,7 @@ def v10_project_directory(tmp_path_factory):
         file_relative_path(
             __file__, "../test_fixtures/upgrade_helper/great_expectations_v1_basic.yml"
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),
     )
     return context_root_dir
 

@@ -46,7 +46,7 @@ def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_fa
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),
     )
     return context_root_dir
 
@@ -70,7 +70,7 @@ def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_fac
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
-        os.path.join(context_root_dir, "great_expectations.yml"),
+        os.path.join(context_root_dir, FileDataContext.GX_YML),
     )
     return context_root_dir
 
@@ -83,7 +83,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
         file_relative_path(
             __file__, "../../test_fixtures/upgrade_helper/great_expectations_v2.yml"
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -303,7 +303,7 @@ def test_project_upgrade_with_manual_steps(
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_needs_manual_upgrade.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -415,7 +415,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             __file__,
             "../../test_fixtures/upgrade_helper/great_expectations_v1_basic_with_exception.yml",
         ),
-        os.path.join(v10_project_directory, "great_expectations.yml"),
+        os.path.join(v10_project_directory, FileDataContext.GX_YML),
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)

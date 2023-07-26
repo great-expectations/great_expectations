@@ -204,7 +204,7 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(

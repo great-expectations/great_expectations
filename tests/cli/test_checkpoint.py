@@ -120,7 +120,7 @@ def titanic_data_context_with_spark_datasource(
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, FileDataContext.GX_YML)),
     )
     shutil.copy(
         file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),

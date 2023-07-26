@@ -103,13 +103,13 @@ def create_data_context_files(
         )
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+            str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
         )
     else:
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+            str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
         )
     create_common_data_context_files(context_path, asset_config_path)
 

@@ -44,7 +44,7 @@ def data_context_with_bad_notebooks(tmp_path_factory):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118
@@ -79,7 +79,7 @@ def _create_custom_notebooks_context(path, ge_yml_name):
     )
     shutil.copy(
         os.path.join(fixture_dir, ge_yml_name),  # noqa: PTH118
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         os.path.join(  # noqa: PTH118

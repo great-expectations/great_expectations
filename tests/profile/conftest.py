@@ -32,7 +32,7 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
     )
     shutil.copy(
         titanic_yml_path,
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     titanic_csv_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(

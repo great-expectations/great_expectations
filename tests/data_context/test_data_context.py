@@ -85,7 +85,7 @@ def titanic_multibatch_data_context(
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(__file__, "../test_fixtures/great_expectations_titanic.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
@@ -129,7 +129,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_bad_datasource.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
 
@@ -734,7 +734,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
                 "..", "test_fixtures", "great_expectations_basic.yml"
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     monkeypatch.setenv("GX_HOME", str(context_path))
     assert FileDataContext.find_context_root_dir() == str(context_path)

@@ -39,7 +39,7 @@ def assetless_dataconnector_context(
             __file__,
             "../../test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     context = gx.get_context(context_root_dir=context_path)
     assert context.root_directory == context_path

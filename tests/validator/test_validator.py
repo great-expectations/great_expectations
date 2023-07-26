@@ -69,10 +69,10 @@ def yellow_trip_pandas_data_context(
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
                 FileDataContext.GX_DIR,
-                "great_expectations.yml",
+                FileDataContext.GX_YML,
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(

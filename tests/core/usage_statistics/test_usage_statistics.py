@@ -195,7 +195,7 @@ def test_global_override_in_yml(tmp_path_factory, monkeypatch):
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -255,7 +255,7 @@ def test_global_override_conf_overrides_yml_and_env_variable(
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -321,7 +321,7 @@ def test_global_override_env_overrides_yml_and_conf(tmp_path_factory, monkeypatc
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
@@ -387,7 +387,7 @@ def test_global_override_yml_overrides_env_and_conf(tmp_path_factory, monkeypatc
         os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_basic_with_usage_stats_disabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+        str(os.path.join(context_path, FileDataContext.GX_YML)),  # noqa: PTH118
     )
 
     assert (
