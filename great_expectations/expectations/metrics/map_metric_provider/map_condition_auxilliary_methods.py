@@ -75,7 +75,7 @@ def _pandas_map_condition_index(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
@@ -121,9 +121,7 @@ def _pandas_map_condition_index(
 
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
-            "column_list"
-        ]
+        column_list = accessor_domain_kwargs["column_list"]
         domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
@@ -165,7 +163,7 @@ def _pandas_map_condition_query(
         "return_unexpected_index_query"
     )
     if return_unexpected_index_query is False:
-        return
+        return None
 
     (
         boolean_mapped_unexpected_values,
@@ -218,7 +216,7 @@ def _pandas_map_condition_rows(
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     accessor_domain_kwargs = get_dbms_compatible_metric_domain_kwargs(
         metric_domain_kwargs=accessor_domain_kwargs,
@@ -267,9 +265,9 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
 
     return (
         sa.func.sum(
@@ -294,9 +292,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     """Returns unexpected count for MapExpectations. This is a *value* metric, which is useful for
     when the unexpected_condition is a window function.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -387,9 +385,9 @@ def _sqlalchemy_map_condition_rows(
     Returns all rows of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
     """
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -397,7 +395,7 @@ def _sqlalchemy_map_condition_rows(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    table_columns = metrics.get("table.columns")
+    table_columns: list[str] = metrics["table.columns"]
     column_selector = [sa.column(column_name) for column_name in table_columns]
     query = sa.select(*column_selector).where(unexpected_condition)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
@@ -435,15 +433,15 @@ def _sqlalchemy_map_condition_query(
         unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     result_format: dict = metric_value_kwargs["result_format"]
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: bool = result_format.get(
+    return_unexpected_index_query: Optional[bool] = result_format.get(
         "return_unexpected_index_query"
     )
     if return_unexpected_index_query is False:
-        return
+        return None
 
     domain_column_name_list: List[str] = list()
     # column map expectations
@@ -460,15 +458,15 @@ def _sqlalchemy_map_condition_query(
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
+        column_list = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
 
     column_selector: List[sa.Column] = []
 
-    all_table_columns: List[str] = metrics.get("table.columns")
-    unexpected_index_column_names: List[str] = result_format.get(
+    all_table_columns: List[str] = metrics.get("table.columns", [])
+    unexpected_index_column_names: List[str] | None = result_format.get(
         "unexpected_index_column_names"
     )
     if unexpected_index_column_names:
@@ -525,7 +523,7 @@ def _sqlalchemy_map_condition_index(
         unexpected_condition,
         compute_domain_kwargs,
         accessor_domain_kwargs,
-    ) = metrics.get("unexpected_condition")
+    ) = metrics["unexpected_condition"]
 
     result_format = metric_value_kwargs["result_format"]
     if "unexpected_index_column_names" not in result_format:
@@ -546,16 +544,16 @@ def _sqlalchemy_map_condition_index(
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
+        column_list = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
 
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    all_table_columns: List[str] = metrics.get("table.columns")
+    all_table_columns: List[str] = metrics.get("table.columns", [])
 
-    unexpected_index_column_names: Optional[List[str]] = result_format.get(
-        "unexpected_index_column_names"
+    unexpected_index_column_names: List[str] = result_format.get(
+        "unexpected_index_column_names", []
     )
 
     column_selector: List[sa.Column] = []
@@ -579,9 +577,9 @@ def _sqlalchemy_map_condition_index(
     ).where(unexpected_condition)
 
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        domain_records_as_selectable: Union[
-            sa.Table, sa.Select
-        ] = get_sqlalchemy_selectable(domain_records_as_selectable)
+        domain_records_as_selectable = get_sqlalchemy_selectable(
+            domain_records_as_selectable
+        )
 
     # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
     final_query: sa.select = (
@@ -593,7 +591,7 @@ def _sqlalchemy_map_condition_index(
         final_query
     ).fetchall()
 
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: List[Dict[str, Any]] = []
 
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
@@ -615,9 +613,9 @@ def _spark_map_condition_unexpected_count_aggregate_fn(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
     return (
         F.sum(F.when(unexpected_condition, 1).otherwise(0)),
         compute_domain_kwargs,
@@ -634,9 +632,9 @@ def _spark_map_condition_unexpected_count_value(
     **kwargs,
 ):
     # fn_domain_kwargs maybe updated to reflect null filtering
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -661,9 +659,9 @@ def _spark_map_condition_rows(
     metrics: Dict[str, Any],
     **kwargs,
 ):
-    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
+    unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
-    )
+    ]
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -729,7 +727,7 @@ def _spark_map_condition_index(
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
+        column_list = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -749,7 +747,7 @@ def _spark_map_condition_index(
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: List[Dict[str, Any]] = []
 
     unexpected_index_column_names: List[str] = result_format[
         "unexpected_index_column_names"
@@ -800,7 +798,7 @@ def _spark_map_condition_query(
     """
     result_format: dict = metric_value_kwargs["result_format"]
     # We will not return map_condition_query if return_unexpected_index_query = False
-    return_unexpected_index_query: bool = result_format.get(
+    return_unexpected_index_query: Optional[bool] = result_format.get(
         "return_unexpected_index_query"
     )
     if return_unexpected_index_query is False:

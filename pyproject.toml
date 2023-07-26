@@ -136,22 +136,8 @@ exclude = [
     'expectations/core/expect_table_column_count_to_be_between\.py', # 3
     'expectations/core/expect_table_row_count_to_equal_other_table\.py', # 11
     'expectations/metrics/column_aggregate_metrics/column_value_counts\.py', # 6
-    'expectations/metrics/column_aggregate_metrics/column_quantile_values\.py', # 1
     'expectations/metrics/column_aggregate_metrics/column_partition\.py', # 10
-    'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
-    'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
-    'expectations/metrics/map_metric_provider/column_condition_partial\.py', # 3
     'expectations/metrics/map_metric_provider/column_function_partial\.py', # 9
-    'expectations/metrics/map_metric_provider/column_map_metric_provider\.py',
-    'expectations/metrics/map_metric_provider/column_pair_condition_partial\.py', # 3
-    'expectations/metrics/map_metric_provider/column_pair_function_partial\.py', # 9
-    'expectations/metrics/map_metric_provider/column_pair_map_metric_provider\.py',
-    'expectations/metrics/map_metric_provider/map_metric_provider\.py', # 2
-    'expectations/metrics/map_metric_provider/multicolumn_map_metric_provider\.py', # 2
-    'expectations/metrics/map_metric_provider/multicolumn_condition_partial\.py', # 3
-    'expectations/metrics/map_metric_provider/multicolumn_function_partial\.py', # 2
-	'expectations/metrics/map_metric_provider/column_map_condition_auxilliary_methods\.py', # 6
-	'expectations/metrics/map_metric_provider/map_condition_auxilliary_methods\.py', # 29
 	'expectations/metrics/map_metric_provider/multicolumn_map_condition_auxilliary_methods\.py', # 2
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/row_conditions\.py',  # 4
