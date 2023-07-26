@@ -268,7 +268,6 @@ extend-exclude = [
     # TODO: remove the items below and fix linting issues
     "tests/data_asset", # 10 warnings
     "tests/dataset", # 10 warnings
-    "tests/expectations", # 56 warnings
     "tests/integration/docusaurus", # 208 warnings, 144 auto-fixable
     "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
 ]
