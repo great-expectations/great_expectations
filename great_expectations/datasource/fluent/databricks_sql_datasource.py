@@ -120,9 +120,16 @@ class DatabricksSQLDatasource(SQLDatasource):
         try:
             super().test_connection(test_assets)
         except TestConnectionError as e:
-            raise TestConnectionError(
-                f"Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`.\n\n{str(e)}"
-            ) from e
+            nested_exception = None
+            if e.__cause__ and e.__cause__.__cause__:
+                nested_exception = e.__cause__.__cause__
+
+            # Raise specific error informing how to install dependencies only if relevant
+            if isinstance(nested_exception, sa.exc.NoSuchModuleError):
+                raise TestConnectionError(
+                    "Could not connect to Databricks - please ensure you've installed necessary dependencies with `pip install great_expectations[databricks]`."
+                )
+            raise e
 
     def _create_engine(self) -> sqlalchemy.Engine:
         model_dict = self.dict(
