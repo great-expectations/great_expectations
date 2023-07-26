@@ -21,16 +21,16 @@ if TYPE_CHECKING:
     from great_expectations.compatibility import sqlalchemy
 
 
-def _parse_http_path_from_query(query: str) -> str | None:
+def _parse_param_from_query_string(param: str, query: str) -> str | None:
     url_components = parse.urlparse(query)
     path = str(url_components.path)
     parse_results: dict[str, list[str]] = parse.parse_qs(path)
-    path_results = parse_results.get("http_path", [])
+    path_results = parse_results.get(param, [])
 
     if not path_results:
         return None
     if len(path_results) > 1:
-        raise ValueError("Only one `http_path` query entry is allowed")
+        raise ValueError(f"Only one `{param}` query entry is allowed")
     return path_results[0]
 
 
@@ -52,6 +52,24 @@ class _UrlHttpPathError(pydantic.UrlError):
     msg_template = "'http_path' query param is invalid or missing"
 
 
+class _UrlCatalogError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing catalog in DatabricksDsn query.
+    """
+
+    code = "url.query.catalog"
+    msg_template = "'catalog' query param is invalid or missing"
+
+
+class _UrlSchemaError(pydantic.UrlError):
+    """
+    Custom Pydantic error for missing schema in DatabricksDsn query.
+    """
+
+    code = "url.query.schema"
+    msg_template = "'schema' query param is invalid or missing"
+
+
 class DatabricksDsn(AnyUrl):
     allowed_schemes = {
         "databricks+connector",
@@ -66,9 +84,17 @@ class DatabricksDsn(AnyUrl):
         if query is None:
             raise _UrlQueryError()
 
-        http_path = _parse_http_path_from_query(query)
+        http_path = _parse_param_from_query_string(param="http_path", query=query)
         if http_path is None:
             raise _UrlHttpPathError()
+
+        catalog = _parse_param_from_query_string(param="catalog", query=query)
+        if catalog is None:
+            raise _UrlCatalogError()
+
+        schema = _parse_param_from_query_string(param="schema", query=query)
+        if schema is None:
+            raise _UrlSchemaError()
 
         return AnyUrl.validate_parts(parts=parts, validate_port=validate_port)
 
@@ -80,7 +106,7 @@ class DatabricksSQLDatasource(SQLDatasource):
     Args:
         name: The name of this DatabricksSQL datasource.
         connection_string: The SQLAlchemy connection string used to connect to the postgres database.
-            For example: "databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>"
+            For example: "databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>""
         assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
             are TableAsset or QueryAsset objects.
     """
@@ -96,7 +122,9 @@ class DatabricksSQLDatasource(SQLDatasource):
         connection_string = model_dict.pop("connection_string")
         kwargs = model_dict.pop("kwargs", {})
 
-        http_path = _parse_http_path_from_query(connection_string.query)
+        http_path = _parse_param_from_query_string(
+            param="http_path", query=connection_string.query
+        )
         assert (
             http_path
         ), "Presence of http_path query string is guaranteed due to prior validation"

@@ -1,6 +1,6 @@
 {
     "title": "DatabricksSQLDatasource",
-    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
+    "description": "--Public API--Adds a DatabricksSQLDatasource to the data context.\n\nArgs:\n    name: The name of this DatabricksSQL datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"databricks+connector://token:<token>@<host>:<port>/<database>?http_path=<http_path>&catalog=<catalog>&schema=<schema>\"\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
     "type": "object",
     "properties": {
         "type": {
