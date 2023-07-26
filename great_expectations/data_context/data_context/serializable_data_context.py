@@ -52,7 +52,8 @@ class SerializableDataContext(AbstractDataContext):
         DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         GX_UNCOMMITTED_DIR,
     ]
-    GX_DIR: ClassVar[str] = "great_expectations"
+    GX_DIR: ClassVar[str] = "gx"
+    _LEGACY_GX_DIR: ClassVar[str] = "great_expectations"
     GX_YML: ClassVar[str] = "great_expectations.yml"
     GX_EDIT_NOTEBOOK_DIR = GX_UNCOMMITTED_DIR
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
@@ -413,31 +414,43 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def _find_context_yml_file(
         cls, search_start_dir: Optional[PathStr] = None
-    ) -> Optional[str]:
+    ) -> str | None:
         """Search for the yml file starting here and moving upward."""
-        yml_path = None
         if search_start_dir is None:
-            search_start_dir = os.getcwd()  # noqa: PTH109
+            search_start_dir = pathlib.Path().absolute()
+        else:
+            search_start_dir = pathlib.Path(search_start_dir)
+
+        # Ensure backwards compatibility if user is using "great_expectations/" over "gx/"
+        # Starting v0.17.7, "gx/" will be the default
+        return cls._search_gx_dir_for_context_yml(
+            search_start_dir=search_start_dir, gx_dir=cls.GX_DIR
+        ) or cls._search_gx_dir_for_context_yml(
+            search_start_dir=search_start_dir, gx_dir=cls._LEGACY_GX_DIR
+        )
+
+    @classmethod
+    def _search_gx_dir_for_context_yml(
+        cls, search_start_dir: pathlib.Path, gx_dir: str
+    ) -> Optional[str]:
+        yml_path: str | None = None
 
         for i in range(4):
             logger.debug(
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(  # noqa: PTH118
-                search_start_dir, cls.GX_DIR
-            )
+            potential_ge_dir = search_start_dir / gx_dir
 
-            if os.path.isdir(potential_ge_dir):  # noqa: PTH112
-                potential_yml = os.path.join(  # noqa: PTH118
-                    potential_ge_dir, cls.GX_YML
-                )
-                if os.path.isfile(potential_yml):  # noqa: PTH113
-                    yml_path = potential_yml
-                    logger.debug(f"Found config file at {str(yml_path)}")
+            if potential_ge_dir.is_dir():
+                potential_yml = potential_ge_dir / gx_dir
+                if potential_yml.is_file():
+                    yml_path = str(potential_yml)
+                    logger.debug(f"Found config file at {yml_path}")
                     break
+
             # move up one directory
-            search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120
+            search_start_dir = search_start_dir.parent
 
         return yml_path
 
