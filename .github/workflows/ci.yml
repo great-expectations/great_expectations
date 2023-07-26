@@ -136,10 +136,6 @@ jobs:
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
             setup.py
-      - name: output Json
-        run:
-          echo "$GE_TEST_GCP_CREDENTIALS" | jq > gcp-credentials.json
-
       - name: Install dependencies
         run: |
           # "Deprecated API features detected" warning/error for test_docs[split_data_on_whole_table_bigquery] when pandas>=2.0
