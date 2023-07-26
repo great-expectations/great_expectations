@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
     def run(self, event: ListTableNamesEvent, id: str) -> ActionResult:
         datasource_name: str = event.datasource_name
-        datasource: FluentDatasource = self._context.get_datasource(
+        datasource = self._context.get_datasource(
             datasource_name=datasource_name
         )
         if not isinstance(datasource, SQLDatasource):
@@ -43,14 +43,14 @@ class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
         )
 
     def _add_or_update_table_names_list(
-        self, datasource_id: str, table_names: list[str]
-    ) -> str:
+        self, datasource_id: str, table_names: List[str]
+    ) -> None:
         cloud_config: GXCloudConfig = self._context._cloud_config
 
         session = create_session(access_token=cloud_config.access_token)
         response = session.patch(
-            url=f"{cloud_config.gx_cloud_base_url}/organizations/"
-            f"{cloud_config.gx_cloud_organization_id}/datasources/{datasource_id}",
+            url=f"{cloud_config.base_url}/organizations/"
+            f"{cloud_config.organization_id}/datasources/{datasource_id}",
             json={"table_names": table_names},
         )
         if response.status_code != 204:
