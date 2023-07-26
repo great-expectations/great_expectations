@@ -21,9 +21,7 @@ if TYPE_CHECKING:
 class ListTableNamesAction(AgentAction[ListTableNamesEvent]):
     def run(self, event: ListTableNamesEvent, id: str) -> ActionResult:
         datasource_name: str = event.datasource_name
-        datasource = self._context.get_datasource(
-            datasource_name=datasource_name
-        )
+        datasource = self._context.get_datasource(datasource_name=datasource_name)
         if not isinstance(datasource, SQLDatasource):
             raise TypeError(
                 f"This operation requires a SQL Datasource but got {type(datasource).__name__}."
