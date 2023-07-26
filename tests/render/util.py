@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import copy
-from typing import Dict, List, Optional
+import pathlib
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
-from nbformat.notebooknode import NotebookNode
+
+if TYPE_CHECKING:
+    from nbformat.notebooknode import NotebookNode
 
 
 def run_notebook(
@@ -83,7 +88,7 @@ def replace_code_in_notebook(
 
 
 def load_notebook_from_path(
-    notebook_path: str,
+    notebook_path: str | pathlib.Path,
 ) -> NotebookNode:
     if not notebook_path:
         raise ValueError("A path to the valid Jupyter notebook is required.")
