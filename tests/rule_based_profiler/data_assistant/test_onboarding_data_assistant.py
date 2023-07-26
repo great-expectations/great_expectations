@@ -376,7 +376,6 @@ def test_onboarding_data_assistant_should_fail_forward(
 
         result = data_assistant_result.to_json_dict()
         assert result["rule_exception_tracebacks"]
-        print(result["rule_exception_tracebacks"])
         assert (
             result["rule_exception_tracebacks"]["table_rule"]["exception_message"]
             == "This rule failed."
