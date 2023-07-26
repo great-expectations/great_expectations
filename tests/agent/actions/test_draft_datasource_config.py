@@ -46,9 +46,7 @@ def build_payload(config: dict, id: UUID) -> dict:
         "data": {
             "type": "draft_config",
             "id": id,
-            "attributes": {
-                "draft_config": config
-            },
+            "attributes": {"draft_config": config},
         }
     }
 
@@ -56,7 +54,9 @@ def build_payload(config: dict, id: UUID) -> dict:
 def test_test_draft_datasource_config_success(context, mocker):
     datasource_config = {"type": "pandas", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
-    create_session = mocker.patch("great_expectations.agent.actions.test_draft_datasource_config.create_session")
+    create_session = mocker.patch(
+        "great_expectations.agent.actions.test_draft_datasource_config.create_session"
+    )
     session = create_session.return_value
     response = session.get.return_value
     response.ok = True
@@ -80,7 +80,9 @@ def test_test_draft_datasource_config_failure(context, mocker):
     ds_type = "sql"
     datasource_config = {"type": ds_type, "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
-    create_session = mocker.patch("great_expectations.agent.actions.test_draft_datasource_config.create_session")
+    create_session = mocker.patch(
+        "great_expectations.agent.actions.test_draft_datasource_config.create_session"
+    )
     session = create_session.return_value
     response = session.get.return_value
     response.ok = True
@@ -103,7 +105,9 @@ def test_test_draft_datasource_config_failure(context, mocker):
 def test_test_draft_datasource_config_raises_for_non_fds(context, mocker):
     datasource_config = {"name": "test-1-2-3", "connection_string": ""}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
-    create_session = mocker.patch("great_expectations.agent.actions.test_draft_datasource_config.create_session")
+    create_session = mocker.patch(
+        "great_expectations.agent.actions.test_draft_datasource_config.create_session"
+    )
     session = create_session.return_value
     response = session.get.return_value
     response.ok = True
@@ -123,7 +127,9 @@ def test_test_draft_datasource_config_raises_for_non_fds(context, mocker):
 def test_test_draft_datasource_config_raises_for_unknown_type(context, mocker):
     datasource_config = {"type": "not a datasource", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
-    create_session = mocker.patch("great_expectations.agent.actions.test_draft_datasource_config.create_session")
+    create_session = mocker.patch(
+        "great_expectations.agent.actions.test_draft_datasource_config.create_session"
+    )
     session = create_session.return_value
     response = session.get.return_value
     response.ok = True
@@ -144,7 +150,9 @@ def test_test_draft_datasource_config_raises_for_unknown_type(context, mocker):
 def test_test_draft_datasource_config_raises_for_cloud_backend_error(context, mocker):
     datasource_config = {"type": "not a datasource", "name": "test-1-2-3"}
     config_id = UUID("df02b47c-e1b8-48a8-9aaa-b6ed9c49ffa5")
-    create_session = mocker.patch("great_expectations.agent.actions.test_draft_datasource_config.create_session")
+    create_session = mocker.patch(
+        "great_expectations.agent.actions.test_draft_datasource_config.create_session"
+    )
     session = create_session.return_value
     response = session.get.return_value
     response.ok = False
