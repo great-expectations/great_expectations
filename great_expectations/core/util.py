@@ -417,7 +417,7 @@ def convert_to_json_serializable(  # noqa: C901, PLR0911, PLR0912
     )
 
 
-def ensure_json_serializable(data) -> None:  # noqa: C901, PLR0911, PLR0912
+def ensure_json_serializable(data: Any) -> None:  # noqa: C901, PLR0911, PLR0912
     """
     Helper function to convert an object to one that is json serializable
     Args:
