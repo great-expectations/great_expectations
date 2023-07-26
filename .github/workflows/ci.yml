@@ -131,7 +131,7 @@ jobs:
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
       - name: Install dependencies
-        run: pip install-c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
+        run: pip install -c ci/constraints-test/py38-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
 
@@ -149,7 +149,7 @@ jobs:
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
       - name: Install dependencies
-        run: pip install-c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
+        run: pip install -c ci/constraints-test/py39-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
 
@@ -167,6 +167,6 @@ jobs:
           cache-dependency-path: |
             reqs/requirements-dev-test.txt
       - name: Install dependencies
-        run: pip install-c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
+        run: pip install -c ci/constraints-test/py310-min-install.txt -r reqs/requirements-dev-test.txt
       - name: Run the tests
         run: invoke tests --unit
